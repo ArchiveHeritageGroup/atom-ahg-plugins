@@ -1,0 +1,23 @@
+{
+    "name": "AHG Theme Bootstrap 5",
+    "machine_name": "arAHGThemeB5Plugin",
+    "version": "1.0.0",
+    "description": "Modern Bootstrap 5 theme for Access to Memory with enhanced UI components, dashboard widgets, and mobile-responsive design.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": []
+    },
+    "theme_support": ["arAHGThemeB5Plugin"],
+    "tables": [],
+    "shared_tables": [],
+    "helpers": [],
+    "install_task": null,
+    "uninstall_task": null
+}
