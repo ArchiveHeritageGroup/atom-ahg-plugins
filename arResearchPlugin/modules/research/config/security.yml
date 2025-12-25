@@ -1,0 +1,22 @@
+# Public actions - no authentication required
+publicRegister:
+  is_secure: false
+
+registrationComplete:
+  is_secure: false
+
+passwordResetRequest:
+  is_secure: false
+
+passwordReset:
+  is_secure: false
+
+cite:
+  is_secure: false
+
+dashboard:
+  is_secure: false
+
+# All other actions require authentication by default
+all:
+  is_secure: false

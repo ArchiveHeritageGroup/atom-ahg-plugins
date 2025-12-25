@@ -1,0 +1,129 @@
+# arSecurityClearancePlugin Configuration
+# =========================================
+# This file contains all plugin-specific settings.
+# These will be merged with the main app.yml automatically.
+
+all:
+  # Security Clearance Plugin Settings
+  security_clearance:
+    # Enable/disable the security clearance system
+    enabled: true
+    
+    # Default classification for new objects (null = unclassified/public)
+    default_classification: ~
+    
+    # Whether to inherit classification from parent by default
+    inherit_by_default: true
+    
+    # Classification levels (can override database values)
+    levels:
+      PUBLIC:
+        level: 0
+        color: "#28a745"
+        icon: "fa-globe"
+        requires_2fa: false
+        watermark: false
+      INTERNAL:
+        level: 1
+        color: "#17a2b8"
+        icon: "fa-building"
+        requires_2fa: false
+        watermark: false
+      RESTRICTED:
+        level: 2
+        color: "#ffc107"
+        icon: "fa-exclamation-triangle"
+        requires_2fa: false
+        watermark: false
+      CONFIDENTIAL:
+        level: 3
+        color: "#fd7e14"
+        icon: "fa-shield-alt"
+        requires_2fa: false
+        watermark: true
+      SECRET:
+        level: 4
+        color: "#dc3545"
+        icon: "fa-lock"
+        requires_2fa: true
+        watermark: true
+      TOP_SECRET:
+        level: 5
+        color: "#6f42c1"
+        icon: "fa-user-secret"
+        requires_2fa: true
+        watermark: true
+
+    # Access request settings
+    access_requests:
+      # Default duration for approved access (hours)
+      default_duration: 24
+      # Maximum duration that can be requested (hours)
+      max_duration: 720
+      # Minimum justification length (characters)
+      min_justification_length: 20
+
+    # Clearance settings
+    clearances:
+      # Default expiry period for new clearances (days, null = no expiry)
+      default_expiry_days: ~
+      # Warning period before expiry (days)
+      expiry_warning_days: 30
+
+    # Two-factor authentication settings
+    two_factor:
+      # Session duration after 2FA verification (hours)
+      session_duration: 8
+      # Require 2FA for Secret and above
+      min_level_required: 4
+
+    # Audit settings
+    audit:
+      # Enable access logging
+      enabled: true
+      # Log retention period (days)
+      retention_days: 365
+      # Log IP addresses
+      log_ip: true
+      # Log user agents
+      log_user_agent: true
+
+    # Watermark settings
+    watermark:
+      enabled: true
+      # Template: {username}, {date}, {code}, {email} are replaced
+      text_template: "CONFIDENTIAL - {username} - {date} - {code}"
+      opacity: 0.3
+      color: "#FF0000"
+
+    # Email notifications
+    notifications:
+      # Notify admins of new access requests
+      admin_new_request: true
+      # Notify users when clearance is about to expire
+      user_clearance_expiry: true
+      # Notify users when access request is reviewed
+      user_request_reviewed: true
+      # Admin email addresses for notifications (comma-separated)
+      admin_emails: ""
+
+    # Scheduled task settings
+    cron:
+      # Secure token for cron access (if using web-based cron)
+      token: "your-secure-token-here"
+
+  # Getty vocabularies integration (if using with museum plugin)
+  getty:
+    cache_enabled: true
+    auto_confirm_threshold: 0.9
+
+  # Institution settings (for watermarks and reports)
+  institution:
+    name: "The Archive and Heritage Group"
+    address: "123 Archive Street"
+    email: "johan@theahg.co.za"
+
+  # Valuation alerts (for arSpectrumPlugin integration)
+  valuation:
+    alert_email: "johan@theahg.co.za"
+    renewal_months: 36

@@ -1,0 +1,4 @@
+
+arSecurityClearance_watermarkSettings:
+  url: /admin/watermark-settings
+  param: { module: arSecurityClearance, action: watermarkSettings }

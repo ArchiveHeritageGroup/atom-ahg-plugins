@@ -1,0 +1,786 @@
+<?php
+use Illuminate\Database\Capsule\Manager as DB;
+
+class researchActions extends sfActions
+{
+    protected $service;
+
+    public function preExecute()
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/arResearchPlugin/lib/Services/ResearchService.php';
+        $this->service = new ResearchService();
+    }
+
+    public function executeIndex(sfWebRequest $request)
+    {
+        $this->redirect("research/dashboard");
+    }
+
+    public function executeDashboard(sfWebRequest $request)
+    {
+        $this->stats = $this->service->getDashboardStats();
+        $this->researcher = null;
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $this->researcher = $this->service->getResearcherByUserId($userId);
+        }
+        $this->pendingResearchers = $this->service->getResearchers(['status' => 'pending']);
+        $this->todayBookings = DB::table('research_booking as b')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
+            ->where('b.booking_date', date('Y-m-d'))
+            ->whereIn('b.status', ['pending', 'confirmed'])
+            ->select('b.*', 'r.first_name', 'r.last_name', 'rm.name as room_name')
+            ->orderBy('b.start_time')->get()->toArray();
+    }
+
+    public function executeRegister(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getUser()->setFlash('error', 'Please log in to register');
+            $this->redirect('user/login');
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        if ($this->service->getResearcherByUserId($userId)) {
+            $this->redirect('research/profile');
+        }
+        $this->user = DB::table('user')->where('id', $userId)->first();
+        if ($request->isMethod('post')) {
+            try {
+                $this->service->registerResearcher([
+                    'user_id' => $userId,
+                    'title' => $request->getParameter('title'),
+                    'first_name' => $request->getParameter('first_name'),
+                    'last_name' => $request->getParameter('last_name'),
+                    'email' => $request->getParameter('email'),
+                    'phone' => $request->getParameter('phone'),
+                    'affiliation_type' => $request->getParameter('affiliation_type'),
+                    'institution' => $request->getParameter('institution'),
+                    'department' => $request->getParameter('department'),
+                    'position' => $request->getParameter('position'),
+                    'research_interests' => $request->getParameter('research_interests'),
+                    'current_project' => $request->getParameter('current_project'),
+                    'orcid_id' => $request->getParameter('orcid_id'),
+                    'id_type' => $request->getParameter('id_type'),
+                    'id_number' => $request->getParameter('id_number'),
+                ]);
+                $this->getUser()->setFlash('success', 'Registration submitted');
+                $this->redirect('research/dashboard');
+            } catch (Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+    }
+
+    public function executeProfile(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+        if ($request->isMethod('post')) {
+            $this->service->updateResearcher($this->researcher->id, [
+                'title' => $request->getParameter('title'),
+                'first_name' => $request->getParameter('first_name'),
+                'last_name' => $request->getParameter('last_name'),
+                'phone' => $request->getParameter('phone'),
+                'affiliation_type' => $request->getParameter('affiliation_type'),
+                'institution' => $request->getParameter('institution'),
+                'department' => $request->getParameter('department'),
+                'position' => $request->getParameter('position'),
+                'research_interests' => $request->getParameter('research_interests'),
+                'current_project' => $request->getParameter('current_project'),
+                'orcid_id' => $request->getParameter('orcid_id'),
+            ]);
+            $this->getUser()->setFlash('success', 'Profile updated');
+            $this->redirect('research/profile');
+        }
+        $this->bookings = $this->service->getResearcherBookings($this->researcher->id);
+        $this->collections = $this->service->getCollections($this->researcher->id);
+        $this->savedSearches = $this->service->getSavedSearches($this->researcher->id);
+    }
+
+    public function executeResearchers(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $this->researchers = $this->service->getResearchers([
+            'status' => $request->getParameter('status'),
+            'search' => $request->getParameter('q'),
+        ]);
+        $this->currentStatus = $request->getParameter('status');
+    }
+
+    public function executeViewResearcher(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $id = (int) $request->getParameter('id');
+        $this->researcher = $this->service->getResearcher($id);
+        if (!$this->researcher) { $this->forward404('Not found'); }
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+            $adminId = $this->getUser()->getAttribute('user_id');
+            if ($action === 'approve') {
+                $this->service->approveResearcher($id, $adminId);
+                $this->getUser()->setFlash('success', 'Approved');
+            } elseif ($action === 'suspend') {
+                DB::table('research_researcher')->where('id', $id)->update(['status' => 'suspended']);
+                $this->getUser()->setFlash('success', 'Suspended');
+            }
+            $this->redirect('research/viewResearcher?id=' . $id);
+        }
+        $this->bookings = $this->service->getResearcherBookings($id);
+    }
+
+    public function executeBookings(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $this->rooms = $this->service->getReadingRooms();
+        $this->pendingBookings = DB::table('research_booking as b')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
+            ->where('b.status', 'pending')
+            ->select('b.*', 'r.first_name', 'r.last_name', 'r.email', 'rm.name as room_name')
+            ->orderBy('b.booking_date')->get()->toArray();
+        $this->upcomingBookings = DB::table('research_booking as b')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
+            ->where('b.status', 'confirmed')->where('b.booking_date', '>=', date('Y-m-d'))
+            ->select('b.*', 'r.first_name', 'r.last_name', 'rm.name as room_name')
+            ->orderBy('b.booking_date')->limit(20)->get()->toArray();
+    }
+
+    public function executeBook(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher || $this->researcher->status !== 'approved') {
+            $this->getUser()->setFlash('error', 'Must be approved researcher');
+            $this->redirect('research/dashboard');
+        }
+        $this->rooms = $this->service->getReadingRooms();
+        $this->objectSlug = $request->getParameter('object');
+        $this->object = null;
+        if ($this->objectSlug) {
+            $this->object = DB::table('slug')
+                ->join('information_object_i18n as i18n', function($join) {
+                    $join->on('slug.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                })->where('slug.slug', $this->objectSlug)
+                ->select('slug.object_id', 'i18n.title')->first();
+        }
+        if ($request->isMethod('post')) {
+            $bookingId = $this->service->createBooking([
+                'researcher_id' => $this->researcher->id,
+                'reading_room_id' => $request->getParameter('reading_room_id'),
+                'booking_date' => $request->getParameter('booking_date'),
+                'start_time' => $request->getParameter('start_time'),
+                'end_time' => $request->getParameter('end_time'),
+                'purpose' => $request->getParameter('purpose'),
+            ]);
+            foreach ($request->getParameter('materials', []) as $objectId) {
+                $this->service->addMaterialRequest($bookingId, (int) $objectId);
+            }
+            $this->getUser()->setFlash('success', 'Booking submitted');
+            $this->redirect('research/viewBooking?id=' . $bookingId);
+        }
+    }
+
+    public function executeViewBooking(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $bookingId = (int) $request->getParameter('id');
+        $this->booking = $this->service->getBooking($bookingId);
+
+        if (!$this->booking) {
+            $this->forward404('Booking not found');
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+            $adminId = $this->getUser()->getAttribute('user_id');
+
+            if ($action === 'confirm') {
+                $this->service->confirmBooking($bookingId, $adminId);
+                $this->getUser()->setFlash('success', 'Booking confirmed');
+            } elseif ($action === 'cancel') {
+                $this->service->cancelBooking($bookingId, 'Cancelled by staff');
+                $this->getUser()->setFlash('success', 'Booking cancelled');
+            } elseif ($action === 'noshow') {
+                DB::table('research_booking')
+                    ->where('id', $bookingId)
+                    ->update(['status' => 'no_show']);
+                $this->getUser()->setFlash('success', 'Marked as no-show');
+            }
+
+            $this->redirect('research/viewBooking?id=' . $bookingId);
+        }
+    }
+
+    public function executeViewBooking_OLD(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $id = (int) $request->getParameter('id');
+        $this->booking = $this->service->getBooking($id);
+        if (!$this->booking) { $this->forward404('Not found'); }
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+            $adminId = $this->getUser()->getAttribute('user_id');
+            match($action) {
+                'confirm' => $this->service->confirmBooking($id, $adminId),
+                'cancel' => $this->service->cancelBooking($id, $request->getParameter('reason')),
+                'checkin' => $this->service->checkIn($id),
+                'checkout' => $this->service->checkOut($id),
+                default => null,
+            };
+            $this->getUser()->setFlash('success', ucfirst($action) . ' done');
+            $this->redirect('research/viewBooking?id=' . $id);
+        }
+    }
+
+    public function executeWorkspace(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+        $this->collections = $this->service->getCollections($this->researcher->id);
+        $this->savedSearches = $this->service->getSavedSearches($this->researcher->id);
+        $this->annotations = $this->service->getAnnotations($this->researcher->id);
+    }
+
+    public function executeSavedSearches(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+            if ($action === 'save') {
+                $this->service->saveSearch($this->researcher->id, [
+                    'name' => $request->getParameter('name'),
+                    'search_query' => $request->getParameter('search_query'),
+                ]);
+            } elseif ($action === 'delete') {
+                $this->service->deleteSavedSearch((int) $request->getParameter('id'), $this->researcher->id);
+            }
+            $this->redirect('research/savedSearches');
+        }
+        $this->savedSearches = $this->service->getSavedSearches($this->researcher->id);
+    }
+
+    public function executeCollections(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+        if ($request->isMethod('post') && $request->getParameter('do') === 'create') {
+            $id = $this->service->createCollection($this->researcher->id, [
+                'name' => $request->getParameter('name'),
+                'description' => $request->getParameter('description'),
+            ]);
+            $this->redirect('research/viewCollection?id=' . $id);
+        }
+        $this->collections = $this->service->getCollections($this->researcher->id);
+    }
+
+    public function executeViewCollection(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $id = (int) $request->getParameter('id');
+        $this->collection = $this->service->getCollection($id);
+        if (!$this->collection) { $this->forward404('Not found'); }
+        if ($request->isMethod('post') && $request->getParameter('do') === 'remove') {
+            $this->service->removeFromCollection($id, (int) $request->getParameter('object_id'));
+            $this->redirect('research/viewCollection?id=' . $id);
+        }
+    }
+
+    public function executeAnnotations(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+        if ($request->isMethod('post') && $request->getParameter('do') === 'delete') {
+            $this->service->deleteAnnotation((int) $request->getParameter('id'), $this->researcher->id);
+            $this->redirect('research/annotations');
+        }
+        $this->annotations = $this->service->getAnnotations($this->researcher->id);
+    }
+
+    public function executeCite(sfWebRequest $request)
+    {
+        $slug = $request->getParameter('slug');
+        $object = DB::table('slug')->where('slug', $slug)->first();
+        if (!$object) { $this->forward404('Not found'); }
+        $this->objectId = $object->object_id;
+        $this->styles = ['chicago', 'mla', 'turabian', 'apa'];
+        $this->citations = [];
+        foreach ($this->styles as $style) {
+            $this->citations[$style] = $this->service->generateCitation($object->object_id, $style);
+        }
+        $researcherId = null;
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $r = $this->service->getResearcherByUserId($userId);
+            if ($r) $researcherId = $r->id;
+        }
+        foreach ($this->citations as $style => $data) {
+            if (!isset($data['error'])) {
+                $this->service->logCitation($researcherId, $object->object_id, $style, $data['citation']);
+            }
+        }
+    }
+}
+
+    // =========================================================================
+    // PUBLIC REGISTRATION (No login required)
+    // =========================================================================
+
+    /**
+     * Public registration form - creates both AtoM user and researcher profile
+     */
+    public function executePublicRegister(sfWebRequest $request)
+    {
+        // If already logged in, redirect to normal register
+        if ($this->getUser()->isAuthenticated()) {
+            $this->redirect('research/register');
+        }
+
+        if ($request->isMethod('post')) {
+            $email = trim($request->getParameter('email'));
+            $username = trim($request->getParameter('username'));
+            $password = $request->getParameter('password');
+            $confirmPassword = $request->getParameter('confirm_password');
+
+            // Validation
+            $errors = [];
+            
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Valid email address is required';
+            }
+            if (empty($username) || strlen($username) < 3) {
+                $errors[] = 'Username must be at least 3 characters';
+            }
+            if (empty($password) || strlen($password) < 8) {
+                $errors[] = 'Password must be at least 8 characters';
+            }
+            if ($password !== $confirmPassword) {
+                $errors[] = 'Passwords do not match';
+            }
+
+            // Check if email/username already exists
+            if (DB::table('user')->where('email', $email)->exists()) {
+                $errors[] = 'Email address is already registered';
+            }
+            if (DB::table('user')->where('username', $username)->exists()) {
+                $errors[] = 'Username is already taken';
+            }
+
+            if (!empty($errors)) {
+                $this->getUser()->setFlash('error', implode('<br>', $errors));
+                return sfView::SUCCESS;
+            }
+
+            try {
+                DB::beginTransaction();
+
+                // Create AtoM user
+                $userId = $this->createAtomUser($username, $email, $password);
+
+                // Assign to authenticated group (99)
+                DB::table('acl_user_group')->insert([
+                    'user_id' => $userId,
+                    'group_id' => 99, // authenticated
+                ]);
+
+                // Create researcher profile
+                $this->service->registerResearcher([
+                    'user_id' => $userId,
+                    'title' => $request->getParameter('title'),
+                    'first_name' => $request->getParameter('first_name'),
+                    'last_name' => $request->getParameter('last_name'),
+                    'email' => $email,
+                    'phone' => $request->getParameter('phone'),
+                    'affiliation_type' => $request->getParameter('affiliation_type', 'independent'),
+                    'institution' => $request->getParameter('institution'),
+                    'department' => $request->getParameter('department'),
+                    'position' => $request->getParameter('position'),
+                    'research_interests' => $request->getParameter('research_interests'),
+                    'current_project' => $request->getParameter('current_project'),
+                    'orcid_id' => $request->getParameter('orcid_id'),
+                    'id_type' => $request->getParameter('id_type'),
+                    'id_number' => $request->getParameter('id_number'),
+                ]);
+
+                DB::commit();
+
+                $this->getUser()->setFlash('success', 'Registration successful! Your account is pending approval. You will receive an email once approved.');
+                $this->redirect('research/registrationComplete');
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                $this->getUser()->setFlash('error', 'Registration failed: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Registration complete page
+     */
+    public function executeRegistrationComplete(sfWebRequest $request)
+    {
+        // Just display success message
+    }
+
+    /**
+     * Create AtoM user with proper password hashing
+     */
+    protected function createAtomUser(string $username, string $email, string $password): int
+    {
+        // Generate salt and hash password (AtoM uses SHA1 with salt)
+        $salt = base64_encode(random_bytes(32));
+        $passwordHash = sha1($salt . $password);
+
+        // Create object record first
+        $objectId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitUser',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'serial_number' => 0,
+        ]);
+
+        // Create user record
+        DB::table('user')->insert([
+            'id' => $objectId,
+            'username' => $username,
+            'email' => $email,
+            'password_hash' => $passwordHash,
+            'salt' => $salt,
+            'active' => 0, // Inactive until approved
+        ]);
+
+        return $objectId;
+    }
+
+    // =========================================================================
+    // PASSWORD RESET
+    // =========================================================================
+
+    /**
+     * Request password reset
+     */
+    public function executePasswordResetRequest(sfWebRequest $request)
+    {
+        if ($request->isMethod('post')) {
+            $email = trim($request->getParameter('email'));
+            
+            $user = DB::table('user')->where('email', $email)->first();
+            
+            if ($user) {
+                // Generate reset token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', strtotime('+2 hours'));
+
+                // Store token (create table if needed)
+                DB::table('research_password_reset')->updateOrInsert(
+                    ['user_id' => $user->id],
+                    [
+                        'token' => $token,
+                        'expires_at' => $expires,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]
+                );
+
+                // In production, send email here
+                // For now, log the reset link
+                $resetUrl = sfConfig::get('app_siteBaseUrl', 'https://psis.theahg.co.za') 
+                    . '/index.php/research/passwordReset?token=' . $token;
+                
+                error_log("Password reset requested for {$email}. Reset URL: {$resetUrl}");
+                
+                // TODO: Send email with $resetUrl
+            }
+
+            // Always show success (don't reveal if email exists)
+            $this->getUser()->setFlash('success', 'If an account exists with that email, you will receive password reset instructions.');
+            $this->redirect('research/passwordResetRequest');
+        }
+    }
+
+    /**
+     * Reset password with token
+     */
+    public function executePasswordReset(sfWebRequest $request)
+    {
+        $token = $request->getParameter('token');
+        
+        if (empty($token)) {
+            $this->getUser()->setFlash('error', 'Invalid reset link');
+            $this->redirect('research/passwordResetRequest');
+        }
+
+        // Validate token
+        $reset = DB::table('research_password_reset')
+            ->where('token', $token)
+            ->where('expires_at', '>', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$reset) {
+            $this->getUser()->setFlash('error', 'Reset link has expired or is invalid');
+            $this->redirect('research/passwordResetRequest');
+        }
+
+        $this->token = $token;
+        $this->user = DB::table('user')->where('id', $reset->user_id)->first();
+
+        if ($request->isMethod('post')) {
+            $password = $request->getParameter('password');
+            $confirmPassword = $request->getParameter('confirm_password');
+
+            if (strlen($password) < 8) {
+                $this->getUser()->setFlash('error', 'Password must be at least 8 characters');
+                return sfView::SUCCESS;
+            }
+
+            if ($password !== $confirmPassword) {
+                $this->getUser()->setFlash('error', 'Passwords do not match');
+                return sfView::SUCCESS;
+            }
+
+            // Update password
+            $salt = base64_encode(random_bytes(32));
+            $passwordHash = sha1($salt . $password);
+
+            DB::table('user')->where('id', $reset->user_id)->update([
+                'password_hash' => $passwordHash,
+                'salt' => $salt,
+            ]);
+
+            // Delete used token
+            DB::table('research_password_reset')->where('user_id', $reset->user_id)->delete();
+
+            $this->getUser()->setFlash('success', 'Password updated successfully. You can now log in.');
+            $this->redirect('user/login');
+        }
+    }
+
+    // =========================================================================
+    // ADMIN: READING ROOM MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Manage reading rooms (admin)
+     */
+    public function executeRooms(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $this->rooms = $this->service->getReadingRooms(false); // Include inactive
+    }
+
+    /**
+     * Add/Edit reading room
+     */
+    public function executeEditRoom(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $id = (int) $request->getParameter('id');
+        $this->room = $id ? $this->service->getReadingRoom($id) : null;
+        $this->isNew = !$this->room;
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'name' => $request->getParameter('name'),
+                'code' => $request->getParameter('code'),
+                'location' => $request->getParameter('location'),
+                'capacity' => (int) $request->getParameter('capacity', 10),
+                'description' => $request->getParameter('description'),
+                'amenities' => $request->getParameter('amenities'),
+                'rules' => $request->getParameter('rules'),
+                'opening_time' => $request->getParameter('opening_time', '09:00:00'),
+                'closing_time' => $request->getParameter('closing_time', '17:00:00'),
+                'days_open' => $request->getParameter('days_open', 'Mon,Tue,Wed,Thu,Fri'),
+                'is_active' => $request->getParameter('is_active') ? 1 : 0,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($id && $this->room) {
+                DB::table('research_reading_room')->where('id', $id)->update($data);
+                $this->getUser()->setFlash('success', 'Reading room updated');
+            } else {
+                $data['created_at'] = date('Y-m-d H:i:s');
+                DB::table('research_reading_room')->insert($data);
+                $this->getUser()->setFlash('success', 'Reading room created');
+            }
+
+            $this->redirect('research/rooms');
+        }
+    }
+
+    // =========================================================================
+    // ADMIN: RESEARCHER APPROVAL
+    // =========================================================================
+
+    /**
+     * Approve researcher and activate their account
+     */
+    public function executeApproveResearcher(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $id = (int) $request->getParameter('id');
+        $researcher = $this->service->getResearcher($id);
+
+        if (!$researcher) {
+            $this->forward404('Researcher not found');
+        }
+
+        $adminId = $this->getUser()->getAttribute('user_id');
+
+        // Approve researcher
+        $this->service->approveResearcher($id, $adminId);
+
+        // Activate user account
+        DB::table('user')->where('id', $researcher->user_id)->update(['active' => 1]);
+
+        // TODO: Send approval email
+
+        $this->getUser()->setFlash('success', 'Researcher approved and account activated');
+        $this->redirect('research/viewResearcher?id=' . $id);
+    }
+
+    /**
+     * Reject researcher registration
+     */
+    public function executeRejectResearcher(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $id = (int) $request->getParameter('id');
+        $researcher = $this->service->getResearcher($id);
+
+        if (!$researcher) {
+            $this->forward404('Researcher not found');
+        }
+
+        $reason = $request->getParameter('reason', '');
+
+        // Update status
+        DB::table('research_researcher')->where('id', $id)->update([
+            'status' => 'rejected',
+            'rejection_reason' => $reason,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // TODO: Send rejection email
+
+        $this->getUser()->setFlash('success', 'Researcher registration rejected');
+        $this->redirect('research/researchers');
+    }
+
+    /**
+     * Admin reset user password
+     */
+    public function executeAdminResetPassword(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $researcherId = (int) $request->getParameter('id');
+        $researcher = $this->service->getResearcher($researcherId);
+
+        if (!$researcher) {
+            $this->forward404('Researcher not found');
+        }
+
+        // Generate new password
+        $newPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 12);
+
+        // Update password
+        $salt = base64_encode(random_bytes(32));
+        $passwordHash = sha1($salt . $newPassword);
+
+        DB::table('user')->where('id', $researcher->user_id)->update([
+            'password_hash' => $passwordHash,
+            'salt' => $salt,
+        ]);
+
+        // Store temporary password to display
+        $this->getUser()->setFlash('success', "Password reset. New temporary password: <strong>{$newPassword}</strong><br>Please provide this to the researcher securely.");
+        $this->redirect('research/viewResearcher?id=' . $researcherId);
+    }
+
+    // =========================================================================
+    // CHECK-IN/CHECK-OUT
+    // =========================================================================
+
+    /**
+     * Check in researcher for booking
+     */
+    public function executeCheckIn(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $bookingId = (int) $request->getParameter('id');
+        
+        DB::table('research_booking')->where('id', $bookingId)->update([
+            'checked_in_at' => date('Y-m-d H:i:s'),
+            'status' => 'confirmed',
+        ]);
+
+        $this->getUser()->setFlash('success', 'Researcher checked in');
+        $this->redirect('research/viewBooking?id=' . $bookingId);
+    }
+
+    /**
+     * Check out researcher from booking
+     */
+    public function executeCheckOut(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $bookingId = (int) $request->getParameter('id');
+        
+        DB::table('research_booking')->where('id', $bookingId)->update([
+            'checked_out_at' => date('Y-m-d H:i:s'),
+            'status' => 'completed',
+        ]);
+
+        // Return all materials
+        DB::table('research_material_request')
+            ->where('booking_id', $bookingId)
+            ->where('status', '!=', 'returned')
+            ->update([
+                'status' => 'returned',
+                'returned_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->getUser()->setFlash('success', 'Researcher checked out and materials returned');
+        $this->redirect('research/bookings');
+    }
+}

@@ -1,0 +1,17 @@
+        // Security Audit routes
+        $routing->prependRoute('security_audit_dashboard', new sfRoute(
+            '/admin/security-audit',
+            ['module' => 'arSecurityAudit', 'action' => 'dashboard']
+        ));
+        $routing->prependRoute('security_audit_logs', new sfRoute(
+            '/admin/security-audit/logs',
+            ['module' => 'arSecurityAudit', 'action' => 'index']
+        ));
+        $routing->prependRoute('security_audit_export', new sfRoute(
+            '/admin/security-audit/export',
+            ['module' => 'arSecurityAudit', 'action' => 'export']
+        ));
+        $routing->prependRoute('security_audit_object', new sfRoute(
+            '/admin/security-audit/object/:object_id',
+            ['module' => 'arSecurityAudit', 'action' => 'objectAccess']
+        ));

@@ -1,0 +1,41 @@
+{
+    "name": "Security Clearance",
+    "machine_name": "arSecurityClearancePlugin",
+    "version": "1.0.0",
+    "description": "Security classification and clearance management for sensitive archival materials. Supports classification levels (Public to Top Secret), user clearances, compartments, declassification schedules, and audit logging.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": ["arResearchPlugin"]
+    },
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"],
+    "tables": [
+        "security_classification",
+        "object_security_classification",
+        "user_security_clearance",
+        "user_security_clearance_log",
+        "security_clearance_history",
+        "security_compartment",
+        "security_access_condition_link",
+        "security_access_log",
+        "security_access_request",
+        "security_audit_log",
+        "security_compliance_log",
+        "security_declassification_schedule",
+        "security_retention_schedule",
+        "security_watermark_log",
+        "security_2fa_session"
+    ],
+    "shared_tables": [],
+    "helpers": [
+        {"class": "SecurityClearanceHelper", "alias": "security"}
+    ],
+    "install_task": null,
+    "uninstall_task": null
+}
