@@ -1,0 +1,5 @@
+        // IIIF Viewer Settings
+        $routing->prependRoute('iiif_viewer_settings', new sfRoute(
+            '/admin/iiif-viewer',
+            ['module' => 'arIiifViewerSettings', 'action' => 'index']
+        ));

@@ -1,0 +1,8 @@
+autocompleteRecords:
+  is_secure: false
+
+autocompleteAccessions:
+  is_secure: false
+
+all:
+  is_secure: true

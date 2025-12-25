@@ -1,0 +1,17 @@
+
+# Display Mode Switching Assets
+informationobjectBrowse:
+  stylesheets: [/plugins/arAHGThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/arAHGThemeB5Plugin/js/display-mode.js]
+
+actorBrowse:
+  stylesheets: [/plugins/arAHGThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/arAHGThemeB5Plugin/js/display-mode.js]
+
+repositoryBrowse:
+  stylesheets: [/plugins/arAHGThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/arAHGThemeB5Plugin/js/display-mode.js]
+
+search:
+  stylesheets: [/plugins/arAHGThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/arAHGThemeB5Plugin/js/display-mode.js]

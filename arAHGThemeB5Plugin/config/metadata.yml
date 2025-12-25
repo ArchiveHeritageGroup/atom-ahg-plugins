@@ -1,0 +1,4 @@
+# Metadata extraction settings
+extraction:
+  enabled: true
+  apply_to_information_object: true

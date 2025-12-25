@@ -1,0 +1,80 @@
+# Landing Page Builder Routes
+
+# Admin routes
+landing_page_list:
+  url: /admin/landing-pages
+  param: { module: landingPageBuilder, action: list }
+
+landing_page_create:
+  url: /admin/landing-pages/create
+  param: { module: landingPageBuilder, action: create }
+
+landing_page_edit:
+  url: /admin/landing-pages/:id/edit
+  param: { module: landingPageBuilder, action: edit }
+  requirements: { id: \d+ }
+
+landing_page_preview:
+  url: /admin/landing-pages/:id/preview
+  param: { module: landingPageBuilder, action: preview }
+  requirements: { id: \d+ }
+
+# AJAX endpoints
+landing_page_ajax_add_block:
+  url: /admin/landing-pages/ajax/add-block
+  param: { module: landingPageBuilder, action: addBlock }
+
+landing_page_ajax_update_block:
+  url: /admin/landing-pages/ajax/update-block
+  param: { module: landingPageBuilder, action: updateBlock }
+
+landing_page_ajax_delete_block:
+  url: /admin/landing-pages/ajax/delete-block
+  param: { module: landingPageBuilder, action: deleteBlock }
+
+landing_page_ajax_duplicate_block:
+  url: /admin/landing-pages/ajax/duplicate-block
+  param: { module: landingPageBuilder, action: duplicateBlock }
+
+landing_page_ajax_reorder:
+  url: /admin/landing-pages/ajax/reorder
+  param: { module: landingPageBuilder, action: reorderBlocks }
+
+landing_page_ajax_toggle_visibility:
+  url: /admin/landing-pages/ajax/toggle-visibility
+  param: { module: landingPageBuilder, action: toggleVisibility }
+
+landing_page_ajax_get_config:
+  url: /admin/landing-pages/ajax/get-config
+  param: { module: landingPageBuilder, action: getBlockConfig }
+
+landing_page_ajax_update_settings:
+  url: /admin/landing-pages/ajax/update-settings
+  param: { module: landingPageBuilder, action: updateSettings }
+
+landing_page_ajax_delete:
+  url: /admin/landing-pages/ajax/delete
+  param: { module: landingPageBuilder, action: delete }
+
+landing_page_ajax_save_draft:
+  url: /admin/landing-pages/ajax/save-draft
+  param: { module: landingPageBuilder, action: saveDraft }
+
+landing_page_ajax_publish:
+  url: /admin/landing-pages/ajax/publish
+  param: { module: landingPageBuilder, action: publish }
+
+landing_page_ajax_restore_version:
+  url: /admin/landing-pages/ajax/restore-version
+  param: { module: landingPageBuilder, action: restoreVersion }
+
+# Public routes
+landing_page_view:
+  url: /landing/:slug
+  param: { module: landingPageBuilder, action: index }
+  requirements: { slug: '[a-z0-9\-]+' }
+
+# Default landing page (for home)
+landing_page_home:
+  url: /
+  param: { module: landingPageBuilder, action: index }

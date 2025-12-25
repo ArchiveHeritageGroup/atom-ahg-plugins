@@ -1,0 +1,27 @@
+search_save:
+  url: /search/save
+  param: { module: searchEnhancement, action: saveSearch }
+
+search_saved_list:
+  url: /search/saved
+  param: { module: searchEnhancement, action: savedSearches }
+
+search_run_saved:
+  url: /search/run/:id
+  param: { module: searchEnhancement, action: runSavedSearch }
+
+search_run_template:
+  url: /search/template/:id
+  param: { module: searchEnhancement, action: runTemplate }
+
+search_history:
+  url: /search/history
+  param: { module: searchEnhancement, action: history }
+
+search_delete_saved:
+  url: /search/delete/:id
+  param: { module: searchEnhancement, action: deleteSavedSearch }
+
+search_admin_templates:
+  url: /admin/search/templates
+  param: { module: searchEnhancement, action: adminTemplates }

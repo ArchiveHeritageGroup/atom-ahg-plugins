@@ -1,0 +1,510 @@
+/*
+AHG Theme - Uses CSS Custom Properties for dynamic theming
+*/
+
+@import "../../arDominionB5Plugin/scss/main.scss";
+
+// ===========================================
+// CSS CUSTOM PROPERTIES (can be overridden dynamically)
+// ===========================================
+:root {
+  --ahg-primary-color: #005837;
+  --ahg-primary-dark: #003d25;
+  --ahg-accent-color: #37A07F;
+  --ahg-accent-dark: #2a7d63;
+  --ahg-background-light: #F3EFD4;
+  --ahg-background-white: #FFFFFF;
+  --ahg-text-primary: #58585B;
+  --ahg-text-light: #939597;
+  --ahg-text-white: #FFFFFF;
+  --ahg-border-color: #99c6b3;
+  
+  // Extended options from settings
+  --ahg-card-header-bg: #005837;
+  --ahg-card-header-text: #FFFFFF;
+  --ahg-button-bg: #005837;
+  --ahg-button-text: #FFFFFF;
+  --ahg-link-color: #005837;
+  --ahg-sidebar-bg: #f8f9fa;
+  --ahg-sidebar-text: #333333;
+}
+
+// ===========================================
+// HEADER & NAVBAR
+// ===========================================
+.navbar,
+header.navbar {
+  background: linear-gradient(135deg, var(--ahg-primary-color), var(--ahg-primary-dark)) !important;
+  color: var(--ahg-text-white) !important;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .navbar-brand,
+  .nav-link,
+  a {
+    color: var(--ahg-text-white) !important;
+    font-weight: 500;
+
+    &:hover,
+    &:focus {
+      color: var(--ahg-background-light) !important;
+      transition: color 0.3s ease;
+    }
+  }
+
+  .dropdown-menu {
+    background: linear-gradient(to bottom, var(--ahg-background-white), var(--ahg-text-light)) !important;
+    border: 1px solid var(--ahg-primary-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 88, 55, 0.15);
+
+    .dropdown-header,
+    .dropdown-menu > li > strong {
+      background-color: var(--ahg-primary-color) !important;
+      color: var(--ahg-text-white) !important;
+      padding: 8px 16px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      border-radius: 4px 4px 0 0;
+    }
+
+    a {
+      color: var(--ahg-text-primary) !important;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: var(--ahg-accent-color);
+        color: var(--ahg-text-white) !important;
+      }
+    }
+  }
+}
+
+// ====================================
+// BACKGROUND PANELS
+// ====================================
+.page-section,
+.rightColumn,
+.leftColumn,
+.clipboard,
+.filterBar,
+#clipboard,
+.bg-secondary,
+.bg-dark,
+.object-tools,
+.digitalObjectContainer,
+.context-menu,
+#action-menu,
+#action-menu-container {
+  background-color: var(--ahg-background-light) !important;
+  color: var(--ahg-text-primary) !important;
+  border: 1px solid var(--ahg-border-color);
+  border-radius: 4px;
+}
+
+// ===============================
+// BUTTONS - Uses CSS Variables
+// ===============================
+.btn-primary,
+.btn.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input.btn-primary {
+  background: var(--ahg-button-bg) !important;
+  border-color: var(--ahg-button-bg) !important;
+  color: var(--ahg-button-text) !important;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  &:hover,
+  &:focus,
+  &:active {
+    filter: brightness(0.85);
+    color: var(--ahg-button-text) !important;
+  }
+}
+
+.btn,
+.button,
+.c-btn,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  background: linear-gradient(to bottom, var(--ahg-primary-color), var(--ahg-primary-dark));
+  border: 1px solid var(--ahg-primary-color);
+  color: var(--ahg-text-white) !important;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  padding: 0.6em 1.2em;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  margin: 0.2em;
+
+  &:hover,
+  &:focus {
+    background: linear-gradient(to bottom, var(--ahg-accent-color), var(--ahg-accent-dark));
+    border-color: var(--ahg-accent-color);
+    color: var(--ahg-text-white) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 88, 55, 0.2);
+    text-decoration: none;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  background: linear-gradient(to bottom, var(--ahg-text-light), var(--ahg-text-primary));
+  border-color: var(--ahg-text-light);
+
+  &:hover {
+    background: linear-gradient(to bottom, var(--ahg-text-primary), var(--ahg-primary-dark));
+    border-color: var(--ahg-text-primary);
+  }
+}
+
+// ====================================
+// ACTION SECTIONS - INLINE LAYOUT
+// ====================================
+section.actions,
+.actions {
+  > ul {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0.5rem;
+
+    > li {
+      display: inline-block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
+} 
+
+// ====================================
+// TYPOGRAPHY AND GENERAL STYLING
+// ====================================
+html, body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ahg-text-primary);
+  background-color: var(--ahg-background-white);
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ahg-primary-color);
+  font-weight: 500;
+  
+  &.page-title {
+    color: var(--ahg-primary-color);
+    border-bottom: 2px solid var(--ahg-accent-color);
+    padding-bottom: 0.5rem;
+  }
+}
+
+a {
+  color: var(--ahg-link-color);
+  text-decoration: none;
+  
+  &:hover {
+    color: var(--ahg-accent-color);
+    text-decoration: underline;
+  }
+}
+
+// ====================================
+// FORM STYLING
+// ====================================
+.feedback-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ahg-background-white);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-table td {
+  padding: 12px 16px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--ahg-border-color);
+}
+
+.feedback-table input[type="text"],
+.feedback-table input[type="email"],
+.feedback-table select,
+.feedback-table textarea {
+  width: 98%;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border: 2px solid var(--ahg-border-color);
+  border-radius: 4px;
+  font-family: 'Roboto', sans-serif;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--ahg-primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 88, 55, 0.1);
+  }
+}
+
+.feedback-buttons {
+  display: flex;
+  justify-content: flex-end;
+  background-color: var(--ahg-background-light);
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.feedback-buttons input {
+  background: linear-gradient(to bottom, var(--ahg-primary-color), var(--ahg-primary-dark));
+  border: none;
+  color: var(--ahg-text-white);
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(to bottom, var(--ahg-accent-color), var(--ahg-accent-dark));
+  }
+}
+
+// ====================================
+// DATE INPUT STYLING
+// ====================================
+.start-date input[type="date"],
+.end-date input[type="date"] {
+  height: 2.8em !important;
+  font-size: 1.1em !important;
+  width: 100% !important;
+  padding: 6px 10px !important;
+  box-sizing: border-box;
+  border: 2px solid var(--ahg-border-color);
+  border-radius: 4px;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--ahg-primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 88, 55, 0.1);
+  }
+}
+
+input.custom-date-input {
+  height: 45px;
+  font-size: 16px;
+  width: 100%;
+  border: 2px solid var(--ahg-border-color);
+  border-radius: 4px;
+  padding: 8px 12px;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--ahg-primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 88, 55, 0.1);
+  }
+}
+
+// ====================================
+// BACKGROUND WRAPPER
+// ====================================
+#wrapper {
+  background: linear-gradient(135deg, var(--ahg-background-white) 0%, var(--ahg-background-light) 100%);
+  min-height: 100vh;
+}
+
+// ====================================
+// CARD AND PANEL - Uses CSS Variables
+// ====================================
+.card {
+  border: 1px solid var(--ahg-border-color);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .card-header,
+  > .card-header {
+    background: var(--ahg-card-header-bg) !important;
+    color: var(--ahg-card-header-text) !important;
+    font-weight: 500;
+    
+    h1, h2, h3, h4, h5, h6,
+    .h1, .h2, .h3, .h4, .h5, .h6,
+    i, span, a, small, .mb-0 {
+      color: var(--ahg-card-header-text) !important;
+    }
+  }
+}
+
+// Direct card-header override
+.card-header,
+.card-header.bg-primary,
+.card-header.bg-secondary,
+div.card-header {
+  background: var(--ahg-card-header-bg) !important;
+  color: var(--ahg-card-header-text) !important;
+  
+  * {
+    color: var(--ahg-card-header-text) !important;
+  }
+}
+
+// ====================================
+// SIDEBAR - Uses CSS Variables
+// ====================================
+.sidebar-content,
+#sidebar-content,
+.sidebar {
+  background-color: var(--ahg-sidebar-bg) !important;
+  color: var(--ahg-sidebar-text) !important;
+}
+
+// ====================================
+// TITLE/HEADER AREA
+// ====================================
+.site-title,
+.page-header,
+.main-title,
+h1.title,
+.breadcrumb-container,
+.title-bar,
+.header-title,
+.page-title-container,
+.site-header-title,
+.main-header,
+#site-slogan,
+.site-name,
+.site-logo-container,
+header .container,
+.header-wrapper,
+.masthead,
+.page-header-wrapper,
+.brand-header,
+.page-title-section,
+.content-header,
+.archive-header {
+  background: var(--ahg-primary-dark) !important;
+  background-color: var(--ahg-primary-dark) !important;
+  color: var(--ahg-text-white) !important;
+  padding: 1rem 2rem !important;
+  margin: 0;
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--ahg-text-white) !important;
+    margin: 0;
+  }
+  
+  a {
+    color: var(--ahg-background-light) !important;
+    
+    &:hover {
+      color: var(--ahg-text-white) !important;
+    }
+  }
+}
+
+.page-section:first-child,
+.main-content > div:first-child,
+.content-wrapper > div:first-child {
+  background: var(--ahg-primary-dark) !important;
+  background-color: var(--ahg-primary-dark) !important;
+}
+
+// ====================================
+// ACTION BAR / BUTTON BAR STYLING
+// ====================================
+.action-bar,
+.button-bar,
+.toolbar,
+.record-actions,
+.item-actions,
+div[class*="action"],
+div[class*="button-group"],
+.btn-toolbar,
+.action-buttons {
+  background: var(--ahg-primary-color) !important;
+  background-color: var(--ahg-primary-color) !important;
+  padding: 0.5rem 1rem !important;
+  
+  .btn,
+  .button,
+  input[type="submit"],
+  input[type="button"] {
+    background: var(--ahg-accent-color) !important;
+    border-color: var(--ahg-accent-color) !important;
+    color: var(--ahg-text-white) !important;
+    margin: 0.25rem !important;
+    
+    &:hover {
+      background: var(--ahg-accent-dark) !important;
+      border-color: var(--ahg-accent-dark) !important;
+    }
+  }
+}
+
+/* ================================================
+   NUCLEAR OVERRIDE FOR MORE DROPDOWN
+   ================================================ */
+html body #wrapper .container-xxl ul.actions.mb-3.nav.gap-2 > li > .dropup > ul.dropdown-menu,
+html body #wrapper .container-xxl ul.actions.mb-3.nav.gap-2 > li > .dropdown > ul.dropdown-menu,
+html body #wrapper ul.actions .dropup .dropdown-menu.show[data-bs-popper],
+html body #wrapper ul.actions .dropdown .dropdown-menu.show[data-bs-popper] {
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: block !important;
+    flex: none !important;
+    flex-direction: initial !important;
+}
+
+html body #wrapper ul.actions .dropdown-menu > li {
+    display: list-item !important;
+    flex: none !important;
+    width: 100% !important;
+}
+
+html body #wrapper ul.actions .dropdown-menu .dropdown-item {
+    display: block !important;
+    width: 100% !important;
+    white-space: normal !important;
+}
+
+html body #wrapper ul.actions .dropdown-menu::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+html body #wrapper ul.actions .dropdown-menu::-webkit-scrollbar-thumb {
+    background: var(--ahg-primary-color) !important;
+    border-radius: 4px !important;
+}
+
+// Override mediaelement hiding native video controls
+.ahg-media-player video::-webkit-media-controls,
+.ahg-media-player video::-webkit-media-controls-panel,
+.ahg-media-player video::-webkit-media-controls-start-playback-button,
+video.ahg-native-video::-webkit-media-controls {
+    -webkit-appearance: media-controls-container !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.ahg-media-player video {
+    pointer-events: auto !important;
+}

@@ -1,0 +1,179 @@
+<?php
+
+/*
+ * This file is part of the Access to Memory (AtoM) software.
+ * Modified by The AHG to include Universal Metadata Extraction
+ */
+
+// Include the metadata extraction trait
+require_once sfConfig::get('sf_plugins_dir').'/arAHGThemeB5Plugin/lib/arMetadataExtractionTrait.php';
+
+/**
+ * Digital Object add component with metadata extraction.
+ */
+class ObjectAddDigitalObjectAction extends sfAction
+{
+    use arMetadataExtractionTrait;
+
+    public function execute($request)
+    {
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $this->resource = $this->getRoute()->resource;
+
+        // Get repository to test upload limits
+        if ($this->resource instanceof QubitInformationObject) {
+            $this->repository = $this->resource->getRepository(['inherit' => true]);
+        } elseif ($this->resource instanceof QubitActor) {
+            $this->repository = $this->resource->getMaintainingRepository();
+        }
+
+        // Check that object exists and that it is not the root
+        if (!isset($this->resource) || !isset($this->resource->parent)) {
+            $this->forward404();
+        }
+
+        // Assemble resource description
+        sfContext::getInstance()->getConfiguration()->loadHelpers(['Qubit']);
+
+        if ($this->resource instanceof QubitActor) {
+            $this->resourceDescription = render_title($this->resource);
+        } elseif ($this->resource instanceof QubitInformationObject) {
+            $this->resourceDescription = '';
+            if (isset($this->resource->identifier)) {
+                $this->resourceDescription .= $this->resource->identifier.' - ';
+            }
+            $this->resourceDescription .= render_title(new sfIsadPlugin($this->resource));
+        }
+
+        // Check if already exists a digital object
+        if (null !== $digitalObject = $this->resource->getDigitalObject()) {
+            $this->redirect([$digitalObject, 'module' => 'digitalobject', 'action' => 'edit']);
+        }
+
+        // Check user authorization
+        if (!QubitAcl::check($this->resource, 'update')) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        // Check if uploads are allowed
+        if (!QubitDigitalObject::isUploadAllowed()) {
+            QubitAcl::forwardToSecureAction();
+        }
+
+        // Add form fields
+        $this->addFields($request);
+
+        // Process form
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters(), $request->getFiles());
+            if ($this->form->isValid()) {
+                $this->processForm();
+
+                $this->resource->save();
+
+                // Extract and apply metadata AFTER digital object is created
+                $this->extractAndApplyMetadata();
+
+                if ($this->resource instanceof QubitInformationObject) {
+                    $this->resource->updateXmlExports();
+                }
+                $this->redirect([$this->resource, 'module' => 'object']);
+            }
+        }
+    }
+
+    /**
+     * Upload the asset and create digital object with derivatives.
+     */
+    public function processForm()
+    {
+        $digitalObject = new QubitDigitalObject();
+
+        if (null !== $this->form->getValue('file')) {
+            $name = $this->form->getValue('file')->getOriginalName();
+            $content = file_get_contents($this->form->getValue('file')->getTempName());
+            $digitalObject->assets[] = new QubitAsset($name, $content);
+            $digitalObject->usageId = QubitTerm::MASTER_ID;
+            
+            // Store temp path for metadata extraction
+            $this->uploadedFilePath = $this->form->getValue('file')->getTempName();
+        } elseif (null !== $this->form->getValue('url')) {
+            try {
+                $digitalObject->importFromURI($this->form->getValue('url'));
+            } catch (sfException $e) {
+                $this->logMessage($e->getMessage(), 'err');
+            }
+        }
+
+        $this->resource->digitalObjectsRelatedByobjectId[] = $digitalObject;
+    }
+
+    /**
+     * Extract and apply metadata after upload
+     */
+    protected function extractAndApplyMetadata()
+    {
+        // Only for information objects
+        if (!($this->resource instanceof QubitInformationObject)) {
+            return;
+        }
+
+        // Get the digital object
+        $digitalObject = $this->resource->getDigitalObject();
+        if (!$digitalObject) {
+            error_log('No digital object found for metadata extraction');
+            return;
+        }
+
+        // Get file path
+        $filePath = null;
+        
+        // Try temp path first (if we stored it during processForm)
+        if (!empty($this->uploadedFilePath) && file_exists($this->uploadedFilePath)) {
+            $filePath = $this->uploadedFilePath;
+        } else {
+            // Otherwise get from saved digital object
+            $filePath = $digitalObject->getAbsolutePath();
+        }
+
+        if (!$filePath || !file_exists($filePath)) {
+            error_log('File not found for metadata extraction: ' . $filePath);
+            return;
+        }
+
+        error_log('=== Starting metadata extraction for: ' . basename($filePath));
+
+        // Extract metadata using trait method
+        $metadata = $this->extractAllMetadata($filePath);
+
+        if (empty($metadata)) {
+            error_log('No metadata extracted from: ' . basename($filePath));
+            return;
+        }
+
+        error_log('Metadata extracted, applying to information object...');
+
+        // Apply metadata to information object using trait method
+        // DISABLED: $this->applyMetadataToInformationObject($this->resource, $metadata, $digitalObject); // TODO: defer to after transaction
+
+        error_log('Metadata extraction and application complete');
+    }
+
+    protected function addFields($request)
+    {
+        // Single upload
+        if (0 < count($request->getFiles())) {
+            $this->form->setValidator('file', new sfValidatorFile());
+        }
+        $this->form->setWidget('file', new sfWidgetFormInputFile());
+
+        // URL
+        if (isset($request->url) && 'http://' != $request->url) {
+            $this->form->setValidator('url', new QubitValidatorUrl());
+        }
+        $this->form->setDefault('url', 'http://');
+        $this->form->setWidget('url', new sfWidgetFormInput());
+    }
+}

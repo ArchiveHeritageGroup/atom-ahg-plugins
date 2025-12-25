@@ -1,0 +1,10 @@
+all:
+  # Flag to indicate Bootstrap 5 theme is active
+  # This prevents loading of legacy mediaelement player
+  b5_theme: true
+  
+  # Enhanced media player settings
+  enhanced_media_player:
+    enabled: true
+    allow_snippets: true
+    allow_transcription: true

@@ -1,0 +1,63 @@
+<?php
+// Check if gallery mode for single column display with large images
+$displayMode = $sf_request->getParameter('displayMode', 'grid');
+$isGallery = ($displayMode === 'gallery');
+$colClass = $isGallery ? 'col-12' : 'col-sm-6 col-lg-4';
+$rowClass = $isGallery ? 'row g-4 mb-3 justify-content-center' : 'row g-3 mb-3 masonry';
+?>
+<div class="<?php echo $rowClass; ?>">
+<?php foreach ($pager->getResults() as $hit) { ?>
+  <?php $doc = $hit->getData(); ?>
+  <?php $title = get_search_i18n(
+      $doc,
+      'title',
+      ['allowEmpty' => false, 'culture' => $selectedCulture]
+  ); ?>
+  <div class="<?php echo $colClass; ?> masonry-item"<?php if ($isGallery) echo ' style="max-width: 1000px;"'; ?>>
+    <div class="card<?php if ($isGallery) echo ' gallery-card'; ?>">
+      <?php if (!empty($doc['hasDigitalObject'])) { ?>
+        <?php
+            // For gallery mode, prefer reference (larger) image
+            if ($isGallery && isset($doc['digitalObject']['referencePath'])) {
+                $imagePath = $doc['digitalObject']['referencePath'];
+            } elseif (
+                isset($doc['digitalObject']['thumbnailPath'])
+                && QubitAcl::check(
+                    QubitInformationObject::getById($hit->getId()),
+                    'readThumbnail'
+                )
+            ) {
+                $imagePath = $doc['digitalObject']['thumbnailPath'];
+            } else {
+                $imagePath = '/' . QubitDigitalObject::getGenericIconPathByMediaTypeId(
+                    $doc['digitalObject']['mediaTypeId'] ?: null
+                );
+            }
+        ?>
+        <a href="<?php echo url_for(
+            ['module' => 'informationobject', 'slug' => $doc['slug']]
+        ); ?>">
+          <?php echo image_tag($imagePath, ['raw_name' => true,
+              'alt' => $doc['digitalObject']['digitalObjectAltText'] ?: strip_markdown($title),
+              'class' => 'card-img-top',
+          ]); ?>
+        </a>
+      <?php } else { ?>
+        <a class="p-3" href="<?php echo url_for(['module' => 'informationobject', 'slug' => $doc['slug']]); ?>">
+          <?php echo render_title($title); ?>
+        </a>
+      <?php } ?>
+      <div class="card-body">
+        <div class="card-text d-flex align-items-start gap-2">
+          <span><?php echo render_title($title); ?></span>
+          <?php echo get_component('clipboard', 'button', [
+              'slug' => $doc['slug'],
+              'wide' => false,
+              'type' => 'informationObject',
+          ]); ?>
+        </div>
+      </div>
+    </div>
+  </div>
+<?php } ?>
+</div>

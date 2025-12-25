@@ -1,0 +1,10 @@
+all:
+  .settings:
+    enabled_modules:
+      - spectrumReports
+      - threeDReports
+      - ahgSettings
+
+# Vendor module settings
+vendor:
+  enabled_modules: [vendor]

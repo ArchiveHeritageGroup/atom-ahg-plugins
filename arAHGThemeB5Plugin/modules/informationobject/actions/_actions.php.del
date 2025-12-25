@@ -1,0 +1,7 @@
+<?php if (has_museum_metadata($resource)) { ?>
+	<?php if (sfConfig::get('app_toggleGrap')) { ?>
+	  <li class="divider"></li>
+	  <li><?php echo link_to(__('View GRAP data'), [$resource, 'module' => 'grap']) ?></li>
+	  <li><?php echo link_to(__('Edit GRAP data'), [$resource, 'module' => 'grap', 'action' => 'edit']) ?></li>
+	<?php } ?>
+<?php } ?> 

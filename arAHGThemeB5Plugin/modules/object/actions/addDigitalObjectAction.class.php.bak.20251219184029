@@ -1,0 +1,490 @@
+<?php
+use Illuminate\Database\Capsule\Manager as DB;
+
+/*
+ * This file is part of the Access to Memory (AtoM) software.
+ * Modified by The AHG to include Universal Metadata Extraction
+ */
+
+// Include the metadata extraction trait
+require_once sfConfig::get('sf_plugins_dir').'/arAHGThemeB5Plugin/lib/arMetadataExtractionTrait.php';
+
+/**
+ * Digital Object add component with metadata extraction.
+ */
+class ObjectAddDigitalObjectAction extends sfAction
+{
+    use arMetadataExtractionTrait;
+
+    protected $uploadedFilePath = null;
+
+    public function execute($request)
+    {
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $this->resource = $this->getRoute()->resource;
+
+        // Get repository to test upload limits
+        if ($this->resource instanceof QubitInformationObject) {
+            $this->repository = $this->resource->getRepository(['inherit' => true]);
+        } elseif ($this->resource instanceof QubitActor) {
+            $this->repository = $this->resource->getMaintainingRepository();
+        }
+
+        // Check that object exists and that it is not the root
+        if (!isset($this->resource) || !isset($this->resource->parent)) {
+            $this->forward404();
+        }
+
+        // Assemble resource description
+        sfContext::getInstance()->getConfiguration()->loadHelpers(['Qubit']);
+
+        if ($this->resource instanceof QubitActor) {
+            $this->resourceDescription = render_title($this->resource);
+        } elseif ($this->resource instanceof QubitInformationObject) {
+            $this->resourceDescription = '';
+            if (isset($this->resource->identifier)) {
+                $this->resourceDescription .= $this->resource->identifier.' - ';
+            }
+            $this->resourceDescription .= render_title(new sfIsadPlugin($this->resource));
+        }
+
+        // Check if already exists a digital object
+        if (null !== $digitalObject = $this->resource->getDigitalObject()) {
+            $this->redirect([$digitalObject, 'module' => 'digitalobject', 'action' => 'edit']);
+        }
+
+        // Check user authorization
+        if (!QubitAcl::check($this->resource, 'update')) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        // Check if uploads are allowed
+        if (!QubitDigitalObject::isUploadAllowed()) {
+            QubitAcl::forwardToSecureAction();
+        }
+
+        // Add form fields
+        $this->addFields($request);
+
+        // Process form
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters(), $request->getFiles());
+            if ($this->form->isValid()) {
+                $this->processForm();
+
+                $this->resource->save();
+
+                // Extract and apply metadata AFTER digital object is created
+                // Wrapped in try-catch to ensure upload succeeds even if metadata fails
+                // DISABLED - debugging hang issue
+                // // Re-enabled with logging only
+                // Run metadata extraction in background (async)
+                $this->runMetadataBackground();
+
+                if ($this->resource instanceof QubitInformationObject) {
+                    $this->resource->updateXmlExports();
+                }
+                $this->redirect([$this->resource, 'module' => 'object']);
+            }
+        }
+    }
+
+    /**
+     * Upload the asset and create digital object with derivatives.
+     */
+    public function processForm()
+    {
+        $digitalObject = new QubitDigitalObject();
+
+        if (null !== $this->form->getValue('file')) {
+            $name = $this->form->getValue('file')->getOriginalName();
+            $content = file_get_contents($this->form->getValue('file')->getTempName());
+            $digitalObject->assets[] = new QubitAsset($name, $content);
+            $digitalObject->usageId = QubitTerm::MASTER_ID;
+            
+            // Store temp path for metadata extraction
+            $this->uploadedFilePath = $this->form->getValue('file')->getTempName();
+        } elseif (null !== $this->form->getValue('url')) {
+            try {
+                $digitalObject->importFromURI($this->form->getValue('url'));
+            } catch (sfException $e) {
+                $this->logMessage($e->getMessage(), 'err');
+            }
+        }
+
+        $this->resource->digitalObjectsRelatedByobjectId[] = $digitalObject;
+    }
+
+    /**
+     * Safe wrapper for metadata extraction - never throws, never breaks upload
+     */
+    protected function safeExtractAndApplyMetadata()
+    {
+        // Check if metadata extraction is enabled in AHG settings
+        $extractEnabled = $this->getAhgSetting('meta_extract_on_upload', 'true') === 'true';
+        $autoPopulate = $this->getAhgSetting('meta_auto_populate', 'true') === 'true';
+        
+        if (!$extractEnabled) {
+            error_log('Metadata extraction disabled in AHG settings');
+            return;
+        }
+
+        try {
+            $this->extractAndApplyMetadata($autoPopulate);
+        } catch (\Throwable $e) {
+            // Log error but don't throw - upload must succeed
+            error_log('Metadata extraction failed (non-fatal): ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+        }
+    }
+    
+    protected function getAhgSetting($key, $default = null)
+    {
+        $value = DB::table('ahg_settings')
+            ->where('setting_key', $key)
+            ->value('setting_value');
+        return $value !== null ? $value : $default;
+    }
+
+    /**
+     * Extract and apply metadata after upload
+     */
+    protected function extractAndApplyMetadata($autoPopulate = true)
+    {
+        // Only for information objects
+        if (!($this->resource instanceof QubitInformationObject)) {
+            return;
+        }
+
+        // Get the digital object
+        $digitalObject = $this->resource->getDigitalObject();
+        if (!$digitalObject) {
+            error_log('No digital object found for metadata extraction');
+            return;
+        }
+
+        // Get file path - try the saved digital object path first (more reliable)
+        $filePath = null;
+        
+        // Get from saved digital object
+        $savedPath = $digitalObject->getAbsolutePath();
+        if ($savedPath && file_exists($savedPath)) {
+            $filePath = $savedPath;
+        }
+        // Fallback to temp path
+        elseif (!empty($this->uploadedFilePath) && file_exists($this->uploadedFilePath)) {
+            $filePath = $this->uploadedFilePath;
+        }
+
+        if (!$filePath || !file_exists($filePath)) {
+            error_log('File not found for metadata extraction: ' . ($filePath ?? 'null'));
+            return;
+        }
+
+        error_log('=== Starting metadata extraction for: ' . basename($filePath));
+
+        // Extract metadata using trait method
+        $metadata = $this->extractAllMetadata($filePath);
+
+        if (empty($metadata)) {
+            error_log('No metadata extracted from: ' . basename($filePath));
+            return;
+        }
+
+        error_log('Metadata extracted successfully, applying to information object...');
+
+        // Apply metadata to information object - simple fields only (no actors/terms)
+        if ($autoPopulate) {
+            // Apply only physical characteristics - minimal and safe
+            $this->applyPhysicalCharacteristicsOnly($this->resource->id, $metadata);
+        } else {
+            error_log('Auto-populate disabled - metadata extracted but not applied');
+        }
+
+        error_log('Metadata extraction and application complete');
+    }
+
+    protected function addFields($request)
+    {
+        // Single upload
+        if (0 < count($request->getFiles())) {
+            $this->form->setValidator('file', new sfValidatorFile());
+        }
+        $this->form->setWidget('file', new sfWidgetFormInputFile());
+
+        // URL
+        if (isset($request->url) && 'http://' != $request->url) {
+            $this->form->setValidator('url', new QubitValidatorUrl());
+        }
+        $this->form->setDefault('url', 'http://');
+        $this->form->setWidget('url', new sfWidgetFormInput());
+    }
+
+    protected function applyPhysicalCharacteristicsOnly($ioId, $metadata)
+    {
+        error_log("=== APPLYING PHYSICAL CHARACTERISTICS ONLY ===");
+        
+        $extractorInfo = $metadata['_extractor'] ?? [];
+        $summary = $extractorInfo['summary'] ?? null;
+        
+        if (empty($summary)) {
+            error_log("No summary to apply");
+            return;
+        }
+        
+        // Limit summary size
+        if (strlen($summary) > 5000) {
+            $summary = substr($summary, 0, 5000) . "\n... (truncated)";
+        }
+        
+        try {
+            $exists = DB::table('information_object_i18n')
+                ->where('id', $ioId)
+                ->where('culture', 'en')
+                ->exists();
+            
+            if ($exists) {
+                DB::table('information_object_i18n')
+                    ->where('id', $ioId)
+                    ->where('culture', 'en')
+                    ->update(['physical_characteristics' => $summary]);
+                error_log("Updated physical_characteristics");
+            } else {
+                error_log("No i18n record found for IO " . $ioId);
+            }
+        } catch (\Exception $e) {
+            error_log("Error updating physical_characteristics: " . $e->getMessage());
+        }
+    }
+
+
+    protected function testMetadataLogging()
+    {
+        error_log("=== TEST METADATA LOGGING START ===");
+        
+        try {
+            $digitalObject = $this->resource->getDigitalObject();
+            if (!$digitalObject) {
+                error_log("No digital object");
+                return;
+            }
+            
+            error_log("Digital object ID: " . $digitalObject->id);
+            
+            $filePath = $digitalObject->getAbsolutePath();
+            error_log("File path: " . $filePath);
+            
+            if (!$filePath || !file_exists($filePath)) {
+                error_log("File not found");
+                return;
+            }
+            
+            error_log("File exists, size: " . filesize($filePath));
+            error_log("=== TEST METADATA LOGGING END ===");
+            
+        } catch (\Throwable $e) {
+            error_log("Test error: " . $e->getMessage());
+        }
+    }
+
+
+    protected function applyMetadataLaravel()
+    {
+        error_log("=== APPLY METADATA LARAVEL START ===");
+        
+        try {
+            // Initialize Laravel DB
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            
+            // Only for information objects
+            if (!($this->resource instanceof QubitInformationObject)) {
+                return;
+            }
+            
+            $digitalObject = $this->resource->getDigitalObject();
+            if (!$digitalObject) {
+                error_log("No digital object");
+                return;
+            }
+            
+            $filePath = $digitalObject->getAbsolutePath();
+            if (!$filePath || !file_exists($filePath)) {
+                error_log("File not found: " . $filePath);
+                return;
+            }
+            
+            error_log("Extracting from: " . basename($filePath));
+            
+            // Extract metadata
+            $extractor = new arUniversalMetadataExtractor($filePath);
+            $metadata = $extractor->extractAll();
+            
+            if (empty($metadata)) {
+                error_log("No metadata extracted");
+                return;
+            }
+            
+            // Get summary
+            $summary = $extractor->formatSummary();
+            if (empty($summary)) {
+                error_log("No summary");
+                return;
+            }
+            
+            // Limit size
+            if (strlen($summary) > 10000) {
+                $summary = substr($summary, 0, 10000) . "\n... (truncated)";
+            }
+            
+            $ioId = $this->resource->id;
+            error_log("Updating IO " . $ioId . " with " . strlen($summary) . " chars");
+            
+            // Use Laravel DB (now initialized)
+            $exists = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                ->where('id', $ioId)
+                ->where('culture', 'en')
+                ->exists();
+            
+            if ($exists) {
+                \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                    ->where('id', $ioId)
+                    ->where('culture', 'en')
+                    ->update(['physical_characteristics' => $summary]);
+                error_log("SUCCESS: Updated physical_characteristics");
+            } else {
+                error_log("No i18n record for IO " . $ioId);
+            }
+            
+        } catch (\Throwable $e) {
+            error_log("Metadata error: " . $e->getMessage());
+        }
+        
+        error_log("=== APPLY METADATA LARAVEL END ===");
+    }
+
+
+    protected function scheduleMetadataExtraction()
+    {
+        try {
+            if (!($this->resource instanceof QubitInformationObject)) {
+                return;
+            }
+            
+            $digitalObject = $this->resource->getDigitalObject();
+            if (!$digitalObject) {
+                return;
+            }
+            
+            $filePath = $digitalObject->getAbsolutePath();
+            if (!$filePath || !file_exists($filePath)) {
+                return;
+            }
+            
+            // Extract metadata now (fast)
+            $extractor = new arUniversalMetadataExtractor($filePath);
+            $metadata = $extractor->extractAll();
+            
+            if (empty($metadata)) {
+                return;
+            }
+            
+            $summary = $extractor->formatSummary();
+            $keyFields = $metadata['_extractor']['key_fields'] ?? [];
+            
+            // Store in session for post-transaction processing
+            $data = [
+                'io_id' => $this->resource->id,
+                'summary' => $summary,
+                'key_fields' => $keyFields,
+            ];
+            
+            // Use a file-based queue (simple, no transaction lock)
+            $queueFile = sfConfig::get('sf_cache_dir') . '/metadata_queue_' . $this->resource->id . '.json';
+            file_put_contents($queueFile, json_encode($data));
+            
+            // Register shutdown function to process after response
+            register_shutdown_function([$this, 'processMetadataQueue'], $queueFile);
+            
+            error_log("Metadata queued for IO " . $this->resource->id);
+            
+        } catch (\Throwable $e) {
+            error_log("Queue error: " . $e->getMessage());
+        }
+    }
+    
+    public function processMetadataQueue($queueFile)
+    {
+        if (!file_exists($queueFile)) {
+            return;
+        }
+        
+        try {
+            $data = json_decode(file_get_contents($queueFile), true);
+            unlink($queueFile);
+            
+            if (empty($data)) {
+                return;
+            }
+            
+            $ioId = $data['io_id'];
+            $summary = $data['summary'];
+            $keyFields = $data['key_fields'] ?? [];
+            
+            // Now safe to use PDO - transaction is complete
+            $conn = Propel::getConnection();
+            
+            // Update physical_characteristics
+            if (!empty($summary)) {
+                $stmt = $conn->prepare("UPDATE information_object_i18n SET physical_characteristics = ? WHERE id = ? AND culture = ?");
+                $stmt->execute([$summary, $ioId, 'en']);
+                error_log("Updated physical_characteristics for IO $ioId");
+            }
+            
+            // Update title if empty
+            if (!empty($keyFields['title'])) {
+                $stmt = $conn->prepare("SELECT title FROM information_object_i18n WHERE id = ? AND culture = ?");
+                $stmt->execute([$ioId, 'en']);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (empty($row['title'])) {
+                    $stmt = $conn->prepare("UPDATE information_object_i18n SET title = ? WHERE id = ? AND culture = ?");
+                    $stmt->execute([$keyFields['title'], $ioId, 'en']);
+                }
+            }
+            
+            // Update scope_and_content if empty
+            if (!empty($keyFields['description'])) {
+                $stmt = $conn->prepare("SELECT scope_and_content FROM information_object_i18n WHERE id = ? AND culture = ?");
+                $stmt->execute([$ioId, 'en']);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (empty($row['scope_and_content'])) {
+                    $stmt = $conn->prepare("UPDATE information_object_i18n SET scope_and_content = ? WHERE id = ? AND culture = ?");
+                    $stmt->execute([$keyFields['description'], $ioId, 'en']);
+                }
+            }
+            
+            error_log("Metadata applied for IO $ioId");
+            
+        } catch (\Throwable $e) {
+            error_log("Process queue error: " . $e->getMessage());
+        }
+    }
+
+    protected function runMetadataBackground()
+    {
+        if (!($this->resource instanceof QubitInformationObject)) {
+            return;
+        }
+        
+        $script = sfConfig::get('sf_plugins_dir') . '/arAHGThemeB5Plugin/lib/process_metadata.php';
+        $ioId = $this->resource->id;
+        
+        // Run in background (non-blocking)
+        $cmd = "php $script $ioId > /dev/null 2>&1 &";
+        exec($cmd);
+        
+        error_log("METADATA: Queued background processing for IO $ioId");
+    }
+
+}

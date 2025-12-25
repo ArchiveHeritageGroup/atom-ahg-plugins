@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Override search action to add security filtering
+ */
+class SearchIndexAction extends \SearchIndexAction
+{
+    public function execute($request)
+    {
+        // Add security filter before parent executes search
+        SecurityAccessFilter::filterByAccess($this->search->queryBool);
+
+        return parent::execute($request);
+    }
+}

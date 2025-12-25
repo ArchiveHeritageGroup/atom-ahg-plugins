@@ -1,0 +1,275 @@
+<?php echo get_partial('header', ['title' => 'Vendor Management']); ?>
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2"><i class="fas fa-truck me-2"></i>Vendor Management</h1>
+        <div>
+            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>" class="btn btn-outline-secondary">
+                <i class="fas fa-building me-1"></i>All Vendors
+            </a>
+            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>" class="btn btn-outline-secondary">
+                <i class="fas fa-exchange-alt me-1"></i>All Transactions
+            </a>
+            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Add Vendor
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50">Active Vendors</h6>
+                            <h2 class="mb-0"><?php echo number_format($stats['active_vendors'] ?? 0); ?></h2>
+                        </div>
+                        <i class="fas fa-building fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50">Active Transactions</h6>
+                            <h2 class="mb-0"><?php echo number_format($stats['active_transactions'] ?? 0); ?></h2>
+                        </div>
+                        <i class="fas fa-exchange-alt fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1">Pending Approval</h6>
+                            <h2 class="mb-0"><?php echo number_format($stats['pending_approval'] ?? 0); ?></h2>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50">Overdue</h6>
+                            <h2 class="mb-0"><?php echo number_format($stats['overdue_items'] ?? 0); ?></h2>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50">Items Out</h6>
+                            <h2 class="mb-0"><?php echo number_format($stats['items_out'] ?? 0); ?></h2>
+                        </div>
+                        <i class="fas fa-boxes fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50">This Month</h6>
+                            <h2 class="mb-0">R<?php echo number_format($stats['this_month_cost'] ?? 0, 2); ?></h2>
+                        </div>
+                        <i class="fas fa-coins fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Overdue Items Alert -->
+        <?php if (isset($overdueTransactions) && $overdueTransactions->count() > 0): ?>
+        <div class="col-12 mb-4">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Overdue Transactions (<?php echo $overdueTransactions->count(); ?>)
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Transaction #</th>
+                                    <th>Vendor</th>
+                                    <th>Service</th>
+                                    <th>Expected Return</th>
+                                    <th>Days Overdue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($overdueTransactions as $trans): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                            <?php echo esc_entities($trans->transaction_number); ?>
+                                        </a>
+                                    </td>
+                                    <td><?php echo esc_entities($trans->vendor_name); ?></td>
+                                    <td><?php echo esc_entities($trans->service_name); ?></td>
+                                    <td><?php echo date('d M Y', strtotime($trans->expected_return_date)); ?></td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            <?php echo (new DateTime())->diff(new DateTime($trans->expected_return_date))->days; ?> days
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Recent Active Transactions -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-history me-2"></i>Recent Active Transactions</span>
+                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>New Transaction
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (isset($activeTransactions) && $activeTransactions->count() > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Transaction #</th>
+                                    <th>Vendor</th>
+                                    <th>Service</th>
+                                    <th>Items</th>
+                                    <th>Status</th>
+                                    <th>Expected Return</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($activeTransactions as $trans): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                            <?php echo esc_entities($trans->transaction_number); ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $trans->vendor_slug]); ?>">
+                                            <?php echo esc_entities($trans->vendor_name); ?>
+                                        </a>
+                                    </td>
+                                    <td><?php echo esc_entities($trans->service_name); ?></td>
+                                    <td><span class="badge bg-secondary"><?php echo $trans->item_count; ?></span></td>
+                                    <td><?php echo get_partial('vendor/statusBadge', ['status' => $trans->status]); ?></td>
+                                    <td>
+                                        <?php if ($trans->expected_return_date): ?>
+                                            <?php echo date('d M Y', strtotime($trans->expected_return_date)); ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">Not set</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No active transactions</p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <div class="card-footer">
+                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>">View all transactions →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Distribution -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-2"></i>Transaction Status Distribution
+                </div>
+                <div class="card-body">
+                    <?php 
+                    $statusLabels = [
+                        'pending_approval' => ['label' => 'Pending Approval', 'color' => 'warning'],
+                        'approved' => ['label' => 'Approved', 'color' => 'info'],
+                        'dispatched' => ['label' => 'Dispatched', 'color' => 'primary'],
+                        'received_by_vendor' => ['label' => 'At Vendor', 'color' => 'secondary'],
+                        'in_progress' => ['label' => 'In Progress', 'color' => 'info'],
+                        'completed' => ['label' => 'Completed', 'color' => 'success'],
+                        'ready_for_collection' => ['label' => 'Ready', 'color' => 'success'],
+                        'returned' => ['label' => 'Returned', 'color' => 'dark'],
+                        'cancelled' => ['label' => 'Cancelled', 'color' => 'danger'],
+                    ];
+                    ?>
+                    <?php if (isset($statusCounts) && count($statusCounts) > 0): ?>
+                        <?php foreach ($statusCounts as $statusCount): ?>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>
+                                <span class="badge bg-<?php echo $statusLabels[$statusCount->status]['color'] ?? 'secondary'; ?> me-2">
+                                    <?php echo $statusCount->count; ?>
+                                </span>
+                                <?php echo $statusLabels[$statusCount->status]['label'] ?? ucfirst(str_replace('_', ' ', $statusCount->status)); ?>
+                            </span>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="text-muted mb-0">No transactions yet</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-outline-primary">
+                            <i class="fas fa-building me-2"></i>Add New Vendor
+                        </a>
+                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-outline-success">
+                            <i class="fas fa-plus me-2"></i>Create Transaction
+                        </a>
+                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions', 'overdue' => 1]); ?>" class="btn btn-outline-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>View Overdue Items
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

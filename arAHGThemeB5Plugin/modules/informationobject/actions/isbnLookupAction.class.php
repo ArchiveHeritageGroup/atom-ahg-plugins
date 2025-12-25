@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * ISBN Lookup Action for Information Objects.
+ *
+ * Handles AJAX requests for ISBN metadata lookup from WorldCat,
+ * Open Library, and Google Books APIs.
+ */
+class InformationobjectIsbnLookupAction extends sfAction
+{
+    public function execute($request)
+    {
+        // Disable layout for AJAX
+        $this->getResponse()->setContentType('application/json');
+
+        // Check authentication
+        if (!$this->context->user->isAuthenticated()) {
+            return $this->renderJson([
+                'success' => false,
+                'error' => 'Authentication required',
+            ], 401);
+        }
+
+        // Get ISBN from request
+        $isbn = trim($request->getParameter('isbn', ''));
+
+        if (empty($isbn)) {
+            return $this->renderJson([
+                'success' => false,
+                'error' => 'ISBN is required',
+            ]);
+        }
+
+        // Get optional object ID for audit
+        $objectId = $request->getParameter('object_id');
+
+        try {
+            // Initialize services
+            $repository = new \AtomFramework\Repositories\IsbnLookupRepository();
+            $service = new \AtomFramework\Services\WorldCatService($repository);
+            $mapper = new \AtomFramework\Services\IsbnMetadataMapper();
+
+            // Perform lookup
+            $result = $service->lookup(
+                $isbn,
+                $this->context->user->getAttribute('user_id'),
+                $objectId ? (int) $objectId : null
+            );
+
+            if (!$result['success']) {
+                return $this->renderJson([
+                    'success' => false,
+                    'error' => $result['error'] ?? 'Lookup failed',
+                ]);
+            }
+
+            // Get preview data and field mapping
+            $preview = $mapper->getPreviewData($result['data']);
+            $mapped = $mapper->mapToAtom($result['data']);
+
+            return $this->renderJson([
+                'success' => true,
+                'source' => $result['source'],
+                'cached' => $result['cached'] ?? false,
+                'preview' => $preview,
+                'mapping' => $mapped,
+                'raw' => $result['data'],
+            ]);
+
+        } catch (\Exception $e) {
+            // Log error
+            sfContext::getInstance()->getLogger()->err(
+                'ISBN lookup failed: '.$e->getMessage()
+            );
+
+            return $this->renderJson([
+                'success' => false,
+                'error' => 'An error occurred during lookup',
+            ], 500);
+        }
+    }
+
+    /**
+     * Render JSON response.
+     */
+    private function renderJson(array $data, int $status = 200): string
+    {
+        $this->getResponse()->setStatusCode($status);
+
+        return $this->renderText(json_encode($data, JSON_PRETTY_PRINT));
+    }
+}

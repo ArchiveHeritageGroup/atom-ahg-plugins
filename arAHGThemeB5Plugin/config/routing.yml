@@ -1,0 +1,356 @@
+# =============================================================================
+# AHG Settings Dashboard Routes
+# =============================================================================
+
+ahg_settings_index:
+  url: /admin/ahg-settings
+  param: { module: ahgSettings, action: index }
+
+ahg_settings_section:
+  url: /admin/ahg-settings/section
+  param: { module: ahgSettings, action: section }
+
+ahg_settings_save:
+  url: /admin/ahg-settings/save
+  param: { module: ahgSettings, action: save }
+
+ahg_settings_export:
+  url: /admin/ahg-settings/export
+  param: { module: ahgSettings, action: export }
+
+ahg_settings_import:
+  url: /admin/ahg-settings/import
+  param: { module: ahgSettings, action: import }
+
+ahg_settings_reset:
+  url: /admin/ahg-settings/reset
+  param: { module: ahgSettings, action: reset }
+
+ahg_settings_email:
+  url: /admin/ahg-settings/email
+  param: { module: ahgSettings, action: email }
+
+ahg_settings_email_test:
+  url: /admin/ahg-settings/email-test
+  param: { module: ahgSettings, action: emailTest }
+
+ahg_settings_fuseki_test:
+  url: /admin/ahg-settings/fuseki-test
+  param: { module: ahgSettings, action: fusekiTest }
+
+ahg_settings_plugins:
+  url: /admin/ahg-settings/plugins
+  param: { module: ahgSettings, action: plugins }
+
+# Centralized Report System
+report_view:
+  url: /reports/view/:code
+  param: { module: reports, action: report }
+  requirements: { code: '[a-z_]+' }
+
+# TK Labels
+tk_labels:
+  url: /tk-labels
+  param: { module: rightsAdmin, action: tkLabels }
+
+tk_labels_assign:
+  url: /tk-labels/assign
+  param: { module: rightsAdmin, action: assignTkLabel }
+
+tk_labels_remove:
+  url: /tk-labels/remove
+  param: { module: rightsAdmin, action: removeTkLabel }
+
+# Rights Admin
+rights_admin:
+  url: /rights/admin
+  param: { module: rightsAdmin, action: index }
+
+rights_admin_dashboard:
+  url: /admin/rights
+  param: { module: rightsAdmin, action: index }
+
+# Export Module
+export_index:
+  url: /export
+  param: { module: export, action: index }
+
+export_archival:
+  url: /export/archival
+  param: { module: export, action: archival }
+
+export_authority:
+  url: /export/authority
+  param: { module: export, action: authority }
+
+export_repository:
+  url: /export/repository
+  param: { module: export, action: repository }
+
+# =============================================================================
+# 3D Object Reports Routes
+# =============================================================================
+threeD_reports_index:
+  url: /threeDReports
+  param: { module: threeDReports, action: index }
+
+threeD_reports_models:
+  url: /threeDReports/models
+  param: { module: threeDReports, action: models }
+
+threeD_reports_hotspots:
+  url: /threeDReports/hotspots
+  param: { module: threeDReports, action: hotspots }
+
+threeD_reports_thumbnails:
+  url: /threeDReports/thumbnails
+  param: { module: threeDReports, action: thumbnails }
+
+threeD_reports_digitalObjects:
+  url: /threeDReports/digitalObjects
+  param: { module: threeDReports, action: digitalObjects }
+
+threeD_reports_settings:
+  url: /threeDReports/settings
+  param: { module: threeDReports, action: settings }
+
+threeD_reports_createConfig:
+  url: /threeDReports/createConfig
+  param: { module: threeDReports, action: createConfig }
+
+threeD_reports_bulkCreateConfig:
+  url: /threeDReports/bulkCreateConfig
+  param: { module: threeDReports, action: bulkCreateConfig }
+
+# =============================================================================
+# Spectrum Reports Routes
+# =============================================================================
+spectrum_reports_index:
+  url: /spectrumReports
+  param: { module: spectrumReports, action: index }
+
+spectrum_reports_loans:
+  url: /spectrumReports/loans
+  param: { module: spectrumReports, action: loans }
+
+spectrum_reports_conditions:
+  url: /spectrumReports/conditions
+  param: { module: spectrumReports, action: conditions }
+
+spectrum_reports_valuations:
+  url: /spectrumReports/valuations
+  param: { module: spectrumReports, action: valuations }
+
+spectrum_reports_movements:
+  url: /spectrumReports/movements
+  param: { module: spectrumReports, action: movements }
+
+spectrum_reports_acquisitions:
+  url: /spectrumReports/acquisitions
+  param: { module: spectrumReports, action: acquisitions }
+
+spectrum_reports_conservation:
+  url: /spectrumReports/conservation
+  param: { module: spectrumReports, action: conservation }
+
+spectrum_reports_objectEntry:
+  url: /spectrumReports/objectEntry
+  param: { module: spectrumReports, action: objectEntry }
+
+# =============================================================================
+# Vendor Management Routes - ORDER MATTERS!
+# Specific routes MUST come before :slug catch-all
+# =============================================================================
+
+vendor_index:
+  url: /vendor
+  param: { module: vendor, action: index }
+
+vendor_list:
+  url: /vendor/list
+  param: { module: vendor, action: list }
+
+vendor_add:
+  url: /vendor/add
+  param: { module: vendor, action: add }
+
+vendor_transactions:
+  url: /vendor/transactions
+  param: { module: vendor, action: transactions }
+
+vendor_services:
+  url: /vendor/services
+  param: { module: vendor, action: serviceTypes }
+
+vendor_transaction_add:
+  url: /vendor/transaction/add
+  param: { module: vendor, action: addTransaction }
+
+vendor_transaction_view:
+  url: /vendor/transaction/:id
+  param: { module: vendor, action: viewTransaction }
+  requirements: { id: \d+ }
+
+vendor_transaction_edit:
+  url: /vendor/transaction/:id/edit
+  param: { module: vendor, action: editTransaction }
+  requirements: { id: \d+ }
+
+vendor_transaction_status:
+  url: /vendor/transaction/:id/status
+  param: { module: vendor, action: updateTransactionStatus }
+  requirements: { id: \d+ }
+
+vendor_transaction_add_item:
+  url: /vendor/transaction/:transaction_id/item/add
+  param: { module: vendor, action: addTransactionItem }
+  requirements: { transaction_id: \d+ }
+
+vendor_transaction_update_item:
+  url: /vendor/transaction/:transaction_id/item/:item_id/update
+  param: { module: vendor, action: updateTransactionItem }
+  requirements: { transaction_id: \d+, item_id: \d+ }
+
+vendor_transaction_remove_item:
+  url: /vendor/transaction/:transaction_id/item/:item_id/remove
+  param: { module: vendor, action: removeTransactionItem }
+  requirements: { transaction_id: \d+, item_id: \d+ }
+
+vendor_add_contact:
+  url: /vendor/:slug/contact/add
+  param: { module: vendor, action: addContact }
+
+vendor_update_contact:
+  url: /vendor/:slug/contact/:contact_id/update
+  param: { module: vendor, action: updateContact }
+  requirements: { contact_id: \d+ }
+
+vendor_delete_contact:
+  url: /vendor/:slug/contact/:contact_id/delete
+  param: { module: vendor, action: deleteContact }
+  requirements: { contact_id: \d+ }
+
+vendor_edit:
+  url: /vendor/:slug/edit
+  param: { module: vendor, action: edit }
+
+vendor_delete:
+  url: /vendor/:slug/delete
+  param: { module: vendor, action: delete }
+
+# CATCH-ALL MUST BE LAST
+vendor_view:
+  url: /vendor/:slug
+  param: { module: vendor, action: view }
+
+# API Routes
+api_search_io:
+  url: /api/search/io
+  param: { module: api, action: searchInformationObjects }
+
+api_autocomplete_glam:
+  url: /api/autocomplete/glam
+  param: { module: api, action: autocompleteGlam }
+
+# TIFF PDF Settings Save
+ahgsettings_save_tiff_pdf:
+  url: /ahgSettings/saveTiffPdfSettings
+  param: { module: ahgSettings, action: saveTiffPdfSettings }
+
+# DAM Tools Settings
+ahgsettings_dam_tools:
+  url: /ahgSettings/damTools
+  param: { module: ahgSettings, action: damTools }
+
+# TIFF PDF Merge Job Browser
+tiffpdfmerge_browse:
+  url: /tiff-pdf-merge/jobs
+  param: { module: tiffpdfmerge, action: browse }
+
+tiffpdfmerge_view:
+  url: /tiff-pdf-merge/job/:job_id
+  param: { module: tiffpdfmerge, action: view }
+  requirements: { job_id: \d+ }
+
+# ============================================================
+# Landing Page Builder Routes
+# ============================================================
+
+# Admin routes
+landing_page_list:
+  url: /admin/landing-pages
+  param: { module: landingPageBuilder, action: list }
+
+landing_page_create:
+  url: /admin/landing-pages/create
+  param: { module: landingPageBuilder, action: create }
+
+landing_page_edit:
+  url: /admin/landing-pages/:id/edit
+  param: { module: landingPageBuilder, action: edit }
+  requirements: { id: \d+ }
+
+landing_page_preview:
+  url: /admin/landing-pages/:id/preview
+  param: { module: landingPageBuilder, action: preview }
+  requirements: { id: \d+ }
+
+# AJAX endpoints
+landing_page_ajax_add_block:
+  url: /admin/landing-pages/ajax/add-block
+  param: { module: landingPageBuilder, action: addBlock }
+
+landing_page_ajax_update_block:
+  url: /admin/landing-pages/ajax/update-block
+  param: { module: landingPageBuilder, action: updateBlock }
+
+landing_page_ajax_delete_block:
+  url: /admin/landing-pages/ajax/delete-block
+  param: { module: landingPageBuilder, action: deleteBlock }
+
+landing_page_ajax_duplicate_block:
+  url: /admin/landing-pages/ajax/duplicate-block
+  param: { module: landingPageBuilder, action: duplicateBlock }
+
+landing_page_ajax_reorder:
+  url: /admin/landing-pages/ajax/reorder
+  param: { module: landingPageBuilder, action: reorderBlocks }
+
+landing_page_ajax_toggle_visibility:
+  url: /admin/landing-pages/ajax/toggle-visibility
+  param: { module: landingPageBuilder, action: toggleVisibility }
+
+landing_page_ajax_get_config:
+  url: /admin/landing-pages/ajax/get-config
+  param: { module: landingPageBuilder, action: getBlockConfig }
+
+landing_page_ajax_update_settings:
+  url: /admin/landing-pages/ajax/update-settings
+  param: { module: landingPageBuilder, action: updateSettings }
+
+landing_page_ajax_delete:
+  url: /admin/landing-pages/ajax/delete
+  param: { module: landingPageBuilder, action: delete }
+
+landing_page_ajax_save_draft:
+  url: /admin/landing-pages/ajax/save-draft
+  param: { module: landingPageBuilder, action: saveDraft }
+
+landing_page_ajax_publish:
+  url: /admin/landing-pages/ajax/publish
+  param: { module: landingPageBuilder, action: publish }
+
+landing_page_ajax_restore_version:
+  url: /admin/landing-pages/ajax/restore-version
+  param: { module: landingPageBuilder, action: restoreVersion }
+
+# Public routes
+landing_page_view:
+  url: /landing/:slug
+  param: { module: landingPageBuilder, action: index }
+  requirements: { slug: '[a-z0-9\-]+' }
+
+
+landing_page_ajax_move_to_column:
+  url: /admin/landing-pages/ajax/move-to-column
+  param: { module: landingPageBuilder, action: moveToColumn }

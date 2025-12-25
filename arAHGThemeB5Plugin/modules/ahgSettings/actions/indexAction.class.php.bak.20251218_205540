@@ -1,0 +1,133 @@
+<?php
+class AhgSettingsIndexAction extends sfAction
+{
+    public function execute($request)
+    {
+        if (!$this->context->user->isAdministrator()) {
+            QubitAcl::forwardUnauthorized();
+        }
+        $this->sections = [
+            'general' => [
+                'label' => 'Theme Configuration',
+                'icon' => 'fa-palette',
+                'description' => 'Customize AHG theme appearance and branding',
+                'url' => 'admin/ahg-settings/section?section=general'
+            ],
+            'email' => [
+                'label' => 'Email Settings',
+                'icon' => 'fa-envelope',
+                'description' => 'SMTP configuration and email templates',
+                'url' => 'admin/ahg-settings/email'
+            ],
+            'research' => [
+                'label' => 'Reading Room',
+                'icon' => 'fa-book-reader',
+                'description' => 'Researcher registration and reading room settings',
+                'url' => 'research/rooms'
+            ],
+            'audit' => [
+                'label' => 'Audit Trail',
+                'icon' => 'fa-history',
+                'description' => 'View change history and user activity logs',
+                'url' => 'arAuditTrailPlugin/browse'
+            ],
+            'watermark' => [
+                'label' => 'Watermark Settings',
+                'icon' => 'fa-copyright',
+                'description' => 'Configure image watermarking options',
+                'url' => 'admin/watermark-settings'
+            ],
+            'carousel' => [
+                'label' => 'Carousel Settings',
+                'icon' => 'fa-images',
+                'description' => 'Homepage carousel and slideshow configuration',
+                'url' => 'arIiifViewerSettings/index'
+            ],
+            'metadata' => [
+                'label' => 'Metadata Extraction',
+                'icon' => 'fa-tags',
+                'description' => 'Auto-extract EXIF, IPTC, XMP from uploaded files',
+                'url' => 'admin/ahg-settings/section?section=metadata'
+            ],
+            'spectrum' => [
+                'label' => 'Spectrum / Collections',
+                'icon' => 'fa-archive',
+                'description' => 'Museum collections management settings',
+                'url' => 'admin/ahg-settings/section?section=spectrum'
+            ],
+            'iiif' => [
+                'label' => 'IIIF Viewer',
+                'icon' => 'fa-photo-video',
+                'description' => 'IIIF image viewer configuration',
+                'url' => 'admin/ahg-settings/section?section=iiif'
+            ],
+            'data_protection' => [
+                'label' => 'Data Protection',
+                'icon' => 'fa-shield-alt',
+                'description' => 'POPIA/GDPR compliance settings',
+                'url' => 'admin/ahg-settings/section?section=data_protection'
+            ],
+            'faces' => [
+                'label' => 'Face Detection',
+                'icon' => 'fa-user-circle',
+                'description' => 'Detect and match faces to authority records',
+                'url' => 'admin/ahg-settings/section?section=faces'
+            ],
+            'media' => [
+                'label' => 'Media Player',
+                'icon' => 'fa-play-circle',
+                'description' => 'Enhanced media player configuration',
+                'url' => 'admin/ahg-settings/section?section=media'
+            ],
+            'media_processing' => [
+                'label' => 'Media Processing',
+                'icon' => 'fa-cogs',
+                'description' => 'Transcription, thumbnails, waveforms & media derivatives',
+                'url' => 'arMediaSettings/index'
+            ],
+            'photos' => [
+                'label' => 'Condition Photos',
+                'icon' => 'fa-camera',
+                'description' => 'Photo upload and thumbnail settings',
+                'url' => 'admin/ahg-settings/section?section=photos'
+            ],
+            'jobs' => [
+                'label' => 'Background Jobs',
+                'icon' => 'fa-tasks',
+                'description' => 'Job queue and scheduling settings',
+                'url' => 'admin/ahg-settings/section?section=jobs'
+            ],
+            'backup' => [
+                'label' => 'Backup & Restore',
+                'icon' => 'fa-database',
+                'description' => 'Database backup, restore and scheduling',
+                'url' => 'backup/index'
+            ],
+            'fuseki' => [
+                'label' => 'Fuseki / RIC Triplestore',
+                'icon' => 'fa-project-diagram',
+                'description' => 'Configure Apache Jena Fuseki connection for RIC ontology',
+                'url' => 'admin/ahg-settings/section?section=fuseki'
+            ],
+            'search' => [
+                'label' => 'Search Templates',
+                'icon' => 'fa-search-plus',
+                'description' => 'Define quick search templates and manage search settings',
+                'url' => 'searchEnhancement/adminTemplates'
+            ],
+               'search' => [
+                   'label' => 'Search Templates',
+                   'icon' => 'fa-search-plus',
+                   'description' => 'Define quick search templates',
+                   'url' => 'searchEnhancement/adminTemplates'
+		   ],
+			'plugins' => [
+				'label' => 'Plugin Management',
+				'icon' => 'fa-puzzle-piece',
+				'description' => 'Enable or disable plugins',
+				'url' => 'pluginAdmin/index',
+			],
+			   
+        ];
+    }
+}

@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Override browse action to add security filtering
+ */
+class InformationObjectBrowseAction extends \InformationObjectBrowseAction
+{
+    public function execute($request)
+    {
+        parent::execute($request);
+
+        // Add security access filter (like QubitAclSearch::filterDrafts)
+        SecurityAccessFilter::filterByAccess($this->search->queryBool);
+    }
+}

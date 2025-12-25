@@ -1,0 +1,31 @@
+backup_index:
+  url: /admin/backup
+  param: { module: backup, action: index }
+
+backup_settings:
+  url: /admin/backup/settings
+  param: { module: backup, action: settings }
+
+backup_create:
+  url: /admin/backup/create
+  param: { module: backup, action: create }
+
+backup_restore:
+  url: /admin/backup/restore
+  param: { module: backup, action: restore }
+
+backup_do_restore:
+  url: /admin/backup/doRestore
+  param: { module: backup, action: doRestore }
+
+backup_delete:
+  url: /admin/backup/delete
+  param: { module: backup, action: delete }
+
+backup_download:
+  url: /admin/backup/download
+  param: { module: backup, action: download }
+
+backup_test_connection:
+  url: /admin/backup/testConnection
+  param: { module: backup, action: testConnection }

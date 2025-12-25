@@ -1,0 +1,326 @@
+<?php
+
+/*
+ * This file is part of Qubit Toolkit.
+ *
+ * Qubit Toolkit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Qubit Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Qubit Toolkit.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// Load PHPMailer manually (since Composer is not used)
+require '/usr/share/nginx/phpmailer/src/PHPMailer.php';
+require '/usr/share/nginx/phpmailer/src/SMTP.php';
+require '/usr/share/nginx/phpmailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+
+/**
+ * Request to Publish edit component.
+ *
+ * @author     Johan Pieterse
+ */
+class InformationObjectEditRequestToPublishAction extends DefaultEditAction
+{
+    public static $NAMES = [
+        'unique_identifier',
+        'rtp_name',
+        'rtp_surname',
+        'rtp_phone',
+        'rtp_email',
+        'rtp_institution',
+        'rtp_motivation',
+        'rtp_planned_use',
+        'rtp_need_image_by',
+        'object_id',
+        'created_at',
+        'cbReceipt',
+    ];
+
+    public function execute($request)
+    {
+        parent::execute($request);
+
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters());
+
+            if ($this->form->isValid()) {
+                $this->processForm();
+                $this->resource->save(); // saves relations added in processForm()
+                $this->informationObject = QubitInformationObject::getById($this->resource->id);
+
+                $this->redirect([$this->resource, 'module' => 'informationobject']);
+            }
+        }
+    }
+
+    public function sendmail(
+        $id,
+        $rtp_name,
+        $rtp_surname,
+        $rtp_phone,
+        $rtp_email,
+        $rtp_institution,
+        $rtp_planned_use,
+        $rtp_motivation,
+        $rtp_need_image_by
+    ) {
+        $mail = new PHPMailer(true);
+
+        try {
+            $host        = QubitSetting::getByNameAndScope('host', 'email');
+            $port        = QubitSetting::getByNameAndScope('port', 'email');
+            $smtp_secure = QubitSetting::getByNameAndScope('smtp_secure', 'email');
+            $smtp_auth   = QubitSetting::getByNameAndScope('smtp_auth', 'email');
+            $username    = QubitSetting::getByNameAndScope('email_username', 'email');
+            $password    = QubitSetting::getByNameAndScope('password', 'email');
+            $from        = QubitSetting::getByNameAndScope('from', 'email');
+            $to          = QubitSetting::getByNameAndScope('to', 'email');
+            $cc          = QubitSetting::getByNameAndScope('cc', 'email');
+            $reply_to    = QubitSetting::getByNameAndScope('reply_to', 'email');
+            $subject     = QubitSetting::getByNameAndScope('subject', 'email');
+            $body        = QubitSetting::getByNameAndScope('body', 'email');
+
+            // NOTE: these QubitSetting values are objects; if needed you can
+            // change them to ->getValue(['sourceCulture' => true]) later.
+
+            if ('' == $body) {
+                $body = "Request to Publish details:\n".$id
+                    ."\n Name & surname: ".$rtp_name.' '.$rtp_surname
+                    ."\n Telephone: ".$rtp_phone
+                    ."\n Email address: ".$rtp_email
+                    ."\n Institution: ".$rtp_institution
+                    ."\n Planned use: ".$rtp_planned_use
+                    ."\n Motivation: ".$rtp_motivation
+                    ."\n Need image by: ".$rtp_need_image_by;
+            } else {
+                $body = $body
+                    ."\n".$id
+                    ."\n Name & surname: ".$rtp_name.' '.$rtp_surname
+                    ."\n Telephone: ".$rtp_phone
+                    ."\n Email address: ".$rtp_email
+                    ."\n Institution: ".$rtp_institution
+                    ."\n Planned use: ".$rtp_planned_use
+                    ."\n Motivation: ".$rtp_motivation
+                    ."\n Need image by: ".$rtp_need_image_by;
+            }
+
+            // SMTP Configuration
+            $mail->isSMTP();
+            $mail->Host       = $host;
+            $mail->SMTPAuth   = true; // filter_var($smtp_auth, FILTER_VALIDATE_BOOLEAN);
+            $mail->Username   = $username;
+            $mail->Password   = $password;
+            $mail->SMTPSecure = trim(strval($smtp_secure)); // 'ssl' or 'tls'
+            $mail->Port       = strval($port);              // e.g. 465 or 587
+
+            $mail->From     = $rtp_email;
+            $mail->FromName = $rtp_name.' '.$rtp_surname;
+
+            $mail->addAddress(trim($to), 'Rock Art Research Institute (RARI)');
+            $mail->addAddress('johan@theahg.co.za', 'Johan-AHG');
+
+            $mail->addReplyTo($reply_to, 'Reply');
+            $mail->addCC($cc);
+
+            $mail->Subject = $subject.' '.$id;
+            $mail->Body    = $body;
+
+            $mail->send();
+        } catch (Exception $e) {
+            echo "Email could not be sent. Error: {$mail->ErrorInfo}";
+        }
+    }
+
+    protected function earlyExecute()
+    {
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+        $this->resource = $this->getRoute()->resource;
+
+        // Check that this isn't the root
+        if (!isset($this->resource->parent)) {
+            $this->forward404();
+        }
+    }
+
+    protected function addField($name)
+    {
+        $user = null;
+        if ($this->context->user->getAttribute('user_id')) {
+            $user = QubitUser::getById($this->context->user->getAttribute('user_id'));
+        }
+
+        switch ($name) {
+            case 'unique_identifier':
+                // Store the logged-in user id, or leave blank
+                $this->form->setDefault('unique_identifier', $user ? $user->id : '');
+                $this->form->setValidator('unique_identifier', new sfValidatorString());
+                $this->form->setWidget('unique_identifier', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_name':
+                $this->form->setDefault('rtp_name', $user ? $user->username : '');
+                $this->form->setValidator('rtp_name', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_name', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_surname':
+                // If you later add surname to QubitUser, you can change this
+                $this->form->setDefault('rtp_surname', $user ? $user->username : '');
+                $this->form->setValidator('rtp_surname', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_surname', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_phone':
+                $this->form->setDefault('rtp_phone', '');
+                $this->form->setValidator('rtp_phone', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_phone', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_email':
+                $this->form->setDefault('rtp_email', $user ? $user->email : '');
+                $this->form->setValidator('rtp_email', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_email', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_institution':
+                $this->form->setDefault('rtp_institution', '');
+                $this->form->setValidator('rtp_institution', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_institution', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_planned_use':
+                $this->form->setDefault('rtp_planned_use', '');
+                $this->form->setValidator('rtp_planned_use', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('rtp_planned_use', new sfWidgetFormInput());
+
+                break;
+
+            case 'rtp_need_image_by':
+                $this->form->setDefault('rtp_need_image_by', '');
+                $this->form->setValidator('rtp_need_image_by', new sfValidatorString());
+                $this->form->setWidget('rtp_need_image_by', $this->dateWidget());
+                $this->form->getWidgetSchema()->rtp_need_image_by->setLabel(
+                    $this->context->i18n->__('rtp_need_image_by')
+                );
+
+                break;
+
+            case 'rtp_motivation':
+                $this->form->setDefault('rtp_motivation', '');
+                $this->form->setValidator('rtp_motivation', new sfValidatorString());
+                $this->form->setWidget('rtp_motivation', new sfWidgetFormTextArea([], ['rows' => 4]));
+
+                break;
+
+            default:
+                return parent::addField($name);
+        }
+    }
+
+    protected function dateWidget()
+    {
+        $widget = new sfWidgetFormInput();
+        $widget->setAttribute('type', 'date');
+
+        return $widget;
+    }
+
+    protected function processForm()
+    {
+        $requesttopublish = new QubitRequestToPublish();
+
+        // Name
+        $rtp_name = $this->form->getValue('rtp_name') ?: '';
+        $requesttopublish->rtp_name = $rtp_name;
+
+        // Unique identifier (logged-in user id, as captured in form)
+        $unique_identifier = $this->form->getValue('unique_identifier') ?: '';
+        $requesttopublish->parent_id = $unique_identifier; // match feedback pattern
+
+        // Surname
+        $rtp_surname = $this->form->getValue('rtp_surname') ?: '';
+        $requesttopublish->rtp_surname = $rtp_surname;
+
+        // Phone
+        $rtp_phone = $this->form->getValue('rtp_phone') ?: '';
+        $requesttopublish->rtp_phone = $rtp_phone;
+
+        // Email
+        $rtp_email = $this->form->getValue('rtp_email') ?: '';
+        $requesttopublish->rtp_email = $rtp_email;
+
+        // Institution
+        $rtp_institution = $this->form->getValue('rtp_institution') ?: '';
+        $requesttopublish->rtp_institution = $rtp_institution;
+
+        // Motivation
+        $rtp_motivation = $this->form->getValue('rtp_motivation') ?: '';
+        $requesttopublish->rtp_motivation = $rtp_motivation;
+
+        // Planned use
+        $rtp_planned_use = $this->form->getValue('rtp_planned_use') ?: '';
+        $requesttopublish->rtp_planned_use = $rtp_planned_use;
+
+        // Need image by
+        $rtp_need_image_by = $this->form->getValue('rtp_need_image_by') ?: '';
+        $requesttopublish->rtp_need_image_by = $rtp_need_image_by;
+
+        // Also store logged-in user id in unique_identifier column if you want
+        if ($this->context->user->getAttribute('user_id')) {
+            $requesttopublish->unique_identifier = $this->context->user->getAttribute('user_id');
+        }
+
+        $requesttopublish->createdAt = date('Y-m-d H:i:s');
+        $requesttopublish->statusId  = QubitTerm::IN_REVIEW_ID;
+
+        $informationObj = QubitInformationObject::getById($this->resource->id);
+        $requesttopublish->object_id = $informationObj->id;
+
+        $requesttopublish->save();
+
+        $this->requesttopublish = $requesttopublish->id;
+
+        // Create relation IO <-> RequestToPublish using the model helper
+        $this->resource->addRequestToPublish($requesttopublish);
+
+        // Delete any marked relations if needed (leave this as-is)
+        if (isset($this->request->delete_relations)) {
+            foreach ($this->request->delete_relations as $item) {
+                $params = $this->context->routing->parse(Qubit::pathInfo($item));
+                $params['_sf_route']->resource->delete();
+            }
+        }
+
+        // Send email
+        $this->informationObject = $informationObj;
+        $this->sendmail(
+            $informationObj->id,   // pass ID, not entire object
+            $rtp_name,
+            $rtp_surname,
+            $rtp_phone,
+            $rtp_email,
+            $rtp_institution,
+            $rtp_planned_use,
+            $rtp_motivation,
+            $rtp_need_image_by
+        );
+    }
+}

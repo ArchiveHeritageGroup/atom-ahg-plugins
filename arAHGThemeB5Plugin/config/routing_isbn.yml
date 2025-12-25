@@ -1,0 +1,37 @@
+# ISBN Lookup Routes
+
+informationobject_isbn_lookup:
+  url: /informationobject/isbnLookup
+  class: sfRequestRoute
+  param:
+    module: informationobject
+    action: isbnLookup
+  requirements:
+    sf_method: [get]
+
+isbn_test:
+  url: /isbn/test
+  class: sfRequestRoute
+  param:
+    module: isbn
+    action: test
+  requirements:
+    sf_method: [get]
+
+isbn_api_test:
+  url: /isbn/apiTest
+  class: sfRequestRoute
+  param:
+    module: isbn
+    action: apiTest
+  requirements:
+    sf_method: [get]
+
+isbn_stats:
+  url: /admin/isbn/stats
+  class: sfRequestRoute
+  param:
+    module: isbn
+    action: stats
+  requirements:
+    sf_method: [get]
