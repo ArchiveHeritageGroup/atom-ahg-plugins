@@ -1,0 +1,6 @@
+# Only track AHG plugins
+/*
+!/.gitignore
+!/README.md
+!/arAHGThemeB5Plugin/
+!/ahg*/
