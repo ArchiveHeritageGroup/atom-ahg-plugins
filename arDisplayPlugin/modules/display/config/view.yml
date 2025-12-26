@@ -1,0 +1,12 @@
+all:
+  layout: layout
+  
+browseSuccess:
+  layout: layout
+
+indexSuccess:
+  layout: layout
+
+printSuccess:
+  layout: false
+  has_layout: false

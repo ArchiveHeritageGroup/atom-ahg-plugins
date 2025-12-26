@@ -1,0 +1,16 @@
+{
+    "name": "Display Plugin",
+    "machine_name": "arDisplayPlugin",
+    "version": "1.0.0",
+    "description": "GLAM browser and display modes for archival content",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "tables": [],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}
