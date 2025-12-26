@@ -86,34 +86,38 @@ model-viewer {
 }
 </style>
 <?php } ?>
-
 <!-- User Action Buttons -->
+<?php if (class_exists('QubitFavorites') || class_exists('QubitCart')): ?>
 <div class="card mb-4 mt-3" style="position: relative; z-index: 100;">
   <div class="card-body py-2">
     <div class="d-flex flex-wrap gap-2">
-      <?php
-        $userId = $this->context->user->getAttribute('user_id');
-        $favorate_id = QubitFavorites::getByUserIDandObjectId($userId, $resource->id);
-      ?>
-      <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), [$resource, 'module' => 'informationobject', 'action' => 'editFeedback'], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
-      <?php if ('' != $favorate_id->id && '' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'removeFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
-      <?php elseif ('' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+      <?php $userId = $this->context->user->getAttribute('user_id'); ?>
+      <?php if (class_exists('QubitFavorites')): ?>
+        <?php $favorate_id = QubitFavorites::getByUserIDandObjectId($userId, $resource->id); ?>
+        <?php if ('' != $favorate_id->id && '' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'removeFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php elseif ('' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php endif; ?>
       <?php endif; ?>
-      <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), [$resource, 'module' => 'informationobject', 'action' => 'editRequestToPublish'], ['class' => 'btn btn-sm btn-outline-primary']); ?>
-      <?php
-        $cart_id = QubitCart::getByUserIDandObjectId($userId, $resource->id);
-      ?>
-      <?php if ('' != $cart_id->id && '' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'), [$resource, 'module' => 'cart', 'action' => 'browse'], ['class' => 'btn btn-sm btn-outline-success']); ?>
-      <?php elseif ('' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-cart-plus me-1"></i>' . __('Add to Cart'), [$resource, 'module' => 'informationobject', 'action' => 'addCart'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+      <?php if (class_exists('QubitFeedback')): ?>
+        <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), [$resource, 'module' => 'informationobject', 'action' => 'editFeedback'], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
+      <?php endif; ?>
+      <?php if (class_exists('QubitRequestToPublish')): ?>
+        <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), [$resource, 'module' => 'informationobject', 'action' => 'editRequestToPublish'], ['class' => 'btn btn-sm btn-outline-primary']); ?>
+      <?php endif; ?>
+      <?php if (class_exists('QubitCart')): ?>
+        <?php $cart_id = QubitCart::getByUserIDandObjectId($userId, $resource->id); ?>
+        <?php if ('' != $cart_id->id && '' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'), [$resource, 'module' => 'cart', 'action' => 'browse'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+        <?php elseif ('' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-cart-plus me-1"></i>' . __('Add to Cart'), [$resource, 'module' => 'informationobject', 'action' => 'addCart'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
   </div>
 </div>
-
+<?php endif; ?>
 <?php
     // TODO: Move this to the controller when we only have B5 themes
     $headingsCondition = SecurityPrivileges::editCredentials($sf_user, 'informationObject');
@@ -341,12 +345,12 @@ model-viewer {
 </section> <!-- /section#accessPointsArea -->
 
 <section id="museumControlArea" class="border-bottom">
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/sfMuseumPlugin')): ?>
 <?php use_helper('MuseumMetadata'); ?>
-
-<!-- Add this where you want museum metadata to appear -->
 <?php if (has_museum_metadata($resource)) { ?>
   <?php include_partial('informationobject/museumMetadata', ['resource' => $resource]) ?>
 <?php } ?>
+<?php endif; ?>
 </section> 
 
 <section id="descriptionControlArea" class="border-bottom">
@@ -446,7 +450,7 @@ model-viewer {
 
 </section> <!-- /section#accessionArea -->
 
-<?php include_component('arRicExplorer', 'ricPanel', ['resource' => $resource]); ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/arRicExplorerPlugin')) { include_component('arRicExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 
 <?php slot('after-content'); ?>
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?> 

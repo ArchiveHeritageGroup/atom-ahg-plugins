@@ -41,13 +41,13 @@ if ($resource instanceof QubitInformationObject) {
 }
 ?>
 
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/arExtendedRightsPlugin')): ?>
 <!-- Extended Rights Display -->
 <?php include_component('extendedRights', 'rightsDisplay', ['objectId' => $resourceId]); ?>
-
 <!-- Provenance Display (authenticated users only) -->
 <?php if ($canSeeDetails): ?>
   <?php include_component('extendedRights', 'provenanceDisplay', ['objectId' => $resourceId]); ?>
 <?php endif; ?>
-
 <!-- Embargo Warning (public) -->
 <?php include_component('extendedRights', 'embargoStatus', ['objectId' => $resourceId]); ?>
+<?php endif; ?>

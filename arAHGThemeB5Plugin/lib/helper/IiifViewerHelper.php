@@ -134,30 +134,6 @@ function render_iiif_viewer($resource, $options = [])
 }
 
 /**
- * Check if resource has 3D models (from standard digital objects)
- */
-function has_3d_models($resource)
-{
-    $extensions = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
-    
-    try {
-        $digitalObjects = get_digital_objects($resource);
-        
-        foreach ($digitalObjects as $do) {
-            $name = is_object($do) ? $do->name : ($do['name'] ?? '');
-            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            
-            if (in_array($ext, $extensions)) {
-                return true;
-            }
-        }
-        return false;
-    } catch (Exception $e) {
-        return false;
-    }
-}
-
-/**
  * Get primary 3D model for resource (from standard digital objects)
  */
 function get_primary_3d_model($resource)
@@ -229,48 +205,6 @@ function get_iiif_viewer_css($frameworkPath)
     
     $cssIncluded = true;
     
-    return '<link rel="stylesheet" href="' . $frameworkPath . '/public/css/iiif-viewer.css">' . "\n";
-}
-
-/**
- * Render viewer toggle buttons
- */
-function render_viewer_toggle($viewerId, $activeViewer, $has3D, $hasPdf, $hasAV)
-{
-    $osdClass = $activeViewer === 'openseadragon' ? 'btn-primary' : 'btn-outline-primary';
-    $miradorClass = $activeViewer === 'mirador' ? 'btn-primary' : 'btn-outline-primary';
-    
-    $html = '<div class="viewer-toggle mb-2">';
-    $html .= '<div class="btn-group btn-group-sm" role="group">';
-    
-    // OpenSeadragon
-    $html .= '<button type="button" class="btn ' . $osdClass . '" id="btn-osd-' . $viewerId . '" title="OpenSeadragon - Fast image viewer">';
-    $html .= '<i class="fas fa-search-plus me-1"></i><span class="d-none d-sm-inline">OpenSeadragon</span></button>';
-    
-    // Mirador
-    $html .= '<button type="button" class="btn ' . $miradorClass . '" id="btn-mirador-' . $viewerId . '" title="Mirador 3 - IIIF 3.0 viewer">';
-    $html .= '<i class="fas fa-layer-group me-1"></i><span class="d-none d-sm-inline">Mirador 3</span></button>';
-    
-    // PDF
-    if ($hasPdf) {
-        $html .= '<button type="button" class="btn btn-outline-primary" id="btn-pdf-' . $viewerId . '" title="PDF Viewer">';
-        $html .= '<i class="fas fa-file-pdf me-1"></i><span class="d-none d-sm-inline">PDF</span></button>';
-    }
-    
-    // 3D
-    if ($has3D) {
-        $html .= '<button type="button" class="btn btn-outline-primary" id="btn-3d-' . $viewerId . '" title="3D Model Viewer">';
-        $html .= '<i class="fas fa-cube me-1"></i><span class="d-none d-sm-inline">3D</span>';
-        $html .= '<span class="badge bg-success ms-1">AR</span></button>';
-    }
-    
-    // Audio/Video
-    if ($hasAV) {
-        $html .= '<button type="button" class="btn btn-outline-primary" id="btn-av-' . $viewerId . '" title="Media Player">';
-        $html .= '<i class="fas fa-play me-1"></i><span class="d-none d-sm-inline">Media</span></button>';
-    }
-    
-    $html .= '</div></div>';
     
     return $html;
 }
