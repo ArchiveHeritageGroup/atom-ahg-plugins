@@ -493,3 +493,36 @@ INSERT IGNORE INTO watermark_type (code, name, image_file, position, opacity, so
 ('sample', 'Sample', 'sample.png', 'repeat', 0.30, 3);
 
 SET FOREIGN_KEY_CHECKS=1;
+
+-- Donor Stubs (for compatibility until arDonorPlugin is installed)
+CREATE TABLE IF NOT EXISTS `donor` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `actor_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `donor_agreement` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `donor_id` int DEFAULT NULL,
+  `agreement_type_id` int DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `donor_agreement_restriction` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int DEFAULT NULL,
+  `restriction_type` varchar(50) DEFAULT NULL,
+  `applies_to_all` tinyint(1) DEFAULT 0,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `auto_release` tinyint(1) DEFAULT 0,
+  `release_date` date DEFAULT NULL,
+  `security_clearance_level` int DEFAULT NULL,
+  `reason` text,
+  `notes` text,
+  PRIMARY KEY (`id`),
+  KEY `idx_agreement` (`donor_agreement_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
