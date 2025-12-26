@@ -526,3 +526,59 @@ INSERT INTO display_collection_type_i18n (id, culture, name, description) VALUES
 (5, 'en', 'Photo Archive', 'Photographs and digital assets'),
 (6, 'en', 'Audiovisual', 'Film, video, and audio recordings'),
 (7, 'en', 'Mixed Collection', 'Collections with mixed material types');
+
+-- -----------------------------------------------------------------------------
+-- DISPLAY MODE GLOBAL SETTINGS
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `display_mode_global` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `module` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Module: informationobject, actor, repository, etc.',
+  `display_mode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list',
+  `items_per_page` int DEFAULT '30',
+  `sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
+  `sort_direction` enum('asc','desc') COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
+  `show_thumbnails` tinyint(1) DEFAULT '1',
+  `show_descriptions` tinyint(1) DEFAULT '1',
+  `card_size` enum('small','medium','large') COLLATE utf8mb4_unicode_ci DEFAULT 'medium',
+  `available_modes` json DEFAULT NULL COMMENT 'JSON array of enabled modes for this module',
+  `allow_user_override` tinyint(1) DEFAULT '1' COMMENT 'Allow users to change from default',
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_module` (`module`),
+  KEY `idx_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO display_mode_global (module, display_mode, available_modes) VALUES
+('informationobject', 'list', '["list","card","grid","table"]'),
+('actor', 'list', '["list","card","grid"]'),
+('repository', 'card', '["list","card","grid"]'),
+('accession', 'table', '["list","table"]'),
+('function', 'list', '["list","card"]'),
+('term', 'list', '["list","tree"]');
+
+-- -----------------------------------------------------------------------------
+-- USER DISPLAY PREFERENCES
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `user_display_preference` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `module` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Module context: informationobject, actor, repository, etc.',
+  `display_mode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list' COMMENT 'tree, grid, gallery, list, timeline',
+  `items_per_page` int DEFAULT '30',
+  `sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
+  `sort_direction` enum('asc','desc') COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
+  `show_thumbnails` tinyint(1) DEFAULT '1',
+  `show_descriptions` tinyint(1) DEFAULT '1',
+  `card_size` enum('small','medium','large') COLLATE utf8mb4_unicode_ci DEFAULT 'medium',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_custom` tinyint(1) DEFAULT '1' COMMENT 'True if user explicitly set, false if inherited from global',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_module` (`user_id`, `module`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_module` (`module`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
