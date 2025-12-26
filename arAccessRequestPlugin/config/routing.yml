@@ -1,0 +1,58 @@
+security_access_requests:
+  url: /security/access-requests
+  param: { module: arAccessRequest, action: pending }
+
+security_request_view:
+  url: /security/request/:id
+  param: { module: arAccessRequest, action: view }
+  requirements: { id: \d+ }
+
+security_request_approve:
+  url: /security/request/:id/approve
+  param: { module: arAccessRequest, action: approve }
+  requirements: { id: \d+ }
+
+security_request_deny:
+  url: /security/request/:id/deny
+  param: { module: arAccessRequest, action: deny }
+  requirements: { id: \d+ }
+
+security_request_new:
+  url: /security/request
+  param: { module: arAccessRequest, action: new }
+
+security_request_object:
+  url: /security/request-object/:slug
+  param: { module: arAccessRequest, action: requestObject }
+
+security_my_requests:
+  url: /security/my-requests
+  param: { module: arAccessRequest, action: myRequests }
+
+access_request_my:
+  url: /access-requests/my
+  param: { module: arAccessRequest, action: myRequests }
+
+access_request_create:
+  url: /access-requests/create
+  param: { module: arAccessRequest, action: create }
+
+access_request_view:
+  url: /access-requests/:id
+  param: { module: arAccessRequest, action: view }
+  requirements: { id: \d+ }
+
+access_request_approve:
+  url: /access-requests/:id/approve
+  param: { module: arAccessRequest, action: approve }
+  requirements: { id: \d+ }
+
+access_request_deny:
+  url: /access-requests/:id/deny
+  param: { module: arAccessRequest, action: deny }
+  requirements: { id: \d+ }
+
+access_request_cancel:
+  url: /access-requests/:id/cancel
+  param: { module: arAccessRequest, action: cancel }
+  requirements: { id: \d+ }
