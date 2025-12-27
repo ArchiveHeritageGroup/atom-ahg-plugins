@@ -112,6 +112,11 @@ class AhgSettingsSectionAction extends sfAction
 
         error_log("AHG Settings: Saved $saved settings");
         
+        // Regenerate static CSS
+        if ($this->currentSection === 'general') {
+            require_once sfConfig::get('sf_plugins_dir') . '/arAHGThemeB5Plugin/lib/AhgCssGenerator.class.php';
+            AhgCssGenerator::generate();
+        }
         $this->getUser()->setFlash('notice', "Settings saved successfully. ($saved items)");
         $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => $this->currentSection]);
     }

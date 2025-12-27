@@ -2,6 +2,7 @@
 default:
   stylesheets:
     /plugins/arAHGThemeB5Plugin/css/ahg-theme.css:
+    /plugins/arAHGThemeB5Plugin/css/ahg-generated.css:
   javascripts:
     /vendor/jquery:
     /plugins/sfDrupalPlugin/vendor/drupal/misc/drupal:
