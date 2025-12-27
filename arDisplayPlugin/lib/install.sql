@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS display_collection_type_i18n (
 -- Extended Levels of Description
 -- -----------------------------------------------------------------------------
 
-INSERT INTO display_level (code, domain, valid_parent_codes, valid_child_codes, icon, sort_order) VALUES
+INSERT IGNORE INTO display_level (code, domain, valid_parent_codes, valid_child_codes, icon, sort_order) VALUES
 -- Universal
 ('repository', 'universal', NULL, '["fonds","collection","holding"]', 'fa-building', 1),
 ('collection', 'universal', '["repository"]', '["fonds","series","album","object","item","book"]', 'fa-folder-tree', 5),
@@ -245,7 +245,7 @@ INSERT INTO display_level (code, domain, valid_parent_codes, valid_child_codes, 
 ('segment', 'archive', '["recording"]', NULL, 'fa-cut', 64);
 
 -- Level i18n
-INSERT INTO display_level_i18n (id, culture, name, description) 
+INSERT IGNORE INTO display_level_i18n (id, culture, name, description) 
 SELECT id, 'en', 
     CONCAT(UPPER(SUBSTRING(REPLACE(code, '_', ' '), 1, 1)), LOWER(SUBSTRING(REPLACE(code, '_', ' '), 2))),
     NULL
@@ -255,7 +255,7 @@ FROM display_level;
 -- Display Profiles
 -- -----------------------------------------------------------------------------
 
-INSERT INTO display_profile (code, domain, layout_mode, thumbnail_size, thumbnail_position, identity_fields, description_fields, context_fields, access_fields, available_actions, is_default, sort_order) VALUES
+INSERT IGNORE INTO display_profile (code, domain, layout_mode, thumbnail_size, thumbnail_position, identity_fields, description_fields, context_fields, access_fields, available_actions, is_default, sort_order) VALUES
 -- Archive profiles
 ('isad_full', 'archive', 'detail', 'small', 'left',
     '["identifier","title","dates","level","extent","creator"]',
@@ -399,7 +399,7 @@ INSERT INTO display_profile (code, domain, layout_mode, thumbnail_size, thumbnai
     0, 101);
 
 -- Profile i18n
-INSERT INTO display_profile_i18n (id, culture, name)
+INSERT IGNORE INTO display_profile_i18n (id, culture, name)
 SELECT id, 'en', CONCAT(UPPER(SUBSTRING(REPLACE(code, '_', ' '), 1, 1)), SUBSTRING(REPLACE(code, '_', ' '), 2))
 FROM display_profile;
 
@@ -407,7 +407,7 @@ FROM display_profile;
 -- Field Mappings (to existing AtoM tables)
 -- -----------------------------------------------------------------------------
 
-INSERT INTO display_field (code, field_group, data_type, source_table, source_column, source_i18n, isad_element, spectrum_unit, dc_element, sort_order) VALUES
+INSERT IGNORE INTO display_field (code, field_group, data_type, source_table, source_column, source_i18n, isad_element, spectrum_unit, dc_element, sort_order) VALUES
 -- Identity fields (from information_object)
 ('identifier', 'identity', 'text', 'information_object', 'identifier', 0, '3.1.1', 'Object number', 'identifier', 1),
 ('title', 'identity', 'text', 'information_object_i18n', 'title', 1, '3.1.2', 'Object name', 'title', 2),
@@ -491,7 +491,7 @@ INSERT INTO display_field (code, field_group, data_type, source_table, source_co
 ('accession_number', 'admin', 'text', 'accession', 'identifier', 0, NULL, 'Accession number', NULL, 111);
 
 -- Field i18n
-INSERT INTO display_field_i18n (id, culture, name)
+INSERT IGNORE INTO display_field_i18n (id, culture, name)
 SELECT id, 'en', CONCAT(UPPER(SUBSTRING(REPLACE(code, '_', ' '), 1, 1)), SUBSTRING(REPLACE(code, '_', ' '), 2))
 FROM display_field;
 
@@ -509,7 +509,7 @@ UPDATE display_field_i18n SET name = 'Finding Aids' WHERE id = (SELECT id FROM d
 -- Collection Types
 -- -----------------------------------------------------------------------------
 
-INSERT INTO display_collection_type (code, icon, sort_order) VALUES
+INSERT IGNORE INTO display_collection_type (code, icon, sort_order) VALUES
 ('archive', 'fa-archive', 1),
 ('museum', 'fa-landmark', 2),
 ('gallery', 'fa-palette', 3),
@@ -518,7 +518,7 @@ INSERT INTO display_collection_type (code, icon, sort_order) VALUES
 ('audiovisual', 'fa-film', 6),
 ('mixed', 'fa-layer-group', 10);
 
-INSERT INTO display_collection_type_i18n (id, culture, name, description) VALUES
+INSERT IGNORE INTO display_collection_type_i18n (id, culture, name, description) VALUES
 (1, 'en', 'Archive', 'Archival fonds and collections following ISAD(G)'),
 (2, 'en', 'Museum', 'Museum objects following Spectrum'),
 (3, 'en', 'Gallery', 'Artworks and artist archives'),
