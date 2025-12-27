@@ -37,6 +37,7 @@
       </div>
       <div class="d-flex flex-nowrap flex-column flex-lg-row align-items-strech align-items-lg-center">
         <ul class="navbar-nav mx-lg-2">
+	  <?php if (is_dir(sfConfig::get('sf_plugins_dir') . '/arRicExplorerPlugin')): ?>
           <!-- RiC Tools Dropdown -->
           <li class="nav-item dropdown d-flex flex-column">
             <a
@@ -73,7 +74,7 @@
             </ul>
           </li>
           </li>
-          
+          <?php endif; ?>
           <?php echo get_component('menu', 'mainMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>
           <?php echo get_component('menu', 'clipboardMenu'); ?>
           <?php if (sfConfig::get('app_toggleLanguageMenu')) { ?>
