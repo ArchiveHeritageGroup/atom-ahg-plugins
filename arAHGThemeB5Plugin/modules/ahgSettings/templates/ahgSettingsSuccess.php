@@ -72,8 +72,8 @@
 <?php 
 // Show stats if available
 try {
-    require_once '/usr/share/nginx/archive/atom-framework/bootstrap.php';
-    require_once '/usr/share/nginx/archive/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+    require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+    require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
     $tiffRepo = new AtomFramework\Repositories\TiffPdfMergeRepository();
     $tiffStats = $tiffRepo->getStatistics();
     

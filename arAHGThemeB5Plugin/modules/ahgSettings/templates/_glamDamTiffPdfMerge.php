@@ -2,8 +2,8 @@
 /**
  * TIFF to PDF Merge - GLAM/DAM Dashboard Component
  */
-require_once '/usr/share/nginx/archive/atom-framework/bootstrap.php';
-require_once '/usr/share/nginx/archive/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
 
 use AtomFramework\Repositories\TiffPdfMergeRepository;
 

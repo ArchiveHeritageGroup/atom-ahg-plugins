@@ -6,7 +6,7 @@
  */
 
 // Ensure Laravel DB is available
-require_once '/usr/share/nginx/archive/atom-framework/bootstrap.php';
+require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 

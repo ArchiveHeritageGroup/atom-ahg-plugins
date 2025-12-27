@@ -43,8 +43,8 @@ class ThreeDThumbnailObserver
 
     public static function queueGeneration($digitalObjectId, $filename = '')
     {
-        $script = '/usr/share/nginx/archive/atom-framework/bin/process-3d-upload.sh';
-        $logFile = '/usr/share/nginx/archive/log/3d-thumbnail.log';
+        $script = sfConfig::get('sf_root_dir') . '/atom-framework/bin/process-3d-upload.sh';
+        $logFile = sfConfig::get('sf_root_dir') . '/log/3d-thumbnail.log';
 
         $logEntry = sprintf(
             "[%s] [INFO] Queued thumbnail generation for DO %d: %s\n",
