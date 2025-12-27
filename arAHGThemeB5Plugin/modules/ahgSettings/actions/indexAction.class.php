@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+
 class AhgSettingsIndexAction extends sfAction
 {
     public function execute($request)
@@ -7,128 +8,142 @@ class AhgSettingsIndexAction extends sfAction
         if (!$this->context->user->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
-        $this->sections = [
-            'general' => [
-                'label' => 'Theme Configuration',
-                'icon' => 'fa-palette',
-                'description' => 'Customize AHG theme appearance and branding',
-                'url' => 'admin/ahg-settings/section?section=general'
-            ],
-            'email' => [
-                'label' => 'Email Settings',
-                'icon' => 'fa-envelope',
-                'description' => 'SMTP configuration and email templates',
-                'url' => 'admin/ahg-settings/email'
-            ],
-            'research' => [
+        
+        $pluginsDir = sfConfig::get('sf_plugins_dir');
+        
+        // Check which plugins exist
+        $hasResearch = is_dir($pluginsDir . '/arResearchPlugin');
+        $hasAuditTrail = is_dir($pluginsDir . '/arAuditTrailPlugin');
+        $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
+        $hasAccessRequest = is_dir($pluginsDir . '/arAccessRequestPlugin');
+        $hasCondition = is_dir($pluginsDir . '/arConditionPlugin');
+        $hasSpectrum = is_dir($pluginsDir . '/arSpectrumPlugin');
+        $hasIiif = is_dir($pluginsDir . '/IiifViewerFramework');
+        
+        $this->sections = [];
+        
+        // === BASE (Always Available) ===
+        
+        $this->sections['general'] = [
+            'label' => 'Theme Configuration',
+            'icon' => 'fa-palette',
+            'description' => 'Customize AHG theme appearance and branding',
+            'url' => 'admin/ahg-settings/section?section=general'
+        ];
+        
+        $this->sections['email'] = [
+            'label' => 'Email Settings',
+            'icon' => 'fa-envelope',
+            'description' => 'SMTP configuration and email templates',
+            'url' => 'admin/ahg-settings/email'
+        ];
+        
+        // Researcher - conditional but part of default install
+        if ($hasResearch) {
+            $this->sections['research'] = [
                 'label' => 'Reading Room',
                 'icon' => 'fa-book-reader',
                 'description' => 'Researcher registration and reading room settings',
                 'url' => 'research/rooms'
-            ],
-            'audit' => [
+            ];
+        }
+        
+        $this->sections['metadata'] = [
+            'label' => 'Metadata Extraction',
+            'icon' => 'fa-tags',
+            'description' => 'Auto-extract EXIF, IPTC, XMP from uploaded files',
+            'url' => 'admin/ahg-settings/section?section=metadata'
+        ];
+        
+        $this->sections['media'] = [
+            'label' => 'Media Player',
+            'icon' => 'fa-play-circle',
+            'description' => 'Enhanced media player configuration',
+            'url' => 'admin/ahg-settings/section?section=media'
+        ];
+        
+        $this->sections['media_processing'] = [
+            'label' => 'Media Processing',
+            'icon' => 'fa-cogs',
+            'description' => 'Transcription, thumbnails, waveforms & media derivatives',
+            'url' => 'arMediaSettings/index'
+        ];
+        
+        $this->sections['jobs'] = [
+            'label' => 'Background Jobs',
+            'icon' => 'fa-tasks',
+            'description' => 'Job queue and scheduling settings',
+            'url' => 'admin/ahg-settings/section?section=jobs'
+        ];
+        
+        $this->sections['plugins'] = [
+            'label' => 'Plugin Management',
+            'icon' => 'fa-puzzle-piece',
+            'description' => 'Enable or disable plugins',
+            'url' => 'admin/ahg-settings/plugins'
+        ];
+        
+        // === OPTIONAL (Plugin-dependent) ===
+        
+        if ($hasAuditTrail) {
+            $this->sections['audit'] = [
                 'label' => 'Audit Trail',
                 'icon' => 'fa-history',
                 'description' => 'View change history and user activity logs',
                 'url' => 'arAuditTrailPlugin/browse'
-            ],
-            'watermark' => [
-                'label' => 'Watermark Settings',
-                'icon' => 'fa-copyright',
-                'description' => 'Configure image watermarking options',
-                'url' => 'admin/watermark-settings'
-            ],
-            'carousel' => [
+            ];
+        }
+        
+        if ($hasIiif) {
+            $this->sections['carousel'] = [
                 'label' => 'Carousel Settings',
                 'icon' => 'fa-images',
                 'description' => 'Homepage carousel and slideshow configuration',
                 'url' => 'arIiifViewerSettings/index'
-            ],
-            'metadata' => [
-                'label' => 'Metadata Extraction',
-                'icon' => 'fa-tags',
-                'description' => 'Auto-extract EXIF, IPTC, XMP from uploaded files',
-                'url' => 'admin/ahg-settings/section?section=metadata'
-            ],
-            'spectrum' => [
-                'label' => 'Spectrum / Collections',
-                'icon' => 'fa-archive',
-                'description' => 'Museum collections management settings',
-                'url' => 'admin/ahg-settings/section?section=spectrum'
-            ],
-            'iiif' => [
+            ];
+            
+            $this->sections['iiif'] = [
                 'label' => 'IIIF Viewer',
                 'icon' => 'fa-photo-video',
                 'description' => 'IIIF image viewer configuration',
                 'url' => 'admin/ahg-settings/section?section=iiif'
-            ],
-            'data_protection' => [
+            ];
+        }
+        
+        if ($hasSpectrum) {
+            $this->sections['spectrum'] = [
+                'label' => 'Spectrum / Collections',
+                'icon' => 'fa-archive',
+                'description' => 'Museum collections management settings',
+                'url' => 'admin/ahg-settings/section?section=spectrum'
+            ];
+        }
+        
+        if ($hasAccessRequest) {
+            $this->sections['data_protection'] = [
                 'label' => 'Data Protection',
                 'icon' => 'fa-shield-alt',
                 'description' => 'POPIA/GDPR compliance settings',
                 'url' => 'admin/ahg-settings/section?section=data_protection'
-            ],
-            'faces' => [
-                'label' => 'Face Detection',
-                'icon' => 'fa-user-circle',
-                'description' => 'Detect and match faces to authority records',
-                'url' => 'admin/ahg-settings/section?section=faces'
-            ],
-            'media' => [
-                'label' => 'Media Player',
-                'icon' => 'fa-play-circle',
-                'description' => 'Enhanced media player configuration',
-                'url' => 'admin/ahg-settings/section?section=media'
-            ],
-            'media_processing' => [
-                'label' => 'Media Processing',
-                'icon' => 'fa-cogs',
-                'description' => 'Transcription, thumbnails, waveforms & media derivatives',
-                'url' => 'arMediaSettings/index'
-            ],
-            'photos' => [
+            ];
+        }
+        
+        if ($hasCondition) {
+            $this->sections['photos'] = [
                 'label' => 'Condition Photos',
                 'icon' => 'fa-camera',
                 'description' => 'Photo upload and thumbnail settings',
                 'url' => 'admin/ahg-settings/section?section=photos'
-            ],
-            'jobs' => [
-                'label' => 'Background Jobs',
-                'icon' => 'fa-tasks',
-                'description' => 'Job queue and scheduling settings',
-                'url' => 'admin/ahg-settings/section?section=jobs'
-            ],
-            'backup' => [
-                'label' => 'Backup & Restore',
-                'icon' => 'fa-database',
-                'description' => 'Database backup, restore and scheduling',
-                'url' => 'backup/index'
-            ],
-            'fuseki' => [
+            ];
+        }
+        
+        if ($hasRic) {
+            $this->sections['fuseki'] = [
                 'label' => 'Fuseki / RIC Triplestore',
                 'icon' => 'fa-project-diagram',
                 'description' => 'Configure Apache Jena Fuseki connection for RIC ontology',
                 'url' => 'admin/ahg-settings/section?section=fuseki'
-            ],
-            'search' => [
-                'label' => 'Search Templates',
-                'icon' => 'fa-search-plus',
-                'description' => 'Define quick search templates and manage search settings',
-                'url' => 'searchEnhancement/adminTemplates'
-            ],
-               'search' => [
-                   'label' => 'Search Templates',
-                   'icon' => 'fa-search-plus',
-                   'description' => 'Define quick search templates',
-                   'url' => 'searchEnhancement/adminTemplates'
-		   ],
-			'plugins' => [
-				'label' => 'Plugin Management',
-				'icon' => 'fa-puzzle-piece',
-				'description' => 'Enable or disable plugins',
-				'url' => 'admin/ahg-settings/plugins',
-			],
-			   
-        ];
+            ];
+        }
     }
 }
