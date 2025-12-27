@@ -11,12 +11,10 @@ $hasSecurityClearance = is_dir($pluginsDir . '/arSecurityClearancePlugin');
 $hasAccessRequest = is_dir($pluginsDir . '/arAccessRequestPlugin');
 $hasResearch = is_dir($pluginsDir . '/arResearchPlugin');
 $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
-$hasBackup = is_dir($pluginsDir . '/arAHGThemeB5Plugin'); // Backup is in theme
+$hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
 
-// Only show menu if admin and at least one plugin exists
-$hasAnyPlugin = $hasAuditTrail || $hasSecurityClearance || $hasAccessRequest || $hasResearch || $hasRic;
 ?>
-<?php if ($isAdmin && $hasAnyPlugin): ?>
+<?php if ($isAdmin): ?>
 <style>
 #ahg-plugins-menu + .dropdown-menu { font-size: 0.85rem; }
 #ahg-plugins-menu + .dropdown-menu .dropdown-item { padding: 0.25rem 1rem; }
@@ -31,21 +29,17 @@ $hasAnyPlugin = $hasAuditTrail || $hasSecurityClearance || $hasAccessRequest || 
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
 
-    <?php if ($hasAuditTrail): ?>
-    <li><h6 class="dropdown-header"><?php echo __('Security & Audit'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAuditTrailPlugin', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line fa-fw me-2"></i><?php echo __('Audit Dashboard'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAuditTrailPlugin', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAuditTrailPlugin', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-2"></i><?php echo __('Audit Settings'); ?></a></li>
-    <?php endif; ?>
+    <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-2"></i><?php echo __('AHG Settings'); ?></a></li>
 
     <?php if ($hasSecurityClearance): ?>
-    <?php if ($hasAuditTrail): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Security Clearances'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-2"></i><?php echo __('Manage Clearances'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
-    <?php if ($hasAuditTrail || $hasSecurityClearance): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Research Services'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-book-reader fa-fw me-2"></i><?php echo __('Research Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><i class="fas fa-users fa-fw me-2"></i><?php echo __('Manage Researchers'); ?></a></li>
@@ -54,14 +48,20 @@ $hasAnyPlugin = $hasAuditTrail || $hasSecurityClearance || $hasAccessRequest || 
     <?php endif; ?>
 
     <?php if ($hasAccessRequest): ?>
-    <?php if ($hasAuditTrail || $hasSecurityClearance || $hasResearch): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Data Protection'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAccessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-2"></i><?php echo __('Access Requests'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAccessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-2"></i><?php echo __('Manage Approvers'); ?></a></li>
     <?php endif; ?>
 
+    <?php if ($hasAuditTrail): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Audit'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAuditTrailPlugin', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
+    <?php endif; ?>
+
     <?php if ($hasRic): ?>
-    <?php if ($hasAuditTrail || $hasSecurityClearance || $hasResearch || $hasAccessRequest): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('RIC'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-2"></i><?php echo __('RIC Sync Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="/ric/" target="_blank"><i class="fas fa-sitemap fa-fw me-2"></i><?php echo __('RIC Explorer'); ?></a></li>
