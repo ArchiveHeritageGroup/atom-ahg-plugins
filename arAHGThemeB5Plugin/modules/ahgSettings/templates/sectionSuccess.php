@@ -103,8 +103,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_primary_color"><?php echo __('Primary Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_primary_color" name="settings[ahg_primary_color]" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" name="settings[ahg_primary_color]" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_primary_color" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>">
                                             </div>
                                         </div>
                                     </div>
@@ -113,8 +113,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_secondary_color"><?php echo __('Secondary Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_secondary_color" name="settings[ahg_secondary_color]" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" name="settings[ahg_secondary_color]" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_secondary_color" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>">
                                             </div>
                                         </div>
                                     </div>
@@ -126,8 +126,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_bg"><?php echo __('Card Header Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_card_header_bg" name="settings[ahg_card_header_bg]" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" name="settings[ahg_card_header_bg]" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_card_header_bg" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Background color for card headers'); ?></small>
                                         </div>
@@ -137,8 +137,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_text"><?php echo __('Card Header Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_card_header_text" name="settings[ahg_card_header_text]" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" name="settings[ahg_card_header_text]" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_card_header_text" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Text color for card headers'); ?></small>
                                         </div>
@@ -148,8 +148,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_button_bg"><?php echo __('Button Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_button_bg" name="settings[ahg_button_bg]" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" name="settings[ahg_button_bg]" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_button_bg" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Background color for primary buttons'); ?></small>
                                         </div>
@@ -159,8 +159,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_button_text"><?php echo __('Button Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_button_text" name="settings[ahg_button_text]" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" name="settings[ahg_button_text]" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_button_text" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Text color for primary buttons'); ?></small>
                                         </div>
@@ -170,8 +170,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_link_color"><?php echo __('Link Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_link_color" name="settings[ahg_link_color]" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" name="settings[ahg_link_color]" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_link_color" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Color for hyperlinks'); ?></small>
                                         </div>
@@ -181,8 +181,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_bg"><?php echo __('Sidebar Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_sidebar_bg" name="settings[ahg_sidebar_bg]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" name="settings[ahg_sidebar_bg]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_sidebar_bg" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>">
                                             </div>
                                         </div>
                                     </div>
@@ -191,8 +191,8 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_text"><?php echo __('Sidebar Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>" style="width: 50px; padding: 2px;">
-                                                <input type="text" class="form-control" id="ahg_sidebar_text" name="settings[ahg_sidebar_text]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" name="settings[ahg_sidebar_text]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="text" class="form-control" id="ahg_sidebar_text" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>">
                                             </div>
                                         </div>
                                     </div>
