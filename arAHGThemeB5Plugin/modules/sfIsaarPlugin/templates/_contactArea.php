@@ -10,7 +10,7 @@ use AtomFramework\Services\LanguageService;
 // Get existing contacts
 $contactRepo = new ContactInformationRepository();
 $culture = sfContext::getInstance()->getUser()->getCulture();
-$contacts = $contactRepo->getByActorId($resource->id, $culture);
+$contacts = $resource->id ? $contactRepo->getByActorId((int)$resource->id, $culture) : collect([]);
 
 // Ensure at least one empty contact form
 if ($contacts->isEmpty()) {
