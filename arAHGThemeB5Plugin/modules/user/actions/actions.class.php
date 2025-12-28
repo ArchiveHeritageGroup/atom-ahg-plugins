@@ -1,6 +1,7 @@
 <?php
 
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/user/actions/indexAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/user/actions/passwordEditAction.class.php';
 
 class userActions extends sfActions
 {
@@ -15,5 +16,11 @@ class userActions extends sfActions
         }
         
         return sfView::SUCCESS;
+    }
+    
+    public function executePasswordEdit($request)
+    {
+        $action = new UserPasswordEditAction($this->context, 'user', 'passwordEdit');
+        return $action->execute($request);
     }
 }
