@@ -1,0 +1,29 @@
+# Library Plugin Routes
+
+library_browse:
+  url: /library
+  param:
+    module: ahgLibraryPlugin
+    action: browse
+
+library_add:
+  url: /library/add
+  param:
+    module: ahgLibraryPlugin
+    action: edit
+
+library_view:
+  url: /library/:slug
+  param:
+    module: ahgLibraryPlugin
+    action: index
+  requirements:
+    slug: .+
+
+library_edit:
+  url: /library/:slug/edit
+  param:
+    module: ahgLibraryPlugin
+    action: edit
+  requirements:
+    slug: .+

@@ -1,0 +1,25 @@
+{
+    "name": "Library & Bibliographic",
+    "machine_name": "ahgLibraryPlugin",
+    "version": "1.0.0",
+    "description": "Library cataloging with MARC-inspired fields, ISBN lookup, and bibliographic management",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "install_sql": "data/install.sql",
+    "tables": [
+        "library_item",
+        "library_item_creator",
+        "library_item_subject",
+        "atom_isbn_cache",
+        "atom_isbn_lookup_audit",
+        "atom_isbn_provider",
+        "library_settings"
+    ],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}
