@@ -21,6 +21,13 @@ class userActions extends sfActions
     public function executePasswordEdit($request)
     {
         $action = new UserPasswordEditAction($this->context, 'user', 'passwordEdit');
-        return $action->execute($request);
+        $result = $action->execute($request);
+        
+        // Copy variables from action to this controller
+        foreach (get_object_vars($action) as $key => $value) {
+            $this->$key = $value;
+        }
+        
+        return $result ?? sfView::SUCCESS;
     }
 }
