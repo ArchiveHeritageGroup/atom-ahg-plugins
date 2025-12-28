@@ -9,7 +9,7 @@ $clearanceColor = 'secondary';
 
 try {
     if (class_exists('AtomExtensions\Services\SecurityClearanceService')) {
-        $clearanceLevel = SecurityClearanceService::getUserClearanceLevel($resource->id);
+        $clearanceLevel = SecurityClearanceService::getUserClearance($resource->id);
         $clearanceInfo = SecurityClearanceService::getUserClearance($resource->id);
         
         if ($clearanceInfo) {
