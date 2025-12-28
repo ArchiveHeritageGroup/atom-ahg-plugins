@@ -183,3 +183,20 @@ GNU General Public License v3.0 - see [LICENSE](LICENSE) for details.
 Made with ❤️ in South Africa 🇿🇦
 
 </div>
+
+---
+
+## 🔒 Protection Levels
+
+Extensions have protection levels that control what actions are allowed:
+
+| Level | Can Disable | Can Uninstall | Examples |
+|-------|-------------|---------------|----------|
+| 🔒 Core | ❌ No | ❌ No | qbAclPlugin, sfPropelPlugin |
+| ⚙️ System | ✅ Yes | ❌ No | arDominionB5Plugin |
+| 🎨 Theme | ✅ Yes | ✅ Yes* | arAHGThemeB5Plugin |
+| 📦 Extension | ✅ Yes | ✅ Yes | arResearchPlugin |
+
+*Themes can only be uninstalled if not currently active.
+
+Core AtoM plugins are automatically protected to prevent accidental system breakage.
