@@ -1,0 +1,22 @@
+{
+    "name": "Audit Trail",
+    "machine_name": "ahgAuditTrailPlugin",
+    "version": "1.0.0",
+    "description": "Comprehensive audit trail logging for AtoM with POPIA/NARSSA compliance",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "tables": [
+        "ahg_audit_log",
+        "ahg_audit_authentication",
+        "ahg_audit_access",
+        "ahg_audit_settings",
+        "ahg_audit_retention_policy"
+    ],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}

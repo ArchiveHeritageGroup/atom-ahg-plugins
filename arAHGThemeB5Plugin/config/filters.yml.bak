@@ -1,3 +1,0 @@
-# Security access filter - calculates restricted IDs once per request
-security_access:
-  class: SecurityAccessSearchFilter

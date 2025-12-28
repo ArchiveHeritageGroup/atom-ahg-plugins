@@ -1,0 +1,20 @@
+# Audit Trail routes
+ahgAuditTrail_index:
+  url: /admin/audit
+  param: { module: ahgAuditTrail, action: index }
+
+ahgAuditTrail_dashboard:
+  url: /admin/audit/dashboard
+  param: { module: ahgAuditTrail, action: dashboard }
+
+ahgAuditTrail_view:
+  url: /admin/audit/view/:id
+  param: { module: ahgAuditTrail, action: view }
+
+ahgAuditTrail_settings:
+  url: /admin/audit/settings
+  param: { module: ahgAuditTrail, action: settings }
+
+ahgAuditTrail_export:
+  url: /admin/audit/export
+  param: { module: ahgAuditTrail, action: export }
