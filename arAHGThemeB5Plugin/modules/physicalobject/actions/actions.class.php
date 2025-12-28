@@ -121,7 +121,14 @@ class physicalobjectActions extends sfActions
     public function executeBrowse($request)
     {
         $action = new PhysicalObjectBrowseAction($this->context, 'physicalobject', 'browse');
-        return $action->execute($request);
+        $action->execute($request);
+        
+        // Copy variables from action to this controller
+        foreach (get_object_vars($action) as $key => $value) {
+            $this->$key = $value;
+        }
+        
+        return sfView::SUCCESS;
     }
 
     public function executeDelete($request)
