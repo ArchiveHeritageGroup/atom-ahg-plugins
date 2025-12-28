@@ -2,7 +2,7 @@
     "name": "Digital Asset Management",
     "machine_name": "ahgDAMPlugin",
     "version": "1.0.0",
-    "description": "Digital Asset Management with lightbox, derivatives, watermarks, and licensing",
+    "description": "Digital Asset Management with IPTC metadata, watermarks, derivatives, and Creative Commons licensing",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "ahg",
@@ -11,5 +11,19 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "install_sql": "data/install.sql",
+    "tables": [
+        "dam_iptc_metadata",
+        "media_derivatives",
+        "watermark_setting",
+        "watermark_type",
+        "custom_watermark",
+        "object_watermark_setting",
+        "creative_commons_license",
+        "creative_commons_license_i18n",
+        "rights_derivative_rule",
+        "rights_derivative_log",
+        "security_watermark_log"
+    ],
     "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
 }
