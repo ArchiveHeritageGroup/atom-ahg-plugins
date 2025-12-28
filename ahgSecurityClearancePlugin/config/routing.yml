@@ -1,0 +1,4 @@
+
+ahgSecurityClearance_watermarkSettings:
+  url: /admin/watermark-settings
+  param: { module: ahgSecurityClearance, action: watermarkSettings }

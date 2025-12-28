@@ -1,0 +1,36 @@
+{
+    "name": "Research Portal",
+    "machine_name": "ahgResearchPlugin",
+    "version": "1.0.0",
+    "description": "Research support plugin with reading room booking, researcher registration, and workspace management",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": ["ahgSecurityClearancePlugin"]
+    },
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"],
+    "tables": [
+        "research_researcher",
+        "research_booking",
+        "research_room",
+        "research_workspace",
+        "research_request"
+    ],
+    "provides": {
+        "admin_section": {
+            "id": "research",
+            "section": "services",
+            "title": "Research Services",
+            "description": "Researcher registration and reading room management",
+            "icon": "fa-book-reader",
+            "route": "research/dashboard",
+            "permission": "administrator"
+        }
+    }
+}

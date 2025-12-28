@@ -1,0 +1,16 @@
+{
+    "name": "Access Request",
+    "machine_name": "ahgAccessRequestPlugin",
+    "version": "1.0.0",
+    "description": "Researcher access request management for restricted materials",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["arSecurityClearancePlugin"],
+    "tables": ["access_request", "access_request_scope", "access_request_log", "access_request_approver", "object_access_grant"],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}

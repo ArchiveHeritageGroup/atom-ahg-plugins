@@ -1,0 +1,16 @@
+{
+    "name": "Security Clearance",
+    "machine_name": "ahgSecurityClearancePlugin",
+    "version": "1.0.0",
+    "description": "Security classification and clearance management for sensitive archival materials",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "tables": ["security_classification", "user_security_clearance", "object_security_classification", "security_compartment", "security_audit_log", "security_access_request"],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}
