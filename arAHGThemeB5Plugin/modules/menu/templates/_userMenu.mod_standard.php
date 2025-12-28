@@ -50,7 +50,7 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     <!-- Profile Section -->
     <li><h6 class="dropdown-header"><i class="fas fa-user me-1"></i><?php echo __('Profile'); ?></h6></li>
     <li>
-      <a class="dropdown-item" href="<?php echo url_for(['module' => 'user', 'action' => 'index', 'slug' => $sf_user->getAttribute('slug')]); ?>">
+      <a class="dropdown-item" href="<?php echo url_for(array($sf_user->user, 'module' => 'user')); ?>">
         <i class="fas fa-id-card me-2"></i><?php echo __('My Profile'); ?>
       </a>
     </li>
