@@ -1,0 +1,74 @@
+<?php decorate_with('layout_1col'); ?>
+
+<?php slot('title'); ?>
+  <div class="multiline-header d-flex align-items-center mb-3">
+    <i class="fas fa-upload fa-2x text-primary me-3"></i>
+    <div>
+      <h1 class="mb-0"><?php echo __('Bulk Upload'); ?></h1>
+      <span class="small text-muted"><?php echo __('Upload multiple digital assets at once'); ?></span>
+    </div>
+  </div>
+<?php end_slot(); ?>
+
+<?php slot('content'); ?>
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><?php echo __('DAM Dashboard'); ?></a></li>
+      <li class="breadcrumb-item active"><?php echo __('Bulk Upload'); ?></li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+          <i class="fas fa-file-csv"></i> <?php echo __('CSV Import'); ?>
+        </div>
+        <div class="card-body">
+          <p><?php echo __('Import multiple DAM assets using a CSV file.'); ?></p>
+          <a href="<?php echo url_for(['module' => 'object', 'action' => 'importSelect', 'type' => 'csv']); ?>" class="btn btn-primary">
+            <i class="fas fa-file-import"></i> <?php echo __('Import CSV'); ?>
+          </a>
+          <hr>
+          <small class="text-muted">
+            <?php echo __('After import, use the GLAM browser to convert records to DAM type.'); ?>
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-success text-white">
+          <i class="fas fa-images"></i> <?php echo __('Digital Object Import'); ?>
+        </div>
+        <div class="card-body">
+          <p><?php echo __('Import digital objects from a directory.'); ?></p>
+          <a href="<?php echo url_for(['module' => 'digitalobject', 'action' => 'importSelect']); ?>" class="btn btn-success">
+            <i class="fas fa-folder-open"></i> <?php echo __('Import Digital Objects'); ?>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-warning">
+      <i class="fas fa-exchange-alt"></i> <?php echo __('Convert Existing Records to DAM'); ?>
+    </div>
+    <div class="card-body">
+      <p><?php echo __('You can convert existing archival descriptions to DAM type using the GLAM browser.'); ?></p>
+      <ol>
+        <li><?php echo __('Go to the GLAM browser'); ?></li>
+        <li><?php echo __('Find the records you want to convert'); ?></li>
+        <li><?php echo __('Use the action menu to change type to "Photo/DAM"'); ?></li>
+      </ol>
+      <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>" class="btn btn-warning">
+        <i class="fas fa-th-large"></i> <?php echo __('Open GLAM Browser'); ?>
+      </a>
+    </div>
+  </div>
+<?php end_slot(); ?>
+
+  <--- TK Labels EXTENDED RIGHTS AREA -->
+  

@@ -1,0 +1,8 @@
+all:
+  layout: layout
+
+editSuccess:
+  layout: layout
+
+indexSuccess:
+  layout: layout

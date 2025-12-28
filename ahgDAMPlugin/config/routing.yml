@@ -1,0 +1,28 @@
+
+dam_dashboard:
+  url: /dam/dashboard
+  param: { module: dam, action: dashboard }
+
+dam_create:
+  url: /dam/create
+  param: { module: dam, action: create }
+
+dam_edit_iptc:
+  url: /dam/iptc/:slug
+  param: { module: dam, action: editIptc }
+
+dam_extract_metadata:
+  url: /dam/extract/:id
+  param: { module: dam, action: extractMetadata }
+
+dam_browse:
+  url: /dam/browse
+  param: { module: dam, action: browse }
+
+dam_bulk_create:
+  url: /dam/bulk
+  param: { module: dam, action: bulkCreate }
+
+dam_convert:
+  url: /dam/convert/:id
+  param: { module: dam, action: convert }

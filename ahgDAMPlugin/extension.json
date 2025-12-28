@@ -1,0 +1,15 @@
+{
+    "name": "Digital Asset Management",
+    "machine_name": "ahgDAMPlugin",
+    "version": "1.0.0",
+    "description": "Digital Asset Management with lightbox, derivatives, watermarks, and licensing",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+}
