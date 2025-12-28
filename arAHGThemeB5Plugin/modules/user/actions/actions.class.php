@@ -1,22 +1,19 @@
 <?php
 
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/user/actions/indexAction.class.php';
+
 class userActions extends sfActions
 {
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
-        // Get user from route
-        $this->resource = $this->getRoute()->resource;
+        $action = new UserIndexAction($this->context, 'user', 'index');
+        $action->execute($request);
         
-        if (!isset($this->resource)) {
-            $this->forward404();
+        // Copy variables from action to this controller
+        foreach (get_object_vars($action) as $key => $value) {
+            $this->$key = $value;
         }
         
-        // Check if viewing own profile or has permission
-        $currentUser = $this->context->user;
-        $this->isOwnProfile = $currentUser->isAuthenticated() && 
-            $currentUser->getAttribute('user_id') == $this->resource->id;
-        
-        // Set page title
-        $this->response->setTitle($this->resource->username . ' - ' . $this->response->getTitle());
+        return sfView::SUCCESS;
     }
 }
