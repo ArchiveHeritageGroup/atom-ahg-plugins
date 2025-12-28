@@ -1,53 +1,51 @@
-<?php
-// Only load AHG assets if AHG theme is active
-$activeTheme = sfConfig::get('app_theme', '');
-$isAhgTheme = (strpos($activeTheme, 'arAHGTheme') !== false);
-
-// Also check if this plugin is the active theme by checking plugins list
-if (!$isAhgTheme) {
-    $plugins = sfContext::getInstance()->getConfiguration()->getPlugins();
-    $isAhgTheme = in_array('arAHGThemeB5Plugin', $plugins) && 
-                  array_search('arAHGThemeB5Plugin', $plugins) < array_search('arDominionB5Plugin', $plugins);
-}
-
-if ($isAhgTheme):
-    // Find dist bundles dynamically
+<!DOCTYPE html>
+<html lang="<?php echo $sf_user->getCulture(); ?>"
+      dir="<?php echo sfCultureInfo::getInstance($sf_user->getCulture())->direction; ?>"
+      media="<?php echo isset($_GET['media']) ? htmlspecialchars($_GET['media'], ENT_QUOTES, 'UTF-8') : 'screen'; ?>">
+  <head>
+    <?php echo get_partial('default/googleAnalytics'); ?>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php include_title(); ?>
+    <?php echo get_component('default', 'tagManager', ['code' => 'script']); ?>
+    <?php if (file_exists($staticPath = sfConfig::get('app_static_path').DIRECTORY_SEPARATOR.'favicon.ico')) { ?>
+      <?php $faviconLoc = sfConfig::get('app_static_alias').'/favicon.ico'; ?>
+    <?php } else { ?>
+      <?php $faviconLoc = public_path('favicon.ico'); ?>
+    <?php } ?>
+    <link rel="shortcut icon" href="<?php echo $faviconLoc; ?>">
+    <?php
+    // Load Dominion base assets first
+    ?>
+    <script defer src="/dist/js/vendor.bundle.0f9010a8851c963bf1c1.js"></script>
+    <script defer src="/dist/js/arDominionB5Plugin.bundle.f35dfa6a8681aaac95aa.js"></script>
+    <link href="/dist/css/arDominionB5Plugin.bundle.a287608095b6ba1a60b5.css" rel="stylesheet">
+    <?php
+    // Find and load AHG assets dynamically
     $distCss = sfConfig::get('sf_web_dir') . '/dist/css';
     $distJs = sfConfig::get('sf_web_dir') . '/dist/js';
-
-    $ahgCss = '';
-    $ahgJs = '';
-    $vendorJs = '';
-
-    // Find AHG CSS bundle
+    
     if (is_dir($distCss)) {
         foreach (glob($distCss . '/arAHGThemeB5Plugin.bundle.*.css') as $file) {
             if (strpos($file, '.map') === false) {
-                $ahgCss = '/dist/css/' . basename($file);
+                echo '<link href="/dist/css/' . basename($file) . '" rel="stylesheet">';
                 break;
             }
         }
     }
-
-    // Find JS bundles
+    
     if (is_dir($distJs)) {
         foreach (glob($distJs . '/arAHGThemeB5Plugin.bundle.*.js') as $file) {
             if (strpos($file, '.map') === false && strpos($file, '.LICENSE') === false) {
-                $ahgJs = '/dist/js/' . basename($file);
-                break;
-            }
-        }
-        foreach (glob($distJs . '/vendor.bundle.*.js') as $file) {
-            if (strpos($file, '.map') === false && strpos($file, '.LICENSE') === false) {
-                $vendorJs = '/dist/js/' . basename($file);
+                echo '<script defer src="/dist/js/' . basename($file) . '"></script>';
                 break;
             }
         }
     }
-
-    if ($vendorJs || $ahgJs || $ahgCss): ?>
-    <?php if ($vendorJs): ?><script defer src="<?php echo $vendorJs; ?>"></script><?php endif; ?>
-    <?php if ($ahgJs): ?><script defer src="<?php echo $ahgJs; ?>"></script><?php endif; ?>
-    <?php if ($ahgCss): ?><link href="<?php echo $ahgCss; ?>" rel="stylesheet"><?php endif; ?>
-    <?php endif; ?>
-<?php endif; ?>
+    ?>
+    <?php echo get_component_slot('css'); ?>
+  </head>
+  <body class="d-flex flex-column min-vh-100 <?php echo $sf_context->getModuleName(); ?> <?php echo $sf_context->getActionName(); ?><?php echo sfConfig::get('app_show_tooltips') ? ' show-edit-tooltips' : ''; ?>">
+    <?php echo get_component('default', 'tagManager', ['code' => 'noscript']); ?>
+    <?php echo get_partial('header'); ?>
+    <?php include_slot('pre'); ?>
