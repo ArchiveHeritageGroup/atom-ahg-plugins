@@ -30,7 +30,7 @@ class arAHGThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
         parent::initialize();
 
         // Register modules from enabled plugins (framework-driven)
-        $this->registerFrameworkModules();
+        // $this->registerFrameworkModules(); // Disabled - using settings.yml instead
 
         // Register audit trail hooks (moved from ProjectConfiguration)
         $this->registerAuditTrailHooks();

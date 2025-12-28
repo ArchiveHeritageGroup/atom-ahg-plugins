@@ -6,31 +6,35 @@ $userId = $sf_user->getUserID();
 $isAdmin = $sf_user->isAdministrator();
 $isAuthenticated = $sf_user->isAuthenticated();
 
-// Check which plugins are available
-$pluginsDir = sfConfig::get('sf_plugins_dir');
-$hasAccessRequest = is_dir($pluginsDir . '/arAccessRequestPlugin');
-$hasResearch = is_dir($pluginsDir . '/arResearchPlugin');
-$hasSecurity = is_dir($pluginsDir . '/arSecurityClearancePlugin');
+// Check which plugins have routes registered (not just directory exists)
+$routing = sfContext::getInstance()->getRouting();
+$hasAccessRequest = $routing->hasRouteName('access_request_my');
+$hasResearch = $routing->hasRouteName('researcher_my_workspace');
+$hasSecurity = is_dir(sfConfig::get('sf_plugins_dir') . '/arSecurityClearancePlugin');
 
 // Get pending counts only if plugins exist
 $pendingCount = 0;
 $pendingResearcherCount = 0;
 
-if ($isAuthenticated) {
+if ($isAuthenticated && $hasAccessRequest) {
     try {
-        if ($hasAccessRequest && ($isAdmin || \AtomExtensions\Services\AccessRequestService::isApprover($userId))) {
+        if ($isAdmin || \AtomExtensions\Services\AccessRequestService::isApprover($userId)) {
             $pendingCount = \Illuminate\Database\Capsule\Manager::table('access_request')
                 ->where('status', 'pending')
                 ->count();
         }
-        
-        if ($hasResearch && $isAdmin) {
-            $pendingResearcherCount = \Illuminate\Database\Capsule\Manager::table('research_researcher')
-                ->where('status', 'pending')
-                ->count();
-        }
     } catch (Exception $e) {
-        // Tables may not exist
+        // Table may not exist
+    }
+}
+
+if ($isAuthenticated && $hasResearch && $isAdmin) {
+    try {
+        $pendingResearcherCount = \Illuminate\Database\Capsule\Manager::table('research_researcher')
+            ->where('status', 'pending')
+            ->count();
+    } catch (Exception $e) {
+        // Table may not exist
     }
 }
 ?>
