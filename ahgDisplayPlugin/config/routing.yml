@@ -1,0 +1,53 @@
+# arDisplayPlugin routes - using /glam prefix to avoid conflicts
+
+glam_index:
+  url: /glam
+  param: { module: ahgDisplay, action: index }
+
+glam_profiles:
+  url: /glam/profiles
+  param: { module: ahgDisplay, action: profiles }
+
+glam_levels:
+  url: /glam/levels
+  param: { module: ahgDisplay, action: levels }
+
+glam_fields:
+  url: /glam/fields
+  param: { module: ahgDisplay, action: fields }
+
+glam_set_type:
+  url: /glam/setType
+  param: { module: ahgDisplay, action: setType }
+
+glam_assign_profile:
+  url: /glam/assignProfile
+  param: { module: ahgDisplay, action: assignProfile }
+
+glam_bulk_set_type:
+  url: /glam/bulkSetType
+  param: { module: ahgDisplay, action: bulkSetType }
+
+glam_search:
+  url: /glam/search
+  param: { module: displaySearch, action: index }
+
+glam_search_results:
+  url: /glam/search/results
+  param: { module: displaySearch, action: results }
+
+glam_browse:
+  url: /glam/browse
+  param: { module: ahgDisplay, action: browse }
+
+glam_print:
+  url: /glam/print
+  param: { module: ahgDisplay, action: print }
+
+glam_export_csv:
+  url: /glam/exportCsv
+  param: { module: ahgDisplay, action: exportCsv }
+
+glam_change_type:
+  url: /glam/changeType
+  param: { module: ahgDisplay, action: changeType }
