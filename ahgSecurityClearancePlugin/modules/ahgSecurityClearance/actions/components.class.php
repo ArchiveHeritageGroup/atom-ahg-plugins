@@ -1,6 +1,6 @@
 <?php
 
-class arSecurityClearanceComponents extends sfComponents
+class ahgSecurityClearanceComponents extends sfComponents
 {
     public function executeWatermarkSelect(sfWebRequest $request)
     {

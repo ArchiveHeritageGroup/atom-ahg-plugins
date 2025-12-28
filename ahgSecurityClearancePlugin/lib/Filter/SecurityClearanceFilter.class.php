@@ -65,7 +65,7 @@ class SecurityClearanceFilter extends sfFilter
         }
 
         // Load service
-        require_once sfConfig::get('sf_plugins_dir').'/arSecurityClearancePlugin/lib/Services/SecurityClearanceService.php';
+        require_once sfConfig::get('sf_plugins_dir').'/ahgSecurityClearancePlugin/lib/Services/SecurityClearanceService.php';
 
         // Check access
         $accessResult = SecurityClearanceService::canAccess($userId, $resource->id, 'view');
@@ -91,7 +91,7 @@ class SecurityClearanceFilter extends sfFilter
                 $context->getController()->redirect('/security/request/'.$resource->id);
             } else {
                 // Generic access denied
-                $context->getController()->forward('arSecurityClearance', 'denied');
+                $context->getController()->forward('ahgSecurityClearance', 'denied');
             }
         } else {
             // Log access

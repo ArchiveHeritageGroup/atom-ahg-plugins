@@ -48,7 +48,7 @@ EOF;
         $this->logSection('security', 'Starting security scheduled tasks');
 
         // Load services
-        require_once sfConfig::get('sf_plugins_dir').'/arSecurityClearancePlugin/lib/Services/SecurityClearanceService.php';
+        require_once sfConfig::get('sf_plugins_dir').'/ahgSecurityClearancePlugin/lib/Services/SecurityClearanceService.php';
 
         // 1. Process declassifications
         $this->processDeclassifications();

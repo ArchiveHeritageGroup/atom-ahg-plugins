@@ -1,6 +1,6 @@
 <?php
 
-class arSecurityClearanceActions extends sfActions
+class ahgSecurityClearanceActions extends sfActions
 {
     public function preExecute()
     {

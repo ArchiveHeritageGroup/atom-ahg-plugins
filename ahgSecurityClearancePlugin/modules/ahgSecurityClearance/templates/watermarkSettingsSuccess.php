@@ -16,7 +16,7 @@
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
-<form method="post" action="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'watermarkSettings']); ?>">
+<form method="post" action="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'watermarkSettings']); ?>">
 
   <div class="card mb-4">
     <div class="card-header">

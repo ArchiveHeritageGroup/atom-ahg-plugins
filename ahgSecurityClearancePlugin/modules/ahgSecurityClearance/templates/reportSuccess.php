@@ -20,7 +20,7 @@ $period = $sf_data->getRaw('period');
                 <option value="90 days" <?php echo $period === '90 days' ? 'selected' : '' ?>>Last 90 Days</option>
             </select>
         </form>
-        <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-sm btn-primary ms-2">
+        <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-sm btn-primary ms-2">
             <i class="fas fa-tachometer-alt me-1"></i><?php echo __('Dashboard') ?>
         </a>
     </div>

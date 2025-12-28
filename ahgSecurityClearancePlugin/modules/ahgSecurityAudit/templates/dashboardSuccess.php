@@ -314,12 +314,12 @@ $recentLogs = \Illuminate\Database\Capsule\Manager::table('spectrum_audit_log as
                 </a>
             </div>
             <div class="col-md-3">
-                <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary w-100 mb-2">
+                <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary w-100 mb-2">
                     <i class="fas fa-shield-alt"></i> <?php echo __('Security Dashboard') ?>
                 </a>
             </div>
             <div class="col-md-3">
-                <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'report']) ?>" class="btn btn-outline-info w-100 mb-2">
+                <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'report']) ?>" class="btn btn-outline-info w-100 mb-2">
                     <i class="fas fa-chart-bar"></i> <?php echo __('Security Reports') ?>
                 </a>
             </div>

@@ -74,7 +74,7 @@
             <?php endforeach ?>
           </tbody>
         </table>
-        <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'index']) ?>" class="btn btn-sm btn-outline-primary">
+        <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'index']) ?>" class="btn btn-sm btn-outline-primary">
           <?php echo __('Manage Clearances') ?>
         </a>
       </div>
@@ -144,7 +144,7 @@
           </td>
           <td><?php echo date('Y-m-d H:i', strtotime($req->created_at)) ?></td>
           <td>
-            <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'reviewRequest', 'id' => $req->request_id]) ?>" class="btn btn-sm btn-primary">
+            <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'reviewRequest', 'id' => $req->request_id]) ?>" class="btn btn-sm btn-primary">
               <?php echo __('Review') ?>
             </a>
           </td>
@@ -193,7 +193,7 @@
             <?php endif ?>
           </td>
           <td>
-            <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'view', 'id' => $exp->user_id]) ?>" class="btn btn-sm btn-outline-primary">
+            <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'view', 'id' => $exp->user_id]) ?>" class="btn btn-sm btn-outline-primary">
               <?php echo __('Manage') ?>
             </a>
           </td>
@@ -244,12 +244,12 @@
   <div class="card-body">
     <div class="row">
       <div class="col-md-3">
-        <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'index']) ?>" class="btn btn-outline-primary btn-block mb-2 w-100">
+        <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'index']) ?>" class="btn btn-outline-primary btn-block mb-2 w-100">
           <i class="fas fa-users"></i> <?php echo __('Manage Clearances') ?>
         </a>
       </div>
       <div class="col-md-3">
-        <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'compartments']) ?>" class="btn btn-outline-secondary btn-block mb-2 w-100">
+        <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'compartments']) ?>" class="btn btn-outline-secondary btn-block mb-2 w-100">
           <i class="fas fa-project-diagram"></i> <?php echo __('Compartments') ?>
         </a>
       </div>
@@ -259,7 +259,7 @@
         </a>
       </div>
       <div class="col-md-3">
-        <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'report']) ?>" class="btn btn-outline-success btn-block mb-2 w-100">
+        <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'report']) ?>" class="btn btn-outline-success btn-block mb-2 w-100">
           <i class="fas fa-chart-bar"></i> <?php echo __('Reports') ?>
         </a>
       </div>

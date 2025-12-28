@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class arSecurityClearanceUserAction extends sfAction
+class ahgSecurityClearanceUserAction extends sfAction
 {
     public function execute($request)
     {

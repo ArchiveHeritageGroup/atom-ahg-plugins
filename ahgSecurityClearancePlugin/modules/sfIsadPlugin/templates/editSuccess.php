@@ -127,10 +127,10 @@
       </fieldset>
 
       <!-- ============================================================= -->
-      <!-- SECURITY CLASSIFICATION AREA - Added for arSecurityClearancePlugin -->
+      <!-- SECURITY CLASSIFICATION AREA - Added for ahgSecurityClearancePlugin -->
       <!-- ============================================================= -->
-      <?php if (sfConfig::get('app_plugins_arSecurityClearancePlugin', false)): ?>
-        <?php include_partial('arSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
+      <?php if (sfConfig::get('app_plugins_ahgSecurityClearancePlugin', false)): ?>
+        <?php include_partial('ahgSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
       <?php endif; ?>
       <!-- ============================================================= -->
 

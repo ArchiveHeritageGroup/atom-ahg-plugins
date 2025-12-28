@@ -1,6 +1,6 @@
 <?php
 
-class arSecurityClearanceWatermarkSettingsAction extends sfAction
+class ahgSecurityClearanceWatermarkSettingsAction extends sfAction
 {
     public function execute($request)
     {
@@ -44,7 +44,7 @@ class arSecurityClearanceWatermarkSettingsAction extends sfAction
 
             $this->getUser()->setFlash('notice', 'Watermark settings saved successfully.');
 
-            $this->redirect(['module' => 'arSecurityClearance', 'action' => 'watermarkSettings']);
+            $this->redirect(['module' => 'ahgSecurityClearance', 'action' => 'watermarkSettings']);
         }
 
         // Load current settings

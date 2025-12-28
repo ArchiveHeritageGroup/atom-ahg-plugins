@@ -14,34 +14,34 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // Admin clearance management routes
         $routing->prependRoute('security_clearances', new sfRoute(
             '/security/clearances',
-            ['module' => 'arSecurityClearance', 'action' => 'index']
+            ['module' => 'ahgSecurityClearance', 'action' => 'index']
         ));
 
         $routing->prependRoute('security_clearance_view', new sfRoute(
             '/security/clearance/:id',
-            ['module' => 'arSecurityClearance', 'action' => 'view'],
+            ['module' => 'ahgSecurityClearance', 'action' => 'view'],
             ['id' => '\d+']
         ));
 
         $routing->prependRoute('security_clearance_grant', new sfRoute(
             '/security/clearance/grant',
-            ['module' => 'arSecurityClearance', 'action' => 'grant']
+            ['module' => 'ahgSecurityClearance', 'action' => 'grant']
         ));
 
         $routing->prependRoute('security_clearance_revoke', new sfRoute(
             '/security/clearance/:id/revoke',
-            ['module' => 'arSecurityClearance', 'action' => 'revoke'],
+            ['module' => 'ahgSecurityClearance', 'action' => 'revoke'],
             ['id' => '\d+']
         ));
 
         $routing->prependRoute('security_clearance_bulk_grant', new sfRoute(
             '/security/clearance/bulk-grant',
-            ['module' => 'arSecurityClearance', 'action' => 'bulkGrant']
+            ['module' => 'ahgSecurityClearance', 'action' => 'bulkGrant']
         ));
 
         $routing->prependRoute('security_access_revoke', new sfRoute(
             '/security/access/:id/revoke',
-            ['module' => 'arSecurityClearance', 'action' => 'revokeAccess'],
+            ['module' => 'ahgSecurityClearance', 'action' => 'revokeAccess'],
             ['id' => '\d+']
         ));
     }

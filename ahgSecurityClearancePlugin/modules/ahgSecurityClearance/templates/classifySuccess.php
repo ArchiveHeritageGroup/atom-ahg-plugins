@@ -44,7 +44,7 @@
       <?php endif; ?>
     </div>
 
-    <form method="post" action="<?php echo url_for([$resource, 'module' => 'arSecurityClearance', 'action' => 'classify']); ?>">
+    <form method="post" action="<?php echo url_for([$resource, 'module' => 'ahgSecurityClearance', 'action' => 'classify']); ?>">
 
       <!-- Classification Level -->
       <fieldset class="mb-4">
@@ -156,7 +156,7 @@
       <!-- Actions -->
       <section class="actions">
         <ul>
-          <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'arSecurityClearance', 'action' => 'object'], ['class' => 'c-btn']); ?></li>
+          <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'ahgSecurityClearance', 'action' => 'object'], ['class' => 'c-btn']); ?></li>
           <?php if ($currentClassification): ?>
             <li><input class="c-btn c-btn-delete" type="submit" name="action_type" value="declassify" formnovalidate></li>
           <?php endif; ?>

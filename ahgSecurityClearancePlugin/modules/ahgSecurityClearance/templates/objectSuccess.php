@@ -36,7 +36,7 @@
         </h5>
         <?php echo link_to(
             '<i class="fas fa-edit me-1"></i>'.($classification ? __('Reclassify') : __('Classify')),
-            [$resource, 'module' => 'arSecurityClearance', 'action' => 'classify'],
+            [$resource, 'module' => 'ahgSecurityClearance', 'action' => 'classify'],
             ['class' => 'btn btn-sm btn-primary']
         ); ?>
       </div>
@@ -116,7 +116,7 @@
             <p class="text-muted"><?php echo __('No security classification has been applied to this record.'); ?></p>
             <?php echo link_to(
                 '<i class="fas fa-lock me-1"></i>'.__('Apply Classification'),
-                [$resource, 'module' => 'arSecurityClearance', 'action' => 'classify'],
+                [$resource, 'module' => 'ahgSecurityClearance', 'action' => 'classify'],
                 ['class' => 'btn btn-primary']
             ); ?>
           </div>
@@ -175,7 +175,7 @@
   <div class="modal fade" id="declassifyModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form method="post" action="<?php echo url_for([$resource, 'module' => 'arSecurityClearance', 'action' => 'declassify']); ?>">
+        <form method="post" action="<?php echo url_for([$resource, 'module' => 'ahgSecurityClearance', 'action' => 'declassify']); ?>">
           <div class="modal-header bg-success text-white">
             <h5 class="modal-title"><i class="fas fa-unlock me-2"></i><?php echo __('Remove Classification'); ?></h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

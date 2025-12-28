@@ -8,7 +8,7 @@ $userCounts = $sf_data->getRaw('userCounts');
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-project-diagram me-2"></i><?php echo __('Security Compartments') ?></h1>
-    <a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-primary">
+    <a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'dashboard']) ?>" class="btn btn-primary">
         <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard') ?>
     </a>
 </div>
