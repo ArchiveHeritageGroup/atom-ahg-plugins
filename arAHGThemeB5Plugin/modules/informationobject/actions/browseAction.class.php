@@ -37,7 +37,7 @@ class InformationObjectBrowseAction extends sfAction
         }
         
         // Build URL
-        $url = 'display/browse';
+        $url = 'glam/browse';
         if (!empty($glamParams)) {
             $url .= '?' . http_build_query($glamParams);
         }
