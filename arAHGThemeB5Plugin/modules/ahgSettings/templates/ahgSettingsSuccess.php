@@ -1,7 +1,16 @@
 <?php slot('title', __('AHG Plugin Settings')); ?>
 <?php
-// Check if DAM/TIFF features are available
-$damEnabled = class_exists('TiffPdfMergeService') || file_exists(sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/TiffPdfMergeService.php');
+// Check if DAM features are explicitly enabled
+$damEnabled = false;
+try {
+    $result = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+        ->where('setting_key', 'dam_tools_enabled')
+        ->where('setting_group', 'general')
+        ->first();
+    $damEnabled = $result && $result->setting_value === '1';
+} catch (Exception $e) {
+    $damEnabled = false;
+}
 ?>
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h1 class="mb-0"><i class="fas fa-cogs"></i> AHG Plugin Settings</h1>
