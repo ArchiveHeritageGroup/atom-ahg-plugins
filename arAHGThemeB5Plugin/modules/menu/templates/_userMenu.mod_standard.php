@@ -9,7 +9,7 @@ $isAuthenticated = $sf_user->isAuthenticated();
 // Check which plugins have routes registered (not just directory exists)
 $routing = sfContext::getInstance()->getRouting();
 $hasAccessRequest = $routing->hasRouteName('access_request_my');
-$hasResearch = $routing->hasRouteName('researcher_my_workspace');
+$hasResearch = $routing->hasRouteName('research_workspace');
 $hasSecurity = is_dir(sfConfig::get('sf_plugins_dir') . '/arSecurityClearancePlugin');
 
 // Get pending counts only if plugins exist
@@ -65,7 +65,7 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><i class="fas fa-book-reader me-1"></i><?php echo __('Research'); ?></h6></li>
     <li>
-      <a class="dropdown-item" href="<?php echo url_for('@researcher_my_workspace'); ?>">
+      <a class="dropdown-item" href="<?php echo url_for('@research_workspace'); ?>">
         <i class="fas fa-folder-open me-2"></i><?php echo __('My Workspace'); ?>
       </a>
     </li>
