@@ -188,7 +188,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arGalleryPlugin', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasLibrary): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasDam): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
