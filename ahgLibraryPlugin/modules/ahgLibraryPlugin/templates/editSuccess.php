@@ -573,7 +573,7 @@
 
 </form>
 
-<script>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     
     // ISBN Lookup
