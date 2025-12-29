@@ -1,3 +1,25 @@
+<?php
+// Check which sector plugins are enabled
+function checkPluginEnabled($pluginName) {
+    static $plugins = null;
+    if ($plugins === null) {
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
+            $stmt->execute();
+            $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+        } catch (Exception $e) {
+            $plugins = [];
+        }
+    }
+    return isset($plugins[$pluginName]);
+}
+
+$hasLibrary = checkPluginEnabled('ahgLibraryPlugin');
+$hasMuseum = checkPluginEnabled('sfMuseumPlugin');
+$hasGallery = checkPluginEnabled('arGalleryPlugin');
+$hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin');
+?>
 <?php foreach ([$addMenu, $manageMenu, $importMenu, $adminMenu] as $menu) { ?>
   <?php if (
       $menu && ('add' == $menu->getName()
@@ -6,6 +28,7 @@
   ) { ?>
     <li class="nav-item dropdown d-flex flex-column">
       <a
+      
         class="nav-link dropdown-toggle d-flex align-items-center p-0"
         href="#"
         id="<?php echo $menu->getName(); ?>-menu"
@@ -44,6 +67,27 @@
             </li>
           <?php } ?>
         <?php } ?>
+
+        <?php // Inject sector-specific items for Add menu only ?>
+        <?php if ('add' == $menu->getName()): ?>
+          <?php if ($hasLibrary || $hasMuseum || $hasGallery || $hasDam): ?>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header"><?php echo __('Sector Items'); ?></h6></li>
+          <?php endif; ?>
+          <?php if ($hasMuseum): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'sfMuseumPlugin', 'action' => 'add']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum object'); ?></a></li>
+          <?php endif; ?>
+          <?php if ($hasGallery): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arGalleryPlugin', 'action' => 'add']); ?>"><i class="fas fa-images fa-fw me-2"></i><?php echo __('Gallery item'); ?></a></li>
+          <?php endif; ?>
+          <?php if ($hasLibrary): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arLibraryPlugin', 'action' => 'add']); ?>"><i class="fas fa-book fa-fw me-2"></i><?php echo __('Library item'); ?></a></li>
+          <?php endif; ?>
+          <?php if ($hasDam): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arDAMPlugin', 'action' => 'add']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
+          <?php endif; ?>
+        <?php endif; ?>
+
       </ul>
     </li>
   <?php } ?>
