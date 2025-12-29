@@ -163,19 +163,19 @@ class ahgGrapPluginConfiguration extends sfPluginConfiguration
                 return;
             }
 
-            // Add divider and GRAP menu items
-            $menu->addChild('grap-divider', ['label' => '-'])
-                ->setAttribute('class', 'divider');
-
-            $menu->addChild('View GRAP data', [
-                'route' => 'grap/index?slug='.$resource->slug,
-            ])->setAttribute('class', 'grap-view-link');
-
-            if (($sf_user->isAdministrator() || $sf_user->hasCredential('editor'))) {
-                $menu->addChild('Edit GRAP data', [
-                    'route' => 'grap/edit?slug='.$resource->slug,
-                ])->setAttribute('class', 'grap-edit-link');
-            }
+//             // Add divider and GRAP menu items
+//             $menu->addChild('grap-divider', ['label' => '-'])
+//                 ->setAttribute('class', 'divider');
+// 
+//             $menu->addChild('View GRAP data', [
+//                 'route' => 'grap/index?slug='.$resource->slug,
+//             ])->setAttribute('class', 'grap-view-link');
+// 
+//             if (($sf_user->isAdministrator() || $sf_user->hasCredential('editor'))) {
+//                 $menu->addChild('Edit GRAP data', [
+//                     'route' => 'grap/edit?slug='.$resource->slug,
+//                 ])->setAttribute('class', 'grap-edit-link');
+//             }
         } catch (\Exception $e) {
             // Silently fail if resource not available
         }
