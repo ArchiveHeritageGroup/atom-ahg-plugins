@@ -41,7 +41,6 @@ $hasOais = isPluginActive('arOaisPlugin');
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'export', 'action' => 'archival']); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
 <?php // TODO: Create dashboard module
-// ?>        <?php /* TODO: dashboard module */ // <li><a href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>"><i class="fas fa-chart-bar me-2"></i><?php echo __('Data Quality'); ?></a></li> ?>
     </ul>
 
     <?php if ($hasVendor): ?>
@@ -214,7 +213,6 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <?php if ($hasSpectrum): ?>
                     <li class="list-group-item"><a href="/spectrum/export"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Spectrum History Export'); ?></a></li>
                     <?php endif; ?>
-                    <?php /* TODO: cidoc export */ // <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cidoc', 'action' => 'export']); ?>"><i class="fas fa-project-diagram me-2 text-muted"></i><?php echo __('CIDOC-CRM Export'); ?></a></li> ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'export', 'action' => 'csv']); ?>"><i class="fas fa-file-csv me-2 text-muted"></i><?php echo __('CSV Export'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'export', 'action' => 'ead']); ?>"><i class="fas fa-file-code me-2 text-muted"></i><?php echo __('EAD Export'); ?></a></li>
                 </ul>
