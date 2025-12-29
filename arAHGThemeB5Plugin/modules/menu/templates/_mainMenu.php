@@ -68,7 +68,7 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
           <?php } ?>
         <?php } ?>
 
-        <?php // Inject sector-specific items for Add menu only ?>
+        <?php // Inject sector-specific items for Add menu ?>
         <?php if ('add' == $menu->getName()): ?>
           <?php if ($hasLibrary || $hasMuseum || $hasGallery || $hasDam): ?>
             <li><hr class="dropdown-divider"></li>
@@ -86,6 +86,12 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
           <?php if ($hasDam): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDAMPlugin', 'action' => 'add']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
           <?php endif; ?>
+        <?php endif; ?>
+
+        <?php // Inject Central Dashboards for Manage menu ?>
+        <?php if ('manage' == $menu->getName()): ?>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt fa-fw me-2"></i><?php echo __('Central Dashboards'); ?></a></li>
         <?php endif; ?>
 
       </ul>
