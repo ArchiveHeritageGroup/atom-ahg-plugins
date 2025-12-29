@@ -49,7 +49,7 @@ class DisplayViewFilter extends sfFilter
             
         } catch (Exception $e) {
             // Log but don't break the page
-            error_log('arDisplayPlugin: Auto-detection failed: ' . $e->getMessage());
+            error_log('ahgDisplayPlugin: Auto-detection failed: ' . $e->getMessage());
         }
     }
 }

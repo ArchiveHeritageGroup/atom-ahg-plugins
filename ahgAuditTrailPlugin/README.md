@@ -1,4 +1,4 @@
-# arAuditTrailPlugin for AtoM 2.10
+# ahgAuditTrailPlugin for AtoM 2.10
 
 Comprehensive audit trail logging plugin for AtoM 2.10 Laravel rebuild.
 
@@ -13,7 +13,7 @@ Comprehensive audit trail logging plugin for AtoM 2.10 Laravel rebuild.
 
 ## Installation
 
-1. Extract to `plugins/arAuditTrailPlugin`
+1. Extract to `plugins/ahgAuditTrailPlugin`
 2. Run database migration: `mysql -u root -p archive < data/migrations/001_create_audit_tables.sql`
 3. Enable in `apps/qubit/config/settings.yml`
 4. Clear cache: `php symfony cc`

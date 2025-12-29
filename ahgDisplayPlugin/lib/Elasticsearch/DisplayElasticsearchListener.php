@@ -1,6 +1,6 @@
 <?php
 /**
- * Elasticsearch Indexing Listener for arDisplayPlugin
+ * Elasticsearch Indexing Listener for ahgDisplayPlugin
  * 
  * Hooks into AtoM's indexing events to add display-specific fields
  */

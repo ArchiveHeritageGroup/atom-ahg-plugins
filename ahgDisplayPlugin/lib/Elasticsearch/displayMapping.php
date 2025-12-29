@@ -1,6 +1,6 @@
 <?php
 /**
- * Elasticsearch 7 Mapping Extension for arDisplayPlugin
+ * Elasticsearch 7 Mapping Extension for ahgDisplayPlugin
  * 
  * Adds display-specific fields to the information_object index
  */

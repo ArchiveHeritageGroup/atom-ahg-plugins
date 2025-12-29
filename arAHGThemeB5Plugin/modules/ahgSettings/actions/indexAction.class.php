@@ -12,10 +12,10 @@ class AhgSettingsIndexAction extends sfAction
         $pluginsDir = sfConfig::get('sf_plugins_dir');
         
         // Check which plugins exist
-        $hasResearch = is_dir($pluginsDir . '/arResearchPlugin');
-        $hasAuditTrail = is_dir($pluginsDir . '/arAuditTrailPlugin');
+        $hasResearch = is_dir($pluginsDir . '/ahgResearchPlugin');
+        $hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
         $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
-        $hasAccessRequest = is_dir($pluginsDir . '/arAccessRequestPlugin');
+        $hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
         $hasCondition = is_dir($pluginsDir . '/arConditionPlugin');
         $hasSpectrum = is_dir($pluginsDir . '/arSpectrumPlugin');
         $hasIiif = is_dir($pluginsDir . '/IiifViewerFramework');
@@ -90,7 +90,7 @@ class AhgSettingsIndexAction extends sfAction
                 'label' => 'Audit Trail',
                 'icon' => 'fa-history',
                 'description' => 'View change history and user activity logs',
-                'url' => 'arAuditTrailPlugin/browse'
+                'url' => 'ahgAuditTrailPlugin/browse'
             ];
         }
         

@@ -1,4 +1,4 @@
-# arSecurityClearancePlugin v2.0.0
+# ahgSecurityClearancePlugin v2.0.0
 
 A comprehensive security classification and access control plugin for Access to Memory (AtoM) 2.x.
 
@@ -55,12 +55,12 @@ A comprehensive security classification and access control plugin for Access to 
 
 ### 1. Copy Plugin Files
 ```bash
-cp -r arSecurityClearancePlugin /usr/share/nginx/atom/plugins/
+cp -r ahgSecurityClearancePlugin /usr/share/nginx/atom/plugins/
 ```
 
 ### 2. Install Database Schema
 ```bash
-mysql -u atom -p atom < /usr/share/nginx/atom/plugins/arSecurityClearancePlugin/lib/install.sql
+mysql -u atom -p atom < /usr/share/nginx/atom/plugins/ahgSecurityClearancePlugin/lib/install.sql
 ```
 
 ### 3. Enable the Plugin
@@ -69,7 +69,7 @@ Add to `apps/qubit/config/settings.yml`:
 all:
   .settings:
     plugins:
-      - arSecurityClearancePlugin
+      - ahgSecurityClearancePlugin
 ```
 
 ### 4. Clear Cache

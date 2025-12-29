@@ -18,8 +18,8 @@ class ahgAuditTrailListener
         'informationobject', 'actor', 'repository', 'term', 'taxonomy',
         'accession', 'deaccession', 'donor', 'rightsholder', 'function',
         'physicalobject', 'digitalobject', 'user', 'aclGroup', 'staticpage',
-        'sfMuseumPlugin', 'arLibraryPlugin', 'ar3DModelPlugin', 'arGalleryPlugin',
-        'arDAMPlugin', 'sfIsadPlugin', 'sfDcPlugin',
+        'sfMuseumPlugin', 'ahgLibraryPlugin', 'ar3DModelPlugin', 'arGalleryPlugin',
+        'ahgDAMPlugin', 'sfIsadPlugin', 'sfDcPlugin',
     ];
 
     protected static $db = null;
@@ -478,10 +478,10 @@ class ahgAuditTrailListener
             'aclGroup' => 'QubitAclGroup',
             'staticpage' => 'QubitStaticPage',
             'sfMuseumPlugin' => 'MuseumObject',
-            'arLibraryPlugin' => 'LibraryItem',
+            'ahgLibraryPlugin' => 'LibraryItem',
             'ar3DModelPlugin' => 'Object3D',
             'arGalleryPlugin' => 'GalleryWork',
-            'arDAMPlugin' => 'DigitalAsset',
+            'ahgDAMPlugin' => 'DigitalAsset',
         ];
 
         return $mapping[$moduleName] ?? ucfirst($moduleName);

@@ -7,10 +7,10 @@ Custom plugins for Access to Memory (AtoM) 2.10 developed by The Archive and Her
 | Plugin | Description |
 |--------|-------------|
 | **arAHGThemeB5Plugin** | Bootstrap 5 theme with custom styling and enhanced UI |
-| **arDisplayPlugin** | Configurable display profiles, levels of description, layout modes |
-| **arSecurityClearancePlugin** | Security classification system with clearance levels |
-| **arResearchPlugin** | Researcher registration, reading room bookings, collections |
-| **arAccessRequestPlugin** | Access request workflow with approvers |
+| **ahgDisplayPlugin** | Configurable display profiles, levels of description, layout modes |
+| **ahgSecurityClearancePlugin** | Security classification system with clearance levels |
+| **ahgResearchPlugin** | Researcher registration, reading room bookings, collections |
+| **ahgAccessRequestPlugin** | Access request workflow with approvers |
 
 ## Installation
 
@@ -38,27 +38,27 @@ sudo systemctl restart php8.3-fpm
 - AHG Settings dashboard
 - Custom color scheme
 
-### arDisplayPlugin
+### ahgDisplayPlugin
 - Display Mode Switching (list, card, gallery, hierarchy)
 - Extended Levels of Description
 - Per-user display preferences
 - Configurable display profiles
 
-### arSecurityClearancePlugin
+### ahgSecurityClearancePlugin
 - 5-level security classification (Unclassified → Top Secret)
 - User clearance management
 - Object classification
 - Access logging and audit trails
 - Watermark support
 
-### arResearchPlugin
+### ahgResearchPlugin
 - Researcher registration and approval
 - Reading room management
 - Booking system
 - Research collections
 - Citation logging
 
-### arAccessRequestPlugin
+### ahgAccessRequestPlugin
 - Access request workflow
 - Approver management
 - Object access grants

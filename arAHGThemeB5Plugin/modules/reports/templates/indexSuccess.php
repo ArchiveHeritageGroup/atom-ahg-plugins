@@ -112,7 +112,7 @@
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-graduation-cap me-2 text-muted"></i><?php echo __('Research Services'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donor', 'action' => 'dashboard']); ?>"><i class="fas fa-handshake me-2 text-muted"></i><?php echo __('Donor Management'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arGalleryPlugin', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museumReports', 'action' => 'index']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Reports (CCO)"); ?></a></li>
                 </ul>

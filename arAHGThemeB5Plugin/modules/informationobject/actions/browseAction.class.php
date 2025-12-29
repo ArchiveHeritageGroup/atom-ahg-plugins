@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Redirect to GLAM Browse (arDisplayPlugin)
+ * Redirect to GLAM Browse (ahgDisplayPlugin)
  * 
  * This action redirects all informationobject/browse requests to the
- * GLAM browse interface provided by arDisplayPlugin.
+ * GLAM browse interface provided by ahgDisplayPlugin.
  */
 class InformationObjectBrowseAction extends sfAction
 {

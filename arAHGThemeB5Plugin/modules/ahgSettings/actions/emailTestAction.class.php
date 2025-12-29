@@ -12,7 +12,7 @@ class AhgSettingsEmailTestAction extends sfAction
         }
 
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/arResearchPlugin/lib/Services/EmailService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EmailService.php';
 
         $testEmail = $request->getParameter('email');
         

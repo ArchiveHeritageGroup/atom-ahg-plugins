@@ -84,7 +84,7 @@ class arAHGThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
     private function registerAuditTrailHooks(): void
     {
         $listenerPath = sfConfig::get('sf_plugins_dir') 
-            . '/arAuditTrailPlugin/lib/arAuditTrailListener.class.php';
+            . '/ahgAuditTrailPlugin/lib/ahgAuditTrailListener.class.php';
 
         if (!file_exists($listenerPath)) {
             return;
@@ -94,12 +94,12 @@ class arAHGThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
 
         $this->dispatcher->connect(
             'component.method_not_found',
-            ['arAuditTrailListener', 'listenToMethodNotFound']
+            ['ahgAuditTrailListener', 'listenToMethodNotFound']
         );
 
         $this->dispatcher->connect(
             'response.filter_content',
-            ['arAuditTrailListener', 'logAction']
+            ['ahgAuditTrailListener', 'logAction']
         );
     }
 

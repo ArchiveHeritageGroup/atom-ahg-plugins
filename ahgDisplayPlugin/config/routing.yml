@@ -1,4 +1,4 @@
-# arDisplayPlugin routes - using /glam prefix to avoid conflicts
+# ahgDisplayPlugin routes - using /glam prefix to avoid conflicts
 
 glam_index:
   url: /glam

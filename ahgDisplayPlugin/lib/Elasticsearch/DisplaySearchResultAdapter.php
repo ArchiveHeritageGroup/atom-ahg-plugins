@@ -1,6 +1,6 @@
 <?php
 /**
- * Search Result Adapter for arDisplayPlugin
+ * Search Result Adapter for ahgDisplayPlugin
  * 
  * Transforms Elasticsearch results into display-ready format
  * Avoids MySQL round-trips by using ES data directly

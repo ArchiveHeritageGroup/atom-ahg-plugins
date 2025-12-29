@@ -194,7 +194,7 @@ if (is_string($customPlugins)) {
             <div class="mb-3">
                 <label class="form-label"><?php echo __('Plugin Names (one per line)') ?></label>
                 <textarea name="custom_plugins" class="form-control" rows="5"
-                          placeholder="arAHGThemeB5Plugin&#10;arSecurityClearancePlugin&#10;sfMuseumPlugin"><?php echo esc_entities(implode("\n", $customPlugins)) ?></textarea>
+                          placeholder="arAHGThemeB5Plugin&#10;ahgSecurityClearancePlugin&#10;sfMuseumPlugin"><?php echo esc_entities(implode("\n", $customPlugins)) ?></textarea>
                 <div class="form-text"><?php echo __('Enter plugin directory names, one per line') ?></div>
             </div>
         </div>

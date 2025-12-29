@@ -130,7 +130,7 @@
       <!-- SECURITY CLASSIFICATION AREA - Added for ahgSecurityClearancePlugin -->
       <!-- ============================================================= -->
       <?php if (sfConfig::get('app_plugins_ahgSecurityClearancePlugin', false)): ?>
-        <?php include_partial('ahgSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
+        <?php include(sfConfig::get('sf_plugins_dir').'/ahgSecurityClearancePlugin/modules/ahgSecurityClearance/templates/_securityFieldset.php'); //, ['resource' => $resource]); ?>
       <?php endif; ?>
       <!-- ============================================================= -->
 

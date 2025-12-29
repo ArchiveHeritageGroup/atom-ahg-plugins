@@ -398,7 +398,7 @@
         </div>
       </div>
 
-      <?php include_partial('arSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
+      <?php include_partial('ahgSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
       <?php echo get_partial('informationobject/adminInfo', ['form' => $form, 'resource' => $resource]); ?>
 
     </div>

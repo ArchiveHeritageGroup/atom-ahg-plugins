@@ -6,10 +6,10 @@ $isAdmin = $sf_user->isAdministrator();
 $pluginsDir = sfConfig::get('sf_plugins_dir');
 
 // Check which plugins exist
-$hasAuditTrail = is_dir($pluginsDir . '/arAuditTrailPlugin');
-$hasSecurityClearance = is_dir($pluginsDir . '/arSecurityClearancePlugin');
-$hasAccessRequest = is_dir($pluginsDir . '/arAccessRequestPlugin');
-$hasResearch = is_dir($pluginsDir . '/arResearchPlugin');
+$hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
+$hasSecurityClearance = is_dir($pluginsDir . '/ahgSecurityClearancePlugin');
+$hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
+$hasResearch = is_dir($pluginsDir . '/ahgResearchPlugin');
 $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
 $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
 
@@ -57,7 +57,7 @@ $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
     <?php if ($hasAuditTrail): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Audit'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAuditTrailPlugin', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrailPlugin', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasRic): ?>

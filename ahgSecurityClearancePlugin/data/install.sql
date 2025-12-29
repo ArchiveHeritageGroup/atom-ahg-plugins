@@ -1,5 +1,5 @@
 -- =============================================================================
--- arSecurityClearancePlugin Install SQL
+-- ahgSecurityClearancePlugin Install SQL
 -- All security, embargo, extended rights, and watermark tables
 -- =============================================================================
 

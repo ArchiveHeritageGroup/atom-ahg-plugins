@@ -1,4 +1,4 @@
-# arDisplayPlugin
+# ahgDisplayPlugin
 
 Context-aware display system for AtoM 2.10+ with **Elasticsearch 7** integration. Supports archives, museums, galleries, book collections, and photo archives.
 
@@ -40,10 +40,10 @@ Context-aware display system for AtoM 2.10+ with **Elasticsearch 7** integration
 
 ```bash
 # Extract to your AtoM plugins directory
-tar -xzf arDisplayPlugin.tar.gz -C /path/to/atom/plugins/
+tar -xzf ahgDisplayPlugin.tar.gz -C /path/to/atom/plugins/
 
 # Run installation script
-cd /path/to/atom/plugins/arDisplayPlugin
+cd /path/to/atom/plugins/ahgDisplayPlugin
 ./INSTALL.sh
 
 # Update Elasticsearch mapping

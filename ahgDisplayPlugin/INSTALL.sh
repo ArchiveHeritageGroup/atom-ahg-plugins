@@ -1,15 +1,15 @@
 #!/bin/bash
 # =============================================================================
-# arDisplayPlugin Installation Script (with Elasticsearch 7 support)
+# ahgDisplayPlugin Installation Script (with Elasticsearch 7 support)
 # =============================================================================
 
 ATOM_DIR="${ATOM_DIR:-/usr/share/nginx/atom}"
-PLUGIN_DIR="$ATOM_DIR/plugins/arDisplayPlugin"
+PLUGIN_DIR="$ATOM_DIR/plugins/ahgDisplayPlugin"
 DB_NAME="${DB_NAME:-atom}"
 DB_USER="${DB_USER:-atom}"
 
 echo "============================================"
-echo "   arDisplayPlugin INSTALLATION"
+echo "   ahgDisplayPlugin INSTALLATION"
 echo "   (with Elasticsearch 7 Integration)"
 echo "============================================"
 echo ""
@@ -27,16 +27,16 @@ fi
 # Enable plugin in ProjectConfiguration
 PROJ_CONFIG="$ATOM_DIR/config/ProjectConfiguration.class.php"
 if [ -f "$PROJ_CONFIG" ]; then
-    if ! grep -q "arDisplayPlugin" "$PROJ_CONFIG"; then
+    if ! grep -q "ahgDisplayPlugin" "$PROJ_CONFIG"; then
         echo "Enabling plugin in ProjectConfiguration..."
-        sed -i "/sfEadPlugin/a\            'arDisplayPlugin'," "$PROJ_CONFIG"
+        sed -i "/sfEadPlugin/a\            'ahgDisplayPlugin'," "$PROJ_CONFIG"
         echo "✓ Plugin enabled"
     else
         echo "✓ Plugin already enabled in ProjectConfiguration"
     fi
 else
     echo "WARNING: ProjectConfiguration.class.php not found"
-    echo "Please manually add 'arDisplayPlugin' to your enabled plugins."
+    echo "Please manually add 'ahgDisplayPlugin' to your enabled plugins."
 fi
 
 # Install database schema

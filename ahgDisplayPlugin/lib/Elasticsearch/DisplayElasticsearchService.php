@@ -1,7 +1,7 @@
 <?php
 /**
 require_once __DIR__ . "/QubitTermCompat.php";
- * Elasticsearch 7 Search Service for arDisplayPlugin
+ * Elasticsearch 7 Search Service for ahgDisplayPlugin
  * 
  * Handles indexing and searching with display-specific fields
  */
