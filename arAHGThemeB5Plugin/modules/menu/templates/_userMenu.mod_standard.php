@@ -54,6 +54,25 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
         <?php echo $menuLabels['login'] ?? __('Log in'); ?>
       </button>
     </form>
+
+    <div class="text-center mt-2">
+      <a href="<?php echo url_for(['module' => 'user', 'action' => 'passwordReset']); ?>" class="small text-muted">
+        <i class="fas fa-key me-1"></i><?php echo __('Forgot password?'); ?>
+      </a>
+    </div>
+
+    <?php if ($hasResearch): ?>
+    <hr class="my-3">
+    <div class="text-center">
+      <small class="text-muted d-block mb-2"><i class="fas fa-user-graduate me-1"></i><?php echo __('New Researcher?'); ?></small>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="btn btn-sm btn-success w-100">
+        <i class="fas fa-user-plus me-1"></i><?php echo __('Register as Researcher'); ?>
+      </a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>" class="small text-muted d-block mt-2">
+        <i class="fas fa-book-reader me-1"></i><?php echo __('View Research Services'); ?>
+      </a>
+    </div>
+    <?php endif; ?>
   </div>
 </div>
 
