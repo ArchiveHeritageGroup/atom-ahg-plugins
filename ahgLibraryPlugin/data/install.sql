@@ -1,3 +1,15 @@
+-- Ensure level_of_description_sector exists (created by theme, but add here for standalone installs)
+CREATE TABLE IF NOT EXISTS level_of_description_sector (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    term_id INT NOT NULL,
+    sector VARCHAR(50) NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_term_sector (term_id, sector),
+    INDEX idx_sector (sector),
+    INDEX idx_term_id (term_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ahgLibraryPlugin Installation Schema
 -- Version: 1.0.0
 -- Library & Bibliographic Cataloging with MARC-inspired fields
