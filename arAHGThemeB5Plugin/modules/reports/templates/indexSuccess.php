@@ -40,7 +40,7 @@ $hasOais = isPluginActive('arOaisPlugin');
     <h4><?php echo __('Quick Links'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'export', 'action' => 'archival']); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
-<?php // TODO: Create dashboard module
+<?php // TODO: Create dashboard module ?>
     </ul>
 
     <?php if ($hasVendor): ?>

@@ -1,0 +1,84 @@
+# =============================================================================
+# ahgGrapPlugin Routing Configuration
+# GRAP 103 Heritage Asset Financial Accounting
+# =============================================================================
+
+# Dashboard
+grap_dashboard:
+  url: /grap/dashboard
+  param: { module: grap, action: dashboard }
+
+# Export Reports
+grap_export:
+  url: /grap/export
+  param: { module: grap, action: export }
+
+# Installation
+grap_install:
+  url: /grap/install
+  param: { module: grap, action: install }
+
+# View GRAP data for an information object
+grap_index:
+  url: /:slug/grap
+  param: { module: grap, action: index }
+
+# Edit GRAP data for an information object
+grap_edit:
+  url: /:slug/grap/edit
+  param: { module: grap, action: edit }
+
+# =============================================================================
+# GRAP Reports
+# =============================================================================
+
+# Reports Dashboard
+grap_reports:
+  url: /grap/reports
+  param: { module: grapReport, action: index }
+
+# Asset Register Report
+grap_asset_register:
+  url: /grap/reports/asset-register
+  param: { module: grapReport, action: assetRegister }
+
+# GRAP 103 Disclosure Note
+grap_disclosure:
+  url: /grap/reports/disclosure
+  param: { module: grapReport, action: disclosure }
+
+# Valuation Schedule Report
+grap_valuation_schedule:
+  url: /grap/reports/valuation-schedule
+  param: { module: grapReport, action: valuationSchedule }
+
+# Insurance Expiry Report
+grap_insurance_expiry:
+  url: /grap/reports/insurance-expiry
+  param: { module: grapReport, action: insuranceExpiry }
+
+# Compliance Check Report
+grap_compliance:
+  url: /grap/reports/compliance
+  param: { module: grapReport, action: compliance }
+
+# =============================================================================
+# GRAP API Routes
+# =============================================================================
+
+# Asset API - List/Create
+grap_api_assets:
+  url: /api/grap/assets
+  param: { module: api, action: assetApi }
+
+# Asset API - Get/Update specific asset
+grap_api_asset:
+  url: /api/grap/assets/:object_id
+  param: { module: api, action: assetApi }
+  requirements:
+    object_id: \d+
+
+# Statistics API
+grap_api_statistics:
+  url: /api/grap/statistics
+  param: { module: api, action: statisticsApi }
