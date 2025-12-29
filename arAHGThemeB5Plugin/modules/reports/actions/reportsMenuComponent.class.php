@@ -51,8 +51,11 @@ class reportsMenuComponent extends sfComponent
                 'icon' => 'fa-download',
                 'items' => [
                     ['label' => 'Full Archival Export', 'url' => 'export/archival', 'icon' => 'fa-file-export'],
-                    ['label' => 'CSV Export (ISAD-G)', 'url' => 'export/csv', 'icon' => 'fa-file-csv'],
-                    ['label' => 'EAD Export', 'url' => 'export/ead', 'icon' => 'fa-file-code'],
+                    // Sector exports - implemented in each sector plugin
+                    // ['label' => 'Archive Export (EAD/CSV)', 'url' => 'export/archival', 'icon' => 'fa-archive'],
+                    // ['label' => 'Library Export (MARC)', 'url' => 'ahgLibraryPlugin/export', 'icon' => 'fa-book'],
+                    // ['label' => 'Museum Export (CCO)', 'url' => 'sfMuseumPlugin/export', 'icon' => 'fa-university'],
+                    // ['label' => 'DAM Export (IPTC)', 'url' => 'ahgDAMPlugin/export', 'icon' => 'fa-images'],
                     ['label' => 'CIDOC-CRM Export', 'url' => 'cidoc/export', 'icon' => 'fa-project-diagram'],
                     ['label' => 'Authority Export (EAC)', 'url' => 'export/authorities', 'icon' => 'fa-users'],
                     ['label' => 'GRAP 103 Report', 'url' => 'export/grap', 'icon' => 'fa-file-invoice-dollar']
