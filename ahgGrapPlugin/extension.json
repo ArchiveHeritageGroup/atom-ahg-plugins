@@ -23,5 +23,5 @@
         "grap_transaction_log",
         "grap_spectrum_procedure_link"
     ],
-    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
 }

@@ -1,0 +1,48 @@
+<?php
+/**
+ * Example: Display book cover in information object view.
+ *
+ * Usage in template:
+ * <?php include_partial('informationobject/bookCoverExample', ['isbn' => '978-0-13-468599-1']) ?>
+ */
+
+use AtomFramework\Services\BookCoverService;
+
+// Get ISBN from resource properties or parameter
+$isbn = $isbn ?? $resource->getPropertyByName('isbn13')?->getValue() 
+             ?? $resource->getPropertyByName('isbn10')?->getValue();
+
+if (!$isbn): ?>
+    <!-- No ISBN available -->
+<?php else: 
+    $covers = BookCoverService::getAllSizes($isbn);
+?>
+
+<div class="book-cover-container text-center mb-3">
+    <!-- Primary: Open Library (direct URL, no API call) -->
+    <a href="<?php echo $covers['large']; ?>" 
+       target="_blank" 
+       title="<?php echo __('View larger cover'); ?>">
+        <img src="<?php echo $covers['medium']; ?>" 
+             alt="<?php echo __('Book cover'); ?>"
+             class="img-fluid rounded shadow-sm"
+             loading="lazy"
+             style="max-height: 300px;"
+             onerror="this.onerror=null; this.src='/plugins/ahgThemeB5Plugin/images/no-cover.png';">
+    </a>
+    
+    <div class="mt-2">
+        <small class="text-muted">
+            <?php echo __('ISBN: %1%', ['%1%' => $isbn]); ?>
+        </small>
+    </div>
+    
+    <!-- Optional: Link to view all sizes -->
+    <div class="btn-group btn-group-sm mt-2">
+        <a href="<?php echo $covers['small']; ?>" class="btn btn-outline-secondary" target="_blank">S</a>
+        <a href="<?php echo $covers['medium']; ?>" class="btn btn-outline-secondary" target="_blank">M</a>
+        <a href="<?php echo $covers['large']; ?>" class="btn btn-outline-secondary" target="_blank">L</a>
+    </div>
+</div>
+
+<?php endif; ?>

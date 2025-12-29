@@ -1,0 +1,41 @@
+# AHG Theme B5 - Override default assets for Bootstrap 5 compatibility
+default:
+  stylesheets:
+    /plugins/ahgThemeB5Plugin/css/ahg-theme.css:
+    /plugins/ahgThemeB5Plugin/css/ahg-generated.css:
+  javascripts:
+    /vendor/jquery:
+    /plugins/sfDrupalPlugin/vendor/drupal/misc/drupal:
+    /vendor/yui/yahoo-dom-event/yahoo-dom-event:
+    /vendor/yui/element/element-min:
+    /vendor/yui/button/button-min:
+    /vendor/modernizr:
+    /vendor/jquery-ui/jquery-ui.min.js:
+    /vendor/jquery.expander.js:
+    /vendor/jquery.masonry.js:
+    /vendor/jquery.imagesloaded.js:
+    /vendor/bootstrap/js/bootstrap:
+    /vendor/URI.js:
+    /vendor/meetselva/attrchange:
+    qubit:
+    treeView:
+    /plugins/arDominionB5Plugin/js/clipboard:
+    dominion:
+    /plugins/ahgThemeB5Plugin/js/base.js: { position: last }
+
+# Display Mode Switching Assets
+informationobjectBrowse:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+
+actorBrowse:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+
+repositoryBrowse:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+
+search:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]

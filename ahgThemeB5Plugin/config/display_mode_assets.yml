@@ -1,0 +1,9 @@
+# Display Mode Assets Configuration
+# Include in view.yml or load dynamically
+
+display_mode:
+  stylesheets:
+    - /plugins/ahgThemeB5Plugin/css/display-modes.css
+
+  javascripts:
+    - /plugins/ahgThemeB5Plugin/js/display-mode.js

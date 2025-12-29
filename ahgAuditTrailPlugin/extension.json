@@ -19,5 +19,5 @@
         "ahg_audit_settings",
         "ahg_audit_retention_policy"
     ],
-    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
 }

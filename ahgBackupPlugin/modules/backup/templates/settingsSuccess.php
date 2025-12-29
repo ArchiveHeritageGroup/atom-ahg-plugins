@@ -89,7 +89,7 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
                     $customPlugins = $settingsMap['custom_plugins'] ?? '[]';
                     $pluginList = json_decode($customPlugins, true) ?: [];
                     ?>
-                    <textarea class="form-control font-monospace" id="custom_plugins" name="custom_plugins" rows="6" placeholder="arAHGThemeB5Plugin&#10;ahgBackupPlugin&#10;ahgResearchPlugin"><?php echo esc_entities(implode("\n", $pluginList)) ?></textarea>
+                    <textarea class="form-control font-monospace" id="custom_plugins" name="custom_plugins" rows="6" placeholder="ahgThemeB5Plugin&#10;ahgBackupPlugin&#10;ahgResearchPlugin"><?php echo esc_entities(implode("\n", $pluginList)) ?></textarea>
                     <div class="form-text"><?php echo __('One plugin name per line. Only these plugins will be included in plugin backups.') ?></div>
                 </div>
             </div>
