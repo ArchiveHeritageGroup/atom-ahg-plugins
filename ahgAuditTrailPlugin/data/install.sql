@@ -1,5 +1,5 @@
 -- ahgAuditTrailPlugin Installation Schema
--- Version: 1.0.0
+-- Version: 1.0.1
 
 -- Main audit log table
 CREATE TABLE IF NOT EXISTS ahg_audit_log (
@@ -11,14 +11,20 @@ CREATE TABLE IF NOT EXISTS ahg_audit_log (
     action VARCHAR(50) NOT NULL COMMENT 'create, update, delete, view, login, logout, download, export',
     entity_type VARCHAR(100) NULL,
     entity_id INT NULL,
+    entity_slug VARCHAR(255) NULL,
     entity_title VARCHAR(255) NULL,
+    module VARCHAR(100) NULL,
+    action_name VARCHAR(100) NULL,
+    controller VARCHAR(100) NULL,
+    request_method VARCHAR(10) NULL,
+    request_uri VARCHAR(500) NULL,
     old_values JSON NULL,
     new_values JSON NULL,
+    changed_fields JSON NULL,
+    status VARCHAR(50) NULL,
     ip_address VARCHAR(45) NULL,
     user_agent VARCHAR(500) NULL,
     session_id VARCHAR(128) NULL,
-    module VARCHAR(100) NULL,
-    controller VARCHAR(100) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_uuid (uuid),
     INDEX idx_user (user_id),
@@ -48,56 +54,57 @@ CREATE TABLE IF NOT EXISTS ahg_audit_authentication (
 CREATE TABLE IF NOT EXISTS ahg_audit_access (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    username VARCHAR(255) NULL,
-    object_id INT NOT NULL,
-    object_title VARCHAR(255) NULL,
-    security_level VARCHAR(50) NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id INT NOT NULL,
     access_type ENUM('view', 'download', 'print', 'export') NOT NULL,
-    access_granted TINYINT(1) DEFAULT 1,
+    security_level INT NULL,
+    granted BOOLEAN DEFAULT TRUE,
     denial_reason VARCHAR(255) NULL,
     ip_address VARCHAR(45) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user (user_id),
-    INDEX idx_object (object_id),
-    INDEX idx_security (security_level),
+    INDEX idx_entity (entity_type, entity_id),
     INDEX idx_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Settings table
+-- Audit settings
 CREATE TABLE IF NOT EXISTS ahg_audit_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     setting_key VARCHAR(100) NOT NULL UNIQUE,
-    setting_value TEXT,
-    setting_type ENUM('string', 'integer', 'boolean', 'json') DEFAULT 'string',
-    description VARCHAR(255) NULL,
+    setting_value TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert default settings
+INSERT INTO ahg_audit_settings (setting_key, setting_value) VALUES
+('audit_enabled', '1'),
+('log_views', '0'),
+('log_searches', '0'),
+('log_downloads', '1'),
+('log_exports', '1'),
+('log_auth', '1'),
+('retention_days', '365')
+ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 -- Retention policy table
 CREATE TABLE IF NOT EXISTS ahg_audit_retention_policy (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    audit_type VARCHAR(50) NOT NULL UNIQUE COMMENT 'log, authentication, access',
-    retention_days INT DEFAULT 365,
-    auto_archive TINYINT(1) DEFAULT 0,
-    archive_path VARCHAR(500) NULL,
-    last_cleanup DATETIME NULL,
+    action_type VARCHAR(50) NOT NULL,
+    retention_days INT NOT NULL DEFAULT 365,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    UNIQUE KEY (action_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Default settings
-INSERT IGNORE INTO ahg_audit_settings (setting_key, setting_value, setting_type, description) VALUES
-('audit_enabled', '1', 'boolean', 'Enable audit trail logging'),
-('audit_views', '0', 'boolean', 'Log view actions (can impact performance)'),
-('audit_authentication', '1', 'boolean', 'Log authentication events'),
-('audit_downloads', '1', 'boolean', 'Log file downloads'),
-('audit_exports', '1', 'boolean', 'Log export actions'),
-('audit_searches', '0', 'boolean', 'Log search queries'),
-('retention_days', '365', 'integer', 'Days to retain audit logs');
-
--- Default retention policies
-INSERT IGNORE INTO ahg_audit_retention_policy (audit_type, retention_days, auto_archive) VALUES
-('log', 365, 0),
-('authentication', 730, 0),
-('access', 1825, 0);
+-- Insert default retention policies
+INSERT INTO ahg_audit_retention_policy (action_type, retention_days) VALUES
+('view', 90),
+('search', 30),
+('create', 365),
+('update', 365),
+('delete', 730),
+('login', 180),
+('download', 365),
+('export', 365)
+ON DUPLICATE KEY UPDATE action_type = action_type;
