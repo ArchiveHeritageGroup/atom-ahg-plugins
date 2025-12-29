@@ -12,7 +12,7 @@
  * @package ahgGrapPlugin
  */
 
-class arGrapComplianceService
+class ahgGrapComplianceService
 {
     // Compliance Categories
     const CAT_RECOGNITION = 'recognition';
@@ -298,7 +298,7 @@ class arGrapComplianceService
 
     public function __construct()
     {
-        $this->assetService = new arGrapHeritageAssetService();
+        $this->assetService = new ahgGrapHeritageAssetService();
     }
 
     /**

@@ -8,7 +8,7 @@
  * @package ahgGrapPlugin
  */
 
-class arGrapInstallService
+class ahgGrapInstallService
 {
     /**
      * Install database schema
@@ -309,7 +309,7 @@ class arGrapInstallService
     public static function migrateExistingData()
     {
         $conn = Propel::getConnection();
-        $assetService = new arGrapHeritageAssetService();
+        $assetService = new ahgGrapHeritageAssetService();
 
         // Look for objects with existing valuation properties
         $sql = "SELECT DISTINCT p.object_id 

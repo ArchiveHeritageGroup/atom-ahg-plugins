@@ -19,7 +19,7 @@
  * @see GRAP 103 - Heritage Assets (ASB South Africa)
  */
 
-class arGrapHeritageAssetService
+class ahgGrapHeritageAssetService
 {
     // Recognition Status
     const STATUS_UNRECOGNISED = 'unrecognised';

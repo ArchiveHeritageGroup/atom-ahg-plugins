@@ -11,15 +11,15 @@
  * @package ahgGrapPlugin
  */
 
-class arGrapExportService
+class ahgGrapExportService
 {
     protected $assetService;
     protected $complianceService;
 
     public function __construct()
     {
-        $this->assetService = new arGrapHeritageAssetService();
-        $this->complianceService = new arGrapComplianceService();
+        $this->assetService = new ahgGrapHeritageAssetService();
+        $this->complianceService = new ahgGrapComplianceService();
     }
 
     /**
