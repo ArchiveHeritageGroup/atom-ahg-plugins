@@ -3,7 +3,6 @@
 -- Tables are created by atom-framework/database/install.sql
 
 -- Register plugin
-INSERT IGNORE INTO atom_plugin (name, is_enabled, version, category) VALUES
 ('ahgLibraryPlugin', 1, '1.0.0', 'sector');
 
 -- Create Library-specific Level of Description terms
