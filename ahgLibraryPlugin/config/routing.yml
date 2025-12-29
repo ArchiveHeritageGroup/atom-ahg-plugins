@@ -27,3 +27,11 @@ library_edit:
     action: edit
   requirements:
     slug: .+
+
+library_cover_proxy:
+  url: /library/cover/:isbn
+  param:
+    module: ahgLibraryPlugin
+    action: coverProxy
+  requirements:
+    isbn: '[0-9X]+'
