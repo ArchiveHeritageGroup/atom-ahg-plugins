@@ -1,7 +1,7 @@
 <?php
 /**
  * Request Access Button - Include in record views
- * Usage: include_partial('arAccessRequest/requestAccessButton', ['resource' => $resource, 'type' => 'information_object'])
+ * Usage: include_partial('ahgAccessRequest/requestAccessButton', ['resource' => $resource, 'type' => 'information_object'])
  */
 if (!isset($type)) $type = 'information_object';
 if (!isset($resource) || !$resource->id) return;

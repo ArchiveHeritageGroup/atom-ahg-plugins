@@ -35,7 +35,7 @@ $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
     <?php if ($hasSecurityClearance): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Security Clearances'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-2"></i><?php echo __('Manage Clearances'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-2"></i><?php echo __('Manage Clearances'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
@@ -50,8 +50,8 @@ $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
     <?php if ($hasAccessRequest): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Data Protection'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAccessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-2"></i><?php echo __('Access Requests'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arAccessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-2"></i><?php echo __('Manage Approvers'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-2"></i><?php echo __('Access Requests'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-2"></i><?php echo __('Manage Approvers'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasAuditTrail): ?>

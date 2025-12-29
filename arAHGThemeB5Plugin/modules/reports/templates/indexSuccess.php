@@ -148,7 +148,7 @@
                     <li class="list-group-item">
                         <a href="/admin/security/compliance"><i class="fas fa-lock me-2 text-muted"></i><?php echo __('Security Dashboard'); ?></a>
                     </li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arSecurityClearance', 'action' => 'report']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Clearance Report'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'report']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Clearance Report'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arSecurityAudit', 'action' => 'index']); ?>"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('Audit Log'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arSecurityAudit', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Audit Log'); ?></a></li>
                 </ul>

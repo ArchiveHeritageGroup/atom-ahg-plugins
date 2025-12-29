@@ -7,7 +7,7 @@
 <?php slot('title'); ?>
 
   <?php echo get_component('informationobject', 'descriptionHeader', ['resource' => $resource, 'title' => (string) $isad]); ?>
-  <?php include_partial('arSecurityClearance/securityBadge', ['resource' => $resource]); ?>
+  <?php include_partial('ahgSecurityClearance/securityBadge', ['resource' => $resource]); ?>
   <?php if (isset($errorSchema)) { ?>
     <div class="alert alert-danger" role="alert">
       <ul class="<?php echo render_b5_show_list_css_classes(); ?>">

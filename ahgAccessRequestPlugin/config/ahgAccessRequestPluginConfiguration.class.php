@@ -14,80 +14,80 @@ class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
 		// Admin menu route
         $routing->prependRoute('accessRequest_index', new sfRoute(
             '/accessRequest',
-            ['module' => 'arAccessRequest', 'action' => 'pending']
+            ['module' => 'ahgAccessRequest', 'action' => 'pending']
         ));
         // User routes - clearance requests
         $routing->prependRoute('access_request_new', new sfRoute(
             '/security/request-access',
-            ['module' => 'arAccessRequest', 'action' => 'new']
+            ['module' => 'ahgAccessRequest', 'action' => 'new']
         ));
 
         $routing->prependRoute('access_request_create', new sfRoute(
             '/security/request-access/create',
-            ['module' => 'arAccessRequest', 'action' => 'create']
+            ['module' => 'ahgAccessRequest', 'action' => 'create']
         ));
 
         // Object access request
         $routing->prependRoute('access_request_object', new sfRoute(
             '/security/request-object',
-            ['module' => 'arAccessRequest', 'action' => 'requestObject']
+            ['module' => 'ahgAccessRequest', 'action' => 'requestObject']
         ));
 
         $routing->prependRoute('access_request_object_create', new sfRoute(
             '/security/request-object/create',
-            ['module' => 'arAccessRequest', 'action' => 'createObjectRequest']
+            ['module' => 'ahgAccessRequest', 'action' => 'createObjectRequest']
         ));
 
         // My requests
         $routing->prependRoute('access_request_my', new sfRoute(
             '/security/my-requests',
-            ['module' => 'arAccessRequest', 'action' => 'myRequests']
+            ['module' => 'ahgAccessRequest', 'action' => 'myRequests']
         ));
 
         $routing->prependRoute('access_request_cancel', new sfRoute(
             '/security/request/:id/cancel',
-            ['module' => 'arAccessRequest', 'action' => 'cancel'],
+            ['module' => 'ahgAccessRequest', 'action' => 'cancel'],
             ['id' => '\d+']
         ));
 
         // Approver routes
         $routing->prependRoute('access_request_pending', new sfRoute(
             '/security/access-requests',
-            ['module' => 'arAccessRequest', 'action' => 'pending']
+            ['module' => 'ahgAccessRequest', 'action' => 'pending']
         ));
 
         $routing->prependRoute('access_request_view', new sfRoute(
             '/security/request/:id',
-            ['module' => 'arAccessRequest', 'action' => 'view'],
+            ['module' => 'ahgAccessRequest', 'action' => 'view'],
             ['id' => '\d+']
         ));
 
         $routing->prependRoute('access_request_approve', new sfRoute(
             '/security/request/:id/approve',
-            ['module' => 'arAccessRequest', 'action' => 'approve'],
+            ['module' => 'ahgAccessRequest', 'action' => 'approve'],
             ['id' => '\d+']
         ));
 
         $routing->prependRoute('access_request_deny', new sfRoute(
             '/security/request/:id/deny',
-            ['module' => 'arAccessRequest', 'action' => 'deny'],
+            ['module' => 'ahgAccessRequest', 'action' => 'deny'],
             ['id' => '\d+']
         ));
 
         // Admin routes
         $routing->prependRoute('access_request_approvers', new sfRoute(
             '/security/approvers',
-            ['module' => 'arAccessRequest', 'action' => 'approvers']
+            ['module' => 'ahgAccessRequest', 'action' => 'approvers']
         ));
 
         $routing->prependRoute('access_request_add_approver', new sfRoute(
             '/security/approvers/add',
-            ['module' => 'arAccessRequest', 'action' => 'addApprover']
+            ['module' => 'ahgAccessRequest', 'action' => 'addApprover']
         ));
 
         $routing->prependRoute('access_request_remove_approver', new sfRoute(
             '/security/approvers/:id/remove',
-            ['module' => 'arAccessRequest', 'action' => 'removeApprover'],
+            ['module' => 'ahgAccessRequest', 'action' => 'removeApprover'],
             ['id' => '\d+']
         ));
     }
