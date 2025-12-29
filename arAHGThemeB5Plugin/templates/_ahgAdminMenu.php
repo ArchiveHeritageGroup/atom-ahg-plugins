@@ -1,18 +1,32 @@
 <?php
 /**
- * AHG Admin Menu - Conditional display based on plugin existence
+ * AHG Admin Menu - Conditional display based on plugin registration
  */
 $isAdmin = $sf_user->isAdministrator();
-$pluginsDir = sfConfig::get('sf_plugins_dir');
 
-// Check which plugins exist
-$hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
-$hasSecurityClearance = is_dir($pluginsDir . '/ahgSecurityClearancePlugin');
-$hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
-$hasResearch = is_dir($pluginsDir . '/ahgResearchPlugin');
-$hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
-$hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
+// Helper function to check if plugin is enabled (uses Propel - safe in web context)
+function ahgIsPluginEnabled($name) {
+    static $enabledPlugins = null;
+    if ($enabledPlugins === null) {
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
+            $stmt->execute();
+            $enabledPlugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+        } catch (Exception $e) {
+            $enabledPlugins = [];
+        }
+    }
+    return isset($enabledPlugins[$name]);
+}
 
+// Check which plugins are enabled
+$hasBackup = ahgIsPluginEnabled('ahgBackupPlugin');
+$hasAuditTrail = ahgIsPluginEnabled('ahgAuditTrailPlugin');
+$hasSecurityClearance = ahgIsPluginEnabled('ahgSecurityClearancePlugin');
+$hasAccessRequest = ahgIsPluginEnabled('ahgAccessRequestPlugin');
+$hasResearch = ahgIsPluginEnabled('ahgResearchPlugin');
+$hasRic = ahgIsPluginEnabled('arRicExplorerPlugin');
 ?>
 <?php if ($isAdmin): ?>
 <style>
@@ -28,7 +42,6 @@ $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
     <span class="visually-hidden"><?php echo __('AHG Plugins'); ?></span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
-
     <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-2"></i><?php echo __('AHG Settings'); ?></a></li>
 
@@ -49,24 +62,32 @@ $hasAhgTheme = is_dir($pluginsDir . '/arAHGThemeB5Plugin');
 
     <?php if ($hasAccessRequest): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Data Protection'); ?></h6></li>
+    <li><h6 class="dropdown-header"><?php echo __('Access Management'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-2"></i><?php echo __('Access Requests'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-2"></i><?php echo __('Manage Approvers'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasAuditTrail): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Audit'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrailPlugin', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
+    <li><h6 class="dropdown-header"><?php echo __('Audit & Compliance'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'dashboard']); ?>"><i class="fas fa-chart-line fa-fw me-2"></i><?php echo __('Audit Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'index']); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('Audit Logs'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-2"></i><?php echo __('Audit Settings'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasRic): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('RIC'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-2"></i><?php echo __('RIC Sync Dashboard'); ?></a></li>
-    <li><a class="dropdown-item" href="/ric/" target="_blank"><i class="fas fa-sitemap fa-fw me-2"></i><?php echo __('RIC Explorer'); ?></a></li>
+    <li><h6 class="dropdown-header"><?php echo __('RiC Explorer'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-2"></i><?php echo __('RiC Dashboard'); ?></a></li>
     <?php endif; ?>
 
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Maintenance'); ?></h6></li>
+    <?php if ($hasBackup): ?>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-database fa-fw me-2"></i><?php echo __('Backup'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt fa-fw me-2"></i><?php echo __('Restore'); ?></a></li>
+    <?php endif; ?>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'jobs', 'action' => 'browse']); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Job Scheduler'); ?></a></li>
   </ul>
 </li>
 <?php endif; ?>
