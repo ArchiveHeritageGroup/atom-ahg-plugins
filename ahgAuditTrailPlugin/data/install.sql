@@ -2,9 +2,6 @@
 -- Version: 1.0.1
 -- Tables are created by atom-framework/database/install.sql
 
--- Register plugin
-('ahgAuditTrailPlugin', 1, '1.0.1', 'compliance');
-
 -- Default audit settings
 INSERT IGNORE INTO ahg_audit_settings (setting_key, setting_value, description) VALUES
 ('log_views', '1', 'Log view events'),

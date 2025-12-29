@@ -2,8 +2,6 @@
 -- Version: 1.0.0
 -- Tables are created by atom-framework/database/install.sql
 
--- Register plugin
-('ahgLibraryPlugin', 1, '1.0.0', 'sector');
 
 -- Create Library-specific Level of Description terms
 -- Book
