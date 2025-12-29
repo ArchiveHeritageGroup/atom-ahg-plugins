@@ -1,22 +1,19 @@
 <?php
-
 class exportActions extends sfActions
 {
     public function preExecute()
     {
         parent::preExecute();
-        
         if (!$this->context->user->isAuthenticated()) {
             $this->redirect('user/login');
         }
     }
-    
+
     /**
      * Export dashboard/index
      */
     public function executeIndex(sfWebRequest $request)
     {
-        // Available export formats
         $this->exportFormats = [
             'ead' => ['name' => 'EAD 2002', 'description' => 'Encoded Archival Description'],
             'dc' => ['name' => 'Dublin Core', 'description' => 'Simple Dublin Core XML'],
@@ -25,7 +22,25 @@ class exportActions extends sfActions
             'json' => ['name' => 'JSON', 'description' => 'JavaScript Object Notation'],
         ];
     }
-    
+
+    /**
+     * CSV Export
+     */
+    public function executeCsv(sfWebRequest $request)
+    {
+        $this->format = 'csv';
+        $this->formatName = 'CSV Export (ISAD-G)';
+    }
+
+    /**
+     * EAD Export
+     */
+    public function executeEad(sfWebRequest $request)
+    {
+        $this->format = 'ead';
+        $this->formatName = 'EAD 2002 Export';
+    }
+
     /**
      * Archival descriptions export
      */
@@ -33,7 +48,7 @@ class exportActions extends sfActions
     {
         $this->format = $request->getParameter('format', 'ead');
     }
-    
+
     /**
      * Authority records export
      */
@@ -41,7 +56,7 @@ class exportActions extends sfActions
     {
         $this->format = $request->getParameter('format', 'eac');
     }
-    
+
     /**
      * Repository export
      */
