@@ -11,7 +11,16 @@ class InformationObjectBrowseAction extends sfAction
     {
         // Check if ahgDisplayPlugin is enabled
         $plugins = sfConfig::get('app_plugins', []);
-        if (!in_array('ahgDisplayPlugin', $plugins)) {
+        
+        // Ensure plugins is an array (may be serialized string)
+        if (is_string($plugins)) {
+            $plugins = @unserialize($plugins);
+            if (!is_array($plugins)) {
+                $plugins = [];
+            }
+        }
+        
+        if (!is_array($plugins) || !in_array('ahgDisplayPlugin', $plugins)) {
             // Use standard AtoM browse - forward to parent action
             $this->forward('informationobject', 'list');
             return sfView::NONE;
@@ -19,10 +28,10 @@ class InformationObjectBrowseAction extends sfAction
 
         // Build redirect URL with all query parameters
         $params = $request->getGetParameters();
-        
+
         // Map common parameters
         $glamParams = [];
-        
+
         // Pass through relevant filters
         if (!empty($params['repos'])) {
             $glamParams['repo'] = $params['repos'];
@@ -50,7 +59,6 @@ class InformationObjectBrowseAction extends sfAction
         }
 
         $this->redirect($url);
-
         return sfView::NONE;
     }
 }
