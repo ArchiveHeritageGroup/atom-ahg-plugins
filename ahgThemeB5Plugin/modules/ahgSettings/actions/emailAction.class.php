@@ -27,7 +27,7 @@ class AhgSettingsEmailAction extends sfAction
             }
 
             $this->getUser()->setFlash('success', 'Email settings saved successfully');
-            $this->redirect('admin/ahg-settings/email');
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'email']);
         }
 
         // Load settings grouped
