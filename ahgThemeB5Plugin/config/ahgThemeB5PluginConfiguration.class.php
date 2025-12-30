@@ -186,6 +186,23 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
         $routing->prependRoute('ahg_settings_section', new sfRoute('/settings/ahgSettings/section', [
             'module' => 'ahgSettings',
             'action' => 'section'
+        // Admin AHG Settings routes (used by templates)
+        $routing->prependRoute('admin_ahg_settings', new sfRoute('/admin/ahg-settings', [
+            'module' => 'ahgSettings',
+            'action' => 'index'
+        ]));
+        $routing->prependRoute('admin_ahg_settings_section', new sfRoute('/admin/ahg-settings/section', [
+            'module' => 'ahgSettings',
+            'action' => 'section'
+        ]));
+        $routing->prependRoute('admin_ahg_settings_plugins', new sfRoute('/admin/ahg-settings/plugins', [
+            'module' => 'ahgSettings',
+            'action' => 'plugins'
+        ]));
+        $routing->prependRoute('admin_ahg_settings_email', new sfRoute('/admin/ahg-settings/email', [
+            'module' => 'ahgSettings',
+            'action' => 'email'
+        ]));
         ]));
     }
 }
