@@ -1,6 +1,5 @@
 -- ============================================================
 -- ahgDonorAgreementPlugin - Database Schema
--- DO NOT include INSERT INTO atom_plugin - handled by CLI
 -- ============================================================
 
 -- Agreement Types (reference table)
