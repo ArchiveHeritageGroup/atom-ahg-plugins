@@ -18,6 +18,7 @@
         "object_3d_hotspot",
         "object_3d_hotspot_i18n",
         "object_3d_texture",
+        "object_3d_settings",
         "viewer_3d_settings",
         "iiif_3d_manifest",
         "object_3d_audit_log"

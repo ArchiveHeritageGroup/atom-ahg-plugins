@@ -194,3 +194,25 @@ CREATE TABLE IF NOT EXISTS object_3d_audit_log (
     INDEX idx_action (action),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Per-object 3D viewer settings (linked to digital_object)
+CREATE TABLE IF NOT EXISTS object_3d_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    digital_object_id INT NOT NULL UNIQUE,
+    auto_rotate TINYINT(1) DEFAULT 1,
+    rotation_speed DECIMAL(3,2) DEFAULT 1.00,
+    camera_orbit VARCHAR(100) DEFAULT '0deg 75deg 105%',
+    field_of_view VARCHAR(20) DEFAULT '30deg',
+    exposure DECIMAL(3,2) DEFAULT 1.00,
+    shadow_intensity DECIMAL(3,2) DEFAULT 1.00,
+    background_color VARCHAR(20) DEFAULT '#f5f5f5',
+    ar_enabled TINYINT(1) DEFAULT 1,
+    ar_scale VARCHAR(20) DEFAULT 'auto',
+    ar_placement ENUM('floor', 'wall') DEFAULT 'floor',
+    poster_image VARCHAR(500),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_digital_object_id (digital_object_id),
+    FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
