@@ -1,0 +1,479 @@
+/**
+ * ar3DModelPlugin Styles
+ * 
+ * Styling for 3D model viewer, hotspots, and controls
+ * 
+ * @package ar3DModelPlugin
+ * @author Johan Pieterse - The Archive and Heritage Group
+ */
+
+/* =====================================================
+   MODEL VIEWER CONTAINER
+   ===================================================== */
+.model-viewer-container {
+    position: relative;
+    width: 100%;
+    background: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.model-viewer-container model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+    --progress-bar-color: #1a73e8;
+    --progress-bar-height: 4px;
+}
+
+/* =====================================================
+   HOTSPOTS
+   ===================================================== */
+.model-viewer-container .hotspot,
+.hotspot {
+    display: block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: var(--hotspot-color, #1a73e8);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 0;
+    font-size: 0;
+}
+
+.model-viewer-container .hotspot:hover,
+.hotspot:hover {
+    transform: scale(1.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.model-viewer-container .hotspot:focus,
+.hotspot:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* Hotspot type colors */
+.hotspot[data-type="annotation"] { --hotspot-color: #1a73e8; }
+.hotspot[data-type="info"] { --hotspot-color: #34a853; }
+.hotspot[data-type="damage"] { --hotspot-color: #ea4335; }
+.hotspot[data-type="detail"] { --hotspot-color: #fbbc04; }
+.hotspot[data-type="link"] { --hotspot-color: #4285f4; }
+
+/* Hotspot annotation popup */
+.hotspot-annotation {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    min-width: 160px;
+    max-width: 280px;
+    text-align: left;
+    z-index: 100;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.hotspot:hover .hotspot-annotation,
+.hotspot:focus .hotspot-annotation {
+    display: block;
+}
+
+.hotspot-annotation::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: white;
+}
+
+.hotspot-annotation strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #202124;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hotspot-annotation p {
+    margin: 0;
+    font-size: 13px;
+    color: #5f6368;
+    line-height: 1.4;
+}
+
+.hotspot-annotation .btn {
+    margin-top: 8px;
+}
+
+/* =====================================================
+   VIEWER CONTROLS
+   ===================================================== */
+.model-viewer-controls,
+.viewer-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.mv-btn,
+.viewer-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mv-btn:hover,
+.viewer-btn:hover {
+    background: rgba(0,0,0,0.8);
+    transform: scale(1.05);
+}
+
+.mv-btn:active,
+.viewer-btn:active {
+    transform: scale(0.95);
+}
+
+.mv-btn.active,
+.viewer-btn.active {
+    background: #1a73e8;
+}
+
+/* AR Button */
+.ar-button,
+.mv-ar-btn {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #1a73e8;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.1s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ar-button:hover,
+.mv-ar-btn:hover {
+    background: #1557b0;
+}
+
+.ar-button:active,
+.mv-ar-btn:active {
+    transform: scale(0.98);
+}
+
+.ar-button::before {
+    content: '\f1b2'; /* fa-cube */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+/* =====================================================
+   PROGRESS BAR
+   ===================================================== */
+.model-viewer-progress-bar,
+.progress-bar {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0,0,0,0.1);
+}
+
+.model-viewer-progress-bar .update-bar,
+.progress-bar .update-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #1a73e8, #34a853);
+    transition: width 0.1s ease;
+}
+
+/* =====================================================
+   LOADING SPINNER
+   ===================================================== */
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 5;
+}
+
+.loading-spinner i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* =====================================================
+   THREE.JS VIEWER
+   ===================================================== */
+.threejs-viewer {
+    width: 100%;
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.threejs-viewer canvas {
+    display: block;
+}
+
+.threejs-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* =====================================================
+   3D MODEL GALLERY
+   ===================================================== */
+.model-3d-gallery {
+    width: 100%;
+}
+
+.model-3d-gallery .nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.model-3d-gallery .nav-link {
+    color: #5f6368;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    padding: 8px 16px;
+    font-size: 14px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.model-3d-gallery .nav-link:hover {
+    color: #202124;
+    border-bottom-color: #dadce0;
+}
+
+.model-3d-gallery .nav-link.active {
+    color: #1a73e8;
+    border-bottom-color: #1a73e8;
+    background: transparent;
+}
+
+.model-3d-gallery .nav-link .badge {
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+.model-3d-gallery .tab-content {
+    padding-top: 16px;
+}
+
+/* =====================================================
+   3D MODEL SECTION
+   ===================================================== */
+.model-3d-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.model-3d-section h4 {
+    color: #202124;
+    font-weight: 600;
+}
+
+.model-3d-section .badge {
+    font-weight: 500;
+}
+
+/* =====================================================
+   UPLOAD ZONE
+   ===================================================== */
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 48px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+    position: relative;
+    background: #fafafa;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #1a73e8;
+    background-color: #f0f7ff;
+}
+
+.upload-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-zone.has-file {
+    border-color: #34a853;
+    background-color: #f0fff4;
+}
+
+.upload-zone.has-file .upload-content {
+    display: none;
+}
+
+.upload-zone.has-file .upload-preview {
+    display: block !important;
+}
+
+.upload-content i {
+    color: #9aa0a6;
+}
+
+.upload-content p {
+    color: #5f6368;
+}
+
+.upload-preview {
+    color: #202124;
+}
+
+.upload-preview i {
+    color: #34a853;
+}
+
+/* =====================================================
+   FULLSCREEN MODE
+   ===================================================== */
+.model-viewer-wrapper:fullscreen,
+.model-viewer-container:fullscreen {
+    background: #111;
+}
+
+.model-viewer-wrapper:fullscreen model-viewer,
+.model-viewer-container:fullscreen model-viewer {
+    height: 100vh;
+}
+
+/* =====================================================
+   RESPONSIVE ADJUSTMENTS
+   ===================================================== */
+@media (max-width: 768px) {
+    .mv-btn,
+    .viewer-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .ar-button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .hotspot {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .hotspot-annotation {
+        min-width: 140px;
+        max-width: 220px;
+        padding: 10px 12px;
+    }
+    
+    .model-3d-gallery .nav-link {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    
+    .upload-zone {
+        padding: 32px 16px;
+    }
+}
+
+/* =====================================================
+   DARK MODE SUPPORT
+   ===================================================== */
+@media (prefers-color-scheme: dark) {
+    .model-3d-section {
+        background: #292929;
+        border-color: #3c3c3c;
+    }
+    
+    .model-3d-section h4 {
+        color: #e8eaed;
+    }
+    
+    .hotspot-annotation {
+        background: #292929;
+        color: #e8eaed;
+    }
+    
+    .hotspot-annotation::after {
+        border-top-color: #292929;
+    }
+    
+    .hotspot-annotation strong {
+        color: #e8eaed;
+    }
+    
+    .hotspot-annotation p {
+        color: #9aa0a6;
+    }
+}
+
+/* =====================================================
+   PRINT STYLES
+   ===================================================== */
+@media print {
+    .model-viewer-container,
+    .model-3d-section {
+        display: none !important;
+    }
+}
