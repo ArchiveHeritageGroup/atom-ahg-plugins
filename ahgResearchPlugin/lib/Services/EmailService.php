@@ -8,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 class EmailService
 {
     private static array $settings = [];
-    private static bool $loaded = false;
+    public static bool $loaded = false;
 
     /**
      * Load settings from database
