@@ -3,9 +3,9 @@
  * Browse Action - Conditionally redirect to GLAM Browse
  *
  * If ahgDisplayPlugin is enabled, redirects to GLAM browse.
- * Otherwise, uses standard AtoM browse.
+ * Otherwise, uses standard AtoM browse (InformationObjectBrowseAction from core).
  */
-class InformationObjectBrowseAction extends sfAction
+class InformationObjectBrowseAction extends DefaultBrowseAction
 {
     public function execute($request)
     {
@@ -21,9 +21,8 @@ class InformationObjectBrowseAction extends sfAction
         }
         
         if (!is_array($plugins) || !in_array('ahgDisplayPlugin', $plugins)) {
-            // Use standard AtoM browse - forward to parent action
-            $this->forward('informationobject', 'list');
-            return sfView::NONE;
+            // Use standard AtoM browse - call parent
+            return parent::execute($request);
         }
 
         // Build redirect URL with all query parameters
