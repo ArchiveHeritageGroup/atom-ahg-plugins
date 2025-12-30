@@ -63,7 +63,7 @@
             var self = this;
             
             $.ajax({
-                url: '/index.php/sfMuseumPlugin/gettyAutocomplete',
+                url: '/index.php/ahgMuseumPlugin/gettyAutocomplete',
                 data: {
                     q: query,
                     vocabulary: vocabulary,

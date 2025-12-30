@@ -12,7 +12,7 @@
     },
     "dependencies": [],
     "optional": {
-        "extensions": ["ahgConditionPlugin", "ahgGrapPlugin", "sfMuseumPlugin"]
+        "extensions": ["ahgConditionPlugin", "ahgGrapPlugin", "ahgMuseumPlugin"]
     },
     "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
     "tables": [
