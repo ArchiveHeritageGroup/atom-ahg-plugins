@@ -1,0 +1,27 @@
+{
+    "name": "Extended Rights Management",
+    "machine_name": "ahgExtendedRightsPlugin",
+    "version": "1.0.0",
+    "description": "Extended rights management with RightsStatements.org integration, embargo management, Traditional Knowledge labels, and batch rights assignment",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgRightsPlugin"],
+    "optional": {
+        "extensions": []
+    },
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "tables": [
+        "extended_rights", "extended_rights_batch_log",
+        "extended_rights_i18n", "extended_rights_tk_label",
+        "embargo", "embargo_audit", "embargo_exception", "embargo_i18n"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "rights",
+    "load_order": 51
+}

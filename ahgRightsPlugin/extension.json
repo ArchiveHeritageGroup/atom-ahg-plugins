@@ -1,0 +1,37 @@
+{
+    "name": "Rights Management",
+    "machine_name": "ahgRightsPlugin",
+    "version": "1.0.0",
+    "description": "Core rights management including PREMIS rights, Creative Commons, rights holders, and orphan works tracking",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": ["ahgExtendedRightsPlugin"]
+    },
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "tables": [
+        "rights", "rights_i18n",
+        "rights_cc_license", "rights_cc_license_i18n",
+        "rights_derivative_log", "rights_derivative_rule",
+        "rights_embargo", "rights_embargo_i18n", "rights_embargo_log",
+        "rights_grant", "rights_grant_i18n",
+        "rights_holder",
+        "rights_object_tk_label", "rights_orphan_search_step",
+        "rights_orphan_work", "rights_orphan_work_i18n",
+        "rights_record", "rights_record_i18n",
+        "rights_statement", "rights_statement_i18n",
+        "rights_territory",
+        "rights_tk_label", "rights_tk_label_i18n",
+        "creative_commons_license", "creative_commons_license_i18n"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "rights",
+    "load_order": 50
+}
