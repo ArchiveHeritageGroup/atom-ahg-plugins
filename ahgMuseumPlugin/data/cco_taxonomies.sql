@@ -3,7 +3,7 @@
 -- Creates taxonomies, root terms, and child terms with proper parent_id
 -- ============================================================================
 
-USE atom292;
+-- USE archive;
 START TRANSACTION;
 
 -- ============================================================================
