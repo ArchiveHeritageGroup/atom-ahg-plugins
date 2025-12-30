@@ -41,3 +41,11 @@ research_workspace:
 research_collections:
   url: /research/collections
   param: { module: research, action: collections }
+
+research_registration_complete:
+  url: /research/registration-complete
+  param: { module: research, action: registrationComplete }
+
+researcher_admin:
+  url: /research/researchers
+  param: { module: research, action: researchers }
