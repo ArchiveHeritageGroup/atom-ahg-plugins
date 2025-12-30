@@ -1,0 +1,61 @@
+/* Condition Annotator Styles */
+
+.condition-annotator {
+    font-family: inherit;
+}
+
+/* Legend item selected state */
+.legend-item.selected {
+    background: #e3f2fd !important;
+    border-left-color: #2196F3 !important;
+    box-shadow: 0 0 0 2px #2196F3 !important;
+}
+
+/* Toolbar button fixes */
+.annotator-toolbar .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+}
+
+.annotator-toolbar .btn i {
+    font-size: 14px;
+}
+
+.annotator-toolbar .tool-btn.active {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Status bar */
+.annotator-status-bar {
+    font-family: monospace;
+}
+
+/* Canvas container scrollbar */
+.annotator-canvas-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.annotator-canvas-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+.annotator-canvas-container::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+.annotator-canvas-container::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Legend scrollbar */
+.legend-items::-webkit-scrollbar {
+    width: 6px;
+}
+.legend-items::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+.legend-items::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}

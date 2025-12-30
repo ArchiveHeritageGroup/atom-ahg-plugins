@@ -16,7 +16,7 @@ class AhgSettingsIndexAction extends sfAction
         $hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
         $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
         $hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
-        $hasCondition = is_dir($pluginsDir . '/arConditionPlugin');
+        $hasCondition = is_dir($pluginsDir . '/ahgConditionPlugin');
         $hasSpectrum = is_dir($pluginsDir . '/arSpectrumPlugin');
         $hasIiif = is_dir($pluginsDir . '/IiifViewerFramework');
         

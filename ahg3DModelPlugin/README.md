@@ -271,7 +271,7 @@ gltf-pipeline -i model.gltf -o model.glb
 
 ## Integration with Condition Reporting
 
-The 3D hotspots integrate with the arConditionPlugin for damage documentation:
+The 3D hotspots integrate with the ahgConditionPlugin for damage documentation:
 
 ```php
 // Add damage hotspot from condition report

@@ -1,0 +1,14 @@
+{
+    "name": "Condition Assessment",
+    "machine_name": "ahgConditionPlugin",
+    "version": "1.0.0",
+    "description": "Condition assessment and reporting for physical objects",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "extension",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    }
+}

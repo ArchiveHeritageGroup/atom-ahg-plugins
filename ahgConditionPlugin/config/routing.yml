@@ -1,0 +1,4 @@
+# Condition check route via slug
+condition_check_slug:
+  url: /:slug/condition
+  param: { module: arCondition, action: conditionCheck }
