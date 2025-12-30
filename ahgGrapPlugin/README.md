@@ -33,7 +33,7 @@ Comprehensive GRAP 103 (Heritage Assets) accounting module for AtoM (Access to M
 
 ### 2. Spectrum Procedure Linkage
 
-Direct integration with arSpectrumPlugin linking GRAP accounting events to Spectrum 5.0 procedures:
+Direct integration with ahgSpectrumPlugin linking GRAP accounting events to Spectrum 5.0 procedures:
 
 | Spectrum Procedure | GRAP Action |
 |-------------------|-------------|
@@ -114,7 +114,7 @@ The plugin supports all GRAP 103 heritage asset classes:
 - AtoM 2.6+ 
 - PHP 7.4+
 - MySQL 5.7+ with JSON support
-- arSpectrumPlugin (optional, for workflow integration)
+- ahgSpectrumPlugin (optional, for workflow integration)
 
 ### Installation Steps
 
@@ -254,9 +254,9 @@ The plugin uses the South African government financial year:
 - **Year End**: 31 March
 - **Example**: 2024/2025 FY ends 31 March 2025
 
-## Integration with arSpectrumPlugin
+## Integration with ahgSpectrumPlugin
 
-When arSpectrumPlugin is installed, GRAP automatically:
+When ahgSpectrumPlugin is installed, GRAP automatically:
 - Links to relevant Spectrum procedure statuses
 - Uses condition assessments for impairment indicators
 - Connects deaccession workflow to de-recognition
