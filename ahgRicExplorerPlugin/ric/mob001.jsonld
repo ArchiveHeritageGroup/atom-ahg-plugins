@@ -1,0 +1,222 @@
+{
+  "@context": {
+    "rico": "https://www.ica.org/standards/RiC/ontology#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768",
+      "@type": "rico:RecordSet",
+      "rico:identifier": "mob001",
+      "rico:title": "Mobrey Family Archive",
+      "rico:isOrWasHeldBy": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/711"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse AI",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/726",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Mobrey Family",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/726"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Dr. Sarah van der Merwe",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:history": "Prominent South African archivist and historian. Pioneer in digital preservation."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900002",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "James Nkosi",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900002"
+      },
+      "rico:history": "Anti-apartheid activist and community organizer. Documented resistance movements."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900003",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Maria Santos",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900003"
+      },
+      "rico:history": "Photographer and visual artist. Documented township life from 1985 onwards."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900011",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Johannesburg Historical Society",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900011"
+      },
+      "rico:history": "Oldest historical society in Gauteng. Extensive photographic collections."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Liberation Movement Documentation Centre",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:history": "University-affiliated research centre. Primary sources on apartheid resistance."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/770",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/772",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/726"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900110",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900002"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1965-01-01 - 1990-12-31",
+        "rico:beginningDate": "1965-01-01",
+        "rico:endDate": "1990-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900111",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900003"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1980-01-01 - 1995-12-31",
+        "rico:beginningDate": "1980-01-01",
+        "rico:endDate": "1995-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900112",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900011"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1995-01-01 - ?",
+        "rico:beginningDate": "1995-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900113",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "2000-01-01 - ?",
+        "rico:beginningDate": "2000-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900131",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "2005-01-01 - 2015-12-31",
+        "rico:beginningDate": "2005-01-01",
+        "rico:endDate": "2015-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900141",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/768"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1995-01-01 - ?",
+        "rico:beginningDate": "1995-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/711",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Mobrey archival institurion"
+      },
+      "rico:hasOrHadLocation": {
+        "@type": "rico:Place",
+        "rico:hasPlaceName": {
+          "@type": "rico:PlaceName",
+          "rico:textualValue": ""
+        }
+      }
+    }
+  ],
+  "_metadata": {
+    "extracted": "2025-12-13T10:42:11.696717Z",
+    "source": "AtoM instance: atom-psis",
+    "records_count": 1,
+    "agents_count": 7,
+    "activities_count": 8
+  }
+}

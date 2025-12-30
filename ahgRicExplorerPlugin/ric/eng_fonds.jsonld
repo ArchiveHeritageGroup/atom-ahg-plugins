@@ -1,0 +1,281 @@
+{
+  "@context": {
+    "rico": "https://www.ica.org/standards/RiC/ontology#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829",
+      "@type": "rico:RecordSet",
+      "rico:identifier": "eng_fonds",
+      "rico:title": "Engelbrecht Family Fonds",
+      "rico:isOrWasHeldBy": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/731"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/837",
+      "@type": "rico:Record",
+      "rico:identifier": "eng001",
+      "rico:title": "Engelbrecht Family Bible",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/845",
+      "@type": "rico:Record",
+      "rico:identifier": "eng002",
+      "rico:title": "Hendrik and Debora Engelbrecht",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/861",
+      "@type": "rico:Record",
+      "rico:identifier": "eng003",
+      "rico:title": "Debora - first grandchild",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/873",
+      "@type": "rico:Record",
+      "rico:identifier": "eng005",
+      "rico:title": "Bernardth Papenvoes - Rosa se man",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordpart/857",
+      "@type": "rico:RecordPart",
+      "rico:identifier": "eng004",
+      "rico:title": "Rosa Engelbrecht - first born daughter",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/845"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse AI",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/830",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Engelbrecht Family",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/830"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/839",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "NAROS",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/839"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Dr. Sarah van der Merwe",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:history": "Prominent South African archivist and historian. Pioneer in digital preservation."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900004",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Prof. Willem Botha",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900004"
+      },
+      "rico:history": "Academic historian specializing in colonial archives."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900008",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Heinrich Mueller",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900008"
+      },
+      "rico:history": "German-South African engineer. Extensive technical documentation."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Liberation Movement Documentation Centre",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:history": "University-affiliated research centre. Primary sources on apartheid resistance."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900014",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pretoria Technical Institute",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900014"
+      },
+      "rico:history": "Technical college with engineering and mining documentation."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/831",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/830"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900120",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900004"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1960-01-01 - 1980-12-31",
+        "rico:beginningDate": "1960-01-01",
+        "rico:endDate": "1980-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900121",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900008"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1955-01-01 - 1985-12-31",
+        "rico:beginningDate": "1955-01-01",
+        "rico:endDate": "1985-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900122",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900014"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1985-01-01 - 1998-12-31",
+        "rico:beginningDate": "1985-01-01",
+        "rico:endDate": "1998-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900132",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "2008-01-01 - ?",
+        "rico:beginningDate": "2008-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900142",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/829"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1998-01-01 - ?",
+        "rico:beginningDate": "1998-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/838",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/837"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/830"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/840",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/837"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/839"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/841",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/837"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/731",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse archival institution"
+      },
+      "rico:hasOrHadLocation": {
+        "@type": "rico:Place",
+        "rico:hasPlaceName": {
+          "@type": "rico:PlaceName",
+          "rico:textualValue": ""
+        }
+      }
+    }
+  ],
+  "_metadata": {
+    "extracted": "2025-12-13T10:42:11.830599Z",
+    "source": "AtoM instance: atom-psis",
+    "records_count": 6,
+    "agents_count": 8,
+    "activities_count": 9
+  }
+}

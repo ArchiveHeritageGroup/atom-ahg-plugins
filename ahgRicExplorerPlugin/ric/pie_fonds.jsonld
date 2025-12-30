@@ -1,0 +1,298 @@
+{
+  "@context": {
+    "rico": "https://www.ica.org/standards/RiC/ontology#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776",
+      "@type": "rico:RecordSet",
+      "rico:identifier": "pie_fonds",
+      "rico:title": "Pieterse Fonds",
+      "rico:extentAndMedium": "Archival material spanning 30 years. Various books and other parrifinalia",
+      "rico:isOrWasHeldBy": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/731"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/786",
+      "@type": "rico:Record",
+      "rico:identifier": "pie001",
+      "rico:title": "Hennie Pieterse Troue - Vader",
+      "rico:extentAndMedium": "Photograph collection",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/792",
+      "@type": "rico:Record",
+      "rico:identifier": "pie002",
+      "rico:title": "Hennie en Marie Pieterse Troue",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/805",
+      "@type": "rico:Record",
+      "rico:identifier": "pie003",
+      "rico:title": "Pieterse Kinders",
+      "rico:scopeAndContent": "2 fotos van Pieterse kinders",
+      "rico:extentAndMedium": "2 fotos",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/816",
+      "@type": "rico:Record",
+      "rico:identifier": "pie004",
+      "rico:title": "Marie van der Berg/Venter/van Zyl - Moeder",
+      "rico:extentAndMedium": "2 photos",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/820",
+      "@type": "rico:Record",
+      "rico:identifier": "pie005",
+      "rico:title": "Begrafnis - Nico, Hennie en Oom Boet",
+      "rico:extentAndMedium": "1 foto",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/825",
+      "@type": "rico:Record",
+      "rico:identifier": "pie006",
+      "rico:title": "Hennie Pieterse - Seun",
+      "rico:scopeAndContent": "Hennie en kinders",
+      "rico:extentAndMedium": "1 photo",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse AI",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/737",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse Family",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/737"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/747",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Johan Pieterse",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/747"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001",
+      "@type": "rico:Person",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Dr. Sarah van der Merwe",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:history": "Prominent South African archivist and historian. Pioneer in digital preservation."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900010",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "South African Heritage Foundation",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900010"
+      },
+      "rico:history": "Non-profit organization dedicated to preserving South African cultural heritage."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Liberation Movement Documentation Centre",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:history": "University-affiliated research centre. Primary sources on apartheid resistance."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/family/900020",
+      "@type": "rico:Family",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Van der Berg Family",
+        "rico:isOrWasAgentNameOf": "https://archives.theahg.co.za/ric/atom-psis/family/900020"
+      },
+      "rico:history": "Prominent Cape Dutch family. Farming and political legacy spanning 200 years."
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/781",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/715"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/782",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/737"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900100",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1970-01-01 - 2000-12-31",
+        "rico:beginningDate": "1970-01-01",
+        "rico:endDate": "2000-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/900101",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/family/900020"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1950-01-01 - 1990-12-31",
+        "rico:beginningDate": "1950-01-01",
+        "rico:endDate": "1990-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900102",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900010"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "2000-01-01 - ?",
+        "rico:beginningDate": "2000-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900130",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/person/900001"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "2000-01-01 - 2010-12-31",
+        "rico:beginningDate": "2000-01-01",
+        "rico:endDate": "2010-12-31"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/accumulation/900140",
+      "@type": "rico:Accumulation",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/776"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/900013"
+      },
+      "rico:isOrWasAssociatedWithDate": {
+        "@type": "rico:DateRange",
+        "rico:expressedDate": "1995-01-01 - ?",
+        "rico:beginningDate": "1995-01-01"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/788",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/786"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/747"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/808",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/805"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/747"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/production/821",
+      "@type": "rico:Production",
+      "rico:resultsOrResultedIn": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/record/820"
+      },
+      "rico:hasOrHadParticipant": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/747"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/corporatebody/731",
+      "@type": "rico:CorporateBody",
+      "rico:hasAgentName": {
+        "@type": "rico:AgentName",
+        "rico:textualValue": "Pieterse archival institution"
+      },
+      "rico:hasOrHadLocation": {
+        "@type": "rico:Place",
+        "rico:hasPlaceName": {
+          "@type": "rico:PlaceName",
+          "rico:textualValue": ""
+        }
+      }
+    }
+  ],
+  "_metadata": {
+    "extracted": "2025-12-13T10:36:17.285961Z",
+    "source": "AtoM instance: atom-psis",
+    "records_count": 7,
+    "agents_count": 7,
+    "activities_count": 10
+  }
+}

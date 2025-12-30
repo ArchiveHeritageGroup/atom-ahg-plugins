@@ -1,0 +1,103 @@
+{
+  "@context": {
+    "rico": "https://www.ica.org/standards/RiC/ontology#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/361829",
+      "@type": "rico:RecordSet",
+      "rico:identifier": "MN001",
+      "rico:title": "Nelson Mandela"
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520",
+      "@type": "rico:RecordSet",
+      "rico:identifier": "MNP_P001",
+      "rico:title": "Photographs Loose - Nelson Mandela Papers",
+      "rico:extentAndMedium": "Series of pdf file/s",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/361829"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360525",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86643",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86643",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360534",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86644",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86644",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360541",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86645",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86645",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360548",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86646",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86646",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360555",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86647",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86647",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360562",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86648",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86648",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    },
+    {
+      "@id": "https://archives.theahg.co.za/ric/atom-psis/record/360569",
+      "@type": "rico:Record",
+      "rico:identifier": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86649",
+      "rico:title": "Nelson_Mandela_Paper_BOX0395_FLR0382_20171113_86649",
+      "rico:extentAndMedium": "1 pdf file",
+      "rico:isOrWasPartOf": {
+        "@id": "https://archives.theahg.co.za/ric/atom-psis/recordset/360520"
+      }
+    }
+  ],
+  "_metadata": {
+    "extracted": "2025-12-13T10:04:43.073091Z",
+    "source": "AtoM instance: atom-psis",
+    "records_count": 9,
+    "agents_count": 0,
+    "activities_count": 0
+  }
+}
