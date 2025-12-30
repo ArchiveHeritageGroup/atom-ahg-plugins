@@ -24,7 +24,7 @@ class apiVocabularySearchAction extends sfAction
         }
 
         try {
-            $service = arCCOVocabularyService::getInstance();
+            $service = ahgCCOVocabularyService::getInstance();
             $results = $service->search($vocabulary, $query, $limit);
 
             echo json_encode([

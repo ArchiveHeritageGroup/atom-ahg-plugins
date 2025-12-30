@@ -9,7 +9,7 @@ class ahgIiifCollectionPluginConfiguration extends sfPluginConfiguration
     {
         // Enable the module
         $enabledModules = sfConfig::get('sf_enabled_modules');
-        $enabledModules[] = 'arIiifCollection';
+        $enabledModules[] = 'ahgIiifCollection';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         // Add routes
@@ -23,68 +23,68 @@ class ahgIiifCollectionPluginConfiguration extends sfPluginConfiguration
         // Autocomplete first (more specific)
         $routing->prependRoute('iiif_collection_autocomplete', new sfRoute(
             '/manifest-collections/autocomplete',
-            ['module' => 'arIiifCollection', 'action' => 'autocomplete']
+            ['module' => 'ahgIiifCollection', 'action' => 'autocomplete']
         ));
 
         // Index/list
         $routing->prependRoute('iiif_collection_index', new sfRoute(
             '/manifest-collections',
-            ['module' => 'arIiifCollection', 'action' => 'index']
+            ['module' => 'ahgIiifCollection', 'action' => 'index']
         ));
 
         // Create/new
         $routing->prependRoute('iiif_collection_new', new sfRoute(
             '/manifest-collection/new',
-            ['module' => 'arIiifCollection', 'action' => 'new']
+            ['module' => 'ahgIiifCollection', 'action' => 'new']
         ));
 
         $routing->prependRoute('iiif_collection_create', new sfRoute(
             '/manifest-collection/create',
-            ['module' => 'arIiifCollection', 'action' => 'create']
+            ['module' => 'ahgIiifCollection', 'action' => 'create']
         ));
 
         // Reorder
         $routing->prependRoute('iiif_collection_reorder', new sfRoute(
             '/manifest-collection/reorder',
-            ['module' => 'arIiifCollection', 'action' => 'reorder']
+            ['module' => 'ahgIiifCollection', 'action' => 'reorder']
         ));
 
         // View/edit/update/delete
         $routing->prependRoute('iiif_collection_view', new sfRoute(
             '/manifest-collection/:id/view',
-            ['module' => 'arIiifCollection', 'action' => 'view']
+            ['module' => 'ahgIiifCollection', 'action' => 'view']
         ));
 
         $routing->prependRoute('iiif_collection_edit', new sfRoute(
             '/manifest-collection/:id/edit',
-            ['module' => 'arIiifCollection', 'action' => 'edit']
+            ['module' => 'ahgIiifCollection', 'action' => 'edit']
         ));
 
         $routing->prependRoute('iiif_collection_update', new sfRoute(
             '/manifest-collection/:id/update',
-            ['module' => 'arIiifCollection', 'action' => 'update']
+            ['module' => 'ahgIiifCollection', 'action' => 'update']
         ));
 
         $routing->prependRoute('iiif_collection_delete', new sfRoute(
             '/manifest-collection/:id/delete',
-            ['module' => 'arIiifCollection', 'action' => 'delete']
+            ['module' => 'ahgIiifCollection', 'action' => 'delete']
         ));
 
         // Items management
         $routing->prependRoute('iiif_collection_add_items', new sfRoute(
             '/manifest-collection/:id/items/add',
-            ['module' => 'arIiifCollection', 'action' => 'addItems']
+            ['module' => 'ahgIiifCollection', 'action' => 'addItems']
         ));
 
         $routing->prependRoute('iiif_collection_remove_item', new sfRoute(
             '/manifest-collection/item/:item_id/remove',
-            ['module' => 'arIiifCollection', 'action' => 'removeItem']
+            ['module' => 'ahgIiifCollection', 'action' => 'removeItem']
         ));
 
         // IIIF JSON output (must be last - has wildcard slug)
         $routing->prependRoute('iiif_collection_manifest', new sfRoute(
             '/manifest-collection/:slug/manifest.json',
-            ['module' => 'arIiifCollection', 'action' => 'manifest']
+            ['module' => 'ahgIiifCollection', 'action' => 'manifest']
         ));
     }
 }

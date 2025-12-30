@@ -56,11 +56,11 @@ class ahgGalleryPluginEditAction extends sfAction
         }
 
         $this->templateId = $request->getParameter('template', 'generic');
-        $this->availableTemplates = arCCOTemplates::getTemplates();
+        $this->availableTemplates = ahgCCOTemplates::getTemplates();
         $this->ccoData = $this->galleryData;
         
         $this->loadFormOptions();
-        $this->fieldDefinitions = arCCOFieldDefinitions::getAllCategories();
+        $this->fieldDefinitions = ahgCCOFieldDefinitions::getAllCategories();
         $this->createFormWidgets();
         $this->completeness = $this->calculateCompleteness();
 

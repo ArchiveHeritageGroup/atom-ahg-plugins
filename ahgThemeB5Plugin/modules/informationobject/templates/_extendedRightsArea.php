@@ -41,7 +41,7 @@ if ($resource instanceof QubitInformationObject) {
 }
 ?>
 
-<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/arExtendedRightsPlugin')): ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgExtendedRightsPlugin')): ?>
 <!-- Extended Rights Display -->
 <?php include_component('extendedRights', 'rightsDisplay', ['objectId' => $resourceId]); ?>
 <!-- Provenance Display (authenticated users only) -->

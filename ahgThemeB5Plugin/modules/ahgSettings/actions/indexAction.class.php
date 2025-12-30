@@ -66,7 +66,7 @@ class AhgSettingsIndexAction extends sfAction
             'label' => 'Media Processing',
             'icon' => 'fa-cogs',
             'description' => 'Transcription, thumbnails, waveforms & media derivatives',
-            'url' => 'arMediaSettings/index'
+            'url' => 'ahgMediaSettings/index'
         ];
         
         $this->sections['jobs'] = [
@@ -99,7 +99,7 @@ class AhgSettingsIndexAction extends sfAction
                 'label' => 'Carousel Settings',
                 'icon' => 'fa-images',
                 'description' => 'Homepage carousel and slideshow configuration',
-                'url' => 'arIiifViewerSettings/index'
+                'url' => 'ahgIiifViewerSettings/index'
             ];
             
             $this->sections['iiif'] = [

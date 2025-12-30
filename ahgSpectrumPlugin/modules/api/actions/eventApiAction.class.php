@@ -14,7 +14,7 @@ class eventApiAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
 
-        $eventService = new arSpectrumEventService();
+        $eventService = new ahgSpectrumEventService();
 
         $method = $request->getMethod();
         $objectId = $request->getParameter('object_id');
@@ -114,7 +114,7 @@ class eventApiAction extends sfAction
         }
 
         // Validate event type
-        if (!isset(arSpectrumEventService::$eventTypeLabels[$eventType])) {
+        if (!isset(ahgSpectrumEventService::$eventTypeLabels[$eventType])) {
             throw new Exception('Invalid event type', 400);
         }
 
@@ -138,8 +138,8 @@ class eventApiAction extends sfAction
 
     protected function formatEvent($event)
     {
-        $procedure = arSpectrumEventService::$procedures[$event['procedure_id']] ?? null;
-        $eventTypeLabel = arSpectrumEventService::$eventTypeLabels[$event['event_type']] ?? $event['event_type'];
+        $procedure = ahgSpectrumEventService::$procedures[$event['procedure_id']] ?? null;
+        $eventTypeLabel = ahgSpectrumEventService::$eventTypeLabels[$event['event_type']] ?? $event['event_type'];
 
         return [
             'id' => (int)$event['id'],
@@ -152,8 +152,8 @@ class eventApiAction extends sfAction
             'event_type_label' => $eventTypeLabel,
             'status_from' => $event['status_from'],
             'status_to' => $event['status_to'],
-            'status_from_label' => arSpectrumEventService::$statusLabels[$event['status_from']]['label'] ?? null,
-            'status_to_label' => arSpectrumEventService::$statusLabels[$event['status_to']]['label'] ?? null,
+            'status_from_label' => ahgSpectrumEventService::$statusLabels[$event['status_from']]['label'] ?? null,
+            'status_to_label' => ahgSpectrumEventService::$statusLabels[$event['status_to']]['label'] ?? null,
             'user_id' => $event['user_id'] ? (int)$event['user_id'] : null,
             'user_name' => $event['user_name'] ?? null,
             'assigned_to_id' => $event['assigned_to_id'] ? (int)$event['assigned_to_id'] : null,

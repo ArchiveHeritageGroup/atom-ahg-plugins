@@ -316,7 +316,7 @@ class ObjectAddDigitalObjectAction extends sfAction
             error_log("Extracting from: " . basename($filePath));
             
             // Extract metadata
-            $extractor = new arUniversalMetadataExtractor($filePath);
+            $extractor = new ahgUniversalMetadataExtractor($filePath);
             $metadata = $extractor->extractAll();
             if (empty($metadata)) {
                 error_log("No metadata extracted");
@@ -576,7 +576,7 @@ class ObjectAddDigitalObjectAction extends sfAction
             }
             
             // Extract metadata now (fast)
-            $extractor = new arUniversalMetadataExtractor($filePath);
+            $extractor = new ahgUniversalMetadataExtractor($filePath);
             $metadata = $extractor->extractAll();
             
             if (empty($metadata)) {

@@ -14,7 +14,7 @@ class statisticsApiAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
 
-        $eventService = new arSpectrumEventService();
+        $eventService = new ahgSpectrumEventService();
 
         $type = $request->getParameter('type', 'overview');
         $repositoryId = $request->getParameter('repository_id');
@@ -88,7 +88,7 @@ class statisticsApiAction extends sfAction
                 'total_completed' => $totalCompleted,
                 'total_in_progress' => $totalInProgress,
                 'total_overdue' => count($overdue),
-                'procedure_count' => count(arSpectrumEventService::$procedures)
+                'procedure_count' => count(ahgSpectrumEventService::$procedures)
             ],
             'filters' => [
                 'repository_id' => $repositoryId,
@@ -143,7 +143,7 @@ class statisticsApiAction extends sfAction
             if (!isset($byProcedure[$procId])) {
                 $byProcedure[$procId] = [
                     'procedure_id' => $procId,
-                    'name' => arSpectrumEventService::$procedures[$procId]['name'] ?? $procId,
+                    'name' => ahgSpectrumEventService::$procedures[$procId]['name'] ?? $procId,
                     'count' => 0,
                     'max_days_overdue' => 0,
                     'avg_days_overdue' => 0,
@@ -186,7 +186,7 @@ class statisticsApiAction extends sfAction
 
         $procedures = [];
         foreach ($statuses as $procId => $status) {
-            $statusInfo = arSpectrumEventService::$statusLabels[$status['current_status']] ?? null;
+            $statusInfo = ahgSpectrumEventService::$statusLabels[$status['current_status']] ?? null;
             
             $procedures[] = [
                 'procedure_id' => $procId,

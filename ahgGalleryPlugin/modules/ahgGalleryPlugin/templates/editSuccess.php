@@ -61,7 +61,7 @@
 <?php slot('title'); ?>
 <h1 class="multiline">
   <?php echo __('Gallery Cataloguing'); ?>
-  <span class="sub"><?php echo arCCOTemplates::getTemplate($templateId)['label']; ?> Template</span>
+  <span class="sub"><?php echo ahgCCOTemplates::getTemplate($templateId)['label']; ?> Template</span>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
@@ -509,7 +509,7 @@ document.addEventListener("DOMContentLoaded", function() {
   foreach ($fieldDefinitions as $categoryId => $category):
     $categoryHasVisibleFields = false;
     foreach ($category['fields'] as $fieldName => $fieldDef) {
-      if (arCCOTemplates::isFieldVisible($templateId, $fieldName)) {
+      if (ahgCCOTemplates::isFieldVisible($templateId, $fieldName)) {
         $categoryHasVisibleFields = true;
         break;
       }
@@ -540,8 +540,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <?php foreach ($category['fields'] as $fieldName => $fieldDef): ?>
           <?php
-          if (!arCCOTemplates::isFieldVisible($templateId, $fieldName)) continue;
-          $level = arCCOTemplates::getFieldLevel($templateId, $fieldName);
+          if (!ahgCCOTemplates::isFieldVisible($templateId, $fieldName)) continue;
+          $level = ahgCCOTemplates::getFieldLevel($templateId, $fieldName);
           $hasWidget = isset($form[$fieldName]);
           if (!$hasWidget) continue;
           ?>
@@ -641,8 +641,8 @@ document.addEventListener("DOMContentLoaded", function() {
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<link href="/plugins/arAHGThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/arAHGThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
 <script>
 (function() {
   'use strict';

@@ -53,8 +53,8 @@
 
 </div>
 <!-- Tom Select CSS (JS loaded in after-content slot) -->
-<link href="/plugins/arAHGThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/arAHGThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   // Creator dropdown
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <?php slot('title'); ?>
 <h1 class="multiline">
   <?php echo __('CCO Cataloguing'); ?>
-  <span class="sub"><?php echo arCCOTemplates::getTemplate($templateId)['label']; ?> Template</span>
+  <span class="sub"><?php echo ahgCCOTemplates::getTemplate($templateId)['label']; ?> Template</span>
 </h1>
 </script>
 <?php end_slot(); ?>
@@ -488,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function() {
   foreach ($fieldDefinitions as $categoryId => $category):
     $categoryHasVisibleFields = false;
     foreach ($category['fields'] as $fieldName => $fieldDef) {
-      if (arCCOTemplates::isFieldVisible($templateId, $fieldName)) {
+      if (ahgCCOTemplates::isFieldVisible($templateId, $fieldName)) {
         $categoryHasVisibleFields = true;
         break;
       }
@@ -519,8 +519,8 @@ document.addEventListener("DOMContentLoaded", function() {
         
         <?php foreach ($category['fields'] as $fieldName => $fieldDef): ?>
           <?php
-          if (!arCCOTemplates::isFieldVisible($templateId, $fieldName)) continue;
-          $level = arCCOTemplates::getFieldLevel($templateId, $fieldName);
+          if (!ahgCCOTemplates::isFieldVisible($templateId, $fieldName)) continue;
+          $level = ahgCCOTemplates::getFieldLevel($templateId, $fieldName);
           $hasWidget = isset($form[$fieldName]);
           if (!$hasWidget) continue;
           ?>

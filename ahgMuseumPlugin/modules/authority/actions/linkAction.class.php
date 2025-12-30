@@ -31,13 +31,13 @@ class authorityLinkAction extends sfAction
         }
 
         // Initialize service
-        $this->service = new arAuthorityLinkageService();
+        $this->service = new ahgAuthorityLinkageService();
 
         // Get current linked authorities
         $this->linkedAuthorities = $this->service->getActorAuthorities($this->actor->id);
 
         // Get authority sources metadata
-        $this->sources = arAuthorityLinkageService::$sources;
+        $this->sources = ahgAuthorityLinkageService::$sources;
 
         // Determine actor type for filtering
         $this->actorType = $this->getActorType();
@@ -180,7 +180,7 @@ class authorityLinkAction extends sfAction
             $this->service->linkAuthorityToActor($this->actor->id, $source, $authorityId);
             $this->getUser()->setFlash('notice', sprintf(
                 'Successfully linked %s authority: %s',
-                arAuthorityLinkageService::$sources[$source]['label'],
+                ahgAuthorityLinkageService::$sources[$source]['label'],
                 $authorityId
             ));
         } catch (\Exception $e) {
@@ -207,7 +207,7 @@ class authorityLinkAction extends sfAction
             $this->service->unlinkAuthorityFromActor($this->actor->id, $source);
             $this->getUser()->setFlash('notice', sprintf(
                 'Successfully unlinked %s authority',
-                arAuthorityLinkageService::$sources[$source]['label']
+                ahgAuthorityLinkageService::$sources[$source]['label']
             ));
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Failed to unlink authority: ' . $e->getMessage());

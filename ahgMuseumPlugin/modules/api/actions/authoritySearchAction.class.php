@@ -28,7 +28,7 @@ class apiAuthoritySearchAction extends sfAction
         }
 
         try {
-            $service = new arAuthorityLinkageService();
+            $service = new ahgAuthorityLinkageService();
             
             if ($source === 'all') {
                 $results = $service->searchAllSources($query, $type, null, $limit);

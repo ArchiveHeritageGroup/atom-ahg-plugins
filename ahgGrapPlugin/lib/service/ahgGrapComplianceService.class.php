@@ -568,8 +568,8 @@ class ahgGrapComplianceService
     protected function checkImpairmentAssessment($objectId, $grapRecord, $object)
     {
         // Check if condition has been assessed recently via Spectrum
-        if (class_exists('arSpectrumEventService')) {
-            $spectrumService = new arSpectrumEventService();
+        if (class_exists('ahgSpectrumEventService')) {
+            $spectrumService = new ahgSpectrumEventService();
             $conditionStatus = $spectrumService->getProcedureStatus($objectId, 'object_condition');
             
             if ($conditionStatus['last_update']) {
@@ -670,8 +670,8 @@ class ahgGrapComplianceService
 
     protected function hasConditionRecord($objectId, $grapRecord, $object)
     {
-        if (class_exists('arSpectrumEventService')) {
-            $spectrumService = new arSpectrumEventService();
+        if (class_exists('ahgSpectrumEventService')) {
+            $spectrumService = new ahgSpectrumEventService();
             $status = $spectrumService->getProcedureStatus($objectId, 'object_condition');
             if ($status['last_update']) {
                 return ['status' => 'pass', 'message' => 'Condition recorded via Spectrum'];

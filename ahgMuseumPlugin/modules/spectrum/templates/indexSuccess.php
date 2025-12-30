@@ -78,7 +78,7 @@
     
     <div class="row g-3">
       <?php
-      $procedures = arSpectrumWorkflowService::getProcedures();
+      $procedures = ahgSpectrumWorkflowService::getProcedures();
       $colors = ['primary', 'success', 'info', 'warning', 'secondary', 'dark'];
       $i = 0;
       foreach ($procedures as $key => $proc): 

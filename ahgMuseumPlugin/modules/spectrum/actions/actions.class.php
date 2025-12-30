@@ -104,7 +104,7 @@ class spectrumActions extends sfActions
     public function executeWorkflow(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
-        $this->procedureType = $request->getParameter('procedure_type', arSpectrumWorkflowService::PROC_ACQUISITION);
+        $this->procedureType = $request->getParameter('procedure_type', ahgSpectrumWorkflowService::PROC_ACQUISITION);
 
         $this->resource = $this->getResourceBySlug($slug);
 
@@ -113,16 +113,16 @@ class spectrumActions extends sfActions
         }
 
         // Get all procedure definitions from service
-        $this->procedures = arSpectrumWorkflowService::getProcedures();
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
         
         // Get procedure statuses for this object
-        $this->procedureStatuses = arSpectrumWorkflowService::getObjectProcedureStatus($this->resource->id);
+        $this->procedureStatuses = ahgSpectrumWorkflowService::getObjectProcedureStatus($this->resource->id);
         
         // Get current procedure status
         $this->currentProcedure = $this->procedureStatuses[$this->procedureType] ?? null;
         
         // Get timeline for this object
-        $this->timeline = arSpectrumWorkflowService::getObjectTimeline($this->resource->id);
+        $this->timeline = ahgSpectrumWorkflowService::getObjectTimeline($this->resource->id);
         
         // Filter timeline by current procedure type
         $this->procedureTimeline = array_filter($this->timeline, function($event) {
@@ -130,19 +130,19 @@ class spectrumActions extends sfActions
         });
         
         // Get workflow progress
-        $this->progress = arSpectrumWorkflowService::calculateWorkflowProgress($this->resource->id);
+        $this->progress = ahgSpectrumWorkflowService::calculateWorkflowProgress($this->resource->id);
         
         // Status options for update form
         $this->statusOptions = [
-            arSpectrumWorkflowService::STATUS_NOT_STARTED => 'Not Started',
-            arSpectrumWorkflowService::STATUS_IN_PROGRESS => 'In Progress',
-            arSpectrumWorkflowService::STATUS_PENDING_REVIEW => 'Pending Review',
-            arSpectrumWorkflowService::STATUS_COMPLETED => 'Completed',
-            arSpectrumWorkflowService::STATUS_ON_HOLD => 'On Hold',
+            ahgSpectrumWorkflowService::STATUS_NOT_STARTED => 'Not Started',
+            ahgSpectrumWorkflowService::STATUS_IN_PROGRESS => 'In Progress',
+            ahgSpectrumWorkflowService::STATUS_PENDING_REVIEW => 'Pending Review',
+            ahgSpectrumWorkflowService::STATUS_COMPLETED => 'Completed',
+            ahgSpectrumWorkflowService::STATUS_ON_HOLD => 'On Hold',
         ];
         
         // Status colors
-        $this->statusColors = arSpectrumWorkflowService::$statusColors;
+        $this->statusColors = ahgSpectrumWorkflowService::$statusColors;
         
         // Check if user can edit
         $informationObject = $this->resource;
@@ -173,7 +173,7 @@ class spectrumActions extends sfActions
         $userId = $this->getUser()->getAttribute('user_id');
         
         // Update the procedure status
-        arSpectrumWorkflowService::updateProcedureStatus(
+        ahgSpectrumWorkflowService::updateProcedureStatus(
             $resource->id,
             $procedureType,
             $newStatus,
@@ -293,7 +293,7 @@ class spectrumActions extends sfActions
     public function executeDashboard(sfWebRequest $request)
     {
         // Get procedures from service
-        $this->procedures = arSpectrumWorkflowService::getProcedures();
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
         
         // Get workflow statistics
         $this->workflowStats = $this->getWorkflowStatistics($repoId);
@@ -633,7 +633,7 @@ class spectrumActions extends sfActions
     protected function getAllProcedures()
     {
         // Use service for consistent procedure keys
-        return arSpectrumWorkflowService::getProcedures();
+        return ahgSpectrumWorkflowService::getProcedures();
     }
 
     protected function getRecentEvents()

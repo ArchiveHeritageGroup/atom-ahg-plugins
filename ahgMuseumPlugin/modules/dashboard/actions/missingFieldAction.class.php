@@ -26,7 +26,7 @@ class dashboardMissingFieldAction extends sfAction
         $this->repositoryId = $request->getParameter('repository');
 
         // Validate field name
-        $fieldDefinitions = arDataQualityService::getFieldDefinitions();
+        $fieldDefinitions = ahgDataQualityService::getFieldDefinitions();
         if (!isset($fieldDefinitions[$this->fieldName])) {
             $this->forward404('Unknown field');
         }
@@ -34,7 +34,7 @@ class dashboardMissingFieldAction extends sfAction
         $this->fieldDefinition = $fieldDefinitions[$this->fieldName];
 
         // Get records missing this field
-        $this->records = arDataQualityService::getRecordsMissingField(
+        $this->records = ahgDataQualityService::getRecordsMissingField(
             $this->fieldName,
             $this->repositoryId,
             200
@@ -44,7 +44,7 @@ class dashboardMissingFieldAction extends sfAction
         $this->repositories = $this->getRepositories();
 
         // Category labels
-        $this->categoryLabels = arDataQualityService::getCategoryLabels();
+        $this->categoryLabels = ahgDataQualityService::getCategoryLabels();
     }
 
     /**

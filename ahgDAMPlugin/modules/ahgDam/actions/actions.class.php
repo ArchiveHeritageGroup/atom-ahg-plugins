@@ -348,7 +348,7 @@ class ahgDamActions extends sfActions
         }
 
         // Use Universal Metadata Extractor
-        $extractor = new arUniversalMetadataExtractor($filePath, $digitalObject->mime_type);
+        $extractor = new ahgUniversalMetadataExtractor($filePath, $digitalObject->mime_type);
         $allMetadata = $extractor->extractAll();
         $errors = $extractor->getErrors();
 

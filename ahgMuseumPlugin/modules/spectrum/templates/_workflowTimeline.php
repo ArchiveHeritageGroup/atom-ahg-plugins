@@ -11,11 +11,11 @@
 
 <?php
 $objectId = $resource->id;
-$procedures = arSpectrumWorkflowService::getProcedures();
-$statuses = arSpectrumWorkflowService::getObjectProcedureStatus($objectId);
-$progress = arSpectrumWorkflowService::calculateWorkflowProgress($objectId);
-$timeline = arSpectrumWorkflowService::getObjectTimeline($objectId);
-$statusColors = arSpectrumWorkflowService::$statusColors;
+$procedures = ahgSpectrumWorkflowService::getProcedures();
+$statuses = ahgSpectrumWorkflowService::getObjectProcedureStatus($objectId);
+$progress = ahgSpectrumWorkflowService::calculateWorkflowProgress($objectId);
+$timeline = ahgSpectrumWorkflowService::getObjectTimeline($objectId);
+$statusColors = ahgSpectrumWorkflowService::$statusColors;
 
 // Group procedures by category
 $categories = [
@@ -84,7 +84,7 @@ foreach ($statuses as $procId => $procStatus) {
                         <?php 
                         $catCompleted = 0;
                         foreach ($proceduresByCategory[$catId] as $ps) {
-                            if ($ps['status'] === arSpectrumWorkflowService::STATUS_COMPLETED) $catCompleted++;
+                            if ($ps['status'] === ahgSpectrumWorkflowService::STATUS_COMPLETED) $catCompleted++;
                         }
                         echo $catCompleted . '/' . count($proceduresByCategory[$catId]);
                         ?>
@@ -112,7 +112,7 @@ foreach ($statuses as $procId => $procStatus) {
                                     </span>
                                 <?php endif; ?>
                                 
-                                <?php if ($procStatus['dueDate'] && $procStatus['status'] !== arSpectrumWorkflowService::STATUS_COMPLETED): ?>
+                                <?php if ($procStatus['dueDate'] && $procStatus['status'] !== ahgSpectrumWorkflowService::STATUS_COMPLETED): ?>
                                     <span class="procedure-due <?php echo strtotime($procStatus['dueDate']) < time() ? 'overdue' : ''; ?>">
                                         <?php echo __('Due: %1%', ['%1%' => date('d M Y', strtotime($procStatus['dueDate']))]); ?>
                                     </span>

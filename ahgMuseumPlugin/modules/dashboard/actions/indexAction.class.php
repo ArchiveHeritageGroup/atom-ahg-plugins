@@ -30,20 +30,20 @@ class dashboardIndexAction extends sfAction
         $this->repositories = $this->getRepositories();
 
         // Analyze collection
-        $this->analysis = arDataQualityService::analyzeCollection(
+        $this->analysis = ahgDataQualityService::analyzeCollection(
             $this->repositoryId,
             $this->parentId,
             1000
         );
 
         // Get category labels
-        $this->categoryLabels = arDataQualityService::getCategoryLabels();
+        $this->categoryLabels = ahgDataQualityService::getCategoryLabels();
 
         // Get field definitions
-        $this->fieldDefinitions = arDataQualityService::getFieldDefinitions();
+        $this->fieldDefinitions = ahgDataQualityService::getFieldDefinitions();
         // Handle export request
         if ($request->getParameter('export') === 'csv') {
-            $csv = arDataQualityService::exportToCSV($this->repositoryId);
+            $csv = ahgDataQualityService::exportToCSV($this->repositoryId);
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename="data_quality_report_' . date('Y-m-d') . '.csv"');
             header('Pragma: no-cache');

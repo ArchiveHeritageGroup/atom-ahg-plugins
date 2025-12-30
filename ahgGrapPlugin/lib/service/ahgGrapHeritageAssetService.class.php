@@ -618,8 +618,8 @@ class ahgGrapHeritageAssetService
         $linked = [];
 
         // Check if ahgSpectrumPlugin is installed
-        if (class_exists('arSpectrumEventService')) {
-            $spectrumService = new arSpectrumEventService();
+        if (class_exists('ahgSpectrumEventService')) {
+            $spectrumService = new ahgSpectrumEventService();
             
             foreach (self::$spectrumLinkages as $procedureId => $linkage) {
                 $status = $spectrumService->getProcedureStatus($objectId, $procedureId);

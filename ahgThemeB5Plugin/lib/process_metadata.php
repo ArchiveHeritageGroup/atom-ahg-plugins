@@ -19,7 +19,7 @@ require_once SF_ROOT_DIR.'/config/ProjectConfiguration.class.php';
 $configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
 sfContext::createInstance($configuration);
 
-require_once SF_ROOT_DIR.'/plugins/ahgThemeB5Plugin/lib/arUniversalMetadataExtractor.php';
+require_once SF_ROOT_DIR.'/plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php';
 
 // Term/Taxonomy IDs
 define('TERM_CREATION_ID', 111);
@@ -71,7 +71,7 @@ try {
     error_log("METADATA: Overwrite existing: " . ($overwriteExisting ? "yes" : "no") . ", Replace placeholders: " . ($replacePlaceholders ? "yes" : "no"));
 
     // Extract metadata
-    $extractor = new arUniversalMetadataExtractor($filePath);
+    $extractor = new ahgUniversalMetadataExtractor($filePath);
     $metadata = $extractor->extractAll();
 
     if (empty($metadata)) {

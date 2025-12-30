@@ -115,15 +115,15 @@ class ahgMuseumPluginEditAction extends sfAction
 
         // Get template
         error_log('Loading template param: ' . $request->getParameter('template', 'NONE'));
-        $templateId = $request->getParameter('template', arCCOTemplates::TEMPLATE_GENERIC);
-        $this->template = arCCOTemplates::getTemplate($templateId);
+        $templateId = $request->getParameter('template', ahgCCOTemplates::TEMPLATE_GENERIC);
+        $this->template = ahgCCOTemplates::getTemplate($templateId);
         $this->templateId = $templateId;
 
         // Get all templates for selector
-        $this->availableTemplates = arCCOTemplates::getTemplates();
+        $this->availableTemplates = ahgCCOTemplates::getTemplates();
 
         // Get field definitions
-        $this->fieldDefinitions = arCCOFieldDefinitions::getAllCategories();
+        $this->fieldDefinitions = ahgCCOFieldDefinitions::getAllCategories();
 
         // Get repositories for dropdown
         $this->repositories = $this->getRepositories();
@@ -145,7 +145,7 @@ class ahgMuseumPluginEditAction extends sfAction
                 $this->processForm();
 
                 // Validate against template
-                $validation = arCCOTemplates::validateRecord($templateId, $this->ccoData);
+                $validation = ahgCCOTemplates::validateRecord($templateId, $this->ccoData);
 
                 if (true) { // Always save for now
                     $this->saveRecord();
@@ -172,7 +172,7 @@ class ahgMuseumPluginEditAction extends sfAction
         error_log('Template will receive resource->id: ' . ($this->resource->id ?? 'NULL'));
         $this->resourceId = $this->resource->id ?? null;
         $this->resourceSlug = $this->resource->slug ?? null;
-        $this->completeness = arCCOTemplates::calculateCompleteness($templateId, $this->ccoData);
+        $this->completeness = ahgCCOTemplates::calculateCompleteness($templateId, $this->ccoData);
     }
 
     /**
@@ -442,7 +442,7 @@ class ahgMuseumPluginEditAction extends sfAction
         }
 
         // Check if field is visible in template
-        if ($name !== 'template' && !arCCOTemplates::isFieldVisible($this->templateId, $name)) {
+        if ($name !== 'template' && !ahgCCOTemplates::isFieldVisible($this->templateId, $name)) {
             return;
         }
 

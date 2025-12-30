@@ -20,7 +20,7 @@ class cidocExportAction extends sfAction
             $this->forwardUnauthorized();
         }
 
-        $this->format = $request->getParameter('format', arCIDOCExportService::FORMAT_JSONLD);
+        $this->format = $request->getParameter('format', ahgCIDOCExportService::FORMAT_JSONLD);
         $this->repositoryId = $request->getParameter('repository');
         $this->objectSlug = $request->getParameter('slug');
         $this->includeLinkedData = $request->getParameter('linkedData', '1') === '1';
@@ -35,31 +35,31 @@ class cidocExportAction extends sfAction
 
         // Available formats
         $this->formats = [
-            arCIDOCExportService::FORMAT_JSONLD => [
+            ahgCIDOCExportService::FORMAT_JSONLD => [
                 'label' => 'JSON-LD',
                 'description' => 'JSON for Linked Data - recommended for web applications and APIs',
                 'extension' => 'jsonld',
                 'mime' => 'application/ld+json',
             ],
-            arCIDOCExportService::FORMAT_RDFXML => [
+            ahgCIDOCExportService::FORMAT_RDFXML => [
                 'label' => 'RDF/XML',
                 'description' => 'W3C RDF XML serialization - compatible with triple stores',
                 'extension' => 'rdf',
                 'mime' => 'application/rdf+xml',
             ],
-            arCIDOCExportService::FORMAT_TURTLE => [
+            ahgCIDOCExportService::FORMAT_TURTLE => [
                 'label' => 'Turtle',
                 'description' => 'Terse RDF Triple Language - human-readable RDF format',
                 'extension' => 'ttl',
                 'mime' => 'text/turtle',
             ],
-            arCIDOCExportService::FORMAT_NTRIPLES => [
+            ahgCIDOCExportService::FORMAT_NTRIPLES => [
                 'label' => 'N-Triples',
                 'description' => 'Line-based RDF format - simple and fast to parse',
                 'extension' => 'nt',
                 'mime' => 'application/n-triples',
             ],
-            arCIDOCExportService::FORMAT_CSV => [
+            ahgCIDOCExportService::FORMAT_CSV => [
                 'label' => 'CSV',
                 'description' => 'Comma-separated values - easy to open in Excel',
                 'extension' => 'csv',
@@ -71,8 +71,8 @@ class cidocExportAction extends sfAction
         if ($this->objectSlug) {
             $this->object = $this->getObjectBySlug($this->objectSlug);
             if ($this->object) {
-                $service = new arCIDOCExportService();
-                $service->setFormat(arCIDOCExportService::FORMAT_JSONLD);
+                $service = new ahgCIDOCExportService();
+                $service->setFormat(ahgCIDOCExportService::FORMAT_JSONLD);
                 $service->setIncludeLinkedData($this->includeLinkedData);
                 $this->preview = $service->exportObject($this->object);
             }
@@ -125,7 +125,7 @@ class cidocExportAction extends sfAction
 
     /**
      * Get object by slug using Laravel
-     * Returns object compatible with arCIDOCExportService
+     * Returns object compatible with ahgCIDOCExportService
      */
     protected function getObjectBySlug($slug)
     {
@@ -353,19 +353,19 @@ class cidocExportAction extends sfAction
      */
     protected function handleDownload($request)
     {
-        $service = new arCIDOCExportService();
+        $service = new ahgCIDOCExportService();
         $service->setFormat($this->format);
         $service->setIncludeLinkedData($this->includeLinkedData);
 
         $formatInfo = [
-            arCIDOCExportService::FORMAT_JSONLD => ['ext' => 'jsonld', 'mime' => 'application/ld+json'],
-            arCIDOCExportService::FORMAT_RDFXML => ['ext' => 'rdf', 'mime' => 'application/rdf+xml'],
-            arCIDOCExportService::FORMAT_TURTLE => ['ext' => 'ttl', 'mime' => 'text/turtle'],
-            arCIDOCExportService::FORMAT_NTRIPLES => ['ext' => 'nt', 'mime' => 'application/n-triples'],
-            arCIDOCExportService::FORMAT_CSV => ['ext' => 'csv', 'mime' => 'text/csv'],
+            ahgCIDOCExportService::FORMAT_JSONLD => ['ext' => 'jsonld', 'mime' => 'application/ld+json'],
+            ahgCIDOCExportService::FORMAT_RDFXML => ['ext' => 'rdf', 'mime' => 'application/rdf+xml'],
+            ahgCIDOCExportService::FORMAT_TURTLE => ['ext' => 'ttl', 'mime' => 'text/turtle'],
+            ahgCIDOCExportService::FORMAT_NTRIPLES => ['ext' => 'nt', 'mime' => 'application/n-triples'],
+            ahgCIDOCExportService::FORMAT_CSV => ['ext' => 'csv', 'mime' => 'text/csv'],
         ];
 
-        $info = $formatInfo[$this->format] ?? $formatInfo[arCIDOCExportService::FORMAT_JSONLD];
+        $info = $formatInfo[$this->format] ?? $formatInfo[ahgCIDOCExportService::FORMAT_JSONLD];
 
         if ($this->objectSlug) {
             // Single object export

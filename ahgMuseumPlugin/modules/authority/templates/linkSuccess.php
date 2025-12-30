@@ -349,7 +349,7 @@
             </div>
             <div class="standard-item">
                 <h5>CIDOC-CRM</h5>
-                <p><?php echo __('This actor maps to CIDOC-CRM class: %1%', ['%1%' => '<code>' . (new arAuthorityLinkageService())->mapToCIDOCClass($actorType) . '</code>']); ?></p>
+                <p><?php echo __('This actor maps to CIDOC-CRM class: %1%', ['%1%' => '<code>' . (new ahgAuthorityLinkageService())->mapToCIDOCClass($actorType) . '</code>']); ?></p>
             </div>
         </div>
     </div>

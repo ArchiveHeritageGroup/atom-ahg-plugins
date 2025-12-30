@@ -39,7 +39,7 @@ class apiSpectrumUpdateProcedureAction extends sfAction
         }
 
         try {
-            $result = arSpectrumWorkflowService::updateProcedureStatus(
+            $result = ahgSpectrumWorkflowService::updateProcedureStatus(
                 $objectId,
                 $procedureId,
                 $status,

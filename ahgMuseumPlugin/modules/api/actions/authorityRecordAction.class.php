@@ -24,17 +24,17 @@ class apiAuthorityRecordAction extends sfAction
         }
 
         try {
-            $service = new arAuthorityLinkageService();
+            $service = new ahgAuthorityLinkageService();
             $record = null;
 
             switch ($source) {
-                case arAuthorityLinkageService::SOURCE_ULAN:
+                case ahgAuthorityLinkageService::SOURCE_ULAN:
                     $record = $service->getULANRecord($id);
                     break;
-                case arAuthorityLinkageService::SOURCE_WIKIDATA:
+                case ahgAuthorityLinkageService::SOURCE_WIKIDATA:
                     $record = $service->getWikidataRecord($id);
                     break;
-                case arAuthorityLinkageService::SOURCE_VIAF:
+                case ahgAuthorityLinkageService::SOURCE_VIAF:
                     $record = $service->getVIAFRecord($id);
                     break;
                 default:

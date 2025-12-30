@@ -14,9 +14,9 @@
 ?>
 
 <?php
-$service = new arAuthorityLinkageService();
+$service = new ahgAuthorityLinkageService();
 $authorities = $service->getActorAuthorities($actor->id);
-$sources = arAuthorityLinkageService::$sources;
+$sources = ahgAuthorityLinkageService::$sources;
 
 if (empty($authorities)) {
     return;
