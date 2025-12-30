@@ -12,5 +12,5 @@
     },
     "dependencies": ["ahgSecurityClearancePlugin"],
     "tables": ["access_request", "access_request_scope", "access_request_log", "access_request_approver", "object_access_grant"],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
 }

@@ -44,7 +44,7 @@ class ahgDisplayActions extends sfActions
         $this->parentId = $request->getParameter('parent');
         $this->topLevelOnly = $request->getParameter('topLevel', '0');
         $this->page = max(1, (int) $request->getParameter('page', 1));
-        $this->limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 10; if ($this->limit < 10) $this->limit = 10; if ($this->limit > 100) $this->limit = 100; 
+        $this->limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 10; if ($this->limit < 10) $this->limit = 10; if ($this->limit > 100) $this->limit = 100; error_log('LIMIT DEBUG: GET=' . ($_GET['limit'] ?? 'not set') . ' param=' . $request->getParameter('limit') . ' final=' . $this->limit);
         $this->sort = $request->getParameter('sort', 'title');
         $this->sortDir = $request->getParameter('dir', 'asc');
         $this->viewMode = $request->getParameter('view', 'card');

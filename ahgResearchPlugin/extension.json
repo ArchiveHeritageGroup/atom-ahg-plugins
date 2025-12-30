@@ -14,7 +14,7 @@
     "optional": {
         "extensions": ["ahgSecurityClearancePlugin"]
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"],
     "tables": [
         "research_researcher",
         "research_booking",

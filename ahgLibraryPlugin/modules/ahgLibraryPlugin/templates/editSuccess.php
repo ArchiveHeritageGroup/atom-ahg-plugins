@@ -510,7 +510,7 @@
             <?php endif; ?>
           <?php elseif (!empty($cleanIsbn)): ?>
             <div id="ol-cover-preview">
-              <img src="<?php echo url_for(["module" => "ahgLibraryPlugin", "action" => "coverProxy", "isbn" => $cleanIsbn, "size" => "M"]); ?>"
+              <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg"
                    alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;"
                    onerror="this.parentElement.innerHTML='<p class=\'text-muted\'>No Open Library cover found</p>'">
               <div class="mt-1"><small class="text-muted">Open Library Preview</small></div>
@@ -593,33 +593,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 var cleanIsbn = isbn.replace(/[\s-]/g, '');
-                var response = await fetch('<?php echo url_for(["module" => "ahgLibraryPlugin", "action" => "isbnLookup"]); ?>?isbn=' + cleanIsbn);
+                var response = await fetch('https://openlibrary.org/api/books?bibkeys=ISBN:' + cleanIsbn + '&format=json&jscmd=data');
                 var data = await response.json();
-                
-                if (data.success && data.data) {
-                    var d = data.data;
+                var key = 'ISBN:' + cleanIsbn;
 
-                    // Extract all data from server response
+                if (data[key]) {
+                    var d = data[key];
+
+                    // Extract all data
                     var title = d.title || '';
-                    var authors = d.authors ? d.authors.map(function(a) { return {name: typeof a === 'string' ? a : a.name, url: a.url || ''}; }) : [];
-                    var publisher = d.publishers && d.publishers[0] ? (typeof d.publishers[0] === 'string' ? d.publishers[0] : d.publishers[0].name) : '';
-                    var publishPlace = d.publish_places && d.publish_places[0] ? (typeof d.publish_places[0] === 'string' ? d.publish_places[0] : d.publish_places[0].name) : '';
+                    var authors = d.authors ? d.authors.map(function(a) { return {name: a.name, url: a.url}; }) : [];
+                    var publisher = d.publishers && d.publishers[0] ? d.publishers[0].name : '';
+                    var publishPlace = d.publish_places && d.publish_places[0] ? d.publish_places[0].name : '';
                     var date = d.publish_date || '';
                     var pages = d.number_of_pages || '';
                     var pagination = d.pagination || (pages ? pages + ' p.' : '');
-                    var byStatement = d.by_statement || d.responsibility_statement || '';
-                    var subjects = d.subjects ? d.subjects.slice(0, 10).map(function(s) { return {name: typeof s === 'string' ? s : s.name, url: s.url || ''}; }) : [];
-                    var notes = d.notes || d.description || '';
-                    var coverUrl = d.covers ? d.covers.medium : (d.cover_url || '');
-                    var openLibraryUrl = d.openlibrary_url || '';
-                    var openLibraryId = d.openlibrary_id || '';
-                    var lccn = d.lccn || '';
-                    var oclc = d.oclc_number || '';
-                    var goodreads = d.goodreads_id || '';
-                    var librarything = d.librarything_id || '';
-                    var lcClass = d.classification_number || '';
-                    var dewey = d.dewey_decimal || '';
-                    var ebookUrl = d.ebook_preview_url || '';
+                    var byStatement = d.by_statement || '';
+                    var subjects = d.subjects ? d.subjects.slice(0, 10).map(function(s) { return {name: s.name, url: s.url}; }) : [];
+                    var notes = d.notes || '';
+                    var coverUrl = d.cover ? d.cover.medium : '';
+                    var openLibraryUrl = d.url || '';
+                    var openLibraryId = d.identifiers && d.identifiers.openlibrary ? d.identifiers.openlibrary[0] : '';
+                    var lccn = d.identifiers && d.identifiers.lccn ? d.identifiers.lccn[0] : '';
+                    var oclc = d.identifiers && d.identifiers.oclc ? d.identifiers.oclc[0] : '';
+                    var goodreads = d.identifiers && d.identifiers.goodreads ? d.identifiers.goodreads[0] : '';
+                    var librarything = d.identifiers && d.identifiers.librarything ? d.identifiers.librarything[0] : '';
+                    var lcClass = d.classifications && d.classifications.lc_classifications ? d.classifications.lc_classifications[0] : '';
+                    var dewey = d.classifications && d.classifications.dewey_decimal_class ? d.classifications.dewey_decimal_class[0] : '';
+                    var ebookUrl = d.ebooks && d.ebooks[0] ? d.ebooks[0].preview_url : '';
 
                     var msg = '<?php echo __('Found'); ?>: ' + title + '\n';
                     if (authors.length) msg += '<?php echo __('By'); ?>: ' + authors.map(a => a.name).join(', ') + '\n';

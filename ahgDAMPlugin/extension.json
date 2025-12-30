@@ -25,5 +25,5 @@
         "rights_derivative_log",
         "security_watermark_log"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
 }

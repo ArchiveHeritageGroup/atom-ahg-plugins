@@ -2,6 +2,10 @@
 -- Version: 1.0.0
 -- Tables are created by atom-framework/database/install.sql
 
+-- Register plugin
+INSERT IGNORE INTO atom_plugin (name, is_enabled, version, category) VALUES
+('ahgSecurityClearancePlugin', 1, '1.0.0', 'security');
+
 -- Default security classifications
 INSERT IGNORE INTO security_classification (code, level, name, description, color, requires_justification, requires_approval) VALUES
 ('PUBLIC', 0, 'Public', 'Unrestricted access', '#28a745', 0, 0),

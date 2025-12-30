@@ -1,5 +1,4 @@
 # Library Plugin Routes
-# IMPORTANT: Specific routes MUST come before catch-all slug routes
 
 library_browse:
   url: /library
@@ -13,21 +12,14 @@ library_add:
     module: ahgLibraryPlugin
     action: edit
 
-library_isbn_lookup:
-  url: /library/isbn-lookup
+library_view:
+  url: /library/:slug
   param:
     module: ahgLibraryPlugin
-    action: isbnLookup
-
-library_cover_proxy:
-  url: /library/cover/:isbn
-  param:
-    module: ahgLibraryPlugin
-    action: coverProxy
+    action: index
   requirements:
-    isbn: '[0-9Xx]+'
+    slug: .+
 
-# Catch-all slug routes LAST
 library_edit:
   url: /library/:slug/edit
   param:
@@ -36,10 +28,8 @@ library_edit:
   requirements:
     slug: .+
 
-library_view:
-  url: /library/:slug
+library_isbn_lookup:
+  url: /library/isbn-lookup
   param:
     module: ahgLibraryPlugin
-    action: index
-  requirements:
-    slug: .+
+    action: isbnLookup

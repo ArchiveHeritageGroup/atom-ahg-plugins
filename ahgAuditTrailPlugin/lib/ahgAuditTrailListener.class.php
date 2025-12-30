@@ -479,7 +479,7 @@ class ahgAuditTrailListener
             'staticpage' => 'QubitStaticPage',
             'sfMuseumPlugin' => 'MuseumObject',
             'ahgLibraryPlugin' => 'LibraryItem',
-            'ahg3DModelPlugin' => 'Object3D',
+            'ahg3DModelPlugin' => 'ahg3DModel',
             'arGalleryPlugin' => 'GalleryWork',
             'ahgDAMPlugin' => 'DigitalAsset',
         ];

@@ -43,5 +43,5 @@
         "object_rights_holder",
         "object_rights_statement"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
 }
