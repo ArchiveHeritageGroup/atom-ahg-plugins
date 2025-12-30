@@ -19,7 +19,7 @@ function isPluginActive($pluginName) {
 
 $hasLibrary = isPluginActive('ahgLibraryPlugin');
 $hasMuseum = isPluginActive('sfMuseumPlugin');
-$hasGallery = isPluginActive('arGalleryPlugin');
+$hasGallery = isPluginActive('ahgGalleryPlugin');
 $hasDam = isPluginActive('arDAMPlugin') || isPluginActive('ahgDAMPlugin');
 $hasSpectrum = isPluginActive('arSpectrumPlugin');
 $hasGrap = isPluginActive('ahgGrapPlugin');
@@ -185,7 +185,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donor', 'action' => 'dashboard']); ?>"><i class="fas fa-handshake me-2 text-muted"></i><?php echo __('Donor Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasGallery): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arGalleryPlugin', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgGalleryPlugin', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasLibrary): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>

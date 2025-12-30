@@ -1,0 +1,37 @@
+{
+    "name": "Gallery & Exhibition Management",
+    "machine_name": "ahgGalleryPlugin",
+    "version": "1.0.0",
+    "description": "Gallery and exhibition management with artist tracking, loans, insurance, and facility reports",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": ["ahgConditionPlugin", "ahgGrapPlugin"]
+    },
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "tables": [
+        "gallery_artist",
+        "gallery_artist_bibliography",
+        "gallery_artist_exhibition_history",
+        "gallery_exhibition",
+        "gallery_exhibition_checklist",
+        "gallery_exhibition_object",
+        "gallery_facility_report",
+        "gallery_insurance_policy",
+        "gallery_loan",
+        "gallery_loan_object",
+        "gallery_space",
+        "gallery_valuation",
+        "gallery_venue"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "sector",
+    "load_order": 55
+}

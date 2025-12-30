@@ -17,7 +17,7 @@ function checkPluginEnabled($pluginName) {
 
 $hasLibrary = checkPluginEnabled('ahgLibraryPlugin');
 $hasMuseum = checkPluginEnabled('sfMuseumPlugin');
-$hasGallery = checkPluginEnabled('arGalleryPlugin');
+$hasGallery = checkPluginEnabled('ahgGalleryPlugin');
 $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin');
 ?>
 <?php foreach ([$addMenu, $manageMenu, $importMenu, $adminMenu] as $menu) { ?>
@@ -78,7 +78,7 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'sfMuseumPlugin', 'action' => 'add']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum object'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasGallery): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arGalleryPlugin', 'action' => 'add']); ?>"><i class="fas fa-images fa-fw me-2"></i><?php echo __('Gallery item'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgGalleryPlugin', 'action' => 'add']); ?>"><i class="fas fa-images fa-fw me-2"></i><?php echo __('Gallery item'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasLibrary): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'add']); ?>"><i class="fas fa-book fa-fw me-2"></i><?php echo __('Library item'); ?></a></li>
