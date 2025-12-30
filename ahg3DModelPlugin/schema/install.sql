@@ -1,5 +1,5 @@
 -- =====================================================
--- ar3DModelPlugin Database Schema
+-- ahg3DModelPlugin Database Schema
 -- 3D Model Support with IIIF 3D Extension for AtoM
 -- =====================================================
 

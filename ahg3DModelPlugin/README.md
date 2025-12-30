@@ -1,4 +1,4 @@
-# ar3DModelPlugin for AtoM
+# ahg3DModelPlugin for AtoM
 
 A comprehensive 3D model viewing plugin for Access to Memory (AtoM) with IIIF 3D extension support, augmented reality (AR) capabilities, and interactive hotspot annotations.
 
@@ -27,20 +27,20 @@ A comprehensive 3D model viewing plugin for Access to Memory (AtoM) with IIIF 3D
 
 ```bash
 cd /usr/share/nginx/archive/plugins
-cp -r /path/to/ar3DModelPlugin .
+cp -r /path/to/ahg3DModelPlugin .
 ```
 
 ### 2. Copy Service File
 
 ```bash
-cp ar3DModelPlugin/services/Model3DService.php \
+cp ahg3DModelPlugin/services/Model3DService.php \
    /usr/share/nginx/archive/atom-framework/src/Services/
 ```
 
 ### 3. Install Database Schema
 
 ```bash
-mysql -u root -p archive < ar3DModelPlugin/schema/install.sql
+mysql -u root -p archive < ahg3DModelPlugin/schema/install.sql
 ```
 
 ### 4. Create Upload Directory
@@ -65,7 +65,7 @@ Add to `apps/qubit/config/settings.yml`:
 all:
   .settings:
     plugins:
-      - ar3DModelPlugin
+      - ahg3DModelPlugin
 ```
 
 Or enable via Admin > Plugins in AtoM.
@@ -120,7 +120,7 @@ Include the partial in your object template (e.g., `indexSuccess.php`):
 
 ```php
 // Include helper
-include_once sfConfig::get('sf_plugins_dir') . '/ar3DModelPlugin/lib/helper/Model3DHelper.php';
+include_once sfConfig::get('sf_plugins_dir') . '/ahg3DModelPlugin/lib/helper/Model3DHelper.php';
 
 // Check if object has 3D models
 if (has_3d_model($resource)) {

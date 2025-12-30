@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# ar3DModelPlugin Installation Script
+# ahg3DModelPlugin Installation Script
 # 
 # Run this script on the AtoM server to install the 3D model plugin
 #
@@ -11,7 +11,7 @@ set -e
 
 # Configuration
 ATOM_DIR="/usr/share/nginx/archive"
-PLUGIN_DIR="$ATOM_DIR/plugins/ar3DModelPlugin"
+PLUGIN_DIR="$ATOM_DIR/plugins/ahg3DModelPlugin"
 FRAMEWORK_DIR="$ATOM_DIR/atom-framework"
 UPLOAD_DIR="$ATOM_DIR/uploads/3d"
 WEB_USER="www-data"
@@ -20,7 +20,7 @@ MYSQL_PASS="Merlot@123"
 MYSQL_DB="archive"
 
 echo "=============================================="
-echo "ar3DModelPlugin Installation"
+echo "ahg3DModelPlugin Installation"
 echo "=============================================="
 
 # Check if running as root
@@ -83,7 +83,7 @@ find "$PLUGIN_DIR" -type f -exec chmod 644 {} \;
 find "$PLUGIN_DIR" -type d -exec chmod 755 {} \;
 
 echo "Step 7: Creating symlinks for web assets..."
-ASSETS_WEB="$ATOM_DIR/plugins/ar3DModelPlugin/js"
+ASSETS_WEB="$ATOM_DIR/plugins/ahg3DModelPlugin/js"
 if [ -d "$ASSETS_WEB" ]; then
     echo "  Assets directory ready"
 fi

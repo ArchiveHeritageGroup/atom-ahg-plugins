@@ -1,9 +1,9 @@
 /**
- * ar3DModelPlugin JavaScript Utilities
+ * ahg3DModelPlugin JavaScript Utilities
  * 
  * Helper functions for 3D model viewing, hotspot management, and AR features
  * 
- * @package ar3DModelPlugin
+ * @package ahg3DModelPlugin
  * @author Johan Pieterse - The Archive and Heritage Group
  */
 
