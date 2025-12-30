@@ -20,7 +20,7 @@ class displayAutoDetectTask extends arBaseTask
     {
         parent::execute($arguments, $options);
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+        require_once __DIR__ . '/../lib/Services/DisplayTypeDetector.php';
 
         $this->logSection('display', 'Starting auto-detection...');
 

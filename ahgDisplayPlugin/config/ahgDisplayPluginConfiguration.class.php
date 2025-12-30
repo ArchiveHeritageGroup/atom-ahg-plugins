@@ -21,6 +21,8 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        // Override informationobject/browse to redirect to GLAM
+        $routing->prependRoute('informationobject_browse_redirect', new sfRoute('/informationobject/browse', ['module' => 'ahgDisplay', 'action' => 'browse']));
         $routing->prependRoute('glam_index', new sfRoute('/glam', ['module' => 'ahgDisplay', 'action' => 'index']));
         $routing->prependRoute('glam_browse', new sfRoute('/glam/browse', ['module' => 'ahgDisplay', 'action' => 'browse']));
         $routing->prependRoute('glam_print', new sfRoute('/glam/print', ['module' => 'ahgDisplay', 'action' => 'print']));
@@ -40,7 +42,7 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
             return $parameters;
         }
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+            require_once __DIR__ . '/../lib/Services/DisplayTypeDetector.php';
             $objectId = (int) $parameters['resource']->id;
             if ($objectId > 1) {
                 $parameters['display_type'] = DisplayTypeDetector::detect($objectId);
@@ -59,7 +61,7 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
             return;
         }
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+            require_once __DIR__ . '/../lib/Services/DisplayTypeDetector.php';
             DisplayTypeDetector::detectAndSave((int) $object->id, true);
         } catch (Exception $e) {
             error_log('ahgDisplayPlugin save: ' . $e->getMessage());

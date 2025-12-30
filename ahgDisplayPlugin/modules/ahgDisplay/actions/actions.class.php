@@ -8,7 +8,7 @@ class ahgDisplayActions extends sfActions
     public function preExecute()
     {
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+        require_once dirname(dirname(dirname(__DIR__))) . '/lib/Services/DisplayTypeDetector.php';
         $this->service = new DisplayService();
     }
 

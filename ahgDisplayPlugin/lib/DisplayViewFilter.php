@@ -35,7 +35,7 @@ class DisplayViewFilter extends sfFilter
         }
 
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+            require_once __DIR__ . '/Services/DisplayTypeDetector.php';
             
             $objectId = (int) $resource->id;
             
