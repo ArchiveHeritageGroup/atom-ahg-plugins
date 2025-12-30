@@ -12,13 +12,13 @@ class AhgSettingsEmailTestAction extends sfAction
         }
 
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EmailService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/Services/EmailService.php';
 
         $testEmail = $request->getParameter('email');
         
         if (empty($testEmail)) {
             $this->getUser()->setFlash('error', 'Please enter a test email address');
-            $this->redirect('settings/email');
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'email']);
         }
 
         $result = EmailService::testConnection($testEmail);
@@ -29,6 +29,6 @@ class AhgSettingsEmailTestAction extends sfAction
             $this->getUser()->setFlash('error', $result['message']);
         }
 
-        $this->redirect('settings/email');
+        $this->redirect(['module' => 'ahgSettings', 'action' => 'email']);
     }
 }
