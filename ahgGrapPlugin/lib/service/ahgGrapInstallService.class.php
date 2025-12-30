@@ -334,7 +334,7 @@ class ahgGrapInstallService
 
                 // Create GRAP record
                 $data = [
-                    'recognition_status' => arGrapHeritageAssetService::STATUS_PENDING_RECOGNITION,
+                    'recognition_status' => ahgGrapHeritageAssetService::STATUS_PENDING_RECOGNITION,
                     'initial_cost' => $props['acquisitionValue'] ?? $props['estimatedValue'] ?? null,
                     'carrying_amount' => $props['estimatedValue'] ?? $props['acquisitionValue'] ?? null,
                     'insurance_value' => $props['insuranceValue'] ?? null,

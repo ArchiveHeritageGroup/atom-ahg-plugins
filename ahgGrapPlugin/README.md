@@ -144,7 +144,7 @@ The plugin supports all GRAP 103 heritage asset classes:
    
    Or via CLI:
    ```bash
-   php symfony arGrap:install
+   php symfony ahgGrap:install
    ```
 
 5. **Clear Cache**
@@ -279,10 +279,10 @@ The plugin addresses requirements from:
 ```
 ahgGrapPlugin/
 ├── lib/
-│   ├── arGrapHeritageAssetService.class.php    # Core accounting service
-│   ├── arGrapComplianceService.class.php       # Compliance checking
-│   ├── arGrapExportService.class.php           # Report generation
-│   └── arGrapInstallService.class.php          # Database setup
+│   ├── ahgGrapHeritageAssetService.class.php    # Core accounting service
+│   ├── ahgGrapComplianceService.class.php       # Compliance checking
+│   ├── ahgGrapExportService.class.php           # Report generation
+│   └── ahgGrapInstallService.class.php          # Database setup
 ├── modules/
 │   ├── grap/
 │   │   ├── actions/

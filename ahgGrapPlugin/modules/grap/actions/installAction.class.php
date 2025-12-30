@@ -17,8 +17,8 @@ class grapInstallAction extends sfAction
             $this->forward('admin', 'secure');
         }
 
-        $this->status = arGrapInstallService::getStatus();
-        $this->isInstalled = arGrapInstallService::isInstalled();
+        $this->status = ahgGrapInstallService::getStatus();
+        $this->isInstalled = ahgGrapInstallService::isInstalled();
 
         // Handle actions
         if ($request->isMethod('post')) {
@@ -27,24 +27,24 @@ class grapInstallAction extends sfAction
             try {
                 switch ($action) {
                     case 'install':
-                        arGrapInstallService::install();
+                        ahgGrapInstallService::install();
                         $this->getUser()->setFlash('notice', 'GRAP plugin installed successfully');
                         break;
 
                     case 'uninstall':
-                        arGrapInstallService::uninstall(true);
+                        ahgGrapInstallService::uninstall(true);
                         $this->getUser()->setFlash('notice', 'GRAP plugin uninstalled');
                         break;
 
                     case 'migrate':
-                        $count = arGrapInstallService::migrateExistingData();
+                        $count = ahgGrapInstallService::migrateExistingData();
                         $this->getUser()->setFlash('notice', "Migrated {$count} existing records");
                         break;
 
                     case 'snapshot':
                         $repositoryId = $request->getParameter('repository_id') ?: null;
                         $fyEnd = $request->getParameter('financial_year_end') ?: date('Y') . '-03-31';
-                        $count = arGrapInstallService::createFinancialYearSnapshot($repositoryId, $fyEnd);
+                        $count = ahgGrapInstallService::createFinancialYearSnapshot($repositoryId, $fyEnd);
                         $this->getUser()->setFlash('notice', "Created {$count} snapshots for FY ending {$fyEnd}");
                         break;
                 }

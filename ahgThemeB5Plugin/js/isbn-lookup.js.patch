@@ -8,7 +8,7 @@
         if (preview.cover_url || data.raw?.isbn_13 || data.raw?.isbn_10) {
             const isbn = data.raw?.isbn_13 || data.raw?.isbn_10 || '';
             const openLibraryCover = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
-            const fallbackCover = preview.cover_url_fallback || '/plugins/arAHGThemeB5Plugin/images/no-cover.png';
+            const fallbackCover = preview.cover_url_fallback || '/plugins/ahgThemeB5Plugin/images/no-cover.png';
             
             html += `
                 <div class="col-md-3 text-center">

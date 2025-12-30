@@ -56,7 +56,7 @@ class ahgGrapExportService
             fputcsv($output, [
                 $asset['identifier'],
                 $asset['title'],
-                arGrapHeritageAssetService::$assetClassLabels[$asset['asset_class']] ?? $asset['asset_class'],
+                ahgGrapHeritageAssetService::$assetClassLabels[$asset['asset_class']] ?? $asset['asset_class'],
                 $asset['location'] ?? '',
                 $asset['initial_recognition_date'],
                 ucfirst(str_replace('_', ' ', $asset['measurement_basis'] ?? '')),
@@ -68,7 +68,7 @@ class ahgGrapExportService
                 $asset['funding_source'] ?? '',
                 $asset['condition'] ?? '',
                 number_format($asset['insurance_value'] ?? 0, 2, '.', ''),
-                arGrapHeritageAssetService::$statusLabels[$asset['recognition_status']]['label'] ?? $asset['recognition_status'],
+                ahgGrapHeritageAssetService::$statusLabels[$asset['recognition_status']]['label'] ?? $asset['recognition_status'],
                 ''
             ]);
         }
@@ -121,7 +121,7 @@ class ahgGrapExportService
         $totalItems = 0;
 
         foreach ($summary as $row) {
-            $classLabel = arGrapHeritageAssetService::$assetClassLabels[$row['asset_class']] ?? $row['asset_class'];
+            $classLabel = ahgGrapHeritageAssetService::$assetClassLabels[$row['asset_class']] ?? $row['asset_class'];
             fputcsv($output, [
                 $classLabel,
                 number_format($row['cost_model'] ?? 0, 2, '.', ''),
@@ -355,7 +355,7 @@ class ahgGrapExportService
             fputcsv($output, [
                 $imp['identifier'],
                 $imp['title'],
-                arGrapHeritageAssetService::$assetClassLabels[$imp['asset_class']] ?? $imp['asset_class'],
+                ahgGrapHeritageAssetService::$assetClassLabels[$imp['asset_class']] ?? $imp['asset_class'],
                 $imp['date'],
                 $imp['indicator'],
                 number_format($imp['previous_carrying'], 2, '.', ''),
@@ -416,7 +416,7 @@ class ahgGrapExportService
             fputcsv($output, [
                 $derec['identifier'],
                 $derec['title'],
-                arGrapHeritageAssetService::$assetClassLabels[$derec['asset_class']] ?? $derec['asset_class'],
+                ahgGrapHeritageAssetService::$assetClassLabels[$derec['asset_class']] ?? $derec['asset_class'],
                 $derec['derecognition_date'],
                 $derec['derecognition_reason'],
                 number_format($derec['carrying_amount'] ?? 0, 2, '.', ''),
@@ -486,7 +486,7 @@ class ahgGrapExportService
             fputcsv($output, [
                 $reval['identifier'],
                 $reval['title'],
-                arGrapHeritageAssetService::$assetClassLabels[$reval['asset_class']] ?? $reval['asset_class'],
+                ahgGrapHeritageAssetService::$assetClassLabels[$reval['asset_class']] ?? $reval['asset_class'],
                 $reval['date'],
                 $reval['valuer'],
                 number_format($reval['previous_value'], 2, '.', ''),
@@ -841,9 +841,9 @@ class ahgGrapExportService
             <?php foreach ($data['high_value'] as $asset): ?>
             <tr>
                 <td><?php echo htmlspecialchars($asset['identifier']); ?></td>
-                <td><?php echo arGrapHeritageAssetService::$assetClassLabels[$asset['asset_class']] ?? $asset['asset_class']; ?></td>
+                <td><?php echo ahgGrapHeritageAssetService::$assetClassLabels[$asset['asset_class']] ?? $asset['asset_class']; ?></td>
                 <td>R <?php echo number_format($asset['carrying_amount'] ?? 0, 2); ?></td>
-                <td><?php echo arGrapHeritageAssetService::$statusLabels[$asset['recognition_status']]['label'] ?? $asset['recognition_status']; ?></td>
+                <td><?php echo ahgGrapHeritageAssetService::$statusLabels[$asset['recognition_status']]['label'] ?? $asset['recognition_status']; ?></td>
             </tr>
             <?php endforeach; ?>
         </table>

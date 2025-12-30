@@ -49,8 +49,8 @@ class apiStatisticsApiAction extends sfAction
 
     protected function getOverview($repositoryId)
     {
-        $assetService = new arGrapHeritageAssetService();
-        $complianceService = new arGrapComplianceService();
+        $assetService = new ahgGrapHeritageAssetService();
+        $complianceService = new ahgGrapComplianceService();
 
         $summary = $assetService->getAssetSummary($repositoryId);
         $compliance = $complianceService->getRepositoryComplianceSummary($repositoryId);
@@ -91,7 +91,7 @@ class apiStatisticsApiAction extends sfAction
 
     protected function getByClass($repositoryId)
     {
-        $assetService = new arGrapHeritageAssetService();
+        $assetService = new ahgGrapHeritageAssetService();
         $summary = $assetService->getAssetSummary($repositoryId);
 
         $byClass = [];
@@ -100,7 +100,7 @@ class apiStatisticsApiAction extends sfAction
             if (!isset($byClass[$class])) {
                 $byClass[$class] = [
                     'class' => $class,
-                    'label' => arGrapHeritageAssetService::$assetClassLabels[$class] ?? ucfirst(str_replace('_', ' ', $class)),
+                    'label' => ahgGrapHeritageAssetService::$assetClassLabels[$class] ?? ucfirst(str_replace('_', ' ', $class)),
                     'count' => 0,
                     'carrying_amount' => 0,
                     'impairment' => 0,
@@ -121,14 +121,14 @@ class apiStatisticsApiAction extends sfAction
 
     protected function getByStatus($repositoryId)
     {
-        $assetService = new arGrapHeritageAssetService();
+        $assetService = new ahgGrapHeritageAssetService();
         $summary = $assetService->getAssetSummary($repositoryId);
 
         $byStatus = [];
         foreach ($summary as $row) {
             $status = $row['recognition_status'];
             if (!isset($byStatus[$status])) {
-                $statusInfo = arGrapHeritageAssetService::$statusLabels[$status] ?? ['label' => $status, 'color' => '#95a5a6'];
+                $statusInfo = ahgGrapHeritageAssetService::$statusLabels[$status] ?? ['label' => $status, 'color' => '#95a5a6'];
                 $byStatus[$status] = [
                     'status' => $status,
                     'label' => $statusInfo['label'],
@@ -149,7 +149,7 @@ class apiStatisticsApiAction extends sfAction
 
     protected function getComplianceStats($repositoryId)
     {
-        $complianceService = new arGrapComplianceService();
+        $complianceService = new ahgGrapComplianceService();
         $summary = $complianceService->getRepositoryComplianceSummary($repositoryId);
 
         $rates = [];

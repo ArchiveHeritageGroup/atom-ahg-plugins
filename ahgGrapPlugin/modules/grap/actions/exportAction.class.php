@@ -12,7 +12,7 @@ class grapExportAction extends sfAction
 {
     public function execute($request)
     {
-        $this->exportService = new arGrapExportService();
+        $this->exportService = new ahgGrapExportService();
 
         $exportType = $request->getParameter('type');
         $repositoryId = $request->getParameter('repository_id');

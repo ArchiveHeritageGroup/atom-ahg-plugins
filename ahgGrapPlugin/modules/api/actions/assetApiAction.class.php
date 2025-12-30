@@ -45,7 +45,7 @@ class apiAssetApiAction extends sfAction
 
     protected function getAsset($objectId)
     {
-        $service = new arGrapHeritageAssetService();
+        $service = new ahgGrapHeritageAssetService();
         $asset = $service->getAssetRecord($objectId);
 
         if (!$asset || !$asset['id']) {
@@ -64,7 +64,7 @@ class apiAssetApiAction extends sfAction
         $asset['spectrum_status'] = $service->getLinkedSpectrumStatus($objectId);
 
         // Add compliance score
-        $complianceService = new arGrapComplianceService();
+        $complianceService = new ahgGrapComplianceService();
         $compliance = $complianceService->checkCompliance($objectId);
         $asset['compliance_score'] = $compliance['overall_score'];
 
@@ -148,7 +148,7 @@ class apiAssetApiAction extends sfAction
             return AhgCentralHelpers::apiJsonError($this, 'object_id is required', 400);
         }
 
-        $service = new arGrapHeritageAssetService();
+        $service = new ahgGrapHeritageAssetService();
         $id = $service->saveAssetRecord($data['object_id'], $data);
 
         return AhgCentralHelpers::apiJsonResponse($this, [
@@ -166,7 +166,7 @@ class apiAssetApiAction extends sfAction
 
         $data = json_decode($request->getContent(), true);
 
-        $service = new arGrapHeritageAssetService();
+        $service = new ahgGrapHeritageAssetService();
         $id = $service->saveAssetRecord($objectId, $data);
 
         return AhgCentralHelpers::apiJsonResponse($this, [

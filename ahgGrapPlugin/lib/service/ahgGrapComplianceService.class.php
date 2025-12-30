@@ -425,7 +425,7 @@ class ahgGrapComplianceService
         if (!empty($grapRecord['asset_class'])) {
             return [
                 'status' => 'pass',
-                'message' => 'Asset class assigned: ' . arGrapHeritageAssetService::$assetClassLabels[$grapRecord['asset_class']] ?? $grapRecord['asset_class'],
+                'message' => 'Asset class assigned: ' . ahgGrapHeritageAssetService::$assetClassLabels[$grapRecord['asset_class']] ?? $grapRecord['asset_class'],
                 'value' => $grapRecord['asset_class']
             ];
         }
@@ -434,15 +434,15 @@ class ahgGrapComplianceService
 
     protected function hasRecognitionStatus($objectId, $grapRecord, $object)
     {
-        if ($grapRecord['recognition_status'] === arGrapHeritageAssetService::STATUS_RECOGNISED ||
-            $grapRecord['recognition_status'] === arGrapHeritageAssetService::STATUS_IMPAIRED) {
+        if ($grapRecord['recognition_status'] === ahgGrapHeritageAssetService::STATUS_RECOGNISED ||
+            $grapRecord['recognition_status'] === ahgGrapHeritageAssetService::STATUS_IMPAIRED) {
             return [
                 'status' => 'pass',
                 'message' => 'Asset is recognised',
                 'value' => $grapRecord['recognition_status']
             ];
         }
-        if ($grapRecord['recognition_status'] === arGrapHeritageAssetService::STATUS_PENDING_RECOGNITION) {
+        if ($grapRecord['recognition_status'] === ahgGrapHeritageAssetService::STATUS_PENDING_RECOGNITION) {
             return ['status' => 'warning', 'message' => 'Recognition pending'];
         }
         return ['status' => 'fail', 'message' => 'Asset not recognised'];
@@ -522,7 +522,7 @@ class ahgGrapComplianceService
 
     protected function hasRevaluationDetails($objectId, $grapRecord, $object)
     {
-        if ($grapRecord['measurement_basis'] !== arGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE) {
+        if ($grapRecord['measurement_basis'] !== ahgGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE) {
             return ['status' => 'not_applicable', 'message' => 'Not using revaluation model'];
         }
 
@@ -538,7 +538,7 @@ class ahgGrapComplianceService
 
     protected function checkRevaluationFrequency($objectId, $grapRecord, $object)
     {
-        if ($grapRecord['measurement_basis'] !== arGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE) {
+        if ($grapRecord['measurement_basis'] !== ahgGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE) {
             return ['status' => 'not_applicable', 'message' => 'Not using revaluation model'];
         }
 
@@ -591,7 +591,7 @@ class ahgGrapComplianceService
 
     protected function checkNominalValueJustification($objectId, $grapRecord, $object)
     {
-        if ($grapRecord['measurement_basis'] !== arGrapHeritageAssetService::MEASUREMENT_NOMINAL) {
+        if ($grapRecord['measurement_basis'] !== ahgGrapHeritageAssetService::MEASUREMENT_NOMINAL) {
             return ['status' => 'not_applicable', 'message' => 'Not using nominal value'];
         }
 
@@ -609,7 +609,7 @@ class ahgGrapComplianceService
             return ['status' => 'not_applicable', 'message' => 'Not a donated asset'];
         }
 
-        if ($grapRecord['measurement_basis'] === arGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE ||
+        if ($grapRecord['measurement_basis'] === ahgGrapHeritageAssetService::MEASUREMENT_FAIR_VALUE ||
             !empty($grapRecord['initial_cost'])) {
             return ['status' => 'pass', 'message' => 'Donated asset properly valued'];
         }
@@ -717,8 +717,8 @@ class ahgGrapComplianceService
 
     protected function checkDisposalAuthority($objectId, $grapRecord, $object)
     {
-        if ($grapRecord['recognition_status'] === arGrapHeritageAssetService::STATUS_PENDING_DERECOGNITION ||
-            $grapRecord['recognition_status'] === arGrapHeritageAssetService::STATUS_DERECOGNISED) {
+        if ($grapRecord['recognition_status'] === ahgGrapHeritageAssetService::STATUS_PENDING_DERECOGNITION ||
+            $grapRecord['recognition_status'] === ahgGrapHeritageAssetService::STATUS_DERECOGNISED) {
             $metadata = $grapRecord['metadata'] ?? [];
             if (!empty($metadata['narssa_disposal_authority'])) {
                 return ['status' => 'pass', 'message' => 'NARSSA disposal authority obtained'];

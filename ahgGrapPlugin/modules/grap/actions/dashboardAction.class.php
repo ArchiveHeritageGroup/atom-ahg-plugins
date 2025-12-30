@@ -12,9 +12,9 @@ class grapDashboardAction extends sfAction
 {
     public function execute($request)
     {
-        $this->assetService = new arGrapHeritageAssetService();
-        $this->complianceService = new arGrapComplianceService();
-        $this->exportService = new arGrapExportService();
+        $this->assetService = new ahgGrapHeritageAssetService();
+        $this->complianceService = new ahgGrapComplianceService();
+        $this->exportService = new ahgGrapExportService();
 
         // Repository filter
         $this->repositoryId = $request->getParameter('repository_id');
@@ -44,8 +44,8 @@ class grapDashboardAction extends sfAction
         $this->pendingDerecognition = $this->getPendingDerecognition($this->repositoryId);
 
         // Asset classes and status labels for display
-        $this->assetClasses = arGrapHeritageAssetService::$assetClassLabels;
-        $this->statusLabels = arGrapHeritageAssetService::$statusLabels;
+        $this->assetClasses = ahgGrapHeritageAssetService::$assetClassLabels;
+        $this->statusLabels = ahgGrapHeritageAssetService::$statusLabels;
     }
 
     protected function getRepositories()
@@ -124,8 +124,8 @@ class grapDashboardAction extends sfAction
             $totals['total_impairment'] += $row['total_impairment'];
             $totals['total_surplus'] += $row['total_revaluation_surplus'];
 
-            if ($row['recognition_status'] === arGrapHeritageAssetService::STATUS_RECOGNISED ||
-                $row['recognition_status'] === arGrapHeritageAssetService::STATUS_IMPAIRED) {
+            if ($row['recognition_status'] === ahgGrapHeritageAssetService::STATUS_RECOGNISED ||
+                $row['recognition_status'] === ahgGrapHeritageAssetService::STATUS_IMPAIRED) {
                 $totals['recognised'] += $row['count'];
             } else {
                 $totals['unrecognised'] += $row['count'];
