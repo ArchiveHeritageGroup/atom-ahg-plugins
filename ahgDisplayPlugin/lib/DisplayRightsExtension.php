@@ -10,7 +10,7 @@ declare(strict_types=1);
  * Usage in DisplayService::prepareForDisplay():
  *   $data['rights'] = DisplayRightsExtension::getRightsData($objectId, $userId);
  * 
- * @package arRightsPlugin
+ * @package ahgRightsPlugin
  */
 class DisplayRightsExtension
 {
@@ -27,7 +27,7 @@ class DisplayRightsExtension
     {
         // Load RightsService if not already loaded
         if (!class_exists('RightsService')) {
-            $rightsPluginPath = sfConfig::get('sf_plugins_dir') . '/arRightsPlugin/lib/Service/RightsService.php';
+            $rightsPluginPath = sfConfig::get('sf_plugins_dir') . '/ahgRightsPlugin/lib/Service/RightsService.php';
             if (file_exists($rightsPluginPath)) {
                 require_once $rightsPluginPath;
             } else {

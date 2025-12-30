@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# arRightsPlugin Installation Script
+# ahgRightsPlugin Installation Script
 # AtoM 2.10 / Laravel Rights Management
 # =============================================================================
 
@@ -12,10 +12,10 @@ PLUGINS_DIR="${ATOM_ROOT}/plugins"
 DB_NAME="${DB_NAME:-archive}"
 DB_USER="${DB_USER:-root}"
 DB_PASS="${DB_PASS:-}"
-PLUGIN_NAME="arRightsPlugin"
+PLUGIN_NAME="ahgRightsPlugin"
 
 echo "=============================================="
-echo "  arRightsPlugin Installer"
+echo "  ahgRightsPlugin Installer"
 echo "=============================================="
 echo ""
 
@@ -37,11 +37,11 @@ echo ""
 
 # Step 1: Extract plugin
 echo "[1/4] Installing plugin files..."
-if [ -f "arRightsPlugin-v1.0.0.tar.gz" ]; then
-    tar -xzf arRightsPlugin-v1.0.0.tar.gz -C "$PLUGINS_DIR/"
+if [ -f "ahgRightsPlugin-v1.0.0.tar.gz" ]; then
+    tar -xzf ahgRightsPlugin-v1.0.0.tar.gz -C "$PLUGINS_DIR/"
     echo "  ✓ Plugin files extracted"
-elif [ -d "arRightsPlugin" ]; then
-    cp -r arRightsPlugin "$PLUGINS_DIR/"
+elif [ -d "ahgRightsPlugin" ]; then
+    cp -r ahgRightsPlugin "$PLUGINS_DIR/"
     echo "  ✓ Plugin files copied"
 else
     echo "  ✗ Error: Plugin archive not found"
@@ -68,10 +68,10 @@ fi
 echo "[3/4] Enabling plugin..."
 SETTINGS_FILE="$ATOM_ROOT/apps/qubit/config/settings.yml"
 
-if grep -q "arRightsPlugin" "$SETTINGS_FILE" 2>/dev/null; then
+if grep -q "ahgRightsPlugin" "$SETTINGS_FILE" 2>/dev/null; then
     echo "  ⓘ Plugin already in settings.yml"
 else
-    echo "  Note: Add 'arRightsPlugin' to plugins list in $SETTINGS_FILE"
+    echo "  Note: Add 'ahgRightsPlugin' to plugins list in $SETTINGS_FILE"
 fi
 
 # Step 4: Clear cache

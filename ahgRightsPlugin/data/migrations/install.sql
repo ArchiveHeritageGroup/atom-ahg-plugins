@@ -1,5 +1,5 @@
 -- =====================================================
--- arRightsPlugin Database Schema
+-- ahgRightsPlugin Database Schema
 -- Comprehensive Rights Management
 -- =====================================================
 

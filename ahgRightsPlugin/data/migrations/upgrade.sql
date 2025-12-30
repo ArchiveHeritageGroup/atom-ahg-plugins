@@ -1,5 +1,5 @@
 -- =====================================================
--- arRightsPlugin Safe Upgrade Script
+-- ahgRightsPlugin Safe Upgrade Script
 -- Handles existing data gracefully
 -- Run: mysql -u root archive < upgrade.sql
 -- =====================================================
@@ -512,7 +512,7 @@ INSERT IGNORE INTO rights_derivative_profile (name, code, watermark_enabled, max
 -- =====================================================
 -- COMPLETE
 -- =====================================================
-SELECT 'arRightsPlugin upgrade complete!' as status;
+SELECT 'ahgRightsPlugin upgrade complete!' as status;
 SELECT COUNT(*) as rights_statements FROM rights_statement;
 SELECT COUNT(*) as cc_licenses FROM rights_cc_license;
 SELECT COUNT(*) as tk_labels FROM rights_tk_label;

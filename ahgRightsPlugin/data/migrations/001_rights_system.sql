@@ -1,5 +1,5 @@
 -- =============================================================================
--- arRightsPlugin Database Migration
+-- ahgRightsPlugin Database Migration
 -- Version: 1.0.0
 -- AtoM 2.10 / Laravel / MySQL 8 / PHP 8.3
 -- =============================================================================

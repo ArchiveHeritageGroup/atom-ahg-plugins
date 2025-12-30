@@ -1,4 +1,4 @@
-# arRightsPlugin
+# ahgRightsPlugin
 
 Comprehensive Rights Management for AtoM 2.10 Laravel Rebuild
 
@@ -18,13 +18,13 @@ Comprehensive Rights Management for AtoM 2.10 Laravel Rebuild
 
 ```bash
 # 1. Extract to plugins directory
-tar -xzf arRightsPlugin.tar.gz -C /usr/share/nginx/archive/plugins/
+tar -xzf ahgRightsPlugin.tar.gz -C /usr/share/nginx/archive/plugins/
 
 # 2. Install database tables
-mysql -u root archive < /usr/share/nginx/archive/plugins/arRightsPlugin/data/migrations/install.sql
+mysql -u root archive < /usr/share/nginx/archive/plugins/ahgRightsPlugin/data/migrations/install.sql
 
 # 3. Enable plugin in ProjectConfiguration.class.php
-# Add 'arRightsPlugin' to the enabled plugins array
+# Add 'ahgRightsPlugin' to the enabled plugins array
 
 # 4. Clear cache
 php symfony cc
@@ -36,7 +36,7 @@ The plugin automatically integrates with ahgDisplayPlugin if installed:
 
 1. Copy `DisplayRightsExtension.php` to ahgDisplayPlugin:
    ```bash
-   cp /usr/share/nginx/archive/plugins/arRightsPlugin/lib/DisplayRightsExtension.php \
+   cp /usr/share/nginx/archive/plugins/ahgRightsPlugin/lib/DisplayRightsExtension.php \
       /usr/share/nginx/archive/plugins/ahgDisplayPlugin/lib/
    ```
 
