@@ -3,8 +3,6 @@
 -- Tables are created by atom-framework/database/install.sql
 
 -- Register theme plugin
-INSERT IGNORE INTO atom_plugin (name, is_enabled, version, category) VALUES
-('arAHGThemeB5Plugin', 1, '1.0.0', 'theme');
 
 -- Default AHG Settings
 INSERT IGNORE INTO ahg_settings (setting_key, setting_value, setting_type, setting_group) VALUES

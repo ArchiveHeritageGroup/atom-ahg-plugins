@@ -2,9 +2,6 @@
 -- Version: 1.0.0
 -- Tables are created by atom-framework/database/install.sql
 
--- Register plugin
-INSERT IGNORE INTO atom_plugin (name, is_enabled, version, category) VALUES
-('ahgResearchPlugin', 1, '1.0.0', 'services');
 
 -- Default reading rooms
 INSERT IGNORE INTO research_reading_room (name, code, description, capacity, is_active) VALUES
