@@ -1,0 +1,11 @@
+<?php
+class DonorAgreementReminderForm extends sfForm
+{
+    public function configure()
+    {
+        $this->setWidgets(['reminder_type' => new sfWidgetFormChoice(['choices' => ['expiry_warning' => 'Expiry Warning', 'review_due' => 'Review Due', 'renewal_required' => 'Renewal Required', 'restriction_ending' => 'Restriction Ending', 'payment_due' => 'Payment Due', 'donor_contact' => 'Donor Contact', 'anniversary' => 'Anniversary', 'audit' => 'Audit', 'preservation_check' => 'Preservation Check', 'custom' => 'Custom']]), 'title' => new sfWidgetFormInputText(), 'description' => new sfWidgetFormTextarea(), 'reminder_date' => new sfWidgetFormInputText(['type' => 'date']), 'priority' => new sfWidgetFormChoice(['choices' => ['low' => 'Low', 'normal' => 'Normal', 'high' => 'High', 'urgent' => 'Urgent']]), 'is_recurring' => new sfWidgetFormInputCheckbox(), 'recurrence_pattern' => new sfWidgetFormChoice(['choices' => ['' => '-- None --', 'daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'yearly' => 'Yearly']]), 'recurrence_end_date' => new sfWidgetFormInputText(['type' => 'date']), 'notify_email' => new sfWidgetFormInputCheckbox(), 'action_required' => new sfWidgetFormTextarea()]);
+        $this->setValidators(['reminder_type' => new sfValidatorChoice(['choices' => ['expiry_warning', 'review_due', 'renewal_required', 'restriction_ending', 'payment_due', 'donor_contact', 'anniversary', 'audit', 'preservation_check', 'custom'], 'required' => true]), 'title' => new sfValidatorString(['required' => true, 'max_length' => 255]), 'description' => new sfValidatorString(['required' => false]), 'reminder_date' => new sfValidatorDate(['required' => true]), 'priority' => new sfValidatorChoice(['choices' => ['low', 'normal', 'high', 'urgent']]), 'is_recurring' => new sfValidatorBoolean(['required' => false]), 'recurrence_pattern' => new sfValidatorChoice(['choices' => ['', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'], 'required' => false]), 'recurrence_end_date' => new sfValidatorDate(['required' => false]), 'notify_email' => new sfValidatorBoolean(['required' => false]), 'action_required' => new sfValidatorString(['required' => false])]);
+        $this->widgetSchema->setNameFormat('reminder[%s]');
+        $this->setDefaults(['priority' => 'normal', 'notify_email' => true]);
+    }
+}

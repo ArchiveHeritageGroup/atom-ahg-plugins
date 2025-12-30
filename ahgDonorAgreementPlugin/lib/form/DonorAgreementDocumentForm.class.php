@@ -1,0 +1,10 @@
+<?php
+class DonorAgreementDocumentForm extends sfForm
+{
+    public function configure()
+    {
+        $this->setWidgets(['document_type' => new sfWidgetFormChoice(['choices' => ['' => '-- Select --', 'signed_agreement' => 'Signed Agreement', 'draft' => 'Draft', 'amendment' => 'Amendment', 'addendum' => 'Addendum', 'schedule' => 'Schedule/Appendix', 'correspondence' => 'Correspondence', 'appraisal_report' => 'Appraisal Report', 'inventory' => 'Inventory', 'deed_of_gift' => 'Deed of Gift', 'transfer_form' => 'Transfer Form', 'receipt' => 'Receipt', 'legal_opinion' => 'Legal Opinion', 'valuation' => 'Valuation Report', 'insurance' => 'Insurance Document', 'photo' => 'Photo', 'other' => 'Other']]), 'title' => new sfWidgetFormInputText(), 'description' => new sfWidgetFormTextarea(), 'document_date' => new sfWidgetFormInputText(['type' => 'date']), 'file' => new sfWidgetFormInputFile(), 'is_signed' => new sfWidgetFormInputCheckbox(), 'signature_date' => new sfWidgetFormInputText(['type' => 'date']), 'is_confidential' => new sfWidgetFormInputCheckbox()]);
+        $this->setValidators(['document_type' => new sfValidatorChoice(['choices' => ['signed_agreement', 'draft', 'amendment', 'addendum', 'schedule', 'correspondence', 'appraisal_report', 'inventory', 'deed_of_gift', 'transfer_form', 'receipt', 'legal_opinion', 'valuation', 'insurance', 'photo', 'other'], 'required' => true]), 'title' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'description' => new sfValidatorString(['required' => false]), 'document_date' => new sfValidatorDate(['required' => false]), 'file' => new sfValidatorFile(['required' => true, 'max_size' => 52428800, 'mime_types' => ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/tiff']]), 'is_signed' => new sfValidatorBoolean(['required' => false]), 'signature_date' => new sfValidatorDate(['required' => false]), 'is_confidential' => new sfValidatorBoolean(['required' => false])]);
+        $this->widgetSchema->setNameFormat('document[%s]');
+    }
+}

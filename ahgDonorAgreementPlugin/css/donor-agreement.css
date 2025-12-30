@@ -1,0 +1,47 @@
+/* ahgDonorAgreementPlugin Styles */
+
+.donor-dashboard .stat-card {
+    border-left: 4px solid var(--bs-primary);
+    transition: transform 0.2s;
+}
+.donor-dashboard .stat-card:hover {
+    transform: translateY(-2px);
+}
+.donor-dashboard .stat-card.warning { border-left-color: var(--bs-warning); }
+.donor-dashboard .stat-card.danger { border-left-color: var(--bs-danger); }
+.donor-dashboard .stat-card.success { border-left-color: var(--bs-success); }
+
+.agreement-status { font-size: 0.85rem; }
+.agreement-status.draft { background-color: #6c757d; }
+.agreement-status.pending_review { background-color: #ffc107; color: #000; }
+.agreement-status.pending_signature { background-color: #17a2b8; }
+.agreement-status.active { background-color: #28a745; }
+.agreement-status.expired { background-color: #dc3545; }
+.agreement-status.terminated { background-color: #343a40; }
+.agreement-status.superseded { background-color: #6f42c1; }
+
+.agreement-view .section-header {
+    background-color: var(--bs-light);
+    padding: 0.75rem 1rem;
+    margin: 1.5rem -1rem 1rem;
+    border-left: 3px solid var(--bs-primary);
+    font-weight: 600;
+}
+
+.agreement-documents .document-item {
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+.agreement-documents .document-item:hover {
+    background-color: var(--bs-light);
+}
+
+.reminder-item { border-left: 3px solid var(--bs-secondary); }
+.reminder-item.priority-high { border-left-color: var(--bs-warning); }
+.reminder-item.priority-urgent { border-left-color: var(--bs-danger); }
+.reminder-item.completed { opacity: 0.6; }
+
+.expiry-warning { color: var(--bs-danger); font-weight: 600; }
+.expiry-soon { color: var(--bs-warning); }
