@@ -24,7 +24,7 @@ $hasDam = isPluginActive('arDAMPlugin') || isPluginActive('ahgDAMPlugin');
 $hasSpectrum = isPluginActive('ahgSpectrumPlugin');
 $hasGrap = isPluginActive('ahgGrapPlugin');
 $hasResearch = isPluginActive('ahgResearchPlugin');
-$hasDonor = isPluginActive('ahgDonorPlugin');
+$hasDonor = isPluginActive('ahgDonorAgreementPlugin');
 $hasRights = isPluginActive('ahgExtendedRightsPlugin');
 $hasCondition = isPluginActive('ahgConditionPlugin');
 $hasPrivacy = isPluginActive('arPrivacyPlugin');
@@ -165,7 +165,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboards'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Quality Dashboard'); ?></a></li>
+                    <!-- Quality Dashboard removed - module does not exist -->
                     <?php if ($hasSpectrum): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Spectrum Workflow'); ?></a></li>
                     <?php endif; ?>
