@@ -14,6 +14,10 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         $routing = $event->getSubject();
         
         // Admin clearance management routes
+        $routing->prependRoute('security_compliance', new sfRoute(
+            '/admin/security/compliance',
+            ['module' => 'ahgSecurityClearance', 'action' => 'securityCompliance']
+        ));
         $routing->prependRoute('security_clearances', new sfRoute(
             '/security/clearances',
             ['module' => 'ahgSecurityClearance', 'action' => 'index']

@@ -433,4 +433,26 @@ class ahgSecurityClearanceActions extends sfActions
             ->pluck('count', 'compartment_id')
             ->toArray();
     }
+
+    /**
+     * Security Compliance Dashboard
+     */
+    public function executeSecurityCompliance(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+
+        $this->stats = [
+            'classified_objects' => \Illuminate\Database\Capsule\Manager::table('security_classification')->count(),
+            'pending_reviews' => 0,
+            'cleared_users' => \Illuminate\Database\Capsule\Manager::table('user_security_clearance')->count(),
+            'access_logs_today' => \Illuminate\Database\Capsule\Manager::table('user_security_clearance_log')
+                ->whereDate('created_at', date('Y-m-d'))->count(),
+        ];
+        $this->pendingReviews = [];
+        $this->retentionSchedules = [];
+        $this->recentLogs = \Illuminate\Database\Capsule\Manager::table('user_security_clearance_log')
+            ->orderBy('created_at', 'desc')->limit(10)->get()->toArray();
+    }
 }
