@@ -14,10 +14,10 @@ class AhgSettingsIndexAction extends sfAction
         // Check which plugins exist
         $hasResearch = is_dir($pluginsDir . '/ahgResearchPlugin');
         $hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
-        $hasRic = is_dir($pluginsDir . '/arRicExplorerPlugin');
+        $hasRic = is_dir($pluginsDir . '/ahgRicExplorerPlugin');
         $hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
         $hasCondition = is_dir($pluginsDir . '/ahgConditionPlugin');
-        $hasSpectrum = is_dir($pluginsDir . '/arSpectrumPlugin');
+        $hasSpectrum = is_dir($pluginsDir . '/ahgSpectrumPlugin');
         $hasIiif = is_dir($pluginsDir . '/IiifViewerFramework');
         
         $this->sections = [];

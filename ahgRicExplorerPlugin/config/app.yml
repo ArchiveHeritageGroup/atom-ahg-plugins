@@ -1,0 +1,7 @@
+all:
+  ric_search_api: /api/ric
+  ric_fuseki_endpoint: http://192.168.0.112:3030/ric
+  ric_base_uri: https://archives.theahg.co.za/ric
+  ric_instance_id: atom-psis
+  ric_enable_search_widget: true
+  ric_enable_explorer_panel: true

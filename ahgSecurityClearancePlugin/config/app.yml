@@ -123,7 +123,7 @@ all:
     address: "123 Archive Street"
     email: "johan@theahg.co.za"
 
-  # Valuation alerts (for arSpectrumPlugin integration)
+  # Valuation alerts (for ahgSpectrumPlugin integration)
   valuation:
     alert_email: "johan@theahg.co.za"
     renewal_months: 36

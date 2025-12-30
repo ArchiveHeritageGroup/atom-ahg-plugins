@@ -651,3 +651,164 @@ CREATE TABLE IF NOT EXISTS `creative_commons_license_i18n` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 16:42:35
+
+-- Seed Data
+-- MySQL dump 10.13  Distrib 8.0.44, for Linux (x86_64)
+--
+-- Host: localhost    Database: archive
+-- ------------------------------------------------------
+-- Server version	8.0.44-0ubuntu0.22.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `rights_statement`
+--
+
+LOCK TABLES `rights_statement` WRITE;
+/*!40000 ALTER TABLE `rights_statement` DISABLE KEYS */;
+INSERT IGNORE INTO `rights_statement` VALUES (1,'http://rightsstatements.org/vocab/InC/1.0/','InC','in-copyright','InC.png',1,1,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (2,'http://rightsstatements.org/vocab/InC-OW-EU/1.0/','InC-OW-EU','in-copyright','InC-OW-EU.png',1,2,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (3,'http://rightsstatements.org/vocab/InC-EDU/1.0/','InC-EDU','in-copyright','InC-EDU.png',1,3,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (4,'http://rightsstatements.org/vocab/InC-NC/1.0/','InC-NC','in-copyright','InC-NC.png',1,4,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (5,'http://rightsstatements.org/vocab/InC-RUU/1.0/','InC-RUU','in-copyright','InC-RUU.png',1,5,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (6,'http://rightsstatements.org/vocab/NoC-CR/1.0/','NoC-CR','no-copyright','NoC-CR.png',1,10,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (7,'http://rightsstatements.org/vocab/NoC-NC/1.0/','NoC-NC','no-copyright','NoC-NC.png',1,11,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (8,'http://rightsstatements.org/vocab/NoC-OKLR/1.0/','NoC-OKLR','no-copyright','NoC-OKLR.png',1,12,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (9,'http://rightsstatements.org/vocab/NoC-US/1.0/','NoC-US','no-copyright','NoC-US.png',1,13,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (10,'http://rightsstatements.org/vocab/CNE/1.0/','CNE','other','CNE.png',1,20,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (11,'http://rightsstatements.org/vocab/UND/1.0/','UND','other','UND.png',1,21,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+INSERT IGNORE INTO `rights_statement` VALUES (12,'http://rightsstatements.org/vocab/NKC/1.0/','NKC','other','NKC.png',1,22,'2025-12-16 15:58:48','2025-12-16 16:10:45',NULL);
+/*!40000 ALTER TABLE `rights_statement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `rights_statement_i18n`
+--
+
+LOCK TABLES `rights_statement_i18n` WRITE;
+/*!40000 ALTER TABLE `rights_statement_i18n` DISABLE KEYS */;
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (1,1,'en','In Copyright','This Item is protected by copyright.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (2,2,'en','In Copyright - EU Orphan Work','Identified as an orphan work in the EU.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (3,3,'en','In Copyright - Educational Use Permitted','Educational use permitted.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (4,4,'en','In Copyright - Non-Commercial Use Permitted','Non-commercial use permitted.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (5,5,'en','In Copyright - Rights-holder(s) Unlocatable','Rights-holder cannot be found.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (6,6,'en','No Copyright - Contractual Restrictions','Contractual restrictions apply.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (7,7,'en','No Copyright - Non-Commercial Use Only','Non-commercial use only.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (8,8,'en','No Copyright - Other Known Legal Restrictions','Other legal restrictions apply.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (9,9,'en','No Copyright - United States','Not protected in the US.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (10,10,'en','Copyright Not Evaluated','Status not evaluated.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (11,11,'en','Copyright Undetermined','Status could not be determined.',NULL);
+INSERT IGNORE INTO `rights_statement_i18n` VALUES (12,12,'en','No Known Copyright','No restrictions believed to apply.',NULL);
+/*!40000 ALTER TABLE `rights_statement_i18n` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `creative_commons_license`
+--
+
+LOCK TABLES `creative_commons_license` WRITE;
+/*!40000 ALTER TABLE `creative_commons_license` DISABLE KEYS */;
+INSERT IGNORE INTO `creative_commons_license` VALUES (1,'https://creativecommons.org/publicdomain/zero/1.0/','https://licensebuttons.net/l/zero/1.0/88x31.png','CC0-1.0','1.0',1,1,0,0,'cc-zero.png',1,1,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (2,'https://creativecommons.org/licenses/by/4.0/','https://licensebuttons.net/l/by/4.0/88x31.png','CC-BY-4.0','4.0',1,1,1,0,'cc-by.png',1,2,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (3,'https://creativecommons.org/licenses/by-sa/4.0/','https://licensebuttons.net/l/by-sa/4.0/88x31.png','CC-BY-SA-4.0','4.0',1,1,1,1,'cc-by-sa.png',1,3,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (4,'https://creativecommons.org/licenses/by-nc/4.0/','https://licensebuttons.net/l/by-nc/4.0/88x31.png','CC-BY-NC-4.0','4.0',1,0,1,0,'cc-by-nc.png',1,4,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (5,'https://creativecommons.org/licenses/by-nc-sa/4.0/','https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png','CC-BY-NC-SA-4.0','4.0',1,0,1,1,'cc-by-nc-sa.png',1,5,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (6,'https://creativecommons.org/licenses/by-nd/4.0/','https://licensebuttons.net/l/by-nd/4.0/88x31.png','CC-BY-ND-4.0','4.0',0,1,1,0,'cc-by-nd.png',1,6,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (7,'https://creativecommons.org/licenses/by-nc-nd/4.0/','https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png','CC-BY-NC-ND-4.0','4.0',0,0,1,0,'cc-by-nc-nd.png',1,7,'2025-12-16 15:58:48','2025-12-16 17:10:02');
+INSERT IGNORE INTO `creative_commons_license` VALUES (8,'https://creativecommons.org/publicdomain/mark/1.0/',NULL,'PDM-1.0','1.0',1,1,0,0,'publicdomain.png',1,8,'2025-12-16 15:58:48','2025-12-16 16:10:45');
+/*!40000 ALTER TABLE `creative_commons_license` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `creative_commons_license_i18n`
+--
+
+LOCK TABLES `creative_commons_license_i18n` WRITE;
+/*!40000 ALTER TABLE `creative_commons_license_i18n` DISABLE KEYS */;
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (1,1,'en','CC0 1.0 Universal (Public Domain)','No rights reserved.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (2,2,'en','Attribution 4.0 International','Credit required.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (3,3,'en','Attribution-ShareAlike 4.0 International','Credit, share alike.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (4,4,'en','Attribution-NonCommercial 4.0 International','Credit, non-commercial.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (5,5,'en','Attribution-NonCommercial-ShareAlike 4.0','Credit, NC, share alike.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (6,6,'en','Attribution-NoDerivatives 4.0 International','Credit, no derivatives.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (7,7,'en','Attribution-NonCommercial-NoDerivatives 4.0','Most restrictive.');
+INSERT IGNORE INTO `creative_commons_license_i18n` VALUES (8,8,'en','Public Domain Mark 1.0','Free of restrictions.');
+/*!40000 ALTER TABLE `creative_commons_license_i18n` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `rights_tk_label`
+--
+
+LOCK TABLES `rights_tk_label` WRITE;
+/*!40000 ALTER TABLE `rights_tk_label` DISABLE KEYS */;
+INSERT IGNORE INTO `rights_tk_label` VALUES (1,'TK-A','attribution','https://localcontexts.org/label/tk-attribution/','#4A90D9',NULL,1,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (2,'TK-NC','tk','https://localcontexts.org/label/tk-non-commercial/','#7B8D42',NULL,2,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (3,'TK-C','tk','https://localcontexts.org/label/tk-community/','#D35400',NULL,3,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (4,'TK-CV','tk','https://localcontexts.org/label/tk-culturally-sensitive/','#8E44AD',NULL,4,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (5,'TK-SS','tk','https://localcontexts.org/label/tk-secret-sacred/','#C0392B',NULL,5,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (6,'TK-MC','tk','https://localcontexts.org/label/tk-multiple-communities/','#16A085',NULL,6,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (7,'TK-MR','tk','https://localcontexts.org/label/tk-men-restricted/','#2C3E50',NULL,7,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (8,'TK-WR','tk','https://localcontexts.org/label/tk-women-restricted/','#E74C3C',NULL,8,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (9,'TK-SR','tk','https://localcontexts.org/label/tk-seasonal/','#F39C12',NULL,9,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (10,'TK-F','tk','https://localcontexts.org/label/tk-family/','#27AE60',NULL,10,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (11,'TK-O','tk','https://localcontexts.org/label/tk-outreach/','#3498DB',NULL,11,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (12,'TK-V','tk','https://localcontexts.org/label/tk-verified/','#1ABC9C',NULL,12,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (13,'TK-NV','tk','https://localcontexts.org/label/tk-non-verified/','#95A5A6',NULL,13,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (14,'BC-R','bc','https://localcontexts.org/label/bc-research/','#9B59B6',NULL,14,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (15,'BC-CB','bc','https://localcontexts.org/label/bc-consent-before/','#E67E22',NULL,15,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (16,'BC-P','bc','https://localcontexts.org/label/bc-provenance/','#1ABC9C',NULL,16,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (17,'BC-MC','bc','https://localcontexts.org/label/bc-multiple-communities/','#3498DB',NULL,17,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (18,'BC-CL','bc','https://localcontexts.org/label/bc-clan/','#9B59B6',NULL,18,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (19,'BC-O','bc','https://localcontexts.org/label/bc-outreach/','#2ECC71',NULL,19,1,'2025-12-11 07:48:41');
+/*!40000 ALTER TABLE `rights_tk_label` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `rights_tk_label_i18n`
+--
+
+LOCK TABLES `rights_tk_label_i18n` WRITE;
+/*!40000 ALTER TABLE `rights_tk_label_i18n` DISABLE KEYS */;
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (1,'en','TK Attribution','Attribution is required. This label asks users to respect traditional citation practices.','Include attribution to the community when using this material.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (2,'en','TK Non-Commercial','This material should only be used for non-commercial purposes.','Do not use this material for commercial gain without community permission.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (3,'en','TK Community Voice','This material should only be used with the consent of the community.','Contact the community before any use.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (4,'en','TK Culturally Sensitive','This material contains culturally sensitive content.','Treat this material with cultural respect and sensitivity.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (5,'en','TK Secret/Sacred','This material contains secret or sacred content with restricted access.','Access is restricted. Do not share without explicit permission.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (6,'en','TK Multiple Communities','Multiple communities have interests in this material.','Consult with all relevant communities before use.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (7,'en','TK Men Restricted','Access to this material is restricted to men only within the community.','Respect gender-specific cultural protocols.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (8,'en','TK Women Restricted','Access to this material is restricted to women only within the community.','Respect gender-specific cultural protocols.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (9,'en','TK Seasonal','Access to this material may be seasonally or ceremonially restricted.','Check with the community about appropriate times for access.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (10,'en','TK Family','This material belongs to a specific family within the community.','Contact the specific family for permissions.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (11,'en','TK Outreach','The community has designated this material for educational outreach.','May be used for educational purposes with attribution.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (12,'en','TK Verified','Community protocols for this material have been verified.','Follow the verified community protocols.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (13,'en','TK Non-Verified','Community protocols for this material have not yet been verified.','Exercise additional caution; protocols may change.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (14,'en','BC Research Use','This material has been collected with consent for research purposes.','Use is limited to approved research activities.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (15,'en','BC Consent Before','Consent was obtained prior to collection of this material.','Original consent terms apply to subsequent use.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (16,'en','BC Provenance','The provenance and history of this material is documented.','Review provenance information before use.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (17,'en','BC Multiple Communities','Multiple communities contributed to this collection.','Acknowledge all contributing communities.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (18,'en','BC Clan','This material relates to a specific clan within the community.','Contact the relevant clan for permissions.');
+INSERT IGNORE INTO `rights_tk_label_i18n` VALUES (19,'en','BC Outreach','This material is designated for educational outreach by the community.','May be used for education with community acknowledgment.');
+/*!40000 ALTER TABLE `rights_tk_label_i18n` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-12-30 18:05:06

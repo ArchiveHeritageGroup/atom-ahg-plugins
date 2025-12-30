@@ -400,3 +400,47 @@ CREATE TABLE IF NOT EXISTS `user_security_clearance_log` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 17:00:32
+
+-- Seed Data
+-- MySQL dump 10.13  Distrib 8.0.44, for Linux (x86_64)
+--
+-- Host: localhost    Database: archive
+-- ------------------------------------------------------
+-- Server version	8.0.44-0ubuntu0.22.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `security_classification`
+--
+
+LOCK TABLES `security_classification` WRITE;
+/*!40000 ALTER TABLE `security_classification` DISABLE KEYS */;
+INSERT IGNORE INTO `security_classification` VALUES (1,'PUBLIC',0,'Public','Publicly accessible material',NULL,NULL,0,0,0,NULL,0,NULL,1,1,1,1,'2025-12-02 08:13:59','2025-12-04 13:58:31');
+INSERT IGNORE INTO `security_classification` VALUES (2,'INTERNAL',1,'Internal','Internal institutional use',NULL,NULL,0,0,0,NULL,0,NULL,1,1,1,1,'2025-12-02 08:13:59','2025-12-04 13:58:31');
+INSERT IGNORE INTO `security_classification` VALUES (3,'RESTRICTED',2,'Restricted','Restricted material, limited staff',NULL,NULL,1,0,0,NULL,0,NULL,1,1,0,1,'2025-12-02 08:13:59','2025-12-04 13:58:31');
+INSERT IGNORE INTO `security_classification` VALUES (4,'CONFIDENTIAL',3,'Confidential','Confidential archival material',NULL,NULL,1,1,0,NULL,1,'confidential.png',0,0,0,1,'2025-12-02 08:13:59','2025-12-04 16:18:54');
+INSERT IGNORE INTO `security_classification` VALUES (5,'SECRET',4,'Secret','Highly sensitive material',NULL,NULL,1,1,1,NULL,1,'secret_copyright.png',0,0,0,1,'2025-12-02 08:13:59','2025-12-04 16:18:54');
+INSERT IGNORE INTO `security_classification` VALUES (7,'TOP_SECRET',5,'Top Secret',NULL,'#6f42c1','fa-user-secret',0,0,0,NULL,1,'top_secret_copyright.png',1,1,1,1,'2025-12-04 14:14:15','2025-12-04 16:18:54');
+/*!40000 ALTER TABLE `security_classification` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-12-30 18:05:06

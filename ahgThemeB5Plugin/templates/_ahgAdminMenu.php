@@ -26,7 +26,7 @@ $hasAuditTrail = ahgIsPluginEnabled('ahgAuditTrailPlugin');
 $hasSecurityClearance = ahgIsPluginEnabled('ahgSecurityClearancePlugin');
 $hasAccessRequest = ahgIsPluginEnabled('ahgAccessRequestPlugin');
 $hasResearch = ahgIsPluginEnabled('ahgResearchPlugin');
-$hasRic = ahgIsPluginEnabled('arRicExplorerPlugin');
+$hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
 ?>
 <?php if ($isAdmin): ?>
 <style>

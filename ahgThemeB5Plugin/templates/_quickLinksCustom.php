@@ -23,7 +23,7 @@ if ($sf_user->isAuthenticated()) {
     $customQuickLinks[] = [
         'label' => 'RIC',
         'icon'  => 'fa-project-diagram',
-        'url'   => url_for(['module' => 'arRicExplorer', 'action' => 'index']),
+        'url'   => url_for(['module' => 'ahgRicExplorer', 'action' => 'index']),
         'title' => 'Records in Contexts Explorer',
     ];
 }

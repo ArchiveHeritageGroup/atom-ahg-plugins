@@ -483,3 +483,93 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template_section` (
          Create View: CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_spectrum_condition_with_photos` AS select `cc`.`id` AS `condition_check_id`,`cc`.`object_id` AS `object_id`,`io`.`identifier` AS `identifier`,`i18n`.`title` AS `title`,`cc`.`check_date` AS `check_date`,`cc`.`overall_condition` AS `overall_condition`,`cc`.`checked_by` AS `checked_by`,count(`cp`.`id`) AS `photo_count`,max(`cp`.`created_at`) AS `last_photo_added` from (((`spectrum_condition_check` `cc` join `information_object` `io` on((`cc`.`object_id` = `io`.`id`))) left join `information_object_i18n` `i18n` on(((`io`.`id` = `i18n`.`id`) and (`i18n`.`culture` = 'en')))) left join `spectrum_condition_photo` `cp` on((`cc`.`id` = `cp`.`condition_check_id`))) group by `cc`.`id`,`cc`.`object_id`,`io`.`identifier`,`i18n`.`title`,`cc`.`check_date`,`cc`.`overall_condition`,`cc`.`checked_by` order by `cc`.`check_date` desc
 character_set_client: utf8mb4
 collation_connection: utf8mb4_0900_ai_ci
+
+-- Seed Data
+-- MySQL dump 10.13  Distrib 8.0.44, for Linux (x86_64)
+--
+-- Host: localhost    Database: archive
+-- ------------------------------------------------------
+-- Server version	8.0.44-0ubuntu0.22.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `condition_vocabulary`
+--
+
+LOCK TABLES `condition_vocabulary` WRITE;
+/*!40000 ALTER TABLE `condition_vocabulary` DISABLE KEYS */;
+INSERT IGNORE INTO `condition_vocabulary` VALUES (1,'damage_type','tear','Tear','Physical tear or rip in material','#dc3545',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (2,'damage_type','stain','Stain','Discoloration or marks','#fd7e14',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (3,'damage_type','foxing','Foxing','Brown spots typically on paper','#ffc107',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (4,'damage_type','fading','Fading','Loss of color intensity','#6c757d',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (5,'damage_type','water_damage','Water Damage','Damage from moisture or flooding','#0dcaf0',NULL,50,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (6,'damage_type','mold','Mold/Mildew','Fungal growth','#198754',NULL,60,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (7,'damage_type','pest_damage','Pest Damage','Damage from insects or rodents','#6f42c1',NULL,70,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (8,'damage_type','abrasion','Abrasion','Surface wear or scratching','#adb5bd',NULL,80,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (9,'damage_type','brittleness','Brittleness','Material becoming fragile','#495057',NULL,90,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (10,'damage_type','loss','Loss/Missing','Missing portions of material','#212529',NULL,100,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (11,'severity','minor','Minor','Minimal impact, low priority','#28a745',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (12,'severity','moderate','Moderate','Noticeable damage, should address','#ffc107',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (13,'severity','severe','Severe','Significant damage requiring attention','#fd7e14',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (14,'severity','critical','Critical','Immediate action required','#dc3545',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (15,'condition','excellent','Excellent','Like new, no visible issues','#198754',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (16,'condition','good','Good','Minor wear consistent with age','#28a745',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (17,'condition','fair','Fair','Some damage but stable','#ffc107',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (18,'condition','poor','Poor','Significant damage or deterioration','#fd7e14',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (19,'condition','critical','Critical','Severe damage, at risk','#dc3545',NULL,50,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (20,'priority','low','Low','Can be addressed when convenient','#6c757d',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (21,'priority','medium','Medium','Should be addressed in normal workflow','#17a2b8',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (22,'priority','high','High','Needs prompt attention','#fd7e14',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (23,'priority','urgent','Urgent','Requires immediate action','#dc3545',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (24,'material','paper','Paper','Paper-based materials','#f8f9fa',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (25,'material','parchment','Parchment/Vellum','Animal skin materials','#e9ecef',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (26,'material','textile','Textile','Fabric and cloth materials','#dee2e6',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (27,'material','leather','Leather','Leather bindings and materials','#795548',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (28,'material','photographic','Photographic','Photos, negatives, slides','#212529',NULL,50,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (29,'material','metal','Metal','Metal objects or components','#adb5bd',NULL,60,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (30,'material','wood','Wood','Wooden items or frames','#8d6e63',NULL,70,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (31,'material','glass','Glass','Glass plates, frames','#90caf9',NULL,80,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (32,'material','plastic','Plastic/Polymer','Synthetic materials','#ce93d8',NULL,90,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (33,'material','audiovisual','Audiovisual','Tapes, films, discs','#424242',NULL,100,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (34,'location_zone','recto','Recto (Front)','Front side of item','#e3f2fd',NULL,10,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (35,'location_zone','verso','Verso (Back)','Back side of item','#fce4ec',NULL,20,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (36,'location_zone','edge_top','Top Edge','Top edge of item','#f3e5f5',NULL,30,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (37,'location_zone','edge_bottom','Bottom Edge','Bottom edge of item','#e8eaf6',NULL,40,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (38,'location_zone','edge_left','Left Edge','Left edge of item','#e0f2f1',NULL,50,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (39,'location_zone','edge_right','Right Edge','Right edge of item','#fff3e0',NULL,60,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (40,'location_zone','spine','Spine','Spine/binding area','#efebe9',NULL,70,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (41,'location_zone','cover_front','Front Cover','Front cover of bound item','#eceff1',NULL,80,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (42,'location_zone','cover_back','Back Cover','Back cover of bound item','#fafafa',NULL,90,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+INSERT IGNORE INTO `condition_vocabulary` VALUES (43,'location_zone','center','Center','Central area of item','#fff8e1',NULL,100,1,'2025-12-19 10:05:43','2025-12-19 10:05:43');
+/*!40000 ALTER TABLE `condition_vocabulary` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `condition_vocabulary_term`
+--
+
+LOCK TABLES `condition_vocabulary_term` WRITE;
+/*!40000 ALTER TABLE `condition_vocabulary_term` DISABLE KEYS */;
+/*!40000 ALTER TABLE `condition_vocabulary_term` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-12-30 18:05:06

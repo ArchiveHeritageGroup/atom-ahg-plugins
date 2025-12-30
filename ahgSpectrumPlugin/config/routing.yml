@@ -1,0 +1,57 @@
+# ahgSpectrumPlugin - Routing Configuration
+
+# Dashboard & Core Routes
+spectrum_dashboard:
+  url: /spectrum/dashboard
+  param: { module: spectrum, action: dashboard }
+
+spectrum_workflow:
+  url: /spectrum/:slug/workflow
+  param: { module: spectrum, action: workflow }
+
+spectrum_export:
+  url: /spectrum/export
+  param: { module: spectrum, action: export }
+
+spectrum_template_config:
+  url: /spectrum/config/templates
+  param: { module: spectrum, action: templateConfig }
+
+spectrum_install:
+  url: /spectrum/install
+  param: { module: spectrum, action: install }
+
+# AHG Settings Routes
+#DISABLED 
+#DISABLED   url: /admin/ahg-settings/:section
+#DISABLED   param: { module: settings, action: ahgSettings }
+#DISABLED 
+#DISABLED # Condition Photos Routes
+#DISABLED spectrum_condition_photos:
+#DISABLED   url: /spectrum/:slug/condition/:condition_id/photos
+  param: { module: spectrum, action: conditionPhotos }
+
+spectrum_photo_edit:
+  url: /spectrum/photo/:photo_id/edit
+  param: { module: spectrum, action: conditionPhotos, photo_action: edit }
+
+spectrum_photo_delete:
+  url: /spectrum/photo/:photo_id/delete
+  param: { module: spectrum, action: conditionPhotos, photo_action: delete }
+
+# API Routes
+spectrum_api_events:
+  url: /api/spectrum/events
+  param: { module: api, action: eventApi }
+
+spectrum_api_object_events:
+  url: /api/spectrum/objects/:object_id/events
+  param: { module: api, action: eventApi }
+
+spectrum_api_statistics:
+  url: /api/spectrum/statistics
+  param: { module: api, action: statisticsApi }
+
+spectrum_conditionCheck:
+  url: /:slug/spectrum/conditionCheck
+  param: { module: spectrum, action: conditionCheck }

@@ -45,7 +45,7 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
             </span>
             <br>
             <?php if ($check->slug): ?>
-            <a href="/<?php echo $check->slug ?>/arSpectrumPlugin/edit?procedure=condition&procedure_id=<?php echo $check->id ?>" class="btn btn-outline-primary btn-sm">
+            <a href="/<?php echo $check->slug ?>/ahgSpectrumPlugin/edit?procedure=condition&procedure_id=<?php echo $check->id ?>" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-edit me-1"></i> Edit
             </a>
             <?php endif ?>
@@ -297,7 +297,7 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
                 </div>
                 <div class="card-body d-grid gap-2">
                     <?php if ($check->slug): ?>
-                    <a href="/<?php echo $check->slug ?>/arSpectrumPlugin/edit?procedure=condition&procedure_id=<?php echo $check->id ?>" class="btn btn-primary">
+                    <a href="/<?php echo $check->slug ?>/ahgSpectrumPlugin/edit?procedure=condition&procedure_id=<?php echo $check->id ?>" class="btn btn-primary">
                         <i class="fas fa-edit me-1"></i> Edit Condition Check
                     </a>
                     <?php endif ?>

@@ -1,0 +1,117 @@
+/**
+ * RiC Explorer Plugin Styles
+ */
+
+/* Constrain RiC Explorer panel to content width */
+#ric-explorer-panel {
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#ric-mini-graph-container {
+  height: 200px !important;
+  max-height: 200px;
+}
+
+.ric-fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  z-index: 9999;
+}
+
+.ric-fullscreen-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10001;
+}
+
+.ric-fullscreen-legend {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(255,255,255,0.9);
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 10001;
+}
+
+.ric-fullscreen-legend div {
+  margin: 3px 0;
+}
+
+.ric-fullscreen-legend span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.ric-view-btn.active {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+.ric-fs-view-btn.active {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+/* Smaller card header */
+#ric-explorer-panel .card-header {
+  padding: 0.5rem 1rem;
+}
+
+#ric-explorer-panel .card-header h5 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+#ric-explorer-panel .card-body {
+  padding: 0.75rem;
+}
+
+/* Hide creators/related if empty space needed */
+.ric-creators, .ric-related {
+  font-size: 0.875rem;
+}
+
+.ric-creators h6, .ric-related h6 {
+  font-size: 0.8rem;
+}
+
+/* Force graph container to stay within card bounds */
+#ric-explorer-panel .card-body {
+  overflow: hidden;
+}
+
+#ric-mini-graph-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+#ric-mini-graph-container > div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#ric-graph-2d, #ric-graph-3d {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Force 3D canvas to fit */
+#ric-graph-3d canvas {
+  max-width: 100% !important;
+}

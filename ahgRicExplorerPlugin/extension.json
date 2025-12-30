@@ -1,0 +1,32 @@
+{
+    "name": "RiC Explorer",
+    "machine_name": "ahgRicExplorerPlugin",
+    "version": "1.0.0",
+    "description": "Records in Context (RiC) visualization, exploration, and Fuseki triplestore integration",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": []
+    },
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "tables": [
+        "ric_orphan_tracking",
+        "ric_queue_status",
+        "ric_recent_operations",
+        "ric_sync_config",
+        "ric_sync_log",
+        "ric_sync_queue",
+        "ric_sync_status",
+        "ric_sync_summary"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "ahg",
+    "load_order": 65
+}

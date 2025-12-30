@@ -1,0 +1,53 @@
+# =============================================================================
+# ahgRicExplorerPlugin Routing Configuration
+# =============================================================================
+
+# RIC Dashboard Routes
+ric_dashboard_index:
+  url: /admin/ric
+  param: { module: ricDashboard, action: index }
+
+ric_dashboard_sync_status:
+  url: /admin/ric/sync-status
+  param: { module: ricDashboard, action: syncStatus }
+
+ric_dashboard_orphans:
+  url: /admin/ric/orphans
+  param: { module: ricDashboard, action: orphans }
+
+ric_dashboard_queue:
+  url: /admin/ric/queue
+  param: { module: ricDashboard, action: queue }
+
+ric_dashboard_logs:
+  url: /admin/ric/logs
+  param: { module: ricDashboard, action: logs }
+
+ric_dashboard_config:
+  url: /admin/ric/config
+  param: { module: ricDashboard, action: config }
+
+# AJAX Endpoints
+ric_ajax_stats:
+  url: /admin/ric/ajax/stats
+  param: { module: ricDashboard, action: ajaxStats }
+
+ric_ajax_integrity_check:
+  url: /admin/ric/ajax/integrity-check
+  param: { module: ricDashboard, action: ajaxIntegrityCheck }
+
+ric_ajax_cleanup_orphans:
+  url: /admin/ric/ajax/cleanup-orphans
+  param: { module: ricDashboard, action: ajaxCleanupOrphans }
+
+ric_ajax_resync:
+  url: /admin/ric/ajax/resync
+  param: { module: ricDashboard, action: ajaxResync }
+
+ric_ajax_queue_item:
+  url: /admin/ric/ajax/queue-item
+  param: { module: ricDashboard, action: ajaxClearQueueItem }
+
+ric_ajax_update_orphan:
+  url: /admin/ric/ajax/update-orphan
+  param: { module: ricDashboard, action: ajaxUpdateOrphan }

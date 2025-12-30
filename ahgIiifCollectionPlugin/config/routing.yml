@@ -1,0 +1,52 @@
+# IIIF Collection routes - using /manifest-collections to avoid Cantaloupe conflict
+
+iiif_collection_autocomplete:
+  url: /manifest-collections/autocomplete
+  param: { module: arIiifCollection, action: autocomplete }
+
+iiif_collection_index:
+  url: /manifest-collections
+  param: { module: arIiifCollection, action: index }
+
+iiif_collection_new:
+  url: /manifest-collection/new
+  param: { module: arIiifCollection, action: new }
+
+iiif_collection_create:
+  url: /manifest-collection/create
+  param: { module: arIiifCollection, action: create }
+  requirements: { sf_method: post }
+
+iiif_collection_reorder:
+  url: /manifest-collection/reorder
+  param: { module: arIiifCollection, action: reorder }
+
+iiif_collection_view:
+  url: /manifest-collection/:id/view
+  param: { module: arIiifCollection, action: view }
+
+iiif_collection_edit:
+  url: /manifest-collection/:id/edit
+  param: { module: arIiifCollection, action: edit }
+
+iiif_collection_update:
+  url: /manifest-collection/:id/update
+  param: { module: arIiifCollection, action: update }
+  requirements: { sf_method: post }
+
+iiif_collection_delete:
+  url: /manifest-collection/:id/delete
+  param: { module: arIiifCollection, action: delete }
+
+iiif_collection_add_items:
+  url: /manifest-collection/:id/items/add
+  param: { module: arIiifCollection, action: addItems }
+
+iiif_collection_remove_item:
+  url: /manifest-collection/item/:item_id/remove
+  param: { module: arIiifCollection, action: removeItem }
+
+# JSON manifest output
+iiif_collection_manifest:
+  url: /manifest-collection/:slug/manifest.json
+  param: { module: arIiifCollection, action: manifest }

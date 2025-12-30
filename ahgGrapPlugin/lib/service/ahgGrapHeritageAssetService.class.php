@@ -617,7 +617,7 @@ class ahgGrapHeritageAssetService
     {
         $linked = [];
 
-        // Check if arSpectrumPlugin is installed
+        // Check if ahgSpectrumPlugin is installed
         if (class_exists('arSpectrumEventService')) {
             $spectrumService = new arSpectrumEventService();
             

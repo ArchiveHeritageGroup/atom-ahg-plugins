@@ -1,0 +1,32 @@
+{
+    "name": "IIIF Collection Management",
+    "machine_name": "ahgIiifCollectionPlugin",
+    "version": "1.0.0",
+    "description": "IIIF Presentation API support with collections, annotations, and OCR text",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": ["ahg3DModelPlugin"]
+    },
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "tables": [
+        "iiif_annotation",
+        "iiif_annotation_body",
+        "iiif_collection",
+        "iiif_collection_i18n",
+        "iiif_collection_item",
+        "iiif_ocr_block",
+        "iiif_ocr_text",
+        "iiif_viewer_settings"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "integration",
+    "load_order": 60
+}
