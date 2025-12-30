@@ -1,15 +1,22 @@
 <?php
-
 /**
- * Redirect to GLAM Browse (ahgDisplayPlugin)
- * 
- * This action redirects all informationobject/browse requests to the
- * GLAM browse interface provided by ahgDisplayPlugin.
+ * Browse Action - Conditionally redirect to GLAM Browse
+ *
+ * If ahgDisplayPlugin is enabled, redirects to GLAM browse.
+ * Otherwise, uses standard AtoM browse.
  */
 class InformationObjectBrowseAction extends sfAction
 {
     public function execute($request)
     {
+        // Check if ahgDisplayPlugin is enabled
+        $plugins = sfConfig::get('app_plugins', []);
+        if (!in_array('ahgDisplayPlugin', $plugins)) {
+            // Use standard AtoM browse - forward to parent action
+            $this->forward('informationobject', 'list');
+            return sfView::NONE;
+        }
+
         // Build redirect URL with all query parameters
         $params = $request->getGetParameters();
         
@@ -29,19 +36,21 @@ class InformationObjectBrowseAction extends sfAction
         if (!empty($params['view'])) {
             $glamParams['view'] = $params['view'];
         }
+        if (!empty($params['sq'])) {
+            $glamParams['sq'] = $params['sq'];
+        }
         if (!empty($params['sort'])) {
             $glamParams['sort'] = $params['sort'];
         }
-        if (!empty($params['topLod']) && $params['topLod'] == '1') {
-            $glamParams['topLevel'] = '1';
-        }
-        
-        // Build URL
+
+        // Build redirect URL
         $url = 'glam/browse';
         if (!empty($glamParams)) {
             $url .= '?' . http_build_query($glamParams);
         }
-        
+
         $this->redirect($url);
+
+        return sfView::NONE;
     }
 }
