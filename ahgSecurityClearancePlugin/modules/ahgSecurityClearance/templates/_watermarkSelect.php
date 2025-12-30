@@ -85,7 +85,7 @@ if (isset($resource) && $resource->id) {
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const enabledCheckbox = document.getElementById('watermark_enabled');
     const typeSelect = document.getElementById('watermark_type_id');

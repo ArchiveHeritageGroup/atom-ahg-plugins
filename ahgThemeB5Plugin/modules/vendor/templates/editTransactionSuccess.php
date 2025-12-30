@@ -249,7 +249,7 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
     </form>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const form = document.querySelector('.needs-validation');

@@ -173,7 +173,7 @@
   </div>
 </form>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function sendTestEmail() {
     var email = document.getElementById('testEmailInput').value;
     if (email) {

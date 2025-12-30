@@ -322,7 +322,7 @@
 .loan-table .progress { width: 60px; }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 $(document).ready(function() {
   // Handle workflow transitions
   $('.transition-action').on('click', function(e) {

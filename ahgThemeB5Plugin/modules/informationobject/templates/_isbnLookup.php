@@ -48,7 +48,7 @@ $resourceId = isset($resource) && $resource->id ? $resource->id : '';
         </div>
         
         <?php if ($resourceId): ?>
-        <script>
+        <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
             document.addEventListener('DOMContentLoaded', function() {
                 IsbnLookup.setObjectId(<?php echo (int) $resourceId; ?>);
             });

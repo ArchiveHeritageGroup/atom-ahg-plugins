@@ -61,7 +61,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function deleteSearch(id) {
   if (!confirm('<?php echo __('Delete this saved search?'); ?>')) return;
   

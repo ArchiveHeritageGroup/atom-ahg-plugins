@@ -246,7 +246,7 @@ if (is_string($customPlugins)) {
     </div>
 </form>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.getElementById('btn-test-connection').addEventListener('click', function() {
     const btn = this;
     const resultDiv = document.getElementById('connection-result');

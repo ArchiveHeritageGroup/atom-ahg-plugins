@@ -117,7 +117,7 @@ $components = $upload['components'] ?? [];
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('restore-form');
     const btnRestore = document.getElementById('btn-restore');

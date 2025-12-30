@@ -236,11 +236,11 @@ $canEdit = $sf_data->getRaw('canEdit');
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 <?php include sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin/js/provenance-timeline.js'; ?>
 </script>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 var timelineData = <?php echo json_encode($timelineData ?? ['nodes' => [], 'links' => [], 'events' => []]) ?>;
 var objectId = <?php echo $resource->id ?? 0 ?>;
 var objectSlug = '<?php echo $resource->slug ?? '' ?>';

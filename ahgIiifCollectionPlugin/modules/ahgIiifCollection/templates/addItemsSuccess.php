@@ -93,7 +93,7 @@
     <?php endif ?>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 (function() {
     var searchInput = document.getElementById('objectSearchInput');
     var searchResults = document.getElementById('searchResults');

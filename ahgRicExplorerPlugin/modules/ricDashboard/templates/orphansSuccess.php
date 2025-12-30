@@ -91,7 +91,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function updateOrphan(id, status) {
   fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxUpdateOrphan']); ?>', {
     method: 'POST',

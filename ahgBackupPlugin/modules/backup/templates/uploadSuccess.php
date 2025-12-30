@@ -213,7 +213,7 @@ function formatBytes($bytes) {
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('backup-file');

@@ -162,7 +162,7 @@ if (!$model): ?>
     </div>
 </model-viewer>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 // Handle hotspot clicks for links
 document.querySelectorAll('.hotspot[data-link]').forEach(hotspot => {
     hotspot.addEventListener('click', function(e) {

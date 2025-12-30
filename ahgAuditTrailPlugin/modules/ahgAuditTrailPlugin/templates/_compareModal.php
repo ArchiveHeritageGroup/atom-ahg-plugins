@@ -123,7 +123,7 @@
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function showAuditCompare(auditId) {
   // Show loading state
   const modal = new bootstrap.Modal(document.getElementById('auditCompareModal'));

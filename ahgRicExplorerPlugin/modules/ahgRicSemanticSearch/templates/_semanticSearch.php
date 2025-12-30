@@ -410,7 +410,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 (function() {
   'use strict';
   

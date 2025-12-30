@@ -190,7 +190,7 @@
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 let deleteSlug = '';
 
 function deleteVendor(slug, name) {

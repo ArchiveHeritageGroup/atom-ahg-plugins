@@ -163,7 +163,7 @@ $categories = [
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function replaceTemplate(id, name) {
     document.getElementById('replace_id').value = id;
     document.getElementById('replace_name').textContent = name;

@@ -176,7 +176,7 @@ if ($informationObject) {
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 (function() {
     'use strict';
     let currentJob = null, uploadedFiles = [], sortable = null;

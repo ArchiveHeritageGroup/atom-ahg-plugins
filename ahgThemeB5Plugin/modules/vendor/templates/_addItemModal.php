@@ -114,7 +114,7 @@
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 let autocompleteTimeout;
 
 document.getElementById('glamAutocomplete').addEventListener('input', function() {

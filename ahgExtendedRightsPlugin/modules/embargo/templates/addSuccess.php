@@ -93,7 +93,7 @@
 
 </form>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.getElementById('is_perpetual').addEventListener('change', function() {
   document.getElementById('end_date_input').disabled = this.checked;
   if (this.checked) {

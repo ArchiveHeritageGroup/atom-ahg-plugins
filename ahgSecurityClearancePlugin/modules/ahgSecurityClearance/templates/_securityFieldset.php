@@ -238,7 +238,7 @@ if (isset($resource) && $resource->id) {
   </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Security classification toggle
     const classSelect = document.getElementById('security_classification_id');

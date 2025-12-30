@@ -341,7 +341,7 @@ $hotspots = $sf_data->getRaw('hotspots');
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function updatePreview() {
     const viewer = document.getElementById('preview-viewer');
     viewer.exposure = document.getElementById('exposure').value;

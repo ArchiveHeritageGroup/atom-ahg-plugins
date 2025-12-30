@@ -183,7 +183,7 @@ $photoTypes = [
 <script src="/plugins/ahgMuseumPlugin/js/fabric.min.js"></script>
 <script src="/plugins/ahgMuseumPlugin/js/condition-annotator.js?v=1765295470"></script>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 var currentAnnotator = null;
 var annotatorModal = null;
 

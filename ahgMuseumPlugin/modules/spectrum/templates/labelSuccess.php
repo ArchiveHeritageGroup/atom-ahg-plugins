@@ -285,7 +285,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function updateBarcodeSource() {
     var value = document.getElementById('barcodeSource').value;
     document.getElementById('barcodeImg').src = 'https://barcodeapi.org/api/128/' + encodeURIComponent(value);

@@ -106,7 +106,7 @@
   <pre id="ric-sparql-code" class="bg-dark text-light p-3 rounded mt-2" style="display: none; font-size: 12px;"></pre>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 (function() {
   var API_URL = '<?php echo $searchApiUrl; ?>';
   var input = document.getElementById('ric-search-input');

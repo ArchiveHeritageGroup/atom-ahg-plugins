@@ -27,7 +27,7 @@
 	</select> 
 </div>
   
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function myFunction()
 {
 	var x=document.getElementById("dropd");

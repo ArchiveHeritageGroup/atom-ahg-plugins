@@ -271,7 +271,7 @@
   </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.getElementById('exception_type').addEventListener('change', function() {
   var isIpRange = this.value === 'ip_range';
   document.getElementById('exception_id_field').style.display = isIpRange ? 'none' : 'block';

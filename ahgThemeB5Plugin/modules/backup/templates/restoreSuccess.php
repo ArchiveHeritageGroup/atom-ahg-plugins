@@ -170,7 +170,7 @@ $backup = $sf_data->getRaw('backup');
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('restore-form');
     const confirmCheckbox = document.getElementById('confirm_restore');

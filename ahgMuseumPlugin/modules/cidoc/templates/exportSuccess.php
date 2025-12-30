@@ -329,7 +329,7 @@ table code {
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 function updateFormat(format) {
     document.querySelectorAll('.format-option').forEach(function(opt) {
         opt.classList.remove('active');

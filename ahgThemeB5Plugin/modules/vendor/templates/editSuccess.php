@@ -315,7 +315,7 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
     </form>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle insurance fields visibility
     const hasInsurance = document.getElementById('hasInsurance');

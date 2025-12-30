@@ -22,7 +22,7 @@ $mapId = 'map-' . uniqid();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   
-  <script>
+  <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
   (function() {
       const locations = <?php echo json_encode($locations) ?>;
       

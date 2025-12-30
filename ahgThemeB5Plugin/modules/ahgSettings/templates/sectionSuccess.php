@@ -872,7 +872,7 @@ slot('title', $title);
                                 </div>
 
                                 <!-- Fuseki Test Connection Script -->
-                                <script>
+                                <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
                                 document.getElementById('test-fuseki-btn')?.addEventListener('click', function() {
                                     const btn = this;
                                     const resultDiv = document.getElementById('fuseki-test-result');
@@ -1144,7 +1144,7 @@ slot('title', $title);
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 // Color picker sync
 document.querySelectorAll('[id$="_color_picker"]').forEach(function(picker) {
     var textInput = document.getElementById(picker.id.replace('_picker', ''));
@@ -1201,7 +1201,7 @@ document.querySelectorAll('input[type="range"]').forEach(function(range) {
 }
 </style>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 // Color picker sync for extended options
 document.addEventListener('DOMContentLoaded', function() {
     const colorFields = [
@@ -1254,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 // Color picker sync for PRIMARY and SECONDARY colors
 document.addEventListener('DOMContentLoaded', function() {
     // Sync primary color

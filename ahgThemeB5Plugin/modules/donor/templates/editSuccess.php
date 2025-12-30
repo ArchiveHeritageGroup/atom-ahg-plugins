@@ -512,7 +512,7 @@ $titles = ['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Prof', 'Rev', 'Hon', 'Sir', 'Dame',
 
 </form>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('contacts-container');
   const addBtn = document.getElementById('add-contact');

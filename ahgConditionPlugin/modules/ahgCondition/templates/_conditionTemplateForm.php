@@ -101,7 +101,7 @@ foreach ($templates as $t) {
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const templateSelector = document.getElementById('templateSelector');
     const formContainer = document.getElementById('templateFormContainer');

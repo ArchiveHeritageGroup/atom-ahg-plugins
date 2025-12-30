@@ -454,7 +454,7 @@ $metadataSources = [
     </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Update hidden JSON field when dropdowns change
     const fieldMappingSelects = document.querySelectorAll('.field-mapping');

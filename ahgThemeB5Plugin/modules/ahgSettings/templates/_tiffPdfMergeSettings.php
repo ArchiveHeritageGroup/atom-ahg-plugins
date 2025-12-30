@@ -210,7 +210,7 @@ $recentJobs = $repository->getJobs([], 10);
     <?php endif; ?>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.getElementById('tiffPdfSettingsForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(this);
