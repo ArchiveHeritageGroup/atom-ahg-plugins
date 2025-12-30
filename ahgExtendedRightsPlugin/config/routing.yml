@@ -1,0 +1,35 @@
+# Extended Rights Routes - Simple routes only (no sfPropelRoute)
+
+extendedRights_index:
+  url: /extendedRights
+  param: { module: extendedRights, action: index }
+
+extendedRights_edit:
+  url: /extendedRights/edit/:slug
+  param: { module: extendedRights, action: edit }
+
+extendedRights_batch:
+  url: /extendedRights/batch
+  param: { module: extendedRights, action: batch }
+
+extendedRights_embargoes:
+  url: /extendedRights/embargoes
+  param: { module: extendedRights, action: embargoes }
+
+extendedRights_liftEmbargo:
+  url: /extendedRights/liftEmbargo/:id
+  param: { module: extendedRights, action: liftEmbargo }
+  requirements: { id: \d+ }
+
+# Admin routes
+extendedRights_dashboard:
+  url: /admin/rights
+  param: { module: extendedRights, action: index }
+
+extendedRights_admin_batch:
+  url: /admin/rights/batch
+  param: { module: extendedRights, action: batch }
+
+extendedRights_browse:
+  url: /extendedRights/browse
+  param: { module: extendedRights, action: browse }
