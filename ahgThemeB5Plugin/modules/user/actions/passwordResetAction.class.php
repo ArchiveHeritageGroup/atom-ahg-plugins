@@ -1,5 +1,5 @@
 <?php
-use AtomExtensions\Services\SettingService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 // Load PHPMailer manually (since Composer is not used)
 require '/usr/share/nginx/phpmailer/src/PHPMailer.php';
@@ -20,7 +20,7 @@ class UserPasswordResetAction extends sfAction
     {
         $this->form = new sfForm([], [], false);
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
-        
+
         foreach ($this::$NAMES as $name) {
             $this->addField($name);
         }
@@ -40,7 +40,7 @@ class UserPasswordResetAction extends sfAction
 
             if ($this->form->isValid()) {
                 $email = $this->form->getValue('email');
-                
+
                 // Find user by email
                 $criteria = new Criteria();
                 $criteria->add(QubitUser::EMAIL, $email);
@@ -50,7 +50,7 @@ class UserPasswordResetAction extends sfAction
                     // Generate reset token
                     $token = bin2hex(random_bytes(32));
                     $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
-                    
+
                     // Store token in user object
                     $user->resetToken = $token;
                     $user->resetTokenExpiry = $expiry;
@@ -58,7 +58,7 @@ class UserPasswordResetAction extends sfAction
 
                     // Send email
                     $this->sendResetEmail($user, $token);
-                    
+
                     $this->getUser()->setFlash('notice', $this->context->i18n->__('Password reset instructions have been sent to your email.'));
                 } else {
                     // Don't reveal if email exists (security best practice)
@@ -84,26 +84,38 @@ class UserPasswordResetAction extends sfAction
         }
     }
 
+    /**
+     * Get email setting from email_setting table
+     */
+    protected function getEmailSetting(string $key, $default = null)
+    {
+        // Bootstrap Laravel DB
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        
+        $setting = DB::table('email_setting')
+            ->where('setting_key', $key)
+            ->first();
+        
+        return $setting ? $setting->setting_value : $default;
+    }
+
     protected function sendResetEmail($user, $token)
     {
         $mail = new PHPMailer(true);
 
         try {
-            // Get email settings from QubitSetting
-            $host = SettingService::getByNameAndScope('host', 'email');
-            $port = SettingService::getByNameAndScope('port', 'email');
-            $smtp_secure = SettingService::getByNameAndScope('smtp_secure', 'email');
-            $smtp_auth = SettingService::getByNameAndScope('smtp_auth', 'email');
-            $username = SettingService::getByNameAndScope('email_username', 'email');
-            $password = SettingService::getByNameAndScope('password', 'email');
-            $from = SettingService::getByNameAndScope('from', 'email');
-            $to = SettingService::getByNameAndScope('to', 'email');
-            $cc = SettingService::getByNameAndScope('cc', 'email');
-            $reply_to = SettingService::getByNameAndScope('reply_to', 'email');
+            // Get email settings from email_setting table
+            $host = $this->getEmailSetting('smtp_host', 'localhost');
+            $port = $this->getEmailSetting('smtp_port', 587);
+            $smtp_secure = $this->getEmailSetting('smtp_encryption', 'tls');
+            $username = $this->getEmailSetting('smtp_username', '');
+            $password = $this->getEmailSetting('smtp_password', '');
+            $from_email = $this->getEmailSetting('smtp_from_email', '');
+            $from_name = $this->getEmailSetting('smtp_from_name', 'AtoM Archive');
 
             // Generate reset URL
             $resetUrl = $this->getController()->genUrl([
-                'module' => 'user', 
+                'module' => 'user',
                 'action' => 'passwordResetConfirm',
                 'token' => $token
             ], true);
@@ -124,24 +136,19 @@ class UserPasswordResetAction extends sfAction
             $mail->Username = $username;
             $mail->Password = $password;
             $mail->SMTPSecure = trim(strval($smtp_secure));
-            $mail->Port = strval($port);
+            $mail->Port = intval($port);
 
-            $mail->setFrom(trim($from), 'Rock Art Research Institute (RARI)');
+            $mail->setFrom(trim($from_email), $from_name);
             $mail->addAddress($user->email, $user->username);
-            $mail->addReplyTo(trim($reply_to), 'Reply');
-            
-            if (!empty($cc)) {
-                $mail->addCC(trim($cc));
-            }
 
+            $mail->isHTML(false);
             $mail->Subject = 'Password Reset Request';
             $mail->Body = $body;
 
-            // Send email
             $mail->send();
+
         } catch (Exception $e) {
-            // Log error but don't reveal to user for security
-            error_log("Password reset email could not be sent. Error: {$mail->ErrorInfo}");
+            error_log("Password reset email could not be sent. Error: " . $mail->ErrorInfo);
         }
     }
 }
