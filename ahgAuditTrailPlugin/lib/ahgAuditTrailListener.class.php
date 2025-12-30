@@ -18,7 +18,7 @@ class ahgAuditTrailListener
         'informationobject', 'actor', 'repository', 'term', 'taxonomy',
         'accession', 'deaccession', 'donor', 'rightsholder', 'function',
         'physicalobject', 'digitalobject', 'user', 'aclGroup', 'staticpage',
-        'sfMuseumPlugin', 'ahgLibraryPlugin', 'ahg3DModelPlugin', 'ahgGalleryPlugin',
+        'ahgMuseumPlugin', 'ahgLibraryPlugin', 'ahg3DModelPlugin', 'ahgGalleryPlugin',
         'ahgDAMPlugin', 'sfIsadPlugin', 'sfDcPlugin',
     ];
 
@@ -477,7 +477,7 @@ class ahgAuditTrailListener
             'user' => 'QubitUser',
             'aclGroup' => 'QubitAclGroup',
             'staticpage' => 'QubitStaticPage',
-            'sfMuseumPlugin' => 'MuseumObject',
+            'ahgMuseumPlugin' => 'MuseumObject',
             'ahgLibraryPlugin' => 'LibraryItem',
             'ahg3DModelPlugin' => 'ahg3DModel',
             'ahgGalleryPlugin' => 'GalleryWork',

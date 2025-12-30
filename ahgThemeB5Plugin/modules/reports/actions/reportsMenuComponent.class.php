@@ -54,7 +54,7 @@ class reportsMenuComponent extends sfComponent
                     // Sector exports - implemented in each sector plugin
                     // ['label' => 'Archive Export (EAD/CSV)', 'url' => 'export/archival', 'icon' => 'fa-archive'],
                     // ['label' => 'Library Export (MARC)', 'url' => 'ahgLibraryPlugin/export', 'icon' => 'fa-book'],
-                    // ['label' => 'Museum Export (CCO)', 'url' => 'sfMuseumPlugin/export', 'icon' => 'fa-university'],
+                    // ['label' => 'Museum Export (CCO)', 'url' => 'ahgMuseumPlugin/export', 'icon' => 'fa-university'],
                     // ['label' => 'DAM Export (IPTC)', 'url' => 'ahgDAMPlugin/export', 'icon' => 'fa-images'],
                     ['label' => 'CIDOC-CRM Export', 'url' => 'cidoc/export', 'icon' => 'fa-project-diagram'],
                     ['label' => 'Authority Export (EAC)', 'url' => 'export/authorities', 'icon' => 'fa-users'],

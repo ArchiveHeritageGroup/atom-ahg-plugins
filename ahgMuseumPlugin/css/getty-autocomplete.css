@@ -1,0 +1,253 @@
+/**
+ * Getty Vocabulary Autocomplete Styles
+ *
+ * Styles for the Getty vocabulary autocomplete widget.
+ *
+ * @author Johan Pieterse <johan@theahg.co.za>
+ */
+
+/* Wrapper */
+.getty-autocomplete-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Input styling */
+.getty-autocomplete-wrapper input[type="text"] {
+  width: 100%;
+  padding-right: 30px; /* Space for clear button */
+}
+
+/* Clear button */
+.getty-autocomplete-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.getty-autocomplete-clear:hover {
+  color: #333;
+}
+
+/* Dropdown container */
+.getty-autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+/* Result items */
+.getty-autocomplete-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.getty-autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.getty-autocomplete-item:hover,
+.getty-autocomplete-item.active {
+  background-color: #f0f7ff;
+}
+
+/* Result content */
+.getty-result-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.getty-result-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.getty-result-hierarchy {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+}
+
+.getty-result-uri {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* Vocabulary badges */
+.getty-vocab-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.getty-vocab-aat {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.getty-vocab-tgn {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.getty-vocab-ulan {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+/* Loading state */
+.getty-autocomplete-loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.getty-autocomplete-loading::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border: 2px solid #ddd;
+  border-top-color: #666;
+  border-radius: 50%;
+  animation: getty-spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes getty-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty/Error states */
+.getty-autocomplete-empty,
+.getty-autocomplete-error {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+.getty-autocomplete-error {
+  color: #c62828;
+}
+
+/* Link indicator (shows when linked to Getty) */
+.getty-linked-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #e8f5e9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2e7d32;
+  margin-left: 8px;
+}
+
+.getty-linked-indicator i {
+  margin-right: 4px;
+}
+
+.getty-linked-indicator a {
+  color: #1565c0;
+  text-decoration: none;
+}
+
+.getty-linked-indicator a:hover {
+  text-decoration: underline;
+}
+
+/* Form field integration */
+.form-group .getty-autocomplete-wrapper {
+  width: 100%;
+}
+
+/* AtoM admin theme integration */
+.section .getty-autocomplete-wrapper input {
+  width: 100%;
+}
+
+/* Table display for linked terms */
+.getty-links-table .getty-vocab-badge {
+  margin-right: 4px;
+}
+
+.getty-links-table .progress {
+  margin: 0;
+  height: 8px;
+  width: 60px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.getty-links-table .confidence-value {
+  font-size: 11px;
+  color: #666;
+  margin-left: 4px;
+}
+
+/* Status badges */
+.getty-status-confirmed {
+  background-color: #4caf50;
+  color: white;
+}
+
+.getty-status-suggested {
+  background-color: #ff9800;
+  color: white;
+}
+
+.getty-status-rejected {
+  background-color: #f44336;
+  color: white;
+}
+
+.getty-status-pending {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .getty-autocomplete-dropdown {
+    max-height: 300px;
+  }
+
+  .getty-result-hierarchy {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .getty-autocomplete-dropdown,
+  .getty-autocomplete-clear {
+    display: none !important;
+  }
+}

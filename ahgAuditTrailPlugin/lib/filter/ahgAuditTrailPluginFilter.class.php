@@ -38,7 +38,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
         'user',
         'aclGroup',
         'staticpage',
-        'sfMuseumPlugin',
+        'ahgMuseumPlugin',
         'sfLibraryPlugin',
         'sf3DModelPlugin',
         'sfGalleryPlugin',
@@ -189,8 +189,8 @@ class ahgAuditTrailPluginFilter extends sfFilter
         }
 
         // Skip static assets
-        // Skip sfMuseumPlugin - it handles its own audit logging
-        if ($moduleName === 'sfMuseumPlugin') {
+        // Skip ahgMuseumPlugin - it handles its own audit logging
+        if ($moduleName === 'ahgMuseumPlugin') {
             return false;
         }
         if (in_array($moduleName, ['sfAsset', 'sfWebDebug', 'default'])) {
@@ -247,7 +247,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
             'user' => 'QubitUser',
             'aclGroup' => 'QubitAclGroup',
             'staticpage' => 'QubitStaticPage',
-            'sfMuseumPlugin' => 'MuseumObject',
+            'ahgMuseumPlugin' => 'MuseumObject',
             'sfLibraryPlugin' => 'LibraryItem',
             'sf3DModelPlugin' => 'Object3D',
             'sfGalleryPlugin' => 'GalleryWork',

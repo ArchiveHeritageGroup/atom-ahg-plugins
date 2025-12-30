@@ -180,8 +180,8 @@ $photoTypes = [
 </div>
 
 <link rel="stylesheet" href="/plugins/ahgConditionPlugin/css/condition-annotator.css">
-<script src="/plugins/sfMuseumPlugin/js/fabric.min.js"></script>
-<script src="/plugins/sfMuseumPlugin/js/condition-annotator.js?v=1765295470"></script>
+<script src="/plugins/ahgMuseumPlugin/js/fabric.min.js"></script>
+<script src="/plugins/ahgMuseumPlugin/js/condition-annotator.js?v=1765295470"></script>
 
 <script>
 var currentAnnotator = null;

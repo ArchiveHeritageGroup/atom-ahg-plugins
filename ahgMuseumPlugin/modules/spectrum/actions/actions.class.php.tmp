@@ -1,0 +1,205 @@
+
+    /**
+     * Save photo annotations
+     */
+    public function executeAnnotationSave(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'POST required']));
+        }
+        
+        $photoId = $request->getParameter('photo_id');
+        $annotations = $request->getParameter('annotations');
+        
+        if (!$photoId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No photo ID']));
+        }
+        
+        try {
+            // Get JSON from request body if not in params
+            if (!$annotations) {
+                $requestBody = file_get_contents('php://input');
+                $data = json_decode($requestBody, true);
+                $photoId = $data['photo_id'] ?? $photoId;
+                $annotations = $data['annotations'] ?? [];
+            }
+            
+            DB::table('spectrum_condition_photo')
+                ->where('id', $photoId)
+                ->update([
+                    'annotations' => json_encode($annotations),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+    
+    /**
+     * Get photo annotations
+     */
+    public function executeAnnotationGet(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        
+        $photoId = $request->getParameter('photo_id');
+        
+        if (!$photoId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No photo ID']));
+        }
+        
+        try {
+            $photo = DB::table('spectrum_condition_photo')
+                ->where('id', $photoId)
+                ->first();
+            
+            if (!$photo) {
+                return $this->renderText(json_encode(['success' => false, 'error' => 'Photo not found']));
+            }
+            
+            $annotations = [];
+            if ($photo->annotations) {
+                $annotations = json_decode($photo->annotations, true) ?: [];
+            }
+            
+            return $this->renderText(json_encode(['success' => true, 'annotations' => $annotations]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+    
+    /**
+     * Photo actions (rotate, delete, set primary)
+     */
+    public function executePhotoAction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        
+        $action = $request->getParameter('action_type');
+        $photoId = $request->getParameter('photo_id');
+        
+        if (!$photoId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No photo ID']));
+        }
+        
+        try {
+            switch ($action) {
+                case 'delete':
+                    // Get file path first
+                    $photo = DB::table('spectrum_condition_photo')
+                        ->where('id', $photoId)
+                        ->first();
+                    
+                    if ($photo && $photo->file_path) {
+                        $fullPath = sfConfig::get('sf_web_dir') . $photo->file_path;
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                    
+                    DB::table('spectrum_condition_photo')
+                        ->where('id', $photoId)
+                        ->delete();
+                    break;
+                    
+                case 'set_primary':
+                    $conditionId = $request->getParameter('condition_id');
+                    
+                    // Clear other primary flags
+                    DB::table('spectrum_condition_photo')
+                        ->where('condition_check_id', $conditionId)
+                        ->update(['is_primary' => 0]);
+                    
+                    // Set this one as primary
+                    DB::table('spectrum_condition_photo')
+                        ->where('id', $photoId)
+                        ->update(['is_primary' => 1]);
+                    break;
+                    
+                case 'rotate':
+                    $degrees = $request->getParameter('degrees', 90);
+                    
+                    $photo = DB::table('spectrum_condition_photo')
+                        ->where('id', $photoId)
+                        ->first();
+                    
+                    if ($photo && $photo->file_path) {
+                        $fullPath = sfConfig::get('sf_web_dir') . $photo->file_path;
+                        
+                        if (file_exists($fullPath)) {
+                            $image = imagecreatefromstring(file_get_contents($fullPath));
+                            if ($image) {
+                                $rotated = imagerotate($image, -$degrees, 0);
+                                
+                                $mime = $photo->mime_type ?: 'image/jpeg';
+                                if (strpos($mime, 'png') !== false) {
+                                    imagepng($rotated, $fullPath);
+                                } else {
+                                    imagejpeg($rotated, $fullPath, 90);
+                                }
+                                
+                                imagedestroy($image);
+                                imagedestroy($rotated);
+                                
+                                // Swap width/height in DB
+                                DB::table('spectrum_condition_photo')
+                                    ->where('id', $photoId)
+                                    ->update([
+                                        'width' => $photo->height,
+                                        'height' => $photo->width,
+                                    ]);
+                            }
+                        }
+                    }
+                    break;
+            }
+            
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    public function executeExport(sfWebRequest $request)
+    {
+        $slug = $request->getParameter('slug');
+        $format = $request->getParameter('format', 'csv');
+        
+        // Get object ID from slug
+        $object = DB::table('slug')
+            ->join('information_object as io', 'slug.object_id', '=', 'io.id')
+            ->where('slug.slug', $slug)
+            ->select('io.id', 'io.identifier')
+            ->first();
+            
+        if (!$object) {
+            $this->forward404('Object not found');
+        }
+        
+        $this->objectId = $object->id;
+        $this->identifier = $object->identifier;
+        $this->format = $format;
+        
+        // Get all spectrum data for this object
+        $this->movements = DB::table('spectrum_movement')->where('object_id', $object->id)->get()->toArray();
+        $this->conditions = DB::table('spectrum_condition_check')->where('object_id', $object->id)->get()->toArray();
+        $this->valuations = DB::table('spectrum_valuation')->where('object_id', $object->id)->get()->toArray();
+        $this->loansIn = DB::table('spectrum_loan_in')->where('object_id', $object->id)->get()->toArray();
+        $this->loansOut = DB::table('spectrum_loan_out')->where('object_id', $object->id)->get()->toArray();
+        
+        if ($format === 'json') {
+            $this->getResponse()->setContentType('application/json');
+            return $this->renderText(json_encode([
+                'identifier' => $this->identifier,
+                'movements' => $this->movements,
+                'conditions' => $this->conditions,
+                'valuations' => $this->valuations,
+                'loans_in' => $this->loansIn,
+                'loans_out' => $this->loansOut,
+            ], JSON_PRETTY_PRINT));
+        }
+    }

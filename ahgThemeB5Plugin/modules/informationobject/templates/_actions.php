@@ -163,7 +163,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
           ->where('setting.scope', 'default_template')
           ->where('setting.name', 'informationobject')
           ->value('setting_i18n.value');
-      $addModule = ($defaultTemplate == 'museum') ? 'sfMuseumPlugin' : 'informationobject';
+      $addModule = ($defaultTemplate == 'museum') ? 'ahgMuseumPlugin' : 'informationobject';
     ?>
     <li><a href="<?php echo url_for(['module' => $addModule, 'action' => 'add', 'parent' => $resourceSlug]); ?>" class="btn atom-btn-outline-light"><?php echo __('Add new'); ?></a></li>
     <li><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'copy', 'source' => $resourceId]); ?>" class="btn atom-btn-outline-light"><?php echo __('Duplicate'); ?></a></li>

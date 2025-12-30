@@ -347,7 +347,7 @@ model-viewer {
 </section> <!-- /section#accessPointsArea -->
 
 <section id="museumControlArea" class="border-bottom">
-<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/sfMuseumPlugin')): ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin')): ?>
 <?php use_helper('MuseumMetadata'); ?>
 <?php if (has_museum_metadata($resource)) { ?>
   <?php include_partial('informationobject/museumMetadata', ['resource' => $resource]) ?>

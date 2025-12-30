@@ -33,7 +33,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('condition_check_by_slug', new sfRoute(
             '/:slug/condition',
             ['module' => 'ahgCondition', 'action' => 'conditionCheck'],
-            ['slug' => '(?!reports|admin|spectrum|user|search|browse|clipboard|settings|import|export|object|actor|repository|term|taxonomy|digitalobject|informationobject|jobs|uploads|images|css|js|plugins|vendor|api|sfMuseumPlugin).+']
+            ['slug' => '(?!reports|admin|spectrum|user|search|browse|clipboard|settings|import|export|object|actor|repository|term|taxonomy|digitalobject|informationobject|jobs|uploads|images|css|js|plugins|vendor|api|ahgMuseumPlugin).+']
         ));
 
         // Condition photo routes - require numeric ID

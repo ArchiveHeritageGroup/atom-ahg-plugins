@@ -203,7 +203,7 @@ class arSpectrumInstallService
     }
 
     /**
-     * Migrate data from sfMuseumPlugin JSON storage
+     * Migrate data from ahgMuseumPlugin JSON storage
      */
     public static function migrateFromJSON(): array
     {

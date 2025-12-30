@@ -18,7 +18,7 @@ function isPluginActive($pluginName) {
 }
 
 $hasLibrary = isPluginActive('ahgLibraryPlugin');
-$hasMuseum = isPluginActive('sfMuseumPlugin');
+$hasMuseum = isPluginActive('ahgMuseumPlugin');
 $hasGallery = isPluginActive('ahgGalleryPlugin');
 $hasDam = isPluginActive('arDAMPlugin') || isPluginActive('ahgDAMPlugin');
 $hasSpectrum = isPluginActive('ahgSpectrumPlugin');

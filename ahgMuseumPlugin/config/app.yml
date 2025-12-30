@@ -1,0 +1,4 @@
+all:
+  museum_metadata:
+    enabled: true
+    template_name: "Museum (CCO)"

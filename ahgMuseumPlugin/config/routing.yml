@@ -1,0 +1,31 @@
+# Vocabulary API - use module prefix
+ahgMuseumPlugin_vocabulary:
+  url: /ahgMuseumPlugin/vocabulary
+  param: { module: ahgMuseumPlugin, action: vocabulary }
+
+ahgMuseumPlugin_getty:
+  url: /ahgMuseumPlugin/getty
+  param: { module: ahgMuseumPlugin, action: gettyAutocomplete }
+
+# Friendly museum URLs
+museum_add:
+  url: /museum/add
+  param: { module: ahgMuseumPlugin, action: add }
+
+museum_edit:
+  url: /museum/edit/:slug
+  param: { module: ahgMuseumPlugin, action: edit }
+
+# CCO Provenance Routes
+cco_provenance:
+  url: /cco/provenance/:slug
+  param: { module: cco, action: provenance }
+
+# Standard routes
+ahgMuseumPlugin_edit:
+  url: /ahgMuseumPlugin/edit
+  param: { module: ahgMuseumPlugin, action: edit }
+
+ahgMuseumPlugin_add:
+  url: /ahgMuseumPlugin/add
+  param: { module: ahgMuseumPlugin, action: add }

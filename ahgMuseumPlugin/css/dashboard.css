@@ -1,0 +1,619 @@
+/**
+ * Data Quality Dashboard & Spectrum Workflow Styles
+ * sfMuseumPlugin
+ */
+
+/* ============================================
+   DATA QUALITY DASHBOARD
+   ============================================ */
+
+.data-quality-dashboard {
+    max-width: 1200px;
+}
+
+/* Score Overview */
+.score-overview {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    align-items: stretch;
+}
+
+.score-card.main-score {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    flex: 0 0 300px;
+}
+
+.score-grade {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.score-details .score-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.score-details .score-label {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.score-details .score-sublabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+/* Stats Boxes */
+.score-stats {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.stat-box {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 25px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.stat-box .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.stat-box .stat-label {
+    font-size: 13px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+}
+
+/* Dashboard Section */
+.dashboard-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.dashboard-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    color: #2c3e50;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3498db;
+}
+
+.section-description {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Grade Distribution */
+.grade-distribution {
+    padding: 20px 0;
+}
+
+.grade-bars {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 30px;
+    height: 200px;
+    padding: 20px 0;
+}
+
+.grade-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px;
+}
+
+.grade-bar {
+    width: 50px;
+    min-height: 20px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 8px;
+    transition: height 0.3s ease;
+}
+
+.grade-bar-count {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.grade-bar-label {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.grade-bar-legend {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 50px;
+    color: #7f8c8d;
+    font-size: 13px;
+}
+
+/* Category Scores */
+.category-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-score-item {
+    padding: 10px 0;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.category-value {
+    font-weight: 700;
+    color: #34495e;
+}
+
+.category-bar {
+    height: 10px;
+    background: #ecf0f1;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.category-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+/* Field Completeness Table */
+.field-completeness-table .low-completeness {
+    background: #fff5f5;
+}
+
+.field-completeness-table .badge-required {
+    background: #e74c3c;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 8px;
+}
+
+.category-badge {
+    background: #3498db;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.mini-progress {
+    display: inline-block;
+    width: 100px;
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.mini-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.mini-progress-value {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Grade Badges */
+.grade-badge {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
+}
+
+.grade-badge.grade-a { background: #27ae60; }
+.grade-badge.grade-b { background: #2ecc71; }
+.grade-badge.grade-c { background: #f39c12; }
+.grade-badge.grade-d { background: #e67e22; }
+.grade-badge.grade-f { background: #e74c3c; }
+
+/* Sidebar Styles */
+.grade-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.grade-legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12px;
+}
+
+/* Issues List */
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.issue-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: #fff5f5;
+    border-left: 4px solid #e74c3c;
+    border-radius: 6px;
+}
+
+.issue-item i {
+    color: #e74c3c;
+}
+
+.issue-label {
+    flex: 1;
+    font-weight: 500;
+}
+
+.issue-count {
+    color: #7f8c8d;
+    font-size: 13px;
+}
+
+/* ============================================
+   SPECTRUM WORKFLOW PANEL
+   ============================================ */
+
+.spectrum-workflow-panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* Progress Header */
+.workflow-progress {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.progress-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.progress-header h4 i {
+    margin-right: 8px;
+    color: #3498db;
+}
+
+.progress-percent {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.progress-bar-container .progress {
+    height: 12px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+}
+
+.progress-bar-container .progress-bar {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.progress-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+}
+
+.progress-stats .stat {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.progress-stats .stat i {
+    margin-right: 5px;
+}
+
+.progress-stats .stat.completed i { color: #27ae60; }
+.progress-stats .stat.in-progress i { color: #3498db; }
+.progress-stats .stat.overdue i { color: #e74c3c; }
+
+/* Workflow Categories */
+.workflow-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.workflow-category {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.workflow-category.collapsed .category-procedures {
+    display: none;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.category-header:hover {
+    background: #ecf0f1;
+}
+
+.category-header i {
+    color: #3498db;
+    width: 20px;
+    text-align: center;
+}
+
+.category-label {
+    font-weight: 600;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.category-count {
+    font-size: 12px;
+    color: #7f8c8d;
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Procedure Items */
+.category-procedures {
+    padding: 10px;
+}
+
+.procedure-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: background 0.2s;
+}
+
+.procedure-item:hover {
+    background: #f8f9fa;
+}
+
+.procedure-item:last-child {
+    margin-bottom: 0;
+}
+
+.procedure-status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.procedure-info {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.procedure-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.procedure-name i {
+    margin-right: 6px;
+    color: #7f8c8d;
+}
+
+.procedure-date {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.procedure-due {
+    font-size: 11px;
+    color: #7f8c8d;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.procedure-due.overdue {
+    background: #ffebeb;
+    color: #e74c3c;
+}
+
+.procedure-actions {
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.procedure-item:hover .procedure-actions {
+    opacity: 1;
+}
+
+.btn-procedure-action {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #ecf0f1;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #7f8c8d;
+    transition: all 0.2s;
+}
+
+.btn-procedure-action:hover {
+    background: #3498db;
+    color: #fff;
+}
+
+/* Timeline */
+.workflow-timeline {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.workflow-timeline h5 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.workflow-timeline h5 i {
+    margin-right: 8px;
+    color: #7f8c8d;
+}
+
+.timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.timeline-event {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+}
+
+.timeline-event:last-child {
+    border-bottom: none;
+}
+
+.event-time {
+    color: #7f8c8d;
+    font-size: 12px;
+    min-width: 90px;
+}
+
+.event-procedure {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.event-status {
+    font-weight: 600;
+}
+
+.event-notes {
+    width: 100%;
+    font-size: 12px;
+    color: #7f8c8d;
+    font-style: italic;
+    padding-left: 100px;
+}
+
+.no-activity {
+    color: #7f8c8d;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.view-all-timeline {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .score-overview {
+        flex-direction: column;
+    }
+    
+    .score-card.main-score {
+        flex: none;
+    }
+    
+    .grade-bars {
+        gap: 15px;
+    }
+}

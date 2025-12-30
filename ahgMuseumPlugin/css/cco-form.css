@@ -1,0 +1,442 @@
+/**
+ * CCO Cataloguing Form Styles
+ * sfMuseumPlugin - Cataloguing Cultural Objects
+ */
+
+/* Template Selector */
+.template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.template-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.template-option:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+  text-decoration: none;
+}
+
+.template-option.active {
+  border-color: #3498db;
+  background: #3498db;
+  color: #fff;
+}
+
+.template-option i {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+/* Completeness Meter */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress {
+  flex: 1;
+  height: 10px;
+  background: #e9ecef;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.progress-bar.bg-success { background: #27ae60; }
+.progress-bar.bg-warning { background: #f39c12; }
+.progress-bar.bg-danger { background: #e74c3c; }
+
+.completeness-value {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2c3e50;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+}
+
+.sidebar-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.sidebar-section .help-text {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-top: 8px;
+}
+
+/* Field Legend */
+.legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-required {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.badge-recommended {
+  background: #f39c12;
+  color: #fff;
+}
+
+.badge-optional {
+  background: #bdc3c7;
+  color: #fff;
+}
+
+.badge-cco {
+  background: #3498db;
+  color: #fff;
+}
+
+.badge-vocab {
+  background: #9b59b6;
+  color: #fff;
+}
+
+.badge-vocab i {
+  margin-right: 3px;
+}
+
+/* Form Fields */
+.cco-cataloguing-form fieldset {
+  margin-bottom: 30px;
+}
+
+.cco-cataloguing-form legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.cco-chapter {
+  font-size: 12px;
+  font-weight: normal;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.category-description {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* Individual Field */
+.cco-field {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #bdc3c7;
+  transition: border-color 0.2s ease;
+}
+
+.cco-field.level-required {
+  border-left-color: #e74c3c;
+}
+
+.cco-field.level-recommended {
+  border-left-color: #f39c12;
+}
+
+.cco-field:focus-within {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Field Header */
+.field-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.field-header label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.field-header label .required {
+  color: #e74c3c;
+  margin-left: 3px;
+}
+
+.field-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-help {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.btn-help:hover,
+.btn-help.active {
+  opacity: 1;
+}
+
+/* Field Input */
+.field-input {
+  margin-bottom: 5px;
+}
+
+.field-input input,
+.field-input select,
+.field-input textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-input input:focus,
+.field-input select:focus,
+.field-input textarea:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  outline: none;
+}
+
+.field-input input[type="number"] {
+  max-width: 150px;
+}
+
+.field-input input[type="date"] {
+  max-width: 200px;
+}
+
+/* Field Help */
+.field-help {
+  background: #e8f4fd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 10px;
+  border-left: 3px solid #3498db;
+}
+
+.field-help .help-text {
+  font-size: 13px;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.field-help .help-long {
+  font-size: 12px;
+  color: #555;
+  margin: 0 0 10px 0;
+}
+
+.field-help .help-examples {
+  font-size: 12px;
+}
+
+.field-help .help-examples strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #2c3e50;
+}
+
+.field-help .help-examples ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.field-help .help-examples li {
+  margin-bottom: 3px;
+  font-style: italic;
+  color: #666;
+}
+
+.field-help .help-spectrum {
+  font-size: 11px;
+  color: #7f8c8d;
+  margin: 10px 0 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #d4e8f5;
+}
+
+.field-help .help-spectrum i {
+  margin-right: 5px;
+}
+
+/* Autocomplete Dropdown */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.autocomplete-option {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-option:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-option:hover {
+  background: #f8f9fa;
+}
+
+/* Validation Alerts */
+.alert ul {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+}
+
+.alert ul li {
+  margin-bottom: 5px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .field-header {
+    flex-wrap: wrap;
+  }
+  
+  .field-badges {
+    width: 100%;
+    margin-top: 5px;
+  }
+  
+  .btn-help {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .cco-field {
+    position: relative;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .cco-field {
+    background: #2a2a2a;
+  }
+  
+  .cco-field:focus-within {
+    background: #333;
+  }
+  
+  .field-input input,
+  .field-input select,
+  .field-input textarea {
+    background: #1a1a1a;
+    border-color: #444;
+    color: #fff;
+  }
+  
+  .field-help {
+    background: #1a3a4a;
+    border-left-color: #3498db;
+  }
+  
+  .field-help .help-text,
+  .field-help .help-long {
+    color: #ddd;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar-content,
+  .btn-help,
+  .template-list,
+  .actions {
+    display: none !important;
+  }
+  
+  .cco-field {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

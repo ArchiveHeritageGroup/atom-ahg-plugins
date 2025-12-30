@@ -39,7 +39,7 @@ class SecurityClearanceFilter extends sfFilter
         $action = $request->getParameter('action');
 
         // Only check information object views
-        if (!in_array($module, ['informationobject', 'sfIsadPlugin', 'sfRadPlugin', 'sfDcPlugin', 'sfMuseumPlugin'])) {
+        if (!in_array($module, ['informationobject', 'sfIsadPlugin', 'sfRadPlugin', 'sfDcPlugin', 'ahgMuseumPlugin'])) {
             return;
         }
 

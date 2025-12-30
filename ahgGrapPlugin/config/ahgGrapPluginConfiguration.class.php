@@ -142,7 +142,7 @@ class ahgGrapPluginConfiguration extends sfPluginConfiguration
             'sfRadPlugin',
             'sfDcPlugin',
             'sfModsPlugin',
-            'sfMuseumPlugin',
+            'ahgMuseumPlugin',
             'arMuseumMetadataPlugin',
             'museum',
         ];
