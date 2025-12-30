@@ -27,7 +27,7 @@
       <button type="submit" class="btn atom-btn-outline-success">
         <i class="fas fa-sign-in-alt me-1"></i><?php echo __('Log in'); ?>
       </button>
-      <a href="<?php echo url_for(['module' => 'research', 'action' => 'passwordResetRequest']); ?>" class="text-muted">
+      <a href="<?php echo url_for(['module' => 'user', 'action' => 'passwordReset']); ?>" class="text-muted">
         <i class="fas fa-key me-1"></i><?php echo __('Forgot password?'); ?>
       </a>
     </div>
