@@ -248,7 +248,7 @@
   </div>
 </div>
 
-<script>
+<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Grant modal - populate data
   const grantModal = document.getElementById('grantModal');
