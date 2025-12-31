@@ -635,6 +635,11 @@ class researchActions extends sfActions
             'active' => 0,
         ]);
         
+        // 4. Insert into slug table
+        DB::table('slug')->insert([
+            'object_id' => $objectId,
+            'slug' => $username,
+        ]);
         return $objectId;
     }
 
