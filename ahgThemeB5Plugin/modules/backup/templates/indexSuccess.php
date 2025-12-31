@@ -317,8 +317,8 @@ $settings = $settingsService->all();
 </div>
 <style>
 .preset-label { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; display: block; }
-.preset-label:hover { border-color: var(--bs-primary); transform: translateY(-2px); }
-.btn-check:checked + .preset-label { border-color: var(--bs-primary); background-color: rgba(var(--bs-primary-rgb), 0.1); }
+.preset-label:hover { border-color: #005837; box-shadow: 0 0 0 2px rgba(0,88,55,0.25); transform: translateY(-2px); }
+.btn-check:checked + .preset-label { border-color: #005837; box-shadow: 0 0 0 2px rgba(0,88,55,0.25); background-color: #e8f5e9; }
 </style>
 
 <!-- Progress Modal -->
