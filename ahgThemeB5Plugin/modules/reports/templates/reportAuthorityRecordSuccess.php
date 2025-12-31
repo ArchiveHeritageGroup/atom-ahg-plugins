@@ -159,7 +159,7 @@ $rawHasPrevious = isset($hasPrevious) ? $sf_data->getRaw('hasPrevious') : false;
   <?php endif; ?>
 </section>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function exportTableToCSV() {
   var table = document.getElementById('reportTable');
   if (!table) {

@@ -337,7 +337,7 @@ class SpectrumMediaPlayer
         ]);
         
         return <<<SCRIPT
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 (function() {
     var options = {$options};
     var container = document.getElementById('{$id}-container');

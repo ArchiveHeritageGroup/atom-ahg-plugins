@@ -210,7 +210,7 @@ slot('title', $title);
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.getElementById('processBtn')?.addEventListener('click', async function() {
     this.disabled = true;
     this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';

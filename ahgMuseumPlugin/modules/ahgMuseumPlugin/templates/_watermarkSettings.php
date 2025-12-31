@@ -191,7 +191,7 @@ $opacity = $watermarkSetting->opacity ?? 0.4;
   </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Toggle watermark options visibility
   var enableToggle = document.getElementById('watermark_enabled');

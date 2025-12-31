@@ -80,7 +80,7 @@
     <?php endif ?>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const filters = document.querySelectorAll('.material-filter');
     const cards = document.querySelectorAll('.template-card');

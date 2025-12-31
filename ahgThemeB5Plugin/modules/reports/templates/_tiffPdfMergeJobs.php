@@ -175,7 +175,7 @@ $hasProcessing = DB::table('tiff_pdf_merge_job')->whereIn('status', ['queued', '
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.querySelectorAll('.tpm-process-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
         const jobId = this.dataset.jobId;

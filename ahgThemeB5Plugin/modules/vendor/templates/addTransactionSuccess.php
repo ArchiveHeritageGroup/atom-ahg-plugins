@@ -224,7 +224,7 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
 }
 </style>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 let selectedItems = [];
 let searchTimeout;
 

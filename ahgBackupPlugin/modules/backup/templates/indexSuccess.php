@@ -230,7 +230,7 @@ foreach ($backups as $backup) {
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Test connection
     document.getElementById('btn-test-connection')?.addEventListener('click', function() {

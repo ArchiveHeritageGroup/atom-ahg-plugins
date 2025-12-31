@@ -81,7 +81,7 @@ if ($firstCitation && !isset($firstCitation['error'])):
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function copyToClipboard(id) {
     var el = document.getElementById(id);
     // Strip HTML tags for plain text copy

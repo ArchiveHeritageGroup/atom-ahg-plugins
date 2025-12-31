@@ -129,7 +129,7 @@
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function updateDsarStatus(id, status) {
     if (confirm('Update status to ' + status + '?')) {
         fetch('/admin/privacy/dsar/update', {

@@ -322,7 +322,7 @@ $carouselId = 'featured-collection-' . $collection->id;
     <?php endif ?>
 </section>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var carousel = document.getElementById('<?php echo $carouselId ?>');
     if (!carousel) return;

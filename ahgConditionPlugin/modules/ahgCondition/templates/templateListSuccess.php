@@ -67,7 +67,7 @@
     <?php endif ?>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.material-filter').forEach(function(filter) {
         filter.addEventListener('click', function(e) {

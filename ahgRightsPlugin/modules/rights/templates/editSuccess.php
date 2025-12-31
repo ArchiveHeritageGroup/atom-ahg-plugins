@@ -274,7 +274,7 @@
 
 </form>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var basisSelect = document.getElementById('basis');
     var licenseTypeSelect = document.getElementById('license_type');

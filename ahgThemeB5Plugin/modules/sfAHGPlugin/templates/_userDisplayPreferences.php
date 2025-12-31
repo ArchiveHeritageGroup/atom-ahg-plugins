@@ -182,7 +182,7 @@ $allModes = [
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const API_BASE = '/atom-framework/public/api/display-mode.php';
     

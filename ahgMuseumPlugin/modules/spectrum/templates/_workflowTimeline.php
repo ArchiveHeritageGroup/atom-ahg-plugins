@@ -216,7 +216,7 @@ foreach ($statuses as $procId => $procStatus) {
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 (function() {
     'use strict';
 

@@ -371,7 +371,7 @@
     </div>
   </form>
 
-  <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+  <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
   document.getElementById('extractMetadataBtn')?.addEventListener('click', function() {
     if (!confirm('<?php echo __('This will overwrite existing metadata with values from the file. Continue?'); ?>')) {
       return;

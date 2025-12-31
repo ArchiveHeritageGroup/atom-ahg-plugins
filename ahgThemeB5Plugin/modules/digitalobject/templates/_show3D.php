@@ -38,7 +38,7 @@ $viewerId = 'viewer-' . uniqid();
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-        <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+        <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
         (function() {
           const container = document.getElementById('<?php echo $viewerId; ?>-threejs');
           if (!container) return;

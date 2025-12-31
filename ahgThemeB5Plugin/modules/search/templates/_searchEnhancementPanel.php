@@ -179,7 +179,7 @@ $savedSearches = $isAuthenticated ? $searchService->getSavedSearches($userId) : 
   </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 // Toggle notification frequency
 document.getElementById('save-search-notify')?.addEventListener('change', function() {
   document.getElementById('notify-frequency-group').style.display = this.checked ? 'block' : 'none';

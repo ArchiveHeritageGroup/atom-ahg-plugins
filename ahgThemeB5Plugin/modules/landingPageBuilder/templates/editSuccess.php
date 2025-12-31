@@ -249,7 +249,7 @@
   </div>
 </template>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 const LandingPageBuilder = {
     pageId: <?php echo $page->id ?>,
     blocks: <?php echo json_encode($blocks->toArray()) ?>,

@@ -74,7 +74,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function testConnection() {
   const btn = event.target;
   btn.disabled = true;

@@ -127,7 +127,7 @@ $dailyAccess = $sf_data->getRaw('dailyAccess');
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var ctx = document.getElementById('accessChart');
     if (!ctx) return;

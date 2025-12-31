@@ -71,7 +71,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function queueAction(id, action) {
   fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxClearQueueItem']); ?>', {
     method: 'POST',

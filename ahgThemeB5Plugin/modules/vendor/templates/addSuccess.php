@@ -222,7 +222,7 @@
     </form>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const hasInsurance = document.getElementById('hasInsurance');
     const insuranceDetails = document.getElementById('insuranceDetails');

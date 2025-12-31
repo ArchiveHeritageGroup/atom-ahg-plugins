@@ -55,7 +55,7 @@
 <!-- Tom Select CSS (JS loaded in after-content slot) -->
 <link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener("DOMContentLoaded", function() {
   // Creator dropdown
   var creatorSelect = document.querySelector("select[name=\"creator\"]");
@@ -618,7 +618,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 (function() {
   'use strict';
 

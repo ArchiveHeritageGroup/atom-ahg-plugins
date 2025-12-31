@@ -216,7 +216,7 @@
       </div>
     </div>
     
-    <script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+    <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
     (function() {
       var doId = <?php echo $digitalObjectId; ?>;
       var snippetData = { startTime: 0, endTime: 0 };

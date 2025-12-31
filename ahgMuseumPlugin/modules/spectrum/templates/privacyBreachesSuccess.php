@@ -143,7 +143,7 @@
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 function closeBreach(id) {
     if (confirm('Close this breach incident?')) {
         fetch('/admin/privacy/breaches/update', {

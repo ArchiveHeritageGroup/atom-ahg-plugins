@@ -356,7 +356,7 @@ $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" 
 }
 </style>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const viewer = document.getElementById('main-viewer');
     

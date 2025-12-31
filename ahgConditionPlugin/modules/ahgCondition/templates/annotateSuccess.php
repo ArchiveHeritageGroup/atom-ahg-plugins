@@ -165,7 +165,7 @@ $photoTypes = [
 <!-- Load our annotator -->
 <script src="/plugins/ahgConditionPlugin/js/condition-annotator.js"></script>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize annotator
     var annotator = new ConditionAnnotator('annotator-container', {

@@ -25,7 +25,7 @@ $animate = $config['animate_numbers'] ?? true;
 </div>
 
 <?php if ($animate): ?>
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 (function() {
     const counters = document.querySelectorAll('.stat-counter[data-count]');
     const observer = new IntersectionObserver((entries) => {
