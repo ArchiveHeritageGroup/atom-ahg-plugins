@@ -30,7 +30,7 @@ class ResearchService
             'research_interests' => $data['research_interests'] ?? null,
             'current_project' => $data['current_project'] ?? null,
             'orcid_id' => $data['orcid_id'] ?? null,
-            'id_type' => $data['id_type'] ?? null,
+            'id_type' => ($data['id_type'] ?: null),
             'id_number' => $data['id_number'] ?? null,
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s'),
