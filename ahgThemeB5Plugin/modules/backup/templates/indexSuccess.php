@@ -209,54 +209,57 @@ $settings = $settingsService->all();
                 <!-- Presets -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-4 col-6">
-                        <div class="card h-100 preset-card" data-preset="db">
+                        <input type="radio" class="btn-check" name="backup-preset" id="preset-db" value="db" autocomplete="off">
+                        <label class="card h-100 preset-label" for="preset-db">
                             <div class="card-body text-center py-3">
                                 <i class="bi bi-database fs-2 mb-2 text-primary"></i>
                                 <h6 class="mb-1"><?php echo __('Database Only') ?></h6>
                                 <small class="text-muted"><?php echo __('MySQL dump only') ?></small>
                             </div>
-                        </div>
+                        </label>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="card h-100 preset-card" data-preset="atom_base">
+                        <input type="radio" class="btn-check" name="backup-preset" id="preset-atom_base" value="atom_base" autocomplete="off">
+                        <label class="card h-100 preset-label" for="preset-atom_base">
                             <div class="card-body text-center py-3">
                                 <i class="bi bi-box fs-2 mb-2 text-primary"></i>
                                 <h6 class="mb-1"><?php echo __('AtoM Base') ?></h6>
                                 <small class="text-muted"><?php echo __('DB + core files') ?></small>
                             </div>
-                        </div>
+                        </label>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="card h-100 preset-card" data-preset="content">
+                        <input type="radio" class="btn-check" name="backup-preset" id="preset-content" value="content" autocomplete="off">
+                        <label class="card h-100 preset-label" for="preset-content">
                             <div class="card-body text-center py-3">
                                 <i class="bi bi-images fs-2 mb-2 text-primary"></i>
                                 <h6 class="mb-1"><?php echo __('Content') ?></h6>
                                 <small class="text-muted"><?php echo __('DB + digital objects') ?></small>
                             </div>
-                        </div>
+                        </label>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="card h-100 preset-card selected" data-preset="ahg">
+                        <input type="radio" class="btn-check" name="backup-preset" id="preset-ahg" value="ahg" autocomplete="off" checked>
+                        <label class="card h-100 preset-label" for="preset-ahg">
                             <div class="card-body text-center py-3">
                                 <i class="bi bi-puzzle fs-2 mb-2 text-primary"></i>
                                 <h6 class="mb-1"><?php echo __('AHG Extensions') ?></h6>
                                 <small class="text-muted"><?php echo __('DB + Framework + Plugins') ?></small>
                             </div>
-                        </div>
+                        </label>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="card h-100 preset-card" data-preset="full">
+                        <input type="radio" class="btn-check" name="backup-preset" id="preset-full" value="full" autocomplete="off">
+                        <label class="card h-100 preset-label" for="preset-full">
                             <div class="card-body text-center py-3">
                                 <i class="bi bi-archive fs-2 mb-2 text-primary"></i>
                                 <h6 class="mb-1"><?php echo __('Full Backup') ?></h6>
                                 <small class="text-muted"><?php echo __('Everything') ?></small>
                             </div>
-                        </div>
+                        </label>
                     </div>
                 </div>
-                
-                <input type="hidden" id="backup-preset" value="ahg">
-                
+                <!-- Custom Options -->
                 <!-- Custom Options -->
                 <div class="collapse" id="customOptions">
                     <hr>
@@ -313,9 +316,9 @@ $settings = $settingsService->all();
     </div>
 </div>
 <style>
-.preset-card { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
-.preset-card:hover { border-color: var(--bs-primary); transform: translateY(-2px); }
-.preset-card.selected { border-color: var(--bs-primary); background-color: rgba(var(--bs-primary-rgb), 0.1); }
+.preset-label { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; display: block; }
+.preset-label:hover { border-color: var(--bs-primary); transform: translateY(-2px); }
+.btn-check:checked + .preset-label { border-color: var(--bs-primary); background-color: rgba(var(--bs-primary-rgb), 0.1); }
 </style>
 
 <!-- Progress Modal -->
@@ -338,18 +341,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const createModal = new bootstrap.Modal(document.getElementById('createBackupModal'));
     const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
     
-    // Preset card selection
-    const presetCards = document.querySelectorAll('.preset-card');
-    const presetInput = document.getElementById('backup-preset');
-    
-    presetCards.forEach(card => {
-        card.addEventListener('click', function() {
-            presetCards.forEach(c => c.classList.remove('selected'));
-            this.classList.add('selected');
-            presetInput.value = this.dataset.preset;
-        });
-    });
-    
     // Show create backup modal
     document.querySelectorAll('#btn-create-backup, #btn-first-backup, #btn-backup-full').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -360,9 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Quick backup buttons
     document.getElementById('btn-backup-db-only')?.addEventListener('click', function(e) {
         e.preventDefault();
-        presetCards.forEach(c => c.classList.remove('selected'));
-        document.querySelector('.preset-card[data-preset="db"]')?.classList.add('selected');
-        presetInput.value = 'db';
+        document.getElementById('preset-db').checked = true;
         createModal.show();
     });
     
@@ -388,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else {
             options = new URLSearchParams({
-                preset: presetInput.value
+                preset: document.querySelector('input[name="backup-preset"]:checked').value
             });
         }
         
