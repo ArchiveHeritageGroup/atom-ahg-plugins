@@ -141,7 +141,7 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><i class="fas fa-bell me-1"></i><?php echo __('Notifications'); ?></h6></li>
     <li>
-      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@researcher_admin'); ?>">
+      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@research_researchers'); ?>">
         <span><i class="fas fa-user-clock me-2"></i><?php echo __('Pending Researchers'); ?></span>
         <span class="badge bg-warning text-dark"><?php echo $pendingResearcherCount; ?></span>
       </a>
