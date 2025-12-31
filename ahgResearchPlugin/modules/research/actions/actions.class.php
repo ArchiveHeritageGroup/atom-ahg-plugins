@@ -600,8 +600,10 @@ class researchActions extends sfActions
 
     protected function createAtomUser(string $username, string $email, string $password): int
     {
-        $salt = bin2hex(random_bytes(16));
-        $passwordHash = password_hash($password, PASSWORD_ARGON2I);
+        // AtoM double-hash: SHA1(salt+password) then Argon2i
+        $salt = md5(rand(100000, 999999) . $email);
+        $sha1Hash = sha1($salt . $password);
+        $passwordHash = password_hash($sha1Hash, PASSWORD_ARGON2I);
         $now = date('Y-m-d H:i:s');
         
         // AtoM inheritance: object -> actor -> user
