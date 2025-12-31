@@ -197,50 +197,126 @@ $settings = $settingsService->all();
 
 <!-- Create Backup Modal -->
 <div class="modal fade" id="createBackupModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-plus me-2"></i><?php echo __('Create Backup') ?></h5>
+                <h5 class="modal-title"><i class="bi bi-archive me-2"></i><?php echo __('Create Backup') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label"><?php echo __('Components to backup') ?></label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="backup_database" checked>
-                        <label class="form-check-label" for="backup_database">
-                            <i class="fas fa-database me-1"></i><?php echo __('Database') ?>
-                        </label>
+                <p class="text-muted mb-3"><?php echo __('Select a backup type:') ?></p>
+                
+                <!-- Presets -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4 col-6">
+                        <div class="card h-100 preset-card" data-preset="db">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-database fs-2 mb-2 text-primary"></i>
+                                <h6 class="mb-1"><?php echo __('Database Only') ?></h6>
+                                <small class="text-muted"><?php echo __('MySQL dump only') ?></small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="backup_uploads" checked>
-                        <label class="form-check-label" for="backup_uploads">
-                            <i class="fas fa-folder me-1"></i><?php echo __('Uploads') ?>
-                        </label>
+                    <div class="col-md-4 col-6">
+                        <div class="card h-100 preset-card" data-preset="atom_base">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-box fs-2 mb-2 text-primary"></i>
+                                <h6 class="mb-1"><?php echo __('AtoM Base') ?></h6>
+                                <small class="text-muted"><?php echo __('DB + core files') ?></small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="backup_plugins">
-                        <label class="form-check-label" for="backup_plugins">
-                            <i class="fas fa-puzzle-piece me-1"></i><?php echo __('Custom Plugins') ?>
-                        </label>
+                    <div class="col-md-4 col-6">
+                        <div class="card h-100 preset-card" data-preset="content">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-images fs-2 mb-2 text-primary"></i>
+                                <h6 class="mb-1"><?php echo __('Content') ?></h6>
+                                <small class="text-muted"><?php echo __('DB + digital objects') ?></small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="backup_framework">
-                        <label class="form-check-label" for="backup_framework">
-                            <i class="fas fa-cogs me-1"></i><?php echo __('Framework') ?>
-                        </label>
+                    <div class="col-md-4 col-6">
+                        <div class="card h-100 preset-card selected" data-preset="ahg">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-puzzle fs-2 mb-2 text-primary"></i>
+                                <h6 class="mb-1"><?php echo __('AHG Extensions') ?></h6>
+                                <small class="text-muted"><?php echo __('DB + Framework + Plugins') ?></small>
+                            </div>
+                        </div>
                     </div>
+                    <div class="col-md-4 col-6">
+                        <div class="card h-100 preset-card" data-preset="full">
+                            <div class="card-body text-center py-3">
+                                <i class="bi bi-archive fs-2 mb-2 text-primary"></i>
+                                <h6 class="mb-1"><?php echo __('Full Backup') ?></h6>
+                                <small class="text-muted"><?php echo __('Everything') ?></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="backup-preset" value="ahg">
+                
+                <!-- Custom Options -->
+                <div class="collapse" id="customOptions">
+                    <hr>
+                    <h6 class="mb-3"><?php echo __('Custom Options') ?></h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-database" checked>
+                                <label class="form-check-label" for="opt-database"><?php echo __('Database') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-digital-objects">
+                                <label class="form-check-label" for="opt-digital-objects"><?php echo __('Digital Objects (uploads/r)') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-uploads">
+                                <label class="form-check-label" for="opt-uploads"><?php echo __('All Uploads') ?></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-atom-base">
+                                <label class="form-check-label" for="opt-atom-base"><?php echo __('AtoM Base') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-plugins" checked>
+                                <label class="form-check-label" for="opt-plugins"><?php echo __('AHG Plugins') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-framework" checked>
+                                <label class="form-check-label" for="opt-framework"><?php echo __('AHG Framework') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input custom-opt" type="checkbox" id="opt-fuseki">
+                                <label class="form-check-label" for="opt-fuseki"><?php echo __('Fuseki/RIC') ?></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <a href="#" data-bs-toggle="collapse" data-bs-target="#customOptions" class="small text-decoration-none">
+                        <i class="bi bi-gear me-1"></i><?php echo __('Custom options') ?>
+                    </a>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
                 <button type="button" class="btn btn-primary" id="btn-start-backup">
-                    <i class="fas fa-play me-1"></i><?php echo __('Start Backup') ?>
+                    <i class="bi bi-play-fill me-1"></i><?php echo __('Start Backup') ?>
                 </button>
             </div>
         </div>
     </div>
 </div>
+<style>
+.preset-card { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.preset-card:hover { border-color: var(--bs-primary); transform: translateY(-2px); }
+.preset-card.selected { border-color: var(--bs-primary); background-color: rgba(var(--bs-primary-rgb), 0.1); }
+</style>
 
 <!-- Progress Modal -->
 <div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static">
@@ -262,6 +338,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const createModal = new bootstrap.Modal(document.getElementById('createBackupModal'));
     const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
     
+    // Preset card selection
+    const presetCards = document.querySelectorAll('.preset-card');
+    const presetInput = document.getElementById('backup-preset');
+    
+    presetCards.forEach(card => {
+        card.addEventListener('click', function() {
+            presetCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            presetInput.value = this.dataset.preset;
+        });
+    });
+    
     // Show create backup modal
     document.querySelectorAll('#btn-create-backup, #btn-first-backup, #btn-backup-full').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -269,13 +357,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Database only backup
+    // Quick backup buttons
     document.getElementById('btn-backup-db-only')?.addEventListener('click', function(e) {
         e.preventDefault();
-        document.getElementById('backup_database').checked = true;
-        document.getElementById('backup_uploads').checked = false;
-        document.getElementById('backup_plugins').checked = false;
-        document.getElementById('backup_framework').checked = false;
+        presetCards.forEach(c => c.classList.remove('selected'));
+        document.querySelector('.preset-card[data-preset="db"]')?.classList.add('selected');
+        presetInput.value = 'db';
         createModal.show();
     });
     
@@ -284,12 +371,26 @@ document.addEventListener('DOMContentLoaded', function() {
         createModal.hide();
         progressModal.show();
         
-        const options = new URLSearchParams({
-            database: document.getElementById('backup_database').checked ? 1 : 0,
-            uploads: document.getElementById('backup_uploads').checked ? 1 : 0,
-            plugins: document.getElementById('backup_plugins').checked ? 1 : 0,
-            framework: document.getElementById('backup_framework').checked ? 1 : 0
-        });
+        // Check if custom options are expanded
+        const customExpanded = document.getElementById('customOptions')?.classList.contains('show');
+        
+        let options;
+        if (customExpanded) {
+            options = new URLSearchParams({
+                preset: 'custom',
+                database: document.getElementById('opt-database')?.checked ? 1 : 0,
+                digital_objects: document.getElementById('opt-digital-objects')?.checked ? 1 : 0,
+                uploads: document.getElementById('opt-uploads')?.checked ? 1 : 0,
+                atom_base: document.getElementById('opt-atom-base')?.checked ? 1 : 0,
+                plugins: document.getElementById('opt-plugins')?.checked ? 1 : 0,
+                framework: document.getElementById('opt-framework')?.checked ? 1 : 0,
+                fuseki: document.getElementById('opt-fuseki')?.checked ? 1 : 0
+            });
+        } else {
+            options = new URLSearchParams({
+                preset: presetInput.value
+            });
+        }
         
         fetch('<?php echo url_for(['module' => 'backup', 'action' => 'create']) ?>', {
             method: 'POST',
@@ -305,7 +406,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.error) {
                 alert('<?php echo __('Backup failed') ?>: ' + data.error);
             } else {
-                alert('<?php echo __('Backup created successfully!') ?>');
+                let msg = '<?php echo __('Backup created successfully!') ?>';
+                if (data.zip_file) {
+                    msg += '\nZIP: ' + data.zip_file;
+                }
+                alert(msg);
                 window.location.reload();
             }
         })
@@ -322,7 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm('<?php echo __('Are you sure you want to delete this backup?') ?>')) {
                 return;
             }
-            
             fetch('<?php echo url_for(['module' => 'backup', 'action' => 'delete']) ?>', {
                 method: 'POST',
                 headers: {

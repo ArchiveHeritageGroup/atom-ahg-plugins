@@ -65,19 +65,30 @@ class backupActions extends sfActions
         }
     }
 
-    public function executeCreate(sfWebRequest $request)
+        public function executeCreate(sfWebRequest $request)
     {
+        // Suppress PHP errors from corrupting JSON output
+        error_reporting(0);
+        ini_set('display_errors', 0);
+        
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
         }
         
-        $options = [
-            'database' => (bool)$request->getParameter('database', true),
-            'uploads' => (bool)$request->getParameter('uploads', true),
-            'plugins' => (bool)$request->getParameter('plugins', true),
-            'framework' => (bool)$request->getParameter('framework', true),
-            'type' => 'manual',
-        ];
+        $preset = $request->getParameter('preset', 'ahg');
+        
+        $options = ['preset' => $preset];
+        
+        // If custom preset, get individual options
+        if ($preset === 'custom') {
+            $options['database'] = (bool)$request->getParameter('database', true);
+            $options['digital_objects'] = (bool)$request->getParameter('digital_objects', false);
+            $options['uploads'] = (bool)$request->getParameter('uploads', false);
+            $options['atom_base'] = (bool)$request->getParameter('atom_base', false);
+            $options['plugins'] = (bool)$request->getParameter('plugins', true);
+            $options['framework'] = (bool)$request->getParameter('framework', true);
+            $options['fuseki'] = (bool)$request->getParameter('fuseki', false);
+        }
         
         try {
             $service = new \AtomExtensions\Services\BackupService();
