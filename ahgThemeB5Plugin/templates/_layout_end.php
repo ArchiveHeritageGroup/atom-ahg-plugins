@@ -24,7 +24,7 @@ video.ahg-native-video::-webkit-media-controls {
 }
 </style>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Force show native video controls
 document.addEventListener('DOMContentLoaded', function() {
     var videos = document.querySelectorAll('.ahg-media-player video');

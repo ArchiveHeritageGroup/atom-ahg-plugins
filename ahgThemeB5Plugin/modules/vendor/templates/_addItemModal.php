@@ -114,7 +114,7 @@
 }
 </style>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 let autocompleteTimeout;
 
 document.getElementById('glamAutocomplete').addEventListener('input', function() {

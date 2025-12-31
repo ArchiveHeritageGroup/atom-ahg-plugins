@@ -619,7 +619,7 @@ slot('title', $title);
     </div>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Color picker sync
 document.querySelectorAll('[id$="_color_picker"]').forEach(function(picker) {
     var textInput = document.getElementById(picker.id.replace('_picker', ''));

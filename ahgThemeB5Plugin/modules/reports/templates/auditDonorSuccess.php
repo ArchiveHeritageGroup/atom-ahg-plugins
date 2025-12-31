@@ -64,7 +64,7 @@
       <label><input type="checkbox" onclick="toggleColumn(1)" checked> Created</label>
     </div>
 
-    <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     function toggleColumn(colNum) {
       var table = document.getElementById('reportTable');
       var rows = table.getElementsByTagName('tr');

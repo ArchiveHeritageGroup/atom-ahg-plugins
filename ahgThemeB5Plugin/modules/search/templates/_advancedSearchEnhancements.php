@@ -117,7 +117,7 @@ try {
     </div>
   </div>
 </div>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function saveCurrentSearch() {
   var name = document.getElementById('save-search-name').value;
   if (!name) { alert('Please enter a name'); return; }

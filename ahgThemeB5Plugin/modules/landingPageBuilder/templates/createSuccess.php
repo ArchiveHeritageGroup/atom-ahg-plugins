@@ -90,7 +90,7 @@
   </div>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Auto-generate slug from name
 document.getElementById('name').addEventListener('input', function() {
     const slugInput = document.getElementById('slug');

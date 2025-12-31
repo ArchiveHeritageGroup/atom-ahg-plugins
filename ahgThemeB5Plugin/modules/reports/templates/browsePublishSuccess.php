@@ -125,7 +125,7 @@
   </tbody>
 </table>
  <iframe name="inlineframe" src="" frameborder="0" scrolling="auto" width="0" height="0" marginwidth="0" marginheight="0" ></iframe>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function updateYesNo(eElement,eId,eCount)
 {
 	var partsOfStr = eElement.split('~');

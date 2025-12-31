@@ -224,7 +224,7 @@
 
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.querySelectorAll('.export-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
         e.preventDefault();

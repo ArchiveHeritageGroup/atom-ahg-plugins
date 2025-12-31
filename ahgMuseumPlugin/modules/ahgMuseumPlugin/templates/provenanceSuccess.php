@@ -258,7 +258,7 @@
 
 <!-- D3.js Timeline -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const timelineData = <?php echo $timelineData ?>;
   

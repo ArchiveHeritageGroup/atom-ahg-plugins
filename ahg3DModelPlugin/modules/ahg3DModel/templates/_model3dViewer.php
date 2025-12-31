@@ -72,7 +72,7 @@ $modelCount = count($models);
 </div>
 
 <!-- Load model-viewer script if not already loaded -->
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 if (!customElements.get('model-viewer')) {
     var script = document.createElement('script');
     script.type = 'module';

@@ -350,7 +350,7 @@ if (!empty($graphData['nodes'])) {
 <script src="https://unpkg.com/three-spritetext@1.6.5/dist/three-spritetext.min.js"></script>
 <script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
   var graphData = <?php echo json_encode($graphData); ?>;
   var currentRecordId = '<?php echo $resource->id; ?>';

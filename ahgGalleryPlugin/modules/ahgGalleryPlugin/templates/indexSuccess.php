@@ -676,7 +676,7 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
 #fullscreen-model-viewer::part(default-ar-button) { display: none; }
 </style>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 let autoRotateEnabled = true;
 
 function open3DFullscreen() {

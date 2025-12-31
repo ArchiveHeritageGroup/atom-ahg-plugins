@@ -95,7 +95,7 @@
   </div>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function revokeAccess(userId) {
   if (confirm('<?php echo __('Revoke access for this user?') ?>')) {
     fetch('/security/ajax/revoke_compartment', {

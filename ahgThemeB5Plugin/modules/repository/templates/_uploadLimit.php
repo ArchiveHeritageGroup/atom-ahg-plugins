@@ -18,7 +18,7 @@
   </h5>
 
   <div class="card-body py-2">
-    <style <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 	#upload-limit-progress-div { height : 25px }
 	#upload-limit-progress-bar-div {width: <?php echo $sf_data->getRaw('diskUsageFloat'); ?>%}
     </style>
@@ -72,7 +72,7 @@
           <form id="upload-limit-form" method="POST" action="<?php echo url_for([$resource, 'module' => 'repository', 'action' => 'editUploadLimit']); ?>">
             <?php echo $form->renderHiddenFields(); ?>
 	    <div>
-	      <style <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+	      <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
                 #uploadLimit_value { width: 6em }
               </style>	
               <label for="uploadLimit_type"><?php echo __('Set the upload limit for this %1%', ['%1%' => strtolower(sfConfig::get('app_ui_label_repository'))]); ?></label>

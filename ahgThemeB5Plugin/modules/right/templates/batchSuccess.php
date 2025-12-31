@@ -192,7 +192,7 @@
 </form>
 
 <!-- Tom Select for dropdown -->
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var select = document.getElementById('information_object_id');
     if (select && typeof TomSelect !== 'undefined') {

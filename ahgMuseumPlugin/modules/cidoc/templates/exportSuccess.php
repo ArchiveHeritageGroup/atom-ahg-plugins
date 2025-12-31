@@ -329,7 +329,7 @@ table code {
 }
 </style>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function updateFormat(format) {
     document.querySelectorAll('.format-option').forEach(function(opt) {
         opt.classList.remove('active');

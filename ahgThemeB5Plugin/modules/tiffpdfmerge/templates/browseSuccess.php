@@ -224,7 +224,7 @@ slot('title', $title);
     <?php endif; ?>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async function() {
         if (!confirm('Delete this job and all its files?')) return;

@@ -167,7 +167,7 @@ $period = $sf_data->getRaw('period');
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     <?php
     $clLabels = array_map(function($l) { return $l->name; }, $clearancesByLevel);

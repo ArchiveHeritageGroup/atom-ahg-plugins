@@ -168,7 +168,7 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
 }
 </style>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('model_file');

@@ -422,7 +422,7 @@
       </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-    <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
       document.addEventListener('DOMContentLoaded', function() {
         try {
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {

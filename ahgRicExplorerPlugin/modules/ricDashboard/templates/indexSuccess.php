@@ -243,7 +243,7 @@
 
 <?php slot('after-content'); ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const syncTrendData = <?php echo json_encode($syncTrend); ?>;
 const operationsData = <?php echo json_encode($operationsByType); ?>;
 

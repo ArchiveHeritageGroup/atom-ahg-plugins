@@ -76,7 +76,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function resync(entityType, entityId) {
   fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxResync']); ?>', {
     method: 'POST',

@@ -162,7 +162,7 @@ if (!$model): ?>
     </div>
 </model-viewer>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Handle hotspot clicks for links
 document.querySelectorAll('.hotspot[data-link]').forEach(hotspot => {
     hotspot.addEventListener('click', function(e) {

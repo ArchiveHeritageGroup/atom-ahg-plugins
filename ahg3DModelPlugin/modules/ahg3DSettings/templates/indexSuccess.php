@@ -329,7 +329,7 @@ function isSettingEnabled($settings, $key) {
 
 <?php if (!empty($formatStats)): ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('formatChart').getContext('2d');
     new Chart(ctx, {

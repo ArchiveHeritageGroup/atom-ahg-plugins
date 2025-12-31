@@ -687,7 +687,7 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
   </form>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Document Upload Management
     var docContainer = document.getElementById('document-entries');
@@ -765,7 +765,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var selectedRecordId = null, selectedRecordTitle = '', selectedAccessionId = null, selectedAccessionTitle = '';
     var newRecordCount = 0, newAccessionCount = 0;

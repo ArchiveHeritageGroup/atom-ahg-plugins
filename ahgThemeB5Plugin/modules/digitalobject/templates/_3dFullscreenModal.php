@@ -17,7 +17,7 @@
     </small>
   </div>
 </div>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 let fs3D = { controls: null, renderer: null };
 function open3DFullscreen(modelPath, ext) {
   const modal = document.getElementById('fullscreen-3d-modal');

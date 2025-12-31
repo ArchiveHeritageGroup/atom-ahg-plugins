@@ -263,7 +263,7 @@ $formOptions = sfOutputEscaper::unescape($formOptions ?? []);
 
 <?php if (!empty($stats['by_basis'])): ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var ctx = document.getElementById('basisChart').getContext('2d');
     new Chart(ctx, {

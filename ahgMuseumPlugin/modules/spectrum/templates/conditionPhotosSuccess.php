@@ -389,7 +389,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/js/condition-photos.js');
     </div>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Photo data for lightbox
 var photos = <?php echo json_encode($photos); ?>;
 var currentPhotoIndex = 0;
@@ -483,7 +483,7 @@ function initDropzone() {
     </div>
 </div>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Annotation functionality
 var currentAnnotator = null;
 var currentPhotoId = null;

@@ -399,7 +399,7 @@ foreach ($collection->items as $item) {
 
 <?php if ($sf_user->isAuthenticated()): ?>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var tbody = document.querySelector('.sortable-items');
     if (tbody) {

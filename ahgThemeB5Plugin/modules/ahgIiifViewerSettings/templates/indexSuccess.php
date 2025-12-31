@@ -259,7 +259,7 @@
     </div>
 </form>
 
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('viewerType').addEventListener('change', function() {
     var carouselOpts = document.getElementById('carouselOptions');
     carouselOpts.style.display = (this.value === 'carousel') ? 'block' : 'none';

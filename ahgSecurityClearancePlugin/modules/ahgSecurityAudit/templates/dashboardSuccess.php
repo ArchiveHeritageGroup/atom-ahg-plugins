@@ -328,7 +328,7 @@ $recentLogs = \Illuminate\Database\Capsule\Manager::table('spectrum_audit_log as
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var ctx = document.getElementById('activityChart');
     if (!ctx) return;
