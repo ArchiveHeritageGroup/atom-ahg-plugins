@@ -315,10 +315,11 @@ $settings = $settingsService->all();
         </div>
     </div>
 </div>
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .preset-label { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; display: block; }
 .preset-label:hover { border-color: #005837; box-shadow: 0 0 0 2px rgba(0,88,55,0.25); transform: translateY(-2px); }
 .btn-check:checked + .preset-label { border-color: #005837; box-shadow: 0 0 0 2px rgba(0,88,55,0.25); background-color: #e8f5e9; }
+.preset-label * { pointer-events: none; }
 </style>
 
 <!-- Progress Modal -->
