@@ -50,7 +50,7 @@ if (empty($authorities)) {
     <?php endif; ?>
 </section>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .linked-authorities-section {
     margin-top: 20px;
     padding: 20px;

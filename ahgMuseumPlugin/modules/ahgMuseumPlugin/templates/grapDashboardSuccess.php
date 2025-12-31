@@ -39,7 +39,7 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
 
 <?php slot('content'); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .grap-dashboard {
     padding: 20px;
 }

@@ -173,7 +173,7 @@ class LoanAgreementGenerator
 <head>
     <meta charset="UTF-8">
     <title>Loan Agreement - {{loan_number}}</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; margin: 2cm; }
         h1 { text-align: center; font-size: 16pt; margin-bottom: 20px; }
         h2 { font-size: 12pt; margin-top: 20px; border-bottom: 1px solid #000; }

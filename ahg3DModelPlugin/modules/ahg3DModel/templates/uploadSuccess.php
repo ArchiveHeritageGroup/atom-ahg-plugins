@@ -127,7 +127,7 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .upload-zone {
     border: 2px dashed #dee2e6;
     border-radius: 8px;

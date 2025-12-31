@@ -7,7 +7,7 @@ $isAuthenticated = $sf_user->isAuthenticated();
 $isAdmin = $sf_user->isAdministrator();
 ?>
 <?php if ($isAuthenticated): ?>
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #glam-dam-menu + .dropdown-menu { font-size: 0.85rem; }
 #glam-dam-menu + .dropdown-menu .dropdown-item { padding: 0.25rem 1rem; }
 #glam-dam-menu + .dropdown-menu .dropdown-header { padding: 0.25rem 1rem; font-size: 0.75rem; }

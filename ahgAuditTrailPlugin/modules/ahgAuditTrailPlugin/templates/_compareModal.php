@@ -92,7 +92,7 @@
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .audit-compare-changed {
   background-color: #fff3cd !important;
 }

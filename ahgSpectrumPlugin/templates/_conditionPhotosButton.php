@@ -55,7 +55,7 @@ try {
     <?php endif; ?>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .condition-photos-section {
     margin-top: 10px;
     padding-top: 10px;

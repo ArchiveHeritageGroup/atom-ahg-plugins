@@ -368,7 +368,7 @@ class ahgSpectrumExportService
 <head>
     <meta charset="UTF-8">
     <title>Spectrum Procedure History</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #333; line-height: 1.4; }
         .header { background: #2c3e50; color: #fff; padding: 20px; margin-bottom: 20px; }
@@ -513,7 +513,7 @@ class ahgSpectrumExportService
 <head>
     <meta charset="UTF-8">
     <title>Spectrum Audit Report</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #333; line-height: 1.4; }
         .header { background: #2c3e50; color: #fff; padding: 20px; margin-bottom: 20px; }
@@ -761,7 +761,7 @@ class ahgSpectrumExportService
 <head>
     <meta charset="UTF-8">
     <title>Condition Report</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         body { font-family: Arial, sans-serif; font-size: 10pt; }
         .header { background: #2c3e50; color: #fff; padding: 20px; }
         .section { margin: 20px; }

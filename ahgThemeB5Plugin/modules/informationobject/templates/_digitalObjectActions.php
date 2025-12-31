@@ -146,7 +146,7 @@ $resourceSlug = $resource->slug ?? null;
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #tpmDropZone { cursor: pointer; min-height: 150px; transition: all 0.2s; }
 #tpmDropZone:hover, #tpmDropZone.drag-over { border-color: #0d6efd !important; background-color: #e7f1ff !important; }
 .tpm-file-item { transition: background-color 0.2s; }

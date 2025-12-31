@@ -29,7 +29,7 @@ $hasResearch = ahgIsPluginEnabled('ahgResearchPlugin');
 $hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
 ?>
 <?php if ($isAdmin): ?>
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #ahg-plugins-menu + .dropdown-menu { 
   font-size: 0.8rem; 
   max-height: 80vh;

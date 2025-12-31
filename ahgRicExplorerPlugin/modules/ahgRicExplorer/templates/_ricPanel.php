@@ -335,7 +335,7 @@ if (!empty($graphData['nodes'])) {
   <div id="ric-fullscreen-graph" style="width: 100%; height: 100%;"></div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .ric-fullscreen-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1a1a2e; z-index: 9999; }
 .ric-fullscreen-controls { position: absolute; top: 15px; right: 15px; z-index: 10001; }
 .ric-view-btn.active, .ric-fs-view-btn.active { background-color: #198754 !important; border-color: #198754 !important; color: white !important; }

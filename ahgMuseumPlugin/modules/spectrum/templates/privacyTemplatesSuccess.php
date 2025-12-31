@@ -8,7 +8,7 @@
     </button>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .template-card .card-header { color: #ffffff !important; font-weight: 600; }
 .template-card .card-header h6 { color: #ffffff !important; }
 .template-card .card-header i { color: #ffffff !important; }

@@ -595,7 +595,7 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Annotation badge on photos */
 .photo-item .annotation-badge {
     z-index: 10;

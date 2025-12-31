@@ -648,7 +648,7 @@ document.querySelectorAll('input[type="range"]').forEach(function(range) {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .ahg-settings-page .list-group-item.active {
     background-color: var(--primary, #007bff);
     border-color: var(--primary, #007bff);

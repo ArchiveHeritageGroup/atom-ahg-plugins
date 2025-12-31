@@ -94,7 +94,7 @@
 </li>
 <?php endif; ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .ahg-admin-menu .dropdown-header {
     font-weight: 600;
     color: #6c757d;

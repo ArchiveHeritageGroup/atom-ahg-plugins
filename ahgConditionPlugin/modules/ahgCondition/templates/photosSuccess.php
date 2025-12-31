@@ -310,7 +310,7 @@ function deletePhoto(photoId) {
 }
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .dropzone-area {
     border: 2px dashed #dee2e6;
     cursor: pointer;

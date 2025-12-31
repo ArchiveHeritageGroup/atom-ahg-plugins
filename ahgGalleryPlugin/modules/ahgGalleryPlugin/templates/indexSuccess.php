@@ -670,7 +670,7 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #fullscreen-3d-modal { backdrop-filter: blur(10px); }
 #fullscreen-model-viewer { --poster-color: transparent; }
 #fullscreen-model-viewer::part(default-ar-button) { display: none; }

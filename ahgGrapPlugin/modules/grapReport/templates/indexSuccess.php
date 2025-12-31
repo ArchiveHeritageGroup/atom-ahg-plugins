@@ -16,7 +16,7 @@ $summaryByClassRaw = $sf_data->getRaw('summaryByClass') ?: [];
 $statsRaw = $sf_data->getRaw('stats') ?: [];
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .grap-dashboard .stat-card {
   background: #fff;
   border-radius: 8px;

@@ -14,7 +14,7 @@ $notRecognizedRaw = $sf_data->getRaw('notRecognized') ?: [];
 $valuationScheduleRaw = $sf_data->getRaw('valuationSchedule') ?: [];
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   .grap-disclosure-note { max-width: 900px; margin: 0 auto; }
   .grap-disclosure-note h3 { margin-top: 30px; border-bottom: 2px solid #1B5E20; padding-bottom: 5px; color: #1B5E20; }
   .grap-disclosure-note .total-row { background-color: #E8F5E9; font-weight: bold; }

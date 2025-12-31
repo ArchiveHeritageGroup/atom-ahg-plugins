@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>GLAM Browse - Print Preview</title>
-  <style>
+  <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 20px; }
     h1 { font-size: 18px; border-bottom: 2px solid #1d6a52; padding-bottom: 10px; color: #1d6a52; }
     .meta { color: #666; margin-bottom: 20px; }

@@ -199,7 +199,7 @@ function formatBytes($bytes) {
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #drop-zone {
     transition: all 0.3s ease;
     cursor: pointer;

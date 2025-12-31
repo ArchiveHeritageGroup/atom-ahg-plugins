@@ -10,7 +10,7 @@
 </body>
 </html>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Override mediaelement CSS that hides native video controls */
 .ahg-media-player video::-webkit-media-controls,
 .ahg-media-player video::-webkit-media-controls-panel,

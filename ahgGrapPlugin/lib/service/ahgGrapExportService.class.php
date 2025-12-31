@@ -778,7 +778,7 @@ class ahgGrapExportService
 <head>
     <meta charset="UTF-8">
     <title>Heritage Assets Board Pack</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11pt; color: #333; }
         .header { background: #1a5276; color: #fff; padding: 30px; }

@@ -66,7 +66,7 @@
 
 <?php slot('content'); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Fix font sizes */
 .accordion-body label { font-size: 14px !important; font-weight: 500 !important; }
 .field-input input, .field-input select, .field-input textarea { font-size: 13px !important; }

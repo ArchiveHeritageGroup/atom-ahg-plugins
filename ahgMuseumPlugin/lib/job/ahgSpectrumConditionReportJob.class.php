@@ -434,7 +434,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
 <head>
     <meta charset="utf-8">
     <title>Condition Report - ' . htmlspecialchars($objectTitle) . '</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; color: #333; }
         h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; }

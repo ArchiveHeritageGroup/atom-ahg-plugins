@@ -7,7 +7,7 @@
   </h1>
 <?php end_slot(); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 input[type="date"] {
   height: 45px !important;
   font-size: 16px !important;

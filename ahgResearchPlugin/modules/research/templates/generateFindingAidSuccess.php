@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo __('Finding Aid'); ?> - <?php echo htmlspecialchars($data['collection']->name); ?></title>
-  <style>
+  <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; margin: 40px; color: #333; }
     h1 { font-size: 24pt; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
     h2 { font-size: 18pt; color: #444; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px; }

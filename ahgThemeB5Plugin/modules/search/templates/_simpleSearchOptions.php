@@ -116,7 +116,7 @@ $popular = $searchService->getPopularSearches(5);
   <?php endif; ?>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .search-options-dropdown {
   min-width: 280px;
   max-height: 70vh;

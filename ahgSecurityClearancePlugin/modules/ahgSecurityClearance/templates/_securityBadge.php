@@ -37,7 +37,7 @@ switch ($classification->classificationLevel) {
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .bg-orange { background-color: #fd7e14 !important; color: white; }
 .bg-purple { background-color: #6f42c1 !important; color: white; }
 </style>

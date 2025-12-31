@@ -239,7 +239,7 @@ $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" 
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .model-viewer-wrapper model-viewer {
     --poster-color: transparent;
 }

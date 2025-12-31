@@ -429,7 +429,7 @@ function toggleProblematicItems(hide) {
 </script>
 <?php endif ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .drag-handle { cursor: grab; }
 .drag-handle:active { cursor: grabbing; }
 .sortable-ghost { opacity: 0.4; background: #f0f0f0; }

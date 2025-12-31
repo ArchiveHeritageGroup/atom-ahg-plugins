@@ -164,7 +164,7 @@
 
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .grap-install-page {
     max-width: 900px;
     margin: 0 auto;

@@ -621,7 +621,7 @@ class BarcodeGenerator
     private function getLabelSheetStyles(string $labelWidth, string $labelHeight, int $perRow): string
     {
         return <<<HTML
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 @media print {
     body { margin: 0; padding: 0; }
     .label-sheet { page-break-inside: avoid; }

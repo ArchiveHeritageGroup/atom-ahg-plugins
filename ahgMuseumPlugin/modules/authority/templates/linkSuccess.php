@@ -356,7 +356,7 @@
 
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .authority-linkage-page .section-box {
     background: #fff;
     border-radius: 12px;

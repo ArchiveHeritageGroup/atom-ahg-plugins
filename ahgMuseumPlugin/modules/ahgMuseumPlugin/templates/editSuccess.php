@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <?php slot('content'); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* CCO Form Styling - Collections Management Dashboard Theme */
 .sidebar-section {
   background: #fff;

@@ -67,7 +67,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .ric-widget {
   background: #fff;
   border: 1px solid #ddd;

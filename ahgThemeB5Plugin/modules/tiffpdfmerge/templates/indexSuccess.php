@@ -167,7 +167,7 @@ if ($informationObject) {
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .upload-zone { cursor: pointer; transition: all 0.3s ease; min-height: 200px; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: #0d6efd !important; background-color: #e8f4ff !important; }
 .tpm-file-item { transition: background-color 0.2s; cursor: grab; }

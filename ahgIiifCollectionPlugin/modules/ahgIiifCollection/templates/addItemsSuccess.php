@@ -174,7 +174,7 @@
 })();
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #selectedItems { display: flex; flex-wrap: wrap; gap: 5px; }
 #searchResults .list-group-item:hover { background: #e9ecef; }
 </style>

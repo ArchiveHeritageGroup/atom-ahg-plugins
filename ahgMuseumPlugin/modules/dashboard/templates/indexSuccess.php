@@ -15,7 +15,7 @@ $analyzedRecords = $sf_data->getRaw('analysis')['analyzedRecords'] ?? 0;
 $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .dashboard-title {
     color: #1a5c4c;
     font-size: 28px;

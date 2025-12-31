@@ -91,7 +91,7 @@ $presets = $backupService->getAvailablePresets();
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .preset-card {
     cursor: pointer;
     transition: all 0.2s;

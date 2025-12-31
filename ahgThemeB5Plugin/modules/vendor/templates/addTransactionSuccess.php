@@ -191,7 +191,7 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
     </form>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .autocomplete-dropdown {
     position: absolute;
     z-index: 1050;

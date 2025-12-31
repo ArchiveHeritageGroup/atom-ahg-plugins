@@ -157,7 +157,7 @@ $sectorLabels = [
 $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 @media print {
     .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
     body { background: white !important; }

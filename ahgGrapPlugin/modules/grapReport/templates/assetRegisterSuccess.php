@@ -6,7 +6,7 @@
 
 <?php slot('content') ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .grap-report .summary-stats {
   display: flex;
   gap: 30px;

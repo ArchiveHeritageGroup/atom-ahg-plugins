@@ -297,7 +297,7 @@
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .stats-row { margin-bottom: 20px; }
 .stat-box {
   background: #fff;

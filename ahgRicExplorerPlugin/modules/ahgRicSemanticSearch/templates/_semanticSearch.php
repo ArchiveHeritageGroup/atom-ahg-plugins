@@ -70,7 +70,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
   <pre id="ric-sparql-display" class="ric-sparql-code" style="display: none;"></pre>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .ric-search-widget {
   background: #fff;
   border: 1px solid #e0e0e0;

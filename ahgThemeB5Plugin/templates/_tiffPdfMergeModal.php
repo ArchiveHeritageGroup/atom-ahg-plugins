@@ -137,7 +137,7 @@ $informationObjectId = $informationObjectId ?? null;
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #tpm-drop-zone.tpm-drag-over {
     border-color: #0d6efd !important;
     background-color: #e7f1ff !important;

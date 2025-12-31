@@ -63,7 +63,7 @@
 		<?php echo render_digital_object_viewer($resource, $obj); ?>
 	<?php } ?>
 <!-- Fix model-viewer containment -->
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .iiif-viewer-container,
 .viewer-container,
 .model-wrapper,

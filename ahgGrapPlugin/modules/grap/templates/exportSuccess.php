@@ -249,7 +249,7 @@ document.querySelectorAll('.export-btn').forEach(function(btn) {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .grap-export-page {
     max-width: 1200px;
     margin: 0 auto;

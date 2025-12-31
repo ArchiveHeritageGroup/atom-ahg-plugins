@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .featured-thumb:hover {
     transform: scale(1.1);
     border-color: var(--bs-primary) !important;
