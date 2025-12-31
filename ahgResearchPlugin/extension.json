@@ -10,17 +10,22 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": ["ahgAccessRequestPlugin"],
     "optional": {
-        "extensions": ["ahgSecurityClearancePlugin"]
+        "extensions": []
     },
     "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"],
     "tables": [
         "research_researcher",
         "research_booking",
-        "research_room",
-        "research_workspace",
-        "research_request"
+        "research_reading_room",
+        "research_collection",
+        "research_collection_item",
+        "research_material_request",
+        "research_annotation",
+        "research_saved_search",
+        "research_citation_log",
+        "research_password_reset"
     ],
     "provides": {
         "admin_section": {
