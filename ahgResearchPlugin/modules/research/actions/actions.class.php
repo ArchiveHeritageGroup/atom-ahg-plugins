@@ -600,8 +600,8 @@ class researchActions extends sfActions
 
     protected function createAtomUser(string $username, string $email, string $password): int
     {
-        $salt = base64_encode(random_bytes(32));
-        $passwordHash = sha1($salt . $password);
+        $salt = bin2hex(random_bytes(16));
+        $passwordHash = password_hash($password, PASSWORD_ARGON2I);
         $now = date('Y-m-d H:i:s');
         
         // AtoM inheritance: object -> actor -> user
@@ -696,8 +696,8 @@ class researchActions extends sfActions
                 $this->getUser()->setFlash('error', 'Passwords do not match');
                 return sfView::SUCCESS;
             }
-            $salt = base64_encode(random_bytes(32));
-            $passwordHash = sha1($salt . $password);
+            $salt = bin2hex(random_bytes(16));
+            $passwordHash = password_hash($password, PASSWORD_ARGON2I);
             DB::table('user')->where('id', $reset->user_id)->update([
                 'password_hash' => $passwordHash,
                 'salt' => $salt,
@@ -813,7 +813,7 @@ class researchActions extends sfActions
             $this->forward404('Researcher not found');
         }
         $newPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 12);
-        $salt = base64_encode(random_bytes(32));
+        $salt = bin2hex(random_bytes(16));
         $passwordHash = sha1($salt . $newPassword);
         DB::table('user')->where('id', $researcher->user_id)->update([
             'password_hash' => $passwordHash,
