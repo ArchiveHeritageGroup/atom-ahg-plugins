@@ -333,7 +333,7 @@ $settings = $settingsService->all();
     </div>
 </div>
 
-<script <?php echo sfConfig::get('csp_nonce', ''); ?>>
+<script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const createModal = new bootstrap.Modal(document.getElementById('createBackupModal'));
     const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
