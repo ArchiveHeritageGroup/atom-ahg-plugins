@@ -31,7 +31,7 @@
         <div class="card h-100 shadow-sm">
           
           <!-- Cover Image -->
-          <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px; overflow: hidden;">
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 100px; overflow: hidden;">
             <?php 
               $coverPath = $item['cover_path'] ?? '';
               $coverName = $item['cover_name'] ?? '';
@@ -41,11 +41,11 @@
             ?>
             <?php if (!empty($coverUrl)): ?>
               <img src="<?php echo esc_entities($coverUrl); ?>" alt="Cover" 
-                   class="img-fluid" style="max-height: 200px; width: auto;"
+                   class="img-fluid" style="max-height: 100px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php elseif (!empty($cleanIsbn)): ?>
               <img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=<?php echo $cleanIsbn; ?>&size=M" alt="Cover" 
-                   class="img-fluid" style="max-height: 200px; width: auto;"
+                   class="img-fluid" style="max-height: 100px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>
               <i class="fas fa-book fa-4x text-muted"></i>
