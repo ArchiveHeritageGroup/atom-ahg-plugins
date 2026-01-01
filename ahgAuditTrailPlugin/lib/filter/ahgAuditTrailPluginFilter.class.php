@@ -92,7 +92,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
             }
 
             // Initialize Laravel framework
-            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework-v2';
+            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
             if (!file_exists($frameworkPath . '/bootstrap.php')) {
                 return;
             }
@@ -210,7 +210,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
         // Check if views should be audited
         if ($actionName === 'index' && in_array($moduleName, self::$auditableModules)) {
             try {
-                $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework-v2';
+                $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
                 if (file_exists($frameworkPath . '/bootstrap.php')) {
                     require_once $frameworkPath . '/bootstrap.php';
                     $auditViews = \Illuminate\Support\Facades\DB::table('ahg_audit_settings')
@@ -271,7 +271,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
         $slug = $request->getParameter('slug');
         if ($slug) {
             try {
-                $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework-v2';
+                $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
                 if (file_exists($frameworkPath . '/bootstrap.php')) {
                     require_once $frameworkPath . '/bootstrap.php';
                     $id = \Illuminate\Support\Facades\DB::table('slug')

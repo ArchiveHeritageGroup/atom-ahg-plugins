@@ -423,7 +423,9 @@ function render_3d_model_viewer($resource, $options = [])
     $html .= '</div>';
     
     // Auto-show 3D viewer
-    $html .= '<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>';
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? preg_replace('/^nonce=/', ' nonce="', $n) . '"' : '';
+    $html .= '<script' . $nonceAttr . '>';
     $html .= 'document.getElementById("model-wrapper-' . $viewerId . '").style.display = "block";';
     $html .= '</script>';
     
