@@ -176,12 +176,32 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 
   <?php if (io_check_acl($resource, 'create')) { ?>
     <?php
-      $defaultTemplate = DB::table('setting')
-          ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
-          ->where('setting.scope', 'default_template')
-          ->where('setting.name', 'informationobject')
-          ->value('setting_i18n.value');
-      $addModule = ($defaultTemplate == 'museum') ? 'ahgMuseumPlugin' : 'informationobject';
+      // Detect sector from current resource's level of description
+      $addModule = 'informationobject';
+      $levelOfDescId = $resource->levelOfDescriptionId ?? null;
+      if ($levelOfDescId) {
+          $sector = DB::table('level_of_description_sector')
+              ->where('term_id', $levelOfDescId)
+              ->value('sector');
+          if ($sector === 'library') {
+              $addModule = 'ahgLibraryPlugin';
+          } elseif ($sector === 'museum') {
+              $addModule = 'ahgMuseumPlugin';
+          } elseif ($sector === 'gallery') {
+              $addModule = 'ahgGalleryPlugin';
+          }
+      }
+      // Fallback to default template if no sector detected
+      if ($addModule === 'informationobject') {
+          $defaultTemplate = DB::table('setting')
+              ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+              ->where('setting.scope', 'default_template')
+              ->where('setting.name', 'informationobject')
+              ->value('setting_i18n.value');
+          if ($defaultTemplate === 'museum') {
+              $addModule = 'ahgMuseumPlugin';
+          }
+      }
     ?>
     <li><a href="<?php echo url_for(['module' => $addModule, 'action' => 'add', 'parent' => $resourceSlug]); ?>" class="btn atom-btn-outline-light"><?php echo __('Add new'); ?></a></li>
     <li><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'copy', 'source' => $resourceId]); ?>" class="btn atom-btn-outline-light"><?php echo __('Duplicate'); ?></a></li>
