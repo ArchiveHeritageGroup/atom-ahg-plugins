@@ -16,7 +16,7 @@ use AtomExtensions\Services\AclService;
  */
 
 // Include the metadata extraction trait
-require_once sfConfig::get('sf_lib_dir').'/arMetadataExtractionTrait.php';
+require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/Shared/ahgMetadataExtractionTrait.php';
 
 class InformationObjectMultiFileUploadAction extends sfAction
 {

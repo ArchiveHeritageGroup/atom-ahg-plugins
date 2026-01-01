@@ -8,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 
 // Include the metadata extraction trait
-require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/arMetadataExtractionTrait.php';
+require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/Shared/ahgMetadataExtractionTrait.php';
 
 /**
  * Digital Object add component with metadata extraction.
