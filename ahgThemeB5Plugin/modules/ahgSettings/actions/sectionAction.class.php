@@ -50,13 +50,59 @@ class AhgSettingsSectionAction extends sfAction
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
     ];
 
+    
+    // Map sections to required plugins - section only shows if plugin is enabled
+    protected $sectionPluginMap = [
+        'spectrum' => 'ahgSpectrumPlugin',
+        'data_protection' => 'ahgDataProtectionPlugin',
+        'photos' => 'ahgConditionPlugin',
+        'fuseki' => 'ahgRicExplorerPlugin',
+        'audit' => 'ahgAuditTrailPlugin',
+        'faces' => 'ahgFaceDetectionPlugin',
+    ];
+
+    // Check if a plugin is enabled
+    protected function isPluginEnabled($pluginName)
+    {
+        static $enabledPlugins = null;
+        if ($enabledPlugins === null) {
+            $enabledPlugins = [];
+            try {
+                $results = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+                    ->where('is_enabled', 1)
+                    ->pluck('name')
+                    ->toArray();
+                $enabledPlugins = array_flip($results);
+            } catch (\Exception $e) {
+                // Fallback - check class exists
+            }
+        }
+        return isset($enabledPlugins[$pluginName]) || class_exists($pluginName . 'Configuration');
+    }
+
+    // Get filtered sections (only show if required plugin is enabled)
+    protected function getFilteredSections()
+    {
+        $filtered = [];
+        foreach ($this->sections as $key => $config) {
+            // Check if section requires a plugin
+            if (isset($this->sectionPluginMap[$key])) {
+                if (!$this->isPluginEnabled($this->sectionPluginMap[$key])) {
+                    continue; // Skip this section - plugin not enabled
+                }
+            }
+            $filtered[$key] = $config;
+        }
+        return $filtered;
+    }
+
     public function execute($request)
     {
         if (!$this->context->user->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 
-        $this->sections = $this->sections;
+        $this->sections = $this->getFilteredSections();
         $this->currentSection = $request->getParameter('section', 'general');
 
         if (!isset($this->sections[$this->currentSection])) {
