@@ -41,6 +41,7 @@ class ahgLibraryPluginBrowseAction extends sfAction
                 's.slug',
                 'li.isbn',
                 'do.path as cover_path',
+                'do.name as cover_name',
                 'li.publisher',
                 'li.publication_date',
                 'li.material_type',
