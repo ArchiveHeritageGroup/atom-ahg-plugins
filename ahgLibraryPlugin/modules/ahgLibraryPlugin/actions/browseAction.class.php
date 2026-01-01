@@ -30,6 +30,7 @@ class ahgLibraryPluginBrowseAction extends sfAction
             })
             ->join('library_item as li', 'io.id', '=', 'li.information_object_id')
             ->join('slug as s', 'io.id', '=', 's.object_id')
+            ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
             ->leftJoin('term_i18n as ti', function($join) use ($culture) {
                 $join->on('io.level_of_description_id', '=', 'ti.id')
                      ->where('ti.culture', '=', $culture);
@@ -39,7 +40,7 @@ class ahgLibraryPluginBrowseAction extends sfAction
                 'ioi.title',
                 's.slug',
                 'li.isbn',
-                'li.cover_url',
+                'do.path as cover_path',
                 'li.publisher',
                 'li.publication_date',
                 'li.material_type',

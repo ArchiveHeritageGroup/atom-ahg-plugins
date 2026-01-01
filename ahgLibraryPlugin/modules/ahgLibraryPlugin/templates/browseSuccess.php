@@ -33,7 +33,8 @@
           <!-- Cover Image -->
           <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px; overflow: hidden;">
             <?php 
-              $coverUrl = $item['cover_url'] ?? '';
+              $coverPath = $item['cover_path'] ?? '';
+              $coverUrl = !empty($coverPath) ? $coverPath . basename($coverPath) . '_142.jpg' : '';
               $isbn = $item['isbn'] ?? '';
               $cleanIsbn = preg_replace('/[^0-9X]/', '', strtoupper($isbn));
             ?>
