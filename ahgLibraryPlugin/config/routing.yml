@@ -33,3 +33,28 @@ library_view:
     action: index
   requirements:
     slug: .+
+
+library_isbn_providers:
+  url: /library/isbn-providers
+  param:
+    module: ahgLibraryPlugin
+    action: isbnProviders
+
+library_isbn_provider_edit:
+  url: /library/isbn-provider/edit/:id
+  param:
+    module: ahgLibraryPlugin
+    action: isbnProviderEdit
+    id: ~
+
+library_isbn_provider_toggle:
+  url: /library/isbn-provider/toggle/:id
+  param:
+    module: ahgLibraryPlugin
+    action: isbnProviderToggle
+
+library_isbn_provider_delete:
+  url: /library/isbn-provider/delete/:id
+  param:
+    module: ahgLibraryPlugin
+    action: isbnProviderDelete
