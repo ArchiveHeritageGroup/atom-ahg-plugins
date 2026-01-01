@@ -452,7 +452,7 @@ model-viewer {
 
 </section> <!-- /section#accessionArea -->
 
-<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgRicExplorerPlugin')) { include_component('ahgRicExplorer', 'ricPanel', ['resource' => $resource]); } ?>
+<?php if (function_exists('checkPluginEnabled') && checkPluginEnabled('ahgRicExplorerPlugin')) { include_component('ahgRicExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 
 <?php slot('after-content'); ?>
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?> 
