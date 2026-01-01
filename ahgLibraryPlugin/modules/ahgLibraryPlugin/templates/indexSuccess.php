@@ -446,7 +446,7 @@ if (!function_exists('checkPluginEnabled')) {
         <p class="text-muted small mt-2 mb-0"><?php echo esc_entities($isbn); ?></p>
       </div>
     </section>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script <?php echo sfConfig::get('csp_nonce', ''); ?> src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
       document.addEventListener('DOMContentLoaded', function() {
         try {
