@@ -593,12 +593,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 var cleanIsbn = isbn.replace(/[\s-]/g, '');
-                var response = await fetch('https://openlibrary.org/api/books?bibkeys=ISBN:' + cleanIsbn + '&format=json&jscmd=data');
-                var data = await response.json();
-                var key = 'ISBN:' + cleanIsbn;
+                var response = await fetch('<?php echo url_for(["module" => "ahgLibraryPlugin", "action" => "isbnLookup"]) ?>&isbn=' + encodeURIComponent(cleanIsbn));
+                var result = await response.json();
+                
 
-                if (data[key]) {
-                    var d = data[key];
+                if (result.success) {
+                    var d = result.data;
 
                     // Extract all data
                     var title = d.title || '';
