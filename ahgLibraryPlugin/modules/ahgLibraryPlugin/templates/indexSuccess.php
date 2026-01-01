@@ -452,6 +452,8 @@ if (!function_exists('checkPluginEnabled')) {
         try {
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {
             format: "CODE128",
+            background: "#ffffff",
+            lineColor: "#000000",
             width: 2,
             height: 60,
             displayValue: false,
@@ -461,6 +463,8 @@ if (!function_exists('checkPluginEnabled')) {
           // Fallback to CODE128 if ISBN format fails
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {
             format: "CODE128",
+            background: "#ffffff",
+            lineColor: "#000000",
             width: 2,
             height: 60,
             displayValue: false,
