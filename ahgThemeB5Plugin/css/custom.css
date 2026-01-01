@@ -227,3 +227,104 @@ section {
     z-index: 100 !important;
     background-color: #fff;
 }
+
+/* ==========================================================================
+   Digital Object Viewer Container
+   ========================================================================== */
+
+.digital-object-viewer {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.digital-object-viewer .iiif-viewer-container {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+}
+
+.digital-object-viewer .osd-viewer,
+.digital-object-viewer .mirador-wrapper,
+.digital-object-viewer .model-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  z-index: 1;
+}
+
+/* Prevent viewer overflow into other sections */
+.digital-object-viewer + section,
+.digital-object-viewer + #identityArea,
+.digital-object-viewer ~ .border-bottom {
+  position: relative;
+  z-index: 10;
+  background-color: #fff;
+}
+
+/* ==========================================================================
+   Standard Digital Object Viewer (non-IIIF fallback)
+   Displays when Cantaloupe IIIF server is not available
+   ========================================================================== */
+
+.digital-object-viewer {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  margin: 0 0 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 8px;
+}
+
+.digital-object-viewer a {
+  display: inline-block;
+}
+
+.digital-object-viewer img {
+  max-width: 100%;
+  max-height: 600px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.digital-object-viewer img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  cursor: zoom-in;
+}
+
+.digital-object-viewer video,
+.digital-object-viewer audio {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.digital-object-viewer iframe {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.digital-object-viewer .btn {
+  margin-top: 1rem;
+}
+
+/* IIIF Viewer Container (when Cantaloupe is available) */
+.iiif-viewer-container {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+}
