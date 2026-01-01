@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var coverPreview = document.getElementById('cover-preview');
                 if (coverPreview) {
                     coverPreview.innerHTML =
-                        '<img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=' + isbn + '\-M.jpgsize=M" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
+                        '<img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=' + isbn + '\\-M.jpgsize=Msize=M" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
                         '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                         '<input type="hidden" name="cover_url" id="cover-url-input" value="">';
                 }
