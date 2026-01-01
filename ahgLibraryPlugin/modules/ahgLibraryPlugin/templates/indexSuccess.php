@@ -451,7 +451,7 @@ if (!function_exists('checkPluginEnabled')) {
       document.addEventListener('DOMContentLoaded', function() {
         try {
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {
-            format: "<?php echo strlen($cleanIsbn) === 13 ? 'EAN13' : 'EAN8'; ?>",
+            format: "CODE128",
             width: 2,
             height: 60,
             displayValue: false,
