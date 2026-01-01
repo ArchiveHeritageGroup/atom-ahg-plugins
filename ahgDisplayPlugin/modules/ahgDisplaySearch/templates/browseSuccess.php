@@ -19,31 +19,31 @@
         <ul class="nav nav-pills justify-content-center">
             <li class="nav-item">
                 <a class="nav-link <?php echo $objectType === 'archive' ? 'active' : ''; ?>" 
-                   href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'browse', 'type' => 'archive']); ?>">
+                   href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'browse', 'type' => 'archive']); ?>">
                     <i class="fas fa-archive me-1"></i> Archives
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $objectType === 'museum' ? 'active' : ''; ?>" 
-                   href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'browse', 'type' => 'museum']); ?>">
+                   href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'browse', 'type' => 'museum']); ?>">
                     <i class="fas fa-landmark me-1"></i> Museum
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $objectType === 'gallery' ? 'active' : ''; ?>" 
-                   href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'browse', 'type' => 'gallery']); ?>">
+                   href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'browse', 'type' => 'gallery']); ?>">
                     <i class="fas fa-palette me-1"></i> Gallery
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $objectType === 'library' ? 'active' : ''; ?>" 
-                   href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'browse', 'type' => 'library']); ?>">
+                   href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'browse', 'type' => 'library']); ?>">
                     <i class="fas fa-book me-1"></i> Books
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $objectType === 'dam' ? 'active' : ''; ?>" 
-                   href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'browse', 'type' => 'dam']); ?>">
+                   href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'browse', 'type' => 'dam']); ?>">
                     <i class="fas fa-images me-1"></i> Photos
                 </a>
             </li>
@@ -173,7 +173,7 @@
                     <?php if ($params['query'] !== '*'): ?>
                     Try a different search term.
                     <?php else: ?>
-                    Check back later or <a href="<?php echo url_for(['module' => 'display', 'action' => 'bulkSetType']); ?>">configure object types</a>.
+                    Check back later or <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'bulkSetType']); ?>">configure object types</a>.
                     <?php endif; ?>
                 </div>
             <?php endif; ?>

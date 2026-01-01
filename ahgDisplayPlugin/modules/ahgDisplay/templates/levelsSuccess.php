@@ -1,7 +1,7 @@
 <?php use_helper('Display'); ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>">Display</a></li>
+        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'index']); ?>">Display</a></li>
         <li class="breadcrumb-item active">Levels of Description</li>
     </ol>
 </nav>

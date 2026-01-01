@@ -1,7 +1,7 @@
 <?php use_helper('Display'); ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>">Display</a></li>
+        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'index']); ?>">Display</a></li>
         <li class="breadcrumb-item active">Elasticsearch Reindex</li>
     </ol>
 </nav>
@@ -34,7 +34,7 @@
                     Display fields are NOT in the Elasticsearch mapping. You need to update the mapping first.
                 </div>
                 
-                <form method="post" action="<?php echo url_for(['module' => 'displaySearch', 'action' => 'updateMapping']); ?>">
+                <form method="post" action="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'updateMapping']); ?>">
                     <button type="submit" class="btn btn-warning">
                         <i class="fas fa-plus me-1"></i> Add Display Fields to Mapping
                     </button>

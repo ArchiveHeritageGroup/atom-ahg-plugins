@@ -26,7 +26,7 @@
                         
                         <?php if (!empty($params['object_type']) || !empty($params['media_type'])): ?>
                         <div class="mt-3">
-                            <a href="<?php echo url_for(['module' => 'displaySearch', 'action' => 'search']); ?>" class="btn btn-outline-secondary btn-sm w-100">
+                            <a href="<?php echo url_for(['module' => 'ahgDisplaySearch', 'action' => 'search']); ?>" class="btn btn-outline-secondary btn-sm w-100">
                                 <i class="fas fa-times me-1"></i>Clear All Filters
                             </a>
                         </div>

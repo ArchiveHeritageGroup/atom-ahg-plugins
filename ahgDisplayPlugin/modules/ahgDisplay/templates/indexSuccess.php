@@ -54,16 +54,16 @@
                 <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Links</h5>
             </div>
             <div class="list-group list-group-flush">
-                <a href="<?php echo url_for(['module' => 'display', 'action' => 'profiles']); ?>" class="list-group-item list-group-item-action">
+                <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'profiles']); ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-palette me-2"></i>Display Profiles
                 </a>
-                <a href="<?php echo url_for(['module' => 'display', 'action' => 'levels']); ?>" class="list-group-item list-group-item-action">
+                <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'levels']); ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-layer-group me-2"></i>Levels of Description
                 </a>
-                <a href="<?php echo url_for(['module' => 'display', 'action' => 'fields']); ?>" class="list-group-item list-group-item-action">
+                <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'fields']); ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-list me-2"></i>Field Mappings
                 </a>
-                <a href="<?php echo url_for(['module' => 'display', 'action' => 'bulkSetType']); ?>" class="list-group-item list-group-item-action">
+                <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'bulkSetType']); ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-tags me-2"></i>Bulk Set Object Types
                 </a>
             </div>

@@ -72,7 +72,7 @@ $sortLabels = [
 ];
 
 function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
-    $params = array_merge(['module' => 'display', 'action' => 'browse'], array_filter($fp), $add);
+    $params = array_merge(['module' => 'ahgDisplay', 'action' => 'browse'], array_filter($fp), $add);
     foreach ($remove as $key) { unset($params[$key]); }
     if (!$keepPage && !isset($add['page'])) { unset($params['page']); }
     return url_for($params);
@@ -357,8 +357,8 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
 <?php slot('content'); ?>
   <!-- Toolbar -->
   <div class="d-flex flex-wrap gap-2 mb-3">
-    <a href="<?php echo url_for(array_merge(['module' => 'display', 'action' => 'print'], array_filter($fp))) ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-print"></i> <?php echo __('Print'); ?></a>
-    <a href="<?php echo url_for(array_merge(['module' => 'display', 'action' => 'exportCsv'], array_filter($fp))) ?>" class="btn btn-success btn-sm"><i class="fas fa-download"></i> <?php echo __('CSV'); ?></a>
+    <a href="<?php echo url_for(array_merge(['module' => 'ahgDisplay', 'action' => 'print'], array_filter($fp))) ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-print"></i> <?php echo __('Print'); ?></a>
+    <a href="<?php echo url_for(array_merge(['module' => 'ahgDisplay', 'action' => 'exportCsv'], array_filter($fp))) ?>" class="btn btn-success btn-sm"><i class="fas fa-download"></i> <?php echo __('CSV'); ?></a>
     <a href="<?php echo buildUrl($fp, ['view' => 'card']) ?>" class="btn btn-sm <?php echo $viewMode === 'card' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Card view'); ?>"><i class="fas fa-th-large"></i></a>
     <a href="<?php echo buildUrl($fp, ['view' => 'grid']) ?>" class="btn btn-sm <?php echo $viewMode === 'grid' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Grid view'); ?>"><i class="fas fa-th"></i></a>
     <a href="<?php echo buildUrl($fp, ['view' => 'table']) ?>" class="btn btn-sm <?php echo $viewMode === 'table' ? 'btn-success' : 'btn-outline-success' ?>"><i class="fas fa-list"></i></a>

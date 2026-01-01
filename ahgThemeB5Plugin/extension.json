@@ -11,5 +11,8 @@
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
-    }
+    },
+    "dependencies": [
+        "ahgDisplayPlugin"
+    ]
 }

@@ -1,7 +1,7 @@
 <?php use_helper('Display'); ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>">Display</a></li>
+        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'index']); ?>">Display</a></li>
         <li class="breadcrumb-item active">Bulk Set Object Types</li>
     </ol>
 </nav>
@@ -50,7 +50,7 @@
                     <hr>
                     
                     <div class="d-flex justify-content-between">
-                        <a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'index']); ?>" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary" onclick="return confirm('This will update ALL objects in this collection. Continue?')">
                             <i class="fas fa-save me-1"></i> Apply to Collection
                         </button>
