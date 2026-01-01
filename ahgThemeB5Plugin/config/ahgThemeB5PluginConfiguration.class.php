@@ -99,7 +99,25 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
 
         $this->dispatcher->connect(
             'response.filter_content',
+
             ['ahgAuditTrailListener', 'logAction']
+        );
+    }
+
+    /**
+     * Register sector redirect hooks for library items
+     */
+    private function registerSectorRedirectHooks(): void
+    {
+        $listenerPath = sfConfig::get('sf_plugins_dir')
+            . '/ahgThemeB5Plugin/lib/SectorRedirectListener.class.php';
+        if (!file_exists($listenerPath)) {
+            return;
+        }
+        require_once $listenerPath;
+        $this->dispatcher->connect(
+            'request.filter_parameters',
+            ['SectorRedirectListener', 'redirectLibraryItems']
         );
     }
 

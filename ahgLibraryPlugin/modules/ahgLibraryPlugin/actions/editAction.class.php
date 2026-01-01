@@ -83,6 +83,13 @@ class ahgLibraryPluginEditAction extends sfAction
             $this->resource->parentId = QubitInformationObject::ROOT_ID;
         }
 
+        // Set library display standard
+        // Get library template ID
+        $libraryTermId = QubitTerm::getByCode('library', QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID);
+        if ($libraryTermId) {
+            $this->resource->displayStandardId = $libraryTermId->id;
+        }
+
         // Save the information object
         $this->resource->save();
         $savedId = $this->resource->id;
