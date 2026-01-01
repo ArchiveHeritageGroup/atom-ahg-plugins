@@ -238,6 +238,11 @@ class ahgLibraryPluginEditAction extends sfAction
             'udc' => 'Universal Decimal (UDC)', 'nlm' => 'National Library of Medicine (NLM)',
             'sudocs' => 'SuDocs', 'local' => 'Local Scheme', 'other' => 'Other',
         ];
+
+        // Languages from AtoM's sfCultureInfo
+        $cultureInfo = sfCultureInfo::getInstance($culture);
+        $this->languageOptions = $cultureInfo->getLanguages();
+        asort($this->languageOptions);
     }
 
     protected function syncDisplayConfig(int $objectId): void

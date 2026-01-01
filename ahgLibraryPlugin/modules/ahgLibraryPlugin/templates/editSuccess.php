@@ -68,9 +68,14 @@
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label"><?php echo __('Language'); ?></label>
-              <input type="text" name="language" class="form-control"
-                     value="<?php echo esc_entities($libraryData['language'] ?? ''); ?>"
-                     placeholder="e.g. English">
+              <select name="language" class="form-select">
+                <option value=""><?php echo __('-- Select --'); ?></option>
+                <?php foreach ($languageOptions as $code => $name): ?>
+                  <option value="<?php echo $code; ?>" <?php echo ($libraryData['language'] ?? '') === $code ? 'selected' : ''; ?>>
+                    <?php echo esc_entities($name); ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
             </div>
           </div>
 
