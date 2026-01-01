@@ -1,16 +1,115 @@
 <?php
-
 /**
  * IIIF Viewer Helper for AtoM Integration
- * 
+ *
  * Drop-in replacement for existing digital object viewing in AtoM
  * Replaces: ZoomPan, OpenSeadragon, video/audio players
- * 
+ *
  * Add to: /usr/share/nginx/archive/plugins/ahgThemeB5Plugin/lib/helper/IiifViewerHelper.php
- * 
+ *
  * @author Johan Pieterse - The Archive and Heritage Group
  * @version 1.0.0
  */
+
+/**
+ * Check if IIIF/Cantaloupe is available
+ */
+function is_iiif_available()
+{
+    static $available = null;
+    if ($available !== null) {
+        return $available;
+    }
+    
+    // Check if IIIF is enabled in config
+    if (!sfConfig::get('app_iiif_enabled', false)) {
+        $available = false;
+        return false;
+    }
+    
+    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', '');
+    if (empty($cantaloupeUrl)) {
+        $available = false;
+        return false;
+    }
+    
+    $available = true;
+    return true;
+}
+
+/**
+ * Render standard AtoM digital object viewer (fallback)
+ */
+function render_standard_viewer($resource, $options = [])
+{
+    $digitalObjects = $resource->digitalObjectsRelatedByobjectId;
+    if (empty($digitalObjects) || count($digitalObjects) === 0) {
+        return '';
+    }
+    
+    $primaryDo = $digitalObjects[0];
+    $mimeType = $primaryDo->mimeType ?? '';
+    $path = $primaryDo->path ?? '';
+    $name = $primaryDo->name ?? '';
+    
+    // Get reference representation
+    $refPath = '';
+    $thumbPath = '';
+    foreach ($primaryDo->digitalObjectsRelatedByparentId ?? [] as $child) {
+        $usageId = $child->usageId ?? 0;
+        if ($usageId == QubitTerm::REFERENCE_ID) {
+            $refPath = $child->path . $child->name;
+        } elseif ($usageId == QubitTerm::THUMBNAIL_ID) {
+            $thumbPath = $child->path . $child->name;
+        }
+    }
+    
+    // Use reference if available, otherwise master
+    $displayPath = $refPath ?: $path . $name;
+    $thumbDisplay = $thumbPath ?: $displayPath;
+    
+    $html = '<div class="digital-object-viewer">';
+    
+    // Image
+    if (strpos($mimeType, 'image') !== false) {
+        $html .= '<a href="' . $displayPath . '" target="_blank">';
+        $html .= '<img src="' . $displayPath . '" alt="' . esc_entities($name) . '" class="img-fluid" style="max-height: 600px;">';
+        $html .= '</a>';
+    }
+    // Video
+    elseif (strpos($mimeType, 'video') !== false) {
+        $html .= '<video controls class="w-100" style="max-height: 600px;">';
+        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= 'Your browser does not support the video tag.';
+        $html .= '</video>';
+    }
+    // Audio
+    elseif (strpos($mimeType, 'audio') !== false) {
+        $html .= '<audio controls class="w-100">';
+        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= 'Your browser does not support the audio tag.';
+        $html .= '</audio>';
+    }
+    // PDF
+    elseif (strpos($mimeType, 'pdf') !== false) {
+        $html .= '<iframe src="' . $path . $name . '" width="100%" height="600px"></iframe>';
+    }
+    // Other - show thumbnail/link
+    else {
+        $html .= '<a href="' . $path . $name . '" target="_blank">';
+        if ($thumbPath) {
+            $html .= '<img src="' . $thumbPath . '" alt="' . esc_entities($name) . '" class="img-fluid">';
+        } else {
+            $html .= '<i class="fas fa-file fa-5x"></i><br>' . esc_entities($name);
+        }
+        $html .= '</a>';
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
 /**
  * Get digital objects for a resource
  */
@@ -33,6 +132,85 @@ function get_digital_objects($resource)
         ->toArray();
 }
 
+/**
+ * Main function to render IIIF viewer for an information object
+ * This replaces all previous viewer rendering functions
+ */
+function render_iiif_viewer($resource, $options = [])
+{
+    // Get digital objects
+    $digitalObjects = $resource->digitalObjectsRelatedByobjectId;
+    if (empty($digitalObjects) || count($digitalObjects) === 0) {
+        // Check for 3D models
+        if (has_3d_models($resource)) {
+            return render_3d_model_viewer($resource, $options);
+        }
+        return '';
+    }
+    
+    // Check if IIIF is available, fallback to standard viewer
+    if (!is_iiif_available()) {
+        return render_standard_viewer($resource, $options);
+    }
+    
+    $primaryDo = $digitalObjects[0];
+    $mimeType = $primaryDo->mimeType ?? '';
+    $objectId = $resource->id;
+    $slug = $resource->slug ?? $objectId;
+    elseif (strpos($mimeType, 'video') !== false) {
+        $html .= '<video controls class="w-100" style="max-height: 600px;">';
+        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= 'Your browser does not support the video tag.';
+        $html .= '</video>';
+    }
+    // Audio
+    elseif (strpos($mimeType, 'audio') !== false) {
+        $html .= '<audio controls class="w-100">';
+        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= 'Your browser does not support the audio tag.';
+        $html .= '</audio>';
+    }
+    // PDF
+    elseif (strpos($mimeType, 'pdf') !== false) {
+        $html .= '<iframe src="' . $path . $name . '" width="100%" height="600px"></iframe>';
+    }
+    // Other - show thumbnail/link
+    else {
+        $html .= '<a href="' . $path . $name . '" target="_blank">';
+        if ($thumbPath) {
+            $html .= '<img src="' . $thumbPath . '" alt="' . esc_entities($name) . '" class="img-fluid">';
+        } else {
+            $html .= '<i class="fas fa-file fa-5x"></i><br>' . esc_entities($name);
+        }
+        $html .= '</a>';
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
+/**
+ * Get digital objects for a resource
+ */
+function get_digital_objects($resource)
+{
+    if (!$resource) {
+        return [];
+    }
+    if ($resource instanceof QubitInformationObject) {
+        return $resource->digitalObjectsRelatedByobjectId ?? [];
+    }
+    // Fallback to database query
+    $resourceId = is_object($resource) ? ($resource->id ?? null) : $resource;
+    if (!$resourceId) {
+        return [];
+    }
+    return \Illuminate\Database\Capsule\Manager::table('digital_object')
+        ->where('object_id', $resourceId)
+        ->get()
+        ->toArray();
+}
 
 /**
  * Main function to render IIIF viewer for an information object
@@ -42,7 +220,6 @@ function render_iiif_viewer($resource, $options = [])
 {
     // Get digital objects
     $digitalObjects = $resource->digitalObjectsRelatedByobjectId;
-    
     if (empty($digitalObjects) || count($digitalObjects) === 0) {
         // Check for 3D models
         if (has_3d_models($resource)) {
@@ -51,32 +228,15 @@ function render_iiif_viewer($resource, $options = [])
         return '';
     }
     
+    // Check if IIIF is available, fallback to standard viewer
+    if (!is_iiif_available()) {
+        return render_standard_viewer($resource, $options);
+    }
+    
     $primaryDo = $digitalObjects[0];
     $mimeType = $primaryDo->mimeType ?? '';
     $objectId = $resource->id;
     $slug = $resource->slug ?? $objectId;
-    
-    // Configuration
-    $baseUrl = sfConfig::get('app_iiif_base_url', 'https://archives.theahg.co.za');
-    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://archives.theahg.co.za/iiif/2');
-    $frameworkPath = sfConfig::get('app_iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
-    $defaultViewer = sfConfig::get('app_iiif_default_viewer', 'openseadragon');
-    $enableAnnotations = sfConfig::get('app_iiif_enable_annotations', true);
-    $viewerHeight = $options['height'] ?? sfConfig::get('app_iiif_viewer_height', '600px');
-    
-    // Merge options
-    $opts = array_merge([
-        'viewer' => $defaultViewer,
-        'height' => $viewerHeight,
-        'enable_annotations' => $enableAnnotations,
-        'enable_download' => false,
-        'enable_fullscreen' => true,
-    ], $options);
-    
-    // Build manifest URL
-    $manifestUrl = $baseUrl . '/iiif/manifest/' . $slug;
-    
-    // Determine content type flags
     $hasPdf = stripos($mimeType, 'pdf') !== false;
     $hasAudio = stripos($mimeType, 'audio') !== false;
     $hasVideo = stripos($mimeType, 'video') !== false;
@@ -118,364 +278,3 @@ function render_iiif_viewer($resource, $options = [])
     if ($hasPdf) {
         $pdfUrl = get_digital_object_url($primaryDo);
         $html .= render_pdf_viewer_html($viewerId, $pdfUrl, $viewerHeight);
-    }
-    
-    // 3D viewer (if applicable)
-    if ($has3D) {
-        $model = get_primary_3d_model($resource);
-        if ($model) {
-            $html .= render_3d_viewer_html($viewerId, $model, $viewerHeight, $baseUrl);
-        }
-    }
-    
-    // Audio/Video viewer (if applicable)
-    if ($hasAV) {
-        $html .= render_av_viewer_html($viewerId, $primaryDo, $viewerHeight, $baseUrl);
-    }
-    
-    $html .= '</div>'; // viewer-area
-    
-    // Thumbnail strip for multi-image
-    if (count($digitalObjects) > 1) {
-        $html .= render_thumbnail_strip($viewerId, $digitalObjects, $cantaloupeUrl);
-    }
-    
-    $html .= '</div>'; // container
-    
-    // JavaScript initialization
-    $html .= render_viewer_javascript($viewerId, $objectId, $manifestUrl, $opts, [
-        'has3D' => $has3D,
-        'hasPdf' => $hasPdf,
-        'hasAV' => $hasAV,
-        'baseUrl' => $baseUrl,
-        'cantaloupeUrl' => $cantaloupeUrl,
-        'frameworkPath' => $frameworkPath,
-    ]);
-    
-    return $html;
-}
-
-/**
- * Get primary 3D model for resource (from standard digital objects)
- */
-function get_primary_3d_model($resource)
-{
-    $extensions = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
-    
-    try {
-        $digitalObjects = get_digital_objects($resource);
-        
-        foreach ($digitalObjects as $do) {
-            $name = is_object($do) ? $do->name : ($do['name'] ?? '');
-            $path = is_object($do) ? $do->path : ($do['path'] ?? '');
-            $id = is_object($do) ? $do->id : ($do['id'] ?? 0);
-            $objectId = is_object($do) ? $do->object_id : ($do['object_id'] ?? $resource->id);
-            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            
-            if (in_array($ext, $extensions)) {
-                // Return as object with expected properties
-                return (object)[
-                    'id' => $id,
-                    'object_id' => $objectId,
-                    'filename' => $name,
-                    'path' => $path,
-                    'format' => $ext,
-                    'title' => pathinfo($name, PATHINFO_FILENAME),
-                    'auto_rotate' => true,
-                    'ar_enabled' => true,
-                    'camera_orbit' => '0deg 75deg 105%',
-                    'background_color' => '#f5f5f5',
-                    'poster_image' => null,
-                ];
-            }
-        }
-        return null;
-    } catch (Exception $e) {
-        return null;
-    }
-}
-
-/**
- * Get digital object URL
- */
-function get_digital_object_url($digitalObject)
-{
-    $path = trim($digitalObject->path ?? '', '/');
-    $name = $digitalObject->name ?? '';
-    return '/uploads/' . $path . '/' . $name;
-}
-
-/**
- * Build IIIF identifier from path and name
- */
-function build_iiif_identifier($path, $name)
-{
-    $path = trim($path ?? '', '/');
-    return str_replace('/', '_SL_', $path . '/' . $name);
-}
-
-/**
- * Include viewer CSS (only once per page)
- */
-function get_iiif_viewer_css($frameworkPath)
-{
-    static $cssIncluded = false;
-    
-    if ($cssIncluded) {
-        return '';
-    }
-    
-    $cssIncluded = true;
-    
-    
-    return $html;
-}
-
-/**
- * Render viewer controls bar
- */
-function render_viewer_controls($viewerId, $manifestUrl, $objectId, $opts)
-{
-    $html = '<div class="viewer-controls mb-2 d-flex justify-content-between align-items-center">';
-    
-    // IIIF badge
-    $html .= '<div>';
-    $html .= '<span class="badge bg-info"><i class="fas fa-certificate me-1"></i>IIIF 3.0</span>';
-    $html .= '<small class="text-muted ms-2 d-none d-sm-inline">Presentation API 3.0</small>';
-    $html .= '</div>';
-    
-    // Control buttons
-    $html .= '<div class="btn-group btn-group-sm">';
-    
-    // New window
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="btn-newwin-' . $viewerId . '" title="Open in new window">';
-    $html .= '<i class="fas fa-external-link-alt"></i></button>';
-    
-    // Fullscreen
-    if ($opts['enable_fullscreen']) {
-        $html .= '<button type="button" class="btn btn-outline-secondary" id="btn-fullscreen-' . $viewerId . '" title="Fullscreen">';
-        $html .= '<i class="fas fa-expand"></i></button>';
-    }
-    
-    // Download
-    if ($opts['enable_download']) {
-        $html .= '<button type="button" class="btn btn-outline-secondary" id="btn-download-' . $viewerId . '" title="Download">';
-        $html .= '<i class="fas fa-download"></i></button>';
-    }
-    
-    // Annotations
-    if ($opts['enable_annotations']) {
-        $html .= '<button type="button" class="btn btn-outline-secondary" id="btn-annotations-' . $viewerId . '" title="Toggle Annotations">';
-        $html .= '<i class="fas fa-comment-dots"></i></button>';
-    }
-    
-    // Copy manifest URL
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="btn-manifest-' . $viewerId . '" title="Copy IIIF Manifest URL" data-url="' . htmlspecialchars($manifestUrl) . '">';
-    $html .= '<i class="fas fa-link"></i></button>';
-    
-    $html .= '</div></div>';
-    
-    return $html;
-}
-
-/**
- * Render PDF viewer HTML
- */
-function render_pdf_viewer_html($viewerId, $pdfUrl, $height)
-{
-    $html = '<div id="pdf-wrapper-' . $viewerId . '" class="pdf-wrapper" style="display:none;">';
-    $html .= '<div class="pdf-toolbar mb-2">';
-    $html .= '<div class="btn-group btn-group-sm">';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-prev-' . $viewerId . '"><i class="fas fa-chevron-left"></i></button>';
-    $html .= '<span class="btn btn-outline-secondary disabled" id="pdf-page-' . $viewerId . '">1 / 1</span>';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-next-' . $viewerId . '"><i class="fas fa-chevron-right"></i></button>';
-    $html .= '</div>';
-    $html .= '<div class="btn-group btn-group-sm ms-2">';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-zoom-out-' . $viewerId . '"><i class="fas fa-search-minus"></i></button>';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-zoom-in-' . $viewerId . '"><i class="fas fa-search-plus"></i></button>';
-    $html .= '</div></div>';
-    $html .= '<div id="pdf-container-' . $viewerId . '" style="width:100%;height:' . $height . ';overflow:auto;background:#525659;border-radius:8px;" data-pdf-url="' . htmlspecialchars($pdfUrl) . '">';
-    $html .= '<canvas id="pdf-canvas-' . $viewerId . '"></canvas>';
-    $html .= '</div></div>';
-    
-    return $html;
-}
-
-/**
- * Render 3D viewer HTML (uses standard digital object uploads)
- */
-function render_3d_viewer_html($viewerId, $model, $height, $baseUrl)
-{
-    // Use standard digital object path
-    $modelUrl = $baseUrl . '/uploads/' . trim($model->path ?? '', '/') . '/' . $model->filename;
-    $arAttr = !empty($model->ar_enabled) ? 'ar ar-modes="webxr scene-viewer quick-look"' : '';
-    $autoRotate = !empty($model->auto_rotate) ? 'auto-rotate' : '';
-    $cameraOrbit = $model->camera_orbit ?? '0deg 75deg 105%';
-    $bgColor = $model->background_color ?? '#f5f5f5';
-    $poster = !empty($model->poster_image) ? 'poster="' . $baseUrl . $model->poster_image . '"' : '';
-    
-    $html = '<div id="model-wrapper-' . $viewerId . '" class="model-wrapper" style="display:none;">';
-    $html .= '<model-viewer id="model-' . $viewerId . '" ';
-    $html .= 'src="' . $modelUrl . '" ';
-    $html .= $poster . ' ';
-    $html .= $arAttr . ' ';
-    $html .= $autoRotate . ' ';
-    $html .= 'camera-controls touch-action="pan-y" ';
-    $html .= 'camera-orbit="' . $cameraOrbit . '" ';
-    $html .= 'style="width:100%;height:' . $height . ';background-color:' . $bgColor . ';border-radius:8px;">';
-    $html .= '<button slot="ar-button" class="btn btn-primary" style="position:absolute;bottom:16px;right:16px;">';
-    $html .= '<i class="fas fa-cube me-1"></i>View in AR</button>';
-    $html .= '</model-viewer></div>';
-    
-    return $html;
-}
-
-/**
- * Render audio/video viewer HTML
- */
-function render_av_viewer_html($viewerId, $digitalObject, $height, $baseUrl)
-{
-    $mediaUrl = get_digital_object_url($digitalObject);
-    $mimeType = $digitalObject->mimeType ?? 'video/mp4';
-    $isAudio = stripos($mimeType, 'audio') !== false;
-    
-    $html = '<div id="av-wrapper-' . $viewerId . '" class="av-wrapper" style="display:none;">';
-    
-    if ($isAudio) {
-        $html .= '<audio id="audio-' . $viewerId . '" controls style="width:100%;">';
-        $html .= '<source src="' . $mediaUrl . '" type="' . $mimeType . '">';
-        $html .= 'Your browser does not support the audio element.</audio>';
-    } else {
-        $html .= '<video id="video-' . $viewerId . '" controls style="width:100%;height:' . $height . ';background:#000;border-radius:8px;">';
-        $html .= '<source src="' . $mediaUrl . '" type="' . $mimeType . '">';
-        $html .= 'Your browser does not support the video element.</video>';
-    }
-    
-    $html .= '</div>';
-    
-    return $html;
-}
-
-/**
- * Render thumbnail strip
- */
-function render_thumbnail_strip($viewerId, $digitalObjects, $cantaloupeUrl)
-{
-    $html = '<div class="thumbnail-strip mt-2" id="thumbs-' . $viewerId . '" style="display:flex;gap:8px;overflow-x:auto;padding:8px 0;">';
-    
-    foreach ($digitalObjects as $index => $do) {
-        $iiifId = build_iiif_identifier($do->path, $do->name);
-        $thumbUrl = $cantaloupeUrl . '/' . urlencode($iiifId) . '/full/100,/0/default.jpg';
-        $activeClass = $index === 0 ? 'active' : '';
-        
-        $html .= '<div class="thumb-item ' . $activeClass . '" data-index="' . $index . '" style="flex-shrink:0;cursor:pointer;border:2px solid transparent;border-radius:4px;">';
-        $html .= '<img src="' . $thumbUrl . '" alt="Page ' . ($index + 1) . '" style="height:80px;display:block;">';
-        $html .= '</div>';
-    }
-    
-    $html .= '</div>';
-    
-    return $html;
-}
-
-/**
- * Render viewer JavaScript initialization
- */
-function render_viewer_javascript($viewerId, $objectId, $manifestUrl, $opts, $config)
-{
-    $flagsJson = json_encode([
-        'has3D' => $config['has3D'],
-        'hasPdf' => $config['hasPdf'],
-        'hasAV' => $config['hasAV'],
-        'enableAnnotations' => $opts['enable_annotations'],
-    ]);
-    
-    $osdConfig = json_encode([
-        'showNavigator' => true,
-        'navigatorPosition' => 'BOTTOM_RIGHT',
-        'showRotationControl' => true,
-        'showFlipControl' => true,
-        'gestureSettingsMouse' => ['scrollToZoom' => true],
-    ]);
-    
-    $miradorConfig = json_encode([
-        'sideBarOpenByDefault' => false,
-        'defaultSideBarPanel' => 'info',
-    ]);
-    
-    $js = '<script src="https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js"></script>' . "\n";
-    $js .= '<script type="module">' . "\n";
-    $js .= 'import { IiifViewerManager } from "' . $config['frameworkPath'] . '/public/js/iiif-viewer-manager.js";' . "\n";
-    $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
-    $js .= '    const viewer = new IiifViewerManager("' . $viewerId . '", {' . "\n";
-    $js .= '        objectId: ' . $objectId . ',' . "\n";
-    $js .= '        manifestUrl: "' . $manifestUrl . '",' . "\n";
-    $js .= '        baseUrl: "' . $config['baseUrl'] . '",' . "\n";
-    $js .= '        cantaloupeUrl: "' . $config['cantaloupeUrl'] . '",' . "\n";
-    $js .= '        frameworkPath: "' . $config['frameworkPath'] . '",' . "\n";
-    $js .= '        defaultViewer: "' . $opts['viewer'] . '",' . "\n";
-    $js .= '        flags: ' . $flagsJson . ',' . "\n";
-    $js .= '        osdConfig: ' . $osdConfig . ',' . "\n";
-    $js .= '        miradorConfig: ' . $miradorConfig . "\n";
-    $js .= '    });' . "\n";
-    $js .= '    viewer.init();' . "\n";
-    $js .= '});' . "\n";
-    $js .= '</script>' . "\n";
-    
-    return $js;
-}
-
-/**
- * Render standalone 3D model viewer
- */
-function render_3d_model_viewer($resource, $options = [])
-{
-    $model = get_primary_3d_model($resource);
-    
-    if (!$model) {
-        return '';
-    }
-    
-    $baseUrl = sfConfig::get('app_iiif_base_url', 'https://archives.theahg.co.za');
-    $height = $options['height'] ?? '600px';
-    $viewerId = 'model-viewer-' . $resource->id . '-' . substr(md5(uniqid()), 0, 8);
-    
-    $html = '<div class="iiif-viewer-container">';
-    $html .= render_3d_viewer_html($viewerId, $model, $height, $baseUrl);
-    $html .= '</div>';
-    
-    // Auto-show 3D viewer
-    $n = sfConfig::get('csp_nonce', '');
-    $nonceAttr = $n ? preg_replace('/^nonce=/', ' nonce="', $n) . '"' : '';
-    $html .= '<script' . $nonceAttr . '>';
-    $html .= 'document.getElementById("model-wrapper-' . $viewerId . '").style.display = "block";';
-    $html .= '</script>';
-    
-    // Model-viewer script
-    $html .= '<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>';
-    
-    return $html;
-}
-
-/**
- * Simple function to just render an image via IIIF
- * Useful for thumbnails or simple displays
- */
-function render_iiif_image($identifier, $options = [])
-{
-    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://archives.theahg.co.za/iiif/2');
-    
-    $region = $options['region'] ?? 'full';
-    $size = $options['size'] ?? 'max';
-    $rotation = $options['rotation'] ?? '0';
-    $quality = $options['quality'] ?? 'default';
-    $format = $options['format'] ?? 'jpg';
-    
-    $url = $cantaloupeUrl . '/' . urlencode($identifier) . '/' . $region . '/' . $size . '/' . $rotation . '/' . $quality . '.' . $format;
-    
-    $alt = $options['alt'] ?? 'Image';
-    $class = $options['class'] ?? '';
-    $style = $options['style'] ?? '';
-    
-    return '<img src="' . htmlspecialchars($url) . '" alt="' . htmlspecialchars($alt) . '" class="' . $class . '" style="' . $style . '">';
-}
