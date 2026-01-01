@@ -77,6 +77,17 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
     if (!$keepPage && !isset($add['page'])) { unset($params['page']); }
     return url_for($params);
 }
+
+function getItemUrl($obj) {
+    switch ($obj->object_type) {
+        case 'library':
+            return url_for(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $obj->slug]);
+        case 'museum':
+            return url_for(['module' => 'ahgMuseumPlugin', 'action' => 'index', 'slug' => $obj->slug]);
+        default:
+            return url_for('@slug?slug=' . $obj->slug);
+    }
+}
 ?>
 
 <?php slot('title'); ?>
@@ -432,14 +443,14 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
                   <?php endif ?>
                 </td>
                 <td class="align-middle">
-                  <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="text-success"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
+                  <a href="<?php echo getItemUrl($obj) ?>" class="text-success"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
                   <?php if ($obj->child_count > 0): ?><a href="<?php echo buildUrl($fp, ['parent' => $obj->id]) ?>" class="text-muted ms-1"><small>(<?php echo $obj->child_count ?>)</small></a><?php endif ?>
                 </td>
                 <td class="align-middle small"><?php echo esc_entities($obj->identifier ?: '-') ?></td>
                 <td class="align-middle"><span class="badge bg-light text-dark"><?php echo esc_entities($obj->level_name ?: '-') ?></span></td>
                 <td class="align-middle"><span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo ucfirst($obj->object_type ?: '?') ?></span></td>
                 <td class="align-middle">
-                  <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
+                  <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
                 </td>
               </tr>
             <?php endforeach ?>
@@ -464,7 +475,7 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
                 <?php endif ?>
               </div>
               <div class="card-body p-2">
-                <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="text-success text-decoration-none small d-block text-truncate"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
+                <a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none small d-block text-truncate"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
               </div>
             </div>
           </div>
@@ -488,11 +499,11 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
             </div>
             <div class="col-12 col-md-6">
               <div class="card-body">
-                <h4 class="card-title"><a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a></h4>
+                <h4 class="card-title"><a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a></h4>
                 <p class="card-text mb-2"><span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo $cfg['label'] ?></span> <span class="badge bg-light text-dark"><?php echo esc_entities($obj->level_name ?: '-') ?></span></p>
                 <?php if ($obj->identifier): ?><p class="card-text"><strong><?php echo __('Identifier'); ?>:</strong> <?php echo esc_entities($obj->identifier) ?></p><?php endif ?>
                 <?php if ($obj->scope_and_content): ?><p class="card-text text-muted"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 500)) ?>...</p><?php endif ?>
-                <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="btn btn-success"><?php echo __('View'); ?></a>
+                <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-success"><?php echo __('View'); ?></a>
               </div>
             </div>
           </div>
@@ -517,7 +528,7 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
             <div class="col-md-9">
               <div class="card-body py-2">
                 <h6 class="card-title mb-1">
-                  <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
+                  <a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
                 </h6>
                 <p class="card-text mb-1 small">
                   <span class="text-success"><?php echo esc_entities($obj->identifier ?: '') ?></span>
@@ -531,7 +542,7 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
               </div>
             </div>
             <div class="col-md-1 d-flex flex-column align-items-center justify-content-center border-start gap-1">
-              <a href="<?php echo url_for('@slug?slug=' . $obj->slug) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
+              <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
             </div>
           </div>
         </div>
