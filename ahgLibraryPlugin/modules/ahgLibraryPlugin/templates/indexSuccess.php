@@ -1,4 +1,23 @@
 <?php decorate_with('layout_1col'); ?>
+<?php
+// Check if a plugin is enabled
+if (!function_exists('checkPluginEnabled')) {
+    function checkPluginEnabled($pluginName) {
+        static $plugins = null;
+        if ($plugins === null) {
+            try {
+                $conn = Propel::getConnection();
+                $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
+                $stmt->execute();
+                $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+            } catch (Exception $e) {
+                $plugins = [];
+            }
+        }
+        return isset($plugins[$pluginName]);
+    }
+}
+?>
 
 <?php slot('title'); ?>
   <h1><?php echo esc_entities($resource->getTitle(['cultureFallback' => true])); ?></h1>
@@ -393,13 +412,19 @@
             <li><a class="dropdown-item" href="<?php echo url_for([$resource->digitalObjectsRelatedByobjectId[0], 'module' => 'digitalobject', 'action' => 'edit']); ?>"><i class="fas fa-file-upload me-2"></i><?php echo __('Edit digital object'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit']); ?>"><i class="fas fa-copyright me-2"></i><?php echo __('Create new rights'); ?></a></li>
+            <?php if (checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-balance-scale me-2"></i><?php echo __('Extended Rights'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
+            <?php if (checkPluginEnabled('ahgGrapPlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('View GRAP data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
+            <?php if (checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
           </ul>
         </div>
       </div>
