@@ -118,6 +118,24 @@ if (!function_exists('io_get_slug')) {
     }
 }
 
+// Check if a plugin is enabled
+if (!function_exists('checkPluginEnabled')) {
+    function checkPluginEnabled($pluginName) {
+        static $plugins = null;
+        if ($plugins === null) {
+            try {
+                $conn = Propel::getConnection();
+                $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
+                $stmt->execute();
+                $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+            } catch (Exception $e) {
+                $plugins = [];
+            }
+        }
+        return isset($plugins[$pluginName]);
+    }
+}
+
 // ========== Template Logic ==========
 $resourceId = io_get_id($resource);
 $resourceSlug = io_get_slug($resource);
@@ -207,22 +225,29 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
               <i class="fas fa-puzzle-piece fa-fw me-2"></i><?php echo __('Extensions'); ?>
             </a>
             <ul class="dropdown-menu" style="position: absolute; left: 100%; bottom: 0; top: auto; display: none;">
+              <?php if (checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('Rights & Compliance'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-balance-scale fa-fw me-2"></i><?php echo __('Extended Rights'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
+              <?php endif; ?>
+              <?php if (checkPluginEnabled('ahgGrapPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('GRAP 103 Heritage Assets'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resourceSlug]); ?>"><i class="fas fa-eye fa-fw me-2"></i><?php echo __('View GRAP data'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-edit fa-fw me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
+              <?php endif; ?>
+              <?php if (checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('SPECTRUM Collections'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tag fa-fw me-2"></i><?php echo __('Generate label'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Assessment'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Workflow Status'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
+              <?php endif; ?>
+              <?php if (checkPluginEnabled('ahgCcoPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('CCO Provenance'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?>"><i class="fas fa-history fa-fw me-2"></i><?php echo __('Provenance'); ?></a></li>
-            </ul>
+              <?php endif; ?>
           </li>
 
           <?php if (sfConfig::get('app_audit_log_enabled', false)) { ?>
