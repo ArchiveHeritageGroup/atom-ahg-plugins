@@ -84,7 +84,7 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             }
 
             \Illuminate\Database\Capsule\Manager::table('ahg_audit_log')->insert([
-                'uuid' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+                'uuid' => \Illuminate\Support\Str::uuid()->toString(),
                 'user_id' => $userId,
                 'username' => $username,
                 'action' => $actionType,
