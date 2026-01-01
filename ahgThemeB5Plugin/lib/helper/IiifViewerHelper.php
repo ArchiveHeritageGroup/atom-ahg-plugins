@@ -11,6 +11,28 @@
  * @author Johan Pieterse - The Archive and Heritage Group
  * @version 1.0.0
  */
+/**
+ * Get digital objects for a resource
+ */
+function get_digital_objects($resource)
+{
+    if (!$resource) {
+        return [];
+    }
+    if ($resource instanceof QubitInformationObject) {
+        return $resource->digitalObjectsRelatedByobjectId ?? [];
+    }
+    // Fallback to database query
+    $resourceId = is_object($resource) ? ($resource->id ?? null) : $resource;
+    if (!$resourceId) {
+        return [];
+    }
+    return \Illuminate\Database\Capsule\Manager::table('digital_object')
+        ->where('object_id', $resourceId)
+        ->get()
+        ->toArray();
+}
+
 
 /**
  * Main function to render IIIF viewer for an information object
