@@ -148,9 +148,21 @@ class ahgAuditTrailActions extends sfActions
     {
         if ($request->isMethod('post')) {
             $settings = [
-                'audit_enabled' => $request->getParameter('audit_enabled', '0'),
-                'audit_views' => $request->getParameter('audit_views', '0'),
-                'audit_authentication' => $request->getParameter('audit_authentication', '1'),
+                'audit_enabled' => $request->getParameter('audit_enabled') ? '1' : '0',
+                'audit_authentication' => $request->getParameter('audit_authentication') ? '1' : '0',
+                'audit_failed_logins' => $request->getParameter('audit_failed_logins') ? '1' : '0',
+                'audit_creates' => $request->getParameter('audit_creates') ? '1' : '0',
+                'audit_updates' => $request->getParameter('audit_updates') ? '1' : '0',
+                'audit_deletes' => $request->getParameter('audit_deletes') ? '1' : '0',
+                'audit_views' => $request->getParameter('audit_views') ? '1' : '0',
+                'audit_imports' => $request->getParameter('audit_imports') ? '1' : '0',
+                'audit_exports' => $request->getParameter('audit_exports') ? '1' : '0',
+                'audit_downloads' => $request->getParameter('audit_downloads') ? '1' : '0',
+                'audit_sensitive_access' => $request->getParameter('audit_sensitive_access') ? '1' : '0',
+                'audit_permission_changes' => $request->getParameter('audit_permission_changes') ? '1' : '0',
+                'audit_api_requests' => $request->getParameter('audit_api_requests') ? '1' : '0',
+                'audit_searches' => $request->getParameter('audit_searches') ? '1' : '0',
+                'audit_ip_anonymize' => $request->getParameter('audit_ip_anonymize') ? '1' : '0',
             ];
 
             foreach ($settings as $key => $value) {
@@ -166,7 +178,7 @@ class ahgAuditTrailActions extends sfActions
         }
 
         $this->settings = $this->db->table('ahg_audit_settings')
-            ->pluck('setting_value', 'setting_key');
+            ->pluck('setting_value', 'setting_key')->toArray();
     }
 
     public function executeExport(sfWebRequest $request)
