@@ -171,55 +171,13 @@ CREATE TABLE IF NOT EXISTS `library_settings` (
 
 -- Dump completed on 2025-12-30 17:01:32
 
-
--- ============================================================
--- Library Level of Description Terms
--- Creates terms if they don't exist (AtoM object inheritance)
--- ============================================================
-
--- Book
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @book_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@book_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@book_id, 'en', 'Book');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@book_id, 'book');
-
--- Monograph
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @mono_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@mono_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@mono_id, 'en', 'Monograph');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@mono_id, 'monograph');
-
--- Periodical
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @period_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@period_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@period_id, 'en', 'Periodical');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@period_id, 'periodical');
-
--- Journal
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @journal_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@journal_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@journal_id, 'en', 'Journal');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@journal_id, 'journal');
-
--- Article
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @article_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@article_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@article_id, 'en', 'Article');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@article_id, 'article');
-
--- Manuscript
-INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
-SET @manuscript_id = LAST_INSERT_ID();
-INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@manuscript_id, 34, 'en');
-INSERT INTO term_i18n (id, culture, name) VALUES (@manuscript_id, 'en', 'Manuscript');
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@manuscript_id, 'manuscript');
-
--- Level of description sector mappings
+-- Library Level of Description terms (lookup existing, created by framework)
+SET @book_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Book' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
+SET @mono_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Monograph' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
+SET @period_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Periodical' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
+SET @journal_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Journal' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
+SET @article_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Article' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
+SET @manuscript_id = (SELECT t.id FROM term t JOIN term_i18n ti ON t.id = ti.id WHERE ti.name = 'Manuscript' AND t.taxonomy_id = 34 AND ti.culture = 'en' LIMIT 1);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order, created_at) VALUES
 (@book_id, 'library', 10, NOW()),
 (@mono_id, 'library', 20, NOW()),
@@ -228,13 +186,12 @@ INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order, 
 (@article_id, 'library', 45, NOW()),
 (@manuscript_id, 'library', 50, NOW());
 
--- Add existing Document term if it exists
+-- Add existing Document term
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order, created_at)
-SELECT t.id, 'library', 60, NOW() FROM term t
-JOIN term_i18n ti ON t.id = ti.id
+SELECT t.id, 'library', 60, NOW() FROM term t 
+JOIN term_i18n ti ON t.id = ti.id 
 WHERE ti.name = 'Document' AND t.taxonomy_id = 34 AND ti.culture = 'en'
 LIMIT 1;
-
 
 -- ISBN Providers
 CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
