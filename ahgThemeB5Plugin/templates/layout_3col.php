@@ -3,7 +3,9 @@
   <?php echo get_partial('alerts'); ?>
   <div class="row">
     <div id="left-column" class="col-md-3">
-      <?php include_slot('left'); ?>
+      <?php if (!include_slot('left')) { ?>
+        <?php include_slot('sidebar'); ?>
+      <?php } ?>
     </div>
     <div id="main-column" class="col-md-6" role="main">
       <?php include_slot('title'); ?>
@@ -16,7 +18,9 @@
       <?php include_slot('after-content'); ?>
     </div>
     <div id="right-column" class="col-md-3">
-      <?php include_slot('right'); ?>
+      <?php if (!include_slot('right')) { ?>
+        <?php include_slot('context-menu'); ?>
+      <?php } ?>
     </div>
   </div>
 </div>
