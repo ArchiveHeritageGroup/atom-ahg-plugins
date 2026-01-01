@@ -12,13 +12,11 @@ library_add:
     module: ahgLibraryPlugin
     action: edit
 
-library_view:
-  url: /library/:slug
+library_isbn_lookup:
+  url: /library/isbn-lookup
   param:
     module: ahgLibraryPlugin
-    action: index
-  requirements:
-    slug: .+
+    action: isbnLookup
 
 library_edit:
   url: /library/:slug/edit
@@ -28,8 +26,10 @@ library_edit:
   requirements:
     slug: .+
 
-library_isbn_lookup:
-  url: /library/isbn-lookup
+library_view:
+  url: /library/:slug
   param:
     module: ahgLibraryPlugin
-    action: isbnLookup
+    action: index
+  requirements:
+    slug: .+

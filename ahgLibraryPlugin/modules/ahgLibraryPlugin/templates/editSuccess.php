@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 var cleanIsbn = isbn.replace(/[\s-]/g, '');
-                var response = await fetch('<?php echo url_for(["module" => "ahgLibraryPlugin", "action" => "isbnLookup"]) ?>&isbn=' + encodeURIComponent(cleanIsbn));
+                var response = await fetch('<?php echo url_for("ahgLibraryPlugin/isbnLookup") ?>&isbn=' + encodeURIComponent(cleanIsbn));
                 var result = await response.json();
                 
 
