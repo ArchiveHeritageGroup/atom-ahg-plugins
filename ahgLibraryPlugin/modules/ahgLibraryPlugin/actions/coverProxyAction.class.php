@@ -4,11 +4,16 @@ class ahgLibraryPluginCoverProxyAction extends sfAction
 {
     public function execute($request)
     {
+        // Clear any output buffers
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        
         $isbn = preg_replace('/[^0-9X]/i', '', $request->getParameter('isbn', ''));
         $size = $request->getParameter('size', 'M');
         
         if (empty($isbn) || !in_array($size, ['S', 'M', 'L'])) {
-            header('HTTP/1.1 404 Not Found');
+            http_response_code(404);
             exit;
         }
         
@@ -24,10 +29,11 @@ class ahgLibraryPluginCoverProxyAction extends sfAction
         curl_close($ch);
         
         if ($httpCode !== 200 || empty($imageData) || strlen($imageData) < 1000) {
-            header('HTTP/1.1 404 Not Found');
+            http_response_code(404);
             exit;
         }
         
+        header_remove();
         header('Content-Type: image/jpeg');
         header('Cache-Control: public, max-age=86400');
         header('Content-Length: ' . strlen($imageData));
