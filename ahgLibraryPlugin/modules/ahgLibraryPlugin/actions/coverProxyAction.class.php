@@ -1,13 +1,14 @@
 <?php
+
 /**
- * Proxy cover images from Open Library to avoid mixed content issues
+ * Cover Proxy Action - proxies Open Library covers to avoid CSP issues
  */
 class ahgLibraryPluginCoverProxyAction extends sfAction
 {
     public function execute($request)
     {
         $isbn = preg_replace('/[^0-9X]/i', '', $request->getParameter('isbn', ''));
-        $size = $request->getParameter('size', 'M'); // S, M, L
+        $size = $request->getParameter('size', 'M');
         
         if (empty($isbn)) {
             $this->forward404('ISBN required');
@@ -25,22 +26,21 @@ class ahgLibraryPluginCoverProxyAction extends sfAction
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'AtoM/2.10');
-        
+        curl_setopt($ch, CURLOPT_USERAGENT, 'AtoM/2.10 LibraryPlugin');
         $imageData = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
         
-        if ($httpCode !== 200 || empty($imageData)) {
-            // Return a placeholder or 404
-            $this->forward404('Cover not found');
+        if ($httpCode !== 200 || empty($imageData) || strlen($imageData) < 1000) {
+            // Return placeholder or 404
+            $this->getResponse()->setStatusCode(404);
+            return sfView::NONE;
         }
         
-        // Output the image
+        // Set headers and return image
         $this->getResponse()->setContentType($contentType ?: 'image/jpeg');
         $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=86400');
-        
         echo $imageData;
         
         return sfView::NONE;

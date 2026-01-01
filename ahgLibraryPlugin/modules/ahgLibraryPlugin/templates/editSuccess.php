@@ -515,7 +515,7 @@
             <?php endif; ?>
           <?php elseif (!empty($cleanIsbn)): ?>
             <div id="ol-cover-preview">
-              <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg"
+              <img src="/index.php/ahgLibraryPlugin/coverProxy?isbn=<?php echo $cleanIsbn; ?>&size=M"
                    alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;"
                    onerror="this.parentElement.innerHTML='<p class=\'text-muted\'>No Open Library cover found</p>'">
               <div class="mt-1"><small class="text-muted">Open Library Preview</small></div>
