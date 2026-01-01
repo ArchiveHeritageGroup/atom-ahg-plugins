@@ -137,17 +137,20 @@ class ahgLibraryPluginEditAction extends sfAction
 
         // Get ISBN for Open Library cover lookup
         $isbn = $request->getParameter('isbn');
-
-        // If no digital object and we have ISBN, try to get Open Library cover
+        // If no digital object and we have ISBN, queue cover download for async processing
         if (!$hasDigitalObject && !empty($isbn)) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/LibraryCoverService.php';
-            $coverService = new \AtomFramework\Services\LibraryCoverService();
-            
-            $coverUrl = $coverService->getOpenLibraryCoverUrl($isbn, 'L');
-            if ($coverUrl) {
-                // This will download and save as AtoM digital object
-                $coverService->downloadAndSaveAsDigitalObject($this->resource->id, $coverUrl);
-            }
+            // Queue for background processing (avoids transaction issues on first save)
+            $db->table('atom_library_cover_queue')->updateOrInsert(
+                ['information_object_id' => $this->resource->id],
+                [
+                    'isbn' => $isbn,
+                    'status' => 'pending',
+                    'attempts' => 0,
+                    'error_message' => null,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'processed_at' => null,
+                ]
+            );
         }
 
         $data = [
