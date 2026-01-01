@@ -371,13 +371,9 @@
             <?php if (!empty($libraryData['subjects'])): ?>
               <?php foreach ($libraryData['subjects'] as $i => $subject): ?>
                 <div class="row subject-row mb-2 align-items-center" data-index="<?php echo $i; ?>">
-                  <div class="col-md-7">
+                  <div class="col-md-11">
                     <input type="text" name="subjects[<?php echo $i; ?>][heading]" class="form-control form-control-sm"
                            placeholder="<?php echo __('Subject heading'); ?>" value="<?php echo esc_entities($subject['heading'] ?? ''); ?>">
-                  </div>
-                  <div class="col-md-4">
-                    <input type="text" name="subjects[<?php echo $i; ?>][uri]" class="form-control form-control-sm"
-                           placeholder="<?php echo __('URI'); ?>" value="<?php echo esc_entities($subject['uri'] ?? ''); ?>">
                   </div>
                   <div class="col-md-1">
                     <button type="button" class="btn btn-sm btn-outline-danger remove-subject-btn w-100">
@@ -692,8 +688,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 subjects.forEach(function(subject, i) {
                                     var html = '<div class="row subject-row mb-2 align-items-center" data-index="' + i + '">' +
-                                        '<div class="col-md-7"><input type="text" name="subjects[' + i + '][heading]" class="form-control form-control-sm" value="' + escapeHtml(subject.name) + '"></div>' +
-                                        '<div class="col-md-4"><input type="text" name="subjects[' + i + '][uri]" class="form-control form-control-sm" value="' + escapeHtml(subject.url || '') + '" placeholder="URI"></div>' +
+                                        '<div class="col-md-11"><input type="text" name="subjects[' + i + '][heading]" class="form-control form-control-sm" value="' + escapeHtml(subject.name) + '"></div>' +
+                                        
                                         '<div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-subject-btn w-100"><i class="fas fa-times"></i></button></div></div>';
                                     subContainer.insertAdjacentHTML('beforeend', html);
                                 });
@@ -780,8 +776,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (noMsg) noMsg.remove();
 
         var html = '<div class="row subject-row mb-2 align-items-center" data-index="' + subjectIndex + '">' +
-            '<div class="col-md-7"><input type="text" name="subjects[' + subjectIndex + '][heading]" class="form-control form-control-sm" placeholder="<?php echo __('Subject heading'); ?>"></div>' +
-            '<div class="col-md-4"><input type="text" name="subjects[' + subjectIndex + '][uri]" class="form-control form-control-sm" placeholder="<?php echo __('URI'); ?>"></div>' +
+            '<div class="col-md-11"><input type="text" name="subjects[' + subjectIndex + '][heading]" class="form-control form-control-sm" placeholder="<?php echo __('Subject heading'); ?>"></div>' +
+            
             '<div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-subject-btn w-100"><i class="fas fa-times"></i></button></div></div>';
         container.insertAdjacentHTML('beforeend', html);
         subjectIndex++;
