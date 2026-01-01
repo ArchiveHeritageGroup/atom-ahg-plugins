@@ -160,7 +160,7 @@ $photoTypes = [
 </div>
 
 <!-- Load Fabric.js from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/fabric.min.js"></script>
 
 <!-- Load our annotator -->
 <script src="/plugins/ahgConditionPlugin/js/condition-annotator.js"></script>

@@ -345,10 +345,10 @@ if (!empty($graphData['nodes'])) {
 #ric-explorer-panel .accordion-body li:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
 </style>
 
-<script src="https://unpkg.com/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://unpkg.com/three-spritetext@1.6.5/dist/three-spritetext.min.js"></script>
-<script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/cytoscape.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/three.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/three-spritetext.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/3d-force-graph.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {

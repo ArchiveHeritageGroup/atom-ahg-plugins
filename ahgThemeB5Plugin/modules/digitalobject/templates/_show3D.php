@@ -17,7 +17,7 @@ $viewerId = 'viewer-' . uniqid();
     
     <div id="<?php echo $viewerId; ?>-container" style="width: 100%; height: 400px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; position: relative;">
       <?php if (in_array($ext, ['glb', 'gltf'])): ?>
-        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+        <script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>
         <model-viewer 
           id="<?php echo $viewerId; ?>"
           src="<?php echo esc_entities($fullPath); ?>" 
@@ -34,7 +34,7 @@ $viewerId = 'viewer-' . uniqid();
         </model-viewer>
       <?php else: ?>
         <div id="<?php echo $viewerId; ?>-threejs" style="width:100%;height:100%;border-radius:8px;"></div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="/plugins/ahgThemeB5Plugin/js/three.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>

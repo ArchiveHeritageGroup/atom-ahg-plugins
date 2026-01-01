@@ -10,8 +10,8 @@
 <?php end_slot(); ?>
 
 <?php slot('head'); ?>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
@@ -242,7 +242,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/chart.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const syncTrendData = <?php echo json_encode($syncTrend); ?>;
 const operationsData = <?php echo json_encode($operationsByType); ?>;

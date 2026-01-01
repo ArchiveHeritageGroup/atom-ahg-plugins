@@ -398,7 +398,7 @@ foreach ($collection->items as $item) {
 </div>
 
 <?php if ($sf_user->isAuthenticated()): ?>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/sortable.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var tbody = document.querySelector('.sortable-items');

@@ -32,5 +32,5 @@
 ]); ?>
 
 <!-- Load required scripts -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/sortable.min.js"></script>
 <script src="<?php echo public_path('plugins/ahgThemeB5Plugin/js/tiff-pdf-merge.js'); ?>"></script>

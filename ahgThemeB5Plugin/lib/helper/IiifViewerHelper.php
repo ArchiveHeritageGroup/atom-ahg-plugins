@@ -477,7 +477,7 @@ function render_viewer_javascript($viewerId, $objectId, $manifestUrl, $opts, $co
         'defaultSideBarPanel' => 'info',
     ]);
     
-    $js = '<script src="https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js"></script>' . "\n";
+    $js = '<script src="/plugins/ahgThemeB5Plugin/js/openseadragon.min.js"></script>' . "\n";
     $js .= '<script type="module">' . "\n";
     $js .= 'import { IiifViewerManager } from "' . $config['frameworkPath'] . '/public/js/iiif-viewer-manager.js";' . "\n";
     $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
@@ -526,7 +526,7 @@ function render_3d_model_viewer($resource, $options = [])
     $html .= '</script>';
     
     // Model-viewer script
-    $html .= '<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>';
+    $html .= '<script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>';
     
     return $html;
 }
