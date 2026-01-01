@@ -460,6 +460,9 @@ if (!function_exists('checkPluginEnabled')) {
             displayValue: false,
             margin: 10
           });
+          // Fix fill colors for CSP
+          document.querySelector("#isbn-barcode > rect").style.setProperty("fill", "#ffffff", "important");
+          document.querySelectorAll("#isbn-barcode g rect").forEach(r => r.style.setProperty("fill", "#000000", "important"));
         } catch(e) {
           // Fallback to CODE128 if ISBN format fails
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {
@@ -471,6 +474,9 @@ if (!function_exists('checkPluginEnabled')) {
             displayValue: false,
             margin: 10
           });
+          // Fix fill colors for CSP
+          document.querySelector("#isbn-barcode > rect").style.setProperty("fill", "#ffffff", "important");
+          document.querySelectorAll("#isbn-barcode g rect").forEach(r => r.style.setProperty("fill", "#000000", "important"));
         }
       });
     </script>
