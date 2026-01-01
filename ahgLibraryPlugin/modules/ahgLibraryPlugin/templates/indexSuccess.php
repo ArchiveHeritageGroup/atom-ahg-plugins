@@ -442,7 +442,7 @@ if (!function_exists('checkPluginEnabled')) {
         <h5 class="mb-0"><i class="fas fa-barcode me-2"></i><?php echo __('ISBN Barcode'); ?></h5>
       </div>
       <div class="card-body text-center">
-        <style>#isbn-barcode rect { fill: #ffffff !important; } #isbn-barcode g rect { fill: #000000 !important; }</style>
+        <style <?php echo __(sfConfig::get('csp_nonce', '')); ?>>#isbn-barcode rect { fill: #ffffff !important; } #isbn-barcode g rect { fill: #000000 !important; }</style>
         <svg id="isbn-barcode"></svg>
         <p class="text-muted small mt-2 mb-0"><?php echo esc_entities($isbn); ?></p>
       </div>
