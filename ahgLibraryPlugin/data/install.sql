@@ -170,3 +170,78 @@ CREATE TABLE IF NOT EXISTS `library_settings` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 17:01:32
+
+-- Library Level of Description terms
+-- Book
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @book_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@book_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@book_id, 'en', 'Book');
+
+-- Monograph
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @mono_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@mono_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@mono_id, 'en', 'Monograph');
+
+-- Periodical
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @period_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@period_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@period_id, 'en', 'Periodical');
+
+-- Journal
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @journal_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@journal_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@journal_id, 'en', 'Journal');
+
+-- Article
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @article_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@article_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@article_id, 'en', 'Article');
+
+-- Manuscript
+INSERT INTO object (class_name, created_at, updated_at) VALUES ('QubitTerm', NOW(), NOW());
+SET @manuscript_id = LAST_INSERT_ID();
+INSERT INTO term (id, taxonomy_id, source_culture) VALUES (@manuscript_id, 34, 'en');
+INSERT INTO term_i18n (id, culture, name) VALUES (@manuscript_id, 'en', 'Manuscript');
+
+-- Level of description sector mappings for library
+INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order, created_at) VALUES
+(@book_id, 'library', 10, NOW()),
+(@mono_id, 'library', 20, NOW()),
+(@period_id, 'library', 30, NOW()),
+(@journal_id, 'library', 40, NOW()),
+(@article_id, 'library', 45, NOW()),
+(@manuscript_id, 'library', 50, NOW());
+
+-- Add existing Document term
+INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order, created_at)
+SELECT t.id, 'library', 60, NOW() FROM term t 
+JOIN term_i18n ti ON t.id = ti.id 
+WHERE ti.name = 'Document' AND t.taxonomy_id = 34 AND ti.culture = 'en'
+LIMIT 1;
+
+-- ISBN Providers
+CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(50) NOT NULL,
+  `api_endpoint` varchar(500) NOT NULL,
+  `api_key_setting` varchar(100) DEFAULT NULL,
+  `priority` int DEFAULT 10,
+  `enabled` tinyint(1) DEFAULT 1,
+  `rate_limit_per_minute` int DEFAULT 100,
+  `response_format` varchar(20) DEFAULT 'json',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO atom_isbn_provider (name, slug, api_endpoint, api_key_setting, priority, enabled, rate_limit_per_minute, response_format) VALUES
+('Open Library', 'openlibrary', 'https://openlibrary.org/api/books', NULL, 10, 1, 100, 'json'),
+('Google Books', 'googlebooks', 'https://www.googleapis.com/books/v1/volumes', NULL, 20, 1, 100, 'json'),
+('WorldCat', 'worldcat', 'https://www.worldcat.org/webservices/catalog/content/isbn/', NULL, 30, 0, 10, 'marcxml');
