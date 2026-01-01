@@ -4,18 +4,12 @@ class ahgLibraryPluginCoverProxyAction extends sfAction
 {
     public function execute($request)
     {
-        sfConfig::set('sf_web_debug', false);
-        
         $isbn = preg_replace('/[^0-9X]/i', '', $request->getParameter('isbn', ''));
         $size = $request->getParameter('size', 'M');
         
-        if (empty($isbn)) {
-            $this->getResponse()->setStatusCode(404);
-            return sfView::NONE;
-        }
-        
-        if (!in_array($size, ['S', 'M', 'L'])) {
-            $size = 'M';
+        if (empty($isbn) || !in_array($size, ['S', 'M', 'L'])) {
+            header('HTTP/1.1 404 Not Found');
+            exit;
         }
         
         $url = "https://covers.openlibrary.org/b/isbn/{$isbn}-{$size}.jpg";
@@ -30,17 +24,14 @@ class ahgLibraryPluginCoverProxyAction extends sfAction
         curl_close($ch);
         
         if ($httpCode !== 200 || empty($imageData) || strlen($imageData) < 1000) {
-            $this->getResponse()->setStatusCode(404);
-            return sfView::NONE;
+            header('HTTP/1.1 404 Not Found');
+            exit;
         }
         
-        $this->getResponse()->clearHttpHeaders();
-        $this->getResponse()->setHttpHeader('Content-Type', 'image/jpeg');
-        $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=86400');
-        $this->getResponse()->setHttpHeader('Content-Length', strlen($imageData));
-        $this->getResponse()->setContent($imageData);
-        $this->getResponse()->send();
-        
+        header('Content-Type: image/jpeg');
+        header('Cache-Control: public, max-age=86400');
+        header('Content-Length: ' . strlen($imageData));
+        echo $imageData;
         exit;
     }
 }
