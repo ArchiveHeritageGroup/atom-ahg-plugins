@@ -1,18 +1,20 @@
 <?php
 // Check which sector plugins are enabled
-function checkPluginEnabled($pluginName) {
-    static $plugins = null;
-    if ($plugins === null) {
-        try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
-            $stmt->execute();
-            $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
-        } catch (Exception $e) {
-            $plugins = [];
+if (!function_exists('checkPluginEnabled')) {
+    function checkPluginEnabled($pluginName) {
+        static $plugins = null;
+        if ($plugins === null) {
+            try {
+                $conn = Propel::getConnection();
+                $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
+                $stmt->execute();
+                $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+            } catch (Exception $e) {
+                $plugins = [];
+            }
         }
+        return isset($plugins[$pluginName]);
     }
-    return isset($plugins[$pluginName]);
 }
 
 $hasLibrary = checkPluginEnabled('ahgLibraryPlugin');
