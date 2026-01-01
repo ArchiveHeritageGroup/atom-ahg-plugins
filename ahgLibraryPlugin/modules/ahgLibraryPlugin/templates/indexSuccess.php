@@ -446,7 +446,7 @@ if (!function_exists('checkPluginEnabled')) {
         <p class="text-muted small mt-2 mb-0"><?php echo esc_entities($isbn); ?></p>
       </div>
     </section>
-    <script src="<?php echo public_path('ahgLibraryPlugin/js/JsBarcode.all.min.js'); ?>"></script>
+    <script src="/plugins/ahgLibraryPlugin/js/JsBarcode.all.min.js"></script>
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
       document.addEventListener('DOMContentLoaded', function() {
         try {
