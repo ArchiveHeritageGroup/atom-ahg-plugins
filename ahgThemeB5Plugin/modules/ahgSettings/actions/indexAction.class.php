@@ -75,6 +75,13 @@ class AhgSettingsIndexAction extends sfAction
             'description' => 'Job queue and scheduling settings',
             'url' => 'admin/ahg-settings/section?section=jobs'
         ];
+
+        $this->sections['library'] = [
+            'label' => 'Library Settings',
+            'icon' => 'fa-book',
+            'description' => 'ISBN providers and library module configuration',
+            'url' => 'ahgLibraryPlugin/isbnProviders'
+        ];
         
         $this->sections['plugins'] = [
             'label' => 'Plugin Management',
