@@ -70,7 +70,7 @@ class ahgLibraryPluginIsbnLookupAction extends sfAction
                     'publish_date' => $result['data']['publish_date'] ?? null,
                     'publish_places' => $result['data']['publish_places'] ?? [],
                     'number_of_pages' => $result['data']['number_of_pages'] ?? null,
-                    'subjects' => $result['data']['subjects'] ?? [],
+                    'subjects' => array_map(function($s) { return is_array($s) ? $s : ['name' => $s, 'url' => '']; }, $result['data']['subjects'] ?? []),
                     'description' => $result['data']['description'] ?? null,
                     'edition' => $result['data']['edition'] ?? null,
                     'series' => $result['data']['series'] ?? null,
