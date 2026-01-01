@@ -42,7 +42,7 @@
                    class="img-fluid" style="max-height: 200px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php elseif (!empty($cleanIsbn)): ?>
-              <img src="<?php echo url_for("ahgLibraryPlugin/coverProxy?isbn=" . $cleanIsbn . "&size=M"); ?>" alt="Cover" 
+              <img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=<?php echo $cleanIsbn; ?>&size=M" alt="Cover" 
                    class="img-fluid" style="max-height: 200px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>

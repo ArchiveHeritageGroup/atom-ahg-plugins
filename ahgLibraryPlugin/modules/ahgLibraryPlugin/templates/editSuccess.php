@@ -515,7 +515,7 @@
             <?php endif; ?>
           <?php elseif (!empty($cleanIsbn)): ?>
             <div id="ol-cover-preview">
-              <img src="/index.php/ahgLibraryPlugin/coverProxy?isbn=<?php echo $cleanIsbn; ?>&size=M"
+              <img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=<?php echo $cleanIsbn; ?>&size=M"
                    alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;"
                    onerror="this.parentElement.innerHTML='<p class=\'text-muted\'>No Open Library cover found</p>'">
               <div class="mt-1"><small class="text-muted">Open Library Preview</small></div>
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var coverPreview = document.getElementById('cover-preview');
                 if (coverPreview) {
                     coverPreview.innerHTML =
-                        '<img src="https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
+                        '<img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=' + isbn + '\-M.jpgsize=M" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
                         '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                         '<input type="hidden" name="cover_url" id="cover-url-input" value="">';
                 }
