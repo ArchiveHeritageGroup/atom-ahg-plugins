@@ -447,7 +447,7 @@ if (!function_exists('checkPluginEnabled')) {
       </div>
     </section>
     <script src="/plugins/ahgLibraryPlugin/js/JsBarcode.all.min.js"></script>
-    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+    <script <?php echo __(sfConfig::get('csp_nonce', '')); ?>>
       document.addEventListener('DOMContentLoaded', function() {
         try {
           JsBarcode("#isbn-barcode", "<?php echo $cleanIsbn; ?>", {
