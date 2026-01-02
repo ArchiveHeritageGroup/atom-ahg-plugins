@@ -182,7 +182,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             '/:slug/cco/provenance',
             ['module' => 'ahgMuseumPlugin', 'action' => 'provenance']
         ));
-        $routing->prependRoute('museum_view', new sfRoute(
+        $routing->prependRoute('museum_view', new QubitInformationObjectRoute(
             '/museum/:slug',
             ['module' => 'ahgMuseumPlugin', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
