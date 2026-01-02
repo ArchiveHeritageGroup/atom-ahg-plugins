@@ -84,7 +84,7 @@ class ahgGalleryPluginEditAction extends sfAction
         // Display Standard for admin panel
         $this->form->setWidget('displayStandard', new sfWidgetFormSelect(['choices' => ['' => '-- Select --'] + $this->displayStandards]));
         $this->form->setValidator('displayStandard', new sfValidatorString(['required' => false]));
-        $this->form->setDefault('displayStandard', $this->resource->display_standard_id ?? 1696);
+        $this->form->setDefault('displayStandard', $this->resource->display_standard_id ?? $this->getTermIdByCode('gallery', 70) ?? 353);
         
         $this->form->setWidget('displayStandardUpdateDescendants', new sfWidgetFormInputCheckbox());
         $this->form->setValidator('displayStandardUpdateDescendants', new sfValidatorBoolean(['required' => false]));
@@ -333,7 +333,7 @@ class ahgGalleryPluginEditAction extends sfAction
                 'lft' => 0,
                 'rgt' => 0,
                 'source_culture' => 'en',
-                'display_standard_id' => 1696,
+                'display_standard_id' => $this->getTermIdByCode('gallery', 70) ?? 353,
             ]);
 
             DB::table('information_object_i18n')->insert([
@@ -480,4 +480,16 @@ class ahgGalleryPluginEditAction extends sfAction
         }
         return $slug;
     }
+    /**
+     * Get term ID by code and taxonomy
+     */
+    protected function getTermIdByCode(string $code, int $taxonomyId): ?int
+    {
+        $term = DB::table('term')
+            ->where('code', $code)
+            ->where('taxonomy_id', $taxonomyId)
+            ->value('id');
+        return $term ? (int) $term : null;
+    }
+
 }
