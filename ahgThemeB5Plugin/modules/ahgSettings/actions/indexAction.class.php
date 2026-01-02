@@ -11,13 +11,13 @@ class AhgSettingsIndexAction extends sfAction
         
         
         // Check which plugins are enabled
-        $hasResearch = checkPluginEnabled('ahgResearchPlugin');
-        $hasAuditTrail = checkPluginEnabled('ahgAuditTrailPlugin');
-        $hasRic = checkPluginEnabled('ahgRicExplorerPlugin');
-        $hasAccessRequest = checkPluginEnabled('ahgAccessRequestPlugin');
-        $hasCondition = checkPluginEnabled('ahgConditionPlugin');
-        $hasSpectrum = checkPluginEnabled('ahgSpectrumPlugin');
-        $hasIiif = checkPluginEnabled('IiifViewerFramework');
+        $hasResearch = in_array('ahgResearchPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasAuditTrail = in_array('ahgAuditTrailPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasRic = in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasAccessRequest = in_array('ahgAccessRequestPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasCondition = in_array('ahgConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasSpectrum = in_array('ahgSpectrumPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasIiif = in_array('IiifViewerFramework', sfProjectConfiguration::getActive()->getPlugins());
         
         $this->sections = [];
         
