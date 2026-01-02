@@ -640,9 +640,9 @@ class ahgMuseumPluginEditAction extends sfAction
         
         error_log("DISPLAY STANDARD DEBUG: received = " . var_export($displayStandardId, true));
         
-        // Default to Museum (CCO) = 449 if not set
+        // Default to Museum (CCO) if not set - lookup by code
         if (empty($displayStandardId)) {
-            $displayStandardId = 449;
+            $displayStandardId = $this->getTermIdByCode('museum', 70) ?? 353; // fallback to ISAD
         }
         
         error_log("DISPLAY STANDARD DEBUG: saving = " . $displayStandardId);
@@ -874,7 +874,7 @@ class ahgMuseumPluginEditAction extends sfAction
             'lft' => $lft,
             'rgt' => $rgt,
             'source_culture' => $culture,
-            'display_standard_id' => 449, // Museum (CCO) standard
+            'display_standard_id' => $this->getTermIdByCode('museum', 70) ?? 353, // Museum (CCO) standard
         ]);
 
         // Insert i18n record
@@ -924,7 +924,7 @@ class ahgMuseumPluginEditAction extends sfAction
                 'repository_id' => !empty($this->ccoData['repository']) && is_numeric($this->ccoData['repository'])
                     ? (int) $this->ccoData['repository']
                     : null,
-                'display_standard_id' => 449, // Museum (CCO) standard
+                'display_standard_id' => $this->getTermIdByCode('museum', 70) ?? 353, // Museum (CCO) standard
             ]);
 
         // Update or insert i18n record
@@ -1189,4 +1189,16 @@ class ahgMuseumPluginEditAction extends sfAction
 
         return $eventObjectId;
     }
+    /**
+     * Get term ID by code and taxonomy
+     */
+    protected function getTermIdByCode(string $code, int $taxonomyId): ?int
+    {
+        $term = DB::table('term')
+            ->where('code', $code)
+            ->where('taxonomy_id', $taxonomyId)
+            ->value('id');
+        return $term ? (int) $term : null;
+    }
+
 }
