@@ -75,12 +75,14 @@ class AhgSettingsIndexAction extends sfAction
             'url' => 'admin/ahg-settings/section?section=jobs'
         ];
 
-        $this->sections['library'] = [
-            'label' => 'Library Settings',
-            'icon' => 'fa-book',
-            'description' => 'ISBN providers and library module configuration',
-            'url' => 'ahgLibraryPlugin/isbnProviders'
-        ];
+        if ($hasLibrary) {
+            $this->sections['library'] = [
+                'label' => 'Library Settings',
+                'icon' => 'fa-book',
+                'description' => 'ISBN providers and library module configuration',
+                'url' => 'ahgLibraryPlugin/isbnProviders'
+            ];
+        }
         
         $this->sections['plugins'] = [
             'label' => 'Plugin Management',
