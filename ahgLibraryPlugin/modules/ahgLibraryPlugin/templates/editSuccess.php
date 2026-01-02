@@ -659,6 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setField('ebook_preview_url', ebookUrl);
 
                         // Fill Authors with authority URIs
+                        console.log("Authors data:", authors);
                         if (authors.length > 0) {
                             var container = document.getElementById('creators-container');
                             if (container) {

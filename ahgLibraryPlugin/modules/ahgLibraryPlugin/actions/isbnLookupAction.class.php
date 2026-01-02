@@ -65,7 +65,7 @@ class ahgLibraryPluginIsbnLookupAction extends sfAction
                 'data' => [
                     'title' => $result['data']['title'] ?? null,
                     'subtitle' => $result['data']['subtitle'] ?? null,
-                    'authors' => $result['data']['authors'] ?? [],
+                    'authors' => array_map(function($a) { return is_array($a) ? $a : ['name' => $a, 'url' => '']; }, $result['data']['authors'] ?? []),
                     'publishers' => $result['data']['publishers'] ?? [],
                     'publish_date' => $result['data']['publish_date'] ?? null,
                     'publish_places' => $result['data']['publish_places'] ?? [],
