@@ -4,6 +4,7 @@ all:
       - spectrumReports
       - threeDReports
       - ahgSettings
+      - informationobject
 
 # Vendor module settings
 vendor:
