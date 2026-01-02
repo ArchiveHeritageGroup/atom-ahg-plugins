@@ -98,10 +98,16 @@ class ahgLibraryPluginEditAction extends sfAction
         }
 
         // Set library display standard
-        // Get library template ID
-        $libraryTermId = QubitTerm::getByCode('library', QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID);
-        if ($libraryTermId) {
-            $this->resource->displayStandardId = $libraryTermId->id;
+        $db = \Illuminate\Database\Capsule\Manager::connection();
+        $libraryTerm = $db->table('term')
+            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID)
+            ->where('term_i18n.name', 'Library')
+            ->where('term_i18n.culture', 'en')
+            ->first();
+        
+        if ($libraryTerm) {
+            $this->resource->displayStandardId = $libraryTerm->id;
         }
 
         // Save the information object
