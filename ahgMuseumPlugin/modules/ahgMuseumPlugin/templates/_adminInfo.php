@@ -69,7 +69,7 @@ if (isset($resource) && $resource && isset($resource->id)) {
                         <label for="displayStandard" class="form-label fw-bold"><?php echo __('Display standard'); ?></label>
                         <select name="displayStandard" id="displayStandard" class="form-select">
                             <?php foreach ($displayStandards as $id => $name): ?>
-                                <option value="<?php echo $id; ?>" <?php echo ($currentDisplayStandard == $id) ? 'selected' : ''; ?>>
+                                <option value="<?php echo $id; ?>" <?php echo ((int)$currentDisplayStandard === (int)$id) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($name); ?>
                                 </option>
                             <?php endforeach; ?>
