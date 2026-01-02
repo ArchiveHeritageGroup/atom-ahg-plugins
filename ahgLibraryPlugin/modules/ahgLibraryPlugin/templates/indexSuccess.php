@@ -381,6 +381,16 @@ if (!function_exists('checkPluginEnabled')) {
     </section>
     <?php endif; ?>
 
+    <!-- Rights Area -->
+    <section class="card mb-4">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-copyright me-2"></i><?php echo __('Rights area'); ?></h5>
+      </div>
+      <div class="card-body">
+        <?php echo get_component('right', 'relatedRights', ['resource' => $resource]); ?>
+      </div>
+    </section>
+
     <!-- Actions -->
     <section class="card mb-4">
       <div class="card-header bg-success text-white">
