@@ -2,17 +2,15 @@
 -- DAM Plugin Install
 -- =====================================================
 
--- Add DAM display standard term (taxonomy_id = 70)
+SET @dam_exists = (SELECT COUNT(*) FROM term WHERE code = 'dam' AND taxonomy_id = 70);
+
 INSERT INTO object (class_name, created_at, updated_at)
-SELECT 'QubitTerm', NOW(), NOW() FROM DUAL 
-WHERE NOT EXISTS (SELECT 1 FROM term WHERE code = 'dam' AND taxonomy_id = 70);
+SELECT 'QubitTerm', NOW(), NOW() FROM DUAL WHERE @dam_exists = 0;
+
+SET @dam_id = LAST_INSERT_ID();
 
 INSERT INTO term (id, taxonomy_id, code, source_culture)
-SELECT LAST_INSERT_ID(), 70, 'dam', 'en' FROM DUAL 
-WHERE NOT EXISTS (SELECT 1 FROM term WHERE code = 'dam' AND taxonomy_id = 70)
-AND LAST_INSERT_ID() > 0;
+SELECT @dam_id, 70, 'dam', 'en' FROM DUAL WHERE @dam_exists = 0 AND @dam_id > 0;
 
 INSERT INTO term_i18n (id, culture, name)
-SELECT t.id, 'en', 'Photo/DAM (IPTC/XMP)'
-FROM term t WHERE t.code = 'dam' AND t.taxonomy_id = 70
-AND NOT EXISTS (SELECT 1 FROM term_i18n ti WHERE ti.id = t.id AND ti.culture = 'en');
+SELECT @dam_id, 'en', 'Photo/DAM (IPTC/XMP)' FROM DUAL WHERE @dam_exists = 0 AND @dam_id > 0;
