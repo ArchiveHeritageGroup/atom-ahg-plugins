@@ -455,3 +455,15 @@ CREATE TABLE IF NOT EXISTS `gallery_venue` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 17:07:15
+
+-- =====================================================
+-- Gallery Display Standard Term (taxonomy_id = 70)
+-- =====================================================
+INSERT INTO term (taxonomy_id, code, source_culture)
+SELECT 70, 'gallery', 'en' FROM DUAL 
+WHERE NOT EXISTS (SELECT 1 FROM term WHERE code = 'gallery' AND taxonomy_id = 70);
+
+SET @gallery_id = (SELECT id FROM term WHERE code = 'gallery' AND taxonomy_id = 70);
+
+INSERT IGNORE INTO term_i18n (id, culture, name)
+VALUES (@gallery_id, 'en', 'Gallery (Spectrum 5.0)');

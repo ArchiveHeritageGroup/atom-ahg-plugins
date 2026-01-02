@@ -257,3 +257,15 @@ INSERT IGNORE INTO atom_isbn_provider (name, slug, api_endpoint, api_key_setting
 ('Open Library', 'openlibrary', 'https://openlibrary.org/api/books', NULL, 10, 1, 100, 'json'),
 ('Google Books', 'googlebooks', 'https://www.googleapis.com/books/v1/volumes', NULL, 20, 1, 100, 'json'),
 ('WorldCat', 'worldcat', 'https://www.worldcat.org/webservices/catalog/content/isbn/', NULL, 30, 0, 10, 'marcxml');
+
+-- =====================================================
+-- Library Display Standard Term (taxonomy_id = 70)
+-- =====================================================
+INSERT INTO term (taxonomy_id, code, source_culture)
+SELECT 70, 'library', 'en' FROM DUAL 
+WHERE NOT EXISTS (SELECT 1 FROM term WHERE code = 'library' AND taxonomy_id = 70);
+
+SET @library_id = (SELECT id FROM term WHERE code = 'library' AND taxonomy_id = 70);
+
+INSERT IGNORE INTO term_i18n (id, culture, name)
+VALUES (@library_id, 'en', 'Library (MARC-inspired)');

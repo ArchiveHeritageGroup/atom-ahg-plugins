@@ -140,3 +140,15 @@ CREATE TABLE IF NOT EXISTS `museum_metadata` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 18:09:41
+
+-- =====================================================
+-- Museum Display Standard Term (taxonomy_id = 70)
+-- =====================================================
+INSERT INTO term (taxonomy_id, code, source_culture)
+SELECT 70, 'museum', 'en' FROM DUAL 
+WHERE NOT EXISTS (SELECT 1 FROM term WHERE code = 'museum' AND taxonomy_id = 70);
+
+SET @museum_id = (SELECT id FROM term WHERE code = 'museum' AND taxonomy_id = 70);
+
+INSERT IGNORE INTO term_i18n (id, culture, name)
+VALUES (@museum_id, 'en', 'Museum (CCO), Cataloging Cultural Objects');
