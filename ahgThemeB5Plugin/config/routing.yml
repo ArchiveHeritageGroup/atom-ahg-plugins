@@ -354,3 +354,11 @@ landing_page_view:
 landing_page_ajax_move_to_column:
   url: /admin/landing-pages/ajax/move-to-column
   param: { module: landingPageBuilder, action: moveToColumn }
+
+# =============================================================================
+# Label Generation Routes
+# =============================================================================
+label_index:
+  url: /label/:slug
+  param: { module: label, action: index }
+

@@ -127,6 +127,11 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
     public function loadRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
+        // Label generation route
+        $routing->prependRoute('label_index', new sfRoute('/label/:slug', [
+            'module' => 'label',
+            'action' => 'index'
+        ]));
         // Reports routes
         $routing->prependRoute('reports_index', new sfRoute('/reports', [
             'module' => 'reports',
