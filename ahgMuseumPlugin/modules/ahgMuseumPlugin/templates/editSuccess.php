@@ -359,11 +359,15 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 .field-help {
+  /* hidden by default via inline style */
   margin-top: 10px;
   padding: 12px;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+.field-help.show {
+  display: block !important;
 }
 
 .help-text {
@@ -634,17 +638,17 @@ document.addEventListener("DOMContentLoaded", function() {
         var fieldName = this.dataset.field;
         var helpDiv = document.getElementById('help-' + fieldName);
         
-        if (helpDiv.style.display === 'none') {
+        if (!helpDiv.classList.contains('show')) {
           document.querySelectorAll('.field-help').forEach(function(h) {
-            h.style.display = 'none';
+            h.classList.remove('show');
           });
           document.querySelectorAll('.btn-help').forEach(function(b) {
             b.classList.remove('active');
           });
-          helpDiv.style.display = 'block';
+          helpDiv.classList.add('show');
           this.classList.add('active');
         } else {
-          helpDiv.style.display = 'none';
+          helpDiv.classList.remove('show');
           this.classList.remove('active');
         }
       });
