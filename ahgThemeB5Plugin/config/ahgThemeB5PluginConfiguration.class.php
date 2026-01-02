@@ -127,6 +127,17 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
     public function loadRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
+        // GLAM Metadata Routes - prepend to override core QubitMetadataRoute
+        $routing->prependRoute('ahg_slug', new AhgMetadataRoute('/:slug', [
+            'action' => 'index'
+        ]));
+        $routing->prependRoute('ahg_slug_template', new AhgMetadataRoute('/:slug;:template', [
+            'action' => 'index',
+            'slug' => [ 'pattern' => '[^;]+' ]
+        ]));
+        $routing->prependRoute('ahg_edit', new AhgMetadataRoute('/:slug/edit', [
+            'action' => 'edit'
+        ]));
 
         // Reports routes
         $routing->prependRoute('reports_index', new sfRoute('/reports', [
