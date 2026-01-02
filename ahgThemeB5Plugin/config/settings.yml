@@ -5,6 +5,7 @@ all:
       - threeDReports
       - ahgSettings
       - informationobject
+      - label
 
 # Vendor module settings
 vendor:

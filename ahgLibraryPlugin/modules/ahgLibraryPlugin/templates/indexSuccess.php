@@ -431,10 +431,9 @@ if (!function_exists('checkPluginEnabled')) {
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <?php endif; ?>
-            <?php if (checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin')): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'label', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
-            <?php endif; ?>
+            
           </ul>
         </div>
       </div>
