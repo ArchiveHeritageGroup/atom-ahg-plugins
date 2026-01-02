@@ -1,12 +1,58 @@
 <?php
+
 class ahgMuseumPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Museum Cataloging Plugin with CCO/CDWA support';
-    public static $version = '1.0.0';
+    public static $version = '1.0.1';
+    
+    // Hard dependencies - MUST be enabled
+    public static $dependencies = ['ahgSpectrumPlugin'];
+    
+    // Plugins that depend on this one
+    public static $dependents = [];
+
     public function initialize()
     {
+        // Check dependencies before loading
+        if (!$this->checkDependencies()) {
+            return;
+        }
+        
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
     }
+    
+    /**
+     * Check if all required dependencies are enabled
+     */
+    protected function checkDependencies(): bool
+    {
+        foreach (self::$dependencies as $dependency) {
+            if (!$this->isPluginEnabled($dependency)) {
+                error_log("ahgMuseumPlugin: Required dependency '{$dependency}' is not enabled");
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Check if a plugin is enabled
+     */
+    protected function isPluginEnabled(string $pluginName): bool
+    {
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare("SELECT is_enabled FROM atom_plugin WHERE name = ?");
+            $stmt->execute([$pluginName]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result && $result['is_enabled'] == 1;
+        } catch (Exception $e) {
+            error_log("ahgMuseumPlugin: Could not check dependency - " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function addRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
@@ -76,7 +122,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             '/admin/security/compliance',
             ['module' => 'spectrum', 'action' => 'securityCompliance']
         ));
-        
+
         // === CONDITION ROUTES ===
         $routing->prependRoute('condition_admin', new sfRoute(
             '/admin/condition',
@@ -141,7 +187,8 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             ['module' => 'ahgMuseumPlugin', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
         ));
-		// === MUSEUM CRUD ROUTES ===
+        
+        // === MUSEUM CRUD ROUTES ===
         $routing->prependRoute('museum_browse', new sfRoute(
             '/museum/browse',
             ['module' => 'ahgMuseumPlugin', 'action' => 'browse']
