@@ -391,7 +391,8 @@ if (!function_exists('checkPluginEnabled')) {
       </div>
     </section>
 
-    <!-- Actions -->
+    <!-- Actions (authenticated users only) -->
+    <?php if ($sf_user->isAuthenticated()): ?>
     <section class="card mb-4">
       <div class="card-header bg-success text-white">
         <h5 class="mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Actions'); ?></h5>
@@ -438,6 +439,7 @@ if (!function_exists('checkPluginEnabled')) {
         </div>
       </div>
     </section>
+    <?php endif; ?>
 
 
     <!-- Barcode / ISBN -->
