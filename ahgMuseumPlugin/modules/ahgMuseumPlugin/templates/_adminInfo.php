@@ -20,7 +20,7 @@ foreach ($terms as $term) {
 }
 
 // Get current display standard - default to 449 (Museum CCO)
-$currentDisplayStandard = 449;
+$currentDisplayStandard = null;
 if (isset($resource) && $resource && isset($resource->display_standard_id) && $resource->display_standard_id) {
     $currentDisplayStandard = $resource->display_standard_id;
 }
