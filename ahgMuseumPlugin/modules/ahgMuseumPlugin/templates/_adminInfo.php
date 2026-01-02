@@ -20,7 +20,12 @@ foreach ($terms as $term) {
 }
 
 // Get current display standard - default to 449 (Museum CCO)
-$currentDisplayStandard = null;
+// Get museum term ID dynamically
+$museumTerm = \Illuminate\Database\Capsule\Manager::table('term')
+    ->where('code', 'museum')
+    ->where('taxonomy_id', 70)
+    ->value('id');
+$currentDisplayStandard = $museumTerm ?? 353;
 if (isset($resource) && $resource && isset($resource->display_standard_id) && $resource->display_standard_id) {
     $currentDisplayStandard = $resource->display_standard_id;
 }
