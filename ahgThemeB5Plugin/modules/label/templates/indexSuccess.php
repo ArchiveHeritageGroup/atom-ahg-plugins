@@ -174,8 +174,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 .qr-img { max-width: 120px; max-height: 120px; }
 </style>
 
-<div class="row no-print">
-    <div class="col-md-8">
+<div class="row">
+    <div class="col-md-8 no-print">
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fas fa-cog me-2"></i><?php echo __('Label Configuration'); ?>
