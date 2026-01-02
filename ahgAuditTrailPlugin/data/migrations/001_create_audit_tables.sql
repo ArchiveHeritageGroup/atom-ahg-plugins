@@ -4,7 +4,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS `audit_log` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `uuid` CHAR(36) NOT NULL,
-    `user_id` INT UNSIGNED NULL,
+    `user_id` INT NULL,
     `username` VARCHAR(255) NULL,
     `user_email` VARCHAR(255) NULL,
     `ip_address` VARCHAR(45) NULL,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `audit_authentication` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `uuid` CHAR(36) NOT NULL,
     `event_type` VARCHAR(50) NOT NULL,
-    `user_id` INT UNSIGNED NULL,
+    `user_id` INT NULL,
     `username` VARCHAR(255) NULL,
     `ip_address` VARCHAR(45) NULL,
     `user_agent` VARCHAR(500) NULL,
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `audit_authentication` (
 CREATE TABLE IF NOT EXISTS `audit_access` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `uuid` CHAR(36) NOT NULL,
-    `user_id` INT UNSIGNED NULL,
+    `user_id` INT NULL,
     `username` VARCHAR(255) NULL,
     `ip_address` VARCHAR(45) NULL,
     `access_type` VARCHAR(50) NOT NULL,
