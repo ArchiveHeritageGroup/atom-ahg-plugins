@@ -9,16 +9,15 @@ class AhgSettingsIndexAction extends sfAction
             AclService::forwardUnauthorized();
         }
         
-        $pluginsDir = sfConfig::get('sf_plugins_dir');
         
-        // Check which plugins exist
-        $hasResearch = is_dir($pluginsDir . '/ahgResearchPlugin');
-        $hasAuditTrail = is_dir($pluginsDir . '/ahgAuditTrailPlugin');
-        $hasRic = is_dir($pluginsDir . '/ahgRicExplorerPlugin');
-        $hasAccessRequest = is_dir($pluginsDir . '/ahgAccessRequestPlugin');
-        $hasCondition = is_dir($pluginsDir . '/ahgConditionPlugin');
-        $hasSpectrum = is_dir($pluginsDir . '/ahgSpectrumPlugin');
-        $hasIiif = is_dir($pluginsDir . '/IiifViewerFramework');
+        // Check which plugins are enabled
+        $hasResearch = checkPluginEnabled('ahgResearchPlugin');
+        $hasAuditTrail = checkPluginEnabled('ahgAuditTrailPlugin');
+        $hasRic = checkPluginEnabled('ahgRicExplorerPlugin');
+        $hasAccessRequest = checkPluginEnabled('ahgAccessRequestPlugin');
+        $hasCondition = checkPluginEnabled('ahgConditionPlugin');
+        $hasSpectrum = checkPluginEnabled('ahgSpectrumPlugin');
+        $hasIiif = checkPluginEnabled('IiifViewerFramework');
         
         $this->sections = [];
         
