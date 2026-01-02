@@ -4,20 +4,8 @@
  * Bootstrap 5 compatible
  */
 use Illuminate\Database\Capsule\Manager as DB;
-
-// Get display standards for dropdown - taxonomy 70
-$displayStandards = [];
-$terms = DB::table('term as t')
-    ->join('term_i18n as ti', 't.id', '=', 'ti.id')
-    ->where('t.taxonomy_id', 70) // Display standard taxonomy
-    ->where('ti.culture', 'en')
-    ->orderBy('ti.name')
-    ->select('t.id', 'ti.name')
-    ->get();
-
-foreach ($terms as $term) {
-    $displayStandards[$term->id] = $term->name;
-}
+// Get available display standards (filtered by enabled plugins)
+$displayStandards = \AtomFramework\Helpers\DisplayStandardHelper::getAvailable();
 
 // Get current display standard - default to 449 (Museum CCO)
 // Get museum term ID dynamically
