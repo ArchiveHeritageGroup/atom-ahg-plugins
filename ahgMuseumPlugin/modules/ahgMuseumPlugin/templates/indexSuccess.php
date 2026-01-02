@@ -172,15 +172,16 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
     <div class="d-flex flex-wrap gap-2">
       <?php
         $userId = $sf_user->getAttribute('user_id');
-        $favorate_id = QubitFavorites::getByUserIDandObjectId($userId, $resource->id);
       ?>
-      <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), [$resource, 'module' => 'informationobject', 'action' => 'editFeedback'], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
-      <?php if ('' != $favorate_id->id && '' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'removeFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
-      <?php elseif ('' != $userId): ?>
-        <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+      <?php if (class_exists('QubitFavorites')): ?>
+        <?php $favorate_id = QubitFavorites::getByUserIDandObjectId($userId, $resource->id); ?>
+        <?php if (!empty($favorate_id->id) && !empty($userId)): ?>
+          <?php echo link_to('<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'removeFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php elseif (!empty($userId)): ?>
+          <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php endif; ?>
       <?php endif; ?>
-      <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), [$resource, 'module' => 'informationobject', 'action' => 'editRequestToPublish'], ['class' => 'btn btn-sm btn-outline-primary']); ?>
+      <?php if (class_exists('QubitCart')): ?>
       <?php
         $cart_id = QubitCart::getByUserIDandObjectId($userId, $resource->id);
       ?>
@@ -188,6 +189,7 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
         <?php echo link_to('<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'), [$resource, 'module' => 'cart', 'action' => 'browse'], ['class' => 'btn btn-sm btn-outline-success']); ?>
       <?php elseif ('' != $userId): ?>
         <?php echo link_to('<i class="fas fa-cart-plus me-1"></i>' . __('Add to Cart'), [$resource, 'module' => 'informationobject', 'action' => 'addCart'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+      <?php endif; ?>
       <?php endif; ?>
     </div>
   </div>
