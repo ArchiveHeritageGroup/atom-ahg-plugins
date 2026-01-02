@@ -12,14 +12,27 @@ class ahgLibraryPluginEditAction extends sfAction
         $slug = $request->getParameter('slug');
 
         if ($slug) {
+            // Editing existing resource
             $this->resource = QubitInformationObject::getBySlug($slug);
             if (!$this->resource) {
                 $this->forward404();
             }
+            
+            // Check update permission
+            if (!QubitAcl::check($this->resource, 'update')) {
+                QubitAcl::forwardUnauthorized();
+            }
+            
             $this->loadLibraryData($this->resource->id);
         } else {
+            // Creating new resource
             $this->resource = new QubitInformationObject();
             $this->itemLocation = [];
+            
+            // Check create permission on root
+            if (!QubitAcl::check(QubitInformationObject::getRoot(), 'create')) {
+                QubitAcl::forwardUnauthorized();
+            }
         }
 
         if ($request->isMethod('post')) {
@@ -37,6 +50,7 @@ class ahgLibraryPluginEditAction extends sfAction
 
         $this->loadFormOptions();
     }
+
 
     protected function loadLibraryData(int $informationObjectId): void
     {
