@@ -37,7 +37,7 @@
       </div>
       <div class="d-flex flex-nowrap flex-column flex-lg-row align-items-strech align-items-lg-center">
         <ul class="navbar-nav mx-lg-2">
-	  <?php if (is_dir(sfConfig::get('sf_plugins_dir') . '/ahgRicExplorerPlugin')): ?>
+	  <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
           <!-- RiC Tools Dropdown -->
           <li class="nav-item dropdown d-flex flex-column">
             <a
