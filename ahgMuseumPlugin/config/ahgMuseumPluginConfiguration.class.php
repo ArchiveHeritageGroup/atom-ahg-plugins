@@ -18,7 +18,9 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             return;
         }
         
-        $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
+        if (PHP_SAPI !== 'cli') {
+            $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
+        }
     }
     
     /**
