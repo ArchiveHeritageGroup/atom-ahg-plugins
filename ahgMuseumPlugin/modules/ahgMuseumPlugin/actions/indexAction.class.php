@@ -20,6 +20,7 @@ class ahgMuseumPluginIndexAction extends sfAction
         error_log("MUSEUM DEBUG: resource = " . ($this->resource ? $this->resource->id : "NULL"));
 
         // Check that this isn't the root
+        error_log("MUSEUM DEBUG: parent_id = " . ($this->resource->parent_id ?? "NULL") . ", parent = " . (isset($this->resource->parent) ? "SET" : "NOT SET"));
         if (!isset($this->resource->parent)) {
             $this->forward404();
         }
