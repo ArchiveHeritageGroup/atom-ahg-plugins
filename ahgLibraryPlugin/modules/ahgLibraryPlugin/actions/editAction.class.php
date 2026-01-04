@@ -94,7 +94,13 @@ class ahgLibraryPluginEditAction extends sfAction
         }
 
         if ($isNew) {
-            $this->resource->parentId = QubitInformationObject::ROOT_ID;
+            $parentSlug = $request->getParameter('parent');
+            if ($parentSlug) {
+                $parent = QubitObject::getBySlug($parentSlug);
+                $this->resource->parentId = $parent ? $parent->id : QubitInformationObject::ROOT_ID;
+            } else {
+                $this->resource->parentId = QubitInformationObject::ROOT_ID;
+            }
         }
 
         // Set library display standard

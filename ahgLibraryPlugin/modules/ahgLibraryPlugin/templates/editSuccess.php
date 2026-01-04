@@ -5,6 +5,9 @@
 <?php end_slot(); ?>
 
 <form method="post" action="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'edit', 'slug' => ($resource->slug ?? null)]); ?>" id="library-form">
+<?php if ($sf_request->getParameter('parent')): ?>
+<input type="hidden" name="parent" value="<?php echo $sf_request->getParameter('parent'); ?>">
+<?php endif; ?>
 
   <div class="row">
     <div class="col-md-8">

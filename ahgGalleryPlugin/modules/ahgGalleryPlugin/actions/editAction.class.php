@@ -318,24 +318,56 @@ class ahgGalleryPluginEditAction extends sfAction
         }
 
         if ($isNew) {
+            // Get parent from request parameter (slug) or use root
+            $parentSlug = $request->getParameter('parent');
+            $parentId = 1; // ROOT_INFORMATION_OBJECT_ID
+            
+            if ($parentSlug) {
+                $parentRecord = DB::table('slug')
+                    ->join('information_object', 'slug.object_id', '=', 'information_object.id')
+                    ->where('slug.slug', $parentSlug)
+                    ->select('information_object.id')
+                    ->first();
+                if ($parentRecord) {
+                    $parentId = $parentRecord->id;
+                }
+            }
+            
+            // Get parent lft/rgt for nested set
+            $parent = DB::table('information_object')
+                ->where('id', $parentId)
+                ->first();
+            
+            // Create object record
             $objectId = DB::table('object')->insertGetId([
                 'class_name' => 'QubitInformationObject',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
-
+            
+            // Calculate nested set values
+            $lft = $parent->rgt;
+            $rgt = $parent->rgt + 1;
+            
+            // Make room in nested set
+            DB::table('information_object')
+                ->where('rgt', '>=', $parent->rgt)
+                ->increment('rgt', 2);
+            DB::table('information_object')
+                ->where('lft', '>', $parent->rgt)
+                ->increment('lft', 2);
+            
             DB::table('information_object')->insert([
                 'id' => $objectId,
                 'identifier' => $request->getParameter('object_number'),
                 'level_of_description_id' => null,
                 'repository_id' => $request->getParameter('repository') ?: null,
-                'parent_id' => 1,
-                'lft' => 0,
-                'rgt' => 0,
+                'parent_id' => $parentId,
+                'lft' => $lft,
+                'rgt' => $rgt,
                 'source_culture' => 'en',
                 'display_standard_id' => $this->getTermIdByCode('gallery', 70) ?? 353,
             ]);
-
             DB::table('information_object_i18n')->insert([
                 'id' => $objectId,
                 'culture' => 'en',
@@ -343,17 +375,18 @@ class ahgGalleryPluginEditAction extends sfAction
                 'scope_and_content' => $request->getParameter('description'),
                 'extent_and_medium' => $request->getParameter('dimensions_display'),
             ]);
-
             $slug = $this->generateSlug($request->getParameter('title'));
             DB::table('slug')->insert([
                 'object_id' => $objectId,
                 'slug' => $slug,
             ]);
-
             DB::table('status')->insert([
                 'object_id' => $objectId,
                 'type_id' => 158,
                 'status_id' => 159,
+            ]);
+            $resourceId = $objectId;
+            $this->resource = (object)['id' => $objectId, 'slug' => $slug];
             ]);
 
             $resourceId = $objectId;
