@@ -38,6 +38,12 @@
     };
     
     function detectCurrentSector() {
+        // Check data-sector attribute first (from server-side)
+        const formWithSector = document.querySelector('[data-sector]');
+        if (formWithSector && formWithSector.dataset.sector) {
+            return formWithSector.dataset.sector;
+        }
+        
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get('template');
         if (templateParam && templateSector[templateParam.toLowerCase()]) {

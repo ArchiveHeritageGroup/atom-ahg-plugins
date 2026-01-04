@@ -37,7 +37,25 @@
     </div>
 
   <?php } else { ?>
+    <?php
+    // Detect sector from display standard
+    $sector = 'archive';
+    if ($resource->displayStandardId) {
+        $termCode = \Illuminate\Database\Capsule\Manager::table('term')
+            ->where('id', $resource->displayStandardId)
+            ->value('code');
+        $sectorMap = [
+            'isad' => 'archive', 'rad' => 'archive', 'dacs' => 'archive', 'dc' => 'archive',
+            'mods' => 'library', 'library' => 'library',
+            'museum' => 'museum', 'cco' => 'museum',
+            'cdwa' => 'gallery', 'gallery' => 'gallery',
+            'dam' => 'dam',
+        ];
+        $sector = $sectorMap[strtolower($termCode)] ?? 'archive';
+    }
+    ?>
     <div class="multifileupload-form"
+      data-sector="<?php echo $sector; ?>"
       data-multifileupload-max-file-size="<?php echo $maxFileSize; ?>"
       data-multifileupload-max-post-size="<?php echo $maxPostSize; ?>"
       data-multifileupload-upload-response-path="<?php echo $uploadResponsePath; ?>"
