@@ -8,7 +8,7 @@ $cspNonce = sfConfig::get('csp_nonce', '');
 ?>
 <style <?php echo $cspNonce; ?>>
 .dropdown-menu .dropend { position: relative; }
-.dropdown-menu .dropend > .dropdown-menu { display: none; position: absolute; left: 100%; top: 0; }
+.dropdown-menu .dropend > .dropdown-menu { display: none; position: absolute; left: 100%; top: auto; bottom: 0; }
 .dropdown-menu .dropend:hover > .dropdown-menu,
 .dropup .dropdown-menu .dropend:hover > .dropdown-menu,
 .dropup .dropdown-menu.show .dropend:hover > .dropdown-menu { display: block !important; visibility: visible !important; opacity: 1 !important; }
