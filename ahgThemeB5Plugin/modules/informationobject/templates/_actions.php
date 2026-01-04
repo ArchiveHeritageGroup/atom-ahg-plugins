@@ -3,9 +3,15 @@
  * Actions Partial for Information Object
  * Works with QubitInformationObject
  */
-
 use Illuminate\Database\Capsule\Manager as DB;
-
+?>
+<style>
+.dropdown-menu .dropend { position: relative; }
+.dropdown-menu .dropend > .dropdown-menu { display: none; position: absolute; left: 100%; top: 0; }
+.dropdown-menu .dropend:hover > .dropdown-menu,
+.dropup .dropdown-menu .dropend:hover > .dropdown-menu { display: block !important; }
+</style>
+<?php
 // Initialize Laravel if needed
 if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
     \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
