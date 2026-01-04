@@ -14,6 +14,8 @@ use Illuminate\Database\Capsule\Manager as DB;
 </style>
 <?php
 // Initialize Laravel if needed
+// Initialize Laravel if needed
+// Initialize Laravel if needed
 if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
     \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
 }

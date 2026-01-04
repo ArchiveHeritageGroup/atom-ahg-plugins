@@ -50,3 +50,12 @@
   opacity: 1;
   visibility: visible;
 }
+
+/* Extensions flyout fix - higher specificity */
+.dropdown-menu .dropend:hover > .dropdown-menu,
+.dropup .dropdown-menu .dropend:hover > .dropdown-menu,
+.dropup .dropdown-menu.show .dropend:hover > .dropdown-menu { 
+  display: block !important; 
+  visibility: visible !important; 
+  opacity: 1 !important; 
+}

@@ -4,6 +4,7 @@ default:
     /plugins/ahgThemeB5Plugin/css/ahg-theme.css:
     /plugins/ahgThemeB5Plugin/css/ahg-generated.css:
     /plugins/ahgThemeB5Plugin/css/custom.css:
+    /plugins/ahgThemeB5Plugin/css/style.css:
   javascripts:
     /vendor/jquery:
     /plugins/sfDrupalPlugin/vendor/drupal/misc/drupal:
