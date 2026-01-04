@@ -246,7 +246,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 
           <li><hr class="dropdown-divider"></li>
           <li><?php echo link_to(__('Create new rights'), [$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit'], ['class' => 'dropdown-item']); ?></li>
-          <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgGrapPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin')): ?>
+		  <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgGrapPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin') || checkPluginEnabled('ahgConditionPlugin')): ?>
           <!-- Extensions Submenu with Flyout -->
           <li class="dropend" >
             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">
@@ -264,11 +264,17 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-edit fa-fw me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
+			  
+			  <?php if (checkPluginEnabled('ahgConditionPlugin')): ?>
+              <li><h6 class="dropdown-header"><?php echo __('Condition Assessment'); ?></h6></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Check'); ?></a></li>
+              <li><hr class="dropdown-divider"></li>
+              <?php endif; ?>
+			  
               <?php if (checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('SPECTRUM Collections'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tag fa-fw me-2"></i><?php echo __('Generate label'); ?></a></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'arCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Assessment'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Workflow Status'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
