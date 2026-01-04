@@ -269,6 +269,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
               <li><h6 class="dropdown-header"><?php echo __('CCO Provenance'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?>"><i class="fas fa-history fa-fw me-2"></i><?php echo __('Provenance'); ?></a></li>
               <?php endif; ?>
+            </ul>
           </li>
           <?php endif; ?>
 
