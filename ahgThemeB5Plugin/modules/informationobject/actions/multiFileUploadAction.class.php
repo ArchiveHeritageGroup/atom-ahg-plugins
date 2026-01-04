@@ -91,7 +91,7 @@ class InformationObjectMultiFileUploadAction extends sfAction
             foreach ($levels as $level) {
                 $term = QubitTerm::getById($level->id);
                 if ($term) {
-                    $choices[$this->context->routing->generate(null, [$term, 'module' => 'term'])] = $term;
+                    $choices[$this->context->routing->generate(null, [$term, 'module' => 'term'])] = $level->name;
                 }
             }
         } else {
