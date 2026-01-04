@@ -4,8 +4,9 @@
  * Works with QubitInformationObject
  */
 use Illuminate\Database\Capsule\Manager as DB;
+$cspNonce = sfConfig::get('csp_nonce', '');
 ?>
-<style>
+<style <?php echo $cspNonce; ?>>
 .dropdown-menu .dropend { position: relative; }
 .dropdown-menu .dropend > .dropdown-menu { display: none; position: absolute; left: 100%; top: 0; }
 .dropdown-menu .dropend:hover > .dropdown-menu,
@@ -14,12 +15,9 @@ use Illuminate\Database\Capsule\Manager as DB;
 </style>
 <?php
 // Initialize Laravel if needed
-// Initialize Laravel if needed
-// Initialize Laravel if needed
 if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
     \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
 }
-
 // ACL Group IDs
 if (!defined('GROUP_ADMINISTRATOR')) { define('GROUP_ADMINISTRATOR', 100); }
 if (!defined('GROUP_EDITOR')) { define('GROUP_EDITOR', 101); }
