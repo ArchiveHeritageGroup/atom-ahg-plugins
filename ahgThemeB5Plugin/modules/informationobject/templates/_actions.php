@@ -245,7 +245,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">
               <i class="fas fa-puzzle-piece fa-fw me-2"></i><?php echo __('Extensions'); ?>
             </a>
-            <ul class="dropdown-menu" style="position: absolute; left: 100%; bottom: 0; top: auto; display: none;">
+            <ul class="dropdown-menu" style="position: absolute; left: 100%; bottom: 0; top: auto;">
               <?php if (checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('Rights & Compliance'); ?></h6></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-balance-scale fa-fw me-2"></i><?php echo __('Extended Rights'); ?></a></li>
