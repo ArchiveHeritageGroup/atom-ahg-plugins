@@ -831,17 +831,36 @@ class ahgMuseumPluginEditAction extends sfAction
     /**
      * Create new information object using Laravel
      */
+    /**
+     * Create new information object using Laravel
+     */
     protected function createInformationObject(): int
     {
         $culture = $this->getUser()->getCulture() ?? 'en';
         $userId = $this->getUser()->getAttribute('user_id');
         $now = date('Y-m-d H:i:s');
-
+        
+        // Get parent from request parameter (slug) or use root
+        $parentSlug = $this->getRequest()->getParameter('parent');
+        $parentId = self::ROOT_INFORMATION_OBJECT_ID;
+        error_log("MUSEUM CREATE: parentSlug = " . ($parentSlug ?? "NULL"));
+        
+        if ($parentSlug) {
+            $parentRecord = DB::table('slug')
+                ->join('information_object', 'slug.object_id', '=', 'information_object.id')
+                ->where('slug.slug', $parentSlug)
+                ->select('information_object.id')
+                ->first();
+            if ($parentRecord) {
+                $parentId = $parentRecord->id;
+        error_log("MUSEUM CREATE: parentId = " . $parentId);
+            }
+        }
+        
         // Get parent lft/rgt for nested set
         $parent = DB::table('information_object')
-            ->where('id', self::ROOT_INFORMATION_OBJECT_ID)
+            ->where('id', $parentId)
             ->first();
-
         // Create object record first
         $objectId = DB::table('object')->insertGetId([
             'class_name' => 'QubitInformationObject',
@@ -849,20 +868,16 @@ class ahgMuseumPluginEditAction extends sfAction
             'updated_at' => $now,
             'serial_number' => 0,
         ]);
-
         // Calculate nested set values
         $lft = $parent->rgt;
         $rgt = $parent->rgt + 1;
-
         // Make room in nested set
         DB::table('information_object')
             ->where('rgt', '>=', $parent->rgt)
             ->increment('rgt', 2);
-
         DB::table('information_object')
             ->where('lft', '>', $parent->rgt)
             ->increment('lft', 2);
-
         // Insert information object
         DB::table('information_object')->insert([
             'id' => $objectId,
@@ -870,13 +885,12 @@ class ahgMuseumPluginEditAction extends sfAction
             'repository_id' => !empty($this->ccoData['repository']) && is_numeric($this->ccoData['repository'])
                 ? (int) $this->ccoData['repository']
                 : null,
-            'parent_id' => self::ROOT_INFORMATION_OBJECT_ID,
+            'parent_id' => $parentId,
             'lft' => $lft,
             'rgt' => $rgt,
             'source_culture' => $culture,
             'display_standard_id' => $this->getTermIdByCode('museum', 70) ?? 353, // Museum (CCO) standard
         ]);
-
         // Insert i18n record
         DB::table('information_object_i18n')->insert([
             'id' => $objectId,
@@ -885,25 +899,22 @@ class ahgMuseumPluginEditAction extends sfAction
             'extent_and_medium' => $this->ccoData['dimensions_display'] ?? null,
             'scope_and_content' => $this->ccoData['description'] ?? null,
         ]);
-
         // Create slug
         $slug = $this->generateSlug($this->ccoData['title'] ?? 'untitled');
         DB::table('slug')->insert([
             'object_id' => $objectId,
             'slug' => $slug,
         ]);
-
         // Create publication status (159 = draft, 158 = publicationStatus type)
         DB::table('status')->insert([
             'object_id' => $objectId,
             'type_id' => 158,
             'status_id' => 159,
         ]);
-		
         return $objectId;
     }
-
-    /**
+	
+	/**
      * Update existing information object using Laravel
      */
     protected function updateInformationObject(int $resourceId): void
@@ -1200,5 +1211,4 @@ class ahgMuseumPluginEditAction extends sfAction
             ->value('id');
         return $term ? (int) $term : null;
     }
-
 }

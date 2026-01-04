@@ -483,6 +483,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <?php echo $form->renderHiddenFields(); ?>
 <input type="hidden" name="template" value="<?php echo $templateId; ?>">
+<?php if ($sf_request->getParameter('parent')): ?>
+<input type="hidden" name="parent" value="<?php echo $sf_request->getParameter('parent'); ?>">
+<?php endif; ?>
 <?php if ($resourceId): ?>
   <input type="hidden" name="id" value="<?php echo $resourceId; ?>">
 <?php endif; ?>
