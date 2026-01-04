@@ -241,7 +241,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
           <li><?php echo link_to(__('Create new rights'), [$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit'], ['class' => 'dropdown-item']); ?></li>
           <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgGrapPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin')): ?>
           <!-- Extensions Submenu with Flyout -->
-          <li class="dropend" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
+          <li class="dropend" >
             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">
               <i class="fas fa-puzzle-piece fa-fw me-2"></i><?php echo __('Extensions'); ?>
             </a>
