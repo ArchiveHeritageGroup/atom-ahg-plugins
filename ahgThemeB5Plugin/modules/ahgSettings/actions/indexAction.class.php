@@ -8,8 +8,8 @@ class AhgSettingsIndexAction extends sfAction
         if (!$this->context->user->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
-        
-        
+
+
         // Check which plugins are enabled
         $hasResearch = in_array('ahgResearchPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasAuditTrail = in_array('ahgAuditTrailPlugin', sfProjectConfiguration::getActive()->getPlugins());
@@ -18,25 +18,33 @@ class AhgSettingsIndexAction extends sfAction
         $hasCondition = in_array('ahgConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasSpectrum = in_array('ahgSpectrumPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasIiif = in_array('IiifViewerFramework', sfProjectConfiguration::getActive()->getPlugins());
+        $hasLibrary = in_array('ahgLibraryPlugin', sfProjectConfiguration::getActive()->getPlugins());
         
+        // GLAM/DAM plugins
+        $hasMuseum = in_array('ahgMuseumPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasGallery = in_array('ahgGalleryPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasDam = in_array('ahgDamPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasDisplay = in_array('ahgDisplayPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasGlamDam = $hasMuseum || $hasGallery || $hasLibrary || $hasDam || $hasDisplay || $hasSpectrum;
+
         $this->sections = [];
-        
+
         // === BASE (Always Available) ===
-        
+
         $this->sections['general'] = [
             'label' => 'Theme Configuration',
             'icon' => 'fa-palette',
             'description' => 'Customize AHG theme appearance and branding',
             'url' => 'admin/ahg-settings/section?section=general'
         ];
-        
+
         $this->sections['email'] = [
             'label' => 'Email Settings',
             'icon' => 'fa-envelope',
             'description' => 'SMTP configuration and email templates',
             'url' => 'admin/ahg-settings/email'
         ];
-        
+
         // Researcher - conditional but part of default install
         if ($hasResearch) {
             $this->sections['research'] = [
@@ -46,28 +54,28 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'research/rooms'
             ];
         }
-        
+
         $this->sections['metadata'] = [
             'label' => 'Metadata Extraction',
             'icon' => 'fa-tags',
             'description' => 'Auto-extract EXIF, IPTC, XMP from uploaded files',
             'url' => 'admin/ahg-settings/section?section=metadata'
         ];
-        
+
         $this->sections['media'] = [
             'label' => 'Media Player',
             'icon' => 'fa-play-circle',
             'description' => 'Enhanced media player configuration',
             'url' => 'admin/ahg-settings/section?section=media'
         ];
-        
+
         $this->sections['media_processing'] = [
             'label' => 'Media Processing',
             'icon' => 'fa-cogs',
             'description' => 'Transcription, thumbnails, waveforms & media derivatives',
             'url' => 'ahgMediaSettings/index'
         ];
-        
+
         $this->sections['jobs'] = [
             'label' => 'Background Jobs',
             'icon' => 'fa-tasks',
@@ -83,16 +91,26 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'ahgLibraryPlugin/isbnProviders'
             ];
         }
-        
+
+        // Levels of Description - show when any GLAM/DAM plugin enabled
+        if ($hasGlamDam) {
+            $this->sections['levels'] = [
+                'label' => 'Levels of Description',
+                'icon' => 'fa-layer-group',
+                'description' => 'Assign levels to sectors (Archive, Museum, Library, Gallery, DAM)',
+                'url' => 'ahgSettings/levels'
+            ];
+        }
+
         $this->sections['plugins'] = [
             'label' => 'Plugin Management',
             'icon' => 'fa-puzzle-piece',
             'description' => 'Enable or disable plugins',
             'url' => 'admin/ahg-settings/plugins'
         ];
-        
+
         // === OPTIONAL (Plugin-dependent) ===
-        
+
         if ($hasAuditTrail) {
             $this->sections['audit'] = [
                 'label' => 'Audit Trail',
@@ -101,7 +119,7 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'ahgAuditTrailPlugin/browse'
             ];
         }
-        
+
         if ($hasIiif) {
             $this->sections['carousel'] = [
                 'label' => 'Carousel Settings',
@@ -109,7 +127,7 @@ class AhgSettingsIndexAction extends sfAction
                 'description' => 'Homepage carousel and slideshow configuration',
                 'url' => 'ahgIiifViewerSettings/index'
             ];
-            
+
             $this->sections['iiif'] = [
                 'label' => 'IIIF Viewer',
                 'icon' => 'fa-photo-video',
@@ -117,7 +135,7 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'admin/ahg-settings/section?section=iiif'
             ];
         }
-        
+
         if ($hasSpectrum) {
             $this->sections['spectrum'] = [
                 'label' => 'Spectrum / Collections',
@@ -126,7 +144,7 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'admin/ahg-settings/section?section=spectrum'
             ];
         }
-        
+
         if ($hasAccessRequest) {
             $this->sections['data_protection'] = [
                 'label' => 'Data Protection',
@@ -135,7 +153,7 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'admin/ahg-settings/section?section=data_protection'
             ];
         }
-        
+
         if ($hasCondition) {
             $this->sections['photos'] = [
                 'label' => 'Condition Photos',
@@ -144,7 +162,7 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'admin/ahg-settings/section?section=photos'
             ];
         }
-        
+
         if ($hasRic) {
             $this->sections['fuseki'] = [
                 'label' => 'Fuseki / RIC Triplestore',
