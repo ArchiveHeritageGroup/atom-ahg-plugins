@@ -9,7 +9,8 @@ use Illuminate\Database\Capsule\Manager as DB;
 .dropdown-menu .dropend { position: relative; }
 .dropdown-menu .dropend > .dropdown-menu { display: none; position: absolute; left: 100%; top: 0; }
 .dropdown-menu .dropend:hover > .dropdown-menu,
-.dropup .dropdown-menu .dropend:hover > .dropdown-menu { display: block !important; }
+.dropup .dropdown-menu .dropend:hover > .dropdown-menu,
+.dropup .dropdown-menu.show .dropend:hover > .dropdown-menu { display: block !important; visibility: visible !important; opacity: 1 !important; }
 </style>
 <?php
 // Initialize Laravel if needed
