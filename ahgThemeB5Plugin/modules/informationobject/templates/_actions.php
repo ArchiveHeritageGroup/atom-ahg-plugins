@@ -180,40 +180,50 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
   <?php if (io_check_acl($resource, 'delete')) { ?>
     <li><a href="<?php echo io_url($resource, 'informationobject', 'delete'); ?>" class="btn atom-btn-outline-danger"><?php echo __('Delete'); ?></a></li>
   <?php } ?>
-
   <?php if (io_check_acl($resource, 'create')) { ?>
     <?php
-      // Detect sector from current resource's level of description
+      // Detect sector from current module context first
       $addModule = 'informationobject';
-      $levelOfDescId = $resource->levelOfDescriptionId ?? null;
-      if ($levelOfDescId) {
-          $sector = DB::table('level_of_description_sector')
-              ->where('term_id', $levelOfDescId)
-              ->value('sector');
-          if ($sector === 'library') {
-              $addModule = 'ahgLibraryPlugin';
-          } elseif ($sector === 'museum') {
-              $addModule = 'ahgMuseumPlugin';
-          } elseif ($sector === 'gallery') {
-              $addModule = 'ahgGalleryPlugin';
+      $currentModule = sfContext::getInstance()->getModuleName();
+      
+      // If viewing through a sector plugin, use that plugin for Add new
+      if (in_array($currentModule, ['ahgMuseumPlugin', 'ahgLibraryPlugin', 'ahgGalleryPlugin', 'ahgDAMPlugin'])) {
+          $addModule = $currentModule;
+      } else {
+          // Otherwise detect from level of description
+          $levelOfDescId = $resource->levelOfDescriptionId ?? null;
+          if ($levelOfDescId) {
+              $sector = DB::table('level_of_description_sector')
+                  ->where('term_id', $levelOfDescId)
+                  ->value('sector');
+              if ($sector === 'library') {
+                  $addModule = 'ahgLibraryPlugin';
+              } elseif ($sector === 'museum') {
+                  $addModule = 'ahgMuseumPlugin';
+              } elseif ($sector === 'gallery') {
+                  $addModule = 'ahgGalleryPlugin';
+              } elseif ($sector === 'dam') {
+                  $addModule = 'ahgDAMPlugin';
+              }
           }
-      }
-      // Fallback to default template if no sector detected
-      if ($addModule === 'informationobject') {
-          $defaultTemplate = DB::table('setting')
-              ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
-              ->where('setting.scope', 'default_template')
-              ->where('setting.name', 'informationobject')
-              ->value('setting_i18n.value');
-          if ($defaultTemplate === 'museum') {
-              $addModule = 'ahgMuseumPlugin';
+          // Fallback to default template if no sector detected
+          if ($addModule === 'informationobject') {
+              $defaultTemplate = DB::table('setting')
+                  ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+                  ->where('setting.scope', 'default_template')
+                  ->where('setting.name', 'informationobject')
+                  ->value('setting_i18n.value');
+              if ($defaultTemplate === 'museum') {
+                  $addModule = 'ahgMuseumPlugin';
+              } elseif ($defaultTemplate === 'library') {
+                  $addModule = 'ahgLibraryPlugin';
+              }
           }
       }
     ?>
     <li><a href="<?php echo url_for(['module' => $addModule, 'action' => 'add', 'parent' => $resourceSlug]); ?>" class="btn atom-btn-outline-light"><?php echo __('Add new'); ?></a></li>
     <li><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'copy', 'source' => $resourceId]); ?>" class="btn atom-btn-outline-light"><?php echo __('Duplicate'); ?></a></li>
   <?php } ?>
-
   <?php if (io_check_acl($resource, 'update') || io_user_is_editor()) { ?>
     <li><a href="<?php echo io_url($resource, 'default', 'move'); ?>" class="btn atom-btn-outline-light"><?php echo __('Move'); ?></a></li>
 
