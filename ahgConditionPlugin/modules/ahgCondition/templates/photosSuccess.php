@@ -112,7 +112,7 @@ $photoTypes = [
                                          class="card-img-top" 
                                          alt="<?php echo esc_entities($photo->caption ?? ''); ?>"
                                          style="height: 200px; object-fit: cover; cursor: pointer;"
-                                         onclick="openAnnotator(<?php echo $photo->id; ?>, '/uploads/condition_photos/<?php echo $photo->filename; ?>')">
+                                         data-action="annotate" data-photo-id="<?php echo $photo->id; ?>" data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>">
                                     
                                     <span class="badge bg-info position-absolute top-0 end-0 m-2">
                                         <?php echo __($photoTypes[$photo->photo_type] ?? 'Other'); ?>
@@ -140,10 +140,10 @@ $photoTypes = [
                                 <?php if ($canEdit): ?>
                                 <div class="card-footer p-2">
                                     <div class="btn-group btn-group-sm w-100">
-                                        <button class="btn btn-outline-info" onclick="openAnnotator(<?php echo $photo->id; ?>, '/uploads/condition_photos/<?php echo $photo->filename; ?>')" title="<?php echo __('Annotate'); ?>">
+                                        <button class="btn btn-outline-info" data-action="annotate" data-photo-id="<?php echo $photo->id; ?>" data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>" title="<?php echo __('Annotate'); ?>">
                                             <i class="fas fa-draw-polygon"></i>
                                         </button>
-                                        <button class="btn btn-outline-danger" onclick="deletePhoto(<?php echo $photo->id; ?>)" title="<?php echo __('Delete'); ?>">
+                                        <button class="btn btn-outline-danger" data-action="delete" data-photo-id="<?php echo $photo->id; ?>" title="<?php echo __('Delete'); ?>">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -171,7 +171,7 @@ $photoTypes = [
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
-                <button type="button" class="btn btn-primary" onclick="saveAnnotations()">
+                <button type="button" class="btn btn-primary" data-action="save-annotations">
                     <i class="fas fa-save me-1"></i><?php echo __('Save Annotations'); ?>
                 </button>
             </div>
@@ -225,6 +225,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    // Event delegation for buttons
+    document.addEventListener("click", function(e) {
+        var target = e.target.closest("[data-action]");
+        if (!target) return;
+        var action = target.dataset.action;
+        var photoId = target.dataset.photoId;
+        var imageSrc = target.dataset.imageSrc;
+        if (action === "annotate") {
+            openAnnotator(photoId, imageSrc);
+        } else if (action === "delete") {
+            deletePhoto(photoId);
+        } else if (action === "save-annotations") {
+            saveAnnotations();
+        }
+    });
 });
 
 function uploadPhoto() {
