@@ -256,7 +256,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 
           <li><hr class="dropdown-divider"></li>
           <li><?php echo link_to(__('Create new rights'), [$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit'], ['class' => 'dropdown-item']); ?></li>
-		  <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgGrapPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin') || checkPluginEnabled('ahgConditionPlugin')): ?>
+		  <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgHeritageAccountingPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin') || checkPluginEnabled('ahgConditionPlugin')): ?>
           <!-- Extensions Submenu with Flyout -->
           <li class="dropend" >
             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">
@@ -268,10 +268,10 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-balance-scale fa-fw me-2"></i><?php echo __('Extended Rights'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
-              <?php if (checkPluginEnabled('ahgGrapPlugin')): ?>
-              <li><h6 class="dropdown-header"><?php echo __('GRAP 103 Heritage Assets'); ?></h6></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resourceSlug]); ?>"><i class="fas fa-eye fa-fw me-2"></i><?php echo __('View GRAP data'); ?></a></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resourceSlug]); ?>"><i class="fas fa-edit fa-fw me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
+              <?php if (checkPluginEnabled('ahgHeritageAccountingPlugin')): ?>
+              <li><h6 class="dropdown-header"><?php echo __('Heritage Assets'); ?></h6></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'viewByObject', 'slug' => $resourceSlug]); ?>"><i class="fas fa-eye fa-fw me-2"></i><?php echo __('View Heritage Asset'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'editByObject', 'slug' => $resourceSlug]); ?>"><i class="fas fa-edit fa-fw me-2"></i><?php echo __('Edit Heritage Asset'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
 			  

@@ -76,17 +76,29 @@ class heritageAccountingActions extends sfActions
     public function executeAdd(sfWebRequest $request)
     {
         $service = new HeritageAssetService();
-        
         $this->standards = $service->getAccountingStandards();
         $this->classes = $service->getAssetClasses();
+        
+        // Handle linking to information object
+        $this->io = null;
+        $this->ioId = $request->getParameter('io_id');
+        if ($this->ioId) {
+            $this->io = \Illuminate\Database\Capsule\Manager::table('information_object')
+                ->leftJoin('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
+                ->where('information_object.id', $this->ioId)
+                ->leftJoin('slug', function($join) { $join->on('information_object.id', '=', 'slug.object_id')->where('slug.slug', '!=', ''); })->select('information_object.*', 'information_object_i18n.title', 'slug.slug')
+                ->first();
+        }
         
         if ($request->isMethod('post')) {
             $data = $this->processFormData($request);
             $data['created_by'] = sfContext::getInstance()->getUser()->getAttribute('user_id');
-            
+            if ($request->getParameter('information_object_id')) {
+                $data['information_object_id'] = (int) $request->getParameter('information_object_id');
+            }
             try {
                 $id = $service->create($data);
-                $this->redirect('heritage/view?id=' . $id);
+                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $id]);
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
                 $this->formData = $data;
@@ -115,7 +127,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->update($this->asset->id, $data);
-                $this->redirect('heritage/view?id=' . $this->asset->id);
+                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -149,7 +161,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addValuation($this->asset->id, $data);
-                $this->redirect('heritage/view?id=' . $this->asset->id . '#valuations');
+                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -189,7 +201,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addImpairment($this->asset->id, $data);
-                $this->redirect('heritage/view?id=' . $this->asset->id . '#impairments');
+                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -226,7 +238,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addMovement($this->asset->id, $data);
-                $this->redirect('heritage/view?id=' . $this->asset->id . '#movements');
+                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -276,7 +288,7 @@ class heritageAccountingActions extends sfActions
     protected function processFormData(sfWebRequest $request): array
     {
         return [
-            'object_id' => (int) $request->getParameter('object_id'),
+            'object_id' => $request->getParameter('object_id') ? (int) $request->getParameter('object_id') : null,
             'accounting_standard_id' => $request->getParameter('accounting_standard_id') ?: null,
             'recognition_status' => $request->getParameter('recognition_status'),
             'recognition_status_reason' => $request->getParameter('recognition_status_reason'),
@@ -335,5 +347,68 @@ class heritageAccountingActions extends sfActions
             $this->getUser()->setFlash('notice', 'Settings saved successfully.');
             $this->redirect(['module' => 'heritageAccounting', 'action' => 'settings']);
         }
+    }
+
+    /**
+     * View heritage asset linked to information object
+     */
+    public function executeViewByObject(sfWebRequest $request)
+    {
+        $slug = $request->getParameter('slug');
+        
+        // Get information object
+        $io = \Illuminate\Database\Capsule\Manager::table('slug')
+            ->join('information_object', 'slug.object_id', '=', 'information_object.id')
+            ->where('slug.slug', $slug)
+            ->select('information_object.*')
+            ->first();
+        
+        if (!$io) {
+            $this->forward404('Record not found');
+        }
+        
+        // Find linked heritage asset
+        $asset = \Illuminate\Database\Capsule\Manager::table('heritage_asset')
+            ->where('information_object_id', $io->id)
+            ->first();
+        
+        if ($asset) {
+            $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]);
+        }
+        
+        // No asset yet - offer to create
+        $this->io = $io;
+        $this->slug = $slug;
+    }
+
+    /**
+     * Edit heritage asset linked to information object
+     */
+    public function executeEditByObject(sfWebRequest $request)
+    {
+        $slug = $request->getParameter('slug');
+        
+        // Get information object
+        $io = \Illuminate\Database\Capsule\Manager::table('slug')
+            ->join('information_object', 'slug.object_id', '=', 'information_object.id')
+            ->where('slug.slug', $slug)
+            ->select('information_object.*')
+            ->first();
+        
+        if (!$io) {
+            $this->forward404('Record not found');
+        }
+        
+        // Find linked heritage asset
+        $asset = \Illuminate\Database\Capsule\Manager::table('heritage_asset')
+            ->where('information_object_id', $io->id)
+            ->first();
+        
+        if ($asset) {
+            $this->redirect(['module' => 'heritageAccounting', 'action' => 'edit', 'id' => $asset->id]);
+        }
+        
+        // No asset yet - redirect to create with object link
+        $this->redirect(['module' => 'heritageAccounting', 'action' => 'add', 'io_id' => $io->id]);
     }
 }

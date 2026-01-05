@@ -20,9 +20,15 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label"><?php echo __('Information Object ID') ?> <span class="text-danger">*</span></label>
-                                <input type="number" name="object_id" class="form-control" value="<?php echo $formData['object_id'] ?? '' ?>" required>
-                                <small class="text-muted"><?php echo __('Link to existing archival description') ?></small>
+                                <?php if (isset($io) && $io): ?>
+                                    <label class="form-label"><?php echo __('Linked Record') ?></label>
+                                    <div class="form-control bg-light"><?php echo esc_entities($io->title ?: 'Untitled') ?></div>
+                                    <input type="hidden" name="information_object_id" value="<?php echo $io->id ?>">
+                                <?php else: ?>
+                                    <label class="form-label"><?php echo __('Information Object ID') ?></label>
+                                    <input type="number" name="information_object_id" class="form-control" value="<?php echo $formData['information_object_id'] ?? '' ?>">
+                                    <small class="text-muted"><?php echo __('Optional: Link to archival description') ?></small>
+                                <?php endif; ?>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Accounting Standard') ?></label>
@@ -220,10 +226,14 @@
                     </div>
                 </div>
 
-                <!-- Submit -->
                 <div class="d-grid gap-2">
+                <!-- Submit -->
                     <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save me-2"></i><?php echo __('Save Asset') ?></button>
+                    <?php if (isset($io) && $io): ?>
+                    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $io->slug]) ?>" class="btn btn-outline-secondary"><?php echo __('Cancel') ?></a>
+                    <?php else: ?>
                     <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'browse']) ?>" class="btn btn-outline-secondary"><?php echo __('Cancel') ?></a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -126,6 +126,16 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
             ['id' => '\d+']
         ));
 
+        // Object-linked routes
+        $routing->prependRoute('heritage_view_by_object', new sfRoute(
+            '/heritage/object/:slug',
+            ['module' => 'heritageAccounting', 'action' => 'viewByObject']
+        ));
+
+        $routing->prependRoute('heritage_edit_by_object', new sfRoute(
+            '/heritage/object/:slug/edit',
+            ['module' => 'heritageAccounting', 'action' => 'editByObject']
+        ));
         $routing->prependRoute('heritage_api_summary', new sfRoute(
             '/api/heritage/summary',
             ['module' => 'heritageApi', 'action' => 'summary']

@@ -137,13 +137,18 @@ class HeritageAssetService
      */
     public function create(array $data): int
     {
+        // Clean empty enum values
+        $enumFields = ['acquisition_method', 'recognition_status', 'measurement_basis', 'condition_rating', 'heritage_significance'];
+        foreach ($enumFields as $field) {
+            if (isset($data[$field]) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+        
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
-        
         $id = DB::table('heritage_asset')->insertGetId($data);
-        
-        $this->logTransaction($id, $data['object_id'], 'create', null, $data);
-        
+        $this->logTransaction($id, $data['object_id'] ?? $data['information_object_id'] ?? null, 'create', null, $data);
         return $id;
     }
 
