@@ -246,3 +246,105 @@ CREATE TABLE IF NOT EXISTS donor_agreement_record (
     INDEX idx_io (information_object_id),
     CONSTRAINT fk_darec_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Additional Donor Agreement Tables
+-- ============================================================
+
+-- Link to Classifications/Taxonomy Terms
+CREATE TABLE IF NOT EXISTS donor_agreement_classification (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    donor_agreement_id INT NOT NULL,
+    term_id INT NOT NULL,
+    applies_to_all TINYINT(1) DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_agreement (donor_agreement_id),
+    INDEX idx_term (term_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Link to Extended Rights and Embargoes
+CREATE TABLE IF NOT EXISTS donor_agreement_rights (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    donor_agreement_id INT NOT NULL,
+    extended_rights_id BIGINT UNSIGNED NULL,
+    embargo_id BIGINT UNSIGNED NULL,
+    applies_to ENUM('all_items','specific_items','digital_only','physical_only','metadata_only') DEFAULT 'all_items',
+    auto_apply TINYINT(1) DEFAULT 1,
+    inherit_to_children TINYINT(1) DEFAULT 1,
+    notes TEXT,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_agreement (donor_agreement_id),
+    INDEX idx_extended_rights (extended_rights_id),
+    INDEX idx_embargo (embargo_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Donor Provenance Tracking
+CREATE TABLE IF NOT EXISTS donor_provenance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    donor_id INT NOT NULL,
+    information_object_id INT NOT NULL,
+    donor_agreement_id INT NULL,
+    agreement_item_id INT NULL,
+    relationship_type ENUM('donated','deposited','loaned','purchased','transferred','bequeathed','gifted') DEFAULT 'donated',
+    provenance_date DATE NULL,
+    sequence_number INT NULL,
+    is_current_owner TINYINT(1) DEFAULT 0,
+    custody_start_date DATE NULL,
+    custody_end_date DATE NULL,
+    notes TEXT,
+    source_of_acquisition TEXT,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_donor (donor_id),
+    INDEX idx_io (information_object_id),
+    INDEX idx_agreement (donor_agreement_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Rights Application Log
+CREATE TABLE IF NOT EXISTS donor_rights_application_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    donor_agreement_id INT NOT NULL,
+    information_object_id INT NOT NULL,
+    rights_type ENUM('extended_rights','embargo','both') NOT NULL,
+    extended_rights_id BIGINT UNSIGNED NULL,
+    embargo_id BIGINT UNSIGNED NULL,
+    action ENUM('applied','removed','updated','inherited') NOT NULL,
+    applied_by INT NULL,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    INDEX idx_agreement (donor_agreement_id),
+    INDEX idx_io (information_object_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Agreement Rights Vocabulary
+CREATE TABLE IF NOT EXISTS agreement_rights_vocabulary (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category ENUM('usage','restriction','condition','license') NOT NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order INT NOT NULL DEFAULT 0,
+    INDEX idx_category (category),
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed agreement rights vocabulary
+INSERT IGNORE INTO agreement_rights_vocabulary (code, name, description, category, sort_order) VALUES
+('reproduce', 'Reproduction Rights', 'Permission to reproduce materials', 'usage', 1),
+('publish', 'Publication Rights', 'Permission to publish materials', 'usage', 2),
+('exhibit', 'Exhibition Rights', 'Permission to exhibit materials', 'usage', 3),
+('digitize', 'Digitization Rights', 'Permission to digitize materials', 'usage', 4),
+('loan', 'Loan Rights', 'Permission to loan materials', 'usage', 5),
+('no_access', 'No Access', 'Materials are closed to access', 'restriction', 10),
+('restricted_access', 'Restricted Access', 'Access requires approval', 'restriction', 11),
+('staff_only', 'Staff Only', 'Internal staff access only', 'restriction', 12),
+('reading_room', 'Reading Room Only', 'On-site access only', 'restriction', 13),
+('fragile', 'Fragile Condition', 'Handle with care', 'condition', 20),
+('cc_by', 'CC BY', 'Creative Commons Attribution', 'license', 30),
+('cc_by_nc', 'CC BY-NC', 'Creative Commons Attribution Non-Commercial', 'license', 31),
+('public_domain', 'Public Domain', 'No known copyright restrictions', 'license', 32);
