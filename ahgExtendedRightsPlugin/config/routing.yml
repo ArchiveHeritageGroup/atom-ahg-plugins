@@ -33,3 +33,26 @@ extendedRights_admin_batch:
 extendedRights_browse:
   url: /extendedRights/browse
   param: { module: extendedRights, action: browse }
+
+# Embargo routes
+embargo_add:
+  url: /embargo/add
+  param: { module: embargo, action: add }
+
+embargo_edit:
+  url: /embargo/edit
+  param: { module: embargo, action: edit }
+
+embargo_view:
+  url: /embargo/view/:id
+  param: { module: embargo, action: view }
+  requirements: { id: \d+ }
+
+embargo_lift:
+  url: /embargo/lift/:id
+  param: { module: embargo, action: lift }
+  requirements: { id: \d+ }
+
+embargo_index:
+  url: /embargo
+  param: { module: embargo, action: index }

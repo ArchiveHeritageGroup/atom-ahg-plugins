@@ -1,16 +1,39 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 class embargoActions extends sfActions
 {
-    protected function getService(): \App\Services\Rights\EmbargoService
+    protected function initDb()
     {
-        return new \App\Services\Rights\EmbargoService();
+        // Initialize Laravel DB if not already
+        if (!DB::connection()->getPdo()) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        }
+    }
+
+    protected function getService(): \AtomExtensions\Services\Rights\EmbargoService
+    {
+        $this->initDb();
+        return new \AtomExtensions\Services\Rights\EmbargoService();
+    }
+
+    protected function getResource(int $objectId)
+    {
+        $this->initDb();
+        return DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('io.id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->where('io.id', $objectId)
+            ->select(['io.id', 'ioi.title', 'slug.slug'])
+            ->first();
     }
 
     public function executeIndex(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
         $service = $this->getService();
         $this->activeEmbargoes = $service->getActiveEmbargoes();
         $this->expiringEmbargoes = $service->getExpiringEmbargoes(30);
@@ -18,173 +41,169 @@ class embargoActions extends sfActions
 
     public function executeView(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
         $embargoId = $request->getParameter('id');
         $service = $this->getService();
         $this->embargo = $service->getEmbargo((int)$embargoId);
-        
         if (!$this->embargo) {
             $this->forward404();
         }
-    }
-
-    public function executeObject(sfWebRequest $request)
-    {
-        $this->resource = $this->getRoute()->resource;
-        if (!isset($this->resource)) {
-            $this->forward404();
-        }
-
-        $service = $this->getService();
-        $this->embargoes = $service->getObjectEmbargoes($this->resource->id);
     }
 
     public function executeAdd(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
-        $this->resource = $this->getRoute()->resource;
-        if (!isset($this->resource)) {
-            $this->forward404();
+        $objectId = $request->getParameter('objectId');
+        if (!$objectId) {
+            $this->forward404('Object ID required');
         }
 
+        $this->resource = $this->getResource((int)$objectId);
+        if (!$this->resource) {
+            $this->forward404('Object not found');
+        }
+
+        $this->objectId = $objectId;
+
         if ($request->isMethod('post')) {
-            $this->processAddForm($request);
+            $this->processAddForm($request, (int)$objectId);
+            return sfView::NONE;
         }
     }
 
-    protected function processAddForm(sfWebRequest $request)
+    protected function processAddForm(sfWebRequest $request, int $objectId)
     {
         $service = $this->getService();
-        
+        $userId = $this->context->user->getAttribute('user_id');
+
         $data = [
-            'embargo_type' => $request->getParameter('embargo_type'),
-            'start_date' => $request->getParameter('start_date'),
+            'embargo_type' => $request->getParameter('embargo_type', 'full'),
+            'start_date' => $request->getParameter('start_date', date('Y-m-d')),
             'end_date' => $request->getParameter('end_date') ?: null,
-            'is_perpetual' => $request->getParameter('is_perpetual', false),
-            'notify_on_expiry' => $request->getParameter('notify_on_expiry', true),
-            'notify_days_before' => $request->getParameter('notify_days_before', 30),
-            'user_id' => $this->context->user->getAttribute('user_id'),
-            'i18n' => [
-                $this->context->user->getCulture() => [
-                    'reason' => $request->getParameter('reason'),
-                    'notes' => $request->getParameter('notes'),
-                    'public_message' => $request->getParameter('public_message'),
-                ],
-            ],
+            'is_perpetual' => (bool)$request->getParameter('is_perpetual', false),
+            'notify_on_expiry' => (bool)$request->getParameter('notify_on_expiry', true),
+            'notify_days_before' => (int)$request->getParameter('notify_days_before', 30),
+            'reason' => $request->getParameter('reason'),
+            'notes' => $request->getParameter('notes'),
+            'public_message' => $request->getParameter('public_message'),
         ];
 
-        $service->createEmbargo($this->resource->id, $data);
+        $service->createEmbargo($objectId, $data, $userId);
 
-        $this->redirect([
-            'module' => 'informationobject',
-            'action' => 'embargo',
-            'slug' => $this->resource->slug,
-        ]);
+        $resource = $this->getResource($objectId);
+        $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
     }
 
     public function executeEdit(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
         $embargoId = $request->getParameter('id');
+        $objectId = $request->getParameter('objectId');
+
         $service = $this->getService();
-        $this->embargo = $service->getEmbargo((int)$embargoId);
-        
-        if (!$this->embargo) {
-            $this->forward404();
+
+        if ($embargoId) {
+            $this->embargo = $service->getEmbargo((int)$embargoId);
+            if (!$this->embargo) {
+                $this->forward404('Embargo not found');
+            }
+            $this->resource = $this->getResource($this->embargo->object_id);
+            $this->objectId = $this->embargo->object_id;
+        } elseif ($objectId) {
+            $this->redirect(['module' => 'embargo', 'action' => 'add', 'objectId' => $objectId]);
+            return sfView::NONE;
+        } else {
+            $this->forward404('Embargo ID or Object ID required');
         }
 
         if ($request->isMethod('post')) {
             $this->processEditForm($request, (int)$embargoId);
+            return sfView::NONE;
         }
     }
 
     protected function processEditForm(sfWebRequest $request, int $embargoId)
     {
         $service = $this->getService();
-        
+        $userId = $this->context->user->getAttribute('user_id');
+
         $data = [
             'embargo_type' => $request->getParameter('embargo_type'),
             'start_date' => $request->getParameter('start_date'),
             'end_date' => $request->getParameter('end_date') ?: null,
-            'is_perpetual' => $request->getParameter('is_perpetual', false),
-            'notify_on_expiry' => $request->getParameter('notify_on_expiry', true),
-            'notify_days_before' => $request->getParameter('notify_days_before', 30),
-            'user_id' => $this->context->user->getAttribute('user_id'),
-            'i18n' => [
-                $this->context->user->getCulture() => [
-                    'reason' => $request->getParameter('reason'),
-                    'notes' => $request->getParameter('notes'),
-                    'public_message' => $request->getParameter('public_message'),
-                ],
-            ],
+            'is_perpetual' => (bool)$request->getParameter('is_perpetual', false),
+            'notify_on_expiry' => (bool)$request->getParameter('notify_on_expiry', true),
+            'notify_days_before' => (int)$request->getParameter('notify_days_before', 30),
+            'reason' => $request->getParameter('reason'),
+            'notes' => $request->getParameter('notes'),
+            'public_message' => $request->getParameter('public_message'),
         ];
 
-        $service->updateEmbargo($embargoId, $data);
+        $service->updateEmbargo($embargoId, $data, $userId);
 
-        $this->redirect(['module' => 'embargo', 'action' => 'view', 'id' => $embargoId]);
+        $embargo = $service->getEmbargo($embargoId);
+        $resource = $this->getResource($embargo->object_id);
+        $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
     }
 
     public function executeLift(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
         $embargoId = $request->getParameter('id');
-        
-        if ($request->isMethod('post')) {
-            $service = $this->getService();
-            $reason = $request->getParameter('lift_reason');
-            $service->liftEmbargo((int)$embargoId, $reason);
+
+        if (!$embargoId) {
+            $this->forward404();
         }
 
-        $this->redirect(['module' => 'embargo', 'action' => 'view', 'id' => $embargoId]);
+        $service = $this->getService();
+        $embargo = $service->getEmbargo((int)$embargoId);
+
+        if (!$embargo) {
+            $this->forward404();
+        }
+
+        if ($request->isMethod('post')) {
+            $reason = $request->getParameter('lift_reason');
+            $userId = $this->context->user->getAttribute('user_id');
+            $service->liftEmbargo((int)$embargoId, $reason, $userId);
+
+            $resource = $this->getResource($embargo->object_id);
+            $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
+        }
+
+        $this->embargo = $embargo;
+        $this->resource = $this->getResource($embargo->object_id);
     }
 
     public function executeAddException(sfWebRequest $request)
     {
-        $this->checkAuthorization();
-        
         $embargoId = $request->getParameter('embargo_id');
-        
-        if ($request->isMethod('post')) {
-            $service = $this->getService();
-            
-            $data = [
-                'exception_type' => $request->getParameter('exception_type'),
-                'exception_id' => $request->getParameter('exception_id'),
-                'ip_range_start' => $request->getParameter('ip_range_start'),
-                'ip_range_end' => $request->getParameter('ip_range_end'),
-                'valid_from' => $request->getParameter('valid_from'),
-                'valid_until' => $request->getParameter('valid_until'),
-                'notes' => $request->getParameter('notes'),
-                'user_id' => $this->context->user->getAttribute('user_id'),
-            ];
 
-            $service->addException((int)$embargoId, $data);
-        }
-
-        $this->redirect(['module' => 'embargo', 'action' => 'view', 'id' => $embargoId]);
-    }
-
-    public function executeRemoveException(sfWebRequest $request)
-    {
-        $this->checkAuthorization();
-        
-        $exceptionId = $request->getParameter('id');
-        $embargoId = $request->getParameter('embargo_id');
-        
         $service = $this->getService();
-        $service->removeException((int)$exceptionId);
+        $this->embargo = $service->getEmbargo((int)$embargoId);
 
-        $this->redirect(['module' => 'embargo', 'action' => 'view', 'id' => $embargoId]);
+        if (!$this->embargo) {
+            $this->forward404();
+        }
+
+        if ($request->isMethod('post')) {
+            $this->processAddExceptionForm($request, (int)$embargoId);
+            return sfView::NONE;
+        }
     }
 
-    protected function checkAuthorization()
+    protected function processAddExceptionForm(sfWebRequest $request, int $embargoId)
     {
-        if (!$this->context->user->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
+        $this->initDb();
+        $now = date('Y-m-d H:i:s');
+
+        DB::table('embargo_exception')->insert([
+            'embargo_id' => $embargoId,
+            'exception_type' => $request->getParameter('exception_type'),
+            'exception_id' => $request->getParameter('exception_id'),
+            'ip_range_start' => $request->getParameter('ip_range_start'),
+            'ip_range_end' => $request->getParameter('ip_range_end'),
+            'valid_from' => $request->getParameter('valid_from') ?: null,
+            'valid_until' => $request->getParameter('valid_until') ?: null,
+            'created_at' => $now,
+        ]);
+
+        $this->redirect(['module' => 'embargo', 'action' => 'view', 'id' => $embargoId]);
     }
 }
