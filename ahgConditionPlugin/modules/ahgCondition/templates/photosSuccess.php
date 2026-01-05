@@ -130,7 +130,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                     </span>
 
                                     <?php if ($photo->annotations):
-                                        $annCount = count(json_decode($photo->annotations, true) ?: []);
+                                        $annCount = count(json_decode(html_entity_decode($photo->annotations), true) ?: []);
                                         if ($annCount > 0):
                                     ?>
                                         <span class="badge bg-warning position-absolute top-0 start-0 m-2">
