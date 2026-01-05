@@ -2,7 +2,7 @@
 class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Heritage asset financial accounting with multi-standard support (GRAP 103, FRS 102, GASB 34, PSAS 3150).';
-    public static $version = '1.0.0';
+    public static $version = '1.1.0';
 
     public function initialize(): void
     {
