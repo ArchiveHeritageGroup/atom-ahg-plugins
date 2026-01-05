@@ -221,7 +221,7 @@
     <button type="submit" class="btn btn-primary">
       <i class="fas fa-save me-1"></i> <?php echo __('Save Settings'); ?>
     </button>
-    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'list']); ?>" class="btn btn-secondary">
+    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>" class="btn btn-secondary">
       <?php echo __('Cancel'); ?>
     </a>
   </div>
