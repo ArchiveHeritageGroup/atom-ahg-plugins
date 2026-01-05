@@ -40,7 +40,7 @@ class HeritageAssetService
         return DB::table('heritage_asset as ha')
             ->leftJoin('heritage_accounting_standard as hs', 'ha.accounting_standard_id', '=', 'hs.id')
             ->leftJoin('heritage_asset_class as hc', 'ha.asset_class_id', '=', 'hc.id')
-            ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id')
+            ->leftJoin('information_object as io', function($join) { $join->on('ha.information_object_id', '=', 'io.id')->orOn('ha.object_id', '=', 'io.id'); })
             ->select([
                 'ha.*',
                 'hs.code as standard_code',
@@ -80,7 +80,7 @@ class HeritageAssetService
         $query = DB::table('heritage_asset as ha')
             ->leftJoin('heritage_accounting_standard as hs', 'ha.accounting_standard_id', '=', 'hs.id')
             ->leftJoin('heritage_asset_class as hc', 'ha.asset_class_id', '=', 'hc.id')
-            ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id')
+            ->leftJoin('information_object as io', function($join) { $join->on('ha.information_object_id', '=', 'io.id')->orOn('ha.object_id', '=', 'io.id'); })
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
                      ->where('ioi.culture', '=', 'en');
@@ -353,7 +353,7 @@ class HeritageAssetService
     public function getDashboardStats(?int $repositoryId = null, ?int $standardId = null): array
     {
         $query = DB::table('heritage_asset as ha')
-            ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id');
+            ->leftJoin('information_object as io', function($join) { $join->on('ha.information_object_id', '=', 'io.id')->orOn('ha.object_id', '=', 'io.id'); });
 
         if ($repositoryId) {
             $query->where('io.repository_id', $repositoryId);
@@ -374,7 +374,7 @@ class HeritageAssetService
         // By class
         $byClass = DB::table('heritage_asset as ha')
             ->leftJoin('heritage_asset_class as hc', 'ha.asset_class_id', '=', 'hc.id')
-            ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id')
+            ->leftJoin('information_object as io', function($join) { $join->on('ha.information_object_id', '=', 'io.id')->orOn('ha.object_id', '=', 'io.id'); })
             ->select([
                 'hc.name as class_name',
                 DB::raw('COUNT(*) as count'),

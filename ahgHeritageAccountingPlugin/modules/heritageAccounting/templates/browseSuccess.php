@@ -19,7 +19,7 @@
             <form method="get" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label"><?php echo __('Search') ?></label>
-                    <input type="text" name="sq" class="form-control" value="<?php echo esc_entities($filters['search'] ?? '') ?>" placeholder="<?php echo __('Identifier, title, donor...') ?>">
+                    <input type="text" name="sq" class="form-control form-autocomplete" data-autocomplete-url="<?php echo url_for(['module' => 'heritageApi', 'action' => 'autocomplete']) ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>" placeholder="<?php echo __('Identifier, title, donor...') ?>">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label"><?php echo __('Standard') ?></label>

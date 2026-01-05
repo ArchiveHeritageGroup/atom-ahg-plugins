@@ -136,6 +136,12 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
             '/heritage/object/:slug/edit',
             ['module' => 'heritageAccounting', 'action' => 'editByObject']
         ));
+
+        $routing->prependRoute('heritage_api_autocomplete', new sfRoute(
+            '/api/heritage/autocomplete',
+            ['module' => 'heritageApi', 'action' => 'autocomplete']
+        ));
+
         $routing->prependRoute('heritage_api_summary', new sfRoute(
             '/api/heritage/summary',
             ['module' => 'heritageApi', 'action' => 'summary']
