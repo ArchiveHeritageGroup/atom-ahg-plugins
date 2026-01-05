@@ -97,6 +97,28 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
             ['module' => 'heritageReport', 'action' => 'movement']
         ));
 
+        // GRAP 103 Compliance
+        $routing->prependRoute('grap_dashboard', new sfRoute(
+            '/grap/dashboard',
+            ['module' => 'grapCompliance', 'action' => 'dashboard']
+        ));
+
+        $routing->prependRoute('grap_check', new sfRoute(
+            '/grap/check/:id',
+            ['module' => 'grapCompliance', 'action' => 'check'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('grap_batch_check', new sfRoute(
+            '/grap/batch-check',
+            ['module' => 'grapCompliance', 'action' => 'batchCheck']
+        ));
+
+        $routing->prependRoute('grap_national_treasury', new sfRoute(
+            '/grap/national-treasury-report',
+            ['module' => 'grapCompliance', 'action' => 'nationalTreasuryReport']
+        ));
+
         // API
         $routing->prependRoute('heritage_api_asset', new sfRoute(
             '/api/heritage/asset/:id',

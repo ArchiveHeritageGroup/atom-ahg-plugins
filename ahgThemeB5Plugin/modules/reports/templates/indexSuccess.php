@@ -171,7 +171,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Spectrum Workflow'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasGrap): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'dashboard']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grapCompliance', 'action' => 'dashboard']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 Dashboard'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasHeritage): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __('Heritage Asset Accounting'); ?></a></li>
@@ -212,7 +212,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                 </div>
                 <ul class="list-group list-group-flush">
                     <?php if ($hasGrap): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'export']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 Export'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grapCompliance', 'action' => 'nationalTreasuryReport']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 National Treasury Report'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasSpectrum): ?>
                     <li class="list-group-item"><a href="/spectrum/export"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Spectrum History Export'); ?></a></li>
