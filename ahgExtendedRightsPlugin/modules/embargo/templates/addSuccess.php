@@ -5,7 +5,7 @@
   <p class="lead"><?php echo render_title($resource); ?></p>
 <?php end_slot(); ?>
 
-<form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'add', 'slug' => $resource->slug]); ?>">
+<form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'add', 'objectId' => $objectId]); ?>">
 
   <div class="card mb-4">
     <div class="card-header">
@@ -83,7 +83,7 @@
   </div>
 
   <div class="actions">
-    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'slug' => $resource->slug]); ?>" class="btn btn-secondary">
+    <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]); ?>" class="btn btn-secondary">
       <?php echo __('Cancel'); ?>
     </a>
     <button type="submit" class="btn btn-danger">
