@@ -1,0 +1,49 @@
+# Donor Agreement Plugin Routes
+
+donor_dashboard:
+  url: /donor/dashboard
+  param: { module: donorAgreement, action: dashboard }
+
+donor_browse:
+  url: /donor/browse
+  param: { module: donorAgreement, action: browse }
+
+donor_add:
+  url: /donor/add
+  param: { module: donorAgreement, action: add }
+
+donor_view:
+  url: /donor/:slug
+  param: { module: donorAgreement, action: view }
+
+donor_edit:
+  url: /donor/:slug/edit
+  param: { module: donorAgreement, action: edit }
+
+donor_delete:
+  url: /donor/:slug/delete
+  param: { module: donorAgreement, action: delete }
+
+donor_terminate:
+  url: /donor/:slug/terminate
+  param: { module: donorAgreement, action: terminate }
+
+donor_add_document:
+  url: /donor/:slug/document/add
+  param: { module: donorAgreement, action: addDocument }
+
+donor_download_document:
+  url: /donor/document/:id/download
+  param: { module: donorAgreement, action: downloadDocument }
+
+donor_add_reminder:
+  url: /donor/:slug/reminder/add
+  param: { module: donorAgreement, action: addReminder }
+
+donor_complete_reminder:
+  url: /donor/reminder/:id/complete
+  param: { module: donorAgreement, action: completeReminder }
+
+donor_snooze_reminder:
+  url: /donor/reminder/:id/snooze
+  param: { module: donorAgreement, action: snoozeReminder }
