@@ -116,10 +116,10 @@
         <?php foreach ($watermarkTypes as $wtype): ?>
           <?php if ($wtype->image_file): ?>
           <div class="col-md-3 mb-3 text-center">
-            <div class="border rounded p-2">
+            <div class="border rounded p-2" style="height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
               <img src="/images/watermarks/<?php echo $wtype->image_file; ?>" 
                    alt="<?php echo $wtype->name; ?>" 
-                   style="max-width: 100%; max-height: 60px; opacity: 0.8;">
+                   style="max-width: 100px; max-height: 80px; object-fit: contain;">
               <p class="mb-0 mt-2"><small><strong><?php echo $wtype->name; ?></strong></small></p>
               <p class="mb-0"><small class="text-muted"><?php echo $wtype->code; ?></small></p>
             </div>
