@@ -395,6 +395,14 @@ slot('title', $title);
                                 <!-- Photo Settings -->
                                 <fieldset class="mb-4">
                                     <legend><?php echo __('Photo Upload Settings'); ?></legend>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="photo_upload_path"><?php echo __('Upload Path'); ?></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="photo_upload_path" name="settings[photo_upload_path]" value="<?php echo htmlspecialchars($settings['photo_upload_path'] ?? sfConfig::get('sf_root_dir') . '/uploads/condition_photos'); ?>">
+                                            <small class="form-text text-muted"><?php echo __('Absolute path for condition photo storage'); ?></small>
+                                        </div>
+                                    </div>
                                     
                                     <div class="form-group row">
                                         <label class="col-sm-3 col-form-label" for="photo_max_upload_size"><?php echo __('Max Upload Size'); ?></label>
