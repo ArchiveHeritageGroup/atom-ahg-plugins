@@ -1,14 +1,38 @@
 <?php if ($rights || $embargo): ?>
 
 <?php if ($embargo): ?>
-<div class="alert alert-danger mb-3">
-  <strong><i class="fas fa-lock me-2"></i><?php echo __('Access Restricted'); ?></strong>
-  <?php if ($embargo->public_message): ?>
-    <p class="mb-0 mt-2"><?php echo esc_entities($embargo->public_message); ?></p>
-  <?php endif; ?>
-  <?php if (!$embargo->is_perpetual && $embargo->end_date): ?>
-    <small class="text-muted"><?php echo __('Until: %1%', ['%1%' => $embargo->end_date]); ?></small>
-  <?php endif; ?>
+<?php
+$embargoTypes = [
+    'full' => __('Full Access Restriction'),
+    'metadata_only' => __('Digital Content Restricted'),
+    'digital_object' => __('Download Restricted'),
+    'custom' => __('Access Restricted'),
+];
+$embargoType = $embargoTypes[$embargo->embargo_type ?? 'full'] ?? __('Access Restricted');
+?>
+<div class="alert alert-warning border-warning mb-3">
+  <div class="d-flex align-items-start">
+    <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+    <div>
+      <h5 class="alert-heading mb-1"><?php echo $embargoType; ?></h5>
+      <?php if ($embargo->public_message): ?>
+        <p class="mb-1"><?php echo esc_entities($embargo->public_message); ?></p>
+      <?php else: ?>
+        <p class="mb-1"><?php echo __('Access to this material is currently restricted.'); ?></p>
+      <?php endif; ?>
+      <?php if (!$embargo->is_perpetual && $embargo->end_date): ?>
+        <small class="text-muted">
+          <i class="fas fa-calendar-alt me-1"></i>
+          <?php echo __('Available from: %1%', ['%1%' => date('j F Y', strtotime($embargo->end_date))]); ?>
+        </small>
+      <?php elseif ($embargo->is_perpetual): ?>
+        <small class="text-muted">
+          <i class="fas fa-lock me-1"></i>
+          <?php echo __('Indefinite restriction'); ?>
+        </small>
+      <?php endif; ?>
+    </div>
+  </div>
 </div>
 <?php endif; ?>
 
