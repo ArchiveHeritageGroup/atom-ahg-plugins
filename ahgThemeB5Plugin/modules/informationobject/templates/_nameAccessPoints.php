@@ -53,18 +53,13 @@ $isSidebar = isset($sidebar) && $sidebar;
 
 <?php else: ?>
 <h4 class="h5 mt-3 mb-2 text-muted"><?php echo __('Related people and organizations'); ?></h4>
-<?php foreach ($allActors as $actor): ?>
-  <?php 
+<?php foreach ($allActors as $actor): 
   $actorLink = $actor->slug 
       ? '<a href="' . url_for(['module' => 'actor', 'slug' => $actor->slug]) . '">' . esc_entities($actor->name ?? '') . '</a>'
       : esc_entities($actor->name ?? '');
   if (!empty($actor->event_type)) {
       $actorLink .= ' <span class="text-muted">(' . esc_entities($actor->event_type) . ')</span>';
   }
-  ?>
-  <div class="field text-break row g-0">
-    <div class="col-3"></div>
-    <div class="col-9 p-2"><?php echo $actorLink; ?></div>
-  </div>
-<?php endforeach; ?>
+  echo render_show(null, $actorLink);
+endforeach; ?>
 <?php endif; ?>
