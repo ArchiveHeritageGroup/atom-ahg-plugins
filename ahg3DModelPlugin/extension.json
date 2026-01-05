@@ -11,7 +11,7 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "install_sql": "schema/install.sql",
+    "install_sql": "data/install.sql",
     "tables": [
         "object_3d_model",
         "object_3d_model_i18n",
