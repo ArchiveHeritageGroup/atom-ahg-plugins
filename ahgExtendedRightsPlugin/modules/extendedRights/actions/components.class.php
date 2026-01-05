@@ -112,6 +112,24 @@ class extendedRightsComponents extends sfComponents
                       ->orWhere('end_date', '>', date('Y-m-d'));
             })
             ->first();
+
+        // Combine into single rights object for template
+        $this->rights = null;
+        if ($this->rightsStatement || $this->creativeCommons || count($this->tkLabels) > 0) {
+            $this->rights = (object)[
+                'rs_code' => $this->rightsStatement->code ?? null,
+                'rs_uri' => $this->rightsStatement->uri ?? null,
+                'rs_name' => $this->rightsStatement->name ?? null,
+                'rs_icon_url' => $this->rightsStatement->icon_url ?? null,
+                'rs_category' => $this->rightsStatement->category ?? null,
+                'rs_definition' => $this->rightsStatement->definition ?? null,
+                'cc_code' => $this->creativeCommons->code ?? null,
+                'cc_uri' => $this->creativeCommons->uri ?? null,
+                'cc_name' => $this->creativeCommons->name ?? null,
+                'cc_icon_url' => $this->creativeCommons->icon_url ?? null,
+                'tk_labels' => $this->tkLabels
+            ];
+        }
     }
 
     public function executeProvenanceDisplay(sfWebRequest $request)
@@ -196,6 +214,24 @@ class extendedRightsComponents extends sfComponents
                       ->orWhere('end_date', '>', date('Y-m-d'));
             })
             ->first();
+
+        // Combine into single rights object for template
+        $this->rights = null;
+        if ($this->rightsStatement || $this->creativeCommons || count($this->tkLabels) > 0) {
+            $this->rights = (object)[
+                'rs_code' => $this->rightsStatement->code ?? null,
+                'rs_uri' => $this->rightsStatement->uri ?? null,
+                'rs_name' => $this->rightsStatement->name ?? null,
+                'rs_icon_url' => $this->rightsStatement->icon_url ?? null,
+                'rs_category' => $this->rightsStatement->category ?? null,
+                'rs_definition' => $this->rightsStatement->definition ?? null,
+                'cc_code' => $this->creativeCommons->code ?? null,
+                'cc_uri' => $this->creativeCommons->uri ?? null,
+                'cc_name' => $this->creativeCommons->name ?? null,
+                'cc_icon_url' => $this->creativeCommons->icon_url ?? null,
+                'tk_labels' => $this->tkLabels
+            ];
+        }
     }
 
 }

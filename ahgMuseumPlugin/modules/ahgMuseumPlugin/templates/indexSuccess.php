@@ -342,6 +342,11 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
   <div class="relatedRights">
     <?php echo get_component('right', 'relatedRights', ['resource' => $resource]); ?>
   </div>
+  
+  <!-- Extended Rights Display -->
+  <div class="extendedRights mt-3">
+    <?php echo get_component('extendedRights', 'rightsDisplay', ['objectId' => $resource->id]); ?>
+  </div>
 </section>
 <?php } ?>
 
