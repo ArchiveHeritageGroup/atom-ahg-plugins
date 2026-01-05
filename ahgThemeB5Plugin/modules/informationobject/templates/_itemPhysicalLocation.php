@@ -35,11 +35,18 @@ foreach ($poResult as $po) {
     $physicalObjects[$po->id] = $po->name . ($po->location ? ' (' . $po->location . ')' : '');
 }
 ?>
-<div class="card mb-4">
-  <div class="card-header text-white" style="background-color: #198754;">
-    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i><?php echo __('Item Physical Location'); ?></h5>
-  </div>
-  <div class="card-body">
+<div class="accordion-item">
+  <h2 class="accordion-header" id="heading-physical-location">
+    <button class="accordion-button collapsed" type="button"
+            data-bs-toggle="collapse" data-bs-target="#collapse-physical-location"
+            aria-expanded="false" aria-controls="collapse-physical-location">
+      <?php echo __('Item Physical Location'); ?>
+      <span class="cco-chapter"><?php echo __('Storage & Access'); ?></span>
+    </button>
+  </h2>
+  <div id="collapse-physical-location" class="accordion-collapse collapse"
+       aria-labelledby="heading-physical-location" data-bs-parent="#ccoAccordion">
+    <div class="accordion-body">
     <!-- Container Link -->
     <div class="row mb-3">
       <div class="col-md-6">
@@ -144,6 +151,7 @@ foreach ($poResult as $po) {
         <label class="form-label"><?php echo __('Location notes'); ?></label>
         <textarea name="item_location_notes" class="form-control" rows="2"><?php echo esc_entities($itemLocation['notes'] ?? ''); ?></textarea>
       </div>
+    </div>
     </div>
   </div>
 </div>
