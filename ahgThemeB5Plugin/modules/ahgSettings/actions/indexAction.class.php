@@ -76,6 +76,13 @@ class AhgSettingsIndexAction extends sfAction
             'url' => 'ahgMediaSettings/index'
         ];
 
+
+        $this->sections['watermark'] = [
+            'label' => 'Watermark Settings',
+            'icon' => 'fa-stamp',
+            'description' => 'Configure default watermarks for images and downloads',
+            'url' => 'admin/watermark-settings'
+        ];
         $this->sections['jobs'] = [
             'label' => 'Background Jobs',
             'icon' => 'fa-tasks',
