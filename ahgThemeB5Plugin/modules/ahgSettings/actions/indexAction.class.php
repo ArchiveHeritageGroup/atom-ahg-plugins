@@ -26,6 +26,7 @@ class AhgSettingsIndexAction extends sfAction
         $hasDam = in_array('ahgDamPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasDisplay = in_array('ahgDisplayPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasGlamDam = $hasMuseum || $hasGallery || $hasLibrary || $hasDam || $hasDisplay || $hasSpectrum;
+        $hasHeritage = in_array('ahgHeritageAccountingPlugin', sfProjectConfiguration::getActive()->getPlugins());
 
         $this->sections = [];
 
@@ -176,6 +177,15 @@ class AhgSettingsIndexAction extends sfAction
                 'icon' => 'fa-project-diagram',
                 'description' => 'Configure Apache Jena Fuseki connection for RIC ontology',
                 'url' => 'admin/ahg-settings/section?section=fuseki'
+            ];
+        }
+
+        if ($hasHeritage) {
+            $this->sections['heritage'] = [
+                'label' => 'Heritage Accounting',
+                'icon' => 'fa-landmark',
+                'description' => 'Multi-standard heritage asset accounting settings (GRAP, FRS, GASB, PSAS)',
+                'url' => 'heritage/settings'
             ];
         }
     }

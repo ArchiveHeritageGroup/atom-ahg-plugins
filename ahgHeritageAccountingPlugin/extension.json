@@ -1,0 +1,32 @@
+{
+    "name": "Heritage Asset Accounting",
+    "machine_name": "ahgHeritageAccountingPlugin",
+    "version": "1.0.0",
+    "description": "Base heritage asset financial accounting - supports multiple regional standards (GRAP, FRS, GASB, PSAS)",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "accounting",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "modules": ["ahgGrapModule", "ahgFrsModule", "ahgGasbModule", "ahgPsasModule"]
+    },
+    "install_sql": "data/install.sql",
+    "tables": [
+        "heritage_asset",
+        "heritage_valuation_history",
+        "heritage_impairment_assessment",
+        "heritage_movement_register",
+        "heritage_journal_entry",
+        "heritage_financial_year_snapshot",
+        "heritage_depreciation_schedule",
+        "heritage_transaction_log",
+        "heritage_accounting_standard",
+        "heritage_asset_class"
+    ],
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+}

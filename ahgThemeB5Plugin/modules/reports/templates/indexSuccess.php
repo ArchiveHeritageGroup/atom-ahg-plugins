@@ -23,6 +23,7 @@ $hasGallery = isPluginActive('ahgGalleryPlugin');
 $hasDam = isPluginActive('arDAMPlugin') || isPluginActive('ahgDAMPlugin');
 $hasSpectrum = isPluginActive('ahgSpectrumPlugin');
 $hasGrap = isPluginActive('ahgGrapPlugin');
+$hasHeritage = isPluginActive('ahgHeritageAccountingPlugin');
 $hasResearch = isPluginActive('ahgResearchPlugin');
 $hasDonor = isPluginActive('ahgDonorAgreementPlugin');
 $hasRights = isPluginActive('ahgExtendedRightsPlugin');
@@ -171,6 +172,9 @@ $hasOais = isPluginActive('arOaisPlugin');
                     <?php endif; ?>
                     <?php if ($hasGrap): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'dashboard']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 Dashboard'); ?></a></li>
+                    <?php endif; ?>
+                    <?php if ($hasHeritage): ?>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __('Heritage Asset Accounting'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasCondition): ?>
                     <li class="list-group-item"><a href="/admin/condition"><i class="fas fa-heartbeat me-2 text-muted"></i><?php echo __('Condition Management'); ?></a></li>
