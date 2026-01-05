@@ -1,17 +1,25 @@
 <?php
 use_helper('Text');
+
 $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/index.php';
 
 // Photo types (must match enum values)
 $photoTypes = [
     'overall' => 'Overall View',
-    'detail' => 'Detail',
-    'damage' => 'Damage',
-    'before' => 'Before Treatment',
-    'after' => 'After Treatment',
-    'other' => 'Other',
+    'detail'  => 'Detail',
+    'damage'  => 'Damage',
+    'before'  => 'Before Treatment',
+    'after'   => 'After Treatment',
+    'other'   => 'Other',
 ];
+
+// CSP nonce attribute helper (AtoM uses sfConfig('csp_nonce') like "nonce=XYZ")
+$n = sfConfig::get('csp_nonce', '');
+$nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
+$nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
 ?>
+
+<meta name="csp-nonce" content="<?php echo esc_entities($nonceVal); ?>">
 
 <div class="condition-photos-page">
     <div class="row mb-4">
@@ -50,7 +58,7 @@ $photoTypes = [
         <div class="card-body">
             <form id="upload-form" enctype="multipart/form-data">
                 <input type="hidden" name="condition_check_id" value="<?php echo $checkId; ?>">
-                
+
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -65,7 +73,7 @@ $photoTypes = [
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Caption'); ?></label>
-                            <input type="text" name="caption" id="caption" class="form-control" 
+                            <input type="text" name="caption" id="caption" class="form-control"
                                    placeholder="<?php echo __('Brief description of the photo'); ?>">
                         </div>
                     </div>
@@ -108,17 +116,20 @@ $photoTypes = [
                         <div class="col-md-3 col-sm-6 mb-4">
                             <div class="card h-100 photo-card">
                                 <div class="photo-image position-relative">
-                                    <img src="/uploads/condition_photos/<?php echo $photo->filename; ?>" 
-                                         class="card-img-top" 
-                                         alt="<?php echo esc_entities($photo->caption ?? ''); ?>"
-                                         style="height: 200px; object-fit: cover; cursor: pointer;"
-                                         data-action="annotate" data-photo-id="<?php echo $photo->id; ?>" data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>">
-                                    
+                                    <img
+                                        src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                        class="card-img-top condition-photo-thumb"
+                                        alt="<?php echo esc_entities($photo->caption ?? ''); ?>"
+                                        data-action="annotate"
+                                        data-photo-id="<?php echo $photo->id; ?>"
+                                        data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                    >
+
                                     <span class="badge bg-info position-absolute top-0 end-0 m-2">
                                         <?php echo __($photoTypes[$photo->photo_type] ?? 'Other'); ?>
                                     </span>
-                                    
-                                    <?php if ($photo->annotations): 
+
+                                    <?php if ($photo->annotations):
                                         $annCount = count(json_decode($photo->annotations, true) ?: []);
                                         if ($annCount > 0):
                                     ?>
@@ -127,7 +138,7 @@ $photoTypes = [
                                         </span>
                                     <?php endif; endif; ?>
                                 </div>
-                                
+
                                 <div class="card-body p-2">
                                     <?php if ($photo->caption): ?>
                                         <p class="card-text small mb-1"><?php echo esc_entities($photo->caption); ?></p>
@@ -136,14 +147,21 @@ $photoTypes = [
                                         <?php echo date('d M Y', strtotime($photo->created_at)); ?>
                                     </small>
                                 </div>
-                                
+
                                 <?php if ($canEdit): ?>
                                 <div class="card-footer p-2">
                                     <div class="btn-group btn-group-sm w-100">
-                                        <button class="btn btn-outline-info" data-action="annotate" data-photo-id="<?php echo $photo->id; ?>" data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>" title="<?php echo __('Annotate'); ?>">
+                                        <button class="btn btn-outline-info"
+                                                data-action="annotate"
+                                                data-photo-id="<?php echo $photo->id; ?>"
+                                                data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                                title="<?php echo __('Annotate'); ?>">
                                             <i class="fas fa-draw-polygon"></i>
                                         </button>
-                                        <button class="btn btn-outline-danger" data-action="delete" data-photo-id="<?php echo $photo->id; ?>" title="<?php echo __('Delete'); ?>">
+                                        <button class="btn btn-outline-danger"
+                                                data-action="delete"
+                                                data-photo-id="<?php echo $photo->id; ?>"
+                                                title="<?php echo __('Delete'); ?>">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -167,7 +185,7 @@ $photoTypes = [
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
-                <div id="annotator-container" style="min-height: 600px;"></div>
+                <div id="annotator-container" class="condition-annotator-container"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
@@ -179,178 +197,18 @@ $photoTypes = [
     </div>
 </div>
 
+<!-- CSS -->
 <link rel="stylesheet" href="/plugins/ahgConditionPlugin/css/condition-annotator.css">
+<link rel="stylesheet" href="/plugins/ahgConditionPlugin/css/condition-photos.css">
+
+<!-- External JS -->
 <script src="/plugins/ahgMuseumPlugin/js/fabric.min.js"></script>
-<script src="/plugins/ahgMuseumPlugin/js/condition-annotator.js?v=1765295470"></script>
+<script src="/plugins/ahgConditionPlugin/js/condition-annotator.js?v=<?php echo time(); ?>"></script>
+<script src="/plugins/ahgConditionPlugin/js/condition-photos.js?v=<?php echo time(); ?>"></script>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-var currentAnnotator = null;
-var annotatorModal = null;
-
-document.addEventListener('DOMContentLoaded', function() {
-    annotatorModal = new bootstrap.Modal(document.getElementById('annotatorModal'));
-    
-    // Upload form
-    var uploadForm = document.getElementById('upload-form');
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            uploadPhoto();
-        });
-    }
-
-    // Dropzone
-    var dropzone = document.getElementById('dropzone');
-    var fileInput = document.getElementById('photo-file');
-    
-    if (dropzone && fileInput) {
-        dropzone.addEventListener('click', function() {
-            fileInput.click();
-        });
-
-        dropzone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            dropzone.classList.add('bg-light');
-        });
-
-        dropzone.addEventListener('dragleave', function() {
-            dropzone.classList.remove('bg-light');
-        });
-
-        dropzone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            dropzone.classList.remove('bg-light');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-            }
-        });
-    }
-    // Event delegation for buttons
-    document.addEventListener("click", function(e) {
-        var target = e.target.closest("[data-action]");
-        if (!target) return;
-        var action = target.dataset.action;
-        var photoId = target.dataset.photoId;
-        var imageSrc = target.dataset.imageSrc;
-        if (action === "annotate") {
-            openAnnotator(photoId, imageSrc);
-        } else if (action === "delete") {
-            deletePhoto(photoId);
-        } else if (action === "save-annotations") {
-            saveAnnotations();
-        }
-    });
-    // Event delegation for buttons
-    document.addEventListener("click", function(e) {
-        var target = e.target.closest("[data-action]");
-        if (!target) return;
-        var action = target.dataset.action;
-        var photoId = target.dataset.photoId;
-        var imageSrc = target.dataset.imageSrc;
-        if (action === "annotate") {
-            openAnnotator(photoId, imageSrc);
-        } else if (action === "delete") {
-            deletePhoto(photoId);
-        } else if (action === "save-annotations") {
-            saveAnnotations();
-        }
-    });
-});
-
-function uploadPhoto() {
-    var form = document.getElementById('upload-form');
-    var formData = new FormData(form);
-    var fileInput = document.getElementById('photo-file');
-    
-    if (!fileInput.files.length) {
-        alert('Please select a photo');
-        return;
-    }
-
-    formData.append('photo', fileInput.files[0]);
-
-    fetch('/condition/check/<?php echo $checkId; ?>/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Upload failed: ' + (data.error || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        alert('Upload failed: ' + error.message);
-    });
-}
-
-function openAnnotator(photoId, imageSrc) {
-    if (currentAnnotator) {
-        currentAnnotator.destroy();
-        currentAnnotator = null;
-    }
-
-    // Show modal first, then initialize annotator after it's visible
-    var modal = document.getElementById('annotatorModal');
-    
-    var initAnnotator = function() {
-        // Remove the event listener so it only fires once
-        modal.removeEventListener('shown.bs.modal', initAnnotator);
-        
-        currentAnnotator = new ConditionAnnotator('annotator-container', {
-            photoId: photoId,
-            imageUrl: imageSrc,
-            readonly: false,
-            showToolbar: true,
-            saveUrl: '/condition/annotation/save',
-            getUrl: '/condition/annotation/get'
-        });
-    };
-    
-    modal.addEventListener('shown.bs.modal', initAnnotator);
-    annotatorModal.show();
-}
-
-function saveAnnotations() {
-    if (currentAnnotator) {
-        currentAnnotator.save().then(function() {
-            annotatorModal.hide();
-        });
-    }
-}
-
-function deletePhoto(photoId) {
-    if (!confirm('<?php echo __('Are you sure you want to delete this photo?'); ?>')) {
-        return;
-    }
-
-    fetch('/condition/photo/' + photoId + '/delete', {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Delete failed: ' + (data.error || 'Unknown error'));
-        }
-    });
-}
+<!-- Minimal inline config (CSP nonce applied) -->
+<script <?php echo $nonceAttr; ?>>
+window.AHG_CONDITION = window.AHG_CONDITION || {};
+window.AHG_CONDITION.checkId = <?php echo (int)$checkId; ?>;
+window.AHG_CONDITION.confirmDelete = <?php echo json_encode(__('Are you sure you want to delete this photo?')); ?>;
 </script>
-
-<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-.dropzone-area {
-    border: 2px dashed #dee2e6;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.dropzone-area:hover, .dropzone-area.bg-light {
-    border-color: #0d6efd;
-    background-color: #f8f9fa;
-}
-.photo-card:hover {
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-</style>
