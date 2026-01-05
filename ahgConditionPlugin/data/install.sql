@@ -476,18 +476,8 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template_section` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-30 16:48:19
 
 -- View for condition with photos
-                View: v_spectrum_condition_with_photos
-         Create View: CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_spectrum_condition_with_photos` AS select `cc`.`id` AS `condition_check_id`,`cc`.`object_id` AS `object_id`,`io`.`identifier` AS `identifier`,`i18n`.`title` AS `title`,`cc`.`check_date` AS `check_date`,`cc`.`overall_condition` AS `overall_condition`,`cc`.`checked_by` AS `checked_by`,count(`cp`.`id`) AS `photo_count`,max(`cp`.`created_at`) AS `last_photo_added` from (((`spectrum_condition_check` `cc` join `information_object` `io` on((`cc`.`object_id` = `io`.`id`))) left join `information_object_i18n` `i18n` on(((`io`.`id` = `i18n`.`id`) and (`i18n`.`culture` = 'en')))) left join `spectrum_condition_photo` `cp` on((`cc`.`id` = `cp`.`condition_check_id`))) group by `cc`.`id`,`cc`.`object_id`,`io`.`identifier`,`i18n`.`title`,`cc`.`check_date`,`cc`.`overall_condition`,`cc`.`checked_by` order by `cc`.`check_date` desc
-character_set_client: utf8mb4
-collation_connection: utf8mb4_0900_ai_ci
-
--- Seed Data
--- MySQL dump 10.13  Distrib 8.0.44, for Linux (x86_64)
---
--- Host: localhost    Database: archive
 -- ------------------------------------------------------
 -- Server version	8.0.44-0ubuntu0.22.04.1
 
@@ -572,4 +562,3 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-30 18:05:06
