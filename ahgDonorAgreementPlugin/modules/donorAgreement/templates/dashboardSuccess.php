@@ -1,3 +1,4 @@
+<?php use_helper('Date'); ?>
 <?php slot('title') ?><?php echo __('Agreement Dashboard') ?><?php end_slot() ?>
 <div class="row mb-4">
 <div class="col-md-3 mb-3"><div class="card bg-primary text-white h-100"><div class="card-body"><h6 class="text-white-50"><?php echo __('Total') ?></h6><h2 class="mb-0"><?php echo number_format($dashboardData['statistics']['total'] ?? 0) ?></h2></div></div></div>
