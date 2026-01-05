@@ -1,0 +1,27 @@
+{
+    "name": "Vendor Management",
+    "machine_name": "ahgVendorPlugin",
+    "version": "1.0.0",
+    "description": "Vendor and supplier management with transactions, services, and contact tracking",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "install_sql": "data/install.sql",
+    "tables": [
+        "ahg_vendors",
+        "ahg_vendor_contacts",
+        "ahg_vendor_metrics",
+        "ahg_vendor_service_types",
+        "ahg_vendor_services",
+        "ahg_vendor_transactions",
+        "ahg_vendor_transaction_items",
+        "ahg_vendor_transaction_history",
+        "ahg_vendor_transaction_attachments"
+    ],
+    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+}
