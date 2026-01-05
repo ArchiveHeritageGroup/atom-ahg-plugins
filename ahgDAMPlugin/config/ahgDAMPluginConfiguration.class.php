@@ -2,7 +2,7 @@
 class ahgDAMPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Digital Asset Management for AtoM';
-    public static $version = '1.0.0';
+    public static $version = '1.1.0';
 
     public function initialize()
     {
