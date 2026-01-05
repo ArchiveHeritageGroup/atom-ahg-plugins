@@ -240,6 +240,21 @@ document.addEventListener('DOMContentLoaded', function() {
             saveAnnotations();
         }
     });
+    // Event delegation for buttons
+    document.addEventListener("click", function(e) {
+        var target = e.target.closest("[data-action]");
+        if (!target) return;
+        var action = target.dataset.action;
+        var photoId = target.dataset.photoId;
+        var imageSrc = target.dataset.imageSrc;
+        if (action === "annotate") {
+            openAnnotator(photoId, imageSrc);
+        } else if (action === "delete") {
+            deletePhoto(photoId);
+        } else if (action === "save-annotations") {
+            saveAnnotations();
+        }
+    });
 });
 
 function uploadPhoto() {
