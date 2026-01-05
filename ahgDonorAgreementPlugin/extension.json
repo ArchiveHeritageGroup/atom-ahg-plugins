@@ -29,6 +29,6 @@
         "donor_agreement_record"
     ],
     "shared_tables": ["donor", "actor", "actor_i18n", "repository"],
-    "install_task": "donor-agreement:install",
-    "uninstall_task": "donor-agreement:uninstall"
+    "install_task": null,
+    "uninstall_task": null
 }
