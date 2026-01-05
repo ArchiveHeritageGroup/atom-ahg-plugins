@@ -16,7 +16,7 @@
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
-<form method="post" action="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'watermarkSettings']); ?>">
+<form method="post" action="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'watermarkSettings']); ?>" enctype="multipart/form-data">
 
   <div class="card mb-4">
     <div class="card-header">
@@ -104,6 +104,93 @@
         <small class="text-muted"><?php echo __('Images smaller than this dimension will not receive watermarks.'); ?></small>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Custom Watermarks Section -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><?php echo __('Custom Watermarks'); ?></h5>
+    </div>
+    <div class="card-body">
+      
+      <!-- Upload New -->
+      <h6><?php echo __('Upload New Watermark'); ?></h6>
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <label for="custom_watermark_name" class="form-label"><?php echo __('Name'); ?></label>
+          <input type="text" class="form-control" id="custom_watermark_name" name="custom_watermark_name" placeholder="My Logo">
+        </div>
+        <div class="col-md-4">
+          <label for="custom_watermark_position" class="form-label"><?php echo __('Position'); ?></label>
+          <select class="form-select" id="custom_watermark_position" name="custom_watermark_position">
+            <option value="center">Center</option>
+            <option value="top-left">Top Left</option>
+            <option value="top-right">Top Right</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-right" selected>Bottom Right</option>
+            <option value="repeat">Repeat/Tile</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="custom_watermark_opacity" class="form-label"><?php echo __('Opacity'); ?></label>
+          <input type="number" class="form-control" id="custom_watermark_opacity" name="custom_watermark_opacity" value="0.40" min="0.1" max="1.0" step="0.1">
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label for="custom_watermark_file" class="form-label"><?php echo __('Watermark Image File'); ?></label>
+          <input type="file" class="form-control" id="custom_watermark_file" name="custom_watermark_file" accept="image/png,image/jpeg,image/gif">
+          <small class="text-muted"><?php echo __('Supported: PNG, JPEG, GIF. Recommended: transparent PNG.'); ?></small>
+        </div>
+        <div class="col-md-2 d-flex align-items-center" style="padding-top: 25px;">
+          <button type="submit" name="upload_watermark" value="1" class="btn btn-success">
+            <i class="fas fa-upload me-1"></i> <?php echo __('Upload'); ?>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Existing Custom Watermarks -->
+      <?php if (!empty($customWatermarks) && count($customWatermarks) > 0): ?>
+      <h6 class="mt-4"><?php echo __('Existing Custom Watermarks'); ?></h6>
+      <div class="row">
+        <?php foreach ($customWatermarks as $cw): ?>
+        <div class="col-md-3 mb-3">
+          <div class="card h-100">
+            <div class="card-body text-center p-2">
+              <img src="/uploads/watermarks/<?php echo $cw->filename; ?>" alt="<?php echo $cw->name; ?>" style="max-width: 80px; max-height: 60px; object-fit: contain;">
+              <p class="mb-1 mt-2"><small><strong><?php echo $cw->name; ?></strong></small></p>
+              <p class="mb-1"><small class="text-muted"><?php echo $cw->position; ?> / <?php echo $cw->opacity; ?></small></p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="default_custom_watermark_id" id="custom_<?php echo $cw->id; ?>" value="<?php echo $cw->id; ?>" <?php echo ($defaultCustomWatermarkId == $cw->id) ? 'checked' : ''; ?>>
+                <label class="form-check-label" for="custom_<?php echo $cw->id; ?>"><small><?php echo __('Use as Default'); ?></small></label>
+              </div>
+            </div>
+            <div class="card-footer p-1 text-center">
+              <button type="submit" name="delete_custom_watermark" value="<?php echo $cw->id; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this watermark?');">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+        <div class="col-md-3 mb-3">
+          <div class="card h-100 border-dashed">
+            <div class="card-body text-center d-flex align-items-center justify-content-center">
+              <div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="default_custom_watermark_id" id="custom_none" value="" <?php echo empty($defaultCustomWatermarkId) ? 'checked' : ''; ?>>
+                  <label class="form-check-label" for="custom_none"><small><?php echo __('No Custom (Use System)'); ?></small></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <?php else: ?>
+      <p class="text-muted"><em><?php echo __('No custom watermarks uploaded yet.'); ?></em></p>
+      <?php endif; ?>
+      
     </div>
   </div>
 

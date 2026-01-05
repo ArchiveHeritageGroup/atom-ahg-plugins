@@ -602,9 +602,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </div>
 <section class="actions">
   <ul>
-    <li>
-      <input type="submit" class="btn atom-btn-outline-success" value="<?php echo __('Save'); ?>">
-    </li>
     <?php if ($resourceId): ?>
       <li>
         <a href="<?php echo '/index.php/' . $resourceSlug; ?>" class="btn atom-btn-outline-light">
@@ -618,6 +615,9 @@ document.addEventListener("DOMContentLoaded", function() {
         </a>
       </li>
     <?php endif; ?>
+    <li>
+      <input type="submit" class="btn atom-btn-outline-success" value="<?php echo __('Save'); ?>">
+    </li>
   </ul>
 </section>
 
