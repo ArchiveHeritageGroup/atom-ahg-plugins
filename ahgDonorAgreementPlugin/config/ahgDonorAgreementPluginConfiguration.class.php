@@ -17,7 +17,7 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
         // Dashboard
         $routing->prependRoute('donor_dashboard', new sfRoute(
             '/donor/dashboard',
-            ['module' => 'donorDashboard', 'action' => 'index']
+            ['module' => 'donorAgreement', 'action' => 'dashboard']
         ));
 
         // Agreement CRUD
