@@ -1,4 +1,5 @@
 <?php use_helper('Date'); ?>
+<?php $rawRecentAssets = $sf_data->getRaw('recentAssets'); $rawByClass = $sf_data->getRaw('byClass'); ?>
 <?php slot('title') ?><?php echo __('Heritage Asset Accounting') ?><?php end_slot() ?>
 
 <div class="container-fluid">
@@ -81,7 +82,7 @@
                         <ul class="list-group list-group-flush">
                             <?php foreach ($stats['by_class'] as $class): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <?php echo esc_entities($class->class_name ?: 'Unclassified') ?>
+                                    <?php echo $class->class_name ?: 'Unclassified' ?>
                                     <span class="badge bg-primary rounded-pill"><?php echo $class->count ?></span>
                                 </li>
                             <?php endforeach; ?>
@@ -146,7 +147,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($recentAssets as $asset): ?>
+                                    <?php foreach ($rawRecentAssets as $asset): ?>
                                         <tr>
                                             <td>
                                                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
@@ -154,7 +155,7 @@
                                                 </a>
                                             </td>
                                             <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
-                                            <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                            <td><?php echo $asset->class_name ?: '-' ?></td>
                                             <td><?php echo esc_entities($asset->standard_code ?: '-') ?></td>
                                             <td>
                                                 <?php

@@ -1,13 +1,14 @@
 <?php use_helper('Date'); ?>
-<?php slot('title') ?><?php echo __('Heritage Asset') ?> - <?php echo esc_entities($asset->object_identifier) ?><?php end_slot() ?>
+<?php $rawAsset = $sf_data->getRaw('asset'); ?>
+<?php slot('title') ?><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?> - <?php echo esc_entities($asset->object_title ?: 'Untitled') ?><?php end_slot() ?>
 
 <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="h3 mb-1"><?php echo esc_entities($asset->object_identifier ?: 'Heritage Asset') ?></h1>
-                <p class="text-muted mb-0"><?php echo esc_entities($asset->object_title ?? '') ?></p>
+                <h1 class="h3 mb-1"><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?> - <?php echo esc_entities($asset->object_title ?: 'Untitled') ?></h1>
+                <p class="text-muted mb-0"><?php echo $rawAsset->standard_name ?? 'No Standard' ?></p>
             </div>
             <div class="btn-group">
                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'edit', 'id' => $asset->id]) ?>" class="btn btn-warning">
@@ -46,7 +47,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h6 class="text-muted"><?php echo __('Standard') ?></h6>
-                    <h4 class="mb-0"><?php echo esc_entities($asset->standard_code ?: 'Not Set') ?></h4>
+                    <h4 class="mb-0"><?php echo $rawAsset->standard_code ?: 'Not Set' ?></h4>
                 </div>
             </div>
         </div>
@@ -54,7 +55,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h6 class="text-muted"><?php echo __('Asset Class') ?></h6>
-                    <h5 class="mb-0"><?php echo esc_entities($asset->class_name ?: 'Unclassified') ?></h5>
+                    <h5 class="mb-0"><?php echo $rawAsset->class_name ?: 'Unclassified' ?></h5>
                 </div>
             </div>
         </div>

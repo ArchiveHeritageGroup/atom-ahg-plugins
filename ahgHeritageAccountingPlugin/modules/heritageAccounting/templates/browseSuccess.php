@@ -1,4 +1,5 @@
 <?php use_helper('Date'); ?>
+<?php $rawClasses = $sf_data->getRaw('classes'); $rawStandards = $sf_data->getRaw('standards'); ?>
 <?php slot('title') ?><?php echo __('Heritage Assets') ?><?php end_slot() ?>
 
 <div class="container-fluid">
@@ -19,13 +20,13 @@
             <form method="get" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label"><?php echo __('Search') ?></label>
-                    <input type="text" name="sq" class="form-control form-autocomplete" data-autocomplete-url="<?php echo url_for(['module' => 'heritageApi', 'action' => 'autocomplete']) ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>" placeholder="<?php echo __('Identifier, title, donor...') ?>">
+                    <div class="position-relative"><input type="text" name="sq" id="heritageSearch" class="form-control" value="<?php echo esc_entities($filters['search'] ?? '') ?>" placeholder="<?php echo __('Identifier, title, donor...') ?>" autocomplete="off"><div id="heritageResults" class="autocomplete-dropdown"></div></div>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label"><?php echo __('Standard') ?></label>
                     <select name="standard_id" class="form-select">
                         <option value=""><?php echo __('All Standards') ?></option>
-                        <?php foreach ($standards as $s): ?>
+                        <?php foreach ($rawStandards as $s): ?>
                             <option value="<?php echo $s->id ?>" <?php echo ($filters['standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code) ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -34,8 +35,8 @@
                     <label class="form-label"><?php echo __('Class') ?></label>
                     <select name="class_id" class="form-select">
                         <option value=""><?php echo __('All Classes') ?></option>
-                        <?php foreach ($classes as $c): ?>
-                            <option value="<?php echo $c->id ?>" <?php echo ($filters['class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo esc_entities($c->name) ?></option>
+                        <?php foreach ($rawClasses as $c): ?>
+                            <option value="<?php echo $c->id ?>" <?php echo ($filters['class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo htmlspecialchars_decode($c->name) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -141,3 +142,82 @@
         </div>
     </div>
 </div>
+
+
+<style>
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.autocomplete-dropdown .ac-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.autocomplete-dropdown .ac-item:hover {
+    background-color: #f5f5f5;
+}
+.autocomplete-dropdown .ac-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('heritageSearch');
+    var resultsDiv = document.getElementById('heritageResults');
+    var debounceTimer;
+    
+    if (!searchInput || !resultsDiv) return;
+    
+    searchInput.addEventListener('input', function() {
+        var query = this.value.trim();
+        clearTimeout(debounceTimer);
+        
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = '';
+            return;
+        }
+        
+        debounceTimer = setTimeout(function() {
+            fetch('<?php echo url_for(["module" => "heritageApi", "action" => "autocomplete"]) ?>?term=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.length === 0) {
+                        resultsDiv.style.display = 'none';
+                        return;
+                    }
+                    resultsDiv.innerHTML = data.map(function(item) {
+                        return '<div class="ac-item" data-label="' + (item.title || item.label).replace(/"/g, '&quot;') + '">' + item.label + '</div>';
+                    }).join('');
+                    resultsDiv.style.display = 'block';
+                })
+                .catch(function() { resultsDiv.style.display = 'none'; });
+        }, 300);
+    });
+    
+    resultsDiv.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ac-item')) {
+            searchInput.value = e.target.dataset.label;
+            resultsDiv.style.display = 'none';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#heritageSearch') && !e.target.closest('#heritageResults')) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+});
+</script>

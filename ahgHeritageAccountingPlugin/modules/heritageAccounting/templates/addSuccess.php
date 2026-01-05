@@ -25,8 +25,12 @@
                                     <div class="form-control bg-light"><?php echo esc_entities($io->title ?: 'Untitled') ?></div>
                                     <input type="hidden" name="information_object_id" value="<?php echo $io->id ?>">
                                 <?php else: ?>
-                                    <label class="form-label"><?php echo __('Information Object ID') ?></label>
-                                    <input type="number" name="information_object_id" class="form-control" value="<?php echo $formData['information_object_id'] ?? '' ?>">
+                                    <label class="form-label"><?php echo __('Link to Archival Record') ?></label>
+                                    <div class="position-relative">
+                                        <input type="text" id="ioSearch" class="form-control" placeholder="<?php echo __('Type to search...') ?>" autocomplete="off">
+                                        <div id="ioResults" class="autocomplete-dropdown"></div>
+                                    </div>
+                                    <input type="hidden" name="information_object_id" id="ioId" value="<?php echo $formData['information_object_id'] ?? '' ?>">
                                     <small class="text-muted"><?php echo __('Optional: Link to archival description') ?></small>
                                 <?php endif; ?>
                             </div>
@@ -239,3 +243,84 @@
         </div>
     </form>
 </div>
+
+<style>
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.autocomplete-dropdown .ac-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.autocomplete-dropdown .ac-item:hover {
+    background-color: #f5f5f5;
+}
+.autocomplete-dropdown .ac-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('ioSearch');
+    var resultsDiv = document.getElementById('ioResults');
+    var hiddenInput = document.getElementById('ioId');
+    var debounceTimer;
+    
+    if (!searchInput || !resultsDiv || !hiddenInput) return;
+    
+    searchInput.addEventListener('input', function() {
+        var query = this.value.trim();
+        clearTimeout(debounceTimer);
+        hiddenInput.value = '';
+        
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = '';
+            return;
+        }
+        
+        debounceTimer = setTimeout(function() {
+            fetch('<?php echo url_for(["module" => "heritageApi", "action" => "autocomplete"]) ?>?term=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.length === 0) {
+                        resultsDiv.style.display = 'none';
+                        return;
+                    }
+                    resultsDiv.innerHTML = data.map(function(item) {
+                        return '<div class="ac-item" data-id="' + item.id + '" data-label="' + item.label.replace(/"/g, '&quot;') + '">' + item.label + '</div>';
+                    }).join('');
+                    resultsDiv.style.display = 'block';
+                })
+                .catch(function() { resultsDiv.style.display = 'none'; });
+        }, 300);
+    });
+    
+    resultsDiv.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ac-item')) {
+            searchInput.value = e.target.dataset.label;
+            hiddenInput.value = e.target.dataset.id;
+            resultsDiv.style.display = 'none';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#ioSearch') && !e.target.closest('#ioResults')) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+});
+</script>

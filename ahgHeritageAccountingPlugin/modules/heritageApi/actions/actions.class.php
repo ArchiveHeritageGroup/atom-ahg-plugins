@@ -26,7 +26,7 @@ class heritageApiActions extends sfActions
                 ->map(function($item) {
                     return [
                         'id' => $item->id,
-                        'label' => ($item->identifier ? $item->identifier . ' - ' : '') . ($item->title ?: 'Untitled'),
+                        'label' => ($item->identifier ? $item->identifier . ' - ' : '') . ($item->title ?: 'Untitled'), 'title' => $item->title ?: 'Untitled',
                         'value' => $item->id
                     ];
                 })
@@ -64,5 +64,37 @@ class heritageApiActions extends sfActions
         
         $this->getResponse()->setContentType('application/json');
         return $this->renderText(json_encode($asset));
+    }
+
+    /**
+     * Autocomplete for actors (donors)
+     */
+    public function executeActorAutocomplete(sfWebRequest $request)
+    {
+        $term = $request->getParameter('term', '');
+        $results = [];
+        
+        if (strlen($term) >= 2) {
+            $results = \Illuminate\Database\Capsule\Manager::table('actor')
+                ->leftJoin('actor_i18n', function($join) {
+                    $join->on('actor.id', '=', 'actor_i18n.id')
+                         ->where('actor_i18n.culture', '=', 'en');
+                })
+                ->where('actor_i18n.authorized_form_of_name', 'like', '%' . $term . '%')
+                ->select('actor.id', 'actor_i18n.authorized_form_of_name as name')
+                ->limit(15)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'label' => $item->name ?: 'Unknown',
+                        'value' => $item->name ?: 'Unknown'
+                    ];
+                })
+                ->toArray();
+        }
+        
+        $this->getResponse()->setContentType('application/json');
+        return $this->renderText(json_encode($results));
     }
 }

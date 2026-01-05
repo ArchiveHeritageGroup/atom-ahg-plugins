@@ -127,7 +127,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->update($this->asset->id, $data);
-                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
+                $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -161,7 +161,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addValuation($this->asset->id, $data);
-                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
+                $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -201,7 +201,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addImpairment($this->asset->id, $data);
-                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
+                $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -238,7 +238,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addMovement($this->asset->id, $data);
-                $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]);
+                $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }
@@ -275,7 +275,7 @@ class heritageAccountingActions extends sfActions
             
             try {
                 $service->addJournal($this->asset->id, $data);
-                $this->redirect('heritage/view?id=' . $this->asset->id . '#journals');
+                $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
             } catch (Exception $e) {
                 $this->error = $e->getMessage();
             }

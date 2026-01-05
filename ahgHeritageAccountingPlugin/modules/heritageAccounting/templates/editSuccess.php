@@ -1,4 +1,5 @@
 <?php slot('title') ?><?php echo __('Edit Heritage Asset') ?><?php end_slot() ?>
+<?php $rawClasses = $sf_data->getRaw('classes'); $rawStandards = $sf_data->getRaw('standards'); ?>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -30,7 +31,7 @@
                                 <label class="form-label"><?php echo __('Accounting Standard') ?></label>
                                 <select name="accounting_standard_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Standard --') ?></option>
-                                    <?php foreach ($standards as $s): ?>
+                                    <?php foreach ($rawStandards as $s): ?>
                                         <option value="<?php echo $s->id ?>" <?php echo $asset->accounting_standard_id == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code . ' - ' . $s->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -39,7 +40,7 @@
                                 <label class="form-label"><?php echo __('Asset Class') ?></label>
                                 <select name="asset_class_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Class --') ?></option>
-                                    <?php foreach ($classes as $c): ?>
+                                    <?php foreach ($rawClasses as $c): ?>
                                         <option value="<?php echo $c->id ?>" <?php echo $asset->asset_class_id == $c->id ? 'selected' : '' ?>><?php echo esc_entities($c->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -119,7 +120,10 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label"><?php echo __('Donor Name') ?></label>
-                                <input type="text" name="donor_name" class="form-control" value="<?php echo esc_entities($asset->donor_name ?? '') ?>">
+                                <div class="position-relative">
+                                    <input type="text" name="donor_name" id="donorSearch" class="form-control" value="<?php echo esc_entities($asset->donor_name ?? '') ?>" autocomplete="off">
+                                    <div id="donorResults" class="autocomplete-dropdown"></div>
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label"><?php echo __('Donor Restrictions') ?></label>
@@ -225,3 +229,81 @@
         </div>
     </form>
 </div>
+
+<style>
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.autocomplete-dropdown .ac-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.autocomplete-dropdown .ac-item:hover {
+    background-color: #f5f5f5;
+}
+.autocomplete-dropdown .ac-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('donorSearch');
+    var resultsDiv = document.getElementById('donorResults');
+    var debounceTimer;
+    
+    if (!searchInput || !resultsDiv) return;
+    
+    searchInput.addEventListener('input', function() {
+        var query = this.value.trim();
+        clearTimeout(debounceTimer);
+        
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = '';
+            return;
+        }
+        
+        debounceTimer = setTimeout(function() {
+            fetch('<?php echo url_for(["module" => "heritageApi", "action" => "actorAutocomplete"]) ?>?term=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.length === 0) {
+                        resultsDiv.style.display = 'none';
+                        return;
+                    }
+                    resultsDiv.innerHTML = data.map(function(item) {
+                        return '<div class="ac-item" data-value="' + item.value.replace(/"/g, '&quot;') + '">' + item.label + '</div>';
+                    }).join('');
+                    resultsDiv.style.display = 'block';
+                })
+                .catch(function() { resultsDiv.style.display = 'none'; });
+        }, 300);
+    });
+    
+    resultsDiv.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ac-item')) {
+            searchInput.value = e.target.dataset.value;
+            resultsDiv.style.display = 'none';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#donorSearch') && !e.target.closest('#donorResults')) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+});
+</script>
