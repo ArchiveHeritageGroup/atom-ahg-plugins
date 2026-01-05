@@ -1,41 +1,23 @@
 {
-    "name": "Condition Assessment",
-    "machine_name": "ahgConditionPlugin",
+    "name": "ahgConditionPlugin",
     "version": "1.0.0",
-    "description": "Condition assessment and reporting for physical objects with Spectrum 5.0 compliance",
+    "description": "Condition assessment and reporting for museum objects",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "MIT",
+    "type": "ahg",
+    "category": "museum",
     "requires": {
-        "atom_framework": ">=1.0.0",
-        "atom": ">=2.8",
-        "php": ">=8.1"
+        "php": ">=8.1",
+        "php_extensions": ["gd"],
+        "atom_framework": ">=1.0.0"
     },
     "dependencies": [],
-    "optional": {
-        "extensions": ["ahgMuseumPlugin"]
-    },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
     "tables": [
-        "condition_assessment_schedule",
-        "condition_conservation_link",
-        "condition_damage",
-        "condition_event",
-        "condition_image",
-        "condition_report",
-        "condition_vocabulary",
-        "condition_vocabulary_term",
-        "spectrum_condition_check",
-        "spectrum_condition_check_data",
-        "spectrum_condition_photo",
-        "spectrum_condition_photo_comparison",
-        "spectrum_condition_photos",
-        "spectrum_condition_template",
-        "spectrum_condition_template_field",
-        "spectrum_condition_template_section"
-    ],
-    "views": ["v_spectrum_condition_with_photos"],
-    "shared_tables": [],
-    "helpers": [],
-    "category": "extension",
-    "load_order": 60
+        "condition_check",
+        "condition_check_i18n", 
+        "condition_photo",
+        "condition_annotation",
+        "condition_template",
+        "condition_field"
+    ]
 }

@@ -1,9 +1,7 @@
 <?php
 /**
  * Extended Rights Context Menu Items
- * Add to _contextMenu.php or include as partial
  */
-
 if (!isset($resource) || !$resource->id) {
     return;
 }
@@ -15,11 +13,13 @@ $hasRights = \Illuminate\Database\Capsule\Manager::table('extended_rights')
     ->where('object_id', $resource->id)
     ->exists();
 
-// Check if has active embargo
-$hasEmbargo = \Illuminate\Database\Capsule\Manager::table('embargo')
+// Check if has active embargo and get its ID
+$activeEmbargo = \Illuminate\Database\Capsule\Manager::table('embargo')
     ->where('object_id', $resource->id)
-    ->where('is_active', true)
-    ->exists();
+    ->where('status', 'active')
+    ->first();
+
+$hasEmbargo = $activeEmbargo !== null;
 ?>
 
 <?php if ($canEdit): ?>
@@ -32,12 +32,27 @@ $hasEmbargo = \Illuminate\Database\Capsule\Manager::table('embargo')
         <?php echo $hasRights ? __('Edit extended rights') : __('Add extended rights'); ?>
       </a>
     </li>
+    <?php if ($hasEmbargo): ?>
     <li>
-      <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'objectId' => $resource->id]); ?>">
-        <i class="fas fa-lock fa-fw me-1"></i>
-        <?php echo $hasEmbargo ? __('Manage embargo') : __('Add embargo'); ?>
+      <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'id' => $activeEmbargo->id]); ?>">
+        <i class="fas fa-edit fa-fw me-1"></i>
+        <?php echo __('Edit embargo'); ?>
       </a>
     </li>
+    <li>
+      <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'lift', 'id' => $activeEmbargo->id]); ?>" class="text-success">
+        <i class="fas fa-unlock fa-fw me-1"></i>
+        <?php echo __('Lift embargo'); ?>
+      </a>
+    </li>
+    <?php else: ?>
+    <li>
+      <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'add', 'objectId' => $resource->id]); ?>">
+        <i class="fas fa-lock fa-fw me-1"></i>
+        <?php echo __('Add embargo'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
     <li>
       <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'export', 'id' => $resource->id]); ?>">
         <i class="fas fa-download fa-fw me-1"></i>

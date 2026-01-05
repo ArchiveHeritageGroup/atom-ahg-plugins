@@ -56,3 +56,8 @@ embargo_lift:
 embargo_index:
   url: /embargo
   param: { module: embargo, action: index }
+
+embargo_lift:
+  url: /embargo/lift/:id
+  param: { module: embargo, action: lift }
+  requirements: { id: \d+ }
