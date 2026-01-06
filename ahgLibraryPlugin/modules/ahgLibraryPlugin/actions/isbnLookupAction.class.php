@@ -25,15 +25,15 @@ class ahgLibraryPluginIsbnLookupAction extends sfAction
             // Load framework services
             $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
             
-            require_once $frameworkPath . '/src/Repositories/IsbnLookupRepository.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Repository/IsbnLookupRepository.php';
             require_once $frameworkPath . '/src/Services/LanguageService.php';
-            require_once $frameworkPath . '/src/Services/WorldCatService.php';
-            require_once $frameworkPath . '/src/Services/BookCoverService.php';
-            require_once $frameworkPath . '/src/Services/IsbnMetadataMapper.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/WorldCatService.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/BookCoverService.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/IsbnMetadataMapper.php';
 
-            $repository = new \AtomFramework\Repositories\IsbnLookupRepository();
-            $service = new \AtomFramework\Services\WorldCatService($repository);
-            $mapper = new \AtomFramework\Services\IsbnMetadataMapper();
+            $repository = new \ahgLibraryPlugin\Repository\IsbnLookupRepository();
+            $service = new \ahgLibraryPlugin\Service\WorldCatService($repository);
+            $mapper = new \ahgLibraryPlugin\Service\IsbnMetadataMapper();
 
             // Get user ID for audit
             $userId = null;
@@ -56,7 +56,7 @@ class ahgLibraryPluginIsbnLookupAction extends sfAction
             
             // Get cover URLs using Open Library direct URLs
             $cleanIsbn = preg_replace('/[\s-]/', '', $isbn);
-            $covers = \AtomFramework\Services\BookCoverService::getAllSizes($cleanIsbn);
+            $covers = \ahgLibraryPlugin\Service\BookCoverService::getAllSizes($cleanIsbn);
 
             return $this->renderJson([
                 'success' => true,
