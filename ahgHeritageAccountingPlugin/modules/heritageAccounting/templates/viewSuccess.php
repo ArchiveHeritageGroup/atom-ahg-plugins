@@ -11,6 +11,11 @@
                 <p class="text-muted mb-0"><?php echo $rawAsset->standard_name ?? 'No Standard' ?></p>
             </div>
             <div class="btn-group">
+                <?php if ($objectSlug): ?>
+                <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $objectSlug]) ?>" class="btn btn-primary">
+                    <i class="fas fa-archive me-1"></i><?php echo __('View Record') ?>
+                </a>
+                <?php endif; ?>
                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'edit', 'id' => $asset->id]) ?>" class="btn btn-warning">
                     <i class="fas fa-edit me-1"></i><?php echo __('Edit') ?>
                 </a>

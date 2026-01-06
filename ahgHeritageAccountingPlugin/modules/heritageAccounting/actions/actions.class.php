@@ -65,6 +65,15 @@ class heritageAccountingActions extends sfActions
         }
         
         $this->valuations = $service->getValuationHistory($this->asset->id);
+        // Fetch linked information object slug
+        $this->objectSlug = null;
+        $ioId = $this->asset->object_id ?? $this->asset->information_object_id;
+        if ($ioId) {
+            $slugRow = \Illuminate\Database\Capsule\Manager::table('slug')
+                ->where('object_id', $ioId)
+                ->first();
+            $this->objectSlug = $slugRow ? $slugRow->slug : null;
+        }
         $this->impairments = $service->getImpairmentAssessments($this->asset->id);
         $this->movements = $service->getMovements($this->asset->id);
         $this->journals = $service->getJournalEntries($this->asset->id);
@@ -112,19 +121,25 @@ class heritageAccountingActions extends sfActions
     public function executeEdit(sfWebRequest $request)
     {
         $service = new HeritageAssetService();
-        
         $this->asset = $service->getAsset($request->getParameter('id'));
         if (!$this->asset) {
             $this->forward404('Heritage asset not found');
         }
+        // Fetch linked information object title
+        $this->objectTitle = "Not linked";
+        if ($this->asset->object_id || $this->asset->information_object_id) {
+            $io = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                ->where('id', $this->asset->object_id ?? $this->asset->information_object_id)
+                ->where('culture', 'en')
+                ->first();
+            $this->objectTitle = $io ? $io->title : "No title found";
+        }
         
         $this->standards = $service->getAccountingStandards();
         $this->classes = $service->getAssetClasses();
-        
         if ($request->isMethod('post')) {
             $data = $this->processFormData($request);
             $data['updated_by'] = sfContext::getInstance()->getUser()->getAttribute('user_id');
-            
             try {
                 $service->update($this->asset->id, $data);
                 $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));

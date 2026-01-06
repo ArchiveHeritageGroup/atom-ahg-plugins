@@ -24,8 +24,9 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label"><?php echo __('Information Object ID') ?></label>
-                                <input type="number" name="object_id" class="form-control" value="<?php echo $asset->object_id ?>" readonly>
+                                <label class="form-label"><?php echo __('Linked Record') ?></label>
+                                <input type="hidden" name="object_id" value="<?php echo $asset->object_id ?>">
+                                <div class="form-control-plaintext border rounded px-3 py-2 bg-light"><?php echo esc_entities($objectTitle ?? 'Not linked') ?></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Accounting Standard') ?></label>
