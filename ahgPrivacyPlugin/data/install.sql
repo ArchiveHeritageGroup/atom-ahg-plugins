@@ -434,8 +434,10 @@ CREATE TABLE IF NOT EXISTS `privacy_template` (
 -- =====================================================
 
 -- Default Jurisdictions
-INSERT IGNORE INTO `privacy_jurisdiction` (`code`, `name`, `full_name`, `country`, `region`, `dsar_days`, `breach_hours`, `icon`, `sort_order`) VALUES
-('popia', 'POPIA', 'Protection of Personal Information Act', 'South Africa', 'Africa', 30, 72, '🇿🇦', 1),
-('gdpr', 'GDPR', 'General Data Protection Regulation', 'European Union', 'Europe', 30, 72, '🇪🇺', 2),
-('pipeda', 'PIPEDA', 'Personal Information Protection and Electronic Documents Act', 'Canada', 'North America', 30, 72, '🇨🇦', 3),
-('ccpa', 'CCPA', 'California Consumer Privacy Act', 'United States', 'North America', 45, 72, '🇺🇸', 4);
+INSERT IGNORE INTO `privacy_jurisdiction` (`code`, `name`, `full_name`, `country`, `region`, `regulator`, `regulator_url`, `dsar_days`, `breach_hours`, `effective_date`, `related_laws`, `icon`, `is_active`, `sort_order`) VALUES
+('popia', 'POPIA', 'Protection of Personal Information Act', 'South Africa', 'Africa', 'Information Regulator', 'https://www.justice.gov.za/inforeg/', 30, 72, '2021-07-01', '["PAIA", "ECTA", "RICA"]', 'za', 1, 1),
+('ndpa', 'NDPA', 'Nigeria Data Protection Act', 'Nigeria', 'Africa', 'Nigeria Data Protection Commission (NDPC)', 'https://ndpc.gov.ng/', 30, 72, '2023-06-14', '["NITDA Act", "Cybercrimes Act"]', 'ng', 0, 2),
+('kenya_dpa', 'Kenya DPA', 'Data Protection Act', 'Kenya', 'Africa', 'Office of the Data Protection Commissioner (ODPC)', 'https://www.odpc.go.ke/', 30, 72, '2019-11-25', '["Computer Misuse and Cybercrimes Act"]', 'ke', 0, 3),
+('gdpr', 'GDPR', 'General Data Protection Regulation', 'European Union', 'Europe', 'Supervisory Authority (per member state)', 'https://edpb.europa.eu/', 30, 72, '2018-05-25', '["ePrivacy Directive"]', 'eu', 1, 10),
+('pipeda', 'PIPEDA', 'Personal Information Protection and Electronic Documents Act', 'Canada', 'North America', 'Office of the Privacy Commissioner of Canada (OPC)', 'https://www.priv.gc.ca/', 30, 0, '2000-01-01', '["CASL", "Provincial privacy laws"]', 'ca', 0, 11),
+('ccpa', 'CCPA/CPRA', 'California Consumer Privacy Act / California Privacy Rights Act', 'USA (California)', 'North America', 'California Privacy Protection Agency (CPPA)', 'https://cppa.ca.gov/', 45, 0, '2020-01-01', '["CPRA amendments"]', 'us', 0, 12);
