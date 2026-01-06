@@ -35,6 +35,8 @@
                 ghostClass: 'block-ghost',
                 chosenClass: 'block-chosen',
                 dragClass: 'block-drag',
+                filter: '.column-drop-zone, .nested-block',
+                preventOnFilter: false,
                 group: 'blocks',
                 onEnd: (evt) => {
                     this.saveOrder();
@@ -77,6 +79,11 @@
             this.container.addEventListener('drop', (e) => {
                 e.preventDefault();
                 this.container.classList.remove('drop-active');
+                
+                // Skip if dropped on a column zone (let column handler deal with it)
+                if (e.target.closest('.column-drop-zone')) {
+                    return;
+                }
                 
                 const blockTypeId = e.dataTransfer.getData('block-type-id');
                 if (blockTypeId) {
