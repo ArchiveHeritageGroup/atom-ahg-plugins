@@ -9,7 +9,7 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'donorAgreement';
         $enabledModules[] = 'ahgDonor';
-        $enabledModules[] = 'donorDashboard';
+        
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'configureRouting']);
