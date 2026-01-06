@@ -14,8 +14,8 @@
 
 // Load service if not provided
 if (!isset($templateService)) {
-    require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionTemplateService.php';
-    $templateService = new \AtoM\Framework\Services\ConditionTemplateService();
+    require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
+    $templateService = new \ahgConditionPlugin\Service\ConditionTemplateService();
 }
 
 // Get all templates

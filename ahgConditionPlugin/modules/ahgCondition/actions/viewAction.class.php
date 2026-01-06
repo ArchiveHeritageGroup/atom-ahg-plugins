@@ -14,8 +14,8 @@ class ahgConditionViewAction extends sfAction
         }
         
         // Load services
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionTemplateService.php';
-        $templateService = new \AtoM\Framework\Services\ConditionTemplateService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
+        $templateService = new \ahgConditionPlugin\Service\ConditionTemplateService();
         
         // Get condition check
         $this->check = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check as c')

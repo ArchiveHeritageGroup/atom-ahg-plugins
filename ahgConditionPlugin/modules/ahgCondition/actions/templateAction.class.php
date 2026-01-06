@@ -10,8 +10,8 @@ class ahgConditionTemplateAction extends sfAction
 
     protected function initService()
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionTemplateService.php';
-        $this->templateService = new \AtoM\Framework\Services\ConditionTemplateService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
+        $this->templateService = new \ahgConditionPlugin\Service\ConditionTemplateService();
     }
 
     public function execute($request)

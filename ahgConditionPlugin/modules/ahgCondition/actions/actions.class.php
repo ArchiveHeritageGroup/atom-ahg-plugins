@@ -40,8 +40,8 @@ class ahgConditionActions extends sfActions
         }
 
         // Load service
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($this->checkId);
 
@@ -70,8 +70,8 @@ class ahgConditionActions extends sfActions
             $this->forward404('Photo ID required');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
 
@@ -107,8 +107,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $annotations = $service->getAnnotations($photoId);
 
@@ -138,8 +138,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $result = $service->saveAnnotations($photoId, $annotations, $userId);
@@ -167,8 +167,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing parameters']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $photoType = $request->getParameter('photo_type', 'general');
         $caption = $request->getParameter('caption', '');
@@ -212,8 +212,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $result = $service->deletePhoto($photoId, $userId);
@@ -235,8 +235,8 @@ class ahgConditionActions extends sfActions
             $this->forward404('Photo ID required');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
 
@@ -262,8 +262,8 @@ class ahgConditionActions extends sfActions
 
         $format = $request->getParameter('format', 'pdf');
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($checkId);
 
@@ -292,8 +292,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing condition_check_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $photos = $service->getPhotosForCheck($checkId);
 
@@ -338,8 +338,8 @@ class ahgConditionActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/ConditionAnnotationService.php';
-        $service = new \AtoM\Framework\Services\ConditionAnnotationService();
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $result = $service->updatePhotoMeta($photoId, $caption, $photoType);
 
