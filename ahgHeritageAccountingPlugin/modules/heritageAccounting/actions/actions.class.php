@@ -105,6 +105,14 @@ class heritageAccountingActions extends sfActions
             if ($request->getParameter('information_object_id')) {
                 $data['information_object_id'] = (int) $request->getParameter('information_object_id');
             }
+            // Validate capitalisation requirements
+            $validationError = $this->validateCapitalisation($data);
+            if ($validationError) {
+                $this->error = $validationError;
+                $this->formData = $data;
+                return;
+            }
+            
             try {
                 $id = $service->create($data);
                 $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $id]);
@@ -140,6 +148,13 @@ class heritageAccountingActions extends sfActions
         if ($request->isMethod('post')) {
             $data = $this->processFormData($request);
             $data['updated_by'] = sfContext::getInstance()->getUser()->getAttribute('user_id');
+            
+            // Validate capitalisation requirements
+            $validationError = $this->validateCapitalisation($data);
+            if ($validationError) {
+                $this->error = $validationError;
+                return;
+            }
             try {
                 $service->update($this->asset->id, $data);
                 $this->redirect(url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $this->asset->id]));
@@ -335,6 +350,51 @@ class heritageAccountingActions extends sfActions
             'condition_rating' => $request->getParameter('condition_rating'),
             'notes' => $request->getParameter('notes')
         ];
+    }
+
+    
+    /**
+     * Validate capitalisation requirements based on accounting standard
+     */
+    protected function validateCapitalisation(array $data): ?string
+    {
+        if (empty($data["accounting_standard_id"])) {
+            return null; // No standard selected, skip validation
+        }
+        
+        $standard = \Illuminate\Database\Capsule\Manager::table("heritage_accounting_standard")
+            ->where("id", $data["accounting_standard_id"])
+            ->first();
+        
+        if (!$standard || !$standard->capitalisation_required) {
+            return null; // Standard doesn't require capitalisation
+        }
+        
+        // Check if any monetary value is provided
+        $hasValue = false;
+        $valueFields = [
+            "acquisition_cost",
+            "fair_value_at_acquisition", 
+            "current_carrying_amount",
+            "initial_carrying_amount",
+            "insurance_value"
+        ];
+        
+        foreach ($valueFields as $field) {
+            if (!empty($data[$field]) && (float)$data[$field] > 0) {
+                $hasValue = true;
+                break;
+            }
+        }
+        
+        if (!$hasValue) {
+            return sprintf(
+                "The %s standard requires capitalisation. Please provide a monetary value (acquisition cost, fair value, or carrying amount).",
+                $standard->code
+            );
+        }
+        
+        return null;
     }
 
     /**
