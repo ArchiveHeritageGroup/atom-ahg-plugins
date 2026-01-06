@@ -176,9 +176,12 @@ CREATE TABLE IF NOT EXISTS `privacy_breach` (
 CREATE TABLE IF NOT EXISTS `privacy_breach_i18n` (
   `id` INT UNSIGNED NOT NULL,
   `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
+  `title` VARCHAR(255) DEFAULT NULL,
   `description` TEXT,
+  `cause` TEXT,
   `impact_assessment` TEXT,
-  `remediation_notes` TEXT,
+  `remedial_actions` TEXT,
+  `lessons_learned` TEXT,
   PRIMARY KEY (`id`, `culture`),
   CONSTRAINT `fk_breach_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
