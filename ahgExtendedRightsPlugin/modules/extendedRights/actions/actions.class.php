@@ -39,7 +39,7 @@ class extendedRightsActions extends sfActions
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')
                   ->where('rights_statement_i18n.culture','=','en');
             })
-            ->where('rights_statement.is_active','=',1)
+            ->where('rights_statement.is_active','=','active')
             ->orderBy('rights_statement.category')->orderBy('rights_statement.sort_order')
             ->select([
                 Capsule::raw('rights_statement.id'),
@@ -56,7 +56,7 @@ class extendedRightsActions extends sfActions
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')
                   ->where('creative_commons_license_i18n.culture','=','en');
             })
-            ->where('creative_commons_license.is_active','=',1)
+            ->where('creative_commons_license.is_active','=','active')
             ->orderBy('creative_commons_license.sort_order')
             ->select([
                 Capsule::raw('creative_commons_license.id'),
@@ -77,7 +77,7 @@ class extendedRightsActions extends sfActions
                 $j->on('tk_label_category_i18n.tk_label_category_id','=','tk_label_category.id')
                   ->where('tk_label_category_i18n.culture','=','en');
             })
-            ->where('tk_label.is_active','=',1)
+            ->where('tk_label.is_active','=','active')
             ->orderBy('tk_label_category.sort_order')->orderBy('tk_label.sort_order')
             ->select([
                 Capsule::raw('tk_label.id'),
@@ -95,7 +95,7 @@ class extendedRightsActions extends sfActions
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
             'with_creative_commons' => Capsule::table('object_creative_commons')->distinct()->count('object_id'),
             'with_tk_labels' => Capsule::table('object_tk_label')->distinct()->count('object_id'),
-            'active_embargoes' => Capsule::table('embargo')->where('is_active','=',1)->count()
+            'active_embargoes' => Capsule::table('rights_embargo')->where('status','=','active')->count()
         ];
     }
 
@@ -111,24 +111,24 @@ class extendedRightsActions extends sfActions
             'rights_statement' => Capsule::table('object_rights_statement')->where('object_id','=',$oid)->first(),
             'creative_commons' => Capsule::table('object_creative_commons')->where('object_id','=',$oid)->first(),
             'tk_labels' => Capsule::table('object_tk_label')->where('object_id','=',$oid)->pluck('tk_label_id')->toArray(),
-            'embargo' => Capsule::table('embargo')->where('object_id','=',$oid)->where('is_active','=',1)->first()
+            'embargo' => Capsule::table('rights_embargo')->where('object_id','=',$oid)->where('status','=','active')->first()
             ,'rights_holder' => Capsule::table('object_rights_holder')->where('object_id','=',$oid)->first()
         ];
 
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function($j) {
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')->where('rights_statement_i18n.culture','=','en');
-            })->where('rights_statement.is_active','=',1)->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
+            })->where('rights_statement.is_active','=','active')->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
 
         $this->ccLicenses = Capsule::table('creative_commons_license')
             ->leftJoin('creative_commons_license_i18n', function($j) {
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')->where('creative_commons_license_i18n.culture','=','en');
-            })->where('creative_commons_license.is_active','=',1)->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
+            })->where('creative_commons_license.is_active','=','active')->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
 
         $this->tkLabels = Capsule::table('tk_label')
             ->leftJoin('tk_label_i18n', function($j) {
                 $j->on('tk_label_i18n.tk_label_id','=','tk_label.id')->where('tk_label_i18n.culture','=','en');
-            })->where('tk_label.is_active','=',1)->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
+            })->where('tk_label.is_active','=','active')->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
         $this->donors = Capsule::table('donor')
             ->join('slug', Capsule::raw('slug.object_id'), '=', Capsule::raw('donor.id'))
             ->leftJoin('actor_i18n', function($j) {
@@ -169,17 +169,17 @@ class extendedRightsActions extends sfActions
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function($j) {
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')->where('rights_statement_i18n.culture','=','en');
-            })->where('rights_statement.is_active','=',1)->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
+            })->where('rights_statement.is_active','=','active')->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
 
         $this->ccLicenses = Capsule::table('creative_commons_license')
             ->leftJoin('creative_commons_license_i18n', function($j) {
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')->where('creative_commons_license_i18n.culture','=','en');
-            })->where('creative_commons_license.is_active','=',1)->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
+            })->where('creative_commons_license.is_active','=','active')->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
 
         $this->tkLabels = Capsule::table('tk_label')
             ->leftJoin('tk_label_i18n', function($j) {
                 $j->on('tk_label_i18n.tk_label_id','=','tk_label.id')->where('tk_label_i18n.culture','=','en');
-            })->where('tk_label.is_active','=',1)->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
+            })->where('tk_label.is_active','=','active')->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
 
         $this->objects = Capsule::table('information_object')
             ->join('slug','slug.object_id','=','information_object.id')
@@ -189,7 +189,7 @@ class extendedRightsActions extends sfActions
             ->leftJoin('term_i18n', function($j) {
                 $j->on('term_i18n.id','=','information_object.level_of_description_id')->where('term_i18n.culture','=','en');
             })
-            ->where('information_object.parent_id','=',1)
+            ->where('information_object.parent_id','=','active')
             ->whereNotNull('information_object_i18n.title')
             ->orderBy('information_object_i18n.title')
             ->limit(500)
@@ -235,19 +235,19 @@ class extendedRightsActions extends sfActions
     public function executeEmbargoes(sfWebRequest $request)
     {
         $this->initDb();
-        $this->embargoes = Capsule::table('embargo')
-            ->join('slug','slug.object_id','=','embargo.object_id')
+        $this->embargoes = Capsule::table('rights_embargo')
+            ->join('slug','slug.object_id','=','rights_embargo.object_id')
             ->leftJoin('information_object_i18n', function($j) {
-                $j->on('information_object_i18n.id','=','embargo.object_id')->where('information_object_i18n.culture','=','en');
+                $j->on('information_object_i18n.id','=','rights_embargo.object_id')->where('information_object_i18n.culture','=','en');
             })
-            ->where('embargo.is_active','=',1)
-            ->orderBy('embargo.end_date')
+            ->where('rights_embargo.status','=','active')
+            ->orderBy('rights_embargo.end_date')
             ->select([
-                Capsule::raw('embargo.id'),
-                Capsule::raw('embargo.object_id'),
-                Capsule::raw('embargo.embargo_type'),
-                Capsule::raw('embargo.start_date'),
-                Capsule::raw('embargo.end_date'),
+                Capsule::raw('rights_embargo.id'),
+                Capsule::raw('rights_embargo.object_id'),
+                Capsule::raw('rights_embargo.embargo_type'),
+                Capsule::raw('rights_embargo.start_date'),
+                Capsule::raw('rights_embargo.end_date'),
                 Capsule::raw('information_object_i18n.title'),
                 Capsule::raw('slug.slug')
             ])->get();
@@ -256,7 +256,7 @@ class extendedRightsActions extends sfActions
     public function executeLiftEmbargo(sfWebRequest $request)
     {
         $this->initDb();
-        Capsule::table('embargo')->where('id','=',(int)$request->getParameter('id'))->update(['is_active'=>0,'lifted_at'=>date('Y-m-d H:i:s')]);
+        Capsule::table('rights_embargo')->where('id','=',(int)$request->getParameter('id'))->update(['status'=>'lifted','lifted_at'=>date('Y-m-d H:i:s')]);
         $this->getUser()->setFlash('notice', 'Embargo lifted.');
         $this->redirect(['module'=>'extendedRights','action'=>'embargoes']);
     }

@@ -104,9 +104,9 @@ class extendedRightsComponents extends sfComponents
             )
             ->get();
 
-        $this->embargo = Capsule::table('embargo')
+        $this->embargo = Capsule::table('rights_embargo')
             ->where('object_id', '=', $objectId)
-            ->where('is_active', '=', 1)
+            ->where('status', '=', 'active')
             ->where(function ($query) {
                 $query->whereNull('end_date')
                       ->orWhere('end_date', '>', date('Y-m-d'));
@@ -192,7 +192,7 @@ class extendedRightsComponents extends sfComponents
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
             'with_creative_commons' => Capsule::table('object_creative_commons')->distinct()->count('object_id'),
             'with_tk_labels' => Capsule::table('object_tk_label')->distinct()->count('object_id'),
-            'active_embargoes' => Capsule::table('embargo')->where('is_active', 1)->count(),
+            'active_embargoes' => Capsule::table('rights_embargo')->where('status', 'active')->count(),
         ];
     }
     public function executeEmbargoStatus(sfWebRequest $request)
@@ -206,9 +206,9 @@ class extendedRightsComponents extends sfComponents
         $this->getDb();
         $objectId = (int) $objectId;
 
-        $this->embargo = Capsule::table('embargo')
+        $this->embargo = Capsule::table('rights_embargo')
             ->where('object_id', '=', $objectId)
-            ->where('is_active', '=', 1)
+            ->where('status', '=', 'active')
             ->where(function ($query) {
                 $query->whereNull('end_date')
                       ->orWhere('end_date', '>', date('Y-m-d'));

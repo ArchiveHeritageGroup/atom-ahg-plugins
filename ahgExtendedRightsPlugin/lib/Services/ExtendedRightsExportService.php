@@ -26,14 +26,14 @@ class ExtendedRightsExportService
         }
 
         try {
-            $stats['active_embargoes'] = DB::table('embargo')->where('is_active', '=', 1)->count();
+            $stats['active_embargoes'] = DB::table('rights_embargo')->where('status', '=', 'active')->count();
         } catch (\Exception $e) {
             $stats['active_embargoes'] = 0;
         }
 
         try {
-            $stats['embargoes_expiring_soon'] = DB::table('embargo')
-                ->where('is_active', '=', 1)
+            $stats['embargoes_expiring_soon'] = DB::table('rights_embargo')
+                ->where('status', '=', 'active')
                 ->whereNotNull('end_date')
                 ->where('end_date', '<=', date('Y-m-d', strtotime('+30 days')))
                 ->count();
