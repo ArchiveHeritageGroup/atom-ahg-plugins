@@ -1,369 +1,254 @@
--- ============================================================
--- ahgPrivacyPlugin - Database Schema
--- Multi-jurisdictional privacy compliance
--- DO NOT include INSERT INTO atom_plugin
--- ============================================================
+-- =============================================================================
+-- ahgPrivacyPlugin - Privacy Compliance Tables
+-- Multi-jurisdictional privacy compliance (POPIA, NDPA, GDPR, PIPEDA, CCPA, etc.)
+-- =============================================================================
 
--- Privacy Configuration
+-- Privacy Jurisdiction (admin-configurable)
+CREATE TABLE IF NOT EXISTS `privacy_jurisdiction` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(30) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `full_name` VARCHAR(255) NOT NULL,
+    `country` VARCHAR(100) NOT NULL,
+    `region` VARCHAR(50) DEFAULT 'Africa',
+    `regulator` VARCHAR(255) NULL,
+    `regulator_url` VARCHAR(255) NULL,
+    `dsar_days` INT DEFAULT 30,
+    `breach_hours` INT DEFAULT 72,
+    `effective_date` DATE NULL,
+    `related_laws` JSON NULL,
+    `icon` VARCHAR(10) NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `sort_order` INT DEFAULT 99,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_jurisdiction_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Privacy Config (per jurisdiction settings)
 CREATE TABLE IF NOT EXISTS `privacy_config` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `jurisdiction` ENUM('popia', 'gdpr', 'pipeda', 'ccpa', 'custom') NOT NULL DEFAULT 'popia',
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
     `organization_name` VARCHAR(255) NULL,
     `registration_number` VARCHAR(100) NULL,
-    `privacy_officer_id` INT UNSIGNED NULL,
     `data_protection_email` VARCHAR(255) NULL,
-    `dsar_response_days` INT NOT NULL DEFAULT 30,
-    `breach_notification_hours` INT NOT NULL DEFAULT 72,
-    `retention_default_years` INT NOT NULL DEFAULT 5,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `dsar_response_days` INT DEFAULT 30,
+    `breach_notification_hours` INT DEFAULT 72,
     `settings` JSON NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Privacy Officer / Information Officer
-CREATE TABLE IF NOT EXISTS `privacy_officer` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id` INT NULL,
-    `name` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
-    `phone` VARCHAR(50) NULL,
-    `title` VARCHAR(100) NULL,
-    `jurisdiction` ENUM('popia', 'gdpr', 'pipeda', 'ccpa', 'all') NOT NULL DEFAULT 'all',
-    `registration_number` VARCHAR(100) NULL COMMENT 'POPIA Information Regulator registration',
-    `appointed_date` DATE NULL,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_user` (`user_id`),
-    KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data Subject Access Requests (DSAR)
 CREATE TABLE IF NOT EXISTS `privacy_dsar` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `reference_number` VARCHAR(50) NOT NULL,
-    `jurisdiction` ENUM('popia', 'gdpr', 'pipeda', 'ccpa') NOT NULL,
-    `request_type` ENUM('access', 'rectification', 'erasure', 'portability', 'restriction', 'objection', 'withdraw_consent') NOT NULL,
-    `requestor_name` VARCHAR(255) NOT NULL,
-    `requestor_email` VARCHAR(255) NULL,
-    `requestor_phone` VARCHAR(50) NULL,
-    `requestor_id_type` VARCHAR(50) NULL,
-    `requestor_id_number` VARCHAR(100) NULL,
-    `requestor_address` TEXT NULL,
-    `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
-    `verified_at` DATETIME NULL,
-    `verified_by` INT NULL,
-    `status` ENUM('received', 'verified', 'in_progress', 'pending_info', 'completed', 'rejected', 'withdrawn') NOT NULL DEFAULT 'received',
-    `priority` ENUM('low', 'normal', 'high', 'urgent') NOT NULL DEFAULT 'normal',
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
+    `request_type` VARCHAR(50) NOT NULL,
+    `subject_name` VARCHAR(255) NOT NULL,
+    `subject_email` VARCHAR(255) NULL,
+    `subject_phone` VARCHAR(50) NULL,
+    `subject_id_type` VARCHAR(50) NULL,
+    `subject_id_number` VARCHAR(100) NULL,
+    `description` TEXT NULL,
+    `status` ENUM('received','acknowledged','in_progress','extended','completed','rejected','withdrawn') DEFAULT 'received',
+    `priority` ENUM('low','normal','high','urgent') DEFAULT 'normal',
     `received_date` DATE NOT NULL,
-    `due_date` DATE NOT NULL,
+    `acknowledged_date` DATE NULL,
+    `due_date` DATE NULL,
     `completed_date` DATE NULL,
-    `assigned_to` INT NULL,
-    `outcome` ENUM('granted', 'partially_granted', 'refused', 'not_applicable') NULL,
-    `refusal_reason` TEXT NULL,
-    `fee_required` DECIMAL(10,2) NULL,
-    `fee_paid` TINYINT(1) NOT NULL DEFAULT 0,
-    `created_by` INT NULL,
+    `extension_reason` TEXT NULL,
+    `response_summary` TEXT NULL,
+    `assigned_to` INT UNSIGNED NULL,
+    `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_reference` (`reference_number`),
-    KEY `idx_status` (`status`),
     KEY `idx_jurisdiction` (`jurisdiction`),
-    KEY `idx_due_date` (`due_date`),
-    KEY `idx_assigned` (`assigned_to`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    KEY `idx_status` (`status`),
+    KEY `idx_due_date` (`due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `privacy_dsar_i18n` (
-    `id` INT UNSIGNED NOT NULL,
-    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
-    `description` TEXT NULL,
-    `notes` TEXT NULL,
-    `response_summary` TEXT NULL,
-    PRIMARY KEY (`id`, `culture`),
-    CONSTRAINT `fk_dsar_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_dsar` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Breach Register
+-- Data Breaches
 CREATE TABLE IF NOT EXISTS `privacy_breach` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `reference_number` VARCHAR(50) NOT NULL,
-    `jurisdiction` ENUM('popia', 'gdpr', 'pipeda', 'ccpa') NOT NULL,
-    `breach_type` ENUM('confidentiality', 'integrity', 'availability') NOT NULL,
-    `severity` ENUM('low', 'medium', 'high', 'critical') NOT NULL DEFAULT 'medium',
-    `status` ENUM('detected', 'investigating', 'contained', 'resolved', 'closed') NOT NULL DEFAULT 'detected',
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT NOT NULL,
+    `breach_type` VARCHAR(50) NULL,
+    `severity` ENUM('low','medium','high','critical') DEFAULT 'medium',
     `detected_date` DATETIME NOT NULL,
     `occurred_date` DATETIME NULL,
-    `contained_date` DATETIME NULL,
-    `resolved_date` DATETIME NULL,
-    `data_subjects_affected` INT NULL,
-    `data_categories_affected` TEXT NULL,
-    `notification_required` TINYINT(1) NOT NULL DEFAULT 0,
-    `regulator_notified` TINYINT(1) NOT NULL DEFAULT 0,
+    `reported_date` DATETIME NULL,
+    `data_subjects_affected` INT DEFAULT 0,
+    `data_categories` JSON NULL,
+    `containment_actions` TEXT NULL,
+    `remediation_actions` TEXT NULL,
+    `notification_required` TINYINT(1) DEFAULT 0,
+    `regulator_notified` TINYINT(1) DEFAULT 0,
     `regulator_notified_date` DATETIME NULL,
-    `subjects_notified` TINYINT(1) NOT NULL DEFAULT 0,
+    `subjects_notified` TINYINT(1) DEFAULT 0,
     `subjects_notified_date` DATETIME NULL,
-    `risk_to_rights` ENUM('unlikely', 'possible', 'likely', 'high') NULL,
-    `assigned_to` INT NULL,
-    `created_by` INT NULL,
+    `status` ENUM('detected','investigating','contained','resolved','closed') DEFAULT 'detected',
+    `root_cause` TEXT NULL,
+    `lessons_learned` TEXT NULL,
+    `assigned_to` INT UNSIGNED NULL,
+    `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_reference` (`reference_number`),
+    KEY `idx_jurisdiction` (`jurisdiction`),
     KEY `idx_status` (`status`),
-    KEY `idx_severity` (`severity`),
-    KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    KEY `idx_severity` (`severity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `privacy_breach_i18n` (
-    `id` INT UNSIGNED NOT NULL,
-    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
-    `title` VARCHAR(255) NULL,
-    `description` TEXT NULL,
-    `cause` TEXT NULL,
-    `impact_assessment` TEXT NULL,
-    `remedial_actions` TEXT NULL,
-    `lessons_learned` TEXT NULL,
-    PRIMARY KEY (`id`, `culture`),
-    CONSTRAINT `fk_breach_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Breach Notifications
-CREATE TABLE IF NOT EXISTS `privacy_breach_notification` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `breach_id` INT UNSIGNED NOT NULL,
-    `notification_type` ENUM('regulator', 'data_subject', 'internal', 'third_party') NOT NULL,
-    `recipient` VARCHAR(255) NOT NULL,
-    `method` ENUM('email', 'letter', 'portal', 'phone', 'in_person') NOT NULL,
-    `sent_date` DATETIME NULL,
-    `acknowledged_date` DATETIME NULL,
-    `content` TEXT NULL,
-    `created_by` INT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_breach` (`breach_id`),
-    CONSTRAINT `fk_breach_notif` FOREIGN KEY (`breach_id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Consent Management
-CREATE TABLE IF NOT EXISTS `privacy_consent` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `consent_type` ENUM('processing', 'marketing', 'profiling', 'third_party', 'cookies', 'research', 'special_category') NOT NULL,
-    `purpose_code` VARCHAR(50) NOT NULL,
-    `is_required` TINYINT(1) NOT NULL DEFAULT 0,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `valid_from` DATE NULL,
-    `valid_until` DATE NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_type` (`consent_type`),
-    KEY `idx_purpose` (`purpose_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `privacy_consent_i18n` (
-    `id` INT UNSIGNED NOT NULL,
-    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
-    `name` VARCHAR(255) NOT NULL,
-    `description` TEXT NULL,
-    `purpose_description` TEXT NULL,
-    PRIMARY KEY (`id`, `culture`),
-    CONSTRAINT `fk_consent_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_consent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Consent Log (individual consent records)
-CREATE TABLE IF NOT EXISTS `privacy_consent_log` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `consent_id` INT UNSIGNED NOT NULL,
-    `user_id` INT NULL,
-    `subject_identifier` VARCHAR(255) NULL COMMENT 'Email or other identifier if not user',
-    `action` ENUM('granted', 'withdrawn', 'expired', 'renewed') NOT NULL,
-    `consent_given` TINYINT(1) NOT NULL DEFAULT 0,
-    `consent_date` DATETIME NOT NULL,
-    `withdrawal_date` DATETIME NULL,
-    `ip_address` VARCHAR(45) NULL,
-    `user_agent` TEXT NULL,
-    `consent_proof` TEXT NULL COMMENT 'Evidence of consent',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_consent` (`consent_id`),
-    KEY `idx_user` (`user_id`),
-    KEY `idx_subject` (`subject_identifier`),
-    CONSTRAINT `fk_consent_log` FOREIGN KEY (`consent_id`) REFERENCES `privacy_consent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Processing Activities (ROPA - Records of Processing Activities)
+-- Record of Processing Activities (ROPA)
 CREATE TABLE IF NOT EXISTS `privacy_processing_activity` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `reference_code` VARCHAR(50) NOT NULL,
-    `controller_name` VARCHAR(255) NULL,
-    `processor_name` VARCHAR(255) NULL,
-    `lawful_basis` ENUM('consent', 'contract', 'legal_obligation', 'vital_interests', 'public_task', 'legitimate_interests') NOT NULL,
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT NULL,
+    `purpose` TEXT NOT NULL,
+    `lawful_basis` VARCHAR(100) NULL,
     `data_categories` JSON NULL,
-    `special_categories` TINYINT(1) NOT NULL DEFAULT 0,
     `data_subjects` JSON NULL,
     `recipients` JSON NULL,
-    `third_country_transfers` TINYINT(1) NOT NULL DEFAULT 0,
-    `transfer_safeguards` VARCHAR(255) NULL,
-    `retention_period` VARCHAR(100) NULL,
+    `third_countries` JSON NULL,
+    `retention_period` VARCHAR(255) NULL,
     `security_measures` TEXT NULL,
-    `dpia_required` TINYINT(1) NOT NULL DEFAULT 0,
-    `dpia_completed` TINYINT(1) NOT NULL DEFAULT 0,
+    `dpia_required` TINYINT(1) DEFAULT 0,
+    `dpia_completed` TINYINT(1) DEFAULT 0,
     `dpia_date` DATE NULL,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `last_reviewed` DATE NULL,
-    `next_review` DATE NULL,
-    `created_by` INT NULL,
+    `status` ENUM('draft','active','under_review','archived') DEFAULT 'draft',
+    `owner` VARCHAR(255) NULL,
+    `next_review_date` DATE NULL,
+    `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_reference` (`reference_code`),
-    KEY `idx_lawful_basis` (`lawful_basis`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    KEY `idx_jurisdiction` (`jurisdiction`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `privacy_processing_activity_i18n` (
-    `id` INT UNSIGNED NOT NULL,
-    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
-    `name` VARCHAR(255) NOT NULL,
-    `purpose` TEXT NULL,
-    `description` TEXT NULL,
-    PRIMARY KEY (`id`, `culture`),
-    CONSTRAINT `fk_processing_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_processing_activity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Data Inventory
-CREATE TABLE IF NOT EXISTS `privacy_data_inventory` (
+-- Consent Records
+CREATE TABLE IF NOT EXISTS `privacy_consent_record` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL,
-    `description` TEXT NULL,
-    `data_type` ENUM('personal', 'special_category', 'children', 'criminal', 'financial', 'health', 'biometric', 'genetic') NOT NULL,
-    `storage_location` VARCHAR(255) NULL,
-    `storage_format` ENUM('electronic', 'paper', 'both') NOT NULL DEFAULT 'electronic',
-    `encryption` TINYINT(1) NOT NULL DEFAULT 0,
-    `access_controls` TEXT NULL,
-    `retention_years` INT NULL,
-    `disposal_method` VARCHAR(100) NULL,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
+    `subject_identifier` VARCHAR(255) NOT NULL,
+    `consent_type` VARCHAR(100) NOT NULL,
+    `purpose` TEXT NOT NULL,
+    `status` ENUM('active','withdrawn','expired') DEFAULT 'active',
+    `granted_date` DATETIME NOT NULL,
+    `withdrawn_date` DATETIME NULL,
+    `expiry_date` DATE NULL,
+    `consent_method` VARCHAR(100) NULL,
+    `evidence` TEXT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `idx_type` (`data_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    KEY `idx_jurisdiction` (`jurisdiction`),
+    KEY `idx_status` (`status`),
+    KEY `idx_subject` (`subject_identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Retention Schedule
-CREATE TABLE IF NOT EXISTS `privacy_retention_schedule` (
+-- Privacy Complaints
+CREATE TABLE IF NOT EXISTS `privacy_complaint` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `record_type` VARCHAR(255) NOT NULL,
-    `description` TEXT NULL,
-    `retention_period` VARCHAR(100) NOT NULL,
-    `retention_years` INT NULL,
-    `legal_basis` VARCHAR(255) NULL,
-    `disposal_action` ENUM('destroy', 'archive', 'anonymize', 'review') NOT NULL DEFAULT 'destroy',
-    `jurisdiction` ENUM('popia', 'gdpr', 'pipeda', 'ccpa', 'all') NOT NULL DEFAULT 'all',
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `reference_number` VARCHAR(50) NOT NULL,
+    `jurisdiction` VARCHAR(30) NOT NULL DEFAULT 'popia',
+    `complaint_type` VARCHAR(50) NOT NULL,
+    `complainant_name` VARCHAR(255) NOT NULL,
+    `complainant_email` VARCHAR(255) NULL,
+    `complainant_phone` VARCHAR(50) NULL,
+    `description` TEXT NOT NULL,
+    `date_of_incident` DATE NULL,
+    `status` ENUM('received','investigating','resolved','escalated','closed') DEFAULT 'received',
+    `assigned_to` INT UNSIGNED NULL,
+    `resolution` TEXT NULL,
+    `resolved_date` DATE NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    UNIQUE KEY `uk_reference` (`reference_number`),
+    KEY `idx_jurisdiction` (`jurisdiction`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Audit Log
-CREATE TABLE IF NOT EXISTS `privacy_audit_log` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `entity_type` VARCHAR(50) NOT NULL,
-    `entity_id` INT UNSIGNED NOT NULL,
-    `action` VARCHAR(50) NOT NULL,
-    `user_id` INT NULL,
-    `ip_address` VARCHAR(45) NULL,
-    `old_values` JSON NULL,
-    `new_values` JSON NULL,
-    `notes` TEXT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_entity` (`entity_type`, `entity_id`),
-    KEY `idx_user` (`user_id`),
-    KEY `idx_action` (`action`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Default jurisdiction-specific retention schedules
-INSERT INTO `privacy_retention_schedule` (`record_type`, `description`, `retention_period`, `retention_years`, `legal_basis`, `disposal_action`, `jurisdiction`) VALUES
-('Personnel records', 'Employee files after termination', '5 years after termination', 5, 'POPIA s14, BCEA', 'destroy', 'popia'),
-('Financial records', 'Accounting and tax records', '5 years', 5, 'TAA, Companies Act', 'destroy', 'popia'),
-('Access requests', 'DSAR records', '3 years after completion', 3, 'POPIA s23', 'archive', 'popia'),
-('Consent records', 'Proof of consent', 'Duration of processing + 3 years', 3, 'POPIA s11', 'destroy', 'popia'),
-('Breach records', 'Data breach documentation', '5 years', 5, 'POPIA s22', 'archive', 'popia'),
-('Personnel records', 'Employee files after termination', '6 years after termination', 6, 'GDPR Art 17, Limitation Act', 'destroy', 'gdpr'),
-('Access requests', 'DSAR records', '3 years after completion', 3, 'GDPR Art 5(2)', 'archive', 'gdpr'),
-('Consent records', 'Proof of consent', 'Duration of processing + 6 years', 6, 'GDPR Art 7', 'destroy', 'gdpr'),
-('Breach records', 'Data breach documentation', '5 years', 5, 'GDPR Art 33', 'archive', 'gdpr'),
-('Customer records', 'Customer personal data', '7 years after last transaction', 7, 'PIPEDA Principle 5', 'destroy', 'pipeda'),
-('Access requests', 'Access request records', '2 years after completion', 2, 'PIPEDA s8', 'archive', 'pipeda'),
-('Consumer requests', 'CCPA request records', '24 months', 2, 'CCPA 1798.130', 'destroy', 'ccpa'),
-('Opt-out records', 'Do Not Sell records', '24 months', 2, 'CCPA 1798.135', 'archive', 'ccpa')
-ON DUPLICATE KEY UPDATE `retention_period` = VALUES(`retention_period`);
-
--- PAIA Requests (South Africa - Promotion of Access to Information Act)
+-- PAIA Requests (South Africa specific)
 CREATE TABLE IF NOT EXISTS `privacy_paia_request` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `reference_number` VARCHAR(50) NOT NULL,
-    `paia_section` ENUM('section_18', 'section_22', 'section_23', 'section_50', 'section_77') NOT NULL,
-    `requestor_name` VARCHAR(255) NOT NULL,
-    `requestor_email` VARCHAR(255) NULL,
-    `requestor_phone` VARCHAR(50) NULL,
-    `requestor_id_number` VARCHAR(100) NULL,
-    `requestor_address` TEXT NULL,
-    `record_description` TEXT NULL,
-    `access_form` ENUM('inspect', 'copy', 'both') NOT NULL DEFAULT 'copy',
-    `status` ENUM('received', 'processing', 'granted', 'partially_granted', 'refused', 'transferred', 'appealed') NOT NULL DEFAULT 'received',
-    `outcome_reason` TEXT NULL,
-    `refusal_grounds` VARCHAR(100) NULL COMMENT 'PAIA grounds for refusal section',
-    `fee_deposit` DECIMAL(10,2) NULL,
-    `fee_access` DECIMAL(10,2) NULL,
-    `fee_paid` TINYINT(1) NOT NULL DEFAULT 0,
+    `requester_name` VARCHAR(255) NOT NULL,
+    `requester_email` VARCHAR(255) NULL,
+    `requester_phone` VARCHAR(50) NULL,
+    `requester_address` TEXT NULL,
+    `request_type` ENUM('personal','third_party','public') DEFAULT 'personal',
+    `record_description` TEXT NOT NULL,
+    `access_form` ENUM('inspect','copy','both') DEFAULT 'copy',
+    `status` ENUM('received','processing','granted','partially_granted','refused','transferred') DEFAULT 'received',
     `received_date` DATE NOT NULL,
-    `due_date` DATE NOT NULL,
-    `completed_date` DATE NULL,
-    `assigned_to` INT NULL,
-    `created_by` INT NULL,
+    `due_date` DATE NULL,
+    `decision_date` DATE NULL,
+    `refusal_reason` TEXT NULL,
+    `fees_required` DECIMAL(10,2) DEFAULT 0,
+    `fees_paid` DECIMAL(10,2) DEFAULT 0,
+    `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_paia_reference` (`reference_number`),
-    KEY `idx_paia_status` (`status`),
-    KEY `idx_paia_section` (`paia_section`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    UNIQUE KEY `uk_reference` (`reference_number`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Add jurisdiction column to existing tables if not exists
--- Note: Using ALTER TABLE with IF NOT EXISTS workaround
+-- Information Officers (POPIA specific)
+CREATE TABLE IF NOT EXISTS `privacy_information_officer` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `jurisdiction` VARCHAR(30) DEFAULT 'popia',
+    `officer_type` ENUM('information_officer','deputy_information_officer') DEFAULT 'information_officer',
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(50) NULL,
+    `department` VARCHAR(255) NULL,
+    `registration_number` VARCHAR(100) NULL,
+    `appointed_date` DATE NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_jurisdiction` (`jurisdiction`),
+    KEY `idx_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Check and add jurisdiction to privacy_processing_activity
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'privacy_processing_activity' AND COLUMN_NAME = 'jurisdiction');
-SET @sql = IF(@col_exists = 0, 'ALTER TABLE privacy_processing_activity ADD COLUMN jurisdiction VARCHAR(20) DEFAULT ''popia'' AFTER name', 'SELECT ''Column exists''');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+-- =============================================================================
+-- Seed Data: Jurisdictions
+-- =============================================================================
 
--- Check and add lawful_basis_code
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'privacy_processing_activity' AND COLUMN_NAME = 'lawful_basis_code');
-SET @sql = IF(@col_exists = 0, 'ALTER TABLE privacy_processing_activity ADD COLUMN lawful_basis_code VARCHAR(50) NULL AFTER lawful_basis', 'SELECT ''Column exists''');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Check and add cross_border_safeguards
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'privacy_processing_activity' AND COLUMN_NAME = 'cross_border_safeguards');
-SET @sql = IF(@col_exists = 0, 'ALTER TABLE privacy_processing_activity ADD COLUMN cross_border_safeguards TEXT NULL AFTER third_countries', 'SELECT ''Column exists''');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Add jurisdiction to consent_record
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'privacy_consent_record' AND COLUMN_NAME = 'jurisdiction');
-SET @sql = IF(@col_exists = 0, 'ALTER TABLE privacy_consent_record ADD COLUMN jurisdiction VARCHAR(20) DEFAULT ''popia''', 'SELECT ''Column exists''');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+INSERT INTO privacy_jurisdiction 
+(code, name, full_name, country, region, regulator, regulator_url, dsar_days, breach_hours, effective_date, related_laws, icon, is_active, sort_order)
+VALUES
+('popia', 'POPIA', 'Protection of Personal Information Act', 'South Africa', 'Africa', 
+ 'Information Regulator', 'https://www.justice.gov.za/inforeg/', 30, 72, '2021-07-01',
+ '["PAIA", "ECTA", "RICA"]', 'za', 1, 1),
+('ndpa', 'NDPA', 'Nigeria Data Protection Act', 'Nigeria', 'Africa',
+ 'Nigeria Data Protection Commission (NDPC)', 'https://ndpc.gov.ng/', 30, 72, '2023-06-14',
+ '["NITDA Act", "Cybercrimes Act"]', 'ng', 1, 2),
+('kenya_dpa', 'Kenya DPA', 'Data Protection Act', 'Kenya', 'Africa',
+ 'Office of the Data Protection Commissioner (ODPC)', 'https://www.odpc.go.ke/', 30, 72, '2019-11-25',
+ '["Computer Misuse and Cybercrimes Act"]', 'ke', 1, 3),
+('gdpr', 'GDPR', 'General Data Protection Regulation', 'European Union', 'Europe',
+ 'Supervisory Authority (per member state)', 'https://edpb.europa.eu/', 30, 72, '2018-05-25',
+ '["ePrivacy Directive"]', 'eu', 1, 10),
+('pipeda', 'PIPEDA', 'Personal Information Protection and Electronic Documents Act', 'Canada', 'North America',
+ 'Office of the Privacy Commissioner of Canada (OPC)', 'https://www.priv.gc.ca/', 30, 0, '2000-01-01',
+ '["CASL", "Provincial privacy laws"]', 'ca', 1, 11),
+('ccpa', 'CCPA/CPRA', 'California Consumer Privacy Act / California Privacy Rights Act', 'USA (California)', 'North America',
+ 'California Privacy Protection Agency (CPPA)', 'https://cppa.ca.gov/', 45, 0, '2020-01-01',
+ '["CPRA amendments"]', 'us', 1, 12)
+ON DUPLICATE KEY UPDATE name=VALUES(name);
