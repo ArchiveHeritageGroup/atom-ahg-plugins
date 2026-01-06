@@ -67,7 +67,7 @@ class researchActions extends sfActions
                 $this->getUser()->setFlash('success', 'Registration submitted');
                 $this->redirect('research/dashboard');
             } catch (Exception $e) {
-                $this->getUser()->setFlash('error', $e->getMessage());
+                if ($e->getMessage()) { $this->getUser()->setFlash('error', $e->getMessage()); }
             }
         }
     }
@@ -591,7 +591,7 @@ class researchActions extends sfActions
                 $this->redirect('research/registrationComplete');
             } catch (Exception $e) {
                 DB::rollBack();
-                $this->getUser()->setFlash('error', 'Registration failed: ' . $e->getMessage());
+                if ($e->getMessage()) { $this->getUser()->setFlash('error', 'Registration failed: ' . $e->getMessage()); }
             }
         }
     }
