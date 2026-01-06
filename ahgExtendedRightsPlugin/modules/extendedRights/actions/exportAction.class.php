@@ -12,10 +12,10 @@ class extendedRightsExportAction extends sfAction
 
         // Load services with require_once
         require_once sfConfig::get('sf_root_dir').'/atom-framework/app/Services/Rights/ExtendedRightsExportService.php';
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/app/Services/Rights/ExtendedRightsService.php';
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
 
         $exportService = new \App\Services\Rights\ExtendedRightsExportService($culture);
-        $rightsService = new \App\Services\Rights\ExtendedRightsService($culture);
+        $rightsService = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService($culture);
 
         // Get records for dropdown
         $this->topLevelRecords = $rightsService->getTopLevelRecords(1000);

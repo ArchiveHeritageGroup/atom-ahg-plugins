@@ -9,9 +9,9 @@ class extendedRightsLiftEmbargoAction extends sfAction
         }
 
         // Load service
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/app/Services/Rights/ExtendedRightsService.php';
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
 
-        $service = new \App\Services\Rights\ExtendedRightsService('en');
+        $service = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService('en');
 
         $embargoId = (int) $request->getParameter('id');
         $service->liftEmbargo($embargoId);

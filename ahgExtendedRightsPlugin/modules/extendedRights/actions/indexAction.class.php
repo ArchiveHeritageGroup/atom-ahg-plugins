@@ -7,9 +7,9 @@ class extendedRightsIndexAction extends sfAction
         $culture = $this->context->user->getCulture();
 
         // Load service
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/app/Services/Rights/ExtendedRightsService.php';
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
 
-        $service = new \App\Services\Rights\ExtendedRightsService($culture);
+        $service = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService($culture);
 
         $this->rightsStatements = $service->getRightsStatements();
         $this->ccLicenses = $service->getCreativeCommonsLicenses();
