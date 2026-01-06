@@ -16,6 +16,41 @@ class PrivacyService
      */
     public static function getJurisdictions(): array
     {
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+        
+        $rows = DB::table('privacy_jurisdiction')
+            ->orderBy('sort_order')
+            ->get();
+        
+        $cache = [];
+        foreach ($rows as $row) {
+            $cache[$row->code] = [
+                'id' => $row->id,
+                'name' => $row->name,
+                'full_name' => $row->full_name,
+                'country' => $row->country,
+                'region' => $row->region,
+                'regulator' => $row->regulator,
+                'regulator_url' => $row->regulator_url,
+                'dsar_days' => $row->dsar_days,
+                'breach_hours' => $row->breach_hours,
+                'effective_date' => $row->effective_date,
+                'related_laws' => $row->related_laws ? json_decode($row->related_laws, true) : [],
+                'icon' => $row->icon,
+                'is_active' => (bool)$row->is_active
+            ];
+        }
+        return $cache;
+    }
+
+    /**
+     * OLD HARDCODED - kept for reference, now using database
+     */
+    private static function getJurisdictionsLegacy(): array
+    {
         return [
             // African Jurisdictions
             'popia' => [

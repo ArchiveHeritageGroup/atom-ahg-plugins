@@ -460,3 +460,110 @@ class privacyAdminActions extends sfActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'complaintView', 'id' => $request->getParameter('id')]);
     }
 }
+    // =====================
+    // Jurisdiction Management
+    // =====================
+
+    public function executeJurisdictionList(sfWebRequest $request)
+    {
+        $this->jurisdictions = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function executeJurisdictionAdd(sfWebRequest $request)
+    {
+        $this->jurisdiction = null;
+        $this->regions = ['Africa', 'Europe', 'North America', 'South America', 'Asia', 'Oceania', 'International'];
+
+        if ($request->isMethod('post')) {
+            $this->saveJurisdiction($request);
+            $this->getUser()->setFlash('success', 'Jurisdiction added successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']);
+        }
+    }
+
+    public function executeJurisdictionEdit(sfWebRequest $request)
+    {
+        $this->jurisdiction = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+
+        if (!$this->jurisdiction) {
+            $this->forward404();
+        }
+
+        $this->regions = ['Africa', 'Europe', 'North America', 'South America', 'Asia', 'Oceania', 'International'];
+
+        if ($request->isMethod('post')) {
+            $this->saveJurisdiction($request, $this->jurisdiction->id);
+            $this->getUser()->setFlash('success', 'Jurisdiction updated successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']);
+        }
+    }
+
+    public function executeJurisdictionToggle(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+        $j = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->first();
+
+        if ($j) {
+            \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
+                ->where('id', $id)
+                ->update(['is_active' => !$j->is_active]);
+        }
+
+        $this->getUser()->setFlash('success', 'Jurisdiction status updated');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']);
+    }
+
+    public function executeJurisdictionDelete(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+
+        // Check if jurisdiction is in use
+        $code = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
+            ->where('id', $id)
+            ->value('code');
+
+        $inUse = \Illuminate\Database\Capsule\Manager::table('privacy_dsar')
+            ->where('jurisdiction', $code)
+            ->exists();
+
+        if ($inUse) {
+            $this->getUser()->setFlash('error', 'Cannot delete - jurisdiction is in use');
+        } else {
+            \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->delete();
+            $this->getUser()->setFlash('success', 'Jurisdiction deleted');
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']);
+    }
+
+    protected function saveJurisdiction(sfWebRequest $request, $id = null)
+    {
+        $data = [
+            'code' => strtolower($request->getParameter('code')),
+            'name' => $request->getParameter('name'),
+            'full_name' => $request->getParameter('full_name'),
+            'country' => $request->getParameter('country'),
+            'region' => $request->getParameter('region'),
+            'regulator' => $request->getParameter('regulator'),
+            'regulator_url' => $request->getParameter('regulator_url'),
+            'dsar_days' => (int)$request->getParameter('dsar_days', 30),
+            'breach_hours' => (int)$request->getParameter('breach_hours', 72),
+            'effective_date' => $request->getParameter('effective_date') ?: null,
+            'related_laws' => json_encode(array_filter(explode("\n", $request->getParameter('related_laws', '')))),
+            'icon' => $request->getParameter('icon'),
+            'is_active' => $request->getParameter('is_active') ? 1 : 0,
+            'sort_order' => (int)$request->getParameter('sort_order', 99),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($id) {
+            \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->update($data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->insert($data);
+        }
+    }
