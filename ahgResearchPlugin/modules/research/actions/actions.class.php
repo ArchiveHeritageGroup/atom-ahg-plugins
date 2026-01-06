@@ -390,6 +390,7 @@ class researchActions extends sfActions
                         $exists = DB::table('research_collection_item')
                             ->where('collection_id', $id)
                             ->where('object_id', $oid)->exists();
+                        if (!$exists) {
                             DB::table('research_collection_item')->insert([
                                 'collection_id' => $id,
                                 'object_id' => $oid,
@@ -441,6 +442,7 @@ class researchActions extends sfActions
                 $this->getUser()->setFlash('success', 'Collection deleted');
                 $this->redirect('research/collections');
             }
+		}
     }
 
     public function executeAnnotations(sfWebRequest $request)
