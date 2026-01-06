@@ -15,7 +15,7 @@ class extendedRightsDashboardAction extends sfAction
 
         $service = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService($culture);
 
-        $this->stats = $service->getRightsStatistics();
+        $this->stats = $service->getDashboardStats();
         $this->embargoes = $service->getActiveEmbargoes();
         $this->rightsStatements = $service->getRightsStatements();
         $this->ccLicenses = $service->getCreativeCommonsLicenses();

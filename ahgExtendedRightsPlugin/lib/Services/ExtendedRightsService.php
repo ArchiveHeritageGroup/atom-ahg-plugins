@@ -68,7 +68,7 @@ class ExtendedRightsService
         $labels = DB::table('tk_label as tk')
             ->leftJoin('tk_label_category as cat', 'tk.tk_label_category_id', '=', 'cat.id')
             ->where('tk.is_active', 1)
-            ->select('tk.id', 'tk.code', 'tk.uri', 'tk.icon_url', 'tk.icon_filename', 'cat.code as category_code', 'cat.name as category_name')
+            ->select('tk.id', 'tk.code', 'tk.uri', 'tk.icon_url', 'tk.icon_filename', 'cat.code as category_code', 'cat.code as category_name')
             ->orderBy('cat.sort_order')
             ->orderBy('tk.sort_order')
             ->get();
@@ -239,5 +239,153 @@ class ExtendedRightsService
                 ->where('expiry_date', '>', date('Y-m-d'))
                 ->count(),
         ];
+    }
+
+    /**
+     * Get all active embargoes
+     */
+    public function getActiveEmbargoes(): Collection
+    {
+        return DB::table('embargo as e')
+            ->join('information_object as io', 'io.id', '=', 'e.object_id')
+            ->leftJoin('information_object_i18n as ioi', function($j) {
+                $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', $this->culture);
+            })
+            ->where('e.end_date', '>=', date('Y-m-d'))
+            ->where('e.is_active', 1)
+            ->select(['e.*', 'ioi.title as object_title'])
+            ->orderBy('e.end_date')
+            ->limit(20)
+            ->get();
+    }
+
+    /**
+     * Get rights statements (alias for getRightsStatementsByCategory)
+     */
+    public function getRightsStatements(): array
+    {
+        return $this->getRightsStatementsByCategory();
+    }
+
+    /**
+     * Get TK labels (alias for getTkLabelsByCategory)
+     */
+    public function getTkLabels(): array
+    {
+        return $this->getTkLabelsByCategory();
+    }
+
+    /**
+     * Get donors/rights holders for batch assignment
+     */
+    public function getDonors(int $limit = 100): Collection
+    {
+        try {
+            return DB::table("actor as a")
+                ->leftJoin("actor_i18n as ai", function($j) {
+                    $j->on("ai.id", "=", "a.id")->where("ai.culture", "=", $this->culture);
+                })
+                ->select(["a.id", "ai.authorized_form_of_name as name"])
+                ->whereNotNull("ai.authorized_form_of_name")
+                ->orderBy("ai.authorized_form_of_name")
+                ->limit($limit)
+                ->get();
+        } catch (\Exception $e) {
+            return collect([]);
+        }
+    }
+
+    /**
+     * Get top level records for batch selection
+     */
+    public function getTopLevelRecords(int $limit = 100): Collection
+    {
+        try {
+            return DB::table("information_object as io")
+                ->leftJoin("information_object_i18n as ioi", function($j) {
+                    $j->on("ioi.id", "=", "io.id")->where("ioi.culture", "=", $this->culture);
+                })
+                ->where("io.parent_id", 1)
+                ->select(["io.id", "ioi.title"])
+                ->whereNotNull("ioi.title")
+                ->orderBy("ioi.title")
+                ->limit($limit)
+                ->get();
+        } catch (\Exception $e) {
+            return collect([]);
+        }
+    }
+
+    /**
+     * Assign rights statement to object
+     */
+    public function assignRightsStatement(int $objectId, int $statementId): void
+    {
+        DB::table("extended_rights")->updateOrInsert(
+            ["object_id" => $objectId],
+            ["rights_statement_id" => $statementId, "updated_at" => now()]
+        );
+    }
+
+    /**
+     * Assign Creative Commons license to object
+     */
+    public function assignCreativeCommons(int $objectId, int $licenseId): void
+    {
+        DB::table("extended_rights")->updateOrInsert(
+            ["object_id" => $objectId],
+            ["creative_commons_license_id" => $licenseId, "updated_at" => now()]
+        );
+    }
+
+    /**
+     * Assign TK Label to object
+     */
+    public function assignTkLabel(int $objectId, int $labelId): void
+    {
+        DB::table("extended_rights_tk_label")->insertOrIgnore([
+            "extended_rights_id" => $objectId,
+            "tk_label_id" => $labelId,
+            "created_at" => now()
+        ]);
+    }
+
+    /**
+     * Assign rights holder to object
+     */
+    public function assignRightsHolder(int $objectId, int $holderId): void
+    {
+        DB::table("extended_rights")->updateOrInsert(
+            ["object_id" => $objectId],
+            ["rights_holder_id" => $holderId, "updated_at" => now()]
+        );
+    }
+
+    /**
+     * Create embargo on object
+     */
+    public function createEmbargo(int $objectId, string $type, string $startDate, ?string $endDate = null): int
+    {
+        return DB::table("embargo")->insertGetId([
+            "object_id" => $objectId,
+            "embargo_type" => $type,
+            "start_date" => $startDate,
+            "end_date" => $endDate,
+            "status" => "active",
+            "created_at" => now()
+        ]);
+    }
+
+    /**
+     * Clear all rights from object
+     */
+    public function clearRights(int $objectId): void
+    {
+        DB::table("extended_rights")->where("object_id", $objectId)->delete();
+        DB::table("extended_rights_tk_label")
+            ->whereIn("extended_rights_id", function($q) use ($objectId) {
+                $q->select("id")->from("extended_rights")->where("object_id", $objectId);
+            })
+            ->delete();
     }
 }

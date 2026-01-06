@@ -28,7 +28,7 @@ $hasResearch = isPluginActive('ahgResearchPlugin');
 $hasDonor = isPluginActive('ahgDonorAgreementPlugin');
 $hasRights = isPluginActive('ahgExtendedRightsPlugin');
 $hasCondition = isPluginActive('ahgConditionPlugin');
-$hasPrivacy = isPluginActive('arPrivacyPlugin');
+$hasPrivacy = isPluginActive('ahgPrivacyPlugin');
 $hasSecurity = isPluginActive('ahgSecurityClearancePlugin');
 $hasAudit = isPluginActive('ahgAuditTrailPlugin');
 $hasVendor = isPluginActive('ahgVendorPlugin');
@@ -63,7 +63,7 @@ $hasOais = isPluginActive('arOaisPlugin');
         <li><a href="/admin/security/compliance"><i class="fas fa-shield-alt me-2"></i><?php echo __('Security'); ?></a></li>
         <?php endif; ?>
         <?php if ($hasPrivacy): ?>
-        <li><a href="/privacyAdmin"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy (POPIA)'); ?></a></li>
+        <li><a href="/privacyAdmin"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy &amp; Compliance'); ?></a></li>
         <?php endif; ?>
         <?php if ($hasCondition): ?>
         <li><a href="/admin/condition"><i class="fas fa-heartbeat me-2"></i><?php echo __('Condition'); ?></a></li>
@@ -254,7 +254,7 @@ $hasOais = isPluginActive('arOaisPlugin');
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy (POPIA/PAIA)'); ?></h5>
+                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy &amp; Data Protection'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">

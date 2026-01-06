@@ -87,3 +87,64 @@ class ahgPrivacyActions extends sfActions
         }
     }
 }
+
+    /**
+     * Lodge Privacy Complaint (public)
+     */
+    public function executeComplaint(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+
+        $this->complaintTypes = [
+            'unauthorized_access' => 'Unauthorized access to my personal information',
+            'unauthorized_disclosure' => 'Unauthorized disclosure of my personal information',
+            'inaccurate_data' => 'Inaccurate personal information held',
+            'failure_to_respond' => 'Failure to respond to my access request',
+            'excessive_collection' => 'Excessive collection of personal information',
+            'unsolicited_marketing' => 'Unsolicited direct marketing',
+            'security_breach' => 'Data security breach',
+            'other' => 'Other privacy concern'
+        ];
+
+        if ($request->isMethod('post')) {
+            try {
+                $refNum = 'CMP-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                
+                $id = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')->insertGetId([
+                    'reference_number' => $refNum,
+                    'jurisdiction' => $request->getParameter('jurisdiction', 'popia'),
+                    'complainant_name' => $request->getParameter('complainant_name'),
+                    'complainant_email' => $request->getParameter('complainant_email'),
+                    'complainant_phone' => $request->getParameter('complainant_phone'),
+                    'complaint_type' => $request->getParameter('complaint_type'),
+                    'description' => $request->getParameter('description'),
+                    'date_of_incident' => $request->getParameter('date_of_incident') ?: null,
+                    'status' => 'received',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+                $this->getUser()->setFlash('success', 'Your complaint has been submitted. Reference: ' . $refNum);
+                $this->redirect(['module' => 'ahgPrivacy', 'action' => 'complaintConfirmation', 'id' => $id]);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', 'Failed to submit complaint: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Complaint Confirmation
+     */
+    public function executeComplaintConfirmation(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+
+        $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+
+        if (!$this->complaint) {
+            $this->forward404();
+        }
+    }

@@ -154,14 +154,6 @@ class AhgSettingsIndexAction extends sfAction
             ];
         }
 
-        if ($hasAccessRequest) {
-            $this->sections['data_protection'] = [
-                'label' => 'Data Protection',
-                'icon' => 'fa-shield-alt',
-                'description' => 'POPIA/GDPR compliance settings',
-                'url' => 'admin/ahg-settings/section?section=data_protection'
-            ];
-        }
 
         if ($hasCondition) {
             $this->sections['photos'] = [

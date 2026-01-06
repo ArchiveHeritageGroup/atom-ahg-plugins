@@ -14,6 +14,6 @@ class extendedRightsBrowseAction extends sfAction
         $this->rightsStatements = $service->getRightsStatements();
         $this->ccLicenses = $service->getCreativeCommonsLicenses();
         $this->tkLabels = $service->getTkLabels();
-        $this->stats = $service->getRightsStatistics();
+        $this->stats = $service->getDashboardStats();
     }
 }
