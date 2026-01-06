@@ -252,3 +252,49 @@ VALUES
  'California Privacy Protection Agency (CPPA)', 'https://cppa.ca.gov/', 45, 0, '2020-01-01',
  '["CPRA amendments"]', 'us', 1, 12)
 ON DUPLICATE KEY UPDATE name=VALUES(name);
+
+-- =====================================================
+-- I18N Tables for multi-language support
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS `privacy_dsar_i18n` (
+    `id` INT UNSIGNED NOT NULL,
+    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
+    `description` TEXT NULL,
+    `notes` TEXT NULL,
+    `response_summary` TEXT NULL,
+    PRIMARY KEY (`id`, `culture`),
+    CONSTRAINT `fk_dsar_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_dsar` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `privacy_breach_i18n` (
+    `id` INT UNSIGNED NOT NULL,
+    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
+    `description` TEXT NULL,
+    `impact_assessment` TEXT NULL,
+    `remediation_notes` TEXT NULL,
+    PRIMARY KEY (`id`, `culture`),
+    CONSTRAINT `fk_breach_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `privacy_processing_activity_i18n` (
+    `id` INT UNSIGNED NOT NULL,
+    `culture` VARCHAR(16) NOT NULL DEFAULT 'en',
+    `description` TEXT NULL,
+    `purpose_details` TEXT NULL,
+    PRIMARY KEY (`id`, `culture`),
+    CONSTRAINT `fk_processing_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_processing_activity` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `privacy_officer` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(50) NULL,
+    `role` VARCHAR(100) NULL DEFAULT 'Information Officer',
+    `registration_number` VARCHAR(100) NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
