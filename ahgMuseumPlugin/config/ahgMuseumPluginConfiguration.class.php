@@ -50,7 +50,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             
             return $result && $result['is_enabled'] == 1;
         } catch (Exception $e) {
-            error_log("ahgMuseumPlugin: Could not check dependency - " . $e->getMessage());
+            if (PHP_SAPI !== 'cli') error_log("ahgMuseumPlugin: Could not check dependency - " . $e->getMessage());
             return true; // Assume enabled when DB not available (cache clear)
         }
     }
