@@ -3,7 +3,12 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="h3 mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Heritage Accounting Settings') ?></h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Heritage Accounting Settings') ?></h1>
+                <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'standardList']); ?>" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i><?php echo __('Manage Standards'); ?>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -31,12 +36,9 @@
                                                value="<?php echo $std->id ?>" 
                                                id="std_<?php echo $std->id ?>"
                                                <?php echo $std->is_active ? 'checked' : '' ?>
-                                               <?php echo $std->code == 'GRAP103' ? 'onclick="return false;" checked' : '' ?>>
+                                               >
                                         <label class="form-check-label" for="std_<?php echo $std->id ?>">
                                             <strong><?php echo esc_entities($std->code) ?></strong>
-                                            <?php if ($std->code == 'GRAP103'): ?>
-                                                <span class="badge bg-danger ms-1">Required</span>
-                                            <?php endif; ?>
                                         </label>
                                     </div>
                                     <p class="mb-1 mt-2"><?php echo esc_entities($std->name) ?></p>
