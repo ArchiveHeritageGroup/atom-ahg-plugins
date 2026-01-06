@@ -1,0 +1,397 @@
+<?php
+
+class privacyAdminActions extends sfActions
+{
+    public function preExecute()
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+        
+        // Check admin permission
+        if (!$this->context->user->hasCredential('administrator')) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    protected function getService(): \ahgPrivacyPlugin\Service\PrivacyService
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        return new \ahgPrivacyPlugin\Service\PrivacyService();
+    }
+
+    protected function getUserId(): ?int
+    {
+        return $this->getUser()->getAttribute('user_id');
+    }
+
+    protected function getJurisdiction(): ?string
+    {
+        $j = $this->getRequest()->getParameter('jurisdiction', 'all');
+        return $j === 'all' ? null : $j;
+    }
+
+    /**
+     * Dashboard
+     */
+    public function executeIndex(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $jurisdiction = $this->getJurisdiction();
+        $this->stats = $service->getDashboardStats($jurisdiction);
+        $this->config = $service->getConfig($jurisdiction ?? 'popia');
+        $this->recentDsars = $service->getDsarList(['jurisdiction' => $jurisdiction, 'limit' => 5]);
+        $this->openBreaches = $service->getBreachList(['status' => 'investigating', 'jurisdiction' => $jurisdiction]);
+    }
+
+    // =====================
+    // DSAR Management
+    // =====================
+
+    public function executeDsarList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->dsars = $service->getDsarList([
+            'status' => $request->getParameter('status'),
+            'jurisdiction' => $this->getJurisdiction() ?? $request->getParameter('jurisdiction'),
+            'overdue' => $request->getParameter('overdue')
+        ]);
+        $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes(
+            $this->getJurisdiction() ?? 'popia'
+        );
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+    }
+
+    public function executeDsarView(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->dsar = $service->getDsar($request->getParameter('id'));
+        $this->logs = $service->getDsarLogs($request->getParameter('id'));
+        
+        if (!$this->dsar) {
+            $this->forward404();
+        }
+
+        $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($this->dsar->jurisdiction);
+        $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($this->dsar->jurisdiction);
+    }
+
+    public function executeDsarAdd(sfWebRequest $request)
+    {
+        $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
+        $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($defaultJurisdiction);
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->idTypes = \ahgPrivacyPlugin\Service\PrivacyService::getIdTypes();
+        $this->defaultJurisdiction = $defaultJurisdiction;
+
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $id = $service->createDsar($request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'DSAR created successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $id]);
+        }
+    }
+
+    public function executeDsarUpdate(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $service = $this->getService();
+        $service->updateDsar(
+            $request->getParameter('id'),
+            $request->getPostParameters(),
+            $this->getUserId()
+        );
+
+        $this->getUser()->setFlash('success', 'DSAR updated successfully');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $request->getParameter('id')]);
+    }
+
+    // =====================
+    // Breach Management
+    // =====================
+
+    public function executeBreachList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->breaches = $service->getBreachList([
+            'status' => $request->getParameter('status'),
+            'severity' => $request->getParameter('severity'),
+            'jurisdiction' => $this->getJurisdiction()
+        ]);
+        $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+    }
+
+    public function executeBreachView(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->breach = $service->getBreach($request->getParameter('id'));
+        
+        if (!$this->breach) {
+            $this->forward404();
+        }
+
+        $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
+        $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
+        $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($this->breach->jurisdiction);
+    }
+
+    public function executeBreachAdd(sfWebRequest $request)
+    {
+        $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
+        $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
+
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $id = $service->createBreach($request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'Breach reported successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'breachView', 'id' => $id]);
+        }
+    }
+
+    public function executeBreachUpdate(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $service = $this->getService();
+        $service->updateBreach(
+            $request->getParameter('id'),
+            $request->getPostParameters(),
+            $this->getUserId()
+        );
+
+        $this->getUser()->setFlash('success', 'Breach updated successfully');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'breachView', 'id' => $request->getParameter('id')]);
+    }
+
+    // =====================
+    // ROPA Management
+    // =====================
+
+    public function executeRopaList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->activities = $service->getRopaList([
+            'status' => $request->getParameter('status'),
+            'jurisdiction' => $this->getJurisdiction()
+        ]);
+        $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
+            $this->getJurisdiction() ?? 'popia'
+        );
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+    }
+
+    public function executeRopaView(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->activity = $service->getRopa($request->getParameter('id'));
+        
+        if (!$this->activity) {
+            $this->forward404();
+        }
+
+        $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
+            $this->activity->jurisdiction ?? 'popia'
+        );
+    }
+
+    public function executeRopaAdd(sfWebRequest $request)
+    {
+        $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
+        $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases($defaultJurisdiction);
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->defaultJurisdiction = $defaultJurisdiction;
+
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $id = $service->saveRopa($request->getPostParameters(), null, $this->getUserId());
+            $this->getUser()->setFlash('success', 'Processing activity added successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+        }
+    }
+
+    public function executeRopaEdit(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->activity = $service->getRopa($request->getParameter('id'));
+
+        if (!$this->activity) {
+            $this->forward404();
+        }
+
+        $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
+            $this->activity->jurisdiction ?? 'popia'
+        );
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+
+        if ($request->isMethod('post')) {
+            $service->saveRopa($request->getPostParameters(), $request->getParameter('id'), $this->getUserId());
+            $this->getUser()->setFlash('success', 'Processing activity updated successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $request->getParameter('id')]);
+        }
+    }
+
+    // =====================
+    // PAIA Requests (South Africa)
+    // =====================
+
+    public function executePaiaList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->requests = $service->getPaiaRequests([
+            'status' => $request->getParameter('status'),
+            'section' => $request->getParameter('section')
+        ]);
+        $this->paiaTypes = \ahgPrivacyPlugin\Service\PrivacyService::getPAIARequestTypes();
+    }
+
+    public function executePaiaAdd(sfWebRequest $request)
+    {
+        $this->paiaTypes = \ahgPrivacyPlugin\Service\PrivacyService::getPAIARequestTypes();
+
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $id = $service->createPaiaRequest($request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'PAIA request created successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'paiaList']);
+        }
+    }
+
+    // =====================
+    // Officers Management
+    // =====================
+
+    public function executeOfficerList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->officers = $service->getOfficers($this->getJurisdiction());
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+    }
+
+    public function executeOfficerAdd(sfWebRequest $request)
+    {
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $service->saveOfficer($request->getPostParameters());
+            $this->getUser()->setFlash('success', 'Privacy officer added successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'officerList']);
+        }
+    }
+
+    // =====================
+    // Configuration
+    // =====================
+
+    public function executeConfig(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $jurisdiction = $request->getParameter('jurisdiction', 'popia');
+        $this->config = $service->getConfig($jurisdiction);
+        $this->officers = $service->getOfficers($jurisdiction);
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->currentJurisdiction = $jurisdiction;
+        $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($jurisdiction);
+
+        if ($request->isMethod('post')) {
+            $service->saveConfig($request->getPostParameters());
+            $this->getUser()->setFlash('success', 'Configuration saved successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'config', 'jurisdiction' => $jurisdiction]);
+        }
+    }
+
+    // =====================
+    // Reports & Export
+    // =====================
+
+    public function executeReport(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $jurisdiction = $this->getJurisdiction();
+        $this->stats = $service->getDashboardStats($jurisdiction);
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+
+        $dsarQuery = \Illuminate\Database\Capsule\Manager::table('privacy_dsar')
+            ->selectRaw('request_type, COUNT(*) as count');
+        if ($jurisdiction) {
+            $dsarQuery->where('jurisdiction', $jurisdiction);
+        }
+        $this->dsarsByType = $dsarQuery->groupBy('request_type')->get();
+
+        $breachQuery = \Illuminate\Database\Capsule\Manager::table('privacy_breach')
+            ->selectRaw('severity, COUNT(*) as count');
+        if ($jurisdiction) {
+            $breachQuery->where('jurisdiction', $jurisdiction);
+        }
+        $this->breachesBySeverity = $breachQuery->groupBy('severity')->get();
+
+        // By jurisdiction
+        $this->dsarsByJurisdiction = \Illuminate\Database\Capsule\Manager::table('privacy_dsar')
+            ->selectRaw('jurisdiction, COUNT(*) as count')
+            ->groupBy('jurisdiction')
+            ->get();
+    }
+
+    public function executeExport(sfWebRequest $request)
+    {
+        $type = $request->getParameter('type', 'dsar');
+        $format = $request->getParameter('format', 'csv');
+        $service = $this->getService();
+        $jurisdiction = $this->getJurisdiction();
+
+        switch ($type) {
+            case 'dsar':
+                $data = $service->getDsarList(['jurisdiction' => $jurisdiction]);
+                $filename = 'dsar_export_' . date('Y-m-d');
+                break;
+            case 'breach':
+                $data = $service->getBreachList(['jurisdiction' => $jurisdiction]);
+                $filename = 'breach_export_' . date('Y-m-d');
+                break;
+            case 'ropa':
+                $data = $service->getRopaList(['jurisdiction' => $jurisdiction]);
+                $filename = 'ropa_export_' . date('Y-m-d');
+                break;
+            default:
+                $this->forward404();
+        }
+
+        if ($format === 'csv') {
+            $this->getResponse()->setContentType('text/csv');
+            $this->getResponse()->setHttpHeader('Content-Disposition', "attachment; filename=\"{$filename}.csv\"");
+            
+            $output = fopen('php://output', 'w');
+            if ($data->isNotEmpty()) {
+                fputcsv($output, array_keys((array)$data->first()));
+                foreach ($data as $row) {
+                    fputcsv($output, (array)$row);
+                }
+            }
+            fclose($output);
+            return sfView::NONE;
+        }
+
+        $this->data = $data;
+        $this->type = $type;
+    }
+
+    // =====================
+    // Consent Management
+    // =====================
+
+    public function executeConsentList(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->consents = $service->getConsentRecords([
+            'status' => $request->getParameter('status')
+        ]);
+    }
+}

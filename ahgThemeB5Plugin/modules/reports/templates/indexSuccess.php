@@ -63,7 +63,7 @@ $hasOais = isPluginActive('arOaisPlugin');
         <li><a href="/admin/security/compliance"><i class="fas fa-shield-alt me-2"></i><?php echo __('Security'); ?></a></li>
         <?php endif; ?>
         <?php if ($hasPrivacy): ?>
-        <li><a href="/admin/privacy/manage"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy (POPIA)'); ?></a></li>
+        <li><a href="/privacyAdmin"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy (POPIA)'); ?></a></li>
         <?php endif; ?>
         <?php if ($hasCondition): ?>
         <li><a href="/admin/condition"><i class="fas fa-heartbeat me-2"></i><?php echo __('Condition'); ?></a></li>
@@ -258,12 +258,14 @@ $hasOais = isPluginActive('arOaisPlugin');
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <a href="/admin/privacy/manage"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Privacy Dashboard'); ?></a>
+                        <a href="/privacyAdmin"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Privacy Dashboard'); ?></a>
                     </li>
-                    <li class="list-group-item"><a href="/admin/privacy/ropa"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('ROPA'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/privacy/dsar"><i class="fas fa-user-clock me-2 text-muted"></i><?php echo __('DSAR Requests'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/privacy/breaches"><i class="fas fa-exclamation-circle me-2 text-muted"></i><?php echo __('Breach Register'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/privacy/templates"><i class="fas fa-file-alt me-2 text-muted"></i><?php echo __('Template Library'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/ropaList"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('ROPA'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/dsarList"><i class="fas fa-user-clock me-2 text-muted"></i><?php echo __('DSAR Requests'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/breachList"><i class="fas fa-exclamation-circle me-2 text-muted"></i><?php echo __('Breach Register'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/paiaList"><i class="fas fa-file-contract me-2 text-muted"></i><?php echo __('PAIA Requests'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/officerList"><i class="fas fa-user-tie me-2 text-muted"></i><?php echo __('Privacy Officers'); ?></a></li>
+                    <li class="list-group-item"><a href="/privacyAdmin/config"><i class="fas fa-file-alt me-2 text-muted"></i><?php echo __('Template Library'); ?></a></li>
                 </ul>
             </div>
         </div>

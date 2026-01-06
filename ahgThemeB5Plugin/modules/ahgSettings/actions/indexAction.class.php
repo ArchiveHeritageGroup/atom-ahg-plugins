@@ -27,6 +27,7 @@ class AhgSettingsIndexAction extends sfAction
         $hasDisplay = in_array('ahgDisplayPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasGlamDam = $hasMuseum || $hasGallery || $hasLibrary || $hasDam || $hasDisplay || $hasSpectrum;
         $hasHeritage = in_array('ahgHeritageAccountingPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasPrivacy = in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins());
 
         $this->sections = [];
 
@@ -186,6 +187,15 @@ class AhgSettingsIndexAction extends sfAction
                 'icon' => 'fa-landmark',
                 'description' => 'Multi-standard heritage asset accounting settings (GRAP, FRS, GASB, PSAS)',
                 'url' => 'heritage/settings'
+            ];
+        }
+
+        if ($hasPrivacy) {
+            $this->sections['privacy'] = [
+                'label' => 'Privacy Compliance',
+                'icon' => 'fa-user-shield',
+                'description' => 'POPIA, NDPA, GDPR compliance - DSARs, Breaches, ROPA, PAIA',
+                'url' => 'privacyAdmin'
             ];
         }
     }
