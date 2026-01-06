@@ -1,7 +1,7 @@
 {
     "name": "Donor Agreement Management",
     "machine_name": "ahgDonorAgreementPlugin",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Comprehensive donor/institution agreement management with contract uploads, rights, restrictions, reminders, and South African compliance.",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

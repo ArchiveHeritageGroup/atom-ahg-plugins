@@ -1,2 +1,3 @@
 all:
   is_internal: false
+  view_class: sfPHP

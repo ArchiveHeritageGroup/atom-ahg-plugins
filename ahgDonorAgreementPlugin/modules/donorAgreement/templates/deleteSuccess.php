@@ -1,3 +1,0 @@
-<?php slot('title') ?><?php echo __('Delete Agreement') ?><?php end_slot() ?>
-<div class="alert alert-danger"><h4><?php echo __('Are you sure?') ?></h4><p><strong><?php echo esc_entities($agreement['agreement_number']) ?></strong>: <?php echo esc_entities($agreement['title']) ?></p></div>
-<form method="post"><input type="hidden" name="confirm" value="1"><div class="d-flex justify-content-between"><a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'view', 'id' => $agreement['id']]) ?>" class="btn btn-secondary"><?php echo __('Cancel') ?></a><button type="submit" class="btn btn-danger"><?php echo __('Delete') ?></button></div></form>
