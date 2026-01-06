@@ -1,5 +1,6 @@
 /**
  * Column Drop Zone Handling for Landing Page Builder
+ * Uses Sortable.js for consistent drag/drop with main builder
  */
 (function() {
     'use strict';
@@ -9,7 +10,6 @@
     });
 
     function initColumnDropZones() {
-        // Find all column drop zones
         const dropZones = document.querySelectorAll('.column-drop-zone');
         
         if (dropZones.length === 0) {
@@ -20,78 +20,64 @@
         console.log('Initializing', dropZones.length, 'column drop zones');
 
         dropZones.forEach(function(zone) {
-            // Prevent default drag behaviors
+            // Initialize Sortable on each drop zone
+            new Sortable(zone, {
+                group: {
+                    name: 'columns',
+                    pull: true,
+                    put: ['palette', 'columns', 'blocks']
+                },
+                animation: 150,
+                ghostClass: 'drop-ghost',
+                onAdd: function(evt) {
+                    const item = evt.item;
+                    const dropZone = evt.to;
+                    const parentBlockId = dropZone.dataset.parentBlock;
+                    const columnSlot = dropZone.dataset.column;
+                    
+                    console.log('Sortable onAdd:', item, 'to zone:', dropZone, 'parent:', parentBlockId, 'slot:', columnSlot);
+                    
+                    // Check if it's from palette (has block-type-id)
+                    const blockTypeId = item.dataset.typeId;
+                    if (blockTypeId) {
+                        console.log('Adding from palette:', blockTypeId);
+                        // Remove the dragged clone
+                        item.remove();
+                        addBlockToColumn(blockTypeId, parentBlockId, columnSlot);
+                        return;
+                    }
+                    
+                    // Moving existing nested block
+                    const blockId = item.dataset.blockId;
+                    if (blockId) {
+                        console.log('Moving block:', blockId);
+                        item.remove();
+                        moveBlockToColumn(blockId, parentBlockId, columnSlot);
+                    }
+                }
+            });
+            
+            // Visual feedback on drag over
             zone.addEventListener('dragenter', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
                 this.style.borderColor = '#0d6efd';
                 this.style.backgroundColor = '#e7f1ff';
             });
-
-            zone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = 'copy';
-            });
-
+            
             zone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
                 this.style.borderColor = '';
                 this.style.backgroundColor = '#fff';
             });
-
+            
             zone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
                 this.style.borderColor = '';
                 this.style.backgroundColor = '#fff';
-
-                const parentBlockId = this.dataset.parentBlock;
-                const columnSlot = this.dataset.column;
-
-                console.log('Drop on column:', parentBlockId, columnSlot);
-
-                // Check for block type from palette
-                const blockTypeId = e.dataTransfer.getData('block-type-id');
-                if (blockTypeId) {
-                    console.log('Adding new block type:', blockTypeId, 'to column:', columnSlot);
-                    addBlockToColumn(blockTypeId, parentBlockId, columnSlot);
-                    return;
-                }
-
-                // Check for existing block being moved
-                const blockId = e.dataTransfer.getData('block-id');
-                if (blockId) {
-                    console.log('Moving block:', blockId, 'to column:', columnSlot);
-                    moveBlockToColumn(blockId, parentBlockId, columnSlot);
-                }
             });
         });
 
-        // Make palette items set data on drag
-        const paletteItems = document.querySelectorAll('.block-type-item');
-        paletteItems.forEach(function(item) {
-            item.addEventListener('dragstart', function(e) {
-                const typeId = this.dataset.typeId;
-                console.log('Dragging block type:', typeId);
-                e.dataTransfer.setData('block-type-id', typeId);
-                e.dataTransfer.effectAllowed = 'copy';
-            });
-        });
-
-        // Make nested blocks draggable
+        // Make nested blocks draggable within columns
         const nestedBlocks = document.querySelectorAll('.nested-block');
         nestedBlocks.forEach(function(block) {
-            block.addEventListener('dragstart', function(e) {
-                e.dataTransfer.setData('block-id', this.dataset.blockId);
-                e.dataTransfer.effectAllowed = 'move';
-                this.style.opacity = '0.5';
-            });
-
-            block.addEventListener('dragend', function() {
-                this.style.opacity = '1';
-            });
+            block.setAttribute('draggable', 'true');
         });
     }
 
@@ -118,17 +104,16 @@
             method: 'POST',
             body: formData
         })
-        .then(function(response) { return response.json(); })
-        .then(function(result) {
+        .then(response => response.json())
+        .then(result => {
             console.log('addBlock result:', result);
             if (result.success) {
-                // Reload to show the nested block
                 location.reload();
             } else {
                 alert(result.error || 'Failed to add block to column');
             }
         })
-        .catch(function(error) {
+        .catch(error => {
             console.error('addBlock error:', error);
             alert('Failed to add block: ' + error.message);
         });
@@ -140,19 +125,19 @@
         formData.append('parent_block_id', parentBlockId);
         formData.append('column_slot', columnSlot);
 
-        fetch('/admin/landing-pages/ajax/move-to-column', {
+        fetch(LandingPageBuilder.urls.moveToColumn || '/admin/landing-pages/ajax/move-to-column', {
             method: 'POST',
             body: formData
         })
-        .then(function(response) { return response.json(); })
-        .then(function(result) {
+        .then(response => response.json())
+        .then(result => {
             if (result.success) {
                 location.reload();
             } else {
                 alert(result.error || 'Failed to move block');
             }
         })
-        .catch(function(error) {
+        .catch(error => {
             console.error('moveBlock error:', error);
         });
     }
@@ -164,3 +149,55 @@
         moveBlockToColumn: moveBlockToColumn
     };
 })();
+
+// Handle nested block edit and delete buttons
+document.addEventListener('click', function(e) {
+    // Edit nested block
+    if (e.target.closest('.btn-edit-nested')) {
+        const btn = e.target.closest('.btn-edit-nested');
+        const blockId = btn.dataset.blockId;
+        console.log('Edit nested block:', blockId);
+        
+        // Use main builder's edit modal
+        if (window.LandingPageBuilderUI && window.LandingPageBuilderUI.openEditModal) {
+            window.LandingPageBuilderUI.openEditModal(blockId);
+        } else {
+            alert('Edit functionality loading...');
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
+    
+    // Delete nested block
+    if (e.target.closest('.btn-delete-nested')) {
+        const btn = e.target.closest('.btn-delete-nested');
+        const blockId = btn.dataset.blockId;
+        console.log('Delete nested block:', blockId);
+        
+        if (!confirm('Delete this block?')) return;
+        
+        const formData = new FormData();
+        formData.append('block_id', blockId);
+        
+        fetch(window.LandingPageBuilder.urls.deleteBlock, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error || 'Failed to delete block');
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            alert('Failed to delete block');
+        });
+        
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});

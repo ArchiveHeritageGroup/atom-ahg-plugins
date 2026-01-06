@@ -250,7 +250,7 @@
 </template>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-const LandingPageBuilder = {
+window.LandingPageBuilder = {
     pageId: <?php echo $page->id ?>,
     blocks: <?php echo json_encode($blocks->toArray()) ?>,
     blockTypes: <?php echo json_encode($blockTypes->toArray()) ?>,

@@ -115,8 +115,8 @@ class landingPageBuilderActions extends sfActions
             'name' => $request->getParameter('name'),
             'slug' => $request->getParameter('slug'),
             'description' => $request->getParameter('description'),
-            'is_default' => $request->getParameter('is_default', 0),
-            'is_active' => $request->getParameter('is_active', 1)
+            'is_default' => $request->getParameter('is_default') ? 1 : 0,
+            'is_active' => $request->getParameter('is_active') ? 1 : 0
         ], $userId);
 
         return $this->renderText(json_encode($result));

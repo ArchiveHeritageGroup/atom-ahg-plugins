@@ -37,7 +37,11 @@
                 dragClass: 'block-drag',
                 filter: '.column-drop-zone, .nested-block',
                 preventOnFilter: false,
-                group: 'blocks',
+                group: {
+                    name: 'blocks',
+                    pull: true,
+                    put: ['blocks']
+                },
                 onEnd: (evt) => {
                     this.saveOrder();
                     this.hideEmptyMessage();
@@ -45,8 +49,22 @@
             });
         },
 
-        // Initialize palette drag
+        // Initialize palette drag with Sortable
         initPaletteDrag: function() {
+            // Use Sortable on each category collapse for drag to column zones
+            this.palette.querySelectorAll('.collapse').forEach(collapse => {
+                new Sortable(collapse, {
+                    group: {
+                        name: 'palette',
+                        pull: 'clone',
+                        put: false
+                    },
+                    draggable: '.block-type-item',
+                    sort: false,
+                    animation: 150
+                });
+            });
+
             const items = this.palette.querySelectorAll('.block-type-item');
             
             items.forEach(item => {
