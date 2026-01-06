@@ -80,7 +80,8 @@ class privacyAdminActions extends sfActions
     {
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($defaultJurisdiction);
-        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+                $service = new \ahgPrivacyPlugin\Service\PrivacyService();
+        $this->jurisdictions = $service->getEnabledJurisdictions();
         $this->idTypes = \ahgPrivacyPlugin\Service\PrivacyService::getIdTypes();
         $this->defaultJurisdiction = $defaultJurisdiction;
 
@@ -143,7 +144,7 @@ class privacyAdminActions extends sfActions
     {
         $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
         $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
-        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->jurisdictions = $service->getEnabledJurisdictions();
         $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
 
         if ($request->isMethod('post')) {
@@ -206,7 +207,7 @@ class privacyAdminActions extends sfActions
     {
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases($defaultJurisdiction);
-        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->jurisdictions = $service->getEnabledJurisdictions();
         $this->defaultJurisdiction = $defaultJurisdiction;
 
         if ($request->isMethod('post')) {
@@ -229,7 +230,7 @@ class privacyAdminActions extends sfActions
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
             $this->activity->jurisdiction ?? 'popia'
         );
-        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->jurisdictions = $service->getEnabledJurisdictions();
 
         if ($request->isMethod('post')) {
             $service->saveRopa($request->getPostParameters(), $request->getParameter('id'), $this->getUserId());
@@ -277,6 +278,7 @@ class privacyAdminActions extends sfActions
 
     public function executeOfficerAdd(sfWebRequest $request)
     {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
 
         if ($request->isMethod('post')) {
@@ -295,7 +297,7 @@ class privacyAdminActions extends sfActions
     {
         $service = $this->getService();
         $jurisdiction = $request->getParameter('jurisdiction', 'popia');
-        $this->config = $service->getConfig($jurisdiction);
+        $this->config = $service->getConfig($jurisdiction, true);
         $this->officers = $service->getOfficers($jurisdiction);
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
         $this->currentJurisdiction = $jurisdiction;

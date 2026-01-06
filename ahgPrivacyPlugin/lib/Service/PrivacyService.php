@@ -103,6 +103,29 @@ class PrivacyService
     /**
      * Get African jurisdictions only
      */
+    /**
+     * Get only enabled jurisdictions (for forms and public pages)
+     */
+    public function getEnabledJurisdictions(): array
+    {
+        $enabled = DB::table('privacy_config')
+            ->where('is_active', 1)
+            ->pluck('jurisdiction')
+            ->toArray();
+        
+        // If none configured, default to popia
+        if (empty($enabled)) {
+            return ['popia' => self::getJurisdictions()['popia']];
+        }
+        
+        return array_filter(
+            self::getJurisdictions(),
+            fn($code) => in_array($code, $enabled),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+
     public static function getAfricanJurisdictions(): array
     {
         return array_filter(self::getJurisdictions(), fn($j) => $j['region'] === 'Africa');
@@ -490,9 +513,12 @@ class PrivacyService
     // Configuration
     // =====================
 
-    public function getConfig(string $jurisdiction = null): ?object
+    public function getConfig(string $jurisdiction = null, bool $includeInactive = false): ?object
     {
-        $query = DB::table('privacy_config')->where('is_active', 1);
+        $query = DB::table('privacy_config');
+        if (!$includeInactive) {
+            $query->where('is_active', 1);
+        }
         if ($jurisdiction) {
             $query->where('jurisdiction', $jurisdiction);
         }
@@ -513,7 +539,7 @@ class PrivacyService
             'dsar_response_days' => $data['dsar_response_days'] ?? 30,
             'breach_notification_hours' => $data['breach_notification_hours'] ?? 72,
             'retention_default_years' => $data['retention_default_years'] ?? 5,
-            'is_active' => $data['is_active'] ?? 1,
+            'is_active' => isset($data['is_active']) ? 1 : 0,
             'settings' => isset($data['settings']) ? json_encode($data['settings']) : null,
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -577,7 +603,7 @@ class PrivacyService
             'registration_number' => $data['registration_number'] ?? null, // For POPIA IO registration
             'appointed_date' => $data['appointed_date'] ?? null,
             'user_id' => $data['user_id'] ?? null,
-            'is_active' => $data['is_active'] ?? 1,
+            'is_active' => isset($data['is_active']) ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -775,7 +801,7 @@ class PrivacyService
             ->leftJoin('privacy_breach_i18n as bi', function ($j) {
                 $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
             })
-            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remediation_actions']);
+            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions']);
 
         if (!empty($filters['status'])) {
             $query->where('b.status', $filters['status']);
@@ -797,7 +823,7 @@ class PrivacyService
                 $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
             })
             ->where('b.id', $id)
-            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remediation_actions', 'bi.lessons_learned'])
+            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions', 'bi.lessons_learned'])
             ->first();
     }
 
@@ -855,7 +881,7 @@ class PrivacyService
         // Update i18n
         $i18nUpdates = array_filter([
             'impact_assessment' => $data['impact_assessment'] ?? null,
-            'remediation_actions' => $data['remediation_actions'] ?? null,
+            'remedial_actions' => $data['remedial_actions'] ?? null,
             'lessons_learned' => $data['lessons_learned'] ?? null
         ], fn($v) => $v !== null);
 

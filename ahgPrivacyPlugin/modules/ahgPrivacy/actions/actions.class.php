@@ -23,6 +23,9 @@ class ahgPrivacyActions extends sfActions
      */
     public function executeDsarRequest(sfWebRequest $request)
     {
+        // Bootstrap and require service
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes();
 
         if ($request->isMethod('post')) {
