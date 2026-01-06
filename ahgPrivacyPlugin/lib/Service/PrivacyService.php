@@ -1060,12 +1060,14 @@ class PrivacyService
         $breachQuery = DB::table('privacy_breach');
         $ropaQuery = DB::table('privacy_processing_activity');
         $consentQuery = DB::table('privacy_consent_record');
+        $complaintQuery = DB::table('privacy_complaint');
 
         if ($jurisdiction) {
             $dsarQuery->where('jurisdiction', $jurisdiction);
             $breachQuery->where('jurisdiction', $jurisdiction);
             $ropaQuery->where('jurisdiction', $jurisdiction);
             $consentQuery->where('jurisdiction', $jurisdiction);
+            $complaintQuery->where('jurisdiction', $jurisdiction);
         }
 
         return [
@@ -1118,6 +1120,16 @@ class PrivacyService
                     ->where('status', 'withdrawn')
                     ->whereMonth('withdrawn_date', date('m'))
                     ->whereYear('withdrawn_date', date('Y'))
+                    ->count()
+            ],
+            'complaint' => [
+                'total' => (clone $complaintQuery)->count(),
+                'open' => (clone $complaintQuery)
+                    ->whereNotIn('status', ['resolved', 'closed'])
+                    ->count(),
+                'received_this_month' => (clone $complaintQuery)
+                    ->whereMonth('created_at', date('m'))
+                    ->whereYear('created_at', date('Y'))
                     ->count()
             ],
             'compliance_score' => $this->calculateComplianceScore($jurisdiction)

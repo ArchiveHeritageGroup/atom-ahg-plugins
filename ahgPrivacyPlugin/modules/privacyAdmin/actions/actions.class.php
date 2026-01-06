@@ -4,6 +4,7 @@ class privacyAdminActions extends sfActions
 {
     public function preExecute()
     {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
@@ -78,10 +79,11 @@ class privacyAdminActions extends sfActions
 
     public function executeDsarAdd(sfWebRequest $request)
     {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($defaultJurisdiction);
                 $service = new \ahgPrivacyPlugin\Service\PrivacyService();
-        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->idTypes = \ahgPrivacyPlugin\Service\PrivacyService::getIdTypes();
         $this->defaultJurisdiction = $defaultJurisdiction;
 
@@ -144,7 +146,8 @@ class privacyAdminActions extends sfActions
     {
         $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
         $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
-        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $service = $this->getService();
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
 
         if ($request->isMethod('post')) {
@@ -207,7 +210,7 @@ class privacyAdminActions extends sfActions
     {
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases($defaultJurisdiction);
-        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->defaultJurisdiction = $defaultJurisdiction;
 
         if ($request->isMethod('post')) {
@@ -230,7 +233,7 @@ class privacyAdminActions extends sfActions
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
             $this->activity->jurisdiction ?? 'popia'
         );
-        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
 
         if ($request->isMethod('post')) {
             $service->saveRopa($request->getPostParameters(), $request->getParameter('id'), $this->getUserId());
@@ -395,5 +398,65 @@ class privacyAdminActions extends sfActions
         $this->consents = $service->getConsentRecords([
             'status' => $request->getParameter('status')
         ]);
+    }
+    // =====================
+    // Complaint Management
+    // =====================
+
+    public function executeComplaintList(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+
+        $this->complaints = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+            ->when($request->getParameter('status'), function($q, $status) {
+                return $q->where('status', $status);
+            })
+            ->when($this->getJurisdiction(), function($q, $j) {
+                return $q->where('jurisdiction', $j);
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        $this->complaintTypes = [
+            'unauthorized_access' => 'Unauthorized Access',
+            'unauthorized_disclosure' => 'Unauthorized Disclosure',
+            'inaccurate_data' => 'Inaccurate Data',
+            'failure_to_respond' => 'Failure to Respond',
+            'excessive_collection' => 'Excessive Collection',
+            'unsolicited_marketing' => 'Unsolicited Marketing',
+            'security_breach' => 'Security Breach',
+            'other' => 'Other'
+        ];
+    }
+
+    public function executeComplaintView(sfWebRequest $request)
+    {
+        $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+
+        if (!$this->complaint) {
+            $this->forward404();
+        }
+    }
+
+    public function executeComplaintUpdate(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+            ->where('id', $request->getParameter('id'))
+            ->update([
+                'status' => $request->getParameter('status'),
+                'assigned_to' => $request->getParameter('assigned_to'),
+                'resolution' => $request->getParameter('resolution'),
+                'resolved_date' => $request->getParameter('status') === 'resolved' ? date('Y-m-d') : null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+        $this->getUser()->setFlash('success', 'Complaint updated');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'complaintView', 'id' => $request->getParameter('id')]);
     }
 }

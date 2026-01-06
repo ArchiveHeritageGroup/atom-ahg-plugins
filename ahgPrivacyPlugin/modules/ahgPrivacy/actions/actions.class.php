@@ -86,7 +86,6 @@ class ahgPrivacyActions extends sfActions
             }
         }
     }
-}
 
     /**
      * Lodge Privacy Complaint (public)
@@ -148,3 +147,4 @@ class ahgPrivacyActions extends sfActions
             $this->forward404();
         }
     }
+}
