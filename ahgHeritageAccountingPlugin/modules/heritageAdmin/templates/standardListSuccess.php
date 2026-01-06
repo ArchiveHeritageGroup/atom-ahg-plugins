@@ -56,6 +56,10 @@
                             <?php endif; ?>
                         </td>
                         <td class="text-end">
+                            <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $s->id]); ?>" 
+                               class="btn btn-sm btn-outline-info" title="<?php echo __('Rules'); ?>">
+                                <i class="fas fa-clipboard-check"></i>
+                            </a>
                             <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'standardEdit', 'id' => $s->id]); ?>" 
                                class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>">
                                 <i class="fas fa-edit"></i>

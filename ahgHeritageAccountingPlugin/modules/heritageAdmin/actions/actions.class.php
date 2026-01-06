@@ -141,4 +141,125 @@ class heritageAdminActions extends sfActions
             'replacement' => 'Replacement Cost'
         ];
     }
+
+    // =====================
+    // Compliance Rules Management
+    // =====================
+
+    public function executeRuleList(sfWebRequest $request)
+    {
+        $this->standardId = $request->getParameter('standard_id');
+        
+        $this->standards = \Illuminate\Database\Capsule\Manager::table('heritage_accounting_standard')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $query = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule as r')
+            ->join('heritage_accounting_standard as s', 'r.standard_id', '=', 's.id')
+            ->select('r.*', 's.code as standard_code', 's.name as standard_name');
+
+        if ($this->standardId) {
+            $query->where('r.standard_id', $this->standardId);
+        }
+
+        $this->rules = $query->orderBy('s.sort_order')->orderBy('r.category')->orderBy('r.sort_order')->get();
+    }
+
+    public function executeRuleAdd(sfWebRequest $request)
+    {
+        $this->rule = null;
+        $this->standards = \Illuminate\Database\Capsule\Manager::table('heritage_accounting_standard')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get();
+        $this->categories = ['recognition', 'measurement', 'disclosure'];
+        $this->checkTypes = ['required_field', 'value_check', 'date_check', 'custom'];
+        $this->severities = ['error', 'warning', 'info'];
+        $this->preselectedStandard = $request->getParameter('standard_id');
+
+        if ($request->isMethod('post')) {
+            $this->saveRule($request);
+            $this->getUser()->setFlash('success', 'Compliance rule added');
+            $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $request->getParameter('standard_id')]);
+        }
+    }
+
+    public function executeRuleEdit(sfWebRequest $request)
+    {
+        $this->rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+
+        if (!$this->rule) {
+            $this->forward404();
+        }
+
+        $this->standards = \Illuminate\Database\Capsule\Manager::table('heritage_accounting_standard')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get();
+        $this->categories = ['recognition', 'measurement', 'disclosure'];
+        $this->checkTypes = ['required_field', 'value_check', 'date_check', 'custom'];
+        $this->severities = ['error', 'warning', 'info'];
+
+        if ($request->isMethod('post')) {
+            $this->saveRule($request, $this->rule->id);
+            $this->getUser()->setFlash('success', 'Compliance rule updated');
+            $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $this->rule->standard_id]);
+        }
+    }
+
+    public function executeRuleToggle(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+        $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
+
+        if ($rule) {
+            \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')
+                ->where('id', $id)
+                ->update(['is_active' => !$rule->is_active]);
+        }
+
+        $this->getUser()->setFlash('success', 'Rule status updated');
+        $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $rule->standard_id ?? null]);
+    }
+
+    public function executeRuleDelete(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+        $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
+        $standardId = $rule->standard_id ?? null;
+
+        \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->delete();
+
+        $this->getUser()->setFlash('success', 'Compliance rule deleted');
+        $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $standardId]);
+    }
+
+    protected function saveRule(sfWebRequest $request, $id = null)
+    {
+        $data = [
+            'standard_id' => (int)$request->getParameter('standard_id'),
+            'category' => $request->getParameter('category'),
+            'code' => strtoupper($request->getParameter('code')),
+            'name' => $request->getParameter('name'),
+            'description' => $request->getParameter('description'),
+            'check_type' => $request->getParameter('check_type'),
+            'field_name' => $request->getParameter('field_name'),
+            'condition' => $request->getParameter('condition'),
+            'error_message' => $request->getParameter('error_message'),
+            'reference' => $request->getParameter('reference'),
+            'severity' => $request->getParameter('severity'),
+            'is_active' => $request->getParameter('is_active') ? 1 : 0,
+            'sort_order' => (int)$request->getParameter('sort_order', 0)
+        ];
+
+        if ($id) {
+            \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->update($data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->insert($data);
+        }
+    }
 }
