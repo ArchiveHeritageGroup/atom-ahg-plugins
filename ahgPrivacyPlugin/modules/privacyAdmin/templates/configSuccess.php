@@ -5,7 +5,12 @@
         <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'index']); ?>" class="btn btn-outline-secondary btn-sm me-3">
             <i class="fas fa-arrow-left"></i>
         </a>
-        <h1 class="h2 mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Privacy Settings'); ?></h1>
+        <div class="d-flex justify-content-between align-items-center flex-grow-1">
+            <h1 class="h2 mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Privacy Settings'); ?></h1>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']); ?>" class="btn btn-outline-info">
+                <i class="fas fa-globe me-1"></i><?php echo __('Manage Jurisdictions'); ?>
+            </a>
+        </div>
     </div>
 
     <?php if ($sf_user->hasFlash('success')): ?>

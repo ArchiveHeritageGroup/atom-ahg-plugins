@@ -459,7 +459,7 @@ class privacyAdminActions extends sfActions
         $this->getUser()->setFlash('success', 'Complaint updated');
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'complaintView', 'id' => $request->getParameter('id')]);
     }
-}
+
     // =====================
     // Jurisdiction Management
     // =====================
@@ -567,3 +567,4 @@ class privacyAdminActions extends sfActions
             \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->insert($data);
         }
     }
+}
