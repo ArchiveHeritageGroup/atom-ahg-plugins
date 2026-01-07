@@ -105,7 +105,8 @@ class donorAgreementActions extends sfActions
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
         $this->agreement = null;
-        $this->donors = $this->getDonorsList();
+        file_put_contents("/tmp/donor_debug.txt", "getDonorsList called at " . date("Y-m-d H:i:s") . "\n", FILE_APPEND); $this->donors = $this->getDonorsList();
+        error_log("DEBUG executeAdd: donors count = " . count($this->donors));
         
         // For donor pre-selection
         $this->donorId = $request->getParameter('donor_id');
@@ -135,7 +136,8 @@ class donorAgreementActions extends sfActions
     {
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
-        $this->donors = $this->getDonorsList();
+        file_put_contents("/tmp/donor_debug.txt", "getDonorsList called at " . date("Y-m-d H:i:s") . "\n", FILE_APPEND); $this->donors = $this->getDonorsList();
+        error_log("DEBUG executeAdd: donors count = " . count($this->donors));
         
         $id = $request->getParameter('id');
         
@@ -274,7 +276,7 @@ class donorAgreementActions extends sfActions
             error_log("Error fetching donors: " . $e->getMessage());
         }
         
-        return $donors;
+        error_log("getDonorsList returning " . count($donors) . " donors"); return $donors;
     }
 
     /**

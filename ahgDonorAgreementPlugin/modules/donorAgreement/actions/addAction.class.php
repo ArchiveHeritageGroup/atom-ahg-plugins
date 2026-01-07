@@ -14,6 +14,7 @@ class donorAgreementAddAction extends sfAction
         // Get types directly from database using Laravel Query Builder
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
+        $this->donors = $this->getDonorsList();
         $this->agreement = null;
         $this->documents = [];
 
@@ -334,5 +335,25 @@ class donorAgreementAddAction extends sfAction
             ->count();
         
         return sprintf('%s-%s-%04d', $prefix, $year, $count + 1);
+    }
+
+    protected function getDonorsList()
+    {
+        $donors = [];
+        try {
+            $results = \Illuminate\Database\Capsule\Manager::table('donor')
+                ->join('actor', 'donor.id', '=', 'actor.id')
+                ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
+                ->select(['donor.id', 'actor_i18n.authorized_form_of_name as name'])
+                ->where('actor_i18n.culture', 'en')
+                ->orderBy('actor_i18n.authorized_form_of_name')
+                ->get();
+            foreach ($results as $row) {
+                $donors[] = $row;
+            }
+        } catch (Exception $e) {
+            error_log("Error fetching donors: " . $e->getMessage());
+        }
+        return $donors;
     }
 }

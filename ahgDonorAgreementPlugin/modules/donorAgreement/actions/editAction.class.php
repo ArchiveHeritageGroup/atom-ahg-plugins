@@ -19,6 +19,7 @@ class donorAgreementEditAction extends sfAction
         // Get types and statuses
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
+        $this->donors = $this->getDonorsList();
         
         // Get agreement
         $this->agreement = \Illuminate\Database\Capsule\Manager::table('donor_agreement as da')
@@ -433,5 +434,25 @@ class donorAgreementEditAction extends sfAction
                 // Skip duplicates
             }
         }
+    }
+
+    protected function getDonorsList()
+    {
+        $donors = [];
+        try {
+            $results = \Illuminate\Database\Capsule\Manager::table('donor')
+                ->join('actor', 'donor.id', '=', 'actor.id')
+                ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
+                ->select(['donor.id', 'actor_i18n.authorized_form_of_name as name'])
+                ->where('actor_i18n.culture', 'en')
+                ->orderBy('actor_i18n.authorized_form_of_name')
+                ->get();
+            foreach ($results as $row) {
+                $donors[] = $row;
+            }
+        } catch (Exception $e) {
+            error_log("Error fetching donors: " . $e->getMessage());
+        }
+        return $donors;
     }
 }

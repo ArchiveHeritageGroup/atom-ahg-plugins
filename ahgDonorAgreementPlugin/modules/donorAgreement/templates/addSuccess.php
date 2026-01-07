@@ -1,5 +1,4 @@
 <?php use_helper('Date') ?>
-
 <?php include_partial('donorAgreement/form', [
     'agreement' => $agreement ?? null,
     'types' => $types ?? [],
@@ -7,7 +6,7 @@
     'donor' => $donor ?? null,
     'donorId' => $donorId ?? null,
     'documents' => [],
-    'title' => __('Add Agreement'),
     'donors' => $donors ?? [],
+    'title' => __('Add Agreement'),
     'action' => url_for(['module' => 'donorAgreement', 'action' => 'add'])
 ]) ?>
