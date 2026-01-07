@@ -11,6 +11,9 @@ $savedSearches = is_array($savedSearches) ? $savedSearches : (method_exists($sav
 $annotations = is_array($annotations) ? $annotations : (method_exists($annotations, 'getRawValue') ? $annotations->getRawValue() : (is_iterable($annotations) ? iterator_to_array($annotations) : []));
 $upcomingBookings = is_array($upcomingBookings) ? $upcomingBookings : (method_exists($upcomingBookings, 'getRawValue') ? $upcomingBookings->getRawValue() : (is_iterable($upcomingBookings) ? iterator_to_array($upcomingBookings) : []));
 $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBookings, 'getRawValue') ? $pastBookings->getRawValue() : (is_iterable($pastBookings) ? iterator_to_array($pastBookings) : []));
+
+// Check if researcher can use features (approved and not expired)
+$canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_at || strtotime($researcher->expires_at) >= time());
 ?>
 
 <?php if ($sf_user->hasFlash('success')): ?>
@@ -18,6 +21,42 @@ $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBo
 <?php endif; ?>
 <?php if ($sf_user->hasFlash('error')): ?>
   <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+<?php endif; ?>
+
+<?php if ($researcher->status === 'expired' || ($researcher->status === 'approved' && $researcher->expires_at && strtotime($researcher->expires_at) < time())): ?>
+<div class="alert alert-danger d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <i class="fas fa-exclamation-circle me-2"></i>
+    <strong><?php echo __('Your researcher registration has expired.'); ?></strong>
+    <?php echo __('Please request a renewal to continue using research features.'); ?>
+  </div>
+  <a href="<?php echo url_for('research/renewal'); ?>" class="btn btn-danger">
+    <i class="fas fa-sync-alt me-1"></i><?php echo __('Request Renewal'); ?>
+  </a>
+</div>
+<?php elseif ($researcher->status === 'approved' && $researcher->expires_at && strtotime($researcher->expires_at) < strtotime('+30 days')): ?>
+<div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <i class="fas fa-clock me-2"></i>
+    <strong><?php echo __('Your registration expires on') . ' ' . date('M j, Y', strtotime($researcher->expires_at)); ?></strong>
+  </div>
+  <a href="<?php echo url_for('research/renewal'); ?>" class="btn btn-warning">
+    <i class="fas fa-sync-alt me-1"></i><?php echo __('Request Renewal'); ?>
+  </a>
+</div>
+<?php elseif ($researcher->status === 'rejected'): ?>
+<div class="alert alert-danger d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <i class="fas fa-times-circle me-2"></i>
+    <strong><?php echo __('Your registration was rejected.'); ?></strong>
+    <?php if ($researcher->rejection_reason): ?>
+      <br><small><?php echo __('Reason:') . ' ' . htmlspecialchars($researcher->rejection_reason); ?></small>
+    <?php endif; ?>
+  </div>
+  <a href="<?php echo url_for('research/register'); ?>" class="btn btn-primary">
+    <i class="fas fa-redo me-1"></i><?php echo __('Re-apply'); ?>
+  </a>
+</div>
 <?php endif; ?>
 
 <!-- Profile Summary Bar -->
@@ -32,7 +71,7 @@ $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBo
       </div>
       <div class="col-md-6 text-md-end mt-2 mt-md-0">
         <a href="<?php echo url_for(['module' => 'research', 'action' => 'profile']); ?>" class="btn btn-outline-secondary btn-sm me-1"><i class="fas fa-user-edit me-1"></i><?php echo __('Edit Profile'); ?></a>
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-primary btn-sm"><i class="fas fa-calendar-plus me-1"></i><?php echo __('Book Reading Room'); ?></a>
+        <?php if ($canUseFeatures): ?><a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-primary btn-sm"><i class="fas fa-calendar-plus me-1"></i><?php echo __('Book Reading Room'); ?></a><?php else: ?><button class="btn btn-secondary btn-sm" disabled><i class="fas fa-calendar-plus me-1"></i><?php echo __('Book Reading Room'); ?></button><?php endif; ?>
       </div>
     </div>
   </div>
@@ -80,7 +119,7 @@ $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBo
         <div class="card-body text-center text-muted py-4">
           <i class="fas fa-calendar fa-2x mb-2 opacity-50"></i>
           <p class="mb-2"><?php echo __('No upcoming visits'); ?></p>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('Book a visit'); ?></a>
+          <?php if ($canUseFeatures): ?><a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('Book a visit'); ?></a><?php else: ?><button class="btn btn-sm btn-outline-secondary" disabled><?php echo __('Book a visit'); ?></button><?php endif; ?>
         </div>
       <?php endif; ?>
     </div>
@@ -128,7 +167,7 @@ $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBo
         <div class="card-body text-center text-muted py-4">
           <i class="fas fa-folder-open fa-2x mb-2 opacity-50"></i>
           <p class="mb-2"><?php echo __('No collections yet'); ?></p>
-          <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#newCollectionModal"><?php echo __('Create your first collection'); ?></button>
+          <?php if ($canUseFeatures): ?><button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#newCollectionModal"><?php echo __('Create your first collection'); ?></button><?php else: ?><button class="btn btn-sm btn-outline-secondary" disabled><?php echo __('Create your first collection'); ?></button><?php endif; ?>
         </div>
       <?php endif; ?>
     </div>

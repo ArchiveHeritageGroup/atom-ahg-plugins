@@ -31,7 +31,7 @@ DROP TABLE IF EXISTS `access_request`;
 CREATE TABLE IF NOT EXISTS `access_request` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `request_type` enum('clearance','object','repository','authority','researcher') DEFAULT 'clearance',
-  `scope_type` enum('single','with_children','collection','repository_all') DEFAULT 'single',
+  `scope_type` enum('single','with_children','collection','repository_all','renewal') DEFAULT 'single',
   `user_id` int unsigned NOT NULL,
   `requested_classification_id` int unsigned NOT NULL,
   `current_classification_id` int unsigned DEFAULT NULL,
