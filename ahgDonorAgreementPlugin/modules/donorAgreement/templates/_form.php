@@ -76,6 +76,7 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
             <h5 class="mb-0"><?php echo __('Donor Information') ?></h5>
           </div>
           <div class="card-body">
+            <div class="row g-3">
               <div class="col-12">
                 <label class="form-label"><?php echo __('Select Donor') ?></label>
                 <select id="donor-select" name="agreement[donor_id]" class="form-select">
