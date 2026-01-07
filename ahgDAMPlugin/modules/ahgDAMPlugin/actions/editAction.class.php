@@ -94,14 +94,17 @@ class ahgDAMPluginEditAction extends InformationObjectEditAction
                     ->select('term.id', 'term_i18n.name')
                     ->get();
                 
-                foreach ($levels as $level) {
-                    $term = QubitTerm::getById($level->id);
-                    if ($term) {
-                        $choices[$this->context->routing->generate(null, [$term, 'module' => 'term'])] = $level->name;
+                // Get terms from QubitTaxonomy and filter by sector levels
+                $levelIds = $levels->pluck('id')->toArray();
+                foreach (QubitTaxonomy::getTaxonomyTerms(QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID) as $item) {
+                    if (in_array($item->id, $levelIds)) {
+                        // Use slug-based URL to avoid routing prefix issues
+                        $url = sfConfig::get('sf_script_name', '/index.php') . '/' . $item->slug;
+                        $choices[$url] = $item;
                     }
                 }
                 
-                $this->form->setWidget('levelOfDescription', new sfWidgetFormSelect(['choices' => $choices]));
+                $this->form->setWidget('levelOfDescription', new sfWidgetFormSelect(['choices' => $choices], ['class' => 'form-select']));
                 break;
                 
             default:

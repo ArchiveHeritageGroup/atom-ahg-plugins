@@ -25,6 +25,13 @@
         'artwork': 1750, 'artifact': 1751, 'specimen': 1752,
         'photograph': 1753, 'audio': 1754, 'video': 1755,
         'image': 1756, '3d-model': 1757, 'dataset': 1758, 'article': 1759,
+        // Level-prefixed slugs for GLAM sectors
+        'level-photograph': 1753, 'level-audio': 1754, 'level-video': 1755,
+        'level-image': 1756, 'level-3d-model': 1757, 'level-dataset': 1758,
+        'level-document': 1161, 'level-book': 1700, 'level-monograph': 1701,
+        'level-periodical': 1702, 'level-journal': 1703, 'level-manuscript': 1704,
+        'level-article': 1759, 'level-artwork': 1750, 'level-artifact': 1751,
+        'level-specimen': 1752, 'level-object': 500, 'level-installation': 512,
         // Weird slugs from imports
         'enhanced-mushroom-141-jpg-8': 1753,
         'enhanced-mushroom-142-jpg-8': 1754,
