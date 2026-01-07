@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `research_researcher` (
   `id_verified` tinyint(1) DEFAULT '0',
   `id_verified_by` int DEFAULT NULL,
   `id_verified_at` datetime DEFAULT NULL,
-  `status` enum('pending','approved','suspended','expired') DEFAULT 'pending',
+  `status` enum('pending','approved','suspended','expired','rejected') DEFAULT 'pending',
   `rejection_reason` text,
   `approved_by` int DEFAULT NULL,
   `approved_at` datetime DEFAULT NULL,

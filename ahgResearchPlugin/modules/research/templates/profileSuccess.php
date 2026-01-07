@@ -19,6 +19,21 @@
                 <span class="badge bg-<?php echo $researcher->status === 'approved' ? 'success' : ($researcher->status === 'pending' ? 'warning' : 'danger'); ?>"><?php echo ucfirst($researcher->status); ?></span>
             </div>
             <div class="card-body">
+                <?php if ($researcher->status === 'expired' || ($researcher->status === 'approved' && $researcher->expires_at && strtotime($researcher->expires_at) < strtotime('+30 days'))): ?>
+                <div class="alert alert-<?php echo $researcher->status === 'expired' ? 'danger' : 'warning'; ?> d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-<?php echo $researcher->status === 'expired' ? 'exclamation-circle' : 'clock'; ?> me-2"></i>
+                        <?php if ($researcher->status === 'expired'): ?>
+                            <?php echo __('Your researcher registration has expired.'); ?>
+                        <?php else: ?>
+                            <?php echo __('Your registration expires on') . ' ' . date('M j, Y', strtotime($researcher->expires_at)); ?>
+                        <?php endif; ?>
+                    </div>
+                    <a href="<?php echo url_for('research/renewal'); ?>" class="btn btn-sm btn-<?php echo $researcher->status === 'expired' ? 'danger' : 'warning'; ?>">
+                        <i class="fas fa-sync-alt me-1"></i><?php echo __('Request Renewal'); ?>
+                    </a>
+                </div>
+                <?php endif; ?>
                 <form method="post">
                     <div class="row mb-3">
                         <div class="col-md-2">

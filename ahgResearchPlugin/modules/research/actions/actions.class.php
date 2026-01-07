@@ -41,13 +41,20 @@ class researchActions extends sfActions
             $this->redirect('user/login');
         }
         $userId = $this->getUser()->getAttribute('user_id');
-        if ($this->service->getResearcherByUserId($userId)) {
-            $this->redirect('research/profile');
+        $existing = $this->service->getResearcherByUserId($userId);
+        if ($existing) {
+            // If rejected, allow re-registration
+            if ($existing->status === 'rejected') {
+                $this->existingResearcher = $existing;
+                // Will update existing record instead of creating new
+            } else {
+                $this->redirect('research/profile');
+            }
         }
         $this->user = DB::table('user')->where('id', $userId)->first();
         if ($request->isMethod('post')) {
             try {
-                $this->service->registerResearcher([
+                $data = [
                     'user_id' => $userId,
                     'title' => $request->getParameter('title'),
                     'first_name' => $request->getParameter('first_name'),
@@ -63,9 +70,21 @@ class researchActions extends sfActions
                     'orcid_id' => $request->getParameter('orcid_id'),
                     'id_type' => $request->getParameter('id_type'),
                     'id_number' => $request->getParameter('id_number'),
-                ]);
-                $this->getUser()->setFlash('success', 'Registration submitted');
-                $this->redirect('research/dashboard');
+                ];
+                
+                // If re-registering after rejection, update existing record
+                if (isset($this->existingResearcher) && $this->existingResearcher) {
+                    $data['status'] = 'pending';
+                    $data['rejection_reason'] = null;
+                    DB::table('research_researcher')
+                        ->where('id', $this->existingResearcher->id)
+                        ->update($data);
+                    $this->getUser()->setFlash('success', 'Re-registration submitted for review');
+                } else {
+                    $this->service->registerResearcher($data);
+                    $this->getUser()->setFlash('success', 'Registration submitted');
+                }
+                $this->redirect('research/registrationComplete');
             } catch (Exception $e) {
                 if ($e->getMessage()) { $this->getUser()->setFlash('error', $e->getMessage()); }
             }
@@ -1040,4 +1059,45 @@ class researchActions extends sfActions
         
         return $this->renderText(json_encode(['items' => $items]));
     }
+
+    /**
+     * Request renewal of expired researcher status
+     */
+    public function executeRenewal(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+        
+        // Only allow renewal for expired or soon-to-expire
+        if (!in_array($this->researcher->status, ['expired', 'approved'])) {
+            $this->getUser()->setFlash('error', 'Renewal not available for your current status');
+            $this->redirect('research/profile');
+        }
+        
+        if ($request->isMethod('post')) {
+            $reason = trim($request->getParameter('reason', ''));
+            
+            // Create renewal request via access_request
+            $requestId = DB::table('access_request')->insertGetId([
+                'request_type' => 'researcher',
+                'scope_type' => 'renewal',
+                'user_id' => $userId,
+                'reason' => $reason ?: 'Researcher registration renewal request',
+                'status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            
+            $this->getUser()->setFlash('success', 'Renewal request submitted. You will be notified when reviewed.');
+            $this->redirect('research/profile');
+        }
+    }
+
 }

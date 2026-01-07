@@ -48,6 +48,35 @@
   <h4><i class="fas fa-clock me-2"></i><?php echo __('Registration Pending'); ?></h4>
   <p class="mb-0"><?php echo __('Your researcher registration is being reviewed. You will be notified once approved.'); ?></p>
 </div>
+<?php elseif ($researcher->status === 'expired'): ?>
+<div class="alert alert-danger mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h4><i class="fas fa-exclamation-circle me-2"></i><?php echo __('Registration Expired'); ?></h4>
+      <p class="mb-0"><?php echo __('Your researcher registration has expired. Please request a renewal to continue.'); ?></p>
+    </div>
+    <a href="<?php echo url_for('research/renewal'); ?>" class="btn btn-danger">
+      <i class="fas fa-sync-alt me-1"></i><?php echo __('Request Renewal'); ?>
+    </a>
+  </div>
+</div>
+<?php elseif ($researcher->status === 'rejected'): ?>
+<div class="alert alert-danger mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h4><i class="fas fa-times-circle me-2"></i><?php echo __('Registration Rejected'); ?></h4>
+      <p class="mb-0">
+        <?php echo __('Your registration was not approved.'); ?>
+        <?php if ($researcher->rejection_reason): ?>
+          <br><small><?php echo __('Reason:') . ' ' . htmlspecialchars($researcher->rejection_reason); ?></small>
+        <?php endif; ?>
+      </p>
+    </div>
+    <a href="<?php echo url_for('research/register'); ?>" class="btn btn-primary">
+      <i class="fas fa-redo me-1"></i><?php echo __('Re-apply'); ?>
+    </a>
+  </div>
+</div>
 <?php elseif ($researcher->status === 'approved'): ?>
 <div class="card bg-light mb-4">
   <div class="card-body">

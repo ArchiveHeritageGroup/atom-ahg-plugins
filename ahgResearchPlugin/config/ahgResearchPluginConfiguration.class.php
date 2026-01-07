@@ -173,6 +173,10 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
             '/research',
             ['module' => 'research', 'action' => 'dashboard']
         ));
+        $routing->prependRoute('research_renewal', new sfRoute(
+            '/research/renewal',
+            ['module' => 'research', 'action' => 'renewal']
+        ));
         $routing->prependRoute('research_index', new sfRoute(
             '/research/dashboard',
             ['module' => 'research', 'action' => 'dashboard']
