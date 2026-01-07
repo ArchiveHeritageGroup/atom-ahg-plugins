@@ -1,13 +1,94 @@
 # ahgSpectrumPlugin - Routing Configuration
 
-# Dashboard & Core Routes
-spectrum_dashboard:
-  url: /spectrum/dashboard
-  param: { module: spectrum, action: dashboard }
+# Spectrum 5.0 Object Routes
+spectrum_index:
+  url: /:slug/spectrum
+  param: { module: spectrum, action: index }
+
+spectrum_label:
+  url: /:slug/spectrum/label
+  param: { module: spectrum, action: label }
 
 spectrum_workflow:
   url: /spectrum/:slug/workflow
   param: { module: spectrum, action: workflow }
+
+spectrum_workflow_update:
+  url: /spectrum/:slug/workflow/update
+  param: { module: spectrum, action: workflowUpdate }
+
+spectrum_workflow_transition:
+  url: /spectrum/:slug/workflow/transition
+  param: { module: spectrum, action: workflowTransition }
+
+# Dashboard Routes
+spectrum_dashboard:
+  url: /spectrum/dashboard
+  param: { module: spectrum, action: dashboard }
+
+spectrum_grap_dashboard:
+  url: /spectrum/grap
+  param: { module: spectrum, action: grapDashboard }
+
+spectrum_loan_dashboard:
+  url: /spectrum/loans
+  param: { module: spectrum, action: loanDashboard }
+
+# Condition Routes
+spectrum_condition_photos:
+  url: /:slug/spectrum/condition-photos
+  param: { module: spectrum, action: conditionPhotos }
+
+spectrum_condition_report:
+  url: /:slug/spectrum/condition-report
+  param: { module: spectrum, action: conditionReport }
+
+spectrum_condition_check:
+  url: /:slug/spectrum/conditionCheck
+  param: { module: spectrum, action: conditionCheck }
+
+# Compliance Routes
+spectrum_security_compliance:
+  url: /:slug/spectrum/security
+  param: { module: spectrum, action: securityCompliance }
+
+spectrum_privacy_compliance:
+  url: /:slug/spectrum/privacy
+  param: { module: spectrum, action: privacyCompliance }
+
+spectrum_privacy_ropa:
+  url: /spectrum/ropa
+  param: { module: spectrum, action: privacyRopa }
+
+# Photo Management Routes
+spectrum_annotation_save:
+  url: /spectrum/annotation/save
+  param: { module: spectrum, action: annotationSave }
+
+spectrum_annotation_get:
+  url: /spectrum/annotation/get/:photo_id
+  param: { module: spectrum, action: annotationGet }
+
+spectrum_photo_delete:
+  url: /spectrum/photo/delete/:photo_id
+  param: { module: spectrum, action: photoDelete }
+
+spectrum_photo_primary:
+  url: /spectrum/photo/primary/:photo_id
+  param: { module: spectrum, action: photoSetPrimary }
+
+spectrum_photo_rotate:
+  url: /spectrum/photo/rotate/:photo_id
+  param: { module: spectrum, action: photoRotate }
+
+# Provenance & Misc
+spectrum_provenance_ajax:
+  url: /spectrum/provenance/ajax
+  param: { module: spectrum, action: provenanceAjax }
+
+spectrum_install:
+  url: /spectrum/install
+  param: { module: spectrum, action: install }
 
 spectrum_export:
   url: /spectrum/export
@@ -16,28 +97,6 @@ spectrum_export:
 spectrum_template_config:
   url: /spectrum/config/templates
   param: { module: spectrum, action: templateConfig }
-
-spectrum_install:
-  url: /spectrum/install
-  param: { module: spectrum, action: install }
-
-# AHG Settings Routes
-#DISABLED 
-#DISABLED   url: /admin/ahg-settings/:section
-#DISABLED   param: { module: settings, action: ahgSettings }
-#DISABLED 
-#DISABLED # Condition Photos Routes
-#DISABLED spectrum_condition_photos:
-#DISABLED   url: /spectrum/:slug/condition/:condition_id/photos
-  param: { module: spectrum, action: conditionPhotos }
-
-spectrum_photo_edit:
-  url: /spectrum/photo/:photo_id/edit
-  param: { module: spectrum, action: conditionPhotos, photo_action: edit }
-
-spectrum_photo_delete:
-  url: /spectrum/photo/:photo_id/delete
-  param: { module: spectrum, action: conditionPhotos, photo_action: delete }
 
 # API Routes
 spectrum_api_events:
@@ -51,7 +110,3 @@ spectrum_api_object_events:
 spectrum_api_statistics:
   url: /api/spectrum/statistics
   param: { module: api, action: statisticsApi }
-
-spectrum_conditionCheck:
-  url: /:slug/spectrum/conditionCheck
-  param: { module: spectrum, action: conditionCheck }
