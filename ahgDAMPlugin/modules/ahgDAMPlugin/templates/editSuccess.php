@@ -381,7 +381,7 @@
 
     <!-- Admin Area -->
     <div class="card mb-3">
-      <div class="card-header bg-secondary text-white collapsed" data-bs-toggle="collapse" data-bs-target="#adminSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#adminSection" style="cursor:pointer;">
         <i class="fas fa-lock"></i> <?php echo __('Administration area'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -403,7 +403,7 @@
         </div>
       </div>
 <!-- Item Physical Location -->
-<?php include_partial("informationobject/itemPhysicalLocation", ["resource" => $resource ?? null, "itemLocation" => $itemLocation ?? []]); ?>
+<?php include_partial("ahgDAMPlugin/itemPhysicalLocationCard", ["resource" => $resource ?? null, "itemLocation" => $itemLocation ?? []]); ?>
     </div>
 
     <section class="actions">
