@@ -264,4 +264,17 @@ function escapeHtml(text) {
   div.textContent = String(text);
   return div.innerHTML;
 }
+
+// Event delegation for compare buttons (CSP compliant)
+document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("click", function(e) {
+    const btn = e.target.closest(".btn-audit-compare");
+    if (btn) {
+      const auditId = btn.getAttribute("data-audit-id");
+      if (auditId) {
+        showAuditCompare(auditId);
+      }
+    }
+  });
+});
 </script>

@@ -97,7 +97,7 @@
           <td class="text-end">
             <div class="btn-group btn-group-sm">
               <?php if (($log->action === 'update' || $log->action === 'create') && ($log->old_values || $log->new_values)): ?>
-                <button type="button" class="btn btn-outline-warning" onclick="showAuditCompare(<?php echo $log->id ?>)" title="<?php echo __('Compare Changes') ?>">
+                <button type="button" class="btn btn-outline-warning btn-audit-compare" data-audit-id="<?php echo $log->id ?>" title="<?php echo __('Compare Changes') ?>">
                   <i class="fas fa-exchange-alt"></i>
                 </button>
               <?php endif; ?>
