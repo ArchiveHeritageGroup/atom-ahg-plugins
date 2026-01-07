@@ -448,7 +448,7 @@ class researchActions extends sfActions
                         'name' => $name,
                         'description' => $description,
                         'is_public' => $isPublic,
-                        'updated_at' => date('Y-m-d H:i:s'),
+                        
                     ]);
                     $this->getUser()->setFlash('success', 'Collection updated');
                 }
@@ -508,7 +508,7 @@ class researchActions extends sfActions
                         ->update([
                             'title' => $title,
                             'content' => $content,
-                            'updated_at' => date('Y-m-d H:i:s'),
+                            
                         ]);
                     $this->getUser()->setFlash('success', 'Note updated');
                 }
@@ -572,10 +572,26 @@ class researchActions extends sfActions
             if ($password !== $confirmPassword) {
                 $errors[] = 'Passwords do not match';
             }
-            if (DB::table('user')->where('email', $email)->exists()) {
-                $errors[] = 'Email address is already registered';
+            // Check for existing users - allow reactivation of rejected/deactivated users
+            $existingUser = DB::table('user')->where('email', $email)->first();
+            $existingByUsername = DB::table('user')->where('username', $username)->first();
+            
+            // If user exists, check if they can re-register
+            if ($existingUser) {
+                if ($existingUser->active) {
+                    $errors[] = 'Email address is already registered';
+                } else {
+                    // Check if disabled due to rejection (can re-register) or other reason (cannot)
+                    $wasRejected = DB::table('research_researcher_audit')
+                        ->where('user_id', $existingUser->id)
+                        ->where('status', 'rejected')
+                        ->exists();
+                    if (!$wasRejected) {
+                        $errors[] = 'This account has been disabled. Please contact the administrator.';
+                    }
+                }
             }
-            if (DB::table('user')->where('username', $username)->exists()) {
+            if ($existingByUsername && $existingByUsername->active && (!$existingUser || $existingByUsername->id != $existingUser->id)) {
                 $errors[] = 'Username is already taken';
             }
 
@@ -586,8 +602,37 @@ class researchActions extends sfActions
 
             try {
                 DB::beginTransaction();
-                $userId = $this->createAtomUser($username, $email, $password);
-                DB::table('acl_user_group')->insert(['user_id' => $userId, 'group_id' => 99]);
+                
+                // Check if this is a reactivation of a previously rejected researcher
+                // Only allow if they have a rejected entry in audit table
+                $wasRejected = $existingUser && !$existingUser->active && 
+                    DB::table('research_researcher_audit')
+                        ->where('user_id', $existingUser->id)
+                        ->where('status', 'rejected')
+                        ->exists();
+                
+                if ($wasRejected) {
+                    // Reactivate existing user with new password
+                    $salt = md5(rand(100000, 999999) . $email);
+                    $sha1Hash = sha1($salt . $password);
+                    $passwordHash = password_hash($sha1Hash, PASSWORD_ARGON2I);
+                    
+                    DB::table('user')->where('id', $existingUser->id)->update([
+                        'username' => $username,
+                        'password_hash' => $passwordHash,
+                        'salt' => $salt,
+                        'active' => 0, // Keep inactive until approved
+                        
+                    ]);
+                    $userId = $existingUser->id;
+                } else {
+                    $userId = $this->createAtomUser($username, $email, $password);
+                }
+                
+                // Ensure user is in researcher group
+                if (!DB::table('acl_user_group')->where('user_id', $userId)->where('group_id', 99)->exists()) {
+                    DB::table('acl_user_group')->insert(['user_id' => $userId, 'group_id' => 99]);
+                }
                 $this->service->registerResearcher([
                     'user_id' => $userId,
                     'title' => $request->getParameter('title'),
@@ -767,7 +812,7 @@ class researchActions extends sfActions
                 'closing_time' => $request->getParameter('closing_time', '17:00:00'),
                 'days_open' => $request->getParameter('days_open', 'Mon,Tue,Wed,Thu,Fri'),
                 'is_active' => $request->getParameter('is_active') ? 1 : 0,
-                'updated_at' => date('Y-m-d H:i:s'),
+                
             ];
             if ($id && $this->room) {
                 DB::table('research_reading_room')->where('id', $id)->update($data);
@@ -1133,7 +1178,7 @@ class researchActions extends sfActions
                 'reason' => $reason ?: 'Researcher registration renewal request',
                 'status' => 'pending',
                 'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
+                
             ]);
             
             $this->getUser()->setFlash('success', 'Renewal request submitted. You will be notified when reviewed.');
