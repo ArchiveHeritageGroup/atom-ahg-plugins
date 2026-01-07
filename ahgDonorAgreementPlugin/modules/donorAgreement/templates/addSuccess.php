@@ -8,5 +8,6 @@
     'donorId' => $donorId ?? null,
     'documents' => [],
     'title' => __('Add Agreement'),
+    'donors' => $donors ?? [],
     'action' => url_for(['module' => 'donorAgreement', 'action' => 'add'])
 ]) ?>

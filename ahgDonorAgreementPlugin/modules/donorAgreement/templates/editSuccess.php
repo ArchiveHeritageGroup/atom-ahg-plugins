@@ -10,5 +10,6 @@
     'linkedAccessions' => $linkedAccessions ?? [],
     'reminders' => $reminders ?? [],
     'title' => __('Edit Agreement') . ': ' . esc_entities($agreement->agreement_number ?: $agreement->title),
+    'donors' => $donors ?? [],
     'action' => url_for(['module' => 'donorAgreement', 'action' => 'edit', 'id' => $agreement->id])
 ]) ?>
