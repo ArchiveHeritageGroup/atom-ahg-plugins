@@ -66,9 +66,6 @@ if (isset($resource)) {
     <?php if ($hasResearch): ?>
     <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
-    <?php if ($hasDisplay): ?>
-    <li><?php echo link_to(__('GLAM browser'), ['module' => 'display', 'action' => 'browse']); ?></li>
-    <?php endif; ?>
   </ul>
 </section>
 <?php
