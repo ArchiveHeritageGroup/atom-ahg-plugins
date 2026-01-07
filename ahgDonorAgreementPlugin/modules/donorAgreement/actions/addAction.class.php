@@ -307,7 +307,7 @@ class donorAgreementAddAction extends sfAction
             $insertData = [
                 'donor_agreement_id' => $agreementId,
                 'reminder_type' => $reminder['reminder_type'] ?? 'review_due',
-                'title' => $reminder['message'] ?? 'Reminder',
+                'subject' => $reminder['message'] ?? 'Reminder',
                 'reminder_date' => $reminder['reminder_date'],
                 'status' => 'active',
                 'created_at' => date('Y-m-d H:i:s'),
