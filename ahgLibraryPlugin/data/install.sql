@@ -28,7 +28,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @book_id, 34, 'en' FROM DUAL WHERE @book_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @book_id, 'en', 'Book' FROM DUAL WHERE @book_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@book_id, 'book');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@book_id, 'level-book');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@book_id, 'library', 10);
 
 -- Monograph
@@ -40,7 +40,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @mono_id, 34, 'en' FROM DUAL WHERE @mono_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @mono_id, 'en', 'Monograph' FROM DUAL WHERE @mono_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@mono_id, 'monograph');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@mono_id, 'level-monograph');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@mono_id, 'library', 20);
 
 -- Periodical
@@ -52,7 +52,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @peri_id, 34, 'en' FROM DUAL WHERE @peri_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @peri_id, 'en', 'Periodical' FROM DUAL WHERE @peri_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@peri_id, 'periodical');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@peri_id, 'level-periodical');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@peri_id, 'library', 30);
 
 -- Journal
@@ -64,7 +64,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @jour_id, 34, 'en' FROM DUAL WHERE @jour_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @jour_id, 'en', 'Journal' FROM DUAL WHERE @jour_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@jour_id, 'journal');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@jour_id, 'level-journal');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@jour_id, 'library', 40);
 
 -- Article
@@ -76,7 +76,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @arti_id, 34, 'en' FROM DUAL WHERE @arti_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @arti_id, 'en', 'Article' FROM DUAL WHERE @arti_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@arti_id, 'article');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@arti_id, 'level-article');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@arti_id, 'library', 45);
 
 -- Manuscript
@@ -88,7 +88,7 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @manu_id, 34, 'en' FROM DUAL WHERE @manu_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @manu_id, 'en', 'Manuscript' FROM DUAL WHERE @manu_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@manu_id, 'manuscript');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@manu_id, 'level-manuscript');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@manu_id, 'library', 50);
 
 -- Document (shared with DAM)
@@ -100,6 +100,6 @@ INSERT INTO term (id, taxonomy_id, source_culture)
 SELECT @doc_id, 34, 'en' FROM DUAL WHERE @doc_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @doc_id, 'en', 'Document' FROM DUAL WHERE @doc_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@doc_id, 'document');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@doc_id, 'level-document');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@doc_id, 'library', 60);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@doc_id, 'dam', 50);

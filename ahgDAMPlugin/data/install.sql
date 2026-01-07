@@ -354,7 +354,7 @@ INSERT INTO term (id, taxonomy_id, code, source_culture)
 SELECT @photo_id, 34, '', 'en' FROM DUAL WHERE @photo_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @photo_id, 'en', 'Photograph' FROM DUAL WHERE @photo_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@photo_id, 'photograph');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@photo_id, 'level-photograph');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@photo_id, 'dam', 10);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@photo_id, 'gallery', 20);
 
@@ -367,7 +367,7 @@ INSERT INTO term (id, taxonomy_id, code, source_culture)
 SELECT @audio_id, 34, '', 'en' FROM DUAL WHERE @audio_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @audio_id, 'en', 'Audio' FROM DUAL WHERE @audio_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@audio_id, 'audio');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@audio_id, 'level-audio');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@audio_id, 'dam', 20);
 
 -- Video
@@ -379,7 +379,7 @@ INSERT INTO term (id, taxonomy_id, code, source_culture)
 SELECT @video_id, 34, '', 'en' FROM DUAL WHERE @video_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @video_id, 'en', 'Video' FROM DUAL WHERE @video_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@video_id, 'video');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@video_id, 'level-video');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@video_id, 'dam', 30);
 
 -- Image
@@ -391,7 +391,7 @@ INSERT INTO term (id, taxonomy_id, code, source_culture)
 SELECT @image_id, 34, '', 'en' FROM DUAL WHERE @image_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @image_id, 'en', 'Image' FROM DUAL WHERE @image_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@image_id, 'image');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@image_id, 'level-image');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@image_id, 'dam', 40);
 
 -- Dataset
@@ -403,5 +403,5 @@ INSERT INTO term (id, taxonomy_id, code, source_culture)
 SELECT @data_id, 34, '', 'en' FROM DUAL WHERE @data_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @data_id, 'en', 'Dataset' FROM DUAL WHERE @data_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@data_id, 'dataset');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@data_id, 'level-dataset');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@data_id, 'dam', 70);

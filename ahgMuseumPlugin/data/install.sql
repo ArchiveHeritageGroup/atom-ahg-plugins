@@ -33,7 +33,7 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @obj_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @obj_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @obj_id, 'en', 'Object' FROM DUAL WHERE @obj_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@obj_id, 'object-level');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@obj_id, 'level-object');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@obj_id, 'museum', 50);
 
 -- Artwork
@@ -45,7 +45,7 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @art_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @art_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @art_id, 'en', 'Artwork' FROM DUAL WHERE @art_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@art_id, 'artwork');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@art_id, 'level-artwork');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@art_id, 'museum', 30);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@art_id, 'gallery', 10);
 
@@ -58,7 +58,7 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @artf_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @artf_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @artf_id, 'en', 'Artifact' FROM DUAL WHERE @artf_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@artf_id, 'artifact');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@artf_id, 'level-artifact');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@artf_id, 'museum', 20);
 
 -- Specimen
@@ -70,7 +70,7 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @spec_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @spec_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @spec_id, 'en', 'Specimen' FROM DUAL WHERE @spec_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@spec_id, 'specimen');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@spec_id, 'level-specimen');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@spec_id, 'museum', 60);
 
 -- Installation
@@ -82,7 +82,7 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @inst_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @inst_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @inst_id, 'en', 'Installation' FROM DUAL WHERE @inst_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@inst_id, 'installation');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@inst_id, 'level-installation');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@inst_id, 'museum', 40);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@inst_id, 'gallery', 40);
 
@@ -95,6 +95,6 @@ INSERT INTO term (id, taxonomy_id, source_culture, class_name)
 SELECT @model_id, 34, 'en', 'QubitTerm' FROM DUAL WHERE @model_exists IS NULL;
 INSERT INTO term_i18n (id, culture, name)
 SELECT @model_id, 'en', '3D Model' FROM DUAL WHERE @model_exists IS NULL;
-INSERT IGNORE INTO slug (object_id, slug) VALUES (@model_id, '3d-model');
+INSERT IGNORE INTO slug (object_id, slug) VALUES (@model_id, 'level-3d-model');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@model_id, 'museum', 10);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@model_id, 'dam', 60);
