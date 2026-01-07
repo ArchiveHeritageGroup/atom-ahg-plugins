@@ -357,7 +357,7 @@
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Trend Chart
-    var trendData = <?php echo $trendChartData ?>;
+    var trendData = <?php echo $sf_data->getRaw('trendChartData') ?>;
     if (document.getElementById('trendChart')) {
         new Chart(document.getElementById('trendChart').getContext('2d'), {
             type: 'line',
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Type Chart
-    var typeData = <?php echo $typeChartData ?>;
+    var typeData = <?php echo $sf_data->getRaw('typeChartData') ?>;
     if (document.getElementById('typeChart') && typeData.labels.length > 0) {
         new Chart(document.getElementById('typeChart').getContext('2d'), {
             type: 'doughnut',
