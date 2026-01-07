@@ -55,7 +55,9 @@ class donorAgreementBrowseAction extends sfAction
             });
         }
 
-        $this->total = $query->count();
+        // Clone before count to preserve query
+        $countQuery = clone $query;
+        $this->total = $countQuery->count();
         $this->totalPages = ceil($this->total / $perPage);
         $this->page = $page;
 
