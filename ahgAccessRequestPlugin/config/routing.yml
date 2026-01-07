@@ -34,7 +34,7 @@ access_request_my:
   param: { module: ahgAccessRequest, action: myRequests }
 
 access_request_create:
-  url: /access-requests/create
+  url: /security/request-access/create
   param: { module: ahgAccessRequest, action: create }
 
 access_request_view:

@@ -33,7 +33,7 @@
               <?php echo $currentClearance ? htmlspecialchars($currentClearance->classification_name) : 'None'; ?>
             </div>
 
-            <form method="post" action="<?php echo url_for('security/request-access/create'); ?>">
+            <form method="post" action="<?php echo url_for('@access_request_create'); ?>">
               <div class="mb-3">
                 <label for="classification_id" class="form-label">Requested Clearance Level <span class="text-danger">*</span></label>
                 <select class="form-select" id="classification_id" name="classification_id" required>
