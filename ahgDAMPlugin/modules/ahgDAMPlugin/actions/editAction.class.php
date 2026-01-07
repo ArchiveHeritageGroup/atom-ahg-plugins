@@ -119,6 +119,13 @@ class ahgDAMPluginEditAction extends InformationObjectEditAction
 
     protected function processForm()
     {
+        // Capture old values for audit trail
+        $isNew = !isset($this->resource->id) || !$this->resource->id;
+        $oldValues = [];
+        if (!$isNew && $this->resource) {
+            $oldValues = $this->captureCurrentValues($this->resource->id);
+        }
+        
         // Call parent first to save the information object
         parent::processForm();
         
@@ -147,6 +154,10 @@ class ahgDAMPluginEditAction extends InformationObjectEditAction
         if (array_filter($locationData)) {
             $locRepo->saveLocationData($this->resource->id, $locationData);
         }
+        
+        // Capture new values and log audit trail
+        $newValues = $this->captureCurrentValues($this->resource->id);
+        $this->logAudit($isNew ? 'create' : 'update', $this->resource->id, $oldValues, $newValues);
     }
 
     protected function saveIptcMetadataDirectly()
@@ -252,4 +263,106 @@ class ahgDAMPluginEditAction extends InformationObjectEditAction
             error_log("DAM IPTC Save Error: " . $e->getMessage());
         }
     }
+
+    /**
+     * Capture current values for audit trail
+     */
+    protected function captureCurrentValues(int $resourceId): array
+    {
+        try {
+            $io = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($join) {
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                })
+                ->where('io.id', $resourceId)
+                ->select(['io.identifier', 'ioi.title', 'ioi.scope_and_content', 'ioi.extent_and_medium'])
+                ->first();
+            
+            $iptc = DB::table('dam_iptc_metadata')
+                ->where('object_id', $resourceId)
+                ->first();
+            
+            $values = [];
+            if ($io) {
+                if ($io->identifier) $values['identifier'] = $io->identifier;
+                if ($io->title) $values['title'] = $io->title;
+                if ($io->scope_and_content) $values['scope_and_content'] = $io->scope_and_content;
+            }
+            
+            if ($iptc) {
+                $iptcFields = ['creator', 'headline', 'caption', 'keywords', 'date_created', 
+                    'city', 'country', 'credit_line', 'copyright_notice'];
+                foreach ($iptcFields as $field) {
+                    if (!empty($iptc->$field)) {
+                        $values['iptc_' . $field] = $iptc->$field;
+                    }
+                }
+            }
+            
+            return $values;
+        } catch (\Exception $e) {
+            error_log("DAM AUDIT CAPTURE ERROR: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Log audit trail entry
+     */
+    protected function logAudit(string $action, int $resourceId, array $oldValues, array $newValues): void
+    {
+        try {
+            $user = $this->getUser();
+            $userId = $user->getAttribute('user_id');
+            $username = null;
+
+            if ($userId) {
+                $userRecord = DB::table('user')->where('id', $userId)->first();
+                $username = $userRecord->username ?? null;
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($newVal !== $oldVal) {
+                    $changedFields[] = $key;
+                }
+            }
+
+            $uuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => 'DAMAsset',
+                'entity_id' => $resourceId,
+                'entity_slug' => $this->resource->slug ?? null,
+                'entity_title' => $newValues['title'] ?? null,
+                'module' => 'ahgDAMPlugin',
+                'action_name' => 'edit',
+                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("DAM AUDIT ERROR: " . $e->getMessage());
+        }
+    }
+
 }

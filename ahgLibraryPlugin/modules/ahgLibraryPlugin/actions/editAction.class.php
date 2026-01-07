@@ -80,6 +80,12 @@ class ahgLibraryPluginEditAction extends sfAction
         $repo = new \AtomFramework\Repositories\LibraryItemRepository();
 
         $isNew = !isset($this->resource->id);
+        
+        // Capture old values for audit trail
+        $oldValues = [];
+        if (!$isNew && $this->resource) {
+            $oldValues = $this->captureCurrentValues($this->resource->id);
+        }
 
         $this->resource->title = $request->getParameter('title');
         $this->resource->identifier = $request->getParameter('identifier');
@@ -157,6 +163,10 @@ class ahgLibraryPluginEditAction extends sfAction
         if (array_filter($locationData)) {
             $locRepo->saveLocationData($savedId, $locationData);
         }
+
+        // Capture new values and log audit trail
+        $newValues = $this->captureCurrentValues($savedId);
+        $this->logAudit($isNew ? 'create' : 'update', $savedId, $oldValues, $newValues);
 
         return $savedId;
     }
@@ -311,4 +321,119 @@ class ahgLibraryPluginEditAction extends sfAction
             error_log("Failed to sync display_object_config for object $objectId: " . $e->getMessage());
         }
     }
+
+    /**
+     * Capture current values for audit trail
+     */
+    protected function captureCurrentValues(int $resourceId): array
+    {
+        try {
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+            $culture = $this->getUser()->getCulture() ?? 'en';
+            
+            $io = $db->table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+                })
+                ->leftJoin('information_object_i18n as ioi_en', function ($join) {
+                    $join->on('io.id', '=', 'ioi_en.id')->where('ioi_en.culture', '=', 'en');
+                })
+                ->where('io.id', $resourceId)
+                ->select([
+                    'io.identifier',
+                    $db->raw('COALESCE(ioi.title, ioi_en.title) as title'),
+                    $db->raw('COALESCE(ioi.scope_and_content, ioi_en.scope_and_content) as scope_and_content'),
+                ])
+                ->first();
+            
+            $libraryItem = $db->table('library_item')
+                ->where('information_object_id', $resourceId)
+                ->first();
+            
+            $values = [];
+            if ($io) {
+                if ($io->identifier) $values['identifier'] = $io->identifier;
+                if ($io->title) $values['title'] = $io->title;
+                if ($io->scope_and_content) $values['scope_and_content'] = $io->scope_and_content;
+            }
+            
+            if ($libraryItem) {
+                $libraryFields = ['material_type', 'subtitle', 'isbn', 'issn', 'publisher', 
+                    'publication_place', 'publication_date', 'edition', 'call_number', 
+                    'series_title', 'language', 'summary'];
+                foreach ($libraryFields as $field) {
+                    if (!empty($libraryItem->$field)) {
+                        $values[$field] = $libraryItem->$field;
+                    }
+                }
+            }
+            
+            return $values;
+        } catch (\Exception $e) {
+            error_log("Library AUDIT CAPTURE ERROR: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Log audit trail entry
+     */
+    protected function logAudit(string $action, int $resourceId, array $oldValues, array $newValues): void
+    {
+        try {
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+            $user = $this->getUser();
+            $userId = $user->getAttribute('user_id');
+            $username = null;
+
+            if ($userId) {
+                $userRecord = $db->table('user')->where('id', $userId)->first();
+                $username = $userRecord->username ?? null;
+            }
+
+            // Calculate changed fields
+            $changedFields = [];
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($newVal !== $oldVal) {
+                    $changedFields[] = $key;
+                }
+            }
+
+            $uuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
+
+            $db->table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => 'LibraryItem',
+                'entity_id' => $resourceId,
+                'entity_slug' => $this->resource->slug ?? null,
+                'entity_title' => $newValues['title'] ?? null,
+                'module' => 'ahgLibraryPlugin',
+                'action_name' => 'edit',
+                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("Library AUDIT ERROR: " . $e->getMessage());
+        }
+    }
+
 }

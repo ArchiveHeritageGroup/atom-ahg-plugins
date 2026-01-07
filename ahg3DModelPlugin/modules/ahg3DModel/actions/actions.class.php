@@ -394,6 +394,9 @@ class ahg3DModelActions extends sfActions
     private function processSave(sfWebRequest $request, int $modelId)
     {
         $db = $this->db;
+        
+        // Capture old values for audit trail
+        $oldValues = $this->captureModelValues($modelId);
 
         // Update model settings
         $db::table('object_3d_model')
@@ -434,6 +437,10 @@ class ahg3DModelActions extends sfActions
 
         // Log action
         $this->logAction($modelId, 'update');
+        
+        // Capture new values and log to central audit trail
+        $newValues = $this->captureModelValues($modelId);
+        $this->logAuditTrail('update', $modelId, $oldValues, $newValues);
 
         $this->getUser()->setFlash('notice', 'Model settings updated');
         $this->redirect(['module' => 'ahg3DModel', 'action' => 'edit', 'id' => $modelId]);
@@ -857,4 +864,93 @@ class ahg3DModelActions extends sfActions
             'created_at' => date('Y-m-d H:i:s'),
         ]);
     }
+
+    /**
+     * Capture model values for audit trail
+     */
+    private function captureModelValues(int $modelId): array
+    {
+        try {
+            $db = $this->db;
+            $model = $db::table('object_3d_model as m')
+                ->leftJoin('object_3d_model_i18n as i18n', function($join) {
+                    $join->on('m.id', '=', 'i18n.model_id')->where('i18n.culture', '=', 'en');
+                })
+                ->where('m.id', $modelId)
+                ->select('m.*', 'i18n.title', 'i18n.description', 'i18n.alt_text')
+                ->first();
+            
+            if (!$model) return [];
+            
+            return [
+                'title' => $model->title ?? null,
+                'description' => $model->description ?? null,
+                'auto_rotate' => $model->auto_rotate ?? 0,
+                'rotation_speed' => $model->rotation_speed ?? 30,
+                'camera_orbit' => $model->camera_orbit ?? null,
+                'is_public' => $model->is_public ?? 0,
+                'ar_enabled' => $model->ar_enabled ?? 0,
+            ];
+        } catch (\Exception $e) {
+            error_log("3D AUDIT CAPTURE ERROR: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Log to central audit trail with old/new values
+     */
+    private function logAuditTrail(string $action, int $modelId, array $oldValues, array $newValues): void
+    {
+        try {
+            $db = $this->db;
+            $model = $db::table('object_3d_model')->where('id', $modelId)->first();
+            
+            $userId = $this->context->user->getUserId();
+            $username = $this->context->user->getUsername();
+
+            $changedFields = [];
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($newVal !== $oldVal) {
+                    $changedFields[] = $key;
+                }
+            }
+
+            $uuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
+
+            $db::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => 'Object3D',
+                'entity_id' => $model->object_id ?? $modelId,
+                'entity_slug' => null,
+                'entity_title' => $newValues['title'] ?? null,
+                'module' => 'ahg3DModelPlugin',
+                'action_name' => 'edit',
+                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("3D AUDIT ERROR: " . $e->getMessage());
+        }
+    }
+
 }

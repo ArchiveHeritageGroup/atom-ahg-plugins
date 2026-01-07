@@ -295,6 +295,12 @@ class ahgGalleryPluginEditAction extends sfAction
             $slugRow = DB::table('slug')->where('object_id', (int)$hiddenId)->first();
             $this->resource = (object)['id' => (int)$hiddenId, 'slug' => $slugRow->slug ?? null];
         }
+        
+        // Capture old values for audit trail
+        $oldValues = [];
+        if (!$isNew && isset($this->resource->id) && $this->resource->id) {
+            $oldValues = $this->captureCurrentValues($this->resource->id);
+        }
 
         // Collect all field data
         $fields = ['work_type', 'work_type_qualifier', 'components_count', 'object_number',
@@ -385,9 +391,6 @@ class ahgGalleryPluginEditAction extends sfAction
                 'type_id' => 158,
                 'status_id' => 159,
             ]);
-            $resourceId = $objectId;
-            $this->resource = (object)['id' => $objectId, 'slug' => $slug];
-            ]);
 
             $resourceId = $objectId;
             $this->resource = (object)['id' => $objectId, 'slug' => $slug];
@@ -444,6 +447,10 @@ class ahgGalleryPluginEditAction extends sfAction
         if (array_filter($locationData)) {
             $locRepo->saveLocationData($resourceId, $locationData);
         }
+
+        // Capture new values and log audit trail
+        $newValues = $this->captureCurrentValues($resourceId);
+        $this->logAudit($isNew ? 'create' : 'update', $resourceId, $oldValues, $newValues);
 
         $this->redirect(['module' => 'ahgGalleryPlugin', 'action' => 'index', 'slug' => $this->resource->slug ?? $this->resourceSlug]);
     }
@@ -523,6 +530,114 @@ class ahgGalleryPluginEditAction extends sfAction
             ->where('taxonomy_id', $taxonomyId)
             ->value('id');
         return $term ? (int) $term : null;
+    }
+
+
+    /**
+     * Capture current values for audit trail
+     */
+    protected function captureCurrentValues(int $resourceId): array
+    {
+        try {
+            $io = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($join) {
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                })
+                ->where('io.id', $resourceId)
+                ->select(['io.identifier', 'ioi.title', 'ioi.scope_and_content', 'ioi.extent_and_medium'])
+                ->first();
+            
+            $galleryProperty = DB::table('property')
+                ->leftJoin('property_i18n', 'property.id', '=', 'property_i18n.id')
+                ->where('property.object_id', $resourceId)
+                ->where('property.name', 'galleryData')
+                ->value('property_i18n.value');
+            
+            $values = [];
+            if ($io) {
+                if ($io->identifier) $values['identifier'] = $io->identifier;
+                if ($io->title) $values['title'] = $io->title;
+                if ($io->scope_and_content) $values['description'] = $io->scope_and_content;
+                if ($io->extent_and_medium) $values['dimensions_display'] = $io->extent_and_medium;
+            }
+            
+            if ($galleryProperty) {
+                $galleryData = json_decode($galleryProperty, true);
+                if (is_array($galleryData)) {
+                    $galleryFields = ['work_type', 'creator_display', 'creation_date_display', 
+                        'materials_display', 'subject_display', 'condition_summary'];
+                    foreach ($galleryFields as $field) {
+                        if (!empty($galleryData[$field])) {
+                            $values[$field] = $galleryData[$field];
+                        }
+                    }
+                }
+            }
+            
+            return $values;
+        } catch (\Exception $e) {
+            error_log("Gallery AUDIT CAPTURE ERROR: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Log audit trail entry
+     */
+    protected function logAudit(string $action, int $resourceId, array $oldValues, array $newValues): void
+    {
+        try {
+            $user = $this->getUser();
+            $userId = $user->getAttribute('user_id');
+            $username = null;
+
+            if ($userId) {
+                $userRecord = DB::table('user')->where('id', $userId)->first();
+                $username = $userRecord->username ?? null;
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $newVal) {
+                $oldVal = $oldValues[$key] ?? null;
+                if ($newVal !== $oldVal) {
+                    $changedFields[] = $key;
+                }
+            }
+
+            $uuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => 'GalleryWork',
+                'entity_id' => $resourceId,
+                'entity_slug' => $this->resource->slug ?? null,
+                'entity_title' => $newValues['title'] ?? null,
+                'module' => 'ahgGalleryPlugin',
+                'action_name' => 'edit',
+                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("Gallery AUDIT ERROR: " . $e->getMessage());
+        }
     }
 
 }
