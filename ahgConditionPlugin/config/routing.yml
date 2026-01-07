@@ -2,3 +2,8 @@
 condition_check_slug:
   url: /:slug/condition
   param: { module: ahgCondition, action: conditionCheck }
+
+# Legacy route for backwards compatibility
+condition_check_legacy:
+  url: /:slug/arCondition/conditionCheck
+  param: { module: ahgCondition, action: conditionCheck }
