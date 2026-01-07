@@ -154,6 +154,15 @@ class HeritageAssetService
     public function update(int $id, array $data): bool
     {
         $oldValues = (array)(DB::table('heritage_asset')->where('id', $id)->first() ?? []);
+        
+        // Clean empty enum values
+        $enumFields = ['acquisition_method', 'recognition_status', 'measurement_basis', 'condition_rating', 'heritage_significance'];
+        foreach ($enumFields as $field) {
+            if (isset($data[$field]) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+        
         $data['updated_at'] = date('Y-m-d H:i:s');
         
         $result = DB::table('heritage_asset')
