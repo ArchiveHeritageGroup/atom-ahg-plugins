@@ -382,6 +382,7 @@ URL: https://psis.theahg.co.za
 - [Installation Guide](INSTALLATION.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
+- [RIC - Records In Context](docs/RIC_INTEGRATION_GUIDE.md)
 - [CLI Reference](docs/CLI_REFERENCE.md)
 - [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
 - [Media Features Guide](docs/MEDIA_FEATURES.md)
