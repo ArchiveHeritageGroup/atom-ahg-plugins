@@ -383,6 +383,7 @@ URL: https://psis.theahg.co.za
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
 - [CLI Reference](docs/CLI_REFERENCE.md)
+- [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
 - [Media Features Guide](docs/MEDIA_FEATURES.md)
 
 ---
