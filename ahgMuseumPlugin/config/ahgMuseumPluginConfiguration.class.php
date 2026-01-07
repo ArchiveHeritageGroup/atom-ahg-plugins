@@ -13,6 +13,11 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Skip dependency check in CLI mode (no DB manager yet)
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
         // Check dependencies before loading
         if (!$this->checkDependencies()) {
             return;

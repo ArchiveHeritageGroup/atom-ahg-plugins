@@ -135,8 +135,8 @@ SELECT DISTINCT ?record ?title ?identifier WHERE {
   ?record rico:title ?title .
   OPTIONAL { ?record rico:identifier ?identifier }
   
-  FILTER(?sourceRecord IN (<{$uriFilter}>))
-  FILTER(?record NOT IN (<{$uriFilter}>))
+  FILTER(?sourceRecord IN ({$uriFilter}))
+  FILTER(?record NOT IN ({$uriFilter}))
 }
 LIMIT 20
 SPARQL;
