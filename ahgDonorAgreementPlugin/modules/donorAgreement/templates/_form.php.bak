@@ -5,7 +5,6 @@
  */
 $isEdit = isset($agreement) && $agreement && isset($agreement->id);
 ?>
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
 <div class="container-fluid py-4">
   <div class="row mb-4">
@@ -76,17 +75,25 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
             <h5 class="mb-0"><?php echo __('Donor Information') ?></h5>
           </div>
           <div class="card-body">
+            <div class="row g-3">
               <div class="col-12">
                 <label class="form-label"><?php echo __('Select Donor') ?></label>
-                <select id="donor-select" name="agreement[donor_id]" class="form-select">
-                  <option value=""><?php echo __('-- Select a donor --') ?></option>
-                  <?php foreach ($donors ?? [] as $d): ?>
-                    <option value="<?php echo $d->id ?>" <?php echo (isset($agreement->donor_id) && $agreement->donor_id == $d->id) ? 'selected' : '' ?>>
-                      <?php echo esc_entities($d->name) ?>
-                    </option>
-                  <?php endforeach ?>
-                </select>
-                <small class="text-muted"><?php echo __('Type to search or select from list') ?></small>
+                <?php if (!empty($donor)): ?>
+                  <input type="hidden" name="agreement[donor_id]" value="<?php echo $donorId ?>">
+                  <div class="form-control bg-light">
+                    <i class="fas fa-user me-2"></i><?php echo esc_entities($donor->authorizedFormOfName ?? $donor->name ?? '') ?>
+                    <a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'add']) ?>" class="btn btn-sm btn-link float-end"><?php echo __('Change') ?></a>
+                  </div>
+                <?php else: ?>
+                  <div class="position-relative">
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-search"></i></span>
+                      <input type="text" id="donor-search" class="form-control" placeholder="<?php echo __('Search donors...') ?>" autocomplete="off">
+                      <input type="hidden" name="agreement[donor_id]" id="donor-id" value="<?php echo $agreement->donor_id ?? '' ?>">
+                    </div>
+                    <div id="donor-results" class="list-group position-absolute w-100 shadow" style="z-index:1000; display:none; max-height:200px; overflow-y:auto;"></div>
+                  </div>
+                <?php endif ?>
               </div>
               <div class="col-md-6">
                 <label class="form-label"><?php echo __('Donor Name (Override)') ?></label>
@@ -847,18 +854,5 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.list-group').forEach(function(el) { if (el.closest('.input-group')) el.remove(); });
         }
     });
-});
-</script>
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-document.addEventListener('DOMContentLoaded', function() {
-    var donorSelect = document.getElementById('donor-select');
-    if (donorSelect) {
-        new TomSelect(donorSelect, {
-            placeholder: '<?php echo __("Type to search donors...") ?>',
-            allowEmptyOption: true,
-            create: false
-        });
-    }
 });
 </script>
