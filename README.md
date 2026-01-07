@@ -30,6 +30,82 @@ The AtoM AHG Framework extends Access to Memory 2.10 with Laravel Query Builder 
 | 🔒 [Security](#-required-installed-by-default) | 1 | Multi-level security classification (Public to Top Secret) |
 | 📋 [Compliance](#-compliance--governance) | 2 | Privacy (6 jurisdictions) and Heritage Accounting (10 standards) |
 | 🛠️ [Utilities](#-utility-plugins) | 5 | Backup, audit, rights, vendor, and donor management |
+| 🎬 [Media](#-media--enhanced-features) | 6 | 3D viewers, audio/video players, transcription, metadata |
+
+---
+
+## 🎬 Media & Enhanced Features
+
+Built-in framework enhancements for rich media handling:
+
+### 3D Model Viewers
+
+| Feature | Description |
+|---------|-------------|
+| **Interactive 3D Viewer** | Three.js with drag-rotate, scroll-zoom, pan controls |
+| **GLB/GLTF Viewer** | Google Model-viewer with AR support on mobile |
+| **Fullscreen Mode** | Auto-rotate, reset camera, ESC to close |
+| **3D Thumbnail Generation** | Blender CLI renders thumbnails for GLB, OBJ, STL, FBX, PLY, DAE |
+| **Auto-queue on Upload** | Observer pattern triggers background rendering |
+
+### Enhanced Audio/Video Player
+
+| Feature | Description |
+|---------|-------------|
+| **Waveform Visualization** | Canvas-based waveform display for audio files |
+| **Playback Controls** | Play/pause, skip ±10s, speed 0.5x-2x, volume, loop |
+| **Keyboard Shortcuts** | Space, arrows, M (mute), L (loop), F (fullscreen), 0-9 (seek) |
+| **Legacy Format Streaming** | FFmpeg transcoding for AVI, MOV, WMV, AIFF, AU to browser-compatible formats |
+
+### Snippet Creation
+
+| Feature | Description |
+|---------|-------------|
+| **IN/OUT Points** | Mark start/end with I/O keys or buttons |
+| **Visual Region Overlay** | See selection on progress bar and waveform |
+| **Save & Export** | FFmpeg extracts clips with metadata |
+| **Thumbnails** | Auto-generated for saved snippets |
+
+### Speech-to-Text Transcription
+
+| Feature | Description |
+|---------|-------------|
+| **Whisper Integration** | OpenAI Whisper (tiny → large-v3 models) |
+| **90+ Languages** | Including Afrikaans, Zulu, Xhosa, and all major languages |
+| **Subtitle Output** | Auto-generates VTT and SRT files |
+| **Word Timestamps** | Click any word to jump to that position |
+| **Full-text Search** | Transcriptions indexed for discovery |
+
+### Metadata Extraction
+
+| File Type | What's Extracted |
+|-----------|------------------|
+| **Images** | EXIF (camera, GPS, dates), IPTC (keywords, caption), XMP (Dublin Core) |
+| **Audio/Video** | Codec, duration, bitrate, channels, sample rate via FFprobe |
+| **PDF** | Title, author, pages, keywords via pdfinfo |
+| **Office** | Document properties from DOCX, XLSX |
+
+### TIFF to PDF Merge
+
+| Feature | Description |
+|---------|-------------|
+| **Batch Upload** | Select multiple TIFF, JPEG, PNG files |
+| **Drag-drop Reorder** | Arrange pages before merge |
+| **PDF/A Standards** | Output as PDF/A-1b, PDF/A-2b, PDF/A-3b for archival |
+| **Background Processing** | Jobs run via framework worker service |
+| **Record Attachment** | Optionally attach output PDF to archival description |
+
+### Component Locations
+
+| Component | Path |
+|-----------|------|
+| 3D Viewer Templates | `plugins/arAHGThemeB5Plugin/templates/` |
+| 3D Thumbnail Tools | `atom-framework/tools/3d-thumbnail/` |
+| Media Player JS | `plugins/arAHGThemeB5Plugin/js/atom-media-player.js` |
+| Transcription Job | `lib/task/job/arTranscriptionJob.class.php` |
+| Metadata Extractor | `plugins/arAHGThemeB5Plugin/lib/arUniversalMetadataExtractor.php` |
+| TIFF-PDF Module | `plugins/arAHGThemeB5Plugin/modules/tiffpdfmerge/` |
+| Media Helper | `lib/helper/MediaHelper.php` |
 
 ---
 
@@ -168,6 +244,17 @@ Heritage accounting features:
 | MySQL | 8.0 | 8.0+ |
 | Composer | 2.x | Latest |
 
+### Optional Dependencies (for Media Features)
+
+| Tool | Purpose |
+|------|---------|
+| FFmpeg/FFprobe | Audio/video transcoding and metadata |
+| Blender | 3D thumbnail generation |
+| Whisper | Speech-to-text transcription |
+| ImageMagick | Image processing, TIFF conversion |
+| Ghostscript | PDF/A generation |
+| exiftool | Advanced metadata extraction |
+
 ### Installation Overview
 ```bash
 # Clone framework
@@ -257,6 +344,10 @@ php bin/atom extension:enable <name>   # Enable extension
 php bin/atom extension:disable <name>  # Disable extension
 php bin/atom extension:install <name>  # Install extension
 
+# Media commands
+php atom-framework/bin/generate-3d-thumbnails.php        # Batch 3D thumbnails
+php atom-framework/bin/generate-3d-thumbnails.php --id=X # Single 3D thumbnail
+
 # Migration commands
 php bin/atom migrate run          # Run pending migrations
 php bin/atom migrate status       # Show migration status
@@ -292,6 +383,7 @@ URL: https://psis.theahg.co.za
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
 - [CLI Reference](docs/CLI_REFERENCE.md)
+- [Media Features Guide](docs/MEDIA_FEATURES.md)
 
 ---
 
