@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `heritage_asset` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Valuations History
-CREATE TABLE IF NOT EXISTS `heritage_valuation` (
+CREATE TABLE IF NOT EXISTS `heritage_valuation_history` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `asset_id` INT UNSIGNED NOT NULL,
     `valuation_date` DATE NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `heritage_valuation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Impairments
-CREATE TABLE IF NOT EXISTS `heritage_impairment` (
+CREATE TABLE IF NOT EXISTS `heritage_impairment_assessment` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `asset_id` INT UNSIGNED NOT NULL,
     `impairment_date` DATE NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `heritage_impairment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Movements/Transfers
-CREATE TABLE IF NOT EXISTS `heritage_movement` (
+CREATE TABLE IF NOT EXISTS `heritage_movement_register` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `asset_id` INT UNSIGNED NOT NULL,
     `movement_date` DATE NOT NULL,
