@@ -1,350 +1,286 @@
 -- ============================================================
--- ahgDonorAgreementPlugin - Database Schema
+-- ahgDonorAgreementPlugin - Database Schema (from 112)
 -- ============================================================
 
 -- Agreement Types (reference table)
-CREATE TABLE IF NOT EXISTS agreement_type (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) NOT NULL UNIQUE,
-    prefix VARCHAR(10) DEFAULT 'AGR',
-    description TEXT,
-    is_active TINYINT(1) DEFAULT 1,
-    requires_witness TINYINT(1) DEFAULT 0,
-    requires_legal_review TINYINT(1) DEFAULT 0,
-    default_term_years INT NULL,
-    sort_order INT DEFAULT 0,
-    color VARCHAR(7) DEFAULT '#6c757d',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_active (is_active),
-    INDEX idx_sort (sort_order)
+CREATE TABLE IF NOT EXISTS `agreement_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `is_active` tinyint(1) DEFAULT '1',
+  `sort_order` int DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `prefix` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT 'AGR',
+  `color` varchar(7) COLLATE utf8mb4_unicode_ci DEFAULT '#6c757d',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert standard agreement types (South African context)
-INSERT IGNORE INTO agreement_type (name, slug, prefix, description, requires_witness, requires_legal_review, sort_order, color) VALUES
-('Deed of Gift', 'deed-of-gift', 'DOG', 'Unconditional transfer of ownership', 1, 1, 1, '#28a745'),
-('Deed of Donation', 'deed-of-donation', 'DON', 'Formal donation under SA law', 1, 1, 2, '#28a745'),
-('Deed of Deposit', 'deed-of-deposit', 'DOD', 'Materials deposited, ownership retained', 0, 0, 3, '#17a2b8'),
-('Loan Agreement', 'loan-agreement', 'LOA', 'Temporary loan for exhibition/research', 0, 0, 4, '#ffc107'),
-('Purchase Agreement', 'purchase-agreement', 'PUR', 'Acquisition through purchase', 0, 1, 5, '#6f42c1'),
-('Bequest', 'bequest', 'BEQ', 'Transfer through will or testament', 1, 1, 6, '#20c997'),
-('Transfer Agreement', 'transfer-agreement', 'TRA', 'Inter-institutional transfer', 0, 1, 7, '#fd7e14'),
-('Custody Agreement', 'custody-agreement', 'CUS', 'Temporary custody pending disposition', 0, 0, 8, '#6c757d'),
-('License Agreement', 'license-agreement', 'LIC', 'Rights license without ownership transfer', 0, 1, 9, '#e83e8c'),
-('Reproduction Agreement', 'reproduction-agreement', 'REP', 'Agreement for reproduction rights', 0, 0, 10, '#007bff'),
-('Access Agreement', 'access-agreement', 'ACC', 'Special access arrangements', 0, 0, 11, '#ffc107'),
-('Memorandum of Understanding', 'mou', 'MOU', 'Non-binding agreement outlining intentions', 0, 0, 12, '#6c757d'),
-('Service Level Agreement', 'sla', 'SLA', 'Agreement defining service levels', 0, 0, 13, '#343a40');
+-- Seed agreement types
+INSERT IGNORE INTO agreement_type (name, slug, prefix, description, is_active, sort_order, color) VALUES
+('Deed of Gift', 'deed-of-gift', 'DOG', 'Unconditional transfer of ownership', 1, 1, '#28a745'),
+('Deed of Donation', 'deed-of-donation', 'DON', 'Formal donation under SA law', 1, 2, '#28a745'),
+('Deed of Deposit', 'deed-of-deposit', 'DOD', 'Materials deposited, ownership retained', 1, 3, '#17a2b8'),
+('Loan Agreement', 'loan-agreement', 'LOA', 'Temporary loan for exhibition/research', 1, 4, '#ffc107'),
+('Purchase Agreement', 'purchase-agreement', 'PUR', 'Acquisition through purchase', 1, 5, '#6f42c1'),
+('Bequest', 'bequest', 'BEQ', 'Transfer through will or testament', 1, 6, '#20c997'),
+('Transfer Agreement', 'transfer-agreement', 'TRA', 'Inter-institutional transfer', 1, 7, '#fd7e14'),
+('Custody Agreement', 'custody-agreement', 'CUS', 'Temporary custody pending disposition', 1, 8, '#6c757d'),
+('License Agreement', 'license-agreement', 'LIC', 'Rights license without ownership transfer', 1, 9, '#e83e8c'),
+('Reproduction Agreement', 'reproduction-agreement', 'REP', 'Agreement for reproduction rights', 1, 10, '#007bff'),
+('Access Agreement', 'access-agreement', 'ACC', 'Special access arrangements', 1, 11, '#ffc107'),
+('Memorandum of Understanding', 'mou', 'MOU', 'Non-binding agreement outlining intentions', 1, 12, '#6c757d'),
+('Service Level Agreement', 'sla', 'SLA', 'Agreement defining service levels', 1, 13, '#343a40');
 
 -- Main Donor Agreement Table
-CREATE TABLE IF NOT EXISTS donor_agreement (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agreement_number VARCHAR(50) NOT NULL UNIQUE,
-    title VARCHAR(255) NOT NULL,
-    donor_id INT NULL,
-    repository_id INT NULL,
-    agreement_type_id INT UNSIGNED NULL,
-
-    -- Parties
-    donor_contact_info TEXT,
-    institution_name VARCHAR(255),
-    institution_contact_info TEXT,
-    legal_representative VARCHAR(255),
-    legal_representative_title VARCHAR(255),
-    repository_representative VARCHAR(255),
-    repository_representative_title VARCHAR(255),
-
-    -- Status & Dates
-    status ENUM('draft','pending_review','pending_signature','active','expired','terminated','superseded') DEFAULT 'draft',
-    agreement_date DATE,
-    effective_date DATE,
-    expiry_date DATE,
-    review_date DATE,
-    termination_date DATE,
-    termination_reason TEXT,
-
-    -- Financial
-    has_financial_terms TINYINT(1) DEFAULT 0,
-    purchase_amount DECIMAL(15,2),
-    currency VARCHAR(3) DEFAULT 'ZAR',
-    payment_terms TEXT,
-
-    -- Scope
-    scope_description TEXT,
-    extent_statement VARCHAR(255),
-    transfer_method VARCHAR(100),
-    transfer_date DATE,
-    received_by VARCHAR(255),
-
-    -- Terms
-    general_terms TEXT,
-    special_conditions TEXT,
-
-    -- Signatures
-    donor_signature_date DATE,
-    donor_signature_name VARCHAR(255),
-    repository_signature_date DATE,
-    repository_signature_name VARCHAR(255),
-    witness_name VARCHAR(255),
-    witness_date DATE,
-
-    -- Meta
-    internal_notes TEXT,
-    is_template TINYINT(1) DEFAULT 0,
-    parent_agreement_id INT UNSIGNED NULL,
-    supersedes_agreement_id INT UNSIGNED NULL,
-    created_by INT UNSIGNED,
-    updated_by INT UNSIGNED,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    INDEX idx_donor (donor_id),
-    INDEX idx_repository (repository_id),
-    INDEX idx_status (status),
-    INDEX idx_expiry (expiry_date),
-    INDEX idx_review (review_date),
-    INDEX idx_type (agreement_type_id),
-    CONSTRAINT fk_da_agreement_type FOREIGN KEY (agreement_type_id) REFERENCES agreement_type(id) ON DELETE SET NULL
+CREATE TABLE IF NOT EXISTS `donor_agreement` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `agreement_number` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `donor_id` int unsigned DEFAULT NULL,
+  `actor_id` int unsigned DEFAULT NULL,
+  `accession_id` int unsigned DEFAULT NULL,
+  `information_object_id` int unsigned DEFAULT NULL,
+  `repository_id` int unsigned DEFAULT NULL,
+  `agreement_type_id` int unsigned NOT NULL,
+  `title` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `donor_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `donor_contact_info` text COLLATE utf8mb4_unicode_ci,
+  `institution_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `institution_contact_info` text COLLATE utf8mb4_unicode_ci,
+  `legal_representative` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `legal_representative_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `legal_representative_contact` text COLLATE utf8mb4_unicode_ci,
+  `repository_representative` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `repository_representative_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('draft','pending_review','pending_signature','active','expired','terminated','superseded') COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `agreement_date` date DEFAULT NULL,
+  `effective_date` date DEFAULT NULL,
+  `expiry_date` date DEFAULT NULL,
+  `review_date` date DEFAULT NULL,
+  `termination_date` date DEFAULT NULL,
+  `termination_reason` text COLLATE utf8mb4_unicode_ci,
+  `has_financial_terms` tinyint(1) DEFAULT '0',
+  `purchase_amount` decimal(15,2) DEFAULT NULL,
+  `currency` varchar(3) COLLATE utf8mb4_unicode_ci DEFAULT 'ZAR',
+  `payment_terms` text COLLATE utf8mb4_unicode_ci,
+  `scope_description` text COLLATE utf8mb4_unicode_ci,
+  `extent_statement` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transfer_method` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transfer_date` date DEFAULT NULL,
+  `received_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `general_terms` text COLLATE utf8mb4_unicode_ci,
+  `special_conditions` text COLLATE utf8mb4_unicode_ci,
+  `donor_signature_date` date DEFAULT NULL,
+  `donor_signature_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `repository_signature_date` date DEFAULT NULL,
+  `repository_signature_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `witness_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `witness_date` date DEFAULT NULL,
+  `internal_notes` text COLLATE utf8mb4_unicode_ci,
+  `is_template` tinyint(1) DEFAULT '0',
+  `parent_agreement_id` int DEFAULT NULL,
+  `supersedes_agreement_id` int DEFAULT NULL,
+  `created_by` int unsigned DEFAULT NULL,
+  `updated_by` int unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_agreement_number` (`agreement_number`),
+  KEY `idx_donor` (`donor_id`),
+  KEY `idx_accession` (`accession_id`),
+  KEY `idx_io` (`information_object_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_dates` (`effective_date`,`expiry_date`),
+  KEY `idx_review` (`review_date`),
+  KEY `idx_agreement_type` (`agreement_type_id`),
+  KEY `idx_parent_agreement` (`parent_agreement_id`),
+  KEY `idx_supersedes_agreement` (`supersedes_agreement_id`),
+  CONSTRAINT `fk_donor_agreement_agreement_type` FOREIGN KEY (`agreement_type_id`) REFERENCES `agreement_type` (`id`),
+  CONSTRAINT `fk_donor_agreement_parent` FOREIGN KEY (`parent_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_donor_agreement_supersedes` FOREIGN KEY (`supersedes_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Agreement i18n
-CREATE TABLE IF NOT EXISTS donor_agreement_i18n (
-    id INT UNSIGNED NOT NULL,
-    culture VARCHAR(7) NOT NULL DEFAULT 'en',
-    title VARCHAR(255),
-    scope_description TEXT,
-    general_terms TEXT,
-    special_conditions TEXT,
-    PRIMARY KEY (id, culture),
-    CONSTRAINT fk_dai_agreement FOREIGN KEY (id) REFERENCES donor_agreement(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Rights granted
-CREATE TABLE IF NOT EXISTS donor_agreement_right (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    right_type VARCHAR(100) NOT NULL,
-    basis VARCHAR(100),
-    start_date DATE,
-    end_date DATE,
-    granted_to VARCHAR(255),
-    conditions TEXT,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    CONSTRAINT fk_dar_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Restrictions
-CREATE TABLE IF NOT EXISTS donor_agreement_restriction (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    restriction_type VARCHAR(100) NOT NULL,
-    description TEXT,
-    start_date DATE,
-    end_date DATE,
-    review_date DATE,
-    applies_to VARCHAR(255),
-    is_active TINYINT(1) DEFAULT 1,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_active (is_active),
-    CONSTRAINT fk_dars_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Documents/Attachments
-CREATE TABLE IF NOT EXISTS donor_agreement_document (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    document_type VARCHAR(100) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    filename VARCHAR(255) NOT NULL,
-    original_filename VARCHAR(255),
-    file_path VARCHAR(500) NOT NULL,
-    mime_type VARCHAR(100),
-    file_size INT UNSIGNED,
-    description TEXT,
-    uploaded_by INT UNSIGNED,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    CONSTRAINT fk_dad_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `donor_agreement_i18n` (
+  `id` int NOT NULL,
+  `culture` varchar(7) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `restrictions` text COLLATE utf8mb4_unicode_ci,
+  `conditions` text COLLATE utf8mb4_unicode_ci,
+  `attribution_text` text COLLATE utf8mb4_unicode_ci,
+  `internal_notes` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`,`culture`),
+  CONSTRAINT `fk_donor_agreement_i18n` FOREIGN KEY (`id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Reminders
-CREATE TABLE IF NOT EXISTS donor_agreement_reminder (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    reminder_type VARCHAR(50) NOT NULL,
-    reminder_date DATE NOT NULL,
-    subject VARCHAR(255) NOT NULL,
-    message TEXT,
-    priority ENUM('low','normal','high','urgent') DEFAULT 'normal',
-    is_recurring TINYINT(1) DEFAULT 0,
-    recurrence_interval VARCHAR(20),
-    next_reminder_date DATE,
-    is_completed TINYINT(1) DEFAULT 0,
-    completed_at DATETIME,
-    completed_by INT UNSIGNED,
-    notify_creator TINYINT(1) DEFAULT 1,
-    notify_emails TEXT,
-    created_by INT UNSIGNED,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_date (reminder_date),
-    INDEX idx_completed (is_completed),
-    CONSTRAINT fk_darm_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `donor_agreement_reminder` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int NOT NULL,
+  `reminder_type` enum('expiry_warning','review_due','renewal_required','restriction_ending','payment_due','donor_contact','anniversary','audit','preservation_check','custom') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `reminder_date` date NOT NULL,
+  `advance_days` int DEFAULT '30',
+  `is_recurring` tinyint(1) DEFAULT '0',
+  `recurrence_pattern` enum('daily','weekly','monthly','quarterly','yearly') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recurrence_end_date` date DEFAULT NULL,
+  `priority` enum('low','normal','high','urgent') COLLATE utf8mb4_unicode_ci DEFAULT 'normal',
+  `notify_email` tinyint(1) DEFAULT '1',
+  `notify_system` tinyint(1) DEFAULT '1',
+  `notification_recipients` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('active','snoozed','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `snooze_until` date DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `completed_by` int unsigned DEFAULT NULL,
+  `completion_notes` text COLLATE utf8mb4_unicode_ci,
+  `action_required` text COLLATE utf8mb4_unicode_ci,
+  `action_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_by` int unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_sent` tinyint(1) DEFAULT '0',
+  `sent_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_agreement` (`donor_agreement_id`),
+  KEY `idx_date` (`reminder_date`),
+  KEY `idx_status` (`status`),
+  KEY `idx_priority` (`priority`),
+  CONSTRAINT `fk_donor_agreement_reminder_agreement` FOREIGN KEY (`donor_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Reminder Log
-CREATE TABLE IF NOT EXISTS donor_agreement_reminder_log (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    reminder_id INT UNSIGNED NOT NULL,
-    action VARCHAR(50) NOT NULL,
-    performed_by INT UNSIGNED,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_reminder (reminder_id),
-    CONSTRAINT fk_darml_reminder FOREIGN KEY (reminder_id) REFERENCES donor_agreement_reminder(id) ON DELETE CASCADE
+-- Rights
+CREATE TABLE IF NOT EXISTS `donor_agreement_right` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int NOT NULL,
+  `right_type` enum('replicate','migrate','modify','use','disseminate','delete','display','publish','digitize','reproduce','loan','exhibit','broadcast','commercial_use','derivative_works') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `permission` enum('granted','restricted','prohibited','conditional') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `conditions` text COLLATE utf8mb4_unicode_ci,
+  `applies_to_digital` tinyint(1) DEFAULT '1',
+  `applies_to_physical` tinyint(1) DEFAULT '1',
+  `applies_to_metadata` tinyint(1) DEFAULT '1',
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `requires_donor_approval` tinyint(1) DEFAULT '0',
+  `requires_fee` tinyint(1) DEFAULT '0',
+  `fee_structure` text COLLATE utf8mb4_unicode_ci,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_agreement` (`donor_agreement_id`),
+  KEY `idx_type` (`right_type`),
+  CONSTRAINT `fk_donor_agreement_right_agreement` FOREIGN KEY (`donor_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- History/Audit
-CREATE TABLE IF NOT EXISTS donor_agreement_history (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    action VARCHAR(50) NOT NULL,
-    field_name VARCHAR(100),
-    old_value TEXT,
-    new_value TEXT,
-    performed_by INT UNSIGNED,
-    ip_address VARCHAR(45),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_action (action),
-    CONSTRAINT fk_dah_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
+-- Restrictions
+CREATE TABLE IF NOT EXISTS `donor_agreement_restriction` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int NOT NULL,
+  `restriction_type` enum('closure','partial_closure','redaction','permission_only','researcher_only','onsite_only','no_copying','no_publication','anonymization','time_embargo','review_required','security_clearance','popia_restricted','legal_hold','cultural_protocol') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applies_to_all` tinyint(1) DEFAULT '1',
+  `specific_materials` text COLLATE utf8mb4_unicode_ci,
+  `box_list` text COLLATE utf8mb4_unicode_ci,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `auto_release` tinyint(1) DEFAULT '0',
+  `release_date` date DEFAULT NULL,
+  `release_trigger` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `can_be_overridden` tinyint(1) DEFAULT '0',
+  `override_authority` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci,
+  `legal_basis` text COLLATE utf8mb4_unicode_ci,
+  `popia_category` enum('special_personal','personal','children','criminal','biometric') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `data_subject_consent` tinyint(1) DEFAULT NULL,
+  `security_clearance_level` int DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `idx_agreement` (`donor_agreement_id`),
+  KEY `idx_type` (`restriction_type`),
+  KEY `idx_release` (`release_date`,`auto_release`),
+  CONSTRAINT `fk_donor_agreement_restriction_agreement` FOREIGN KEY (`donor_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Documents
+CREATE TABLE IF NOT EXISTS `donor_agreement_document` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int NOT NULL,
+  `document_type` enum('signed_agreement','draft','amendment','addendum','schedule','correspondence','appraisal_report','inventory','deed_of_gift','transfer_form','receipt','payment_record','legal_opinion','board_resolution','donor_id','provenance_evidence','valuation','insurance','photo','other') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `filename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `original_filename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_size` int unsigned DEFAULT NULL,
+  `checksum_md5` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `checksum_sha256` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `document_date` date DEFAULT NULL,
+  `version` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_signed` tinyint(1) DEFAULT '0',
+  `signature_date` date DEFAULT NULL,
+  `signed_by` text COLLATE utf8mb4_unicode_ci,
+  `is_confidential` tinyint(1) DEFAULT '0',
+  `access_restriction` text COLLATE utf8mb4_unicode_ci,
+  `uploaded_by` int unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_agreement` (`donor_agreement_id`),
+  KEY `idx_type` (`document_type`),
+  CONSTRAINT `fk_donor_agreement_document_agreement` FOREIGN KEY (`donor_agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Link to Accessions
-CREATE TABLE IF NOT EXISTS donor_agreement_accession (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    accession_id INT NOT NULL,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_agreement_accession (donor_agreement_id, accession_id),
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_accession (accession_id),
-    CONSTRAINT fk_daa_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `donor_agreement_accession` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `donor_agreement_id` int NOT NULL,
+  `accession_id` int NOT NULL,
+  `is_primary` tinyint(1) DEFAULT '0',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `linked_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `linked_by` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_daa` (`donor_agreement_id`,`accession_id`),
+  KEY `idx_daa_accession` (`accession_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Link to Information Objects
-CREATE TABLE IF NOT EXISTS donor_agreement_record (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT UNSIGNED NOT NULL,
-    information_object_id INT NOT NULL,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_agreement_record (donor_agreement_id, information_object_id),
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_io (information_object_id),
-    CONSTRAINT fk_darec_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `donor_agreement_record` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `agreement_id` int NOT NULL,
+  `information_object_id` int NOT NULL,
+  `relationship_type` enum('covers','partially_covers','references') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'covers',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_agreement_record` (`agreement_id`,`information_object_id`),
+  KEY `idx_record_agreement` (`agreement_id`),
+  KEY `idx_record_io` (`information_object_id`),
+  CONSTRAINT `fk_agreement_record_agreement` FOREIGN KEY (`agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_agreement_record_io` FOREIGN KEY (`information_object_id`) REFERENCES `information_object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Link to Classifications/Taxonomy Terms
-CREATE TABLE IF NOT EXISTS donor_agreement_classification (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT NOT NULL,
-    term_id INT NOT NULL,
-    applies_to_all TINYINT(1) DEFAULT 0,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_term (term_id)
+-- History/Audit
+CREATE TABLE IF NOT EXISTS `donor_agreement_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `agreement_id` int NOT NULL,
+  `action` enum('created','updated','status_changed','approved','renewed','terminated','document_added','document_removed','record_linked','record_unlinked','reminder_sent','note_added') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `old_value` text COLLATE utf8mb4_unicode_ci,
+  `new_value` text COLLATE utf8mb4_unicode_ci,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `user_id` int DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_history_agreement` (`agreement_id`),
+  KEY `idx_history_action` (`action`),
+  KEY `idx_history_date` (`created_at`),
+  CONSTRAINT `fk_agreement_history` FOREIGN KEY (`agreement_id`) REFERENCES `donor_agreement` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Link to Extended Rights and Embargoes
-CREATE TABLE IF NOT EXISTS donor_agreement_rights (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT NOT NULL,
-    extended_rights_id BIGINT UNSIGNED NULL,
-    embargo_id BIGINT UNSIGNED NULL,
-    applies_to ENUM('all_items','specific_items','digital_only','physical_only','metadata_only') DEFAULT 'all_items',
-    auto_apply TINYINT(1) DEFAULT 1,
-    inherit_to_children TINYINT(1) DEFAULT 1,
-    notes TEXT,
-    created_by INT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_extended_rights (extended_rights_id),
-    INDEX idx_embargo (embargo_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Donor Provenance Tracking
-CREATE TABLE IF NOT EXISTS donor_provenance (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    donor_id INT NOT NULL,
-    information_object_id INT NOT NULL,
-    donor_agreement_id INT NULL,
-    agreement_item_id INT NULL,
-    relationship_type ENUM('donated','deposited','loaned','purchased','transferred','bequeathed','gifted') DEFAULT 'donated',
-    provenance_date DATE NULL,
-    sequence_number INT NULL,
-    is_current_owner TINYINT(1) DEFAULT 0,
-    custody_start_date DATE NULL,
-    custody_end_date DATE NULL,
-    notes TEXT,
-    source_of_acquisition TEXT,
-    created_by INT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_donor (donor_id),
-    INDEX idx_io (information_object_id),
-    INDEX idx_agreement (donor_agreement_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Rights Application Log
-CREATE TABLE IF NOT EXISTS donor_rights_application_log (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    donor_agreement_id INT NOT NULL,
-    information_object_id INT NOT NULL,
-    rights_type ENUM('extended_rights','embargo','both') NOT NULL,
-    extended_rights_id BIGINT UNSIGNED NULL,
-    embargo_id BIGINT UNSIGNED NULL,
-    action ENUM('applied','removed','updated','inherited') NOT NULL,
-    applied_by INT NULL,
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    INDEX idx_agreement (donor_agreement_id),
-    INDEX idx_io (information_object_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Agreement Rights Vocabulary
-CREATE TABLE IF NOT EXISTS agreement_rights_vocabulary (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    category ENUM('usage','restriction','condition','license') NOT NULL,
-    is_active TINYINT(1) NOT NULL DEFAULT 1,
-    sort_order INT NOT NULL DEFAULT 0,
-    INDEX idx_category (category),
-    INDEX idx_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Seed agreement rights vocabulary
-INSERT IGNORE INTO agreement_rights_vocabulary (code, name, description, category, sort_order) VALUES
-('reproduce', 'Reproduction Rights', 'Permission to reproduce materials', 'usage', 1),
-('publish', 'Publication Rights', 'Permission to publish materials', 'usage', 2),
-('exhibit', 'Exhibition Rights', 'Permission to exhibit materials', 'usage', 3),
-('digitize', 'Digitization Rights', 'Permission to digitize materials', 'usage', 4),
-('loan', 'Loan Rights', 'Permission to loan materials', 'usage', 5),
-('no_access', 'No Access', 'Materials are closed to access', 'restriction', 10),
-('restricted_access', 'Restricted Access', 'Access requires approval', 'restriction', 11),
-('staff_only', 'Staff Only', 'Internal staff access only', 'restriction', 12),
-('reading_room', 'Reading Room Only', 'On-site access only', 'restriction', 13),
-('fragile', 'Fragile Condition', 'Handle with care', 'condition', 20),
-('cc_by', 'CC BY', 'Creative Commons Attribution', 'license', 30),
-('cc_by_nc', 'CC BY-NC', 'Creative Commons Attribution Non-Commercial', 'license', 31),
-('public_domain', 'Public Domain', 'No known copyright restrictions', 'license', 32);
