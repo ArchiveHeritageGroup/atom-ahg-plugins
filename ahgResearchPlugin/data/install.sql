@@ -299,3 +299,33 @@ CREATE TABLE IF NOT EXISTS `research_saved_search` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 17:00:32
+
+-- Audit table for rejected/archived researchers
+CREATE TABLE IF NOT EXISTS `research_researcher_audit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `original_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `affiliation_type` varchar(50) DEFAULT NULL,
+  `institution` varchar(255) DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `research_interests` text,
+  `current_project` text,
+  `orcid_id` varchar(50) DEFAULT NULL,
+  `id_type` varchar(50) DEFAULT NULL,
+  `id_number` varchar(100) DEFAULT NULL,
+  `status` varchar(20) NOT NULL COMMENT 'Status at time of archival',
+  `rejection_reason` text,
+  `archived_by` int DEFAULT NULL,
+  `archived_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `original_created_at` datetime DEFAULT NULL,
+  `original_updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

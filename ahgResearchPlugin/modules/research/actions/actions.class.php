@@ -815,12 +815,53 @@ class researchActions extends sfActions
             $this->forward404('Researcher not found');
         }
         $reason = $request->getParameter('reason', '');
-        DB::table('research_researcher')->where('id', $id)->update([
+        $adminId = $this->getUser()->getAttribute('user_id');
+        
+        // Move to audit table
+        DB::table('research_researcher_audit')->insert([
+            'original_id' => $researcher->id,
+            'user_id' => $researcher->user_id,
+            'title' => $researcher->title,
+            'first_name' => $researcher->first_name,
+            'last_name' => $researcher->last_name,
+            'email' => $researcher->email,
+            'phone' => $researcher->phone,
+            'affiliation_type' => $researcher->affiliation_type,
+            'institution' => $researcher->institution,
+            'department' => $researcher->department,
+            'position' => $researcher->position,
+            'research_interests' => $researcher->research_interests,
+            'current_project' => $researcher->current_project,
+            'orcid_id' => $researcher->orcid_id,
+            'id_type' => $researcher->id_type,
+            'id_number' => $researcher->id_number,
             'status' => 'rejected',
             'rejection_reason' => $reason,
-            'updated_at' => date('Y-m-d H:i:s'),
+            'archived_by' => $adminId,
+            'archived_at' => date('Y-m-d H:i:s'),
+            'original_created_at' => $researcher->created_at,
+            'original_updated_at' => $researcher->updated_at,
         ]);
-        $this->getUser()->setFlash('success', 'Researcher registration rejected');
+        
+        // Delete from main table
+        DB::table('research_researcher')->where('id', $id)->delete();
+        
+        // Deactivate the user account
+        DB::table('user')->where('id', $researcher->user_id)->update(['active' => 0]);
+        
+        // Update access request to rejected
+        DB::table('access_request')
+            ->where('user_id', $researcher->user_id)
+            ->where('request_type', 'researcher')
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'denied',
+                'reviewed_by' => $adminId,
+                'reviewed_at' => date('Y-m-d H:i:s'),
+                'review_notes' => $reason,
+            ]);
+        
+        $this->getUser()->setFlash('success', 'Researcher registration rejected and archived');
         $this->redirect('research/researchers');
     }
 
