@@ -3,6 +3,7 @@
 namespace AtomFramework\Services;
 
 use AtomFramework\Repositories\VendorRepository;
+use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Collection;
 
 class VendorService
@@ -45,6 +46,9 @@ class VendorService
 
         try {
             $vendorId = $this->repository->createVendor($data);
+            
+            $newValues = $this->captureVendorValues($vendorId);
+            $this->logAudit('create', 'Vendor', $vendorId, [], $newValues, $data['name'] ?? null);
 
             return ['success' => true, 'vendor_id' => $vendorId];
         } catch (\Exception $e) {
@@ -61,7 +65,10 @@ class VendorService
         }
 
         try {
+            $oldValues = $this->captureVendorValues($id);
             $this->repository->updateVendor($id, $data);
+            $newValues = $this->captureVendorValues($id);
+            $this->logAudit('update', 'Vendor', $id, $oldValues, $newValues, $newValues['name'] ?? null);
 
             return ['success' => true];
         } catch (\Exception $e) {
@@ -71,6 +78,7 @@ class VendorService
 
     public function deleteVendor(int $id): array
     {
+        $oldValues = $this->captureVendorValues($id);
         $deleted = $this->repository->deleteVendor($id);
 
         if (!$deleted) {
@@ -80,6 +88,7 @@ class VendorService
             ];
         }
 
+        $this->logAudit('delete', 'Vendor', $id, $oldValues, [], $oldValues['name'] ?? null);
         return ['success' => true];
     }
 
@@ -224,6 +233,9 @@ class VendorService
 
         try {
             $transactionId = $this->repository->createTransaction($data);
+            
+            $newValues = $this->captureTransactionValues($transactionId);
+            $this->logAudit('create', 'VendorTransaction', $transactionId, [], $newValues, $newValues['transaction_number'] ?? null);
 
             return ['success' => true, 'transaction_id' => $transactionId];
         } catch (\Exception $e) {
@@ -234,7 +246,10 @@ class VendorService
     public function updateTransaction(int $id, array $data, int $userId): array
     {
         try {
+            $oldValues = $this->captureTransactionValues($id);
             $this->repository->updateTransaction($id, $data, $userId);
+            $newValues = $this->captureTransactionValues($id);
+            $this->logAudit('update', 'VendorTransaction', $id, $oldValues, $newValues, $newValues['transaction_number'] ?? null);
 
             return ['success' => true];
         } catch (\Exception $e) {
@@ -251,7 +266,10 @@ class VendorService
         }
 
         try {
+            $oldValues = $this->captureTransactionValues($id);
             $this->repository->updateTransactionStatus($id, $status, $userId, $notes);
+            $newValues = $this->captureTransactionValues($id);
+            $this->logAudit('status_change', 'VendorTransaction', $id, $oldValues, $newValues, $newValues['transaction_number'] ?? null);
 
             return ['success' => true];
         } catch (\Exception $e) {
@@ -420,4 +438,93 @@ class VendorService
     {
         return $this->repository->getPaymentStatuses();
     }
+
+    // =========================================================================
+    // AUDIT LOGGING
+    // =========================================================================
+
+    protected function captureVendorValues(int $id): array
+    {
+        try {
+            $row = DB::table('vendor')->where('id', $id)->first();
+            if (!$row) return [];
+            return array_filter((array)$row, fn($v) => $v !== null && $v !== '');
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    protected function captureContactValues(int $id): array
+    {
+        try {
+            $row = DB::table('vendor_contact')->where('id', $id)->first();
+            if (!$row) return [];
+            return array_filter((array)$row, fn($v) => $v !== null && $v !== '');
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    protected function captureTransactionValues(int $id): array
+    {
+        try {
+            $row = DB::table('vendor_transaction')->where('id', $id)->first();
+            if (!$row) return [];
+            return array_filter((array)$row, fn($v) => $v !== null && $v !== '');
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
+    {
+        try {
+            $userId = null;
+            $username = null;
+            if (class_exists('sfContext') && \sfContext::hasInstance()) {
+                $user = \sfContext::getInstance()->getUser();
+                if ($user && $user->isAuthenticated()) {
+                    $userId = $user->getAttribute('user_id');
+                    if ($userId) {
+                        $userRecord = DB::table('user')->where('id', $userId)->first();
+                        $username = $userRecord->username ?? null;
+                    }
+                }
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $val) {
+                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
+            }
+            if ($action === 'delete') $changedFields = array_keys($oldValues);
+
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), 
+                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'entity_title' => $title,
+                'module' => 'ahgVendorPlugin',
+                'action_name' => $action,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("VendorService AUDIT ERROR: " . $e->getMessage());
+        }
+    }
+
 }

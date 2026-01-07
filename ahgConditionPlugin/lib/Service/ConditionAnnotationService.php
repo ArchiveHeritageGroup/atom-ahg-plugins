@@ -247,6 +247,12 @@ class ConditionAnnotationService
                 'condition_check_id' => $conditionCheckId,
                 'filename' => $filename,
             ]);
+            
+            $this->logAudit('create', 'ConditionPhoto', $photoId, [], [
+                'condition_check_id' => $conditionCheckId,
+                'filename' => $filename,
+                'photo_type' => $photoType,
+            ], $caption);
 
             return $photoId;
         } catch (\Exception $e) {
@@ -384,6 +390,8 @@ class ConditionAnnotationService
             }
 
             $this->logger->info('Photo deleted', ['photo_id' => $photoId]);
+            
+            $this->logAudit('delete', 'ConditionPhoto', $photoId, (array)$photo, [], $photo->caption ?? null);
 
             return true;
         } catch (\Exception $e) {
@@ -443,5 +451,56 @@ class ConditionAnnotationService
         }
         
         return \sfConfig::get('sf_root_dir') . '/uploads/condition_photos';
+    }
+
+    protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
+    {
+        try {
+            $userId = null;
+            $username = null;
+            if (class_exists('sfContext') && \sfContext::hasInstance()) {
+                $user = \sfContext::getInstance()->getUser();
+                if ($user && $user->isAuthenticated()) {
+                    $userId = $user->getAttribute('user_id');
+                    if ($userId) {
+                        $userRecord = DB::table('user')->where('id', $userId)->first();
+                        $username = $userRecord->username ?? null;
+                    }
+                }
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $val) {
+                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
+            }
+            if ($action === 'delete') $changedFields = array_keys($oldValues);
+
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), 
+                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'entity_title' => $title,
+                'module' => 'ahgConditionPlugin',
+                'action_name' => $action,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error("AUDIT ERROR: " . $e->getMessage());
+        }
     }
 }

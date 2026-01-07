@@ -51,23 +51,36 @@ class ResearchService
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
+        $this->logAudit('create', 'Researcher', $researcherId, [], $data, $data['first_name'] . ' ' . $data['last_name']);
         return $researcherId;
     }
 
     public function updateResearcher(int $id, array $data): bool
     {
+        $oldValues = (array)(DB::table('research_researcher')->where('id', $id)->first() ?? []);
         $data['updated_at'] = date('Y-m-d H:i:s');
-        return DB::table('research_researcher')->where('id', $id)->update($data) > 0;
+        $result = DB::table('research_researcher')->where('id', $id)->update($data) > 0;
+        if ($result) {
+            $newValues = (array)(DB::table('research_researcher')->where('id', $id)->first() ?? []);
+            $this->logAudit('update', 'Researcher', $id, $oldValues, $newValues, ($newValues['first_name'] ?? '') . ' ' . ($newValues['last_name'] ?? ''));
+        }
+        return $result;
     }
 
     public function approveResearcher(int $id, int $approvedBy, ?string $expiresAt = null): bool
     {
-        return DB::table('research_researcher')->where('id', $id)->update([
+        $oldValues = (array)(DB::table('research_researcher')->where('id', $id)->first() ?? []);
+        $result = DB::table('research_researcher')->where('id', $id)->update([
             'status' => 'approved',
             'approved_by' => $approvedBy,
             'approved_at' => date('Y-m-d H:i:s'),
             'expires_at' => $expiresAt ?? date('Y-m-d', strtotime('+1 year')),
         ]) > 0;
+        if ($result) {
+            $newValues = (array)(DB::table('research_researcher')->where('id', $id)->first() ?? []);
+            $this->logAudit('approve', 'Researcher', $id, $oldValues, $newValues, ($newValues['first_name'] ?? '') . ' ' . ($newValues['last_name'] ?? ''));
+        }
+        return $result;
     }
 
     public function getResearchers(array $filters = []): array
@@ -100,7 +113,7 @@ class ResearchService
 
     public function createBooking(array $data): int
     {
-        return DB::table('research_booking')->insertGetId([
+        $bookingId = DB::table('research_booking')->insertGetId([
             'researcher_id' => $data['researcher_id'],
             'reading_room_id' => $data['reading_room_id'],
             'booking_date' => $data['booking_date'],
@@ -110,6 +123,8 @@ class ResearchService
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+        $this->logAudit('create', 'ResearchBooking', $bookingId, [], $data, 'Booking ' . $data['booking_date']);
+        return $bookingId;
     }
 
     public function addMaterialRequest(int $bookingId, int $objectId, ?string $notes = null): int
@@ -156,16 +171,28 @@ class ResearchService
 
     public function confirmBooking(int $id, int $confirmedBy): bool
     {
-        return DB::table('research_booking')->where('id', $id)->update([
+        $oldValues = (array)(DB::table('research_booking')->where('id', $id)->first() ?? []);
+        $result = DB::table('research_booking')->where('id', $id)->update([
             'status' => 'confirmed', 'confirmed_by' => $confirmedBy, 'confirmed_at' => date('Y-m-d H:i:s'),
         ]) > 0;
+        if ($result) {
+            $newValues = (array)(DB::table('research_booking')->where('id', $id)->first() ?? []);
+            $this->logAudit('confirm', 'ResearchBooking', $id, $oldValues, $newValues, null);
+        }
+        return $result;
     }
 
     public function cancelBooking(int $id, ?string $reason = null): bool
     {
-        return DB::table('research_booking')->where('id', $id)->update([
+        $oldValues = (array)(DB::table('research_booking')->where('id', $id)->first() ?? []);
+        $result = DB::table('research_booking')->where('id', $id)->update([
             'status' => 'cancelled', 'cancelled_at' => date('Y-m-d H:i:s'), 'cancellation_reason' => $reason,
         ]) > 0;
+        if ($result) {
+            $newValues = (array)(DB::table('research_booking')->where('id', $id)->first() ?? []);
+            $this->logAudit('cancel', 'ResearchBooking', $id, $oldValues, $newValues, null);
+        }
+        return $result;
     }
 
     public function checkIn(int $bookingId): bool
@@ -539,5 +566,60 @@ class ResearchService
             ->where('lft', '<', $item->lft)
             ->where('rgt', '>', $item->rgt)
             ->count();
+    }
+
+    // =========================================================================
+    // AUDIT LOGGING
+    // =========================================================================
+
+    protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
+    {
+        try {
+            $userId = null;
+            $username = null;
+            if (class_exists('sfContext') && \sfContext::hasInstance()) {
+                $user = \sfContext::getInstance()->getUser();
+                if ($user && $user->isAuthenticated()) {
+                    $userId = $user->getAttribute('user_id');
+                    if ($userId) {
+                        $userRecord = DB::table('user')->where('id', $userId)->first();
+                        $username = $userRecord->username ?? null;
+                    }
+                }
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $val) {
+                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
+            }
+            if ($action === 'delete') $changedFields = array_keys($oldValues);
+
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), 
+                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'entity_title' => $title,
+                'module' => 'ahgResearchPlugin',
+                'action_name' => $action,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("ResearchService AUDIT ERROR: " . $e->getMessage());
+        }
     }
 }

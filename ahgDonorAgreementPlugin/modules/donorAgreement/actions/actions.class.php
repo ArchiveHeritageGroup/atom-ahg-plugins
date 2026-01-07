@@ -1,31 +1,26 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 class donorAgreementActions extends sfActions
 {
+    protected function initFramework()
+    {
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+    }
+
     /**
      * Get agreement types from database
      */
     protected function getAgreementTypes()
     {
-        $types = [];
-        
-        try {
-            $pdo = Propel::getConnection();
-            $stmt = $pdo->query("
-                SELECT id, name, slug, description 
-                FROM agreement_type 
-                WHERE is_active = 1 
-                ORDER BY sort_order, name
-            ");
-            
-            while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $types[] = $row;
-            }
-        } catch (Exception $e) {
-            error_log("Error fetching agreement types: " . $e->getMessage());
-        }
-        
-        return $types;
+        $this->initFramework();
+        return DB::table('agreement_type')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -48,53 +43,43 @@ class donorAgreementActions extends sfActions
      */
     public function executeBrowse(sfWebRequest $request)
     {
+        $this->initFramework();
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
-        
-        $pdo = Propel::getConnection();
-        $where = [];
-        $params = [];
-        
+
+        $query = DB::table('donor_agreement as da')
+            ->leftJoin('donor_agreement_i18n as dai', function($j) {
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+            })
+            ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
+            ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
+            ->leftJoin('actor as a', 'd.id', '=', 'a.id')
+            ->leftJoin('actor_i18n as ai', function($j) {
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->select(
+                'da.*',
+                'dai.title',
+                'dai.description',
+                'at.name as agreement_type_name',
+                'ai.authorized_form_of_name as donor_name'
+            );
+
         if ($status = $request->getParameter('status')) {
-            $where[] = "da.status = ?";
-            $params[] = $status;
+            $query->where('da.status', $status);
         }
-        
         if ($typeId = $request->getParameter('type')) {
-            $where[] = "da.agreement_type_id = ?";
-            $params[] = $typeId;
+            $query->where('da.agreement_type_id', $typeId);
         }
-        
         if ($sq = $request->getParameter('sq')) {
-            $where[] = "(da.agreement_number LIKE ? OR dai.title LIKE ? OR ai.authorized_form_of_name LIKE ?)";
-            $params[] = "%{$sq}%";
-            $params[] = "%{$sq}%";
-            $params[] = "%{$sq}%";
+            $query->where(function($q) use ($sq) {
+                $q->where('da.agreement_number', 'LIKE', "%{$sq}%")
+                  ->orWhere('dai.title', 'LIKE', "%{$sq}%")
+                  ->orWhere('ai.authorized_form_of_name', 'LIKE', "%{$sq}%");
+            });
         }
-        
-        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        
-        $sql = "
-            SELECT 
-                da.*,
-                dai.title,
-                dai.description,
-                at.name as agreement_type_name,
-                ai.authorized_form_of_name as donor_name
-            FROM donor_agreement da
-            LEFT JOIN donor_agreement_i18n dai ON da.id = dai.id AND dai.culture = 'en'
-            LEFT JOIN agreement_type at ON da.agreement_type_id = at.id
-            LEFT JOIN donor d ON da.donor_id = d.id
-            LEFT JOIN actor a ON d.id = a.id
-            LEFT JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-            {$whereClause}
-            ORDER BY da.created_at DESC
-            LIMIT 100
-        ";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $this->agreements = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        $this->agreements = $query->orderBy('da.created_at', 'desc')->limit(100)->get()->toArray();
     }
 
     /**
@@ -102,28 +87,25 @@ class donorAgreementActions extends sfActions
      */
     public function executeAdd(sfWebRequest $request)
     {
+        $this->initFramework();
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
+        $this->donors = $this->getDonorsList();
         $this->agreement = null;
-        file_put_contents("/tmp/donor_debug.txt", "getDonorsList called at " . date("Y-m-d H:i:s") . "\n", FILE_APPEND); $this->donors = $this->getDonorsList();
-        error_log("DEBUG executeAdd: donors count = " . count($this->donors));
-        
-        // For donor pre-selection
+
         $this->donorId = $request->getParameter('donor_id');
         $this->donor = null;
         if ($this->donorId) {
-            $pdo = Propel::getConnection();
-            $stmt = $pdo->prepare("
-                SELECT d.id, ai.authorized_form_of_name as name
-                FROM donor d
-                JOIN actor a ON d.id = a.id
-                JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-                WHERE d.id = ?
-            ");
-            $stmt->execute([$this->donorId]);
-            $this->donor = $stmt->fetch(PDO::FETCH_OBJ);
+            $this->donor = DB::table('donor as d')
+                ->join('actor as a', 'd.id', '=', 'a.id')
+                ->join('actor_i18n as ai', function($j) {
+                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                })
+                ->where('d.id', $this->donorId)
+                ->select('d.id', 'ai.authorized_form_of_name as name')
+                ->first();
         }
-        
+
         if ($request->isMethod('post')) {
             $this->processForm($request);
         }
@@ -134,42 +116,38 @@ class donorAgreementActions extends sfActions
      */
     public function executeEdit(sfWebRequest $request)
     {
+        $this->initFramework();
         $this->types = $this->getAgreementTypes();
         $this->statuses = $this->getStatuses();
-        file_put_contents("/tmp/donor_debug.txt", "getDonorsList called at " . date("Y-m-d H:i:s") . "\n", FILE_APPEND); $this->donors = $this->getDonorsList();
-        error_log("DEBUG executeAdd: donors count = " . count($this->donors));
-        
-        $id = $request->getParameter('id');
-        
-        $pdo = Propel::getConnection();
-        $stmt = $pdo->prepare("
-            SELECT da.*, dai.title, dai.description
-            FROM donor_agreement da
-            LEFT JOIN donor_agreement_i18n dai ON da.id = dai.id AND dai.culture = 'en'
-            WHERE da.id = ?
-        ");
-        $stmt->execute([$id]);
-        $this->agreement = $stmt->fetch(PDO::FETCH_OBJ);
-        
+        $this->donors = $this->getDonorsList();
+
+        $id = (int)$request->getParameter('id');
+
+        $this->agreement = DB::table('donor_agreement as da')
+            ->leftJoin('donor_agreement_i18n as dai', function($j) {
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+            })
+            ->where('da.id', $id)
+            ->select('da.*', 'dai.title', 'dai.description')
+            ->first();
+
         if (!$this->agreement) {
             $this->forward404('Agreement not found');
         }
-        
-        // Get donor info
+
         $this->donorId = $this->agreement->donor_id;
         $this->donor = null;
         if ($this->donorId) {
-            $stmt = $pdo->prepare("
-                SELECT d.id, ai.authorized_form_of_name as name
-                FROM donor d
-                JOIN actor a ON d.id = a.id
-                JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-                WHERE d.id = ?
-            ");
-            $stmt->execute([$this->donorId]);
-            $this->donor = $stmt->fetch(PDO::FETCH_OBJ);
+            $this->donor = DB::table('donor as d')
+                ->join('actor as a', 'd.id', '=', 'a.id')
+                ->join('actor_i18n as ai', function($j) {
+                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                })
+                ->where('d.id', $this->donorId)
+                ->select('d.id', 'ai.authorized_form_of_name as name')
+                ->first();
         }
-        
+
         if ($request->isMethod('post')) {
             $this->processForm($request, $id);
         }
@@ -180,50 +158,37 @@ class donorAgreementActions extends sfActions
      */
     public function executeView(sfWebRequest $request)
     {
-        $id = $request->getParameter('id');
-        
-        $pdo = Propel::getConnection();
-        $stmt = $pdo->prepare("
-            SELECT 
-                da.*,
-                dai.title,
-                dai.description,
-                at.name as agreement_type_name,
-                ai.authorized_form_of_name as donor_name
-            FROM donor_agreement da
-            LEFT JOIN donor_agreement_i18n dai ON da.id = dai.id AND dai.culture = 'en'
-            LEFT JOIN agreement_type at ON da.agreement_type_id = at.id
-            LEFT JOIN donor d ON da.donor_id = d.id
-            LEFT JOIN actor a ON d.id = a.id
-            LEFT JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-            WHERE da.id = ?
-        ");
-        $stmt->execute([$id]);
-        $this->agreement = $stmt->fetch(PDO::FETCH_OBJ);
-        
+        $this->initFramework();
+        $id = (int)$request->getParameter('id');
+
+        $this->agreement = DB::table('donor_agreement as da')
+            ->leftJoin('donor_agreement_i18n as dai', function($j) {
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+            })
+            ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
+            ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
+            ->leftJoin('actor as a', 'd.id', '=', 'a.id')
+            ->leftJoin('actor_i18n as ai', function($j) {
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->where('da.id', $id)
+            ->select(
+                'da.*',
+                'dai.title',
+                'dai.description',
+                'at.name as agreement_type_name',
+                'ai.authorized_form_of_name as donor_name'
+            )
+            ->first();
+
         if (!$this->agreement) {
             $this->forward404('Agreement not found');
         }
-        
-        // Get rights
-        $stmt = $pdo->prepare("SELECT * FROM donor_agreement_right WHERE donor_agreement_id = ?");
-        $stmt->execute([$id]);
-        $this->rights = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        // Get restrictions
-        $stmt = $pdo->prepare("SELECT * FROM donor_agreement_restriction WHERE donor_agreement_id = ?");
-        $stmt->execute([$id]);
-        $this->restrictions = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        // Get documents
-        $stmt = $pdo->prepare("SELECT * FROM donor_agreement_document WHERE donor_agreement_id = ?");
-        $stmt->execute([$id]);
-        $this->documents = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        // Get reminders
-        $stmt = $pdo->prepare("SELECT * FROM donor_agreement_reminder WHERE donor_agreement_id = ? ORDER BY reminder_date");
-        $stmt->execute([$id]);
-        $this->reminders = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        $this->rights = DB::table('donor_agreement_right')->where('donor_agreement_id', $id)->get()->toArray();
+        $this->restrictions = DB::table('donor_agreement_restriction')->where('donor_agreement_id', $id)->get()->toArray();
+        $this->documents = DB::table('donor_agreement_document')->where('donor_agreement_id', $id)->get()->toArray();
+        $this->reminders = DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->orderBy('reminder_date')->get()->toArray();
     }
 
     /**
@@ -231,25 +196,27 @@ class donorAgreementActions extends sfActions
      */
     public function executeReminders(sfWebRequest $request)
     {
-        $pdo = Propel::getConnection();
-        
-        $sql = "
-            SELECT 
-                r.*,
-                dai.title as agreement_title,
-                da.agreement_number,
-                ai.authorized_form_of_name as donor_name
-            FROM donor_agreement_reminder r
-            JOIN donor_agreement da ON r.donor_agreement_id = da.id
-            LEFT JOIN donor_agreement_i18n dai ON da.id = dai.id AND dai.culture = 'en'
-            LEFT JOIN donor d ON da.donor_id = d.id
-            LEFT JOIN actor a ON d.id = a.id
-            LEFT JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-            WHERE r.is_active = 1
-            ORDER BY r.reminder_date ASC
-        ";
-        
-        $this->reminders = $pdo->query($sql)->fetchAll(PDO::FETCH_OBJ);
+        $this->initFramework();
+        $this->reminders = DB::table('donor_agreement_reminder as r')
+            ->join('donor_agreement as da', 'r.donor_agreement_id', '=', 'da.id')
+            ->leftJoin('donor_agreement_i18n as dai', function($j) {
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+            })
+            ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
+            ->leftJoin('actor as a', 'd.id', '=', 'a.id')
+            ->leftJoin('actor_i18n as ai', function($j) {
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->where('r.is_active', 1)
+            ->orderBy('r.reminder_date')
+            ->select(
+                'r.*',
+                'dai.title as agreement_title',
+                'da.agreement_number',
+                'ai.authorized_form_of_name as donor_name'
+            )
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -257,26 +224,15 @@ class donorAgreementActions extends sfActions
      */
     protected function getDonorsList()
     {
-        $donors = [];
-        
-        try {
-            $pdo = Propel::getConnection();
-            $stmt = $pdo->query("
-                SELECT d.id, ai.authorized_form_of_name as name
-                FROM donor d
-                JOIN actor a ON d.id = a.id
-                JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
-                ORDER BY ai.authorized_form_of_name
-            ");
-            
-            while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $donors[] = $row;
-            }
-        } catch (Exception $e) {
-            error_log("Error fetching donors: " . $e->getMessage());
-        }
-        
-        error_log("getDonorsList returning " . count($donors) . " donors"); return $donors;
+        return DB::table('donor as d')
+            ->join('actor as a', 'd.id', '=', 'a.id')
+            ->join('actor_i18n as ai', function($j) {
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->orderBy('ai.authorized_form_of_name')
+            ->select('d.id', 'ai.authorized_form_of_name as name')
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -284,76 +240,55 @@ class donorAgreementActions extends sfActions
      */
     protected function processForm(sfWebRequest $request, $id = null)
     {
+        $this->initFramework();
         $data = $request->getParameter('agreement');
-        $pdo = Propel::getConnection();
-        
+        $isNew = !$id;
+
+        // Capture old values for audit
+        $oldValues = [];
+        if ($id) {
+            $oldValues = $this->captureAgreementValues($id);
+        }
+
         try {
-            $pdo->beginTransaction();
-            
+            DB::beginTransaction();
+
+            $agreementData = [
+                'donor_id' => $data['donor_id'] ?: null,
+                'agreement_type_id' => $data['agreement_type_id'],
+                'agreement_number' => $data['agreement_number'] ?: null,
+                'status' => $data['status'] ?: 'draft',
+                'effective_date' => $data['effective_date'] ?: null,
+                'expiry_date' => $data['expiry_date'] ?: null,
+                'review_date' => $data['review_date'] ?: null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
             if ($id) {
-                $stmt = $pdo->prepare("
-                    UPDATE donor_agreement SET
-                        donor_id = ?,
-                        agreement_type_id = ?,
-                        agreement_number = ?,
-                        status = ?,
-                        effective_date = ?,
-                        expiry_date = ?,
-                        review_date = ?,
-                        updated_at = NOW()
-                    WHERE id = ?
-                ");
-                $stmt->execute([
-                    $data['donor_id'] ?: null,
-                    $data['agreement_type_id'],
-                    $data['agreement_number'] ?: null,
-                    $data['status'] ?: 'draft',
-                    $data['effective_date'] ?: null,
-                    $data['expiry_date'] ?: null,
-                    $data['review_date'] ?: null,
-                    $id
-                ]);
-                
-                $stmt = $pdo->prepare("
-                    INSERT INTO donor_agreement_i18n (id, culture, title, description)
-                    VALUES (?, 'en', ?, ?)
-                    ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)
-                ");
-                $stmt->execute([$id, $data['title'], $data['description'] ?? null]);
-                
+                DB::table('donor_agreement')->where('id', $id)->update($agreementData);
                 $agreementId = $id;
             } else {
-                $stmt = $pdo->prepare("
-                    INSERT INTO donor_agreement 
-                    (donor_id, agreement_type_id, agreement_number, status, effective_date, expiry_date, review_date, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-                ");
-                $stmt->execute([
-                    $data['donor_id'] ?: null,
-                    $data['agreement_type_id'],
-                    $data['agreement_number'] ?: null,
-                    $data['status'] ?: 'draft',
-                    $data['effective_date'] ?: null,
-                    $data['expiry_date'] ?: null,
-                    $data['review_date'] ?: null
-                ]);
-                
-                $agreementId = $pdo->lastInsertId();
-                
-                $stmt = $pdo->prepare("
-                    INSERT INTO donor_agreement_i18n (id, culture, title, description)
-                    VALUES (?, 'en', ?, ?)
-                ");
-                $stmt->execute([$agreementId, $data['title'], $data['description'] ?? null]);
+                $agreementData['created_at'] = date('Y-m-d H:i:s');
+                $agreementId = DB::table('donor_agreement')->insertGetId($agreementData);
             }
-            
-            $pdo->commit();
-            
+
+            // Save i18n
+            DB::table('donor_agreement_i18n')->updateOrInsert(
+                ['id' => $agreementId, 'culture' => 'en'],
+                ['title' => $data['title'], 'description' => $data['description'] ?? null]
+            );
+
+            DB::commit();
+
+            // Capture new values and log audit
+            $newValues = $this->captureAgreementValues($agreementId);
+            $this->logAudit($isNew ? 'create' : 'update', $agreementId, $oldValues, $newValues);
+
             $this->getUser()->setFlash('notice', $id ? 'Agreement updated.' : 'Agreement created.');
             $this->redirect(['module' => 'donorAgreement', 'action' => 'view', 'id' => $agreementId]);
-            
+
         } catch (Exception $e) {
-            $pdo->rollBack();
+            DB::rollBack();
             $this->getUser()->setFlash('error', 'Error saving agreement: ' . $e->getMessage());
         }
     }
@@ -363,31 +298,118 @@ class donorAgreementActions extends sfActions
      */
     public function executeDelete(sfWebRequest $request)
     {
-        $id = $request->getParameter('id');
-        
+        $this->initFramework();
+        $id = (int)$request->getParameter('id');
+
         if ($request->isMethod('post')) {
-            $pdo = Propel::getConnection();
-            
+            // Capture values before delete for audit
+            $oldValues = $this->captureAgreementValues($id);
+
             try {
-                $pdo->beginTransaction();
+                DB::beginTransaction();
+
+                DB::table('donor_agreement_right')->where('donor_agreement_id', $id)->delete();
+                DB::table('donor_agreement_restriction')->where('donor_agreement_id', $id)->delete();
+                DB::table('donor_agreement_document')->where('donor_agreement_id', $id)->delete();
                 
-                $pdo->exec("DELETE FROM donor_agreement_right WHERE donor_agreement_id = {$id}");
-                $pdo->exec("DELETE FROM donor_agreement_restriction WHERE donor_agreement_id = {$id}");
-                $pdo->exec("DELETE FROM donor_agreement_document WHERE donor_agreement_id = {$id}");
-                $pdo->exec("DELETE FROM donor_agreement_reminder_log WHERE donor_agreement_reminder_id IN (SELECT id FROM donor_agreement_reminder WHERE donor_agreement_id = {$id})");
-                $pdo->exec("DELETE FROM donor_agreement_reminder WHERE donor_agreement_id = {$id}");
-                $pdo->exec("DELETE FROM donor_agreement_i18n WHERE id = {$id}");
-                $pdo->exec("DELETE FROM donor_agreement WHERE id = {$id}");
-                
-                $pdo->commit();
-                
+                $reminderIds = DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->pluck('id');
+                if ($reminderIds->count() > 0) {
+                    DB::table('donor_agreement_reminder_log')->whereIn('donor_agreement_reminder_id', $reminderIds)->delete();
+                }
+                DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->delete();
+                DB::table('donor_agreement_i18n')->where('id', $id)->delete();
+                DB::table('donor_agreement')->where('id', $id)->delete();
+
+                DB::commit();
+
+                // Log delete audit
+                $this->logAudit('delete', $id, $oldValues, []);
+
                 $this->getUser()->setFlash('notice', 'Agreement deleted.');
             } catch (Exception $e) {
-                $pdo->rollBack();
+                DB::rollBack();
                 $this->getUser()->setFlash('error', 'Error deleting: ' . $e->getMessage());
             }
         }
-        
+
         $this->redirect(['module' => 'donorAgreement', 'action' => 'browse']);
+    }
+
+    /**
+     * Capture agreement values for audit trail
+     */
+    protected function captureAgreementValues(int $id): array
+    {
+        try {
+            $row = DB::table('donor_agreement as da')
+                ->leftJoin('donor_agreement_i18n as dai', function($j) {
+                    $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                })
+                ->where('da.id', $id)
+                ->select('da.*', 'dai.title', 'dai.description')
+                ->first();
+
+            if (!$row) return [];
+
+            $values = [];
+            foreach ((array)$row as $key => $val) {
+                if ($val !== null && $val !== '') $values[$key] = $val;
+            }
+            return $values;
+        } catch (Exception $e) {
+            error_log("DonorAgreement captureValues ERROR: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Log audit trail entry
+     */
+    protected function logAudit(string $action, int $id, array $oldValues, array $newValues): void
+    {
+        try {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $username = null;
+            if ($userId) {
+                $user = DB::table('user')->where('id', $userId)->first();
+                $username = $user->username ?? null;
+            }
+
+            $changedFields = [];
+            foreach ($newValues as $key => $val) {
+                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
+            }
+            // For deletes, all old fields are "changed"
+            if ($action === 'delete') {
+                $changedFields = array_keys($oldValues);
+            }
+
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), 
+                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, 
+                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                'session_id' => session_id() ?: null,
+                'action' => $action,
+                'entity_type' => 'DonorAgreement',
+                'entity_id' => $id,
+                'entity_title' => $newValues['title'] ?? $oldValues['title'] ?? null,
+                'module' => 'ahgDonorAgreementPlugin',
+                'action_name' => $action,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (Exception $e) {
+            error_log("DonorAgreement AUDIT ERROR: " . $e->getMessage());
+        }
     }
 }

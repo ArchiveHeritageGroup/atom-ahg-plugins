@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__FILE__)."/../RightsConstants.php";
-
 declare(strict_types=1);
+
+require_once dirname(__FILE__)."/../RightsConstants.php";
 
 /**
  * RightsService - Business logic for rights management
@@ -124,6 +124,12 @@ class RightsService
 
     public function saveRightsRecord(array $data): int
     {
+        $isNew = empty($data['id']);
+        $oldValues = [];
+        if (!$isNew && !empty($data['id'])) {
+            $oldValues = $this->getRightsRecord((int)$data['id']) ?? [];
+        }
+
         $now = date('Y-m-d H:i:s');
         $userId = sfContext::getInstance()->getUser()->getAttribute('user_id');
 
@@ -178,11 +184,15 @@ class RightsService
 
         $this->logger->info('Rights record saved', ['id' => $id, 'object_id' => $data['object_id']]);
 
+        
+        $newValues = $this->getRightsRecord($id) ?? [];
+        $this->logAudit($isNew ? 'create' : 'update', 'RightsRecord', $id, $oldValues, $newValues, null);
         return $id;
     }
 
     public function deleteRightsRecord(int $id): bool
     {
+        $oldValues = $this->getRightsRecord($id) ?? [];
         $record = DB::table('rights_record')->where('id', $id)->first();
         if (!$record) {
             return false;
@@ -285,6 +295,8 @@ class RightsService
 
         $this->logAudit($data['object_id'], $data['object_type'] ?? 'information_object', 'embargo_set', 'embargo', $id);
 
+        
+        $this->logAudit('create', 'Embargo', $id, [], $data, null);
         return $id;
     }
 
