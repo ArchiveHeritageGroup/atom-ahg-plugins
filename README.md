@@ -278,24 +278,7 @@ php bin/atom enable <name>        # Same as extension:enable
 | atom-extensions-catalog | [GitHub](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog) | This directory/documentation |
 
 ---
-
-## 🖥️ Server Configuration
-
-### Development Server (112)
-```
-Path: /usr/share/nginx/archive
-Database: archive (user: root)
-URL: http://192.168.0.112
-```
-
-### Test Server (154) - nginx/atom
-```
-Path: /usr/share/nginx/atom
-Database: atom (user: atom, pass: AtoM@123)
-URL: http://192.168.0.154
-```
-
-### Production
+### Development  and play environment
 ```
 Path: /usr/share/nginx/atom
 URL: https://psis.theahg.co.za
