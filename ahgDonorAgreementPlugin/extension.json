@@ -1,5 +1,6 @@
 {
     "name": "Donor Agreement Management",
+    "machine_name": "ahgDonorAgreementPlugin",
     "version": "1.0.1",
     "description": "Donor Agreement Management with contract uploads, reminders, and rights tracking",
     "author": "The Archive and Heritage Group",
