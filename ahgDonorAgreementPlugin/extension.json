@@ -1,8 +1,7 @@
 {
-    "name": "Donor Agreement Management",
-    "machine_name": "ahgDonorAgreementPlugin",
-    "version": "1.1.0",
-    "description": "Comprehensive donor/institution agreement management with contract uploads, rights, restrictions, reminders, and South African compliance.",
+    "name": "ahgDonorAgreementPlugin",
+    "version": "1.0.1",
+    "description": "Donor Agreement Management with contract uploads, reminders, and rights tracking",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "requires": {
@@ -12,9 +11,9 @@
     },
     "dependencies": [],
     "optional": {
-        "extensions": ["ahgSecurityClearancePlugin"]
+        "extensions": ["ahgExtendedRightsPlugin"]
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": ["ahgThemeB5Plugin"],
     "tables": [
         "agreement_type",
         "donor_agreement",
@@ -26,9 +25,11 @@
         "donor_agreement_reminder_log",
         "donor_agreement_history",
         "donor_agreement_accession",
-        "donor_agreement_record"
-    ],
-    "shared_tables": ["donor", "actor", "actor_i18n", "repository"],
-    "install_task": null,
-    "uninstall_task": null
+        "donor_agreement_record",
+        "donor_agreement_classification",
+        "donor_agreement_rights",
+        "donor_provenance",
+        "donor_rights_application_log",
+        "agreement_rights_vocabulary"
+    ]
 }

@@ -5,8 +5,9 @@
 -- Agreement Types (reference table)
 CREATE TABLE IF NOT EXISTS agreement_type (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    prefix VARCHAR(10) DEFAULT 'AGR',
     description TEXT,
     is_active TINYINT(1) DEFAULT 1,
     requires_witness TINYINT(1) DEFAULT 0,
@@ -21,17 +22,20 @@ CREATE TABLE IF NOT EXISTS agreement_type (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert standard agreement types (South African context)
-INSERT IGNORE INTO agreement_type (name, code, description, requires_witness, requires_legal_review, sort_order, color) VALUES
-('Deed of Gift', 'deed_of_gift', 'Unconditional transfer of ownership', 1, 1, 1, '#28a745'),
-('Deed of Donation', 'deed_of_donation', 'Formal donation under SA law', 1, 1, 2, '#28a745'),
-('Deposit Agreement', 'deposit', 'Materials deposited, ownership retained', 0, 0, 3, '#17a2b8'),
-('Loan Agreement', 'loan', 'Temporary loan for exhibition/research', 0, 0, 4, '#ffc107'),
-('Purchase Agreement', 'purchase', 'Acquisition through purchase', 0, 1, 5, '#6f42c1'),
-('Bequest', 'bequest', 'Transfer through will or testament', 1, 1, 6, '#20c997'),
-('Transfer Agreement', 'transfer', 'Inter-institutional transfer', 0, 1, 7, '#fd7e14'),
-('Custody Agreement', 'custody', 'Temporary custody pending disposition', 0, 0, 8, '#6c757d'),
-('License Agreement', 'license', 'Rights license without ownership transfer', 0, 1, 9, '#e83e8c'),
-('MOU', 'mou', 'Memorandum of Understanding', 0, 0, 10, '#007bff');
+INSERT IGNORE INTO agreement_type (name, slug, prefix, description, requires_witness, requires_legal_review, sort_order, color) VALUES
+('Deed of Gift', 'deed-of-gift', 'DOG', 'Unconditional transfer of ownership', 1, 1, 1, '#28a745'),
+('Deed of Donation', 'deed-of-donation', 'DON', 'Formal donation under SA law', 1, 1, 2, '#28a745'),
+('Deed of Deposit', 'deed-of-deposit', 'DOD', 'Materials deposited, ownership retained', 0, 0, 3, '#17a2b8'),
+('Loan Agreement', 'loan-agreement', 'LOA', 'Temporary loan for exhibition/research', 0, 0, 4, '#ffc107'),
+('Purchase Agreement', 'purchase-agreement', 'PUR', 'Acquisition through purchase', 0, 1, 5, '#6f42c1'),
+('Bequest', 'bequest', 'BEQ', 'Transfer through will or testament', 1, 1, 6, '#20c997'),
+('Transfer Agreement', 'transfer-agreement', 'TRA', 'Inter-institutional transfer', 0, 1, 7, '#fd7e14'),
+('Custody Agreement', 'custody-agreement', 'CUS', 'Temporary custody pending disposition', 0, 0, 8, '#6c757d'),
+('License Agreement', 'license-agreement', 'LIC', 'Rights license without ownership transfer', 0, 1, 9, '#e83e8c'),
+('Reproduction Agreement', 'reproduction-agreement', 'REP', 'Agreement for reproduction rights', 0, 0, 10, '#007bff'),
+('Access Agreement', 'access-agreement', 'ACC', 'Special access arrangements', 0, 0, 11, '#ffc107'),
+('Memorandum of Understanding', 'mou', 'MOU', 'Non-binding agreement outlining intentions', 0, 0, 12, '#6c757d'),
+('Service Level Agreement', 'sla', 'SLA', 'Agreement defining service levels', 0, 0, 13, '#343a40');
 
 -- Main Donor Agreement Table
 CREATE TABLE IF NOT EXISTS donor_agreement (
@@ -41,7 +45,7 @@ CREATE TABLE IF NOT EXISTS donor_agreement (
     donor_id INT NULL,
     repository_id INT NULL,
     agreement_type_id INT UNSIGNED NULL,
-    
+
     -- Parties
     donor_contact_info TEXT,
     institution_name VARCHAR(255),
@@ -50,7 +54,7 @@ CREATE TABLE IF NOT EXISTS donor_agreement (
     legal_representative_title VARCHAR(255),
     repository_representative VARCHAR(255),
     repository_representative_title VARCHAR(255),
-    
+
     -- Status & Dates
     status ENUM('draft','pending_review','pending_signature','active','expired','terminated','superseded') DEFAULT 'draft',
     agreement_date DATE,
@@ -59,24 +63,24 @@ CREATE TABLE IF NOT EXISTS donor_agreement (
     review_date DATE,
     termination_date DATE,
     termination_reason TEXT,
-    
+
     -- Financial
     has_financial_terms TINYINT(1) DEFAULT 0,
     purchase_amount DECIMAL(15,2),
     currency VARCHAR(3) DEFAULT 'ZAR',
     payment_terms TEXT,
-    
+
     -- Scope
     scope_description TEXT,
     extent_statement VARCHAR(255),
     transfer_method VARCHAR(100),
     transfer_date DATE,
     received_by VARCHAR(255),
-    
+
     -- Terms
     general_terms TEXT,
     special_conditions TEXT,
-    
+
     -- Signatures
     donor_signature_date DATE,
     donor_signature_name VARCHAR(255),
@@ -84,7 +88,7 @@ CREATE TABLE IF NOT EXISTS donor_agreement (
     repository_signature_name VARCHAR(255),
     witness_name VARCHAR(255),
     witness_date DATE,
-    
+
     -- Meta
     internal_notes TEXT,
     is_template TINYINT(1) DEFAULT 0,
@@ -94,7 +98,7 @@ CREATE TABLE IF NOT EXISTS donor_agreement (
     updated_by INT UNSIGNED,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     INDEX idx_donor (donor_id),
     INDEX idx_repository (repository_id),
     INDEX idx_status (status),
@@ -246,10 +250,6 @@ CREATE TABLE IF NOT EXISTS donor_agreement_record (
     INDEX idx_io (information_object_id),
     CONSTRAINT fk_darec_agreement FOREIGN KEY (donor_agreement_id) REFERENCES donor_agreement(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================
--- Additional Donor Agreement Tables
--- ============================================================
 
 -- Link to Classifications/Taxonomy Terms
 CREATE TABLE IF NOT EXISTS donor_agreement_classification (
