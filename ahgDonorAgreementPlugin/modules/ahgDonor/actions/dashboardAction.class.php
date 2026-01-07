@@ -250,7 +250,7 @@ class ahgDonorDashboardAction extends sfAction
             ->select([
                 'r.id',
                 'r.donor_agreement_id',
-                'r.title',
+                'r.subject',
                 'r.reminder_type',
                 'r.reminder_date',
                 'da.agreement_number'

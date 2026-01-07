@@ -463,8 +463,8 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
                       <span class="badge bg-<?php echo $isSent ? 'success' : ($isPast ? 'danger' : 'info') ?> me-2">
                         <?php echo ucfirst(str_replace('_', ' ', $reminder->reminder_type)) ?>
                       </span>
-                      <?php if (!empty($reminder->title)): ?>
-                        <small><?php echo esc_entities($reminder->title) ?></small>
+                      <?php if (!empty($reminder->subject)): ?>
+                        <small><?php echo esc_entities($reminder->subject) ?></small>
                       <?php endif ?>
                     </div>
                     <small class="text-muted"><?php echo date('d M Y', strtotime($reminder->reminder_date)) ?></small>

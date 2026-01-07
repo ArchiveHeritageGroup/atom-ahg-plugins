@@ -290,7 +290,7 @@
                   <?php foreach ($pendingReminders as $reminder): ?>
                     <li class="list-group-item">
                       <a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'view', 'id' => $reminder->donor_agreement_id]) ?>">
-                        <?php echo esc_entities($reminder->title) ?>
+                        <?php echo esc_entities($reminder->subject) ?>
                       </a>
                       <br>
                       <small class="text-muted"><?php echo esc_entities($reminder->agreement_number) ?></small>
