@@ -1,0 +1,5 @@
+
+# Donor Autocomplete
+donor_autocomplete:
+  url: /donor/autocomplete
+  param: { module: donor, action: autocomplete }
