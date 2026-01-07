@@ -73,12 +73,12 @@ php symfony cc
 # Theme + GLAM sectors
 php bin/atom extension:install arAHGThemeB5Plugin
 php bin/atom extension:install sfMuseumPlugin
-php bin/atom extension:install arDAMPlugin
+php bin/atom extension:install ahgDAMPlugin
 
 # Enable all
 php bin/atom extension:enable arAHGThemeB5Plugin
 php bin/atom extension:enable sfMuseumPlugin
-php bin/atom extension:enable arDAMPlugin
+php bin/atom extension:enable ahgDAMPlugin
 
 php symfony cc
 ```
