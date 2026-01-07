@@ -1,5 +1,6 @@
 {
-    "name": "ahgPrivacyPlugin",
+    "name": "Privacy Compliance Management",
+    "machine_name": "ahgPrivacyPlugin",
     "version": "1.0.0",
     "description": "POPIA/GDPR Privacy Compliance Management - DSAR tracking, Breach register, ROPA, Consent management",
     "author": "The Archive and Heritage Group (Pty) Ltd",
