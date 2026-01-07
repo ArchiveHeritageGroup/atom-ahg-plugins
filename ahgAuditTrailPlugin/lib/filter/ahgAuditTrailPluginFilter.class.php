@@ -61,6 +61,10 @@ class ahgAuditTrailPluginFilter extends sfFilter
             // Store pre-action state for comparison
             $request->setAttribute('_audit_pre_state', $this->captureState($request));
             $request->setAttribute('_audit_start_time', microtime(true));
+            
+            // Track authentication state before action
+            $request->setAttribute('_audit_was_authenticated', $user->isAuthenticated());
+            $request->setAttribute('_audit_pre_user_id', $user->getAttribute('user_id'));
         }
 
         // Execute the rest of the filter chain
@@ -68,6 +72,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
 
         // After action execution - log if applicable
         if ($this->isFirstCall()) {
+            $this->logAuthenticationChange();
             $this->logAction();
         }
     }
@@ -123,13 +128,17 @@ class ahgAuditTrailPluginFilter extends sfFilter
 
             if ($user->isAuthenticated()) {
                 $userId = $user->getAttribute('user_id');
-                $username = $user->getAttribute('username') ?? $user->getUsername();
+                $username = $user->getAttribute('username') ?? $user->getUsername() ?? 'anonymous';
                 if ($userId) {
                     $userRecord = \Illuminate\Support\Facades\DB::table('user')
                         ->where('id', $userId)
                         ->first();
                     if ($userRecord) {
                         $userEmail = $userRecord->email ?? null;
+                        // Get username from DB if not in session
+                        if ($username === 'anonymous' || empty($username)) {
+                            $username = $userRecord->username ?? 'anonymous';
+                        }
                     }
                 }
             }
@@ -380,4 +389,95 @@ class ahgAuditTrailPluginFilter extends sfFilter
         
         return $params;
     }
+
+    /**
+     * Log authentication state changes (login/logout/failed login)
+     */
+    protected function logAuthenticationChange()
+    {
+        try {
+            $context = $this->getContext();
+            $request = $context->getRequest();
+            $user = $context->getUser();
+            
+            $moduleName = $context->getModuleName();
+            $actionName = $context->getActionName();
+            
+            // Only check for user module login/logout actions
+            if ($moduleName !== 'user' || !in_array($actionName, ['login', 'logout'])) {
+                return;
+            }
+            
+            $wasAuthenticated = $request->getAttribute('_audit_was_authenticated', false);
+            $isAuthenticated = $user->isAuthenticated();
+            $preUserId = $request->getAttribute('_audit_pre_user_id');
+            
+            // Initialize Laravel
+            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+            if (!file_exists($frameworkPath . '/bootstrap.php')) {
+                return;
+            }
+            require_once $frameworkPath . '/bootstrap.php';
+            
+            // Check if auth audit is enabled
+            $auditAuth = \Illuminate\Support\Facades\DB::table('ahg_audit_settings')
+                ->where('setting_key', 'audit_authentication')
+                ->value('setting_value');
+            if ($auditAuth !== '1') {
+                return;
+            }
+            
+            $eventType = null;
+            $userId = null;
+            $username = null;
+            $status = 'success';
+            $failureReason = null;
+            
+            // Detect login success
+            if ($actionName === 'login' && !$wasAuthenticated && $isAuthenticated) {
+                $eventType = 'login';
+                $userId = $user->getAttribute('user_id');
+                $username = $user->getAttribute('user_name') ?? $user->getUserName();
+            }
+            // Detect logout
+            elseif ($actionName === 'logout' && $wasAuthenticated && !$isAuthenticated) {
+                $eventType = 'logout';
+                $userId = $preUserId;
+                // Get username from DB since session is cleared
+                if ($userId) {
+                    $userRecord = \Illuminate\Support\Facades\DB::table('user')
+                        ->where('id', $userId)
+                        ->first();
+                    $username = $userRecord->username ?? 'unknown';
+                }
+            }
+            // Detect failed login (POST to login, still not authenticated)
+            elseif ($actionName === 'login' && $request->isMethod('POST') && !$isAuthenticated) {
+                $eventType = 'failed_login';
+                $username = $request->getParameter('email'); // AtoM uses email field
+                $status = 'failure';
+                $failureReason = 'Invalid credentials';
+            }
+            
+            if ($eventType) {
+                \Illuminate\Support\Facades\DB::table('ahg_audit_authentication')->insert([
+                    'uuid' => \Illuminate\Support\Str::uuid()->toString(),
+                    'event_type' => $eventType,
+                    'user_id' => $userId,
+                    'username' => $username,
+                    'ip_address' => $request->getRemoteAddress(),
+                    'user_agent' => substr($request->getHttpHeader('User-Agent') ?? '', 0, 500),
+                    'session_id' => session_id() ?: null,
+                    'status' => $status,
+                    'failure_reason' => $failureReason,
+                    'failed_attempts' => 0,
+                    'metadata' => json_encode(['action' => $actionName, 'module' => $moduleName]),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            error_log('AuditTrail Auth Error: ' . $e->getMessage());
+        }
+    }
+
 }

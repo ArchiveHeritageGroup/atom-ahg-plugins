@@ -96,7 +96,7 @@
           <td><small><?php echo $log->ip_address ?? '-' ?></small></td>
           <td class="text-end">
             <div class="btn-group btn-group-sm">
-              <?php if ($log->action === 'update' || $log->action === 'create'): ?>
+              <?php if (($log->action === 'update' || $log->action === 'create') && ($log->old_values || $log->new_values)): ?>
                 <button type="button" class="btn btn-outline-warning" onclick="showAuditCompare(<?php echo $log->id ?>)" title="<?php echo __('Compare Changes') ?>">
                   <i class="fas fa-exchange-alt"></i>
                 </button>
