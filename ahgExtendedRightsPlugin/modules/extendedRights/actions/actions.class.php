@@ -39,7 +39,7 @@ class extendedRightsActions extends sfActions
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')
                   ->where('rights_statement_i18n.culture','=','en');
             })
-            ->where('rights_statement.is_active','=','active')
+            ->where('rights_statement.is_active','=',1)
             ->orderBy('rights_statement.category')->orderBy('rights_statement.sort_order')
             ->select([
                 Capsule::raw('rights_statement.id'),
@@ -56,7 +56,7 @@ class extendedRightsActions extends sfActions
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')
                   ->where('creative_commons_license_i18n.culture','=','en');
             })
-            ->where('creative_commons_license.is_active','=','active')
+            ->where('creative_commons_license.is_active','=',1)
             ->orderBy('creative_commons_license.sort_order')
             ->select([
                 Capsule::raw('creative_commons_license.id'),
@@ -77,7 +77,7 @@ class extendedRightsActions extends sfActions
                 $j->on('tk_label_category_i18n.tk_label_category_id','=','tk_label_category.id')
                   ->where('tk_label_category_i18n.culture','=','en');
             })
-            ->where('tk_label.is_active','=','active')
+            ->where('tk_label.is_active','=',1)
             ->orderBy('tk_label_category.sort_order')->orderBy('tk_label.sort_order')
             ->select([
                 Capsule::raw('tk_label.id'),
@@ -118,17 +118,17 @@ class extendedRightsActions extends sfActions
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function($j) {
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')->where('rights_statement_i18n.culture','=','en');
-            })->where('rights_statement.is_active','=','active')->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
+            })->where('rights_statement.is_active','=',1)->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
 
         $this->ccLicenses = Capsule::table('creative_commons_license')
             ->leftJoin('creative_commons_license_i18n', function($j) {
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')->where('creative_commons_license_i18n.culture','=','en');
-            })->where('creative_commons_license.is_active','=','active')->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
+            })->where('creative_commons_license.is_active','=',1)->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
 
         $this->tkLabels = Capsule::table('tk_label')
             ->leftJoin('tk_label_i18n', function($j) {
                 $j->on('tk_label_i18n.tk_label_id','=','tk_label.id')->where('tk_label_i18n.culture','=','en');
-            })->where('tk_label.is_active','=','active')->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
+            })->where('tk_label.is_active','=',1)->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
         $this->donors = Capsule::table('donor')
             ->join('slug', Capsule::raw('slug.object_id'), '=', Capsule::raw('donor.id'))
             ->leftJoin('actor_i18n', function($j) {
@@ -169,17 +169,17 @@ class extendedRightsActions extends sfActions
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function($j) {
                 $j->on('rights_statement_i18n.rights_statement_id','=','rights_statement.id')->where('rights_statement_i18n.culture','=','en');
-            })->where('rights_statement.is_active','=','active')->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
+            })->where('rights_statement.is_active','=',1)->select([Capsule::raw('rights_statement.id'),Capsule::raw('rights_statement.code'),Capsule::raw('rights_statement_i18n.name')])->get();
 
         $this->ccLicenses = Capsule::table('creative_commons_license')
             ->leftJoin('creative_commons_license_i18n', function($j) {
                 $j->on('creative_commons_license_i18n.creative_commons_license_id','=','creative_commons_license.id')->where('creative_commons_license_i18n.culture','=','en');
-            })->where('creative_commons_license.is_active','=','active')->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
+            })->where('creative_commons_license.is_active','=',1)->select([Capsule::raw('creative_commons_license.id'),Capsule::raw('creative_commons_license.code'),Capsule::raw('creative_commons_license_i18n.name')])->get();
 
         $this->tkLabels = Capsule::table('tk_label')
             ->leftJoin('tk_label_i18n', function($j) {
                 $j->on('tk_label_i18n.tk_label_id','=','tk_label.id')->where('tk_label_i18n.culture','=','en');
-            })->where('tk_label.is_active','=','active')->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
+            })->where('tk_label.is_active','=',1)->select([Capsule::raw('tk_label.id'),Capsule::raw('tk_label.code'),Capsule::raw('tk_label_i18n.name')])->get();
 
         $this->objects = Capsule::table('information_object')
             ->join('slug','slug.object_id','=','information_object.id')
