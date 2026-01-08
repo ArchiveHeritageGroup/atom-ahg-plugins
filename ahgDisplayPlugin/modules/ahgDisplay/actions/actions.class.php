@@ -210,15 +210,30 @@ class ahgDisplayActions extends sfActions
             ->count();
 
         // Sort
-        $sortColumn = match($this->sort) {
-            'identifier' => 'io.identifier',
-            'refcode' => 'io.identifier',
-            'date' => 'io.updated_at',
-            'startdate' => 'io.start_date',
-            'enddate' => 'io.end_date',
-            default => 'i18n.title'
-        };
-        $query->orderBy($sortColumn, $this->sortDir === 'desc' ? 'desc' : 'asc');
+        // Handle sorting
+        $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
+        switch ($this->sort) {
+            case 'identifier':
+            case 'refcode':
+                $query->orderBy('io.identifier', $sortDir);
+                break;
+            case 'date':
+                // Sort by object id as proxy for creation order
+                $query->orderBy('io.id', $sortDir);
+                break;
+            case 'startdate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            case 'enddate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            default:
+                $query->orderBy('i18n.title', $sortDir);
+        }
 
         // Paginate
         $this->objects = $query
@@ -415,15 +430,30 @@ class ahgDisplayActions extends sfActions
             $query->where('doc.object_type', $this->typeFilter);
         }
 
-        $sortColumn = match($this->sort) {
-            'identifier' => 'io.identifier',
-            'refcode' => 'io.identifier',
-            'date' => 'io.updated_at',
-            'startdate' => 'io.start_date',
-            'enddate' => 'io.end_date',
-            default => 'i18n.title'
-        };
-        $query->orderBy($sortColumn, $this->sortDir === 'desc' ? 'desc' : 'asc');
+        // Handle sorting
+        $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
+        switch ($this->sort) {
+            case 'identifier':
+            case 'refcode':
+                $query->orderBy('io.identifier', $sortDir);
+                break;
+            case 'date':
+                // Sort by object id as proxy for creation order
+                $query->orderBy('io.id', $sortDir);
+                break;
+            case 'startdate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            case 'enddate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            default:
+                $query->orderBy('i18n.title', $sortDir);
+        }
 
         $this->objects = $query->limit(500)->get()->toArray();
         $this->total = count($this->objects);
