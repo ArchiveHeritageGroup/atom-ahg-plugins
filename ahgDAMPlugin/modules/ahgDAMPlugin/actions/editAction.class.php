@@ -59,6 +59,7 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 error_log("DAM execute: about to save IPTC, resourceId=" . $this->resource->id);
                 $this->saveIptcMetadataDirectly();
                 $this->saveItemLocation();
+                $this->updateDisplayObjectConfig();
 
                 $this->resource->updateXmlExports();
                 $this->redirect([$this->resource, 'module' => 'informationobject']);

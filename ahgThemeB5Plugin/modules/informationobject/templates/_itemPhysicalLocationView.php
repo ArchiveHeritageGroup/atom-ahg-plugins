@@ -67,109 +67,132 @@ $conditionLabels = [
 
 <?php if (!empty($itemLocation['container'])): ?>
 <!-- Storage Container -->
-<h4 class="h5 mt-3 mb-2 text-muted"><?php echo __('Storage container'); ?></h4>
+<section class="card mb-3">
+  <div class="card-header bg-secondary text-white">
+    <h4 class="mb-0"><i class="fas fa-box me-2"></i><?php echo __('Storage container'); ?></h4>
+  </div>
+  <div class="card-body">
+    <?php
+    $containerLink = '<a href="' . url_for(['module' => 'physicalobject', 'slug' => $itemLocation['container']['slug']]) . '">' . esc_entities($itemLocation['container']['name']) . '</a>';
+    if (!empty($itemLocation['container']['location'])) {
+        $containerLink .= ' <span class="text-muted">(' . esc_entities($itemLocation['container']['location']) . ')</span>';
+    }
+    echo render_show(__('Container'), $containerLink);
+    ?>
 
-<?php 
-$containerLink = '<a href="' . url_for(['module' => 'physicalobject', 'slug' => $itemLocation['container']['slug']]) . '">' . esc_entities($itemLocation['container']['name']) . '</a>';
-if (!empty($itemLocation['container']['location'])) {
-    $containerLink .= ' <span class="text-muted">(' . esc_entities($itemLocation['container']['location']) . ')</span>';
-}
-echo render_show(__('Container'), $containerLink);
-?>
+    <?php if (!empty($containerLocationParts)): ?>
+    <?php echo render_show(__('Container location'), '<i class="fas fa-building me-1 text-primary"></i>' . implode(' &gt; ', $containerLocationParts)); ?>
+    <?php endif; ?>
 
-<?php if (!empty($containerLocationParts)): ?>
-<?php echo render_show(__('Container location'), '<i class="fas fa-building me-1 text-primary"></i>' . implode(' &gt; ', $containerLocationParts)); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['container']['barcode'])): ?>
+    <?php echo render_show(__('Container barcode'), '<code><i class="fas fa-barcode me-1"></i>' . esc_entities($itemLocation['container']['barcode']) . '</code>'); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['container']['barcode'])): ?>
-<?php echo render_show(__('Container barcode'), '<code><i class="fas fa-barcode me-1"></i>' . esc_entities($itemLocation['container']['barcode']) . '</code>'); ?>
-<?php endif; ?>
-
-<?php if (!empty($itemLocation['container']['security_level'])): ?>
-<?php echo render_show(__('Security level'), '<span class="badge bg-danger"><i class="fas fa-lock me-1"></i>' . ucfirst(esc_entities($itemLocation['container']['security_level'])) . '</span>'); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['container']['security_level'])): ?>
+    <?php echo render_show(__('Security level'), '<span class="badge bg-danger"><i class="fas fa-lock me-1"></i>' . ucfirst(esc_entities($itemLocation['container']['security_level'])) . '</span>'); ?>
+    <?php endif; ?>
+  </div>
+</section>
 <?php endif; ?>
 
 <!-- Item Details -->
-<h4 class="h5 mt-3 mb-2 text-muted"><?php echo __('Item details'); ?></h4>
+<?php 
+$hasItemDetails = !empty($itemLocation['barcode']) || !empty($itemLocation['box_number']) || 
+    !empty($itemLocation['folder_number']) || !empty($itemLocation['shelf']) || 
+    !empty($itemLocation['row']) || !empty($itemLocation['position']) || 
+    !empty($itemLocation['item_number']) || !empty($itemLocation['extent_value']);
+?>
+<?php if ($hasItemDetails): ?>
+<section class="card mb-3">
+  <div class="card-header bg-info text-white">
+    <h4 class="mb-0"><i class="fas fa-archive me-2"></i><?php echo __('Item details'); ?></h4>
+  </div>
+  <div class="card-body">
+    <?php if (!empty($itemLocation['barcode'])): ?>
+    <?php echo render_show(__('Item barcode'), '<code><i class="fas fa-barcode me-1"></i>' . esc_entities($itemLocation['barcode']) . '</code>'); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['barcode'])): ?>
-<?php echo render_show(__('Item barcode'), '<code><i class="fas fa-barcode me-1"></i>' . esc_entities($itemLocation['barcode']) . '</code>'); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['box_number'])): ?>
+    <?php echo render_show(__('Box'), esc_entities($itemLocation['box_number'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['box_number'])): ?>
-<?php echo render_show(__('Box'), esc_entities($itemLocation['box_number'])); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['folder_number'])): ?>
+    <?php echo render_show(__('Folder'), esc_entities($itemLocation['folder_number'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['folder_number'])): ?>
-<?php echo render_show(__('Folder'), esc_entities($itemLocation['folder_number'])); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['shelf'])): ?>
+    <?php echo render_show(__('Shelf'), esc_entities($itemLocation['shelf'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['shelf'])): ?>
-<?php echo render_show(__('Shelf'), esc_entities($itemLocation['shelf'])); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['row'])): ?>
+    <?php echo render_show(__('Row'), esc_entities($itemLocation['row'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['row'])): ?>
-<?php echo render_show(__('Row'), esc_entities($itemLocation['row'])); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['position'])): ?>
+    <?php echo render_show(__('Position'), esc_entities($itemLocation['position'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['position'])): ?>
-<?php echo render_show(__('Position'), esc_entities($itemLocation['position'])); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['item_number'])): ?>
+    <?php echo render_show(__('Item number'), esc_entities($itemLocation['item_number'])); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['item_number'])): ?>
-<?php echo render_show(__('Item number'), esc_entities($itemLocation['item_number'])); ?>
-<?php endif; ?>
-
-<?php if (!empty($itemLocation['extent_value'])): ?>
-<?php echo render_show(__('Extent'), esc_entities($itemLocation['extent_value']) . ' ' . esc_entities($itemLocation['extent_unit'] ?? '')); ?>
+    <?php if (!empty($itemLocation['extent_value'])): ?>
+    <?php echo render_show(__('Extent'), esc_entities($itemLocation['extent_value']) . ' ' . esc_entities($itemLocation['extent_unit'] ?? '')); ?>
+    <?php endif; ?>
+  </div>
+</section>
 <?php endif; ?>
 
 <!-- Status & Condition -->
-<h4 class="h5 mt-3 mb-2 text-muted"><?php echo __('Status & condition'); ?></h4>
+<section class="card mb-3">
+  <div class="card-header bg-warning text-dark">
+    <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Status & condition'); ?></h4>
+  </div>
+  <div class="card-body">
+    <?php
+    $status = $itemLocation['access_status'] ?? 'available';
+    $badgeClass = match($status) {
+        'available' => 'bg-success',
+        'in_use' => 'bg-warning text-dark',
+        'restricted' => 'bg-danger',
+        'offsite' => 'bg-info',
+        'missing' => 'bg-dark',
+        default => 'bg-secondary'
+    };
+    echo render_show(__('Access status'), '<span class="badge ' . $badgeClass . '">' . ($accessLabels[$status] ?? ucfirst($status)) . '</span>');
+    ?>
 
-<?php
-$status = $itemLocation['access_status'] ?? 'available';
-$badgeClass = match($status) {
-    'available' => 'bg-success',
-    'in_use' => 'bg-warning text-dark',
-    'restricted' => 'bg-danger',
-    'offsite' => 'bg-info',
-    'missing' => 'bg-dark',
-    default => 'bg-secondary'
-};
-echo render_show(__('Access status'), '<span class="badge ' . $badgeClass . '">' . ($accessLabels[$status] ?? ucfirst($status)) . '</span>');
-?>
+    <?php if (!empty($itemLocation['condition_status'])): ?>
+    <?php
+    $condition = $itemLocation['condition_status'];
+    $condBadgeClass = match($condition) {
+        'excellent' => 'bg-success',
+        'good' => 'bg-primary',
+        'fair' => 'bg-warning text-dark',
+        'poor' => 'bg-orange',
+        'critical' => 'bg-danger',
+        default => 'bg-secondary'
+    };
+    echo render_show(__('Condition'), '<span class="badge ' . $condBadgeClass . '">' . ($conditionLabels[$condition] ?? ucfirst($condition)) . '</span>');
+    ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['condition_status'])): ?>
-<?php
-$condition = $itemLocation['condition_status'];
-$condBadgeClass = match($condition) {
-    'excellent' => 'bg-success',
-    'good' => 'bg-primary',
-    'fair' => 'bg-warning text-dark',
-    'poor' => 'bg-orange',
-    'critical' => 'bg-danger',
-    default => 'bg-secondary'
-};
-echo render_show(__('Condition'), '<span class="badge ' . $condBadgeClass . '">' . ($conditionLabels[$condition] ?? ucfirst($condition)) . '</span>');
-?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['condition_notes'])): ?>
+    <?php echo render_show(__('Condition notes'), nl2br(esc_entities($itemLocation['condition_notes']))); ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['condition_notes'])): ?>
-<?php echo render_show(__('Condition notes'), nl2br(esc_entities($itemLocation['condition_notes']))); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['last_accessed_at'])): ?>
+    <?php
+    $accessedText = date('Y-m-d H:i', strtotime($itemLocation['last_accessed_at']));
+    if (!empty($itemLocation['accessed_by'])) {
+        $accessedText .= ' <span class="text-muted">(' . esc_entities($itemLocation['accessed_by']) . ')</span>';
+    }
+    echo render_show(__('Last accessed'), $accessedText);
+    ?>
+    <?php endif; ?>
 
-<?php if (!empty($itemLocation['last_accessed_at'])): ?>
-<?php 
-$accessedText = date('Y-m-d H:i', strtotime($itemLocation['last_accessed_at']));
-if (!empty($itemLocation['accessed_by'])) {
-    $accessedText .= ' <span class="text-muted">(' . esc_entities($itemLocation['accessed_by']) . ')</span>';
-}
-echo render_show(__('Last accessed'), $accessedText);
-?>
-<?php endif; ?>
-
-<?php if (!empty($itemLocation['notes'])): ?>
-<?php echo render_show(__('Notes'), nl2br(esc_entities($itemLocation['notes']))); ?>
-<?php endif; ?>
+    <?php if (!empty($itemLocation['notes'])): ?>
+    <?php echo render_show(__('Notes'), nl2br(esc_entities($itemLocation['notes']))); ?>
+    <?php endif; ?>
+  </div>
+</section>
