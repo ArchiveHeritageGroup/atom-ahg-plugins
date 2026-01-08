@@ -137,6 +137,7 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
     protected function saveIptcMetadataDirectly()
     {
         $request = $this->getRequest();
+        error_log("DAM saveIptc: resourceId=" . $this->resource->id);
         try {
             $objectId = $this->resource->id;
             if (!$objectId) {
@@ -174,12 +175,12 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 'source' => $request->getParameter('iptc_source'),
                 'copyright_notice' => $request->getParameter('iptc_copyright_notice'),
                 'rights_usage_terms' => $request->getParameter('iptc_rights_usage_terms'),
-                'license_type' => $request->getParameter('iptc_license_type'),
+                'license_type' => $request->getParameter('iptc_license_type') ?: null,
                 'license_url' => $request->getParameter('iptc_license_url'),
                 'license_expiry' => $request->getParameter('iptc_license_expiry') ?: null,
-                'model_release_status' => $request->getParameter('iptc_model_release_status'),
+                'model_release_status' => $request->getParameter('iptc_model_release_status') ?: null,
                 'model_release_id' => $request->getParameter('iptc_model_release_id'),
-                'property_release_status' => $request->getParameter('iptc_property_release_status'),
+                'property_release_status' => $request->getParameter('iptc_property_release_status') ?: null,
                 'property_release_id' => $request->getParameter('iptc_property_release_id'),
                 'artwork_title' => $request->getParameter('iptc_artwork_title'),
                 'artwork_creator' => $request->getParameter('iptc_artwork_creator'),
