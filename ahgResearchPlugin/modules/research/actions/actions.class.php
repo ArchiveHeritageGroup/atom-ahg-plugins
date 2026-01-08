@@ -218,7 +218,7 @@ class researchActions extends sfActions
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('do');
             $adminId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'confirm') {
@@ -309,7 +309,7 @@ class researchActions extends sfActions
         
         // Handle collection actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('do');
             if ($action === 'create_collection') {
                 $name = trim($request->getParameter('collection_name'));
                 $description = trim($request->getParameter('collection_description'));

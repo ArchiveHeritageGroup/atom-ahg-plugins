@@ -73,6 +73,9 @@
                         </form>
                         
                         <?php echo $adapter->renderFacets($results['aggregations'] ?? []); ?>
+
+                        <!-- Advanced Search Enhancements -->
+                        <?php include_partial("search/advancedSearchEnhancements"); ?>
                     </div>
                 </div>
             </div>

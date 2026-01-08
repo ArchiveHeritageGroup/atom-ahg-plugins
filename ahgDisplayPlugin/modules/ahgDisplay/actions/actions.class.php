@@ -57,6 +57,16 @@ class ahgDisplayActions extends sfActions
         $this->genreFilter = $request->getParameter('genre');
         $this->levelFilter = $request->getParameter('level');
         $this->mediaFilter = $request->getParameter('media');
+        // Text search filters
+        $this->queryFilter = $request->getParameter("query");
+        $this->titleFilter = $request->getParameter("title");
+        $this->identifierFilter = $request->getParameter("identifier");
+        $this->referenceCodeFilter = $request->getParameter("referenceCode");
+        $this->scopeAndContentFilter = $request->getParameter("scopeAndContent");
+        $this->creatorSearchFilter = $request->getParameter("creatorSearch");
+        $this->subjectSearchFilter = $request->getParameter("subjectSearch");
+        $this->placeSearchFilter = $request->getParameter("placeSearch");
+        $this->genreSearchFilter = $request->getParameter("genreSearch");
         $this->repoFilter = $request->getParameter('repo');
 
         // GLAM Type facet
@@ -387,7 +397,283 @@ class ahgDisplayActions extends sfActions
         }
 
         if ($this->repoFilter) {
+
+        // Text search filters
+        if ($this->queryFilter) {
+            $q = "%".$this->queryFilter."%";
+            $query->where(function($qb) use ($q) {
+                $qb->whereExists(function($sub) use ($q) {
+                    $sub->select(DB::raw(1))
+                        ->from("information_object_i18n as ioi")
+                        ->whereRaw("ioi.id = io.id")
+                        ->where(function($w) use ($q) {
+                            $w->where("ioi.title", "like", $q)
+                              ->orWhere("ioi.scope_and_content", "like", $q);
+                        });
+                })->orWhere("io.identifier", "like", $q);
+            });
+        }
+
+        if ($this->titleFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
+            });
+        }
+
+        if ($this->identifierFilter) {
+            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
+        }
+
+        if ($this->scopeAndContentFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
+            });
+        }
+
+        if ($this->creatorSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("event as e")
+                    ->join("actor_i18n as ai", function($j) {
+                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
+                    })
+                    ->whereRaw("e.object_id = io.id")
+                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
+            });
+        }
+
+        if ($this->subjectSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 35)
+                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
+            });
+        }
+
+        if ($this->placeSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 42)
+                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
+            });
+        }
+
+        if ($this->genreSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 78)
+                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
+        }
             $query->where('io.repository_id', $this->repoFilter);
+
+        // Text search filters
+        if ($this->queryFilter) {
+            $q = "%".$this->queryFilter."%";
+            $query->where(function($qb) use ($q) {
+                $qb->whereExists(function($sub) use ($q) {
+                    $sub->select(DB::raw(1))
+                        ->from("information_object_i18n as ioi")
+                        ->whereRaw("ioi.id = io.id")
+                        ->where(function($w) use ($q) {
+                            $w->where("ioi.title", "like", $q)
+                              ->orWhere("ioi.scope_and_content", "like", $q);
+                        });
+                })->orWhere("io.identifier", "like", $q);
+            });
+        }
+
+        if ($this->titleFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
+            });
+        }
+
+        if ($this->identifierFilter) {
+            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
+        }
+
+        if ($this->scopeAndContentFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
+            });
+        }
+
+        if ($this->creatorSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("event as e")
+                    ->join("actor_i18n as ai", function($j) {
+                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
+                    })
+                    ->whereRaw("e.object_id = io.id")
+                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
+            });
+        }
+
+        if ($this->subjectSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 35)
+                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
+            });
+        }
+
+        if ($this->placeSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 42)
+                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
+            });
+        }
+
+        if ($this->genreSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 78)
+                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
+        }
+        }
+
+        // Text search filters
+        if ($this->queryFilter) {
+            $q = "%".$this->queryFilter."%";
+            $query->where(function($qb) use ($q) {
+                $qb->whereExists(function($sub) use ($q) {
+                    $sub->select(DB::raw(1))
+                        ->from("information_object_i18n as ioi")
+                        ->whereRaw("ioi.id = io.id")
+                        ->where(function($w) use ($q) {
+                            $w->where("ioi.title", "like", $q)
+                              ->orWhere("ioi.scope_and_content", "like", $q);
+                        });
+                })->orWhere("io.identifier", "like", $q);
+            });
+        }
+
+        if ($this->titleFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
+            });
+        }
+
+        if ($this->identifierFilter) {
+            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
+        }
+
+        if ($this->scopeAndContentFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
+            });
+        }
+
+        if ($this->creatorSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("event as e")
+                    ->join("actor_i18n as ai", function($j) {
+                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
+                    })
+                    ->whereRaw("e.object_id = io.id")
+                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
+            });
+        }
+
+        if ($this->subjectSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 35)
+                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
+            });
+        }
+
+        if ($this->placeSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 42)
+                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
+            });
+        }
+
+        if ($this->genreSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 78)
+                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
         }
     }
 

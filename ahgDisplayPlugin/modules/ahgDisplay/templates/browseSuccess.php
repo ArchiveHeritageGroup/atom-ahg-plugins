@@ -366,6 +366,8 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
+  <?php include_partial("ahgDisplaySearch/glamAdvancedSearchEnhancements"); ?>
+  <?php include_partial("ahgDisplaySearch/glamAdvancedSearch"); ?>
   <!-- Toolbar -->
   <div class="d-flex flex-wrap gap-2 mb-3">
     <a href="<?php echo url_for(array_merge(['module' => 'ahgDisplay', 'action' => 'print'], array_filter($fp))) ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-print"></i> <?php echo __('Print'); ?></a>

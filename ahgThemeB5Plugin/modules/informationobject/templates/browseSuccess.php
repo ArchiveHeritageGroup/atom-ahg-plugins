@@ -247,6 +247,7 @@ if ($sf_request->hasParameter('displayMode')) {
   </div>
 
 <?php end_slot(); ?>
+<?php error_log("BROWSE DEBUG: Content slot executing"); ?>
 
 <?php slot('content'); ?>
 
