@@ -362,3 +362,10 @@ label_index:
   url: /label/:slug
   param: { module: label, action: index }
 
+
+# =============================================================================
+# Plugin Protection API
+# =============================================================================
+api_plugin_protection:
+  url: /api/plugin-protection
+  param: { module: api, action: pluginProtection }

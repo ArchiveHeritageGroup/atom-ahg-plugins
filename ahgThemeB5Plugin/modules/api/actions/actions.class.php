@@ -5,16 +5,16 @@ class apiActions extends sfActions
     public function executeSearchInformationObjects(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
-        
+
         $query = trim($request->getParameter('q', ''));
         $limit = min((int)$request->getParameter('limit', 20), 50);
-        
+
         if (strlen($query) < 2) {
             return $this->renderText(json_encode(['results' => [], 'error' => 'Query too short']));
         }
-        
+
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        
+
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {
                 $join->on('information_object.id', '=', 'information_object_i18n.id')
@@ -46,26 +46,26 @@ class apiActions extends sfActions
             ->orderBy('information_object_i18n.title')
             ->limit($limit)
             ->get();
-        
+
         return $this->renderText(json_encode([
             'results' => $results->toArray(),
             'count' => $results->count()
         ]));
     }
-    
+
     public function executeAutocompleteGlam(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
-        
+
         $query = trim($request->getParameter('q', ''));
         $limit = min((int)$request->getParameter('limit', 10), 20);
-        
+
         if (strlen($query) < 2) {
             return $this->renderText(json_encode([]));
         }
-        
+
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        
+
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {
                 $join->on('information_object.id', '=', 'information_object_i18n.id')
@@ -91,7 +91,7 @@ class apiActions extends sfActions
             ->orderBy('information_object_i18n.title')
             ->limit($limit)
             ->get();
-        
+
         // Format for autocomplete
         $formatted = [];
         foreach ($results as $row) {
@@ -104,7 +104,46 @@ class apiActions extends sfActions
                 'level' => $row->level_of_description
             ];
         }
-        
+
         return $this->renderText(json_encode($formatted));
+    }
+
+    /**
+     * Plugin protection status API.
+     *
+     * Returns protection info for all plugins (record counts, lock status).
+     */
+    public function executePluginProtection(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        // Check user is authenticated
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Unauthorized']));
+        }
+
+        // Check admin permission
+        if (!$this->getUser()->hasCredential('administrator')) {
+            $this->getResponse()->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Forbidden']));
+        }
+
+        $protectionStatus = [];
+
+        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Extensions/ExtensionProtection.php';
+
+        if (file_exists($frameworkPath)) {
+            require_once $frameworkPath;
+            $protection = new \AtomFramework\Extensions\ExtensionProtection();
+            $protectionStatus = $protection->getAllProtectionStatus();
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'plugins' => $protectionStatus,
+        ]));
     }
 }
