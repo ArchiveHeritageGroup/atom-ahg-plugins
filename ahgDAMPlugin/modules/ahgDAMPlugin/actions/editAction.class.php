@@ -68,6 +68,29 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
         QubitDescription::addAssets($this->response);
     }
 
+    protected function updateDisplayObjectConfig()
+    {
+        if (!$this->resource->id) return;
+        
+        $existing = \Illuminate\Database\Capsule\Manager::table('display_object_config')
+            ->where('object_id', $this->resource->id)
+            ->first();
+        
+        if ($existing) {
+            \Illuminate\Database\Capsule\Manager::table('display_object_config')
+                ->where('object_id', $this->resource->id)
+                ->update(['object_type' => 'dam', 'updated_at' => date('Y-m-d H:i:s')]);
+        } else {
+            \Illuminate\Database\Capsule\Manager::table('display_object_config')
+                ->insert([
+                    'object_id' => $this->resource->id,
+                    'object_type' => 'dam',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+    }
+
     protected function saveItemLocation()
     {
         if (!$this->resource->id) return;

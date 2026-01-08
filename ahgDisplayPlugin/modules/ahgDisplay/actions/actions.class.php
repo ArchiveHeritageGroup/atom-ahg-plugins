@@ -213,6 +213,9 @@ class ahgDisplayActions extends sfActions
         $sortColumn = match($this->sort) {
             'identifier' => 'io.identifier',
             'refcode' => 'io.identifier',
+            'date' => 'io.updated_at',
+            'startdate' => 'io.start_date',
+            'enddate' => 'io.end_date',
             default => 'i18n.title'
         };
         $query->orderBy($sortColumn, $this->sortDir === 'desc' ? 'desc' : 'asc');
@@ -415,6 +418,9 @@ class ahgDisplayActions extends sfActions
         $sortColumn = match($this->sort) {
             'identifier' => 'io.identifier',
             'refcode' => 'io.identifier',
+            'date' => 'io.updated_at',
+            'startdate' => 'io.start_date',
+            'enddate' => 'io.end_date',
             default => 'i18n.title'
         };
         $query->orderBy($sortColumn, $this->sortDir === 'desc' ? 'desc' : 'asc');
@@ -470,6 +476,9 @@ class ahgDisplayActions extends sfActions
         $sortColumn = match($sort) {
             'identifier' => 'io.identifier',
             'refcode' => 'io.identifier',
+            'date' => 'io.updated_at',
+            'startdate' => 'io.start_date',
+            'enddate' => 'io.end_date',
             default => 'i18n.title'
         };
         $query->orderBy($sortColumn, $sortDir === 'desc' ? 'desc' : 'asc');
