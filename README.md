@@ -386,7 +386,7 @@ URL: https://psis.theahg.co.za
 - [CLI Reference](docs/CLI_REFERENCE.md)
 - [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
 - [Media Features Guide](docs/MEDIA_FEATURES.md)
-- [Library Plugin Explained](docs/AtoM AHG Framework - Architecture Diagrams.md)
+- [Library Plugin Explained](docs/AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
 
 ---
 
