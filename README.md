@@ -17,7 +17,7 @@
 
 ## 📊 Overview
 
-The AtoM AHG Framework extends Access to Memory 2.8 onwards with Laravel Query Builder integration while maintaining full Symfony compatibility. This catalog provides a modular plugin ecosystem designed for GLAM institutions (Galleries, Libraries, Archives, Museums) with comprehensive support for South African and international legislative compliance and international standards.
+The AtoM AHG Framework extends Access to Memory 2.8+ onwards with Laravel Query Builder integration while maintaining full Symfony compatibility. This catalog provides a modular plugin ecosystem designed for GLAM institutions (Galleries, Libraries, Archives, Museums) with comprehensive support for South African and international legislative compliance and international standards.
 
 ### Category Summary
 
