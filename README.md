@@ -2,9 +2,9 @@
 
 # 🏛️ AtoM Extensions Catalog
 
-**A curated collection of extensions for [Access to Memory](https://www.accesstomemory.org/) 2.10**
+**A curated collection of extensions for [Access to Memory](https://www.accesstomemory.org/) 2.8 to 2.10**
 
-[![AtoM Version -2.8 onwards](https://img.shields.io/badge/AtoM-2.8.x-blue.svg)](https://www.accesstomemory.org/)
+[![AtoM Version](https://img.shields.io/badge/AtoM-2.8.x-blue.svg)](https://www.accesstomemory.org/)
 [![PHP Version](https://img.shields.io/badge/PHP-8.3-purple.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
 [![Extensions](https://img.shields.io/badge/Extensions-18+-orange.svg)](#available-extensions)
