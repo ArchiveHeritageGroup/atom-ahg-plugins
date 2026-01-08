@@ -28,9 +28,34 @@
     </div>
   <?php } ?>
 
-  <?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { ?>
-    <?php echo get_component('digitalobject', 'show', ['link' => $digitalObjectLink, 'resource' => $resource->digitalObjectsRelatedByobjectId[0], 'usageType' => QubitTerm::REFERENCE_ID]); ?>
-  <?php } ?>
+  <!-- Digital Object Display -->
+  <?php if (isset($digitalObject) && $digitalObject): ?>
+  <section class="card mb-3">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Digital Object'); ?></h5>
+    </div>
+    <div class="card-body text-center">
+      <?php
+        $mimeType = $digitalObject->mimeType ?? '';
+        $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
+        $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
+        $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
+        $refPath = $refObj ? $refObj->getFullPath() : null;
+        $masterPath = $digitalObject->getFullPath();
+        $displayPath = $refPath ?: $thumbPath ?: $masterPath;
+      ?>
+      <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
+        <a href="<?php echo $masterPath; ?>" target="_blank">
+          <img src="<?php echo $displayPath; ?>" alt="<?php echo render_title($resource); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
+        </a>
+      <?php else: ?>
+        <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
+          <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
+        </a>
+      <?php endif; ?>
+    </div>
+  </section>
+  <?php endif; ?>
 
   <!-- Basic Identification -->
   <section class="card mb-3">
