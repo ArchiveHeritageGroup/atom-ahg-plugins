@@ -19,7 +19,7 @@
   <?php if (isset($sf_request->getAttribute('sf_route')->resource)) { ?>
     <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'informationobject', 'action' => 'edit']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
   <?php } else { ?>
-    <?php echo $form->renderFormTag(url_for(['module' => 'informationobject', 'action' => 'add']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
+    <?php echo $form->renderFormTag(url_for(['module' => 'ahgDAMPlugin', 'action' => 'add']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
   <?php } ?>
 
     <?php echo $form->renderHiddenFields(); ?>
