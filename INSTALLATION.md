@@ -126,7 +126,7 @@ php bin/atom migrate status
 ## NGINX 443 Sample
 This example listens for connections on port 443 using https with encryption.
 
-##
+**##
 # Access to Memory (AtoM) – GENERIC vhost WITH IIIF SUPPORT
 # Updated: 2025-01-08 - Added bot protection
 ##
