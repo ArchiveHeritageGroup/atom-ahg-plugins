@@ -252,6 +252,16 @@ $statusClasses = [
                     <?php if ($activity->owner): ?>
                     <p class="mb-2"><strong><?php echo __('Owner'); ?>:</strong> <?php echo esc_entities($activity->owner); ?></p>
                     <?php endif; ?>
+                    <?php if ($activity->department): ?>
+                    <p class="mb-2"><strong><?php echo __('Department'); ?>:</strong> <?php echo esc_entities($activity->department); ?></p>
+                    <?php endif; ?>
+                    <?php if ($activity->assigned_officer_id): ?>
+                    <?php 
+                    $assignedOfficer = \Illuminate\Database\Capsule\Manager::table('privacy_officer')->where('id', $activity->assigned_officer_id)->first();
+                    if ($assignedOfficer): ?>
+                    <p class="mb-2"><strong><?php echo __('Assigned Officer'); ?>:</strong> <?php echo esc_entities($assignedOfficer->name); ?></p>
+                    <?php endif; ?>
+                    <?php endif; ?>
                     <p class="mb-2"><strong><?php echo __('Created'); ?>:</strong> <?php echo $activity->created_at; ?></p>
                     <?php if ($activity->next_review_date): ?>
                     <p class="mb-0"><strong><?php echo __('Next Review'); ?>:</strong> <?php echo $activity->next_review_date; ?></p>

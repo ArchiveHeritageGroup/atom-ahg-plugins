@@ -146,6 +146,15 @@
                             <input type="text" name="responsible_person" class="form-control" value="<?php echo esc_specialchars($activity->owner ?? ''); ?>">
                         </div>
                         <div class="mb-3">
+                            <label class="form-label"><?php echo __('Assigned Privacy Officer'); ?></label>
+                            <select name="assigned_officer_id" class="form-select">
+                                <option value=""><?php echo __('-- Select Officer --'); ?></option>
+                                <?php foreach ($officers ?? [] as $officer): ?>
+                                <option value="<?php echo $officer->id; ?>" <?php echo ($activity->assigned_officer_id ?? '') == $officer->id ? 'selected' : ''; ?>><?php echo esc_specialchars($officer->name); ?> (<?php echo $officer->jurisdiction; ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label"><?php echo __('Next Review Date'); ?></label>
                             <input type="date" name="next_review_date" class="form-control">
                         </div>

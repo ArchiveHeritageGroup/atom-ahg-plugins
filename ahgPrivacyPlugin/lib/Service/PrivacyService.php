@@ -980,6 +980,8 @@ class PrivacyService
             'dpia_completed' => $data['dpia_completed'] ?? 0,
             'dpia_date' => (!empty($data['dpia_date'])) ? $data['dpia_date'] : null,
             'owner' => $data['responsible_person'] ?? null,
+            'department' => $data['department'] ?? null,
+            'assigned_officer_id' => !empty($data['assigned_officer_id']) ? (int)$data['assigned_officer_id'] : null,
             
             'status' => $data['status'] ?? 'draft',
             'next_review_date' => (!empty($data['next_review_date'])) ? $data['next_review_date'] : null,
@@ -1253,6 +1255,30 @@ class PrivacyService
             'passport' => 'Passport',
             'drivers_license' => 'Driver\'s License',
             'other' => 'Other'
+        ];
+    }
+
+    public static function getDsarStatuses(): array
+    {
+        return [
+            'received' => 'Received',
+            'verified' => 'Verified',
+            'in_progress' => 'In Progress',
+            'pending_info' => 'Pending Information',
+            'completed' => 'Completed',
+            'rejected' => 'Rejected',
+            'withdrawn' => 'Withdrawn'
+        ];
+    }
+
+    public static function getDsarOutcomes(): array
+    {
+        return [
+            '' => '-- Select Outcome --',
+            'granted' => 'Granted',
+            'partially_granted' => 'Partially Granted',
+            'refused' => 'Refused',
+            'not_applicable' => 'Not Applicable'
         ];
     }
 

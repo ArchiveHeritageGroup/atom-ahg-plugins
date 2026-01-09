@@ -52,6 +52,19 @@
                                 <input type="date" name="received_date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><?php echo __('Assigned To'); ?></label>
+                                <select name="assigned_to" class="form-select">
+                                    <option value=""><?php echo __('-- Unassigned --'); ?></option>
+                                    <?php 
+                                    $users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+                                    foreach ($users as $user): ?>
+                                    <option value="<?php echo $user->id; ?>"><?php echo esc_specialchars($user->username); ?> (<?php echo esc_specialchars($user->email); ?>)</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

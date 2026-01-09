@@ -88,12 +88,43 @@ class privacyAdminActions extends sfActions
         $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->idTypes = \ahgPrivacyPlugin\Service\PrivacyService::getIdTypes();
         $this->defaultJurisdiction = $defaultJurisdiction;
+        $this->officers = $this->getService()->getOfficers();
 
         if ($request->isMethod('post')) {
             $service = $this->getService();
             $id = $service->createDsar($request->getPostParameters(), $this->getUserId());
             $this->getUser()->setFlash('success', 'DSAR created successfully');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $id]);
+        }
+    }
+
+    public function executeDsarEdit(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->dsar = $service->getDsar($request->getParameter('id'));
+        
+        if (!$this->dsar) {
+            $this->forward404();
+        }
+        
+        // Get i18n data
+        $this->dsarI18n = \Illuminate\Database\Capsule\Manager::table('privacy_dsar_i18n')
+            ->where('id', $this->dsar->id)
+            ->where('culture', 'en')
+            ->first();
+        
+        $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($this->dsar->jurisdiction ?? 'popia');
+        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $this->idTypes = \ahgPrivacyPlugin\Service\PrivacyService::getIdTypes();
+        $this->statusOptions = \ahgPrivacyPlugin\Service\PrivacyService::getDsarStatuses();
+        $this->outcomeOptions = \ahgPrivacyPlugin\Service\PrivacyService::getDsarOutcomes();
+        $this->officers = $service->getOfficers();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+        
+        if ($request->isMethod('post')) {
+            $service->updateDsar($request->getParameter('id'), $request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'DSAR updated successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $request->getParameter('id')]);
         }
     }
 
@@ -214,6 +245,7 @@ class privacyAdminActions extends sfActions
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases($defaultJurisdiction);
         $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->defaultJurisdiction = $defaultJurisdiction;
+        $this->officers = $this->getService()->getOfficers();
 
         if ($request->isMethod('post')) {
             $service = $this->getService();
@@ -235,6 +267,7 @@ class privacyAdminActions extends sfActions
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases(
             $this->activity->jurisdiction ?? 'popia'
         );
+        $this->officers = $this->getService()->getOfficers();
         $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
 
         if ($request->isMethod('post')) {

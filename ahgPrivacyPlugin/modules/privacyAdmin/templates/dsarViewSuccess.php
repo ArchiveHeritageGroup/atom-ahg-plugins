@@ -25,6 +25,9 @@
             <?php if ($isOverdue): ?>
             <span class="badge bg-danger fs-6 ms-1"><i class="fas fa-exclamation-triangle"></i> <?php echo __('Overdue'); ?></span>
             <?php endif; ?>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'dsarEdit', 'id' => $dsar->id]); ?>" class="btn btn-primary ms-3">
+                <i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?>
+            </a>
         </div>
     </div>
 
