@@ -54,7 +54,9 @@ Cantaloupe provides deep zoom capability for high-resolution images.
 4. Copy `cantaloupe.properties.sample` to `cantaloupe.properties`
 
 systemctl daemon-reload
+
 systemctl enable cantaloupe
+
 systemctl start cantaloupe
 
 curl -s http://localhost:8182/iiif/2
@@ -113,6 +115,12 @@ Fuseki provides SPARQL queries for Records in Contexts (RiC) ontology support.
 | `curl http://127.0.0.1:3030/$/ping` | Check if Fuseki is responding |
 | `docker logs fuseki --tail 30` | View container logs |
 | `docker restart fuseki` | Restart if unresponsive |
+
+docker run -d --name fuseki -p 3030:3030 -v /opt/fuseki-data:/fuseki 
+
+stain/jena-fuseki
+
+curl -s http://127.0.0.1:3030/$/ping
 
 ### SPARQL Endpoint
 
