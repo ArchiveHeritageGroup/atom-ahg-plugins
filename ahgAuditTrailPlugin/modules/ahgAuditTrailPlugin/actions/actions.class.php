@@ -223,22 +223,22 @@ class ahgAuditTrailPluginActions extends sfActions
             $settings = [
                 'audit_enabled' => $request->getParameter('audit_enabled', '0'),
                 'audit_views' => $request->getParameter('audit_views', '0'),
-                'audit_creates' => $request->getParameter('audit_creates', '1'),
-                'audit_updates' => $request->getParameter('audit_updates', '1'),
-                'audit_deletes' => $request->getParameter('audit_deletes', '1'),
-                'audit_authentication' => $request->getParameter('audit_authentication', '1'),
-                'audit_failed_logins' => $request->getParameter('audit_failed_logins', '1'),
-                'audit_imports' => $request->getParameter('audit_imports', '1'),
-                'audit_exports' => $request->getParameter('audit_exports', '1'),
-                'audit_downloads' => $request->getParameter('audit_downloads', '1'),
-                'audit_sensitive_access' => $request->getParameter('audit_sensitive_access', '1'),
-                'audit_permission_changes' => $request->getParameter('audit_permission_changes', '1'),
+                'audit_creates' => $request->getParameter('audit_creates', '0'),
+                'audit_updates' => $request->getParameter('audit_updates', '0'),
+                'audit_deletes' => $request->getParameter('audit_deletes', '0'),
+                'audit_authentication' => $request->getParameter('audit_authentication', '0'),
+                'audit_failed_logins' => $request->getParameter('audit_failed_logins', '0'),
+                'audit_imports' => $request->getParameter('audit_imports', '0'),
+                'audit_exports' => $request->getParameter('audit_exports', '0'),
+                'audit_downloads' => $request->getParameter('audit_downloads', '0'),
+                'audit_sensitive_access' => $request->getParameter('audit_sensitive_access', '0'),
+                'audit_permission_changes' => $request->getParameter('audit_permission_changes', '0'),
                 'audit_api_requests' => $request->getParameter('audit_api_requests', '0'),
                 'audit_searches' => $request->getParameter('audit_searches', '0'),
                 'audit_ip_anonymize' => $request->getParameter('audit_ip_anonymize', '0'),
             ];
-            foreach ($settings as $key) {
-                $settingsRepo->set($key, (bool) $request->getParameter($key, 0), 'boolean');
+            foreach ($settings as $key => $value) {
+                $settingsRepo->set($key, (bool) $value, 'boolean');
             }
             $this->getUser()->setFlash('notice', 'Audit settings updated successfully');
             $this->redirect(['module' => 'ahgAuditTrailPlugin', 'action' => 'settings']);

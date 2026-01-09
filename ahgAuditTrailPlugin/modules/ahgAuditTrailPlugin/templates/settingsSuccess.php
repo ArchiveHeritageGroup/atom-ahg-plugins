@@ -66,7 +66,7 @@
   </section>
 
   <div class="d-flex justify-content-between">
-    <a href="<?php echo url_for(['module' => 'ahgAuditTrailPlugin', 'action' => 'browse']) ?>" class="btn btn-secondary"><?php echo __('Cancel') ?></a>
+    <a href="<?php echo url_for('admin/ahg-settings') ?>" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings') ?></a>
     <button type="submit" class="btn btn-primary"><?php echo __('Save Settings') ?></button>
   </div>
 </form>

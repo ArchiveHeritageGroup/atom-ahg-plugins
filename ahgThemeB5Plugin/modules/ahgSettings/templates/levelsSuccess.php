@@ -216,6 +216,13 @@
   </div>
 </div>
 
+<hr>
+<div class="d-flex justify-content-start">
+    <a href="<?php echo url_for('admin/ahg-settings'); ?>" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings'); ?>
+    </a>
+</div>
+
 <?php
 function getSectorIcon($sector) {
     return match($sector) {
