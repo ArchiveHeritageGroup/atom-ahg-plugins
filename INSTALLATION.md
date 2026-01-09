@@ -1,1048 +1,308 @@
-# Installation Guide
-
-Complete guide for installing the AtoM Extension Framework and extensions.
-
 ---
 
-## Prerequisites
+## Optional Software Dependencies
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| AtoM | 2.8.0 | 2.10.1+ |
-| PHP | 8.1 | 8.3 |
-| MySQL | 8.0 | 8.0+ |
-| Composer | 2.x | Latest |
+The AHG Framework provides enhanced functionality when these tools are installed:
 
----
+### Media Processing
 
-## Install Framework
+| Tool | Install Command | Purpose |
+|------|-----------------|---------|
+| **FFmpeg** | `apt install ffmpeg` | Audio/video transcoding, streaming legacy formats |
+| **FFprobe** | (included with FFmpeg) | Media metadata extraction (duration, bitrate, codec) |
+| **ImageMagick** | `apt install imagemagick` | Image processing, TIFF conversion, placeholder generation |
+| **Ghostscript** | `apt install ghostscript` | PDF/A generation for archival compliance |
+| **exiftool** | `apt install libimage-exiftool-perl` | EXIF/IPTC/XMP metadata extraction from images |
+| **pdfinfo** | `apt install poppler-utils` | PDF metadata extraction (title, author, pages) |
 
-The `atom-framework` is **required** for all extensions.
+### 3D Thumbnail Generation
 
-### Step 1: Clone Framework
+| Tool | Install Command | Purpose |
+|------|-----------------|---------|
+| **Blender** | `snap install blender --classic` | 3D model rendering for GLB/OBJ/STL/FBX/PLY/DAE |
 ```bash
-cd /usr/share/nginx/atom
-git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
+# Install Blender via snap (recommended - latest version)
+snap install blender --classic
+
+# Verify installation
+/snap/bin/blender --version
 ```
 
-### Step 2: Install Dependencies
+### Speech-to-Text Transcription
+
+| Tool | Install Command | Purpose |
+|------|-----------------|---------|
+| **OpenAI Whisper** | `pip install openai-whisper` | Speech-to-text for 90+ languages |
 ```bash
-cd atom-framework
-composer install --no-dev
-```
+# Install Whisper
+pip install openai-whisper
 
-### Step 3: Run Framework Installer
-```bash
-php bin/atom framework:install
-```
+# Verify installation
+whisper --help
 
-This will:
-- ✅ Create all required database tables
-- ✅ Run pending migrations
-- ✅ Configure default settings
-
-### Step 4: Verify
-```bash
-php bin/atom extension:list
-php bin/atom migrate status
-```
-
----
-
-## Install Extensions
-
-### Discover Available Extensions
-```bash
-php bin/atom extension:discover
-```
-
-### Install from Local or GitHub
-```bash
-# Install by machine name
-php bin/atom extension:install arAHGThemeB5Plugin
-
-# Enable the extension
-php bin/atom extension:enable arAHGThemeB5Plugin
-
-# Clear Symfony cache
-php symfony cc
-```
-
-### Install Multiple Extensions
-```bash
-# Theme + GLAM sectors
-php bin/atom extension:install arAHGThemeB5Plugin
-php bin/atom extension:install sfMuseumPlugin
-php bin/atom extension:install ahgDAMPlugin
-
-# Enable all
-php bin/atom extension:enable arAHGThemeB5Plugin
-php bin/atom extension:enable sfMuseumPlugin
-php bin/atom extension:enable ahgDAMPlugin
-
-php symfony cc
+# Whisper models (downloaded automatically on first use)
+# tiny   - Fastest, ~1GB VRAM
+# base   - Fast, ~1GB VRAM
+# small  - Balanced, ~2GB VRAM
+# medium - Good accuracy, ~5GB VRAM (recommended)
+# large-v3 - Best accuracy, ~10GB VRAM
 ```
 
 ---
 
-## Upgrading
+## IIIF Image Server (Cantaloupe)
 
-When updating the framework:
+Cantaloupe provides deep zoom capability for high-resolution images.
+
+### Installation
 ```bash
-cd /usr/share/nginx/atom/atom-framework
-git pull
-php bin/atom migrate run
+# 1. Install Java (required)
+apt update
+apt install -y openjdk-11-jre-headless
+
+# 2. Create directory and download
+mkdir -p /opt/cantaloupe
+cd /opt/cantaloupe
+wget https://github.com/cantaloupe-project/cantaloupe/releases/download/v5.0.6/cantaloupe-5.0.6.zip
+unzip cantaloupe-5.0.6.zip
+mv cantaloupe-5.0.6/* .
+rm -rf cantaloupe-5.0.6 cantaloupe-5.0.6.zip
+
+# 3. Create configuration
+cp cantaloupe.properties.sample cantaloupe.properties
 ```
 
-This runs only new migrations - already-executed migrations are tracked and skipped.
+### Configuration (cantaloupe.properties)
+```properties
+# Key settings
+http.port = 8182
+slash_substitute = _SL_
+max_pixels = 50000000
 
-### Check Migration Status
+# Enable delegate script
+delegate_script.enabled = true
+delegate_script.pathname = /opt/cantaloupe/delegates.rb
+
+# Source configuration
+source.delegate = true
+FilesystemSource.BasicLookupStrategy.path_prefix = /usr/share/nginx/atom/uploads/
+```
+
+### Delegate Script (delegates.rb)
+
+Create `/opt/cantaloupe/delegates.rb`:
+```ruby
+require 'json'
+
+class CustomDelegate
+  attr_accessor :context
+  
+  # Map hostnames to AtoM installation paths
+  INSTANCE_PATHS = {
+    'your-domain.example.com' => '/usr/share/nginx/atom/',
+    # Add additional instances as needed
+  }.freeze
+  
+  DEFAULT_PATH = '/usr/share/nginx/atom/'.freeze
+
+  def filesystemsource_pathname
+    identifier = context['identifier'].to_s
+    
+    # Decode _SL_ to / for path separator
+    decoded_identifier = identifier.gsub('_SL_', '/')
+    
+    headers = context['request_headers'] || {}
+    host = (headers['X-Forwarded-Host'] || headers['Host'] || '').to_s.split(':').first.to_s.downcase
+    base = INSTANCE_PATHS[host] || DEFAULT_PATH
+    
+    path = base + decoded_identifier
+    STDERR.puts "[Cantaloupe] Identifier=#{identifier} Decoded=#{decoded_identifier} Path=#{path}"
+    path
+  end
+  
+  def pre_authorize(options = {}); true; end
+  def authorize(options = {}); true; end
+  def source(options = {}); 'FilesystemSource'; end
+  def overlay(options = {}); nil; end
+  def extra_iiif_information_response_keys(options = {}); {}; end
+  def azurestoragesource_blob_key(options = {}); nil; end
+  def httpsource_resource_info(options = {}); nil; end
+  def jdbcsource_database_identifier(options = {}); nil; end
+  def jdbcsource_media_type(options = {}); nil; end
+  def jdbcsource_lookup_sql(options = {}); nil; end
+  def s3source_object_info(options = {}); nil; end
+  def redactions(options = {}); []; end
+  def metadata(options = {}); nil; end
+end
+```
+
+### Systemd Service
+
+Create `/etc/systemd/system/cantaloupe.service`:
+```ini
+[Unit]
+Description=Cantaloupe IIIF Image Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+ExecStart=/usr/bin/java -Xmx2g -jar /opt/cantaloupe/cantaloupe-5.0.6.jar
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
 ```bash
-php bin/atom migrate status
+# Enable and start
+systemctl daemon-reload
+systemctl enable cantaloupe
+systemctl start cantaloupe
+systemctl status cantaloupe
+
+# Verify
+curl -s http://localhost:8182/iiif/2 | head -5
 ```
 
 ---
 
-## CLI Reference
+## RiC Triplestore (Apache Jena Fuseki)
 
-| Command | Description |
-|---------|-------------|
-| `php bin/atom framework:install` | Install/upgrade framework |
-| `php bin/atom migrate run` | Run pending migrations |
-| `php bin/atom migrate status` | Show migration status |
-| `php bin/atom extension:discover` | Find available extensions |
-| `php bin/atom extension:list` | List installed extensions |
-| `php bin/atom extension:install <name>` | Install extension |
-| `php bin/atom extension:enable <name>` | Enable extension |
-| `php bin/atom extension:disable <name>` | Disable extension |
-| `php bin/atom extension:uninstall <name>` | Uninstall (30-day grace) |
-| `php bin/atom extension:audit` | View audit log |
+Fuseki provides SPARQL queries for Records in Contexts (RiC) ontology support.
 
+### Docker Installation (Recommended)
+```bash
+# Pull and run Fuseki
+docker run -d \
+  --name fuseki \
+  -p 3030:3030 \
+  -v /opt/fuseki-data:/fuseki \
+  -e ADMIN_PASSWORD=your-secure-password \
+  stain/jena-fuseki
+
+# Verify
+curl -s http://127.0.0.1:3030/$/ping && echo " - Fuseki responding"
+
+# Create RIC dataset
+curl -X POST http://127.0.0.1:3030/$/datasets \
+  -u admin:your-secure-password \
+  -d "dbName=ric&dbType=tdb2"
+```
+
+### Systemd Service (Alternative)
+
+If not using Docker, download and install manually:
+```bash
+# Download Fuseki
+wget https://dlcdn.apache.org/jena/binaries/apache-jena-fuseki-4.10.0.tar.gz
+tar -xzf apache-jena-fuseki-4.10.0.tar.gz -C /opt/
+ln -s /opt/apache-jena-fuseki-4.10.0 /opt/fuseki
+
+# Create service
+cat > /etc/systemd/system/fuseki.service << 'EOF'
+[Unit]
+Description=Apache Jena Fuseki
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+ExecStart=/opt/fuseki/fuseki-server --loc=/opt/fuseki-data/ric /ric
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable fuseki
+systemctl start fuseki
+```
+
+### Check Triple Count
+```bash
+curl -s "http://127.0.0.1:3030/ric/query" \
+  -H "Content-Type: application/sparql-query" \
+  -H "Accept: application/json" \
+  -d "SELECT (COUNT(*) as ?count) WHERE { ?s ?p ?o }" | \
+  python3 -c "import sys,json; d=json.load(sys.stdin); print(f\"Triples: {d['results']['bindings'][0]['count']['value']}\")"
+```
 
 ---
 
----
+## Rate Limiting Configuration
 
-## NGINX 443 Sample
-This example listens for connections on port 443 using https with encryption.
+Add to `/etc/nginx/conf.d/rate-limits.conf`:
+```nginx
+# Rate limiting zones
+limit_req_zone $binary_remote_addr zone=browse_limit:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=search_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=slow:10m rate=20r/s;
+limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
 
-**##
-# Access to Memory (AtoM) – GENERIC vhost WITH IIIF SUPPORT
-# Updated: 2025-01-08 - Added bot protection
-##
-
-# PHP upstream (adjust socket if your server differs)
-upstream atom {
-    # Common options:
-    # server unix:/run/php-fpm.atom.sock;
-    # server unix:/run/php/php8.3-fpm.sock;
-    server unix:/run/php/php8.3-fpm.sock;
+# Bot blocking map
+map $http_user_agent $bad_bot {
+    default 0;
+    ~*bot 0;          # Allow legitimate bots
+    ~*crawl 0;
+    ~*spider 0;
+    ~*Googlebot 0;
+    ~*Bingbot 0;
+    ~*python-requests 1;
+    ~*curl 1;
+    ~*wget 1;
+    ~*libwww 1;
+    ~*Scrapy 1;
+    ~*sqlmap 1;
+    ~*nikto 1;
 }
 
-# =========================================================
-# HTTP (80) - default catch-all
-# - Allow ACME challenges
-# - Redirect everything else to HTTPS
-# =========================================================
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-
-    server_name _;
-
-    # Allow Let's Encrypt renewal over HTTP
-    location ^~ /.well-known/acme-challenge/ {
-        root /var/www/letsencrypt;
-        try_files $uri =404;
-    }
-
-    return 301 https://$host$request_uri;
+map $remote_addr $blocked_ip {
+    default 0;
+    # Add specific IPs to block:
+    # "1.2.3.4" 1;
 }
-
-# =========================================================
-# HTTPS (443) - default catch-all
-# =========================================================
-server {
-    listen 443 ssl default_server;
-    listen [::]:443 ssl default_server;
-
-    server_name _;
-
-    client_max_body_size 2G;
-
-    root /usr/share/nginx/atom;
-    index index.php index.html;
-
-    ssl_certificate     /etc/letsencrypt/live/xxxxxxx/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/xxxxxxx/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/xxxxxxx/chain.pem;
-
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-    ssl_prefer_server_ciphers on;
-
-    access_log /var/log/nginx/atom_access.log;
-    error_log  /var/log/nginx/atom_error.log;
-
-    # ======================================
-    # SECURITY HEADERS
-    # ======================================
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-    # ======================================
-    # BOT PROTECTION (uses maps from conf.d)
-    # ======================================
-    if ($bad_bot) { return 444; }
-    if ($blocked_ip) { return 403; }
-
-    # ======================================
-    # BLOCK COMMON PHP EXPLOIT SCANNERS
-    # ======================================
-    location ~* (eval-stdin\.php|phpunit|pearcmd|thinkphp|invokefunction|\.env|\.git|shell|cmd) {
-        return 444;
-    }
-
-    # Block attempts to include remote files
-    if ($query_string ~* "allow_url_include" ) { return 444; }
-    if ($query_string ~* "auto_prepend_file" ) { return 444; }
-
-    # ======================================
-    # BLOCK PATH TRAVERSAL
-    # ======================================
-    if ($request_uri ~ "\.\./") { return 444; }
-    if ($request_uri ~ "\.%2e%2e/") { return 444; }
-
-    # ======================================
-    # RATE-LIMITED BROWSE ENDPOINTS (bot targets)
-    # ======================================
-
-    location ~ ^/index\.php/glam/browse {
-        limit_req zone=browse_limit burst=10 nodelay;
-        limit_conn conn_limit 5;
-
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass atom;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    location ~ ^/index\.php/informationobject/browse {
-        limit_req zone=browse_limit burst=10 nodelay;
-        limit_conn conn_limit 5;
-
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass atom;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    location ~ ^/index\.php/.*/search {
-        limit_req zone=search_limit burst=15 nodelay;
-        limit_conn conn_limit 10;
-
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass atom;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    # ======================================
-    # RiC EXPLORER & APIs
-    # ======================================
-
-    location ^~ /ric/ {
-        alias /usr/share/nginx/atom/web/ric/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-
-    location ^~ /api/ric/ {
-        proxy_pass http://127.0.0.1:5001/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_connect_timeout 30;
-        proxy_read_timeout 30;
-    }
-
-    location ^~ /api/provenance/ {
-        proxy_pass http://127.0.0.1:5003/api/provenance/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location ^~ /api/editor/ {
-        proxy_pass http://127.0.0.1:5002/api/editor/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location ^~ /sparql/ {
-        proxy_pass http://192.168.0.112:3030/ric/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        add_header Access-Control-Allow-Origin "*" always;
-        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Content-Type" always;
-    }
-
-    location ^~ /ric-dashboard/ {
-        alias /usr/share/nginx/atom/web/ric-dashboard/;
-        index index.php index.html;
-
-        location ~ \.php$ {
-            fastcgi_pass atom;
-            fastcgi_param SCRIPT_FILENAME $request_filename;
-            include fastcgi_params;
-        }
-    }
-
-    location ^~ /ric-provenance/ {
-        alias /usr/share/nginx/atom/web/ric-provenance/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-
-    location ^~ /ric-editor/ {
-        alias /usr/share/nginx/atom/web/ric-editor/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-
-    # ======================================
-    # MEDIA API ROUTES
-    # ======================================
-    location ~ ^/media/ {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/Media/public/routes.php;
-        fastcgi_pass atom;
-    }
-
-    location ~ ^/media/(metadata|extract|waveform)/([0-9]+)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/media/(transcription|transcribe)/([0-9]+)(.*)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        fastcgi_read_timeout 600;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/media/search {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # PHP HANDLING
-    # ======================================
-    location ~ ^/(index|qubit_dev)\.php(/|$) {
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass atom;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 3600;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    # ======================================
-    # DIGITAL OBJECT VIEWERS
-    # ======================================
-
-    location ~* /index\.php/.*/digitalobject/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                            style-src 'self' 'unsafe-inline';
-                                            img-src 'self' data: blob: https:;" always;
-    }
-
-    location /zoompan/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                            style-src 'self' 'unsafe-inline';
-                                            img-src 'self' data: blob: https:;" always;
-        try_files $uri $uri/ /index.php$args;
-    }
-
-    location = /3D-image.php {
-        root /usr/share/nginx/atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
-        fastcgi_pass atom;
-        add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                            script-src 'self' 'unsafe-inline';
-                                            img-src 'self' data: blob:;
-                                            style-src 'self' 'unsafe-inline';" always;
-    }
-
-    location ^~ /atom/3d/ {
-        alias /usr/share/nginx/atom/3d/;
-        try_files $uri =404;
-    }
-
-    # ======================================
-    # STANDALONE REPORT EXTENSION
-    # ======================================
-    location ^~ /ext/reports/ {
-        alias /usr/share/nginx/atom/atom-extensions/extensions/reports/public/;
-        index index.php index.html;
-
-        location ~ \.php$ {
-            try_files $uri =404;
-            include fastcgi_params;
-            fastcgi_param SCRIPT_FILENAME $request_filename;
-            fastcgi_param DOCUMENT_ROOT /usr/share/nginx/atom/atom-extensions/extensions/reports/public;
-            fastcgi_pass atom;
-        }
-    }
-
-    # ======================================
-    # IIIF (Cantaloupe)
-    # ======================================
-
-    location ~ ^/iiif/manifest/(.+)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/collection/(.+)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/viewer/(.+)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/embed/(.+)$ {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/annotations {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/ocr {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/text {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/search {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location /atom-framework/src/Extensions/IiifViewer/public/ {
-        alias /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/;
-        expires 7d;
-    }
-
-    location /iiif/ {
-        proxy_pass http://127.0.0.1:8182/iiif/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        add_header Access-Control-Allow-Origin "*" always;
-    }
-
-    location ^~ /atom/iiif/ {
-        rewrite ^/atom/iiif/(.*)$ /iiif/$1 break;
-        proxy_pass http://127.0.0.1:8182/iiif/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        add_header Access-Control-Allow-Origin "*" always;
-        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept" always;
-    }
-
-    location = /iiif-manifest.php {
-        fastcgi_pass atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # STATIC ASSETS
-    # ======================================
-
-    location ^~ /plugins/arDominionB5Plugin/js/dist/ {
-        alias /usr/share/nginx/atom/dist/js/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /plugins/arDominionB5Plugin/css/dist/ {
-        alias /usr/share/nginx/atom/dist/css/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /atom/dist/js/ {
-        alias /usr/share/nginx/atom/dist/js/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /atom/dist/css/ {
-        alias /usr/share/nginx/atom/dist/css/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ~* ^/(css|dist|js|images|plugins|vendor|arDominionB5Plugin)/.*\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
-        root /usr/share/nginx/atom;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # ======================================
-    # SECURITY - BLOCK DIRECT PHP ACCESS
-    # ======================================
-    location ~ \.php$ {
-        deny all;
-        return 404;
-    }
-
-    location ~ /\.(ht|git|svn) {
-        deny all;
-    }
-
-    # ======================================
-    # MAIN ROUTER (catch-all with rate limiting)
-    # ======================================
-    location / {
-        limit_req zone=slow burst=40 nodelay;
-        try_files $uri /index.php?$args;
-    }
-}
-
----
-
-## NGINX
-
-This example listens for connections on port 80 using basic http without encryption.
-While this is ok for testing AtoM locally on a private network, any public implementation of AtoM should be secured using TLS/SSL certificates such that your content is served over HTTPS.
-The Mozilla SSL Configuration Generator is useful for assisting with adding the appropriate blocks to your Nginx configuration file.
-
-##
-# Access to Memory (AtoM) – GENERIC HTTP (80 ONLY) WITH IIIF SUPPORT
-# Includes: bot protection, rate limits, RiC, Media APIs, IIIF/Cantaloupe, viewers, reports
-##
-
-upstream atom {
-   server unix:/run/php-fpm.atom.sock;
-}
-
-server {
-   listen 80 default_server;
-   listen [::]:80 default_server;
-
-   server_name _;
-
-   root /usr/share/nginx/atom;
-   index index.php index.html;
-
-   client_max_body_size 2G;
-
-   access_log /var/log/nginx/atom_access.log;
-   error_log  /var/log/nginx/atom_error.log;
-
-   # ======================================
-   # SECURITY HEADERS
-   # ======================================
-   add_header X-Frame-Options "SAMEORIGIN" always;
-   add_header X-XSS-Protection "1; mode=block" always;
-   add_header X-Content-Type-Options "nosniff" always;
-   add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-   # ======================================
-   # BOT PROTECTION (uses maps from conf.d)
-   # ======================================
-   if ($bad_bot) { return 444; }
-   if ($blocked_ip) { return 403; }
-
-   # ======================================
-   # BLOCK COMMON PHP EXPLOIT SCANNERS
-   # ======================================
-   location ~* (eval-stdin\.php|phpunit|pearcmd|thinkphp|invokefunction|\.env|\.git|shell|cmd) {
-      return 444;
-   }
-
-   # Block attempts to include remote files
-   if ($query_string ~* "allow_url_include" ) { return 444; }
-   if ($query_string ~* "auto_prepend_file" ) { return 444; }
-
-   # ======================================
-   # BLOCK PATH TRAVERSAL
-   # ======================================
-   if ($request_uri ~ "\.\./") { return 444; }
-   if ($request_uri ~ "\.%2e%2e/") { return 444; }
-
-   # ======================================
-   # STATIC ASSETS (original install pattern + caching)
-   # ======================================
-   location ~* ^/(css|dist|js|images|plugins|vendor)/.*\.(css|png|jpg|js|svg|ico|gif|pdf|woff|woff2|otf|ttf)$ {
-      try_files $uri $uri/ =404;
-      expires 30d;
-      add_header Cache-Control "public, immutable";
-   }
-
-   location ~* ^/(downloads)/.*\.(pdf|xml|html|csv|zip|rtf)$ {
-      try_files $uri $uri/ =404;
-      expires 7d;
-      add_header Cache-Control "public";
-   }
-
-   location ~ ^/(ead\.dtd|favicon\.ico|robots\.txt|sitemap.*)$ {
-      try_files $uri =404;
-      expires 7d;
-      add_header Cache-Control "public";
-   }
-
-   # ======================================
-   # RATE-LIMITED BROWSE ENDPOINTS (bot targets)
-   # ======================================
-   location ~ ^/index\.php/glam/browse {
-      limit_req zone=browse_limit burst=10 nodelay;
-      limit_conn conn_limit 5;
-
-      include /etc/nginx/fastcgi_params;
-      fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-      fastcgi_pass atom;
-      fastcgi_param PATH_INFO $fastcgi_path_info;
-      fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-      fastcgi_index index.php;
-      fastcgi_read_timeout 300;
-      fastcgi_buffer_size 128k;
-      fastcgi_buffers 4 256k;
-      fastcgi_busy_buffers_size 256k;
-   }
-
-   location ~ ^/index\.php/informationobject/browse {
-      limit_req zone=browse_limit burst=10 nodelay;
-      limit_conn conn_limit 5;
-
-      include /etc/nginx/fastcgi_params;
-      fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-      fastcgi_pass atom;
-      fastcgi_param PATH_INFO $fastcgi_path_info;
-      fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-      fastcgi_index index.php;
-      fastcgi_read_timeout 300;
-      fastcgi_buffer_size 128k;
-      fastcgi_buffers 4 256k;
-      fastcgi_busy_buffers_size 256k;
-   }
-
-   location ~ ^/index\.php/.*/search {
-      limit_req zone=search_limit burst=15 nodelay;
-      limit_conn conn_limit 10;
-
-      include /etc/nginx/fastcgi_params;
-      fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-      fastcgi_pass atom;
-      fastcgi_param PATH_INFO $fastcgi_path_info;
-      fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-      fastcgi_index index.php;
-      fastcgi_read_timeout 300;
-      fastcgi_buffer_size 128k;
-      fastcgi_buffers 4 256k;
-      fastcgi_busy_buffers_size 256k;
-   }
-
-   # ======================================
-   # RiC EXPLORER & APIs
-   # ======================================
-   location ^~ /ric/ {
-      alias /usr/share/nginx/atom/web/ric/;
-      index index.html;
-      try_files $uri $uri/ =404;
-   }
-
-   location ^~ /api/ric/ {
-      proxy_pass http://127.0.0.1:5001/api/;
-      proxy_http_version 1.1;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_connect_timeout 30;
-      proxy_read_timeout 30;
-   }
-
-   location ^~ /api/provenance/ {
-      proxy_pass http://127.0.0.1:5003/api/provenance/;
-      proxy_http_version 1.1;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-   }
-
-   location ^~ /api/editor/ {
-      proxy_pass http://127.0.0.1:5002/api/editor/;
-      proxy_http_version 1.1;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-   }
-
-   location ^~ /sparql/ {
-      proxy_pass http://192.168.0.112:3030/ric/;
-      proxy_http_version 1.1;
-      proxy_set_header Host $host;
-      add_header Access-Control-Allow-Origin "*" always;
-      add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
-      add_header Access-Control-Allow-Headers "Content-Type" always;
-   }
-
-   location ^~ /ric-dashboard/ {
-      alias /usr/share/nginx/atom/web/ric-dashboard/;
-      index index.php index.html;
-
-      location ~ \.php$ {
-         include /etc/nginx/fastcgi_params;
-         fastcgi_pass atom;
-         fastcgi_param SCRIPT_FILENAME $request_filename;
-      }
-   }
-
-   location ^~ /ric-provenance/ {
-      alias /usr/share/nginx/atom/web/ric-provenance/;
-      index index.html;
-      try_files $uri $uri/ =404;
-   }
-
-   location ^~ /ric-editor/ {
-      alias /usr/share/nginx/atom/web/ric-editor/;
-      index index.html;
-      try_files $uri $uri/ =404;
-   }
-
-   # ======================================
-   # MEDIA API ROUTES
-   # ======================================
-   location ~ ^/media/ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/Media/public/routes.php;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/media/(metadata|extract|waveform)/([0-9]+)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   location ~ ^/media/(transcription|transcribe)/([0-9]+)(.*)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      fastcgi_read_timeout 600;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   location ~ ^/media/search {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   # ======================================
-   # UPLOADS / PRIVATE (original install logic)
-   # ======================================
-   location ~* /uploads/r/(.*)/conf/ { }
-
-   location ~* ^/uploads/r/(.*)$ {
-      include /etc/nginx/fastcgi_params;
-      set $index /index.php;
-      fastcgi_param SCRIPT_FILENAME $document_root$index;
-      fastcgi_param SCRIPT_NAME $index;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/private/(.*)$ {
-      internal;
-      alias /usr/share/nginx/atom/$1;
-   }
-
-   # ======================================
-   # DIGITAL OBJECT VIEWERS
-   # ======================================
-   location ~* /index\.php/.*/digitalobject/ {
-      add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                          style-src 'self' 'unsafe-inline';
-                                          img-src 'self' data: blob: https:;" always;
-   }
-
-   location /zoompan/ {
-      add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                          style-src 'self' 'unsafe-inline';
-                                          img-src 'self' data: blob: https:;" always;
-      try_files $uri $uri/ /index.php$args;
-   }
-
-   location = /3D-image.php {
-      root /usr/share/nginx/atom;
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
-      fastcgi_pass atom;
-      add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                          script-src 'self' 'unsafe-inline';
-                                          img-src 'self' data: blob:;
-                                          style-src 'self' 'unsafe-inline';" always;
-   }
-
-   location ^~ /atom/3d/ {
-      alias /usr/share/nginx/atom/3d/;
-      try_files $uri =404;
-   }
-
-   # ======================================
-   # STANDALONE REPORT EXTENSION
-   # ======================================
-   location ^~ /ext/reports/ {
-      alias /usr/share/nginx/atom/atom-extensions/extensions/reports/public/;
-      index index.php index.html;
-
-      location ~ \.php$ {
-         try_files $uri =404;
-         include /etc/nginx/fastcgi_params;
-         fastcgi_param SCRIPT_FILENAME $request_filename;
-         fastcgi_param DOCUMENT_ROOT /usr/share/nginx/atom/atom-extensions/extensions/reports/public;
-         fastcgi_pass atom;
-      }
-   }
-
-   # ======================================
-   # IIIF (Cantaloupe)
-   # ======================================
-
-   # IIIF Viewer Framework Routes (must be before generic /iiif/ proxy)
-   location ~ ^/iiif/manifest/(.+)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   location ~ ^/iiif/collection/(.+)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   location ~ ^/iiif/viewer/(.+)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/iiif/embed/(.+)$ {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/iiif/annotations {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   location ~ ^/iiif/ocr {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/iiif/text {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-   }
-
-   location ~ ^/iiif/search {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-      fastcgi_pass atom;
-   }
-
-   location /atom-framework/src/Extensions/IiifViewer/public/ {
-      alias /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/;
-      expires 7d;
-   }
-
-   # IIIF Cantaloupe proxy
-   location /iiif/ {
-      proxy_pass http://127.0.0.1:8182/iiif/;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme;
-      add_header Access-Control-Allow-Origin "*" always;
-   }
-
-   # Optional pretty route: /atom/iiif/... -> /iiif/...
-   location ^~ /atom/iiif/ {
-      rewrite ^/atom/iiif/(.*)$ /iiif/$1 break;
-      proxy_pass http://127.0.0.1:8182/iiif/;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme;
-      add_header Access-Control-Allow-Origin "*" always;
-      add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
-      add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept" always;
-   }
-
-   location = /iiif-manifest.php {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_pass atom;
-      add_header Access-Control-Allow-Origin * always;
-   }
-
-   # ======================================
-   # MAIN ROUTER (catch-all with rate limiting)
-   # ======================================
-   location / {
-      limit_req zone=slow burst=40 nodelay;
-      try_files $uri /index.php?$args;
-
-      # original install behaviour: block direct access to real files
-      if (-f $request_filename) {
-         return 403;
-      }
-   }
-
-   # ======================================
-   # AtoM PHP entrypoints (original install block)
-   # ======================================
-   location ~ ^/(index|qubit_dev)\.php(/|$) {
-      include /etc/nginx/fastcgi_params;
-      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_split_path_info ^(.+\.php)(/.*)$;
-      fastcgi_pass atom;
-   }
-
-   # ======================================
-   # SECURITY - BLOCK DIRECT PHP ACCESS (keep last)
-   # ======================================
-   location ~ \.php$ {
-      deny all;
-      return 404;
-   }
-}
-
----
-
----
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Extension not found | Run `php bin/atom extension:discover` |
-| Database errors | Run `php bin/atom framework:install` |
-| Migration failed | Check `php bin/atom migrate status` |
-| Permission denied | Run `chown -R www-data:www-data plugins/` |
-| Theme not loading | Set `is_enabled=0` in `atom_plugin` table |
-
-### Reset Migrations (Development Only)
-```bash
-# View what's been run
-mysql -u root -p archive -e "SELECT * FROM atom_framework_migrations;"
-
-# To re-run a migration (use with caution!)
-mysql -u root -p archive -e "DELETE FROM atom_framework_migrations WHERE migration='migration_name';"
-php bin/atom migrate run
 ```
 
 ---
 
-## Get Help
+## Quick Dependency Check
 
-- [GitHub Issues](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
-- [AtoM Community](https://groups.google.com/g/ica-atom-users)
+Run this script to verify all dependencies:
+```bash
+#!/bin/bash
+echo "=== AHG Framework Dependency Check ==="
+
+# PHP
+php -v | head -1
+
+# MySQL
+mysql --version
+
+# FFmpeg
+ffmpeg -version 2>/dev/null | head -1 || echo "❌ FFmpeg not installed"
+
+# Blender
+/snap/bin/blender --version 2>/dev/null | head -1 || blender --version 2>/dev/null | head -1 || echo "❌ Blender not installed"
+
+# Whisper
+whisper --help 2>/dev/null | head -1 || echo "❌ Whisper not installed"
+
+# ImageMagick
+convert --version 2>/dev/null | head -1 || echo "❌ ImageMagick not installed"
+
+# exiftool
+exiftool -ver 2>/dev/null || echo "❌ exiftool not installed"
+
+# Cantaloupe
+curl -s http://localhost:8182/iiif/2 >/dev/null && echo "✅ Cantaloupe running" || echo "❌ Cantaloupe not running"
+
+# Fuseki
+curl -s http://127.0.0.1:3030/$/ping >/dev/null && echo "✅ Fuseki running" || echo "❌ Fuseki not running"
+
+echo "=== Check Complete ==="
+```
+
+---
