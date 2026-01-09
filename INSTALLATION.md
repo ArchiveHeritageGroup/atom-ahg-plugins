@@ -29,6 +29,10 @@ snap install blender --classic
 |------|-----------------|---------|
 | **OpenAI Whisper** | `pip install openai-whisper` | Speech-to-text for 90+ languages |
 
+pip install openai-whisper
+
+whisper --help
+
 Whisper models (downloaded automatically on first use):
 - tiny - Fastest, ~1GB VRAM
 - base - Fast, ~1GB VRAM  
@@ -48,6 +52,12 @@ Cantaloupe provides deep zoom capability for high-resolution images.
 2. Download Cantaloupe 5.0.6 from GitHub releases
 3. Extract to `/opt/cantaloupe`
 4. Copy `cantaloupe.properties.sample` to `cantaloupe.properties`
+
+systemctl daemon-reload
+systemctl enable cantaloupe
+systemctl start cantaloupe
+
+curl -s http://localhost:8182/iiif/2
 
 ### Key Configuration (cantaloupe.properties)
 
