@@ -19,6 +19,9 @@ The AHG Framework provides enhanced functionality when these tools are installed
 |------|-----------------|---------|
 | **Blender** | `snap install blender --classic` | 3D model rendering for GLB/OBJ/STL/FBX/PLY/DAE |
 
+snap install blender --classic
+/snap/bin/blender --version
+
 ### Speech-to-Text Transcription
 
 | Tool | Install Command | Purpose |
