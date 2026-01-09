@@ -1,0 +1,36 @@
+vendor_index:
+  url: /vendor
+  param: { module: vendor, action: index }
+
+vendor_list:
+  url: /vendor/list
+  param: { module: vendor, action: list }
+
+vendor_add:
+  url: /vendor/add
+  param: { module: vendor, action: add }
+
+vendor_transactions:
+  url: /vendor/transactions
+  param: { module: vendor, action: transactions }
+
+vendor_service_types:
+  url: /vendor/serviceTypes
+  param: { module: vendor, action: serviceTypes }
+
+vendor_transaction_add:
+  url: /vendor/transaction/add
+  param: { module: vendor, action: addTransaction }
+
+vendor_transaction_view:
+  url: /vendor/transaction/:id
+  param: { module: vendor, action: viewTransaction }
+  requirements: { id: \d+ }
+
+vendor_edit:
+  url: /vendor/:slug/edit
+  param: { module: vendor, action: edit }
+
+vendor_view:
+  url: /vendor/:slug
+  param: { module: vendor, action: view }
