@@ -1,16 +1,5 @@
 <?php decorate_with('layout_1col.php'); ?>
 
-<?php slot('before-content'); ?>
-  <div class="mb-3">
-    <a href="<?php echo url_for('reports/index'); ?>" class="btn btn-outline-secondary">
-      <i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Dashboard'); ?>
-    </a>
-  </div>
-<?php end_slot(); ?>
-
-<?php slot('breadcrumb'); ?>
-<?php end_slot(); ?>
-
 <?php slot('title'); ?>
   <?php if (isset($resource)) { ?>
     <div class="multiline-header d-flex flex-column mb-3">
@@ -92,7 +81,7 @@
 
     <ul class="actions mb-3 nav gap-2">
       <li><input class="btn atom-btn-outline-success" type="submit" id="exportSubmit" value="<?php echo __('Export'); ?>"></li>
-      <li><a href="<?php echo url_for('reports/index'); ?>" class="btn atom-btn-outline-light"><?php echo __('Cancel'); ?></a></li>
+      <li><?php echo link_to(__('Cancel'), !empty($sf_request->getReferer()) ? $sf_request->getReferer() : ['module' => 'clipboard', 'action' => 'view'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
     </ul>
 
   </form>

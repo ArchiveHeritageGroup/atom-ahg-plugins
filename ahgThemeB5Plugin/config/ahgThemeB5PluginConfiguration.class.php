@@ -145,7 +145,7 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
 
         $routing->prependRoute('reports_authorities', new sfRoute('/reports/authorities', [
             'module' => 'reports',
-            'action' => 'authorities'
+            'action' => 'archival'
         ]));
 
         $routing->prependRoute('reports_repositories', new sfRoute('/reports/repositories', [
@@ -181,22 +181,22 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
 
         $routing->prependRoute('export_csv', new sfRoute('/export/csv', [
             'module' => 'export',
-            'action' => 'csv'
+            'action' => 'archival'
         ]));
 
         $routing->prependRoute('export_ead', new sfRoute('/export/ead', [
             'module' => 'export',
-            'action' => 'ead'
+            'action' => 'archival'
         ]));
 
         $routing->prependRoute('export_grap', new sfRoute('/export/grap', [
             'module' => 'export',
-            'action' => 'grap'
+            'action' => 'archival'
         ]));
 
         $routing->prependRoute('export_authorities', new sfRoute('/export/authorities', [
             'module' => 'export',
-            'action' => 'authorities'
+            'action' => 'archival'
         ]));
 
         // AHG Settings routes - module is ahgSettings, NOT settings

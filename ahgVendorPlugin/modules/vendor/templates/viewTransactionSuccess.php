@@ -12,7 +12,6 @@ $statusColors = [
     'on_hold' => 'dark'
 ];
 ?>
-<?php echo get_partial('header', ['title' => 'Transaction: ' . $transactionRaw->transaction_number]); ?>
 
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">

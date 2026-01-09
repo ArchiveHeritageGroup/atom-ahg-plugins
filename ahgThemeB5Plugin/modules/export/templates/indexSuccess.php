@@ -3,13 +3,13 @@ $exportFormats = sfOutputEscaper::unescape($exportFormats ?? []);
 ?>
 
 <div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'staticpage', 'action' => 'static', 'id' => 'homepage']); ?>"><?php echo __('Home'); ?></a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'admin', 'action' => 'index']); ?>"><?php echo __('Admin'); ?></a></li>
-            <li class="breadcrumb-item active"><?php echo __('Export'); ?></li>
-        </ol>
-    </nav>
+    <div class="mb-3">
+        <a href="<?php echo url_for('reports/index'); ?>" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Dashboard'); ?>
+            
+            
+        </a>
+    </div>
     
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">

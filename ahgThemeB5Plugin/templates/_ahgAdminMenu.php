@@ -5,7 +5,7 @@
 $isAdmin = $sf_user->isAdministrator();
 
 // Helper function to check if plugin is enabled (uses Propel - safe in web context)
-function ahgIsPluginEnabled($name) {
+if (!function_exists('ahgIsPluginEnabled')) { function ahgIsPluginEnabled($name) {
     static $enabledPlugins = null;
     if ($enabledPlugins === null) {
         try {
@@ -18,6 +18,7 @@ function ahgIsPluginEnabled($name) {
         }
     }
     return isset($enabledPlugins[$name]);
+}
 }
 
 // Check which plugins are enabled

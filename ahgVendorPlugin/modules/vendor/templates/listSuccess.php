@@ -1,4 +1,3 @@
-<?php echo get_partial('header', ['title' => 'Vendors']); ?>
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">

@@ -50,15 +50,15 @@ class reportsMenuComponent extends sfComponent
                 'label' => 'Export',
                 'icon' => 'fa-download',
                 'items' => [
-                    ['label' => 'Full Archival Export', 'url' => 'export/archival', 'icon' => 'fa-file-export'],
+                    ['label' => 'Full Archival Export', 'url' => 'clipboard/export', 'icon' => 'fa-file-export'],
                     // Sector exports - implemented in each sector plugin
-                    // ['label' => 'Archive Export (EAD/CSV)', 'url' => 'export/archival', 'icon' => 'fa-archive'],
+                    // ['label' => 'Archive Export (EAD/CSV)', 'url' => 'clipboard/export', 'icon' => 'fa-archive'],
                     // ['label' => 'Library Export (MARC)', 'url' => 'ahgLibraryPlugin/export', 'icon' => 'fa-book'],
                     // ['label' => 'Museum Export (CCO)', 'url' => 'ahgMuseumPlugin/export', 'icon' => 'fa-university'],
                     // ['label' => 'DAM Export (IPTC)', 'url' => 'ahgDAMPlugin/export', 'icon' => 'fa-images'],
                     ['label' => 'CIDOC-CRM Export', 'url' => 'cidoc/export', 'icon' => 'fa-project-diagram'],
-                    ['label' => 'Authority Export (EAC)', 'url' => 'export/authorities', 'icon' => 'fa-users'],
-                    ['label' => 'GRAP 103 Report', 'url' => 'export/grap', 'icon' => 'fa-file-invoice-dollar']
+                    ['label' => 'Authority Export (EAC)', 'url' => 'actor/browse', 'icon' => 'fa-users'],
+                    ['label' => 'GRAP 103 Report', 'url' => 'heritageAccounting/dashboard', 'icon' => 'fa-file-invoice-dollar']
                 ]
             ],
             'import' => [

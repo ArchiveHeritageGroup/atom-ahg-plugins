@@ -5,7 +5,6 @@ $conditionRatingsRaw = isset($sf_data) ? $sf_data->getRaw('conditionRatings') : 
 $formRaw = isset($sf_data) ? $sf_data->getRaw('form') : $form;
 $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
 ?>
-<?php echo get_partial('header', ['title' => 'New Transaction']); ?>
 
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">

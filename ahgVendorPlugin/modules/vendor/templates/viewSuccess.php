@@ -11,7 +11,6 @@ if (is_object($statsRaw)) {
     $statsRaw = (array) $statsRaw;
 }
 ?>
-<?php echo get_partial('header', ['title' => $vendorRaw->name]); ?>
 
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">

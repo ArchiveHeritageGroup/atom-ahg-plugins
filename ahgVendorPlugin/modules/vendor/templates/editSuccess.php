@@ -7,7 +7,6 @@ $vendorServicesRaw = isset($sf_data) ? $sf_data->getRaw('vendorServices') : (iss
 $isNew = empty($vendorRaw->id);
 $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
 ?>
-<?php echo get_partial('header', ['title' => $pageTitle]); ?>
 
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">

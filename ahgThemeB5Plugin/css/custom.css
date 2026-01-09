@@ -328,3 +328,17 @@ section {
   border-radius: 8px;
   overflow: hidden;
 }
+
+/* Fix form-select text color in card headers */
+.card-header .form-select,
+.card-header .form-control,
+.card-header select,
+.card-header input[type="text"] {
+  color: #212529 !important;
+  background-color: #fff !important;
+}
+
+.card-header .form-select option {
+  color: #212529 !important;
+  background-color: #fff !important;
+}

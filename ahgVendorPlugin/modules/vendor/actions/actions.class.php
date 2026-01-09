@@ -8,6 +8,8 @@ class vendorActions extends sfActions
     {
         error_log("VENDOR: preExecute started");
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Repository/VendorRepository.php';
         $this->service = new \AtomFramework\Services\VendorService();
         error_log("VENDOR: preExecute completed");
     }
