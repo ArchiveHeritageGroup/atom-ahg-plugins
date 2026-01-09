@@ -108,26 +108,84 @@ class ahgMediaSettingsActions extends sfActions
      */
     public function executeTest(sfWebRequest $request)
     {
-        $digitalObjectId = $request->getParameter('id');
+        $slug = $request->getParameter('slug');
+        if (!$slug) {
+            $this->forward404('Please select an archival description');
+        }
         
-        if (!$digitalObjectId) {
-            $this->forward404('Digital object ID required');
+        // Find information object by slug
+        $informationObject = QubitInformationObject::getBySlug($slug);
+        if (!$informationObject) {
+            $this->forward404('Archival description not found');
+        }
+        
+        // Get the digital object for this information object
+        $digitalObject = $informationObject->getDigitalObject();
+        if (!$digitalObject) {
+            $this->getUser()->setFlash('error', 'No digital object attached to this archival description');
+            $this->redirect(['module' => 'ahgMediaSettings', 'action' => 'index']);
         }
         
         // Load processor
         require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/MediaUploadHook.php';
-        
-        $result = MediaUploadHook::processDigitalObject(
-            QubitDigitalObject::getById($digitalObjectId)
-        );
+        $result = MediaUploadHook::processDigitalObject($digitalObject);
         
         $this->result = $result;
-        $this->digitalObjectId = $digitalObjectId;
+        $this->digitalObjectId = $digitalObject->id;
+        $this->informationObject = $informationObject;
     }
     
     /**
      * View processing queue
      */
+
+    /**
+     * JSON autocomplete for information objects
+     */
+    public function executeAutocomplete(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        
+        $query = $request->getParameter('query', '');
+        if (strlen($query) < 2) {
+            return $this->renderText(json_encode([]));
+        }
+        
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        
+        $results = \Illuminate\Database\Capsule\Manager::table('information_object')
+            ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
+            ->join('slug', 'information_object.id', '=', 'slug.object_id')
+            ->leftJoin('digital_object', 'information_object.id', '=', 'digital_object.object_id')
+            ->select([
+                'information_object.id',
+                'information_object.identifier',
+                'information_object_i18n.title',
+                'slug.slug',
+                'digital_object.id as digital_object_id'
+            ])
+            ->where('information_object_i18n.culture', 'en')
+            ->where(function($q) use ($query) {
+                $q->where('information_object_i18n.title', 'LIKE', '%' . $query . '%')
+                  ->orWhere('information_object.identifier', 'LIKE', '%' . $query . '%');
+            })
+            ->whereNotNull('digital_object.id')
+            ->orderBy('information_object_i18n.title')
+            ->limit(20)
+            ->get();
+        
+        $formatted = [];
+        foreach ($results as $row) {
+            $formatted[] = [
+                'slug' => $row->slug,
+                'title' => $row->title ?: '(Untitled)',
+                'identifier' => $row->identifier ?: ''
+            ];
+        }
+        
+        return $this->renderText(json_encode($formatted));
+    }
+
     public function executeQueue(sfWebRequest $request)
     {
         $pdo = Propel::getConnection();

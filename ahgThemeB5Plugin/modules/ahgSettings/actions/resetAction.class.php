@@ -119,7 +119,7 @@ class AhgSettingsResetAction extends sfAction
 
         if (!isset($defaults[$section])) {
             $this->getUser()->setFlash('error', 'Invalid section.');
-            $this->redirect(['module' => 'settings', 'action' => 'ahgSettings']);
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'index']);
         }
 
         // Reset the settings
@@ -133,6 +133,6 @@ class AhgSettingsResetAction extends sfAction
         }
 
         $this->getUser()->setFlash('notice', 'Settings reset to defaults.');
-        $this->redirect(['module' => 'settings', 'action' => 'ahgSettingsSection', 'section' => $section]);
+        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => $section]);
     }
 }

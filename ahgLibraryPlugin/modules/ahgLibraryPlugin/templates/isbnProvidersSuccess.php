@@ -57,14 +57,14 @@
           </td>
           <td>
             <div class="btn-group btn-group-sm">
-              <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviderEdit', 'id' => $provider->id]) ?>" class="btn btn-outline-primary" title="<?php echo __('Edit'); ?>">
+              <a href="<?php echo url_for('library_isbn_provider_edit', ['id' => $provider->id]) ?>" class="btn btn-outline-primary" title="<?php echo __('Edit'); ?>">
                 <i class="fas fa-edit"></i>
               </a>
-              <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviderToggle', 'id' => $provider->id]) ?>" class="btn btn-outline-<?php echo $provider->enabled ? 'warning' : 'success'; ?>" title="<?php echo $provider->enabled ? __('Disable') : __('Enable'); ?>">
+              <a href="<?php echo url_for('library_isbn_provider_toggle', ['id' => $provider->id]) ?>" class="btn btn-outline-<?php echo $provider->enabled ? 'warning' : 'success'; ?>" title="<?php echo $provider->enabled ? __('Disable') : __('Enable'); ?>">
                 <i class="fas fa-<?php echo $provider->enabled ? 'pause' : 'play'; ?>"></i>
               </a>
               <?php if (!in_array($provider->slug, ['openlibrary', 'googlebooks', 'worldcat'])): ?>
-              <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviderDelete', 'id' => $provider->id]) ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure?'); ?>')">
+              <a href="<?php echo url_for('library_isbn_provider_delete', ['id' => $provider->id]) ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure?'); ?>')">
                 <i class="fas fa-trash"></i>
               </a>
               <?php endif; ?>

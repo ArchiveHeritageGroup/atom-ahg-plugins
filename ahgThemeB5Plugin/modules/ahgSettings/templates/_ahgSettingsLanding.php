@@ -23,7 +23,7 @@
                     <p class="card-text text-muted small"><?php echo __($sectionInfo['description']); ?></p>
                 </div>
                 <div class="card-footer bg-transparent border-0 text-center">
-                    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings', 'section' => $sectionKey]); ?>" class="btn btn-outline-primary">
+                    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => $sectionKey]); ?>" class="btn btn-outline-primary">
                         <i class="fas fa-cog"></i> <?php echo __('Configure'); ?>
                     </a>
                 </div>

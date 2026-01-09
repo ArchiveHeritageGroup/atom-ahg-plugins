@@ -12,7 +12,7 @@ slot('title', $title);
 <div class="ahg-settings-page">
     <!-- Back to Overview Link -->
     <div class="mb-3">
-        <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings']) ?>" class="btn btn-outline-secondary btn-sm">
+        <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']) ?>" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings Overview') ?>
         </a>
     </div>
@@ -47,13 +47,13 @@ slot('title', $title);
                     <h5 class="mb-0"><i class="fas fa-bolt"></i> <?php echo __('Quick Actions'); ?></h5>
                 </div>
                 <div class="card-body">
-                    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgExportSettings']); ?>" class="btn btn-outline-secondary btn-sm btn-block mb-2">
+                    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'export']); ?>" class="btn btn-outline-secondary btn-sm btn-block mb-2">
                         <i class="fas fa-download"></i> <?php echo __('Export Settings'); ?>
                     </a>
-                    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgImportSettings']); ?>" class="btn btn-outline-secondary btn-sm btn-block mb-2">
+                    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'import']); ?>" class="btn btn-outline-secondary btn-sm btn-block mb-2">
                         <i class="fas fa-upload"></i> <?php echo __('Import Settings'); ?>
                     </a>
-                    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgResetSettings', 'section' => $currentSection]); ?>" 
+                    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'reset', 'section' => $currentSection]); ?>" 
                        class="btn btn-outline-danger btn-sm btn-block"
                        onclick="return confirm('<?php echo __('Reset all settings in this section to defaults?'); ?>');">
                         <i class="fas fa-undo"></i> <?php echo __('Reset to Defaults'); ?>

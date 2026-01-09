@@ -32,7 +32,7 @@ slot('title', $title);
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload me-1"></i><?php echo __('Import Settings'); ?>
                             </button>
-                            <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings']); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>
                             </a>
                         </div>

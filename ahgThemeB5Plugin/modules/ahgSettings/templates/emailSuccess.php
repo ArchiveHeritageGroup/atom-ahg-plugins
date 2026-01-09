@@ -164,7 +164,7 @@
   <hr>
 
   <div class="d-flex justify-content-between">
-    <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings']); ?>" class="btn btn-secondary">
+    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>" class="btn btn-secondary">
       <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings'); ?>
     </a>
     <button type="submit" class="btn btn-primary">
@@ -177,7 +177,7 @@
 function sendTestEmail() {
     var email = document.getElementById('testEmailInput').value;
     if (email) {
-        window.location.href = '<?php echo url_for(['module' => 'settings', 'action' => 'testEmail']); ?>?email=' + encodeURIComponent(email);
+        window.location.href = '<?php echo url_for(['module' => 'ahgSettings', 'action' => 'emailTest']); ?>?email=' + encodeURIComponent(email);
     } else {
         alert('Please enter an email address');
     }

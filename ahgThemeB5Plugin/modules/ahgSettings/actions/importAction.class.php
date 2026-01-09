@@ -16,7 +16,7 @@ class AhgSettingsImportAction extends sfAction
             
             if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
                 $this->getUser()->setFlash('error', 'Please select a valid settings file.');
-                $this->redirect(['module' => 'settings', 'action' => 'ahgImportSettings']);
+                $this->redirect(['module' => 'ahgSettings', 'action' => 'import']);
             }
 
             $content = file_get_contents($file['tmp_name']);
@@ -24,7 +24,7 @@ class AhgSettingsImportAction extends sfAction
 
             if (!$data || !isset($data['settings'])) {
                 $this->getUser()->setFlash('error', 'Invalid settings file format.');
-                $this->redirect(['module' => 'settings', 'action' => 'ahgImportSettings']);
+                $this->redirect(['module' => 'ahgSettings', 'action' => 'import']);
             }
 
             // Import settings
@@ -43,7 +43,7 @@ class AhgSettingsImportAction extends sfAction
             }
 
             $this->getUser()->setFlash('notice', "Successfully imported {$imported} settings.");
-            $this->redirect(['module' => 'settings', 'action' => 'ahgSettings']);
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'index']);
         }
 
         // Show import form

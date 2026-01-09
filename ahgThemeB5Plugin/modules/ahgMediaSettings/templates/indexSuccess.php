@@ -1,8 +1,10 @@
 <?php use_helper('Text') ?>
+<?php use_stylesheet("/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css") ?>
+<?php use_javascript("/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js") ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="mb-0"><?php echo __('Media Processing Settings') ?></h1>
-  <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings']) ?>" class="btn btn-outline-secondary">
+  <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']) ?>" class="btn btn-outline-secondary">
     <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to AHG Settings') ?>
   </a>
 </div>
@@ -104,20 +106,23 @@ $groupLabels = [
   </a>
 </div>
 
-</form>
-
 <div class="card">
   <div class="card-header">
     <h5 class="mb-0"><?php echo __('Test Processing') ?></h5>
   </div>
   <div class="card-body">
     <p class="text-muted"><?php echo __('Test media processing on a specific digital object.') ?></p>
-    <form method="get" action="<?php echo url_for(['module' => 'ahgMediaSettings', 'action' => 'test']) ?>" class="row g-2">
-      <div class="col-auto">
-        <input type="number" name="id" class="form-control" placeholder="<?php echo __('Digital Object ID') ?>" required>
+    <form method="get" action="<?php echo url_for(['module' => 'ahgMediaSettings', 'action' => 'test']) ?>" class="row g-2 align-items-end" id="media-test-form">
+      <div class="col-md-6">
+        <label class="form-label"><?php echo __('Search Archival Description') ?></label>
+        <div class="position-relative">
+          <input type="text" id="media-search-input" class="form-control" placeholder="<?php echo __('Type to search (min 2 characters)...') ?>" autocomplete="off">
+          <input type="hidden" name="slug" id="media-search-slug">
+          <div id="media-search-results" class="position-absolute w-100 bg-white border rounded shadow-sm" style="display:none; z-index:1000; max-height:300px; overflow-y:auto;"></div>
+        </div>
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-outline-primary">
+        <button type="submit" class="btn btn-outline-primary" id="media-test-btn" disabled>
           <i class="fas fa-play me-1"></i>
           <?php echo __('Test') ?>
         </button>
@@ -125,3 +130,65 @@ $groupLabels = [
     </form>
   </div>
 </div>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function() {
+    var input = document.getElementById('media-search-input');
+    var slugInput = document.getElementById('media-search-slug');
+    var results = document.getElementById('media-search-results');
+    var btn = document.getElementById('media-test-btn');
+    var timer = null;
+    
+    input.addEventListener('input', function() {
+        var query = this.value.trim();
+        clearTimeout(timer);
+        
+        if (query.length < 2) {
+            results.style.display = 'none';
+            slugInput.value = '';
+            btn.disabled = true;
+            return;
+        }
+        
+        timer = setTimeout(function() {
+            fetch('<?php echo url_for(['module' => 'ahgMediaSettings', 'action' => 'autocomplete']) ?>?query=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.length === 0) {
+                        results.innerHTML = '<div class="p-2 text-muted">No results found</div>';
+                    } else {
+                        var html = '';
+                        data.forEach(function(item) {
+                            html += '<div class="p-2 border-bottom media-result-item" style="cursor:pointer" data-slug="' + item.slug + '">';
+                            html += '<strong>' + (item.title || '(Untitled)') + '</strong>';
+                            if (item.identifier) html += ' <span class="text-muted">(' + item.identifier + ')</span>';
+                            html += '</div>';
+                        });
+                        results.innerHTML = html;
+                    }
+                    results.style.display = 'block';
+                })
+                .catch(function() {
+                    results.innerHTML = '<div class="p-2 text-danger">Error searching</div>';
+                    results.style.display = 'block';
+                });
+        }, 300);
+    });
+    
+    results.addEventListener('click', function(e) {
+        var item = e.target.closest('.media-result-item');
+        if (item) {
+            input.value = item.querySelector('strong').textContent;
+            slugInput.value = item.dataset.slug;
+            results.style.display = 'none';
+            btn.disabled = false;
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#media-search-input') && !e.target.closest('#media-search-results')) {
+            results.style.display = 'none';
+        }
+    });
+})();
+</script>

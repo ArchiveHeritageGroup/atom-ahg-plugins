@@ -2,12 +2,10 @@
 <?php slot('title') ?>
 <h1><i class="fas fa-door-open text-primary me-2"></i><?php echo __('Reading Rooms'); ?></h1>
 <?php end_slot() ?>
-
 <?php slot('content') ?>
 <?php if ($sf_user->hasFlash('success')): ?>
     <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
 <?php endif; ?>
-
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <span><?php echo __('Manage Reading Rooms'); ?></span>
@@ -42,7 +40,7 @@
             <td><?php echo $room->capacity ?? '-'; ?></td>
             <td>
               <small>
-                <?php echo substr($room->opening_time ?? '09:00', 0, 5); ?> - 
+                <?php echo substr($room->opening_time ?? '09:00', 0, 5); ?> -
                 <?php echo substr($room->closing_time ?? '17:00', 0, 5); ?>
               </small>
             </td>
@@ -64,5 +62,12 @@
       </tbody>
     </table>
   </div>
+</div>
+
+<hr>
+<div class="d-flex justify-content-start">
+    <a href="<?php echo url_for('admin/ahg-settings'); ?>" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings'); ?>
+    </a>
 </div>
 <?php end_slot() ?>
