@@ -37,6 +37,9 @@ $severityClasses = [
             <span class="badge bg-<?php echo $statusClasses[$breach->status] ?? 'secondary'; ?> fs-6">
                 <?php echo ucfirst($breach->status); ?>
             </span>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'breachEdit', 'id' => $breach->id]); ?>" class="btn btn-primary ms-3">
+                <i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?>
+            </a>
         </div>
     </div>
 

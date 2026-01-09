@@ -901,37 +901,52 @@ class PrivacyService
 
     public function updateBreach(int $id, array $data, ?int $userId = null): bool
     {
-        $updates = array_filter([
-            'status' => $data['status'] ?? null,
-            'severity' => $data['severity'] ?? null,
-            'regulator_notified' => $data['regulator_notified'] ?? null,
-            'regulator_notified_date' => $data['regulator_notified_date'] ?? null,
-            'subjects_notified' => $data['subjects_notified'] ?? null,
-            'subjects_notified_date' => $data['subjects_notified_date'] ?? null,
-            'contained_date' => $data['contained_date'] ?? null,
-            'resolved_date' => $data['resolved_date'] ?? null,
-        ], fn($v) => $v !== null);
-
-        $updates['updated_at'] = date('Y-m-d H:i:s');
-
+        $updates = [
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Main fields
+        if (isset($data['breach_type'])) $updates['breach_type'] = $data['breach_type'];
+        if (isset($data['severity'])) $updates['severity'] = $data['severity'];
+        if (isset($data['status'])) $updates['status'] = $data['status'];
+        if (isset($data['risk_to_rights'])) $updates['risk_to_rights'] = $data['risk_to_rights'] ?: null;
+        if (isset($data['data_subjects_affected'])) $updates['data_subjects_affected'] = $data['data_subjects_affected'] ?: null;
+        if (isset($data['data_categories_affected'])) $updates['data_categories_affected'] = $data['data_categories_affected'];
+        if (isset($data['assigned_to'])) $updates['assigned_to'] = $data['assigned_to'] ?: null;
+        
+        // Notification flags (checkboxes - 0 if not set)
+        $updates['notification_required'] = isset($data['notification_required']) ? 1 : 0;
+        $updates['regulator_notified'] = isset($data['regulator_notified']) ? 1 : 0;
+        $updates['subjects_notified'] = isset($data['subjects_notified']) ? 1 : 0;
+        
+        // Dates
+        if (isset($data['occurred_date'])) $updates['occurred_date'] = $data['occurred_date'] ?: null;
+        if (isset($data['contained_date'])) $updates['contained_date'] = $data['contained_date'] ?: null;
+        if (isset($data['resolved_date'])) $updates['resolved_date'] = $data['resolved_date'] ?: null;
+        if (isset($data['regulator_notified_date'])) $updates['regulator_notified_date'] = $data['regulator_notified_date'] ?: null;
+        if (isset($data['subjects_notified_date'])) $updates['subjects_notified_date'] = $data['subjects_notified_date'] ?: null;
+        
         $result = DB::table('privacy_breach')->where('id', $id)->update($updates);
-
+        
         // Update i18n
-        $i18nUpdates = array_filter([
-            'impact_assessment' => $data['impact_assessment'] ?? null,
-            'remedial_actions' => $data['remedial_actions'] ?? null,
-            'lessons_learned' => $data['lessons_learned'] ?? null
-        ], fn($v) => $v !== null);
-
+        $i18nUpdates = [];
+        if (isset($data['title'])) $i18nUpdates['title'] = $data['title'];
+        if (isset($data['description'])) $i18nUpdates['description'] = $data['description'];
+        if (isset($data['cause'])) $i18nUpdates['cause'] = $data['cause'];
+        if (isset($data['impact_assessment'])) $i18nUpdates['impact_assessment'] = $data['impact_assessment'];
+        if (isset($data['remedial_actions'])) $i18nUpdates['remedial_actions'] = $data['remedial_actions'];
+        if (isset($data['lessons_learned'])) $i18nUpdates['lessons_learned'] = $data['lessons_learned'];
+        
         if (!empty($i18nUpdates)) {
             DB::table('privacy_breach_i18n')->updateOrInsert(
                 ['id' => $id, 'culture' => 'en'],
                 $i18nUpdates
             );
         }
-
+        
         return $result >= 0;
     }
+
 
     // =====================
     // ROPA (Processing Activities)
@@ -1243,6 +1258,28 @@ class PrivacyService
             'medium' => 'Medium - Moderate impact, limited exposure',
             'high' => 'High - Significant risk, many affected',
             'critical' => 'Critical - Severe harm likely'
+        ];
+    }
+
+    public static function getBreachStatuses(): array
+    {
+        return [
+            'detected' => 'Detected',
+            'investigating' => 'Investigating',
+            'contained' => 'Contained',
+            'resolved' => 'Resolved',
+            'closed' => 'Closed'
+        ];
+    }
+
+    public static function getRiskLevels(): array
+    {
+        return [
+            '' => '-- Select --',
+            'unlikely' => 'Unlikely - No significant risk',
+            'possible' => 'Possible - Some risk exists',
+            'likely' => 'Likely - Risk is probable',
+            'high' => 'High - Risk is certain or severe'
         ];
     }
 

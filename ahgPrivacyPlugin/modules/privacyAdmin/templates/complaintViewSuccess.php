@@ -20,6 +20,10 @@
         <span class="badge bg-<?php echo $statusClasses[$complaint->status] ?? 'secondary'; ?> fs-6">
             <?php echo ucfirst($complaint->status); ?>
         </span>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'complaintEdit', 'id' => $complaint->id]); ?>" class="btn btn-primary ms-3">
+                <i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?>
+            </a>
+        </div>
     </div>
 
     <?php if ($sf_user->hasFlash('success')): ?>

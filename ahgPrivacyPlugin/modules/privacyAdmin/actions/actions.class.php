@@ -63,6 +63,7 @@ class privacyAdminActions extends sfActions
             $this->getJurisdiction() ?? 'popia'
         );
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
     public function executeDsarView(sfWebRequest $request)
@@ -159,6 +160,7 @@ class privacyAdminActions extends sfActions
         ]);
         $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
     public function executeBreachView(sfWebRequest $request)
@@ -188,6 +190,35 @@ class privacyAdminActions extends sfActions
             $id = $service->createBreach($request->getPostParameters(), $this->getUserId());
             $this->getUser()->setFlash('success', 'Breach reported successfully');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'breachView', 'id' => $id]);
+        }
+    }
+
+    public function executeBreachEdit(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->breach = $service->getBreach($request->getParameter('id'));
+        
+        if (!$this->breach) {
+            $this->forward404();
+        }
+        
+        // Get i18n data
+        $this->breachI18n = \Illuminate\Database\Capsule\Manager::table('privacy_breach_i18n')
+            ->where('id', $this->breach->id)
+            ->where('culture', 'en')
+            ->first();
+        
+        $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
+        $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
+        $this->statusOptions = \ahgPrivacyPlugin\Service\PrivacyService::getBreachStatuses();
+        $this->riskLevels = \ahgPrivacyPlugin\Service\PrivacyService::getRiskLevels();
+        $this->jurisdictions = $service->getEnabledJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+        
+        if ($request->isMethod('post')) {
+            $service->updateBreach($request->getParameter('id'), $request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'Breach updated successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'breachView', 'id' => $request->getParameter('id')]);
         }
     }
 
@@ -223,6 +254,7 @@ class privacyAdminActions extends sfActions
             $this->getJurisdiction() ?? 'popia'
         );
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
     public function executeRopaView(sfWebRequest $request)
@@ -312,12 +344,14 @@ class privacyAdminActions extends sfActions
         $service = $this->getService();
         $this->officers = $service->getOfficers($this->getJurisdiction());
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
     public function executeOfficerAdd(sfWebRequest $request)
     {
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
 
         if ($request->isMethod('post')) {
             $service = $this->getService();
@@ -331,6 +365,8 @@ class privacyAdminActions extends sfActions
     {
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
         $service = $this->getService();
         $this->officer = $service->getOfficer($request->getParameter('id'));
         if (!$this->officer) {
@@ -354,6 +390,7 @@ class privacyAdminActions extends sfActions
         $this->config = $service->getConfig($jurisdiction, true);
         $this->officers = $service->getOfficers($jurisdiction);
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
         $this->currentJurisdiction = $jurisdiction;
         $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($jurisdiction);
 
@@ -374,6 +411,7 @@ class privacyAdminActions extends sfActions
         $jurisdiction = $this->getJurisdiction();
         $this->stats = $service->getDashboardStats($jurisdiction);
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
 
         $dsarQuery = \Illuminate\Database\Capsule\Manager::table('privacy_dsar')
             ->selectRaw('request_type, COUNT(*) as count');
@@ -450,6 +488,73 @@ class privacyAdminActions extends sfActions
             'status' => $request->getParameter('status')
         ]);
     }
+    public function executeConsentAdd(sfWebRequest $request)
+    {
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
+        $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
+        $this->consentMethods = ['form' => 'Online Form', 'email' => 'Email', 'verbal' => 'Verbal', 'written' => 'Written Document', 'checkbox' => 'Checkbox/Tick Box'];
+        
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $id = $service->recordConsent($request->getPostParameters(), $this->getUserId());
+            $this->getUser()->setFlash('success', 'Consent recorded successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'consentView', 'id' => $id]);
+        }
+    }
+
+    public function executeConsentView(sfWebRequest $request)
+    {
+        $this->consent = \Illuminate\Database\Capsule\Manager::table('privacy_consent_record')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+        
+        if (!$this->consent) {
+            $this->forward404();
+        }
+    }
+
+    public function executeConsentEdit(sfWebRequest $request)
+    {
+        $this->consent = \Illuminate\Database\Capsule\Manager::table('privacy_consent_record')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+        
+        if (!$this->consent) {
+            $this->forward404();
+        }
+        
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
+        $this->consentMethods = ['form' => 'Online Form', 'email' => 'Email', 'verbal' => 'Verbal', 'written' => 'Written Document', 'checkbox' => 'Checkbox/Tick Box'];
+        
+        if ($request->isMethod('post')) {
+            $data = $request->getPostParameters();
+            \Illuminate\Database\Capsule\Manager::table('privacy_consent_record')
+                ->where('id', $request->getParameter('id'))
+                ->update([
+                    'data_subject_id' => $data['data_subject_id'] ?? $this->consent->data_subject_id,
+                    'subject_name' => $data['subject_name'] ?? null,
+                    'subject_email' => $data['subject_email'] ?? null,
+                    'purpose' => $data['purpose'] ?? $this->consent->purpose,
+                    'consent_given' => isset($data['consent_given']) ? 1 : 0,
+                    'consent_method' => $data['consent_method'] ?? 'form',
+                    'source' => $data['source'] ?? null,
+                    'status' => $data['status'] ?? 'active'
+                ]);
+            $this->getUser()->setFlash('success', 'Consent record updated');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'consentView', 'id' => $request->getParameter('id')]);
+        }
+    }
+
+    public function executeConsentWithdraw(sfWebRequest $request)
+    {
+        if ($request->isMethod('post')) {
+            $service = $this->getService();
+            $service->withdrawConsent($request->getParameter('id'), $request->getParameter('reason'), $this->getUserId());
+            $this->getUser()->setFlash('success', 'Consent withdrawn successfully');
+        }
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'consentList']);
+    }
+
     // =====================
     // Complaint Management
     // =====================
@@ -478,6 +583,79 @@ class privacyAdminActions extends sfActions
             'security_breach' => 'Security Breach',
             'other' => 'Other'
         ];
+    }
+
+    public function executeComplaintAdd(sfWebRequest $request)
+    {
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
+        $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
+        $this->complaintTypes = ['data_breach' => 'Data Breach', 'unauthorized_access' => 'Unauthorized Access', 'consent_violation' => 'Consent Violation', 'rights_denial' => 'Rights Denial', 'marketing' => 'Unsolicited Marketing', 'other' => 'Other'];
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+        
+        if ($request->isMethod('post')) {
+            $data = $request->getPostParameters();
+            $reference = 'COMP-' . strtoupper($data['jurisdiction'] ?? 'POPIA') . '-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            
+            $id = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')->insertGetId([
+                'reference_number' => $reference,
+                'jurisdiction' => $data['jurisdiction'] ?? 'popia',
+                'complainant_name' => $data['complainant_name'],
+                'complainant_email' => $data['complainant_email'] ?? null,
+                'complainant_phone' => $data['complainant_phone'] ?? null,
+                'complaint_type' => $data['complaint_type'],
+                'description' => $data['description'] ?? null,
+                'date_of_incident' => $data['date_of_incident'] ?? null,
+                'status' => 'received',
+                'assigned_to' => $data['assigned_to'] ?? null,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            $this->getUser()->setFlash('success', 'Complaint logged successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'complaintView', 'id' => $id]);
+        }
+    }
+
+    public function executeComplaintEdit(sfWebRequest $request)
+    {
+        $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+            ->where('id', $request->getParameter('id'))
+            ->first();
+        
+        if (!$this->complaint) {
+            $this->forward404();
+        }
+        
+        $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
+        $this->complaintTypes = ['data_breach' => 'Data Breach', 'unauthorized_access' => 'Unauthorized Access', 'consent_violation' => 'Consent Violation', 'rights_denial' => 'Rights Denial', 'marketing' => 'Unsolicited Marketing', 'other' => 'Other'];
+        $this->statusOptions = ['received' => 'Received', 'investigating' => 'Investigating', 'resolved' => 'Resolved', 'escalated' => 'Escalated', 'closed' => 'Closed'];
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
+        
+        if ($request->isMethod('post')) {
+            $data = $request->getPostParameters();
+            $updates = [
+                'complainant_name' => $data['complainant_name'],
+                'complainant_email' => $data['complainant_email'] ?? null,
+                'complainant_phone' => $data['complainant_phone'] ?? null,
+                'complaint_type' => $data['complaint_type'],
+                'description' => $data['description'] ?? null,
+                'date_of_incident' => $data['date_of_incident'] ?? null,
+                'status' => $data['status'] ?? 'received',
+                'assigned_to' => $data['assigned_to'] ?? null,
+                'resolution' => $data['resolution'] ?? null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            if ($data['status'] === 'resolved' && empty($this->complaint->resolved_date)) {
+                $updates['resolved_date'] = date('Y-m-d');
+            }
+            
+            \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
+                ->where('id', $request->getParameter('id'))
+                ->update($updates);
+            
+            $this->getUser()->setFlash('success', 'Complaint updated successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'complaintView', 'id' => $request->getParameter('id')]);
+        }
     }
 
     public function executeComplaintView(sfWebRequest $request)
