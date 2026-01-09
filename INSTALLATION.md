@@ -1,5 +1,5 @@
 ---
-
+ 
 ## Optional Software Dependencies
 
 The AHG Framework provides enhanced functionality when these tools are installed:
