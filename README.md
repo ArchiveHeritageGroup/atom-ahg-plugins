@@ -1232,7 +1232,9 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 ## 👥 Authors
 
 **The Archive and Heritage Group**
+
 https://theahg.co.za
+
 johan@theahg.co.za
 
 ---
