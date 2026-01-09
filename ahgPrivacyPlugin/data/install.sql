@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `privacy_dsar_log` (
   `action` VARCHAR(100) NOT NULL,
   `details` TEXT,
   `user_id` INT DEFAULT NULL,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_dsar` (`dsar_id`)
@@ -373,6 +374,7 @@ CREATE TABLE IF NOT EXISTS `privacy_audit_log` (
   `old_values` JSON DEFAULT NULL,
   `new_values` JSON DEFAULT NULL,
   `user_id` INT DEFAULT NULL,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
   `ip_address` VARCHAR(45) DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

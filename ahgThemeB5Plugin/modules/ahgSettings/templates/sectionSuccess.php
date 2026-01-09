@@ -893,7 +893,7 @@ slot('title', $title);
                                     resultDiv.classList.add('d-none');
                                     
                                     // Test via AJAX endpoint
-                                    fetch('<?php echo url_for(["module" => "settings", "action" => "testFuseki"]); ?>', {
+                                    fetch('<?php echo url_for(['module' => 'ahgSettings', 'action' => 'fusekiTest']); ?>', {
                                         method: 'POST',
                                         headers: {'Content-Type': 'application/json'},
                                         body: JSON.stringify({endpoint, username, password})

@@ -45,7 +45,7 @@ class AhgSettingsSectionAction extends sfAction
         'data_protection' => ['dp_enabled', 'dp_notify_overdue', 'dp_anonymize_on_delete', 'dp_audit_logging', 'dp_consent_required'],
         'faces' => ['face_detect_enabled', 'face_auto_match', 'face_auto_link', 'face_blur_unmatched', 'face_store_embeddings'],
         'media' => ['media_autoplay', 'media_show_controls', 'media_loop', 'media_show_waveform', 'media_transcription_enabled'],
-        'photos' => ['photo_create_thumbnails', 'photo_watermark_enabled', 'photo_exif_strip', 'photo_auto_orient'],
+        'photos' => ['photo_create_thumbnails', 'photo_extract_exif', 'photo_auto_rotate'],
         'jobs' => ['jobs_enabled', 'jobs_notify_failure'],
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
     ];

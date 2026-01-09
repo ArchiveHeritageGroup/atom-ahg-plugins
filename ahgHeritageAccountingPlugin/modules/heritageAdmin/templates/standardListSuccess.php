@@ -99,4 +99,11 @@
             </ul>
         </div>
     </div>
+
+<hr>
+<div class="d-flex justify-content-start">
+    <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'settings']); ?>" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Settings'); ?>
+    </a>
+</div>
 </div>
