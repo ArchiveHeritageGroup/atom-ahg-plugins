@@ -67,13 +67,6 @@
                             <label class="form-label">ID Number</label>
                             <input type="text" name="id_number" class="form-control">
                         </div>
-
-                <!-- Student ID (conditional) -->
-                <div class="col-md-6" id="student_id_wrapper" style="display:none;">
-                    <label class="form-label"><?php echo __('Student ID'); ?></label>
-                    <input type="text" name="student_id" class="form-control" placeholder="<?php echo __('University student number'); ?>">
-                    <small class="text-muted"><?php echo __('Required for student researchers'); ?></small>
-                </div>
                     </div>
                 </div>
                 
@@ -136,21 +129,3 @@
         </form>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var affiliationType = document.querySelector('[name="affiliation_type"]');
-    var studentWrapper = document.getElementById('student_id_wrapper');
-    
-    function toggleStudentId() {
-        if (affiliationType && studentWrapper) {
-            studentWrapper.style.display = affiliationType.value === 'student' ? 'block' : 'none';
-        }
-    }
-    
-    if (affiliationType) {
-        affiliationType.addEventListener('change', toggleStudentId);
-        toggleStudentId(); // Initial state
-    }
-});
-</script>

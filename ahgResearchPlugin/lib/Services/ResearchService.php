@@ -120,6 +120,7 @@ class ResearchService
             'start_time' => $data['start_time'],
             'end_time' => $data['end_time'],
             'purpose' => $data['purpose'] ?? null,
+            'notes' => $data['notes'] ?? null,
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s'),
         ]);

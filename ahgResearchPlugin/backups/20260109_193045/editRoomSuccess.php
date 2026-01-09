@@ -77,35 +77,6 @@
           <div class="mb-3">
             <label class="form-label"><?php echo __('Rules'); ?></label>
             <textarea name="rules" class="form-control" rows="3" placeholder="<?php echo __('No food or drinks, Handle materials with care...'); ?>"><?php echo htmlspecialchars($room->rules ?? ''); ?></textarea>
-        </div>
-
-        <!-- Booking Policy -->
-        <div class="card mb-3">
-          <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-calendar-check me-2"></i><?php echo __('Booking Policy'); ?></h6>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label"><?php echo __('Advance Booking (days)'); ?></label>
-                <input type="number" name="advance_booking_days" class="form-control" 
-                       value="<?php echo $room->advance_booking_days ?? 14; ?>" min="1" max="90">
-                <small class="text-muted"><?php echo __('How far in advance can bookings be made'); ?></small>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label"><?php echo __('Max Hours per Booking'); ?></label>
-                <input type="number" name="max_booking_hours" class="form-control" 
-                       value="<?php echo $room->max_booking_hours ?? 4; ?>" min="1" max="12">
-                <small class="text-muted"><?php echo __('Maximum duration of a single booking'); ?></small>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label"><?php echo __('Cancellation Notice (hours)'); ?></label>
-                <input type="number" name="cancellation_hours" class="form-control" 
-                       value="<?php echo $room->cancellation_hours ?? 24; ?>" min="0" max="72">
-                <small class="text-muted"><?php echo __('Required notice for cancellation'); ?></small>
-              </div>
-            </div>
-          </div>
           </div>
         </div>
       </div>

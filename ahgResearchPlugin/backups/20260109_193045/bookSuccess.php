@@ -67,13 +67,6 @@
             <textarea name="purpose" class="form-control" rows="3" placeholder="<?php echo __('Describe the purpose of your visit and any materials you wish to consult...'); ?>"></textarea>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label"><?php echo __('Additional Notes'); ?></label>
-            <textarea name="notes" class="form-control" rows="2" 
-                      placeholder="<?php echo __('Any special requirements or notes for staff'); ?>"></textarea>
-            <small class="text-muted"><?php echo __('Optional notes visible to archive staff'); ?></small>
-          </div>
-
           <?php if ($object): ?>
           <div class="alert alert-info">
             <strong><?php echo __('Requesting access to:'); ?></strong> <?php echo htmlspecialchars($object->title); ?>

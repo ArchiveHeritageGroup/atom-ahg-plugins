@@ -70,7 +70,6 @@ class researchActions extends sfActions
                     'orcid_id' => $request->getParameter('orcid_id'),
                     'id_type' => $request->getParameter('id_type'),
                     'id_number' => $request->getParameter('id_number'),
-                    'student_id' => $request->getParameter('student_id'),
                 ];
                 
                 // If re-registering after rejection, update existing record
@@ -196,7 +195,6 @@ class researchActions extends sfActions
                 'start_time' => $request->getParameter('start_time'),
                 'end_time' => $request->getParameter('end_time'),
                 'purpose' => $request->getParameter('purpose'),
-                'notes' => $request->getParameter('notes'),
             ]);
             foreach ($request->getParameter('materials', []) as $objectId) {
                 $this->service->addMaterialRequest($bookingId, (int) $objectId);
@@ -319,7 +317,6 @@ class researchActions extends sfActions
                     $this->service->createCollection($this->researcher->id, [
                         'name' => $name,
                         'description' => $description,
-                        'is_public' => $request->getParameter('is_public') ? 1 : 0,
                     ]);
                     $this->getUser()->setFlash('success', 'Collection created successfully.');
                     $this->redirect('research/workspace');
@@ -450,7 +447,6 @@ class researchActions extends sfActions
                     DB::table('research_collection')->where('id', $id)->update([
                         'name' => $name,
                         'description' => $description,
-                        'is_public' => $request->getParameter('is_public') ? 1 : 0,
                         'is_public' => $isPublic,
                         
                     ]);
@@ -653,7 +649,6 @@ class researchActions extends sfActions
                     'orcid_id' => $request->getParameter('orcid_id'),
                     'id_type' => $request->getParameter('id_type'),
                     'id_number' => $request->getParameter('id_number'),
-                    'student_id' => $request->getParameter('student_id'),
                 ]);
                 DB::commit();
                 $this->getUser()->setFlash('success', 'Registration successful! Pending approval.');
@@ -817,9 +812,6 @@ class researchActions extends sfActions
                 'closing_time' => $request->getParameter('closing_time', '17:00:00'),
                 'days_open' => $request->getParameter('days_open', 'Mon,Tue,Wed,Thu,Fri'),
                 'is_active' => $request->getParameter('is_active') ? 1 : 0,
-                'advance_booking_days' => (int) $request->getParameter('advance_booking_days', 14),
-                'max_booking_hours' => (int) $request->getParameter('max_booking_hours', 4),
-                'cancellation_hours' => (int) $request->getParameter('cancellation_hours', 24),
                 
             ];
             if ($id && $this->room) {
@@ -1057,7 +1049,6 @@ class researchActions extends sfActions
             $collectionId = $this->service->createCollection($researcher->id, [
                 'name' => $name,
                 'description' => $description,
-                        'is_public' => $request->getParameter('is_public') ? 1 : 0,
             ]);
             
             // If object_id provided, add it to the new collection
