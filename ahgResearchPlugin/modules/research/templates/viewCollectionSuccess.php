@@ -35,7 +35,7 @@
   <div class="card-header bg-success text-white py-2"><i class="fas fa-plus me-2"></i><?php echo __('Add Item to Collection'); ?></div>
   <div class="card-body">
     <form method="post" id="addItemForm">
-      <input type="hidden" name="do" value="add_item">
+      <input type="hidden" name="booking_action" value="add_item">
       <div class="row g-3">
         <div class="col-md-5">
           <label class="form-label"><?php echo __('Search for item'); ?></label>
@@ -43,7 +43,7 @@
         </div>
         <div class="col-md-3">
           <label class="form-label"><?php echo __('Notes (optional)'); ?></label>
-          <input type="text" name="notes" class="form-control" placeholder="<?php echo __('Add a note...'); ?>">
+          <textarea name="notes" class="form-control" rows="2" placeholder="<?php echo __('Add a note...'); ?>"></textarea>
         </div>
         <div class="col-md-2">
           <label class="form-label d-block">&nbsp;</label>
@@ -70,16 +70,14 @@
           <td><a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item->slug]); ?>"><?php echo htmlspecialchars($item->object_title ?: 'Untitled'); ?></a><?php if (!empty($item->identifier)): ?><br><small class="text-muted"><?php echo htmlspecialchars($item->identifier); ?></small><?php endif; ?></td>
           <td><small><?php echo htmlspecialchars($item->level_of_description ?? '-'); ?></small></td>
           <td>
-            <span class="item-notes-display" id="notes-display-<?php echo $item->object_id; ?>"><?php echo htmlspecialchars($item->notes ?: '-'); ?></span>
-            <form class="item-notes-form d-none" id="notes-form-<?php echo $item->object_id; ?>" method="post">
-              <input type="hidden" name="do" value="update_notes"><input type="hidden" name="object_id" value="<?php echo $item->object_id; ?>">
-              <div class="input-group input-group-sm"><input type="text" name="notes" class="form-control" value="<?php echo htmlspecialchars($item->notes ?? ''); ?>"><button type="submit" class="btn btn-success"><i class="fas fa-check"></i></button><button type="button" class="btn btn-secondary cancel-notes-edit" data-id="<?php echo $item->object_id; ?>"><i class="fas fa-times"></i></button></div>
-            </form>
+            <div class="notes-cell" data-id="<?php echo $item->object_id; ?>" data-notes="<?php echo htmlspecialchars($item->notes ?? '', ENT_QUOTES); ?>" data-title="<?php echo htmlspecialchars($item->object_title ?: 'Untitled', ENT_QUOTES); ?>">
+              <span class="notes-text"><?php echo nl2br(htmlspecialchars($item->notes ?: '-')); ?></span>
+            </div>
           </td>
           <td><small><?php echo date('M j, Y', strtotime($item->created_at)); ?></small></td>
           <td>
-            <button type="button" class="btn btn-sm btn-outline-primary edit-notes-btn" data-id="<?php echo $item->object_id; ?>"><i class="fas fa-edit"></i></button>
-            <form method="post" class="d-inline"><input type="hidden" name="do" value="remove"><input type="hidden" name="object_id" value="<?php echo $item->object_id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove?')"><i class="fas fa-times"></i></button></form>
+            <button type="button" class="btn btn-sm btn-outline-primary edit-notes-btn" data-id="<?php echo $item->object_id; ?>" data-bs-toggle="modal" data-bs-target="#editNotesModal"><i class="fas fa-edit"></i></button>
+            <form method="post" class="d-inline"><input type="hidden" name="booking_action" value="remove"><input type="hidden" name="object_id" value="<?php echo $item->object_id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove?')"><i class="fas fa-times"></i></button></form>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -91,7 +89,7 @@
   <?php endif; ?>
 </div>
 
-<div class="modal fade" id="editCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="do" value="update">
+<div class="modal fade" id="editCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="booking_action" value="update">
   <div class="modal-header"><h5 class="modal-title"><i class="fas fa-edit me-2"></i><?php echo __('Edit Collection'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body">
     <div class="mb-3"><label class="form-label"><?php echo __('Name'); ?> *</label><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($collection->name); ?>" required></div>
@@ -101,7 +99,34 @@
   <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i><?php echo __('Save'); ?></button></div>
 </form></div></div></div>
 
-<div class="modal fade" id="deleteCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="do" value="delete">
+
+<!-- Edit Notes Modal -->
+<div class="modal fade" id="editNotesModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="post" id="editNotesForm">
+        <input type="hidden" name="booking_action" value="update_notes">
+        <input type="hidden" name="object_id" id="editNotesObjectId" value="">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-sticky-note me-2"></i><?php echo __('Edit Notes'); ?></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-2"><small><i class="fas fa-file-alt me-1"></i><span id="editNotesItemTitle"></span></small></p>
+          <label class="form-label"><?php echo __('Notes'); ?></label>
+          <textarea name="notes" id="editNotesTextarea" class="form-control" rows="6" placeholder="<?php echo __('Add your research notes here...'); ?>"></textarea>
+          <small class="text-muted"><?php echo __('You can use these notes to track your research progress, observations, or any relevant information.'); ?></small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i><?php echo __('Save Notes'); ?></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="booking_action" value="delete">
   <div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i><?php echo __('Delete'); ?></h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
   <div class="modal-body"><p><?php echo __('Delete this collection?'); ?></p><p class="text-danger"><strong><?php echo htmlspecialchars($collection->name); ?></strong></p></div>
   <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button><button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button></div>
@@ -126,11 +151,21 @@ document.addEventListener('DOMContentLoaded', function() {
       item: function(item, escape) { return '<div>' + escape(item.title) + '</div>'; }
     }
   });
+  // Edit notes modal handler
   document.querySelectorAll('.edit-notes-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() { var id = this.dataset.id; document.getElementById('notes-display-' + id).classList.add('d-none'); document.getElementById('notes-form-' + id).classList.remove('d-none'); });
+    btn.addEventListener('click', function() {
+      var id = this.dataset.id;
+      var cell = document.querySelector('.notes-cell[data-id="' + id + '"]');
+      if (cell) {
+        document.getElementById('editNotesObjectId').value = id;
+        document.getElementById('editNotesTextarea').value = cell.dataset.notes || '';
+        document.getElementById('editNotesItemTitle').textContent = cell.dataset.title || 'Item';
+      }
+    });
   });
-  document.querySelectorAll('.cancel-notes-edit').forEach(function(btn) {
-    btn.addEventListener('click', function() { var id = this.dataset.id; document.getElementById('notes-display-' + id).classList.remove('d-none'); document.getElementById('notes-form-' + id).classList.add('d-none'); });
+  // Focus textarea when modal opens
+  document.getElementById('editNotesModal').addEventListener('shown.bs.modal', function() {
+    document.getElementById('editNotesTextarea').focus();
   });
 });
 </script>

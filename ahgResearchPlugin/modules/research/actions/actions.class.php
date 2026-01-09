@@ -136,7 +136,7 @@ class researchActions extends sfActions
         $this->researcher = $this->service->getResearcher($id);
         if (!$this->researcher) { $this->forward404('Not found'); }
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             $adminId = $this->getUser()->getAttribute('user_id');
             if ($action === 'approve') {
                 $this->service->approveResearcher($id, $adminId);
@@ -218,7 +218,7 @@ class researchActions extends sfActions
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             $adminId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'confirm') {
@@ -245,7 +245,7 @@ class researchActions extends sfActions
         $this->booking = $this->service->getBooking($id);
         if (!$this->booking) { $this->forward404('Not found'); }
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             $adminId = $this->getUser()->getAttribute('user_id');
             match($action) {
                 'confirm' => $this->service->confirmBooking($id, $adminId),
@@ -309,7 +309,7 @@ class researchActions extends sfActions
         
         // Handle collection actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             if ($action === 'create_collection') {
                 $name = trim($request->getParameter('collection_name'));
                 $description = trim($request->getParameter('collection_description'));
@@ -332,7 +332,7 @@ class researchActions extends sfActions
         $this->researcher = $this->service->getResearcherByUserId($userId);
         if (!$this->researcher) { $this->redirect('research/register'); }
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             if ($action === 'save') {
                 $this->service->saveSearch($this->researcher->id, [
                     'name' => $request->getParameter('name'),
@@ -380,7 +380,7 @@ class researchActions extends sfActions
         }
         
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             
             if ($action === 'remove') {
                 $this->service->removeFromCollection($id, (int) $request->getParameter('object_id'));
@@ -472,7 +472,7 @@ class researchActions extends sfActions
         if (!$this->researcher) { $this->redirect('research/register'); }
         
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('booking_action');
             
             if ($action === 'delete') {
                 $this->service->deleteAnnotation((int) $request->getParameter('id'), $this->researcher->id);

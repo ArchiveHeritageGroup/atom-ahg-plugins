@@ -14,6 +14,7 @@ $hasResearch = $routing->hasRouteName('research_workspace');
 // Get pending counts only if plugins exist
 $pendingCount = 0;
 $pendingResearcherCount = 0;
+$pendingBookingCount = 0;
 
 if ($isAuthenticated && $hasAccessRequest) {
     try {
@@ -30,6 +31,9 @@ if ($isAuthenticated && $hasAccessRequest) {
 if ($isAuthenticated && $hasResearch && $isAdmin) {
     try {
         $pendingResearcherCount = \Illuminate\Database\Capsule\Manager::table('research_researcher')
+            ->where('status', 'pending')
+            ->count();
+        $pendingBookingCount = \Illuminate\Database\Capsule\Manager::table('research_booking')
             ->where('status', 'pending')
             ->count();
     } catch (Exception $e) {
@@ -136,16 +140,26 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     <?php endif; ?>
     <?php endif; ?>
 
-    <?php if ($isAdmin && $hasResearch && $pendingResearcherCount > 0): ?>
+    <?php if ($isAdmin && $hasResearch && ($pendingResearcherCount > 0 || $pendingBookingCount > 0)): ?>
     <!-- Admin Notifications -->
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><i class="fas fa-bell me-1"></i><?php echo __('Notifications'); ?></h6></li>
+    <?php if ($pendingResearcherCount > 0): ?>
     <li>
       <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@research_researchers'); ?>">
         <span><i class="fas fa-user-clock me-2"></i><?php echo __('Pending Researchers'); ?></span>
         <span class="badge bg-warning text-dark"><?php echo $pendingResearcherCount; ?></span>
       </a>
     </li>
+    <?php endif; ?>
+    <?php if ($pendingBookingCount > 0): ?>
+    <li>
+      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>">
+        <span><i class="fas fa-calendar-check me-2"></i><?php echo __('Pending Bookings'); ?></span>
+        <span class="badge bg-danger"><?php echo $pendingBookingCount; ?></span>
+      </a>
+    </li>
+    <?php endif; ?>
     <?php endif; ?>
 
     <!-- Logout -->

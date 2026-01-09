@@ -1,0 +1,33 @@
+{
+  "name": "Information Object (ISAD-G)",
+  "target_type": "information_object",
+  "description": "Import archival descriptions following ISAD(G) standard",
+  "fields": [
+    {"source_field": "id_0", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "title", "atom_field": "title", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "level", "atom_field": "levelOfDescription", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "repository.ref", "atom_field": "repository", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dates", "atom_field": "eventDates", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "create_time", "atom_field": "eventDates", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "lang_materials", "atom_field": "language", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "subjects", "atom_field": "subjectAccessPoints", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "notes", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "publish", "atom_field": "publicationStatus", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "uri", "atom_field": "digitalObjectPath", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "classifications", "atom_field": "archivalHistory", "constant_value": "Classification: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "ead_id", "atom_field": "archivalHistory", "constant_value": "EAD ID: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "ead_location", "atom_field": "archivalHistory", "constant_value": "EAD Location: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "extents", "atom_field": "archivalHistory", "constant_value": "Extents:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "external_documents", "atom_field": "archivalHistory", "constant_value": "External Documents: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "external_ids", "atom_field": "publicationNote", "constant_value": "External ID: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "finding_aid_author", "atom_field": "findingAids", "constant_value": "Finding aid author: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "finding_aid_date", "atom_field": "findingAids", "constant_value": "Finding aid date: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "finding_aid_title", "atom_field": "findingAids", "constant_value": "Finding aid title: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "resource_type", "atom_field": "archivalHistory", "constant_value": "Resource Type: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "restrictions", "atom_field": "archivalHistory", "constant_value": "Restrictions:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "tree.ref", "atom_field": "archivalHistory", "constant_value": "Tree Ref:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "language", "atom_field": "language", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "script", "atom_field": "script", "constant_value": "latn", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "culture", "atom_field": "culture", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Accession Record",
+  "target_type": "accession",
+  "description": "Import accession/acquisition records",
+  "fields": [
+    {"source_field": "id_0", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "title", "atom_field": "title", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_string", "atom_field": "extentAndMedium", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "accession_date", "atom_field": "accessionDate", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "repository.ref", "atom_field": "repository", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "content_description", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "condition_description", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "disposition", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "inventory", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "provenance", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "general_note", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "restrictions_apply", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "retention_rule", "atom_field": "rules", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "access_restrictions", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "access_restrictions_note", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "use_restrictions", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "use_restrictions_note", "atom_field": "accessionNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "acquisition_type", "atom_field": "acquisitionType", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "collection_management.rights_determined", "atom_field": "appraisal", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "collection_management.processing_priority", "atom_field": "processingPriority", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "collection_management.processing_status", "atom_field": "processingStatus", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

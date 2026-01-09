@@ -140,7 +140,7 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           <?php if ($isStaff): ?>
           <!-- Staff can confirm -->
           <form method="post" class="mb-2">
-            <input type="hidden" name="action" value="confirm">
+            <input type="hidden" name="booking_action" value="confirm">
             <button type="submit" class="btn btn-success w-100">
               <i class="fas fa-check me-2"></i><?php echo __('Confirm Booking'); ?>
             </button>
@@ -150,7 +150,7 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           <?php if ($isStaff || $isOwner): ?>
           <!-- Staff or owner can cancel pending booking -->
           <form method="post">
-            <input type="hidden" name="action" value="cancel">
+            <input type="hidden" name="booking_action" value="cancel">
             <button type="submit" class="btn btn-danger w-100" onclick="return confirm('<?php echo __('Cancel this booking?'); ?>')">
               <i class="fas fa-times me-2"></i><?php echo __('Cancel Booking'); ?>
             </button>
@@ -172,7 +172,7 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
             
             <?php if (!$booking->checked_in_at): ?>
             <form method="post" class="mt-2">
-              <input type="hidden" name="action" value="noshow">
+              <input type="hidden" name="booking_action" value="noshow">
               <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('<?php echo __('Mark as no-show?'); ?>')">
                 <i class="fas fa-user-slash me-2"></i><?php echo __('No Show'); ?>
               </button>
@@ -183,7 +183,7 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           <?php if ($isOwner && !$booking->checked_in_at): ?>
           <!-- Owner can cancel confirmed booking if not yet checked in -->
           <form method="post">
-            <input type="hidden" name="action" value="cancel">
+            <input type="hidden" name="booking_action" value="cancel">
             <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('<?php echo __('Cancel this booking?'); ?>')">
               <i class="fas fa-times me-2"></i><?php echo __('Cancel My Booking'); ?>
             </button>

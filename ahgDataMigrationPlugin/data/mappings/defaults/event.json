@@ -1,0 +1,15 @@
+{
+  "name": "Event Record",
+  "target_type": "event",
+  "description": "Import event records linked to archival descriptions",
+  "fields": [
+    {"source_field": "event_type", "atom_field": "eventDescription", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "date.begin", "atom_field": "eventDate", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "date.end", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": false, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "date.expression", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": false, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "outcome", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": false, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "outcome_note", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": false, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "linked_records", "atom_field": "eventType", "constant_value": "", "concatenate": false, "include": false, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "culture", "atom_field": "culture", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

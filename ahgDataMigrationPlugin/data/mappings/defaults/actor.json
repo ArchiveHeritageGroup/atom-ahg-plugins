@@ -1,0 +1,30 @@
+{
+  "name": "Authority Record (ISAAR-CPF)",
+  "target_type": "actor",
+  "description": "Import authority records (people, corporate bodies, families)",
+  "fields": [
+    {"source_field": "title", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "names", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "display_name.primary_name", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.authorized", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.family_name", "atom_field": "standardizedNameIdentifier", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.fuller_form", "atom_field": "standardizedNameIdentifier", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.rest_of_name", "atom_field": "standardizedNameIdentifier", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.sort_name", "atom_field": "parallelFormsOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.subordinate_name_1", "atom_field": "parallelFormsOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.subordinate_name_2", "atom_field": "parallelFormsOfName", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.source", "atom_field": "sources", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dates_of_existence", "atom_field": "datesOfExistence", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "display_name.use_dates", "atom_field": "datesOfExistence", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "notes", "atom_field": "history", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "external_documents", "atom_field": "history", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "agent_sources", "atom_field": "sources", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "agent_type", "atom_field": "occupations", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "agent_alternate_sets", "atom_field": "maintenanceNotes", "constant_value": "Agent Alternate Sets:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "agent_contacts", "atom_field": "maintenanceNotes", "constant_value": "Agent Contacts:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "agent_conventions_declarations", "atom_field": "maintenanceNotes", "constant_value": "Agent Conventions:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "agent_functions", "atom_field": "maintenanceNotes", "constant_value": "Agent Functions:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "agent_genders", "atom_field": "maintenanceNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "uri", "atom_field": "maintenanceNotes", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"}
+  ]
+}

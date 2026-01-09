@@ -1,0 +1,23 @@
+[
+  {"source_field": "AUTOID", "constant_value": "", "atom_field": "identifier", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "STANDNOMMER", "constant_value": "", "atom_field": "legacyId", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "TITEL", "constant_value": "", "atom_field": "title", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "SUBTITEL", "constant_value": "", "atom_field": "alternateTitle", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "PERSOONLIKE OUTEUR", "constant_value": "", "atom_field": "eventActors", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "KORPORATIEWE OUTEUR", "constant_value": "", "atom_field": "eventActors", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "UITGAWE", "constant_value": "", "atom_field": "archivalHistory", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "\\n"},
+  {"source_field": "UITGEWER", "constant_value": "", "atom_field": "eventActors", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "PLEK VAN UITGAWE", "constant_value": "", "atom_field": "placeAccessPoints", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "DATUM VAN UITGAWE", "constant_value": "", "atom_field": "eventDates", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "ISBN", "constant_value": "ISBN: ", "atom_field": "archivalHistory", "include": true, "concatenate": true, "concat_constant": true, "concat_symbol": "\\n"},
+  {"source_field": "ISSN", "constant_value": "ISSN: ", "atom_field": "archivalHistory", "include": true, "concatenate": true, "concat_constant": true, "concat_symbol": "\\n"},
+  {"source_field": "TAAL", "constant_value": "af", "atom_field": "language", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "AANTAL BLADSYE", "constant_value": "", "atom_field": "extentAndMedium", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "REEKSVERMELDING", "constant_value": "", "atom_field": "archivalHistory", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "ONDERWERP", "constant_value": "", "atom_field": "subjectAccessPoints", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "PLEK", "constant_value": "", "atom_field": "placeAccessPoints", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "OPSOMMING", "constant_value": "", "atom_field": "scopeAndContent", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "TREFWOORDE", "constant_value": "", "atom_field": "subjectAccessPoints", "include": true, "concatenate": true, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "NOTA", "constant_value": "", "atom_field": "generalNote", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"},
+  {"source_field": "culture", "constant_value": "en", "atom_field": "culture", "include": true, "concatenate": false, "concat_constant": false, "concat_symbol": "|"}
+]

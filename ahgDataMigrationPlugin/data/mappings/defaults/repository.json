@@ -1,0 +1,23 @@
+{
+  "name": "Repository (ISDIAH)",
+  "target_type": "repository",
+  "description": "Import archival institutions following ISDIAH standard",
+  "fields": [
+    {"source_field": "repo_code", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "name", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "org_code", "atom_field": "maintenanceNote", "constant_value": "Org Code:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "uri", "atom_field": "maintenanceNote", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\\n"},
+    {"source_field": "display_string", "atom_field": "maintenanceNote", "constant_value": "Display String:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "slug", "atom_field": "maintenanceNote", "constant_value": "Slug:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "position", "atom_field": "maintenanceNote", "constant_value": "Position:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "lock_version", "atom_field": "maintenanceNote", "constant_value": "Lock Version:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "publish", "atom_field": "maintenanceNote", "constant_value": "Publish:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "created_by", "atom_field": "maintenanceNote", "constant_value": "Created By:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "last_modified_by", "atom_field": "maintenanceNote", "constant_value": "Last Modified By:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "create_time", "atom_field": "maintenanceNote", "constant_value": "Create Time:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "system_mtime", "atom_field": "maintenanceNote", "constant_value": "System MTime:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\\n"},
+    {"source_field": "agent_representation.ref", "atom_field": "maintenanceNote", "constant_value": "Agent Representation Ref:", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "culture", "atom_field": "culture", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "levelOfDetail", "atom_field": "levelOfDetail", "constant_value": "Partial", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

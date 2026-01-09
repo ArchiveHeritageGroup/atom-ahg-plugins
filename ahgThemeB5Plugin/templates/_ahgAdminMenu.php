@@ -27,6 +27,23 @@ $hasSecurityClearance = ahgIsPluginEnabled('ahgSecurityClearancePlugin');
 $hasAccessRequest = ahgIsPluginEnabled('ahgAccessRequestPlugin');
 $hasResearch = ahgIsPluginEnabled('ahgResearchPlugin');
 $hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
+$hasDataMigration = ahgIsPluginEnabled('ahgDataMigrationPlugin');
+
+// Get pending counts for badges
+$pendingBookings = 0;
+$pendingResearchers = 0;
+
+if ($isAdmin && $hasResearch) {
+    try {
+        $conn = Propel::getConnection();
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_booking WHERE status = 'pending'");
+        $stmt->execute();
+        $pendingBookings = (int)$stmt->fetchColumn();
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_researcher WHERE status = 'pending'");
+        $stmt->execute();
+        $pendingResearchers = (int)$stmt->fetchColumn();
+    } catch (Exception $e) {}
+}
 ?>
 <?php if ($isAdmin): ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -60,8 +77,8 @@ $hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Research'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-book-reader fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><i class="fas fa-users fa-fw me-1"></i><?php echo __('Researchers'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><i class="fas fa-calendar-alt fa-fw me-1"></i><?php echo __('Bookings'); ?></a></li>
+    <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><span><i class="fas fa-users fa-fw me-1"></i><?php echo __('Researchers'); ?></span><?php if ($pendingResearchers > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingResearchers; ?></span><?php endif; ?></a></li>
+    <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><span><i class="fas fa-calendar-alt fa-fw me-1"></i><?php echo __('Bookings'); ?></span><?php if ($pendingBookings > 0): ?><span class="badge bg-danger rounded-pill"><?php echo $pendingBookings; ?></span><?php endif; ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'rooms']); ?>"><i class="fas fa-door-open fa-fw me-1"></i><?php echo __('Rooms'); ?></a></li>
     <?php endif; ?>
 
@@ -84,6 +101,12 @@ $hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('RiC'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-1"></i><?php echo __('RiC Dashboard'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasDataMigration): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Data'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-exchange-alt fa-fw me-1"></i><?php echo __('Data Migration'); ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

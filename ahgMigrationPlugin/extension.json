@@ -1,0 +1,29 @@
+{
+    "name": "Data Migration Tool",
+    "machine_name": "ahgMigrationPlugin",
+    "version": "1.0.0",
+    "description": "Universal data migration and field mapping tool with sector-based destination mapping. Import from Vernon CMS, ArchivesSpace, DB/TextWorks and export to Archives, Museum, Library, Gallery, or DAM sectors.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgThemeB5Plugin"],
+    "theme_support": ["ahgThemeB5Plugin"],
+    "tables": [
+        "atom_migration_job",
+        "atom_migration_template",
+        "atom_migration_log",
+        "atom_migration_staged"
+    ],
+    "settings": {
+        "migration_upload_path": "uploads/migration",
+        "migration_max_file_size": 104857600,
+        "migration_batch_size": 100,
+        "migration_default_output": "direct",
+        "migration_create_actors": true,
+        "migration_create_terms": true
+    }
+}

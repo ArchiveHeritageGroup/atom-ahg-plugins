@@ -1,0 +1,12 @@
+{
+  "name": "Place Terms",
+  "target_type": "place",
+  "description": "Import geographic/place access points",
+  "fields": [
+    {"source_field": "term", "atom_field": "name", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "place_type", "atom_field": "taxonomy", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "coordinates", "atom_field": "scopeNote", "constant_value": "Coordinates: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "|"},
+    {"source_field": "source", "atom_field": "sourceNote", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "culture", "atom_field": "culture", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

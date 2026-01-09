@@ -4,8 +4,9 @@
  */
 $gap = $config['gap'] ?? '30px';
 $stackMobile = $config['stack_mobile'] ?? true;
-$col1Width = $config['col1_width'] ?? '50';
-$col2Width = $config['col2_width'] ?? '50';
+$col1Width = str_replace('%', '', $config['col1_width'] ?? '50');
+$col2Width = str_replace('%', '', $config['col2_width'] ?? '50');
+error_log("DEBUG ROW2COL: col1_width=" . ($config["col1_width"] ?? "null") . " col2_width=" . ($config["col2_width"] ?? "null") . " => col1Class=" . $col1Width . " col2Class=" . $col2Width);
 
 // Handle various types of child_blocks
 $childBlocks = $block->child_blocks ?? [];
@@ -28,7 +29,7 @@ if (!$isEditorMode && empty($col1Blocks) && empty($col2Blocks)) {
 }
 
 // Map percentage to Bootstrap columns
-$colMap = ['25' => '3', '33' => '4', '50' => '6', '66' => '8', '75' => '9'];
+$colMap = ['15' => '2', '20' => '2', '25' => '3', '33' => '4', '40' => '5', '50' => '6', '60' => '7', '66' => '8', '75' => '9', '80' => '10', '85' => '10'];
 $col1Class = 'col-md-' . ($colMap[$col1Width] ?? '6');
 $col2Class = 'col-md-' . ($colMap[$col2Width] ?? '6');
 ?>
