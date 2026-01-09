@@ -251,6 +251,75 @@ Heritage accounting features:
 | **Donor Agreement Plugin** | Donor tracking, agreements, restrictions, and reminders |
 | **Vendor Plugin** | Supplier management for conservation, digitization, storage |
 
+
+---
+
+## 🔄 Data Migration Tool
+
+Universal data migration and field mapping system for importing from legacy systems:
+
+### Supported Source Systems
+
+| System | Formats | Auto-Detection |
+|--------|---------|----------------|
+| **Vernon CMS** | XML, CSV | ✅ Object Number, Primary Maker fields |
+| **ArchivesSpace** | EAD, CSV | ✅ resource_id, ref_id fields |
+| **DB/TextWorks** | CSV, XML | ✅ Flexible textbase structure |
+| **PastPerfect** | CSV | ✅ objectid, objname fields |
+| **CollectiveAccess** | XML | ✅ ca_objects, idno fields |
+| **Generic** | CSV, XML, EAD | Manual mapping |
+
+### Destination Sectors
+
+| Sector | Standard | Key Fields |
+|--------|----------|------------|
+| **Archives** | ISAD(G) | Reference code, Fonds, Series, File, Item |
+| **Museum** | CCO/Spectrum | Object number, Object name, Dimensions |
+| **Library** | RDA/MARC | Call number, ISBN, Author, Publisher |
+| **Gallery** | VRA Core | Artwork title, Artist, Medium, Dimensions |
+| **DAM** | Dublin Core | Identifier, Title, Creator, Rights |
+
+### Migration Workflow
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   UPLOAD    │ →  │   DETECT    │ →  │    MAP      │ →  │   OUTPUT    │
+│  CSV/XML/   │    │   Source    │    │   Fields    │    │  Preview &  │
+│    EAD      │    │   System    │    │  to Sector  │    │   Import    │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+```
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Auto-Detection** | Identifies source system from file headers/structure |
+| **Visual Field Mapper** | Drag-drop interface for field mapping |
+| **Transformations** | Split, combine, format dates, normalize values |
+| **Concatenation** | Combine multiple source fields with separators |
+| **Constants** | Add fixed values to any target field |
+| **Save Templates** | Save custom mappings for reuse |
+| **Preview** | Review transformed data before import |
+| **Validation** | Check for required fields, data types, duplicates |
+| **Direct Import** | Import directly to AtoM database |
+| **Export CSV** | Generate AtoM-compatible CSV for manual import |
+
+### CLI Commands
+```bash
+php bin/atom migration:import <file> --template=vernon    # Import with template
+php bin/atom migration:validate <file>                    # Validate without importing
+php bin/atom migration:templates                          # List available templates
+```
+
+### Component Locations
+
+| Component | Path |
+|-----------|------|
+| Plugin | `atom-ahg-plugins/ahgDataMigrationPlugin/` |
+| Parsers | `lib/Parsers/` (CsvParser, XmlParser, EadParser) |
+| Sectors | `lib/Sectors/` (ArchivesSector, MuseumSector, etc.) |
+| Templates | `data/templates/` (vernon.json, archivesspace.json, etc.) |
+| UI Module | `modules/dataMigration/` |
+
 ---
 
 ## ⚡ Quick Start
