@@ -31,6 +31,18 @@
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'report']); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-chart-bar me-1"></i><?php echo __('Reports'); ?>
             </a>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary position-relative">
+                <i class="fas fa-bell"></i>
+                <?php $notifCount = $sf_data->getRaw('notificationCount') ?? 0; if ($notifCount > 0): ?>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?php echo $notifCount; ?></span>
+                <?php endif; ?>
+            </a>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary position-relative">
+                <i class="fas fa-bell"></i>
+                <?php $notifCount = $sf_data->getRaw('notificationCount') ?? 0; if ($notifCount > 0): ?>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?php echo $notifCount; ?></span>
+                <?php endif; ?>
+            </a>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'config']); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-cog me-1"></i><?php echo __('Settings'); ?>
             </a>

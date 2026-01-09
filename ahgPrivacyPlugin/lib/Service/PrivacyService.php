@@ -569,7 +569,7 @@ class PrivacyService
         $record = [
             'jurisdiction' => $data['jurisdiction'] ?? 'popia',
             'organization_name' => $data['organization_name'] ?? null,
-            'registration_number' => $data['registration_number'] ?? null,
+            'registration_number' => (!empty($data['registration_number'])) ? $data['registration_number'] : null,
             'data_protection_email' => $data['data_protection_email'] ?? null,
             'dsar_response_days' => $data['dsar_response_days'] ?? 30,
             'breach_notification_hours' => $data['breach_notification_hours'] ?? 72,
@@ -632,12 +632,12 @@ class PrivacyService
         $record = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'title' => $data['title'] ?? null,
+            'phone' => (!empty($data['phone'])) ? $data['phone'] : null,
+            'title' => (!empty($data['title'])) ? $data['title'] : null,
             'jurisdiction' => $data['jurisdiction'] ?? 'all',
-            'registration_number' => $data['registration_number'] ?? null, // For POPIA IO registration
-            'appointed_date' => $data['appointed_date'] ?? null,
-            'user_id' => $data['user_id'] ?? null,
+            'registration_number' => (!empty($data['registration_number'])) ? $data['registration_number'] : null, // For POPIA IO registration
+            'appointed_date' => (!empty($data['appointed_date'])) ? $data['appointed_date'] : null,
+            'user_id' => (!empty($data['user_id'])) ? (int)$data['user_id'] : null,
             'is_active' => isset($data['is_active']) ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -875,11 +875,11 @@ class PrivacyService
             'severity' => $data['severity'] ?? 'medium',
             'status' => 'detected',
             'detected_date' => $data['detected_date'] ?? date('Y-m-d H:i:s'),
-            'occurred_date' => $data['occurred_date'] ?? null,
-            'data_categories' => $data['data_categories'] ?? null,
-            'records_affected' => $data['records_affected'] ?? null,
-            'cause' => $data['cause'] ?? null,
-            'reported_by' => $userId,
+            'occurred_date' => (isset($data['occurred_date']) && $data['occurred_date'] !== '') ? $data['occurred_date'] : null,
+            'data_categories_affected' => (isset($data['data_categories']) && $data['data_categories'] !== '') ? $data['data_categories'] : null,
+            'data_subjects_affected' => (isset($data['records_affected']) && $data['records_affected'] !== '') ? (int)$data['records_affected'] : null,
+            
+            'created_by' => $userId,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -972,19 +972,19 @@ class PrivacyService
                 : ($data['data_categories'] ?? null),
             'data_subjects' => $data['data_subjects'] ?? null,
             'recipients' => $data['recipients'] ?? null,
-            'third_countries' => $data['third_countries'] ?? null,
-            'cross_border_safeguards' => $data['cross_border_safeguards'] ?? null,
+            'third_countries' => (!empty($data['third_countries'])) ? (is_array($data['third_countries']) ? json_encode($data['third_countries']) : $data['third_countries']) : null,
+            'transfers' => $data['cross_border_safeguards'] ?? null,
             'retention_period' => $data['retention_period'] ?? null,
             'security_measures' => $data['security_measures'] ?? null,
             'dpia_required' => $data['dpia_required'] ?? 0,
             'dpia_completed' => $data['dpia_completed'] ?? 0,
-            'dpia_date' => $data['dpia_date'] ?? null,
-            'responsible_person' => $data['responsible_person'] ?? null,
-            'department' => $data['department'] ?? null,
+            'dpia_date' => (!empty($data['dpia_date'])) ? $data['dpia_date'] : null,
+            'owner' => $data['responsible_person'] ?? null,
+            
             'status' => $data['status'] ?? 'draft',
-            'next_review_date' => $data['next_review_date'] ?? null,
-            'repository_id' => $data['repository_id'] ?? null,
-            'updated_by' => $userId,
+            'next_review_date' => (!empty($data['next_review_date'])) ? $data['next_review_date'] : null,
+            
+            
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -1294,4 +1294,293 @@ class PrivacyService
         }
     }
     protected string $auditModule = 'ahgPrivacyPlugin';
+
+    // =====================
+    // Notifications
+    // =====================
+    public function createNotification(int $userId, string $entityType, int $entityId, string $type, string $subject, ?string $message = null, ?string $link = null, ?int $createdBy = null): int
+    {
+        return DB::table('privacy_notification')->insertGetId([
+            'user_id' => $userId,
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'notification_type' => $type,
+            'subject' => $subject,
+            'message' => $message,
+            'link' => $link,
+            'created_by' => $createdBy,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    public function getUnreadNotifications(int $userId, int $limit = 10): Collection
+    {
+        return DB::table('privacy_notification')
+            ->where('user_id', $userId)
+            ->where('is_read', 0)
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function getNotificationCount(int $userId): int
+    {
+        return DB::table('privacy_notification')
+            ->where('user_id', $userId)
+            ->where('is_read', 0)
+            ->count();
+    }
+
+    public function markNotificationRead(int $id, int $userId): bool
+    {
+        return DB::table('privacy_notification')
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->update(['is_read' => 1, 'read_at' => date('Y-m-d H:i:s')]) > 0;
+    }
+
+    public function markAllNotificationsRead(int $userId): int
+    {
+        return DB::table('privacy_notification')
+            ->where('user_id', $userId)
+            ->where('is_read', 0)
+            ->update(['is_read' => 1, 'read_at' => date('Y-m-d H:i:s')]);
+    }
+
+    // =====================
+    // ROPA Approval Workflow
+    // =====================
+    public function submitRopaForApproval(int $id, int $userId, ?int $assignedOfficerId = null): bool
+    {
+        $activity = $this->getRopa($id);
+        if (!$activity || $activity->status !== 'draft') {
+            return false;
+        }
+
+        if (!$assignedOfficerId) {
+            $officer = DB::table('privacy_officer')
+                ->where('is_active', 1)
+                ->where('is_primary', 1)
+                ->first();
+            $assignedOfficerId = $officer->user_id ?? null;
+        }
+
+        DB::table('privacy_processing_activity')
+            ->where('id', $id)
+            ->update([
+                'status' => 'pending_review',
+                'submitted_at' => date('Y-m-d H:i:s'),
+                'submitted_by' => $userId,
+                'assigned_officer_id' => $assignedOfficerId,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+        $this->logApprovalAction($id, 'ropa', 'submitted', 'draft', 'pending_review', null, $userId);
+
+        if ($assignedOfficerId) {
+            $this->createNotification(
+                $assignedOfficerId,
+                'ropa',
+                $id,
+                'submitted',
+                'ROPA Submitted for Review: ' . $activity->name,
+                'A processing activity has been submitted for your review.',
+                '/privacyAdmin/ropaView/id/' . $id,
+                $userId
+            );
+            $this->sendApprovalEmail($assignedOfficerId, 'submitted', $activity);
+        }
+
+        return true;
+    }
+
+    public function approveRopa(int $id, int $userId, ?string $comment = null): bool
+    {
+        $activity = $this->getRopa($id);
+        if (!$activity || $activity->status !== 'pending_review') {
+            return false;
+        }
+
+        DB::table('privacy_processing_activity')
+            ->where('id', $id)
+            ->update([
+                'status' => 'approved',
+                'approved_at' => date('Y-m-d H:i:s'),
+                'approved_by' => $userId,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+        $this->logApprovalAction($id, 'ropa', 'approved', 'pending_review', 'approved', $comment, $userId);
+
+        if ($activity->created_by) {
+            $this->createNotification(
+                $activity->created_by,
+                'ropa',
+                $id,
+                'approved',
+                'ROPA Approved: ' . $activity->name,
+                $comment ?: 'Your processing activity has been approved.',
+                '/privacyAdmin/ropaView/id/' . $id,
+                $userId
+            );
+            $this->sendApprovalEmail($activity->created_by, 'approved', $activity, $comment);
+        }
+
+        return true;
+    }
+
+    public function rejectRopa(int $id, int $userId, string $reason): bool
+    {
+        $activity = $this->getRopa($id);
+        if (!$activity || $activity->status !== 'pending_review') {
+            return false;
+        }
+
+        DB::table('privacy_processing_activity')
+            ->where('id', $id)
+            ->update([
+                'status' => 'draft',
+                'rejected_at' => date('Y-m-d H:i:s'),
+                'rejected_by' => $userId,
+                'rejection_reason' => $reason,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+        $this->logApprovalAction($id, 'ropa', 'rejected', 'pending_review', 'draft', $reason, $userId);
+
+        if ($activity->created_by) {
+            $this->createNotification(
+                $activity->created_by,
+                'ropa',
+                $id,
+                'rejected',
+                'ROPA Requires Changes: ' . $activity->name,
+                'Reason: ' . $reason,
+                '/privacyAdmin/ropaEdit/id/' . $id,
+                $userId
+            );
+            $this->sendApprovalEmail($activity->created_by, 'rejected', $activity, $reason);
+        }
+
+        return true;
+    }
+
+    protected function logApprovalAction(int $entityId, string $entityType, string $action, ?string $oldStatus, ?string $newStatus, ?string $comment, int $userId): int
+    {
+        return DB::table('privacy_approval_log')->insertGetId([
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'action' => $action,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'comment' => $comment,
+            'user_id' => $userId,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    public function getApprovalHistory(int $entityId, string $entityType = 'ropa'): Collection
+    {
+        return DB::table('privacy_approval_log as l')
+            ->leftJoin('user as u', 'u.id', '=', 'l.user_id')
+            ->where('l.entity_type', $entityType)
+            ->where('l.entity_id', $entityId)
+            ->select(['l.*', 'u.username', 'u.email'])
+            ->orderByDesc('l.created_at')
+            ->get();
+    }
+
+    public function getPrivacyOfficers(): Collection
+    {
+        return DB::table('privacy_officer')
+            ->where('is_active', 1)
+            ->whereNotNull('user_id')
+            ->get();
+    }
+
+    public function isPrivacyOfficer(int $userId): bool
+    {
+        return DB::table('privacy_officer')
+            ->where('user_id', $userId)
+            ->where('is_active', 1)
+            ->exists();
+    }
+
+    protected function sendApprovalEmail(int $userId, string $action, $activity, ?string $comment = null): void
+    {
+        $user = DB::table('user')->find($userId);
+        if (!$user || empty($user->email)) {
+            return;
+        }
+
+        $subjects = [
+            'submitted' => 'ROPA Submitted for Review: ' . $activity->name,
+            'approved' => 'ROPA Approved: ' . $activity->name,
+            'rejected' => 'ROPA Requires Changes: ' . $activity->name
+        ];
+
+        $subject = $subjects[$action] ?? 'ROPA Update: ' . $activity->name;
+
+        try {
+            $baseUrl = sfConfig::get('app_siteBaseUrl', '');
+            $link = $baseUrl . '/privacyAdmin/ropaView/id/' . $activity->id;
+            
+            $body = $this->buildApprovalEmailBody($action, $activity, $comment, $user, $link);
+            
+            $mailer = sfContext::getInstance()->getMailer();
+            $message = $mailer->compose(
+                sfConfig::get('app_mail_from', 'noreply@example.com'),
+                $user->email,
+                $subject,
+                $body
+            );
+            $message->setContentType('text/html');
+            $mailer->send($message);
+
+            DB::table('privacy_notification')
+                ->where('user_id', $userId)
+                ->where('entity_type', 'ropa')
+                ->where('entity_id', $activity->id)
+                ->where('notification_type', $action)
+                ->orderByDesc('created_at')
+                ->limit(1)
+                ->update(['email_sent' => 1, 'email_sent_at' => date('Y-m-d H:i:s')]);
+        } catch (\Exception $e) {
+            error_log('Privacy email failed: ' . $e->getMessage());
+        }
+    }
+
+    protected function buildApprovalEmailBody(string $action, $activity, ?string $comment, $user, string $link): string
+    {
+        $html = '<html><body style="font-family: Arial, sans-serif;">';
+        $html .= '<h2>Processing Activity Update</h2>';
+        $html .= '<p>Dear ' . htmlspecialchars($user->username ?? 'User') . ',</p>';
+
+        switch ($action) {
+            case 'submitted':
+                $html .= '<p>A processing activity has been submitted for your review:</p>';
+                break;
+            case 'approved':
+                $html .= '<p>Your processing activity has been <strong style="color: green;">approved</strong>:</p>';
+                break;
+            case 'rejected':
+                $html .= '<p>Your processing activity requires <strong style="color: red;">changes</strong>:</p>';
+                break;
+        }
+
+        $html .= '<div style="background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 5px;">';
+        $html .= '<strong>' . htmlspecialchars($activity->name) . '</strong><br>';
+        $html .= '<small>Purpose: ' . htmlspecialchars(substr($activity->purpose ?? '', 0, 100)) . '...</small>';
+        $html .= '</div>';
+
+        if ($comment) {
+            $html .= '<p><strong>Comment:</strong><br>' . nl2br(htmlspecialchars($comment)) . '</p>';
+        }
+
+        $html .= '<p><a href="' . $link . '" style="display: inline-block; padding: 10px 20px; background: #0d6efd; color: white; text-decoration: none; border-radius: 5px;">View Details</a></p>';
+        $html .= '<p style="color: #666; font-size: 12px;">This is an automated message from the Privacy Management System.</p>';
+        $html .= '</body></html>';
+
+        return $html;
+    }
 }

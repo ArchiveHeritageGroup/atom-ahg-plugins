@@ -1,4 +1,5 @@
 <?php use_helper('Text'); ?>
+<?php $rawBases = $sf_data->getRaw('lawfulBases'); ?>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -46,7 +47,7 @@
                             </a>
                         </td>
                         <td><?php echo esc_entities(mb_substr($activity->purpose ?? '', 0, 50)); ?>...</td>
-                        <td><?php echo esc_entities($lawfulBases[$activity->lawful_basis] ?? $activity->lawful_basis); ?></td>
+                        <td><?php echo esc_entities(isset($rawBases[$activity->lawful_basis]) ? $rawBases[$activity->lawful_basis]['label'] : $activity->lawful_basis); ?></td>
                         <td>
                             <?php if ($activity->dpia_required): ?>
                                 <?php if ($activity->dpia_completed): ?>

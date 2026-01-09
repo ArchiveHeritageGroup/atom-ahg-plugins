@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Database\Capsule\Manager as DB;
 
 class privacyAdminActions extends sfActions
 {
@@ -43,6 +44,7 @@ class privacyAdminActions extends sfActions
         $this->config = $service->getConfig($jurisdiction ?? 'popia');
         $this->recentDsars = $service->getDsarList(['jurisdiction' => $jurisdiction, 'limit' => 5]);
         $this->openBreaches = $service->getBreachList(['status' => 'investigating', 'jurisdiction' => $jurisdiction]);
+        $this->notificationCount = $service->getNotificationCount($this->getUserId());
     }
 
     // =====================
@@ -288,6 +290,22 @@ class privacyAdminActions extends sfActions
             $service = $this->getService();
             $service->saveOfficer($request->getPostParameters());
             $this->getUser()->setFlash('success', 'Privacy officer added successfully');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'officerList']);
+        }
+    }
+
+    public function executeOfficerEdit(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
+        $service = $this->getService();
+        $this->officer = $service->getOfficer($request->getParameter('id'));
+        if (!$this->officer) {
+            $this->forward404();
+        }
+        if ($request->isMethod('post')) {
+            $service->saveOfficer($request->getPostParameters(), $request->getParameter('id'));
+            $this->getUser()->setFlash('success', 'Privacy officer updated successfully');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'officerList']);
         }
     }
@@ -566,5 +584,100 @@ class privacyAdminActions extends sfActions
             $data['created_at'] = date('Y-m-d H:i:s');
             \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->insert($data);
         }
+    }
+
+    // =====================
+    // ROPA Approval Actions
+    // =====================
+    public function executeRopaSubmit(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $id = $request->getParameter('id');
+        $officerId = $request->getParameter('officer_id');
+        
+        if ($service->submitRopaForApproval($id, $this->getUserId(), $officerId)) {
+            $this->getUser()->setFlash('success', 'Processing activity submitted for review');
+        } else {
+            $this->getUser()->setFlash('error', 'Unable to submit for review. Only draft items can be submitted.');
+        }
+        
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+    }
+
+    public function executeRopaApprove(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $id = $request->getParameter('id');
+        $comment = $request->getParameter('comment');
+        
+        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->context->user->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Only Privacy Officers can approve records');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+        }
+        
+        if ($service->approveRopa($id, $this->getUserId(), $comment)) {
+            $this->getUser()->setFlash('success', 'Processing activity approved');
+        } else {
+            $this->getUser()->setFlash('error', 'Unable to approve. Only pending review items can be approved.');
+        }
+        
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+    }
+
+    public function executeRopaReject(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $id = $request->getParameter('id');
+        $reason = $request->getParameter('reason');
+        
+        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->context->user->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Only Privacy Officers can reject records');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+        }
+        
+        if (empty($reason)) {
+            $this->getUser()->setFlash('error', 'Please provide a reason for rejection');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+        }
+        
+        if ($service->rejectRopa($id, $this->getUserId(), $reason)) {
+            $this->getUser()->setFlash('success', 'Processing activity returned for changes');
+        } else {
+            $this->getUser()->setFlash('error', 'Unable to reject. Only pending review items can be rejected.');
+        }
+        
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+    }
+
+    // =====================
+    // Notifications
+    // =====================
+    public function executeNotifications(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->notifications = $service->getUnreadNotifications($this->getUserId(), 50);
+    }
+
+    public function executeNotificationRead(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $id = $request->getParameter('id');
+        $service->markNotificationRead($id, $this->getUserId());
+        
+        // Get notification to redirect to link
+        $notification = DB::table('privacy_notification')->find($id);
+        if ($notification && $notification->link) {
+            $this->redirect($notification->link);
+        }
+        
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'notifications']);
+    }
+
+    public function executeNotificationMarkAllRead(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $service->markAllNotificationsRead($this->getUserId());
+        $this->getUser()->setFlash('success', 'All notifications marked as read');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'notifications']);
     }
 }
