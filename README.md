@@ -49,7 +49,7 @@ The AtoM AHG Framework extends Access to Memory 2.8+ with Laravel Query Builder 
 | 🔬 [Research](#-research--access) | 2 | Researcher registration, workspace, and access control |
 | 🔒 [Security](#-required-installed-by-default) | 1 | Multi-level security classification (Public to Top Secret) |
 | 📋 [Compliance](#-compliance--governance) | 2 | Privacy (6 jurisdictions) and Heritage Accounting (10 standards) |
-| 🛠️ [Utilities](#-utility-plugins) | 5 | Backup, audit, rights, vendor, and donor management |
+| 🛠️ [Utilities](#-utility-plugins) | 5 | Backup, audit, rights, vendor, donor management and data migration |
 | 🎬 [Media](#-media--enhanced-features) | 6 | 3D viewers, audio/video players, transcription, metadata |
 
 ---
