@@ -1,14 +1,31 @@
 {
     "name": "ahgNerPlugin",
     "version": "1.0.0",
-    "description": "Named Entity Recognition - Extract and link people, places, organizations from archival records",
+    "description": "Named Entity Recognition - Extract and link people, places, organizations, and dates from archival records using AI",
     "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
     "requires": {
         "atom": ">=2.8",
-        "php": ">=8.1"
+        "php": ">=8.1",
+        "atom_framework": ">=1.0.0"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": []
     },
     "tables": [
         "ahg_ner_extraction",
-        "ahg_ner_entity"
-    ]
+        "ahg_ner_entity",
+        "ahg_ner_settings",
+        "ahg_ner_usage"
+    ],
+    "shared_tables": [],
+    "services": [
+        "ahg-ner.service"
+    ],
+    "install_task": "ner:install",
+    "uninstall_task": "ner:uninstall",
+    "category": "ai",
+    "keywords": ["NER", "AI", "entity extraction", "cataloguing", "automation"]
 }
