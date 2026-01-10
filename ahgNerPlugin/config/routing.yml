@@ -1,0 +1,36 @@
+# NER Plugin Routes
+ahg_ner_extract:
+  url: /ner/extract/:id
+  param: { module: ahgNer, action: extract }
+
+ahg_ner_review:
+  url: /ner/review
+  param: { module: ahgNer, action: review }
+
+ahg_ner_entities:
+  url: /ner/entities/:id
+  param: { module: ahgNer, action: getEntities }
+
+ahg_ner_update:
+  url: /ner/entity/update
+  param: { module: ahgNer, action: updateEntity }
+
+ahg_ner_create_actor:
+  url: /ner/create/actor
+  param: { module: ahgNer, action: createActor }
+
+ahg_ner_create_place:
+  url: /ner/create/place
+  param: { module: ahgNer, action: createPlace }
+
+ahg_ner_create_subject:
+  url: /ner/create/subject
+  param: { module: ahgNer, action: createSubject }
+
+ahg_ner_health:
+  url: /ner/health
+  param: { module: ahgNer, action: health }
+
+ahg_ner_bulk_save:
+  url: /ner/bulk-save
+  param: { module: ahgNer, action: bulkSave }

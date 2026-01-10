@@ -306,3 +306,58 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
   <?php } ?>
 </ul>
 <?php } ?>
+
+<!-- NER Extract Button -->
+<?php if (sfContext::getInstance()->getUser()->hasCredential('editor')): ?>
+<section id="ner-section">
+  <h4>Named Entity Recognition</h4>
+  <ul class="list-unstyled">
+    <li>
+      <button type="button" class="btn btn-sm btn-outline-primary w-100" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>)">
+        <i class="bi bi-cpu me-1"></i>Extract Entities
+      </button>
+    </li>
+  </ul>
+  <div id="nerResults" class="mt-2 small" style="display: none;"></div>
+</section>
+<script>
+function extractEntities(objectId) {
+  const btn = document.getElementById('nerExtractBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Extracting...';
+  
+  fetch('/ner/extract/' + objectId, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-cpu me-1"></i>Extract Entities';
+      
+      if (!data.success) {
+        alert('Error: ' + (data.error || 'Extraction failed'));
+        return;
+      }
+      
+      let html = '';
+      const icons = { PERSON: 'bi-person', ORG: 'bi-building', GPE: 'bi-geo-alt', DATE: 'bi-calendar' };
+      for (const [type, items] of Object.entries(data.entities)) {
+        if (items.length) {
+          html += '<strong><i class="' + icons[type] + ' me-1"></i>' + type + ':</strong> ' + items.join(', ') + '<br>';
+        }
+      }
+      if (data.entity_count > 0) {
+        html += '<a href="/ner/review" class="btn btn-sm btn-success mt-2">Review & Link</a>';
+      } else {
+        html = '<span class="text-muted">No entities found</span>';
+      }
+      
+      document.getElementById('nerResults').innerHTML = html;
+      document.getElementById('nerResults').style.display = 'block';
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-cpu me-1"></i>Extract Entities';
+      alert('Error: ' + err.message);
+    });
+}
+</script>
+<?php endif ?>

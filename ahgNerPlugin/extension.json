@@ -1,0 +1,14 @@
+{
+    "name": "ahgNerPlugin",
+    "version": "1.0.0",
+    "description": "Named Entity Recognition - Extract and link people, places, organizations from archival records",
+    "author": "The Archive and Heritage Group",
+    "requires": {
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "tables": [
+        "ahg_ner_extraction",
+        "ahg_ner_entity"
+    ]
+}
