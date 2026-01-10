@@ -477,6 +477,54 @@ class vendorActions extends sfActions
 
     public function executeServiceTypes(sfWebRequest $request)
     {
+        error_log("SERVICE_TYPES: Method=" . $request->getMethod());
+        
+        // Handle POST actions
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action');
+            error_log("SERVICE_TYPES: POST action=" . $action);
+            error_log("SERVICE_TYPES: name=" . $request->getParameter('name'));
+            $id = $request->getParameter('id');
+            $name = trim($request->getParameter('name', ''));
+            $description = trim($request->getParameter('description', ''));
+            $isActive = $request->getParameter('is_active') ? 1 : 0;
+            
+            try {
+                switch ($action) {
+                    case 'add':
+                        if (empty($name)) {
+                            $this->getUser()->setFlash('error', 'Name is required.');
+                            break;
+                        }
+                        $this->service->addServiceType($name, $description, $isActive);
+                        $this->getUser()->setFlash('success', 'Service type added successfully.');
+                        break;
+                        
+                    case 'edit':
+                        if (empty($id) || empty($name)) {
+                            $this->getUser()->setFlash('error', 'Invalid request.');
+                            break;
+                        }
+                        $this->service->updateServiceType($id, $name, $description, $isActive);
+                        $this->getUser()->setFlash('success', 'Service type updated successfully.');
+                        break;
+                        
+                    case 'delete':
+                        if (empty($id)) {
+                            $this->getUser()->setFlash('error', 'Invalid request.');
+                            break;
+                        }
+                        $this->service->deleteServiceType($id);
+                        $this->getUser()->setFlash('success', 'Service type deleted successfully.');
+                        break;
+                }
+            } catch (Exception $e) {
+                $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
+            }
+            
+            $this->redirect('ahg_vend_service_types');
+        }
+        
         $this->serviceTypes = $this->service->listServiceTypes(false);
     }
 }

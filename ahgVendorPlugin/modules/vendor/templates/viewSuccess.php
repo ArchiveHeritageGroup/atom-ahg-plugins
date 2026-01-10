@@ -15,8 +15,8 @@ if (is_object($statsRaw)) {
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>">Vendors</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_list'); ?>">Vendors</a></li>
             <li class="breadcrumb-item active"><?php echo esc_entities($vendorRaw->name); ?></li>
         </ol>
     </nav>
@@ -32,10 +32,10 @@ if (is_object($statsRaw)) {
             </span>
         </h1>
         <div>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'edit', 'slug' => $vendorRaw->slug]); ?>" class="btn btn-primary">
+            <a href="<?php echo url_for('ahg_vend_edit', ['slug' => $vendorRaw->slug]); ?>" class="btn btn-primary">
                 <i class="fas fa-edit me-1"></i>Edit
             </a>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction', 'vendor' => $vendorRaw->slug]); ?>" class="btn btn-success">
+            <a href="<?php echo url_for('ahg_vend_transaction_add', ['vendor' => $vendorRaw->slug]); ?>" class="btn btn-success">
                 <i class="fas fa-plus me-1"></i>New Transaction
             </a>
         </div>
@@ -176,7 +176,7 @@ if (is_object($statsRaw)) {
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'deleteContact', 'slug' => $vendorRaw->slug, 'contact_id' => $contact->id]); ?>" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this contact?');">
+                                            <a href="<?php echo url_for('ahg_vend_contact_delete', ['slug' => $vendorRaw->slug, 'contact_id' => $contact->id]); ?>" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this contact?');">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -199,7 +199,7 @@ if (is_object($statsRaw)) {
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-exchange-alt me-2"></i>Recent Transactions</span>
-                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']) . '?vendor_id=' . $vendorRaw->id; ?>" class="btn btn-sm btn-outline-primary">
+                    <a href="<?php echo url_for('ahg_vend_transactions') . '?vendor_id=' . $vendorRaw->id; ?>" class="btn btn-sm btn-outline-primary">
                         View All
                     </a>
                 </div>
@@ -229,7 +229,7 @@ if (is_object($statsRaw)) {
                                 ?>
                                 <tr>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                        <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>">
                                             <?php echo esc_entities($trans->transaction_number); ?>
                                         </a>
                                     </td>
@@ -401,7 +401,7 @@ if (is_object($statsRaw)) {
 <div class="modal fade" id="addContactModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => 'addContact', 'slug' => $vendorRaw->slug]); ?>">
+            <form method="post" action="<?php echo url_for('ahg_vend_contact_add', ['slug' => $vendorRaw->slug]); ?>">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Contact</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

@@ -9,8 +9,8 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>">Transactions</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_transactions'); ?>">Transactions</a></li>
             <li class="breadcrumb-item active">New Transaction</li>
         </ol>
     </nav>
@@ -27,7 +27,7 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
     </div>
     <?php endif; ?>
 
-    <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" id="transactionForm">
+    <form method="post" action="<?php echo url_for('ahg_vend_transaction_add'); ?>" id="transactionForm">
         <div class="row">
             <div class="col-md-8">
                 <!-- Basic Info -->
@@ -179,7 +179,7 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-save me-2"></i>Create Transaction
                             </button>
-                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for('ahg_vend_transactions'); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
                         </div>

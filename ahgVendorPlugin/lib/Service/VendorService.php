@@ -163,6 +163,44 @@ class VendorService
         return $this->repository->getServiceTypeById($id);
     }
 
+    public function addServiceType(string $name, ?string $description = null, int $isActive = 1): int
+    {
+        $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $name));
+        $maxOrder = DB::table('ahg_vendor_service_types')->max('display_order') ?? 0;
+        
+        return DB::table('ahg_vendor_service_types')->insertGetId([
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description,
+            'is_active' => $isActive,
+            'display_order' => $maxOrder + 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function updateServiceType(int $id, string $name, ?string $description = null, int $isActive = 1): bool
+    {
+        $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $name));
+        
+        return DB::table('ahg_vendor_service_types')
+            ->where('id', $id)
+            ->update([
+                'name' => $name,
+                'slug' => $slug,
+                'description' => $description,
+                'is_active' => $isActive,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]) > 0;
+    }
+
+    public function deleteServiceType(int $id): bool
+    {
+        return DB::table('ahg_vendor_service_types')
+            ->where('id', $id)
+            ->delete() > 0;
+    }
+
     public function getVendorServices(int $vendorId): Collection
     {
         return $this->repository->getVendorServices($vendorId);

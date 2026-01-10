@@ -3,10 +3,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2"><i class="fas fa-building me-2"></i>Vendors</h1>
         <div>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for('ahg_vend_index'); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
             </a>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-primary">
+            <a href="<?php echo url_for('ahg_vend_add'); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Add Vendor
             </a>
         </div>
@@ -15,7 +15,7 @@
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="get" action="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>" class="row g-3">
+            <form method="get" action="<?php echo url_for('ahg_vend_list'); ?>" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Search</label>
                     <input type="text" name="search" class="form-control" placeholder="Name, code, email..." value="<?php echo esc_entities($filters['search'] ?? ''); ?>">
@@ -89,7 +89,7 @@
                         <tr>
                             <td><code><?php echo esc_entities($vendor->vendor_code); ?></code></td>
                             <td>
-                                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $vendor->slug]); ?>">
+                                <a href="<?php echo url_for('ahg_vend_view', ['slug' => $vendor->slug]); ?>">
                                     <strong><?php echo esc_entities($vendor->name); ?></strong>
                                 </a>
                             </td>
@@ -130,13 +130,13 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $vendor->slug]); ?>" class="btn btn-outline-primary" title="View">
+                                    <a href="<?php echo url_for('ahg_vend_view', ['slug' => $vendor->slug]); ?>" class="btn btn-outline-primary" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'edit', 'slug' => $vendor->slug]); ?>" class="btn btn-outline-secondary" title="Edit">
+                                    <a href="<?php echo url_for('ahg_vend_edit', ['slug' => $vendor->slug]); ?>" class="btn btn-outline-secondary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction', 'vendor' => $vendor->slug]); ?>" class="btn btn-outline-success" title="New Transaction">
+                                    <a href="<?php echo url_for('ahg_vend_transaction_add', ['vendor' => $vendor->slug]); ?>" class="btn btn-outline-success" title="New Transaction">
                                         <i class="fas fa-plus"></i>
                                     </a>
                                     <button type="button" class="btn btn-outline-danger" title="Delete" onclick="deleteVendor('<?php echo $vendor->slug; ?>', '<?php echo esc_entities($vendor->name); ?>')">
@@ -153,7 +153,7 @@
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-building fa-3x mb-3"></i>
                 <p>No vendors found matching your criteria</p>
-                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-primary">
+                <a href="<?php echo url_for('ahg_vend_add'); ?>" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i>Add First Vendor
                 </a>
             </div>
@@ -200,7 +200,7 @@ function deleteVendor(slug, name) {
 
 document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
     const form = document.getElementById('deleteVendorForm');
-    form.action = '/index.php/vendor/' + deleteSlug + '/delete';
+    form.action = '/index.php/ahg/vend/delete/' + deleteSlug;
     form.submit();
 });
 </script>

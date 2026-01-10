@@ -2,8 +2,8 @@
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>">Vendors</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_list'); ?>">Vendors</a></li>
             <li class="breadcrumb-item active">Add Vendor</li>
         </ol>
     </nav>
@@ -20,7 +20,7 @@
     </div>
     <?php endif; ?>
 
-    <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>">
+    <form method="post" action="<?php echo url_for('ahg_vend_add'); ?>">
         <div class="row">
             <div class="col-md-8">
                 <!-- Basic Information -->
@@ -215,7 +215,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save me-1"></i>Save Vendor
                 </button>
-                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>" class="btn btn-secondary">Cancel</a>
+                <a href="<?php echo url_for('ahg_vend_list'); ?>" class="btn btn-secondary">Cancel</a>
             </div>
         </div>
     </form>

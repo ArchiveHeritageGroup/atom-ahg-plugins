@@ -3,13 +3,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2"><i class="fas fa-truck me-2"></i>Vendor Management</h1>
         <div>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for('ahg_vend_list'); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-building me-1"></i>All Vendors
             </a>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for('ahg_vend_transactions'); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-exchange-alt me-1"></i>All Transactions
             </a>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-primary">
+            <a href="<?php echo url_for('ahg_vend_add'); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Add Vendor
             </a>
         </div>
@@ -122,7 +122,7 @@
                                 <?php foreach ($overdueTransactions as $trans): ?>
                                 <tr>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                        <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>">
                                             <?php echo esc_entities($trans->transaction_number); ?>
                                         </a>
                                     </td>
@@ -135,7 +135,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>" class="btn btn-sm btn-outline-primary">
+                                        <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -154,7 +154,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-history me-2"></i>Recent Active Transactions</span>
-                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-sm btn-primary">
+                    <a href="<?php echo url_for('ahg_vend_transaction_add'); ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus me-1"></i>New Transaction
                     </a>
                 </div>
@@ -176,12 +176,12 @@
                                 <?php foreach ($activeTransactions as $trans): ?>
                                 <tr>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                        <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>">
                                             <?php echo esc_entities($trans->transaction_number); ?>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $trans->vendor_slug]); ?>">
+                                        <a href="<?php echo url_for('ahg_vend_view', ['slug' => $trans->vendor_slug]); ?>">
                                             <?php echo esc_entities($trans->vendor_name); ?>
                                         </a>
                                     </td>
@@ -208,7 +208,7 @@
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
-                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>">View all transactions →</a>
+                    <a href="<?php echo url_for('ahg_vend_transactions'); ?>">View all transactions →</a>
                 </div>
             </div>
         </div>
@@ -257,13 +257,13 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'add']); ?>" class="btn btn-outline-primary">
+                        <a href="<?php echo url_for('ahg_vend_add'); ?>" class="btn btn-outline-primary">
                             <i class="fas fa-building me-2"></i>Add New Vendor
                         </a>
-                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-outline-success">
+                        <a href="<?php echo url_for('ahg_vend_transaction_add'); ?>" class="btn btn-outline-success">
                             <i class="fas fa-plus me-2"></i>Create Transaction
                         </a>
-                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions', 'overdue' => 1]); ?>" class="btn btn-outline-danger">
+                        <a href="<?php echo url_for('ahg_vend_transactions') . '?overdue=1'; ?>" class="btn btn-outline-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>View Overdue Items
                         </a>
                     </div>

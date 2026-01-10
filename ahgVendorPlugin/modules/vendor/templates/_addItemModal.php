@@ -2,7 +2,7 @@
 <div class="modal fade" id="addItemModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransactionItem', 'id' => $transactionRaw->id]); ?>" id="addItemForm">
+            <form method="post" action="<?php echo url_for('ahg_vend_transaction_item_add', ['id' => $transactionRaw->id]); ?>" id="addItemForm">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-link me-2"></i>Link GLAM/DAM Item</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

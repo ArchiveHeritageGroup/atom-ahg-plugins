@@ -11,10 +11,10 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>">Vendors</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_list'); ?>">Vendors</a></li>
             <?php if (!$isNew): ?>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $vendorRaw->slug]); ?>"><?php echo esc_entities($vendorRaw->name); ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_view', ['slug' => $vendorRaw->slug]); ?>"><?php echo esc_entities($vendorRaw->name); ?></a></li>
             <?php endif; ?>
             <li class="breadcrumb-item active"><?php echo $isNew ? 'Add New' : 'Edit'; ?></li>
         </ol>
@@ -26,7 +26,7 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
         </h1>
     </div>
 
-    <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => $isNew ? 'add' : 'edit', 'slug' => $vendorRaw->slug ?? '']); ?>" class="needs-validation" novalidate>
+    <form method="post" action="<?php echo url_for($isNew ? 'ahg_vend_add' : 'ahg_vend_edit', $isNew ? [] : ['slug' => $vendorRaw->slug ?? '']); ?>" class="needs-validation" novalidate>
         <?php if (!$isNew): ?>
         <input type="hidden" name="id" value="<?php echo $vendorRaw->id; ?>">
         <?php endif; ?>
@@ -298,11 +298,11 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
                                 <i class="fas fa-save me-2"></i><?php echo $isNew ? 'Create Vendor' : 'Save Changes'; ?>
                             </button>
                             <?php if (!$isNew): ?>
-                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $vendorRaw->slug]); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for('ahg_vend_view', ['slug' => $vendorRaw->slug]); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
                             <?php else: ?>
-                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'list']); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for('ahg_vend_list'); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
                             <?php endif; ?>

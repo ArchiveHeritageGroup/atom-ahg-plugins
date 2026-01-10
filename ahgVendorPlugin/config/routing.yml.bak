@@ -1,0 +1,73 @@
+# ============================================================================
+# ahgVendorPlugin - Standardized Routing
+# Pattern: /ahg/vend/{action}/{params}
+# Updated: 2026-01-10
+# ============================================================================
+
+# Dashboard / Index
+ahg_vend_index:
+  url: /ahg/vend
+  param: { module: vendor, action: index }
+
+# List all vendors
+ahg_vend_list:
+  url: /ahg/vend/list
+  param: { module: vendor, action: list }
+
+# Add new vendor
+ahg_vend_add:
+  url: /ahg/vend/add
+  param: { module: vendor, action: add }
+
+# View vendor (specific slug route)
+ahg_vend_view:
+  url: /ahg/vend/view/:slug
+  param: { module: vendor, action: view }
+  requirements:
+    slug: "[a-z0-9-]+"
+
+# Edit vendor
+ahg_vend_edit:
+  url: /ahg/vend/edit/:slug
+  param: { module: vendor, action: edit }
+  requirements:
+    slug: "[a-z0-9-]+"
+
+# Transactions list
+ahg_vend_transactions:
+  url: /ahg/vend/transactions
+  param: { module: vendor, action: transactions }
+
+# Add transaction
+ahg_vend_transaction_add:
+  url: /ahg/vend/transaction/add
+  param: { module: vendor, action: addTransaction }
+
+# View transaction
+ahg_vend_transaction_view:
+  url: /ahg/vend/transaction/:id
+  param: { module: vendor, action: viewTransaction }
+  requirements:
+    id: \d+
+
+# Service types management
+ahg_vend_service_types:
+  url: /ahg/vend/service-types
+  param: { module: vendor, action: serviceTypes }
+
+# ============================================================================
+# Legacy redirects (temporary - remove after 3 months)
+# ============================================================================
+vendor_legacy_index:
+  url: /vendor
+  param: { module: vendor, action: legacyRedirect, target: ahg_vend_index }
+
+vendor_legacy_list:
+  url: /vendor/list
+  param: { module: vendor, action: legacyRedirect, target: ahg_vend_list }
+
+vendor_legacy_view:
+  url: /vendor/:slug
+  param: { module: vendor, action: legacyRedirect, target: ahg_vend_view }
+  requirements:
+    slug: "[a-z0-9-]+"

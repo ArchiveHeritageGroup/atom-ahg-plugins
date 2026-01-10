@@ -10,10 +10,10 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>">Transactions</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_transactions'); ?>">Transactions</a></li>
             <?php if (!$isNew): ?>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $transactionRaw->id]); ?>"><?php echo esc_entities($transactionRaw->transaction_number); ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $transactionRaw->id]); ?>"><?php echo esc_entities($transactionRaw->transaction_number); ?></a></li>
             <?php endif; ?>
             <li class="breadcrumb-item active"><?php echo $isNew ? 'New' : 'Edit'; ?></li>
         </ol>
@@ -25,7 +25,7 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
         </h1>
     </div>
 
-    <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => $isNew ? 'addTransaction' : 'editTransaction', 'id' => $transactionRaw->id ?? '']); ?>" class="needs-validation" novalidate>
+    <form method="post" action="<?php echo url_for($isNew ? 'ahg_vend_transaction_add' : 'ahg_vend_transaction_edit', $isNew ? [] : ['id' => $transactionRaw->id ?? '']); ?>" class="needs-validation" novalidate>
         <?php if (!$isNew): ?>
         <input type="hidden" name="id" value="<?php echo $transactionRaw->id; ?>">
         <?php endif; ?>
@@ -232,11 +232,11 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
                                 <i class="fas fa-save me-2"></i><?php echo $isNew ? 'Create Transaction' : 'Save Changes'; ?>
                             </button>
                             <?php if (!$isNew): ?>
-                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $transactionRaw->id]); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $transactionRaw->id]); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
                             <?php else: ?>
-                            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>" class="btn btn-secondary">
+                            <a href="<?php echo url_for('ahg_vend_transactions'); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
                             <?php endif; ?>

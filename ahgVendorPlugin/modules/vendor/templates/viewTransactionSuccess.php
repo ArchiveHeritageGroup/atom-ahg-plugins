@@ -16,8 +16,8 @@ $statusColors = [
 <div class="container-fluid px-4">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>">Vendor Management</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>">Transactions</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_transactions'); ?>">Transactions</a></li>
             <li class="breadcrumb-item active"><?php echo esc_entities($transactionRaw->transaction_number); ?></li>
         </ol>
     </nav>
@@ -30,7 +30,7 @@ $statusColors = [
             </span>
         </h1>
         <div>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'editTransaction', 'id' => $transactionRaw->id]); ?>" class="btn btn-primary">
+            <a href="<?php echo url_for('ahg_vend_transaction_edit', ['id' => $transactionRaw->id]); ?>" class="btn btn-primary">
                 <i class="fas fa-edit me-1"></i>Edit
             </a>
             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#statusModal">
@@ -49,7 +49,7 @@ $statusColors = [
                         <div class="col-md-6">
                             <table class="table table-sm">
                                 <tr><th width="40%">Transaction #</th><td><code><?php echo esc_entities($transactionRaw->transaction_number); ?></code></td></tr>
-                                <tr><th>Vendor</th><td><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $vendorRaw->slug]); ?>"><?php echo esc_entities($vendorRaw->name); ?></a></td></tr>
+                                <tr><th>Vendor</th><td><a href="<?php echo url_for('ahg_vend_view', ['slug' => $vendorRaw->slug]); ?>"><?php echo esc_entities($vendorRaw->name); ?></a></td></tr>
                                 <tr><th>Service Type</th><td><?php echo esc_entities($transactionRaw->service_name ?? '-'); ?></td></tr>
                                 <tr><th>Priority</th><td><span class="badge bg-<?php echo ['low'=>'success','normal'=>'primary','high'=>'warning','urgent'=>'danger'][$transactionRaw->priority ?? 'normal'] ?? 'secondary'; ?>"><?php echo ucfirst($transactionRaw->priority ?? 'normal'); ?></span></td></tr>
                             </table>
@@ -95,7 +95,7 @@ $statusColors = [
                                     <td><?php echo $item->unit_cost ? 'R' . number_format($item->unit_cost * ($item->quantity ?? 1), 2) : '-'; ?></td>
                                     <td><span class="badge bg-<?php echo ['pending'=>'warning','in_progress'=>'info','completed'=>'success'][$item->status ?? 'pending'] ?? 'secondary'; ?>"><?php echo ucfirst(str_replace('_', ' ', $item->status ?? 'pending')); ?></span></td>
                                     <td>
-                                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'removeTransactionItem', 'transaction_id' => $transactionRaw->id, 'item_id' => $item->id]); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item?');"><i class="fas fa-unlink"></i></a>
+                                        <a href="<?php echo url_for('ahg_vend_transaction_item_remove', ['transaction_id' => $transactionRaw->id, 'item_id' => $item->id]); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item?');"><i class="fas fa-unlink"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -152,7 +152,7 @@ $statusColors = [
 <div class="modal fade" id="statusModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="<?php echo url_for(['module' => 'vendor', 'action' => 'updateTransactionStatus', 'id' => $transactionRaw->id]); ?>">
+            <form method="post" action="<?php echo url_for('ahg_vend_transaction_status', ['id' => $transactionRaw->id]); ?>">
                 <div class="modal-header"><h5 class="modal-title">Update Status</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="mb-3">

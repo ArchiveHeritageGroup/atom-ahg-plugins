@@ -3,10 +3,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2"><i class="fas fa-exchange-alt me-2"></i>Vendor Transactions</h1>
         <div>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for('ahg_vend_index'); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
             </a>
-            <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-primary">
+            <a href="<?php echo url_for('ahg_vend_transaction_add'); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>New Transaction
             </a>
         </div>
@@ -15,7 +15,7 @@
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="get" action="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>" class="row g-3">
+            <form method="get" action="<?php echo url_for('ahg_vend_transactions'); ?>" class="row g-3">
                 <div class="col-md-2">
                     <label class="form-label">Search</label>
                     <input type="text" name="search" class="form-control" placeholder="Transaction #..." value="<?php echo esc_entities($filters['search'] ?? ''); ?>">
@@ -101,7 +101,7 @@
                         ?>
                         <tr class="<?php echo $isOverdue ? 'table-danger' : ''; ?>">
                             <td>
-                                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>">
+                                <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>">
                                     <strong><?php echo esc_entities($trans->transaction_number); ?></strong>
                                 </a>
                                 <?php if ($isOverdue): ?>
@@ -109,7 +109,7 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'view', 'slug' => $trans->vendor_slug]); ?>">
+                                <a href="<?php echo url_for('ahg_vend_view', ['slug' => $trans->vendor_slug]); ?>">
                                     <?php echo esc_entities($trans->vendor_name); ?>
                                 </a>
                             </td>
@@ -135,10 +135,10 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $trans->id]); ?>" class="btn btn-outline-primary" title="View">
+                                    <a href="<?php echo url_for('ahg_vend_transaction_view', ['id' => $trans->id]); ?>" class="btn btn-outline-primary" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'editTransaction', 'id' => $trans->id]); ?>" class="btn btn-outline-secondary" title="Edit">
+                                    <a href="<?php echo url_for('ahg_vend_transaction_edit', ['id' => $trans->id]); ?>" class="btn btn-outline-secondary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
@@ -152,7 +152,7 @@
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-exchange-alt fa-3x mb-3"></i>
                 <p>No transactions found</p>
-                <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>" class="btn btn-primary">
+                <a href="<?php echo url_for('ahg_vend_transaction_add'); ?>" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i>Create First Transaction
                 </a>
             </div>
