@@ -561,3 +561,26 @@ Made with ❤️ for the archival community
 [Report Bug](https://github.com/ArchiveHeritageGroup/atom-framework/issues) • [Request Feature](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
 
 </div>
+
+## API Documentation
+
+| Document | Description |
+|----------|-------------|
+| [REST API User Guide](docs/api-user-guide.md) | Non-technical guide for using the API |
+| [REST API Technical Reference](docs/api-technical-reference.md) | Detailed technical documentation for developers |
+
+### API Quick Start
+
+```bash
+# Test API connection
+curl -H "X-API-Key: your-key" https://your-site.com/api/v2
+
+# Get archival descriptions
+curl -H "X-API-Key: your-key" https://your-site.com/api/v2/descriptions?sector=archive
+
+# Search collections
+curl -X POST -H "X-API-Key: your-key" -H "Content-Type: application/json" \
+    -d '{"query":"meeting minutes"}' \
+    https://your-site.com/api/v2/search
+```
+
