@@ -105,6 +105,7 @@ Step-by-step guides with visual flow diagrams for end users (non-technical):
 | [Heritage Accounting](docs/heritage-accounting-user-guide.md) | GRAP 103 valuations, movements, compliance |
 | [Vendor Management](docs/vendor-user-guide.md) | Track items at external vendors, transactions |
 | [PDF Merge Tool](docs/pdf-merge-user-guide.md) | Combine images into PDF/A documents |
+| [Data Migration](docs/data-migration-user-guide.md) | Import from Vernon, ArchivesSpace, PastPerfect, CSV/Excel |
 
 ---
 
