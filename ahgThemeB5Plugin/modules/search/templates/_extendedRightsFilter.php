@@ -18,9 +18,9 @@ $rightsStatements = \Illuminate\Database\Capsule\Manager::table('rights_statemen
     ->get();
 
 // Get CC licenses for dropdown
-$ccLicenses = \Illuminate\Database\Capsule\Manager::table('creative_commons_license as cc')
-    ->leftJoin('creative_commons_license_i18n as cci', function ($join) use ($culture) {
-        $join->on('cci.creative_commons_license_id', '=', 'cc.id')
+$ccLicenses = \Illuminate\Database\Capsule\Manager::table('rights_cc_license as cc')
+    ->leftJoin('rights_cc_license_i18n as cci', function ($join) use ($culture) {
+        $join->on('cci.id', '=', 'cc.id')
             ->where('cci.culture', '=', $culture);
     })
     ->where('cc.is_active', true)

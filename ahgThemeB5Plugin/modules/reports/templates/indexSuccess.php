@@ -308,7 +308,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                         <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Rights Dashboard'); ?></a>
                     </li>
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'right', 'action' => 'batch']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Rights Assignment'); ?></a>
+                        <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'batch']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Rights Assignment'); ?></a>
                     </li>
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'index']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Rights'); ?></a>
@@ -331,7 +331,7 @@ $hasOais = isPluginActive('arOaisPlugin');
                         <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'embargoStatus']); ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Active Embargoes'); ?></a>
                     </li>
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'right', 'action' => 'batch', 'action_type' => 'embargo']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('Apply Embargo'); ?></a>
+                        <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'batch', 'action_type' => 'embargo']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('Apply Embargo'); ?></a>
                     </li>
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'expiringEmbargoes']); ?>"><i class="fas fa-hourglass-half me-2 text-muted"></i><?php echo __('Expiring Soon'); ?></a>

@@ -69,7 +69,6 @@ class extendedRightsActions extends sfActions
                 'rights_statement_i18n.definition as description',
             ])->get();
         
-        error_log('BROWSE: rightsStatements count=' . count($this->rightsStatements));
 
         // Creative Commons - using correct table name
         $this->ccLicenses = Capsule::table('rights_cc_license')
@@ -111,7 +110,7 @@ class extendedRightsActions extends sfActions
         $this->stats = (object) [
             'total_objects' => Capsule::table('information_object')->where('id', '>', 1)->count(),
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
-            'with_cc_license' => Capsule::table('extended_rights')->whereNotNull('cc_license_id')->distinct()->count('object_id'),
+            'with_cc_license' => Capsule::table('extended_rights')->whereNotNull('creative_commons_license_id')->distinct()->count('object_id'),
             'with_tk_labels' => Capsule::table('rights_object_tk_label')->distinct()->count('object_id'),
             'active_embargoes' => Capsule::table('rights_embargo')->where('status', '=', 'active')->count(),
         ];
@@ -140,7 +139,7 @@ class extendedRightsActions extends sfActions
 
         $this->currentRights = (object) [
             'rights_statement' => Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->first(),
-            'cc_license' => Capsule::table('extended_rights')->where('object_id', '=', $oid)->whereNotNull('cc_license_id')->first(),
+            'cc_license' => Capsule::table('extended_rights')->where('object_id', '=', $oid)->whereNotNull('creative_commons_license_id')->first(),
             'tk_labels' => Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->pluck('tk_label_id')->toArray(),
             'embargo' => Capsule::table('rights_embargo')->where('object_id', '=', $oid)->where('status', '=', 'active')->first(),
             'rights_holder' => Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->first(),
@@ -198,7 +197,7 @@ class extendedRightsActions extends sfActions
             $ccId = $request->getParameter('cc_license_id');
             Capsule::table('extended_rights')->updateOrInsert(
                 ['object_id' => $oid],
-                ['cc_license_id' => $ccId ?: null, 'updated_at' => date('Y-m-d H:i:s')]
+                ['creative_commons_license_id' => $ccId ?: null, 'updated_at' => date('Y-m-d H:i:s')]
             );
 
             $tkIds = $request->getParameter('tk_label_ids', []);
@@ -304,7 +303,7 @@ class extendedRightsActions extends sfActions
                 } elseif ($rightsType === 'cc_license') {
                     Capsule::table('extended_rights')->updateOrInsert(
                         ['object_id' => $objId],
-                        ['cc_license_id' => (int) $valueId, 'updated_at' => date('Y-m-d H:i:s')]
+                        ['creative_commons_license_id' => (int) $valueId, 'updated_at' => date('Y-m-d H:i:s')]
                     );
                     ++$count;
                 } elseif ($rightsType === 'tk_label') {
@@ -357,10 +356,8 @@ class extendedRightsActions extends sfActions
 
     public function executeBrowse(sfWebRequest $request)
     {
-        try {
-        error_log("BROWSE: Starting executeBrowse action");
+
         $this->initDb();
-        error_log("BROWSE: DB initialized");
 
         // RightsStatements.org
         $this->rightsStatements = Capsule::table('rights_statement')
@@ -381,7 +378,6 @@ class extendedRightsActions extends sfActions
                 'rights_statement_i18n.definition as description',
             ])->get();
         
-        error_log('BROWSE: rightsStatements count=' . count($this->rightsStatements));
 
         // Creative Commons
         $this->ccLicenses = Capsule::table('rights_cc_license')
@@ -423,11 +419,38 @@ class extendedRightsActions extends sfActions
         $this->stats = (object) [
             'total_objects' => Capsule::table('information_object')->where('id', '>', 1)->count(),
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
-            'with_cc_license' => Capsule::table('extended_rights')->whereNotNull('cc_license_id')->distinct()->count('object_id'),
+            'with_cc_license' => Capsule::table('extended_rights')->whereNotNull('creative_commons_license_id')->distinct()->count('object_id'),
             'with_tk_labels' => Capsule::table('rights_object_tk_label')->distinct()->count('object_id'),
             'active_embargoes' => Capsule::table('rights_embargo')->where('status', '=', 'active')->count(),
         ];
         
-        error_log('BROWSE DEBUG: RS count=' . count($this->rightsStatements) . ' CC count=' . count($this->ccLicenses) . ' TK count=' . count($this->tkLabels));
+    }
+
+    public function executeExpiringEmbargoes(sfWebRequest $request)
+    {
+        $this->initDb();
+        $days = (int) $request->getParameter('days', 30);
+        $this->days = $days;
+        
+        $this->embargoes = Capsule::table('rights_embargo')
+            ->join('slug', 'slug.object_id', '=', 'rights_embargo.object_id')
+            ->leftJoin('information_object_i18n', function ($j) {
+                $j->on('information_object_i18n.id', '=', 'rights_embargo.object_id')
+                  ->where('information_object_i18n.culture', '=', 'en');
+            })
+            ->where('rights_embargo.status', '=', 'active')
+            ->whereNotNull('rights_embargo.end_date')
+            ->where('rights_embargo.end_date', '<=', date('Y-m-d', strtotime("+{$days} days")))
+            ->orderBy('rights_embargo.end_date')
+            ->select([
+                'rights_embargo.id',
+                'rights_embargo.object_id',
+                'rights_embargo.embargo_type',
+                'rights_embargo.start_date',
+                'rights_embargo.end_date',
+                'rights_embargo.reason',
+                'information_object_i18n.title',
+                'slug.slug',
+            ])->get();
     }
 }

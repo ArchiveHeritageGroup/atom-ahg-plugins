@@ -8,7 +8,7 @@ $days = $days ?? 30;
     <div class="d-flex justify-content-between align-items-center mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'staticpage', 'action' => 'static', 'id' => 'homepage']); ?>"><?php echo __('Home'); ?></a></li>
+                <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
                 <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'dashboard']); ?>"><?php echo __('Rights Management'); ?></a></li>
                 <li class="breadcrumb-item active"><?php echo __('Expiring Embargoes'); ?></li>
             </ol>

@@ -79,29 +79,29 @@ class ahgExtendedRightsPluginConfiguration extends sfPluginConfiguration
         ));
 
         // Embargo module routes
-        $routing->prependRoute('embargo_index', new sfRoute(
-            '/embargo',
+        $routing->prependRoute('ahg_rights_embargo_index', new sfRoute(
+            '/ahg/rights/embargo',
             ['module' => 'embargo', 'action' => 'index']
         ));
 
-        $routing->prependRoute('embargo_add', new sfRoute(
-            '/embargo/add',
+        $routing->prependRoute('ahg_rights_embargo_add', new sfRoute(
+            '/ahg/rights/embargo/add',
             ['module' => 'embargo', 'action' => 'add']
         ));
 
-        $routing->prependRoute('embargo_edit', new sfRoute(
-            '/embargo/edit',
+        $routing->prependRoute('ahg_rights_embargo_edit', new sfRoute(
+            '/ahg/rights/embargo/edit',
             ['module' => 'embargo', 'action' => 'edit']
         ));
 
-        $routing->prependRoute('embargo_view', new sfRoute(
-            '/embargo/view/:id',
+        $routing->prependRoute('ahg_rights_embargo_view', new sfRoute(
+            '/ahg/rights/embargo/view/:id',
             ['module' => 'embargo', 'action' => 'view'],
             ['id' => '\d+']
         ));
 
-        $routing->prependRoute('embargo_lift', new sfRoute(
-            '/embargo/lift/:id',
+        $routing->prependRoute('ahg_rights_embargo_lift', new sfRoute(
+            '/ahg/rights/embargo/lift/:id',
             ['module' => 'embargo', 'action' => 'lift'],
             ['id' => '\d+']
         ));

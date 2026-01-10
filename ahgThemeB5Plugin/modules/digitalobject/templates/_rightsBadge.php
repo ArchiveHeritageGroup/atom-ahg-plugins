@@ -19,7 +19,7 @@ $culture = sfContext::getInstance()->user->getCulture();
 // Get rights
 $rights = \Illuminate\Database\Capsule\Manager::table('extended_rights as er')
     ->leftJoin('rights_statement as rs', 'rs.id', '=', 'er.rights_statement_id')
-    ->leftJoin('creative_commons_license as cc', 'cc.id', '=', 'er.creative_commons_id')
+    ->leftJoin('rights_cc_license as cc', 'cc.id', '=', 'er.cc_license_id')
     ->where('er.object_id', $informationObject->id)
     ->select('rs.code as rs_code', 'rs.uri as rs_uri', 'cc.code as cc_code', 'cc.uri as cc_uri', 'cc.icon_url as cc_icon')
     ->first();

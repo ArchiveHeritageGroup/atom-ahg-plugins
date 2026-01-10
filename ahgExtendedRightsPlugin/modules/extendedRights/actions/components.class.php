@@ -81,7 +81,7 @@ class extendedRightsComponents extends sfComponents
 
         // Get Creative Commons
         $this->creativeCommons = Capsule::table('extended_rights')
-            ->join('rights_cc_license', 'rights_cc_license.id', '=', 'extended_rights.cc_license_id')
+            ->join('rights_cc_license', 'rights_cc_license.id', '=', 'extended_rights.creative_commons_license_id')
             ->leftJoin('rights_cc_license_i18n', function ($join) {
                 $join->on('rights_cc_license_i18n.id', '=', 'rights_cc_license.id')
                      ->where('rights_cc_license_i18n.culture', '=', 'en');
@@ -194,7 +194,7 @@ class extendedRightsComponents extends sfComponents
         $this->stats = (object) [
             'total_objects' => Capsule::table('information_object')->where('id', '>', 1)->count(),
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
-            'with_creative_commons' => Capsule::table('extended_rights')->whereNotNull('cc_license_id')->distinct()->count('object_id'),
+            'with_creative_commons' => Capsule::table('extended_rights')->whereNotNull('creative_commons_license_id')->distinct()->count('object_id'),
             'with_tk_labels' => Capsule::table('rights_object_tk_label')->distinct()->count('object_id'),
             'active_embargoes' => Capsule::table('rights_embargo')->where('status', 'active')->count(),
         ];
