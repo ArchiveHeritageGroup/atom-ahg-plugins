@@ -1,0 +1,56 @@
+
+    /**
+     * Create embargo for an object and optionally all its descendants
+     */
+    public function createEmbargoWithPropagation(int $objectId, array $data, ?int $userId = null, bool $applyToChildren = false): array
+    {
+        $results = [
+            'created' => 0,
+            'failed' => 0,
+            'ids' => []
+        ];
+        
+        // Create embargo for the main object
+        $embargoId = $this->createEmbargo($objectId, $data, $userId);
+        if ($embargoId) {
+            $results['created']++;
+            $results['ids'][] = $embargoId;
+        } else {
+            $results['failed']++;
+        }
+        
+        // If propagation requested, apply to all descendants
+        if ($applyToChildren) {
+            // Get the object's lft/rgt for nested set query
+            $object = DB::table('information_object')
+                ->where('id', $objectId)
+                ->select('lft', 'rgt')
+                ->first();
+            
+            if ($object && $object->lft && $object->rgt) {
+                // Get all descendant IDs
+                $descendants = DB::table('information_object')
+                    ->where('lft', '>', $object->lft)
+                    ->where('rgt', '<', $object->rgt)
+                    ->pluck('id')
+                    ->toArray();
+                
+                foreach ($descendants as $childId) {
+                    try {
+                        $childEmbargoId = $this->createEmbargo($childId, $data, $userId);
+                        if ($childEmbargoId) {
+                            $results['created']++;
+                            $results['ids'][] = $childEmbargoId;
+                        } else {
+                            $results['failed']++;
+                        }
+                    } catch (\Exception $e) {
+                        $results['failed']++;
+                        error_log("Failed to create embargo for child {$childId}: " . $e->getMessage());
+                    }
+                }
+            }
+        }
+        
+        return $results;
+    }

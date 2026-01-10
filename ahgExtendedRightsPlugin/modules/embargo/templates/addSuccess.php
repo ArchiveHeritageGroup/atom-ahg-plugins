@@ -61,6 +61,46 @@
     </div>
   </div>
 
+  <!-- Propagation Options -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="fas fa-sitemap me-2"></i><?php echo __('Apply to Hierarchy'); ?></h4>
+    </div>
+    <div class="card-body">
+      <?php 
+      // Count children
+      $childCount = \Illuminate\Database\Capsule\Manager::table('information_object')
+          ->where('parent_id', $objectId)
+          ->count();
+      $descendantCount = \Illuminate\Database\Capsule\Manager::table('information_object')
+          ->where('lft', '>', $resource->lft ?? 0)
+          ->where('rgt', '<', $resource->rgt ?? 0)
+          ->count();
+      ?>
+      <?php if ($descendantCount > 0): ?>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="apply_to_children" value="1" id="apply_to_children">
+          <label class="form-check-label" for="apply_to_children">
+            <strong><?php echo __('Apply to all descendants'); ?></strong>
+            <span class="badge bg-info ms-2"><?php echo $descendantCount; ?> <?php echo __($descendantCount === 1 ? 'record' : 'records'); ?></span>
+          </label>
+          <div class="form-text text-muted">
+            <?php echo __('This will create the same embargo on all child records below this item in the hierarchy.'); ?>
+          </div>
+        </div>
+        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <?php echo __('Warning: This action cannot be easily undone. Each child record will have its own embargo that must be lifted individually.'); ?>
+        </div>
+      <?php else: ?>
+        <p class="text-muted mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          <?php echo __('This record has no child records.'); ?>
+        </p>
+      <?php endif; ?>
+    </div>
+  </div>
+
   <div class="card mb-4">
     <div class="card-header">
       <h4 class="mb-0"><?php echo __('Notifications'); ?></h4>
@@ -100,4 +140,15 @@ document.getElementById('is_perpetual').addEventListener('change', function() {
     document.getElementById('end_date_input').value = '';
   }
 });
+
+// Show warning when propagation is selected
+var propagationCheckbox = document.getElementById('apply_to_children');
+if (propagationCheckbox) {
+  propagationCheckbox.addEventListener('change', function() {
+    var warning = document.getElementById('propagation-warning');
+    if (warning) {
+      warning.style.display = this.checked ? 'block' : 'none';
+    }
+  });
+}
 </script>

@@ -31,7 +31,7 @@ class embargoActions extends sfActions
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $objectId)
-            ->select(['io.id', 'ioi.title', 'slug.slug'])
+            ->select(['io.id', 'io.lft', 'io.rgt', 'io.parent_id', 'ioi.title', 'slug.slug'])
             ->first();
     }
 
@@ -89,7 +89,21 @@ class embargoActions extends sfActions
             'public_message' => $request->getParameter('public_message'),
         ];
 
-        $service->createEmbargo($objectId, $data, $userId);
+        // Check if propagation to children is requested
+        $applyToChildren = (bool)$request->getParameter('apply_to_children', false);
+        
+        if ($applyToChildren) {
+            $results = $service->createEmbargoWithPropagation($objectId, $data, $userId, true);
+            // Flash message with results
+            $this->context->user->setFlash('notice', sprintf(
+                'Embargo created for %d records (%d failed)',
+                $results['created'],
+                $results['failed']
+            ));
+        } else {
+            $service->createEmbargo($objectId, $data, $userId);
+            $this->context->user->setFlash('notice', 'Embargo created successfully');
+        }
 
         $resource = $this->getResource($objectId);
         $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);

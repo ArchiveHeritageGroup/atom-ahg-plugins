@@ -3,6 +3,12 @@
   <h1><?php echo __('Edit Embargo'); ?></h1>
   <p class="lead"><?php echo render_title($resource); ?></p>
 <?php end_slot(); ?>
+
+<?php
+// Get object ID for propagation count
+$objectId = $embargo->object_id ?? $resource->id ?? 0;
+?>
+
 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'id' => $embargo->id]); ?>">
   <div class="card mb-4">
     <div class="card-header">
@@ -22,7 +28,7 @@
         <div class="col-md-6 mb-3">
           <label for="reason" class="form-label"><?php echo __('Reason'); ?></label>
           <select name="reason" id="reason" class="form-select">
-            <option value="">-- Select --</option>
+            <option value="">-- <?php echo __('Select'); ?> --</option>
             <option value="donor_restriction" <?php echo ($embargo->reason ?? '') === 'donor_restriction' ? 'selected' : ''; ?>><?php echo __('Donor Restriction'); ?></option>
             <option value="copyright" <?php echo ($embargo->reason ?? '') === 'copyright' ? 'selected' : ''; ?>><?php echo __('Copyright'); ?></option>
             <option value="privacy" <?php echo ($embargo->reason ?? '') === 'privacy' ? 'selected' : ''; ?>><?php echo __('Privacy'); ?></option>
@@ -42,7 +48,7 @@
         </div>
         <div class="col-md-4 mb-3">
           <label for="end_date" class="form-label"><?php echo __('End Date'); ?></label>
-          <input type="date" name="end_date" id="end_date" class="form-control" value="<?php echo $embargo->end_date ?? ''; ?>">
+          <input type="date" name="end_date" id="end_date" class="form-control" id="end_date_input" value="<?php echo $embargo->end_date ?? ''; ?>">
           <small class="text-muted"><?php echo __('Leave blank for perpetual embargo'); ?></small>
         </div>
         <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -70,8 +76,76 @@
       </div>
     </div>
   </div>
+
+  <!-- Propagation Options -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="fas fa-sitemap me-2"></i><?php echo __('Apply to Hierarchy'); ?></h4>
+    </div>
+    <div class="card-body">
+      <?php
+      // Count descendants
+      $io = \Illuminate\Database\Capsule\Manager::table('information_object')
+          ->where('id', $objectId)
+          ->select('lft', 'rgt')
+          ->first();
+      $descendantCount = 0;
+      if ($io && $io->lft && $io->rgt) {
+          $descendantCount = \Illuminate\Database\Capsule\Manager::table('information_object')
+              ->where('lft', '>', $io->lft)
+              ->where('rgt', '<', $io->rgt)
+              ->count();
+      }
+      ?>
+      <?php if ($descendantCount > 0): ?>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="apply_to_children" value="1" id="apply_to_children">
+          <label class="form-check-label" for="apply_to_children">
+            <strong><?php echo __('Apply changes to all descendants'); ?></strong>
+            <span class="badge bg-info ms-2"><?php echo $descendantCount; ?> <?php echo __($descendantCount === 1 ? 'record' : 'records'); ?></span>
+          </label>
+          <div class="form-text text-muted">
+            <?php echo __('This will create or update embargoes on all child records below this item.'); ?>
+          </div>
+        </div>
+        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <?php echo __('Warning: This will create new embargoes on descendants that do not have one, and update those that do.'); ?>
+        </div>
+      <?php else: ?>
+        <p class="text-muted mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          <?php echo __('This record has no child records.'); ?>
+        </p>
+      <?php endif; ?>
+    </div>
+  </div>
+
   <div class="d-flex gap-2 justify-content-end">
     <button type="submit" class="btn btn-primary"><?php echo __('Save Changes'); ?></button>
     <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]); ?>" class="btn btn-secondary"><?php echo __('Cancel'); ?></a>
   </div>
 </form>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.getElementById('is_perpetual').addEventListener('change', function() {
+  var endDateInput = document.getElementById('end_date_input') || document.getElementById('end_date');
+  if (endDateInput) {
+    endDateInput.disabled = this.checked;
+    if (this.checked) {
+      endDateInput.value = '';
+    }
+  }
+});
+
+// Show warning when propagation is selected
+var propagationCheckbox = document.getElementById('apply_to_children');
+if (propagationCheckbox) {
+  propagationCheckbox.addEventListener('change', function() {
+    var warning = document.getElementById('propagation-warning');
+    if (warning) {
+      warning.style.display = this.checked ? 'block' : 'none';
+    }
+  });
+}
+</script>
