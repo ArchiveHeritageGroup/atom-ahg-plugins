@@ -1,29 +1,47 @@
-# AtoM AHG Framework - Architecture Diagrams
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtoM AHG Framework - Architecture Diagrams</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        h1 { text-align: center; color: #1976d2; border-bottom: 3px solid #1976d2; padding-bottom: 15px; }
+        h2 { color: #333; margin-top: 40px; padding: 10px 15px; background: #e3f2fd; border-left: 4px solid #1976d2; }
+        .diagram-container { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; }
+        .mermaid { display: flex; justify-content: center; }
+        .description { background: #fff9c4; padding: 15px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #f9a825; }
+        .toc { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .toc ul { columns: 2; }
+        .toc a { color: #1976d2; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        @media print { .diagram-container { break-inside: avoid; page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <h1>AtoM AHG Framework - Architecture Diagrams</h1>
+    <p style="text-align:center;color:#666;">Focus: ahgLibraryPlugin Integration</p>
+    
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#d1">1. Architecture Overview</a></li>
+            <li><a href="#d2">2. ahgLibraryPlugin Detail</a></li>
+            <li><a href="#d3">3. Request Lifecycle Flow</a></li>
+            <li><a href="#d4">4. File Structure</a></li>
+            <li><a href="#d5">5. Database Access Patterns</a></li>
+            <li><a href="#d6">6. Plugin Lifecycle</a></li>
+            <li><a href="#d7">7. Class Relationships</a></li>
+            <li><a href="#d8">8. Request Sequence</a></li>
+        </ul>
+    </div>
 
-**Focus:** ahgLibraryPlugin Integration  
-**Version:** 1.0.0  
-**Last Updated:** 2025-01-08
-
----
-
-## Table of Contents
-
-1. [Architecture Overview](#1-architecture-overview)
-2. [ahgLibraryPlugin Detail](#2-ahglibraryplugin-detail)
-3. [Request Lifecycle Flow](#3-request-lifecycle-flow)
-4. [File Structure](#4-file-structure)
-5. [Database Access Patterns](#5-database-access-patterns)
-6. [Plugin Lifecycle](#6-plugin-lifecycle)
-7. [Class Relationships](#7-class-relationships)
-8. [Request Sequence](#8-request-sequence)
-
----
-
-## 1. Architecture Overview
-
-Shows the three-layer structure: AtoM Base, atom-framework, atom-ahg-plugins
-
-```mermaid
+    <h2 id="d1">1. Architecture Overview</h2>
+    <div class="description">Shows the three-layer structure: AtoM Base, atom-framework, atom-ahg-plugins</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart TB
     subgraph CLIENT["Client Browser"]
         REQ["HTTP Request"]
@@ -97,15 +115,13 @@ flowchart TB
     QB --> PLUGINTABLES
     TEMPLATES --> THEMEB5
     ACL --> SECCLEAR
-```
+        </pre>
+    </div>
 
----
-
-## 2. ahgLibraryPlugin Detail
-
-Internal structure showing Configuration, Actions, Lib, Templates, and Data layers
-
-```mermaid
+    <h2 id="d2">2. ahgLibraryPlugin - Detailed Integration</h2>
+    <div class="description">Internal structure showing Configuration, Actions, Lib, Templates, and Data layers</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart TB
     subgraph USER["User Request"]
         URL["library routes"]
@@ -169,15 +185,13 @@ flowchart TB
     TEMPLATELAYER --> LAYOUT
     INSTALLSQL -.->|"creates"| DBTABLES
     EXTJSON -.->|"metadata"| ATOMPLUGIN
-```
+        </pre>
+    </div>
 
----
-
-## 3. Request Lifecycle Flow
-
-Complete flow from bootstrap through plugin loading to response rendering
-
-```mermaid
+    <h2 id="d3">3. Request Lifecycle and Plugin Loading Flow</h2>
+    <div class="description">Complete flow from bootstrap through plugin loading to response rendering</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart TD
     subgraph BOOT["Application Bootstrap"]
         A1["index.php"] --> A2["require ProjectConfiguration"]
@@ -223,15 +237,13 @@ flowchart TD
         F3 --> F4["Render Bootstrap 5 HTML"]
         F4 --> F5["Send Response"]
     end
-```
+        </pre>
+    </div>
 
----
-
-## 4. File Structure
-
-Directory structure at /usr/share/nginx/archive showing symlinks and dependencies
-
-```mermaid
+    <h2 id="d4">4. File Structure and Dependencies</h2>
+    <div class="description">Directory structure at /usr/share/nginx/archive showing symlinks and dependencies</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart LR
     subgraph ROOT["usr share nginx archive"]
         direction TB
@@ -283,15 +295,13 @@ flowchart LR
     SYMLIB -.-> LIBPLUGIN
     LREPO -->|"extends"| BASEREPO2
     LTEMPLATES -->|"uses"| TLAYOUT
-```
+        </pre>
+    </div>
 
----
-
-## 5. Database Access Patterns
-
-When to use Propel vs Laravel Query Builder vs PDO
-
-```mermaid
+    <h2 id="d5">5. Database Access Patterns - Dual ORM</h2>
+    <div class="description">When to use Propel vs Laravel Query Builder vs PDO</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart TB
     subgraph ACTION["Action Class Controller"]
         REQ["Request Handler"]
@@ -335,23 +345,13 @@ flowchart TB
     P1 --> P2 --> P3 --> CORETABLES
     L1 --> L2 --> L3 --> PLUGTABLES
     D1 --> D2 --> D3 --> TPLUGIN
-```
+        </pre>
+    </div>
 
-### When to Use Each
-
-| Path | Use For |
-|------|---------|
-| **Propel ORM** | QubitInformationObject, Actor, ACL, Core AtoM queries |
-| **Laravel QB** | Plugin-specific tables, Custom reports, Complex joins |
-| **PDO** | Plugin Manager ONLY due to autoloader conflict |
-
----
-
-## 6. Plugin Lifecycle
-
-Complete lifecycle: Install, Enable, Runtime, Disable, Uninstall
-
-```mermaid
+    <h2 id="d6">6. Plugin Lifecycle - Install to Runtime</h2>
+    <div class="description">Complete lifecycle: Install, Enable, Runtime, Disable, Uninstall</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 flowchart TB
     subgraph INSTALL["Installation Phase"]
         I1["git clone atom-ahg-plugins"] --> I2["bash bin install"]
@@ -397,15 +397,13 @@ flowchart TB
     INSTALL --> ENABLE --> RUNTIME --> REQUEST
     RUNTIME -.-> DISABLE -.-> UNINSTALL
     DISABLE -.->|"re-enable"| ENABLE
-```
+        </pre>
+    </div>
 
----
-
-## 7. Class Relationships
-
-UML class diagram showing inheritance and dependencies
-
-```mermaid
+    <h2 id="d7">7. Class Relationships - ahgLibraryPlugin</h2>
+    <div class="description">UML class diagram showing inheritance and dependencies</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 classDiagram
     direction TB
     class sfActions {
@@ -480,15 +478,13 @@ classDiagram
     libraryActions --> LibraryForm : form
     LibraryRepository --> DB : query builder
     LibraryService --> LibraryRepository : uses
-```
+        </pre>
+    </div>
 
----
-
-## 8. Request Sequence
-
-Sequence diagram for GET /library/view/some-book
-
-```mermaid
+    <h2 id="d8">8. Request Sequence - View Action</h2>
+    <div class="description">Sequence diagram for GET /library/view/some-book</div>
+    <div class="diagram-container">
+        <pre class="mermaid">
 sequenceDiagram
     autonumber
     participant Browser
@@ -551,19 +547,20 @@ sequenceDiagram
     Router-->>Index: Response
     Index-->>Nginx: Response
     Nginx-->>Browser: HTML Page
-```
+        </pre>
+    </div>
 
----
-
-## Quick Reference
-
-### Key Components
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Core AtoM | Symfony 1.x + Propel | Legacy base system |
-| atom-framework | Laravel Capsule | Modern database operations |
-| Plugin Loading | atom_plugin table | Database-driven plugin discovery |
-| Required Plugins | ahgThemeB5Plugin, ahgSecurityClearancePlugin | Locked, always enabled |
-| ahgLibraryPlugin | Symfony actions + Laravel repositories | Library management extension |
-
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { 
+                useMaxWidth: true, 
+                htmlLabels: true, 
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
