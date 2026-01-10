@@ -43,7 +43,7 @@
             <option value="">-- None --</option>
             <?php foreach ($ccLicenses as $cc): ?>
               <option value="<?php echo $cc->id; ?>"
-                <?php echo (isset($currentRights->creative_commons) && $currentRights->creative_commons->creative_commons_license_id == $cc->id) ? 'selected' : ''; ?>>
+                <?php echo (isset($currentRights->creative_commons) && $currentRights->creative_commons->cc_license_id == $cc->id) ? 'selected' : ''; ?>>
                 <?php echo htmlspecialchars($cc->name ?? $cc->code); ?>
               </option>
             <?php endforeach; ?>

@@ -22,17 +22,28 @@ class extendedRightsComponents extends sfComponents
         $dbname = 'archive';
         $host = 'localhost';
         $port = 3306;
-        
-        if (preg_match('/dbname=([^;]+)/', $dsn, $m)) $dbname = $m[1];
-        if (preg_match('/host=([^;]+)/', $dsn, $m)) $host = $m[1];
-        if (preg_match('/port=([^;]+)/', $dsn, $m)) $port = (int) $m[1];
+
+        if (preg_match('/dbname=([^;]+)/', $dsn, $m)) {
+            $dbname = $m[1];
+        }
+        if (preg_match('/host=([^;]+)/', $dsn, $m)) {
+            $host = $m[1];
+        }
+        if (preg_match('/port=([^;]+)/', $dsn, $m)) {
+            $port = (int) $m[1];
+        }
 
         self::$capsule = new Capsule();
         self::$capsule->addConnection([
-            'driver' => 'mysql', 'host' => $host, 'port' => $port, 'database' => $dbname,
+            'driver' => 'mysql',
+            'host' => $host,
+            'port' => $port,
+            'database' => $dbname,
             'username' => $config['all']['propel']['param']['username'] ?? 'root',
             'password' => $config['all']['propel']['param']['password'] ?? '',
-            'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci', 'prefix' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
         ]);
         self::$capsule->setAsGlobal();
         self::$capsule->bootEloquent();
@@ -43,67 +54,66 @@ class extendedRightsComponents extends sfComponents
     public function executeRightsDisplay(sfWebRequest $request)
     {
         $objectId = $this->objectId ?? null;
-        if (!$objectId) return sfView::NONE;
+        if (!$objectId) {
+            return sfView::NONE;
+        }
 
         $this->getDb();
         $objectId = (int) $objectId;
 
+        // Get Rights Statement
         $this->rightsStatement = Capsule::table('object_rights_statement')
-            ->join('rights_statement', Capsule::raw('rights_statement.id'), '=', Capsule::raw('object_rights_statement.rights_statement_id'))
+            ->join('rights_statement', 'rights_statement.id', '=', 'object_rights_statement.rights_statement_id')
             ->leftJoin('rights_statement_i18n', function ($join) {
-                $join->on(Capsule::raw('rights_statement_i18n.rights_statement_id'), '=', Capsule::raw('rights_statement.id'))
-                     ->where(Capsule::raw('rights_statement_i18n.culture'), '=', 'en');
+                $join->on('rights_statement_i18n.rights_statement_id', '=', 'rights_statement.id')
+                     ->where('rights_statement_i18n.culture', '=', 'en');
             })
-            ->where(Capsule::raw('object_rights_statement.object_id'), '=', $objectId)
+            ->where('object_rights_statement.object_id', '=', $objectId)
             ->select(
-                Capsule::raw('rights_statement.id'),
-                Capsule::raw('rights_statement.code'),
-                Capsule::raw('rights_statement.uri'),
-                Capsule::raw('rights_statement.icon_url'),
-                Capsule::raw('rights_statement_i18n.name')
+                'rights_statement.id',
+                'rights_statement.code',
+                'rights_statement.uri',
+                'rights_statement.icon_filename',
+                'rights_statement_i18n.name',
+                'rights_statement_i18n.definition'
             )
             ->first();
 
-        $this->creativeCommons = Capsule::table('object_creative_commons')
-            ->join('creative_commons_license', Capsule::raw('creative_commons_license.id'), '=', Capsule::raw('object_creative_commons.creative_commons_license_id'))
-            ->leftJoin('creative_commons_license_i18n', function ($join) {
-                $join->on(Capsule::raw('creative_commons_license_i18n.creative_commons_license_id'), '=', Capsule::raw('creative_commons_license.id'))
-                     ->where(Capsule::raw('creative_commons_license_i18n.culture'), '=', 'en');
+        // Get Creative Commons
+        $this->creativeCommons = Capsule::table('extended_rights')
+            ->join('rights_cc_license', 'rights_cc_license.id', '=', 'extended_rights.cc_license_id')
+            ->leftJoin('rights_cc_license_i18n', function ($join) {
+                $join->on('rights_cc_license_i18n.id', '=', 'rights_cc_license.id')
+                     ->where('rights_cc_license_i18n.culture', '=', 'en');
             })
-            ->where(Capsule::raw('object_creative_commons.object_id'), '=', $objectId)
+            ->where('extended_rights.object_id', '=', $objectId)
             ->select(
-                Capsule::raw('creative_commons_license.id'),
-                Capsule::raw('creative_commons_license.code'),
-                Capsule::raw('creative_commons_license.uri'),
-                Capsule::raw('creative_commons_license.icon_url'),
-                Capsule::raw('creative_commons_license_i18n.name')
+                'rights_cc_license.id',
+                'rights_cc_license.code',
+                'rights_cc_license.uri',
+                'rights_cc_license_i18n.name'
             )
             ->first();
 
-        $this->tkLabels = Capsule::table('object_tk_label')
-            ->join('tk_label', Capsule::raw('tk_label.id'), '=', Capsule::raw('object_tk_label.tk_label_id'))
-            ->leftJoin('tk_label_i18n', function ($join) {
-                $join->on(Capsule::raw('tk_label_i18n.tk_label_id'), '=', Capsule::raw('tk_label.id'))
-                     ->where(Capsule::raw('tk_label_i18n.culture'), '=', 'en');
+        // Get TK Labels - simplified without category join (category is a column now)
+        $this->tkLabels = Capsule::table('rights_object_tk_label')
+            ->join('rights_tk_label', 'rights_tk_label.id', '=', 'rights_object_tk_label.tk_label_id')
+            ->leftJoin('rights_tk_label_i18n', function ($join) {
+                $join->on('rights_tk_label_i18n.id', '=', 'rights_tk_label.id')
+                     ->where('rights_tk_label_i18n.culture', '=', 'en');
             })
-            ->leftJoin('tk_label_category', Capsule::raw('tk_label_category.id'), '=', Capsule::raw('tk_label.tk_label_category_id'))
-            ->leftJoin('tk_label_category_i18n', function ($join) {
-                $join->on(Capsule::raw('tk_label_category_i18n.tk_label_category_id'), '=', Capsule::raw('tk_label_category.id'))
-                     ->where(Capsule::raw('tk_label_category_i18n.culture'), '=', 'en');
-            })
-            ->where(Capsule::raw('object_tk_label.object_id'), '=', $objectId)
+            ->where('rights_object_tk_label.object_id', '=', $objectId)
             ->select(
-                Capsule::raw('tk_label.id'),
-                Capsule::raw('tk_label.code'),
-                Capsule::raw('tk_label.uri'),
-                Capsule::raw('tk_label.icon_url'),
-                Capsule::raw('tk_label_category.code as category_code'),
-                Capsule::raw('tk_label_category_i18n.name as category_name'),
-                Capsule::raw('tk_label_i18n.name as name'),
-                Capsule::raw('object_tk_label.community_name')
+                'rights_tk_label.id',
+                'rights_tk_label.code',
+                'rights_tk_label.uri',
+                'rights_tk_label.category',
+                'rights_tk_label.color',
+                'rights_tk_label_i18n.name'
             )
             ->get();
 
+        // Get Embargo
         $this->embargo = Capsule::table('rights_embargo')
             ->where('object_id', '=', $objectId)
             ->where('status', '=', 'active')
@@ -116,18 +126,16 @@ class extendedRightsComponents extends sfComponents
         // Combine into single rights object for template
         $this->rights = null;
         if ($this->rightsStatement || $this->creativeCommons || count($this->tkLabels) > 0) {
-            $this->rights = (object)[
+            $this->rights = (object) [
                 'rs_code' => $this->rightsStatement->code ?? null,
                 'rs_uri' => $this->rightsStatement->uri ?? null,
                 'rs_name' => $this->rightsStatement->name ?? null,
-                'rs_icon_url' => $this->rightsStatement->icon_url ?? null,
-                'rs_category' => $this->rightsStatement->category ?? null,
+                'rs_icon_filename' => $this->rightsStatement->icon_filename ?? null,
                 'rs_definition' => $this->rightsStatement->definition ?? null,
                 'cc_code' => $this->creativeCommons->code ?? null,
                 'cc_uri' => $this->creativeCommons->uri ?? null,
                 'cc_name' => $this->creativeCommons->name ?? null,
-                'cc_icon_url' => $this->creativeCommons->icon_url ?? null,
-                'tk_labels' => $this->tkLabels
+                'tk_labels' => $this->tkLabels,
             ];
         }
     }
@@ -135,7 +143,9 @@ class extendedRightsComponents extends sfComponents
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
         $objectId = $this->objectId ?? null;
-        if (!$objectId) return sfView::NONE;
+        if (!$objectId) {
+            return sfView::NONE;
+        }
 
         $this->getDb();
         $this->provenance = Capsule::table('object_provenance')->where('object_id', (int) $objectId)->first();
@@ -144,12 +154,12 @@ class extendedRightsComponents extends sfComponents
         if ($this->provenance && isset($this->provenance->donor_id)) {
             $this->donor = Capsule::table('donor')
                 ->leftJoin('donor_i18n', function ($join) {
-                    $join->on(Capsule::raw('donor_i18n.id'), '=', Capsule::raw('donor.id'))
-                         ->where(Capsule::raw('donor_i18n.culture'), '=', 'en');
+                    $join->on('donor_i18n.id', '=', 'donor.id')
+                         ->where('donor_i18n.culture', '=', 'en');
                 })
-                ->leftJoin('slug', Capsule::raw('slug.object_id'), '=', Capsule::raw('donor.id'))
-                ->where(Capsule::raw('donor.id'), '=', $this->provenance->donor_id)
-                ->select(Capsule::raw('donor.id'), Capsule::raw('donor_i18n.authorized_form_of_name'), Capsule::raw('slug.slug'))
+                ->leftJoin('slug', 'slug.object_id', '=', 'donor.id')
+                ->where('donor.id', '=', $this->provenance->donor_id)
+                ->select('donor.id', 'donor_i18n.authorized_form_of_name', 'slug.slug')
                 ->first();
         }
     }
@@ -158,27 +168,21 @@ class extendedRightsComponents extends sfComponents
     {
         $this->getDb();
 
-        $this->tkLabels = Capsule::table('tk_label')
-            ->leftJoin('tk_label_i18n', function ($join) {
-                $join->on(Capsule::raw('tk_label_i18n.tk_label_id'), '=', Capsule::raw('tk_label.id'))
-                     ->where(Capsule::raw('tk_label_i18n.culture'), '=', 'en');
+        $this->tkLabels = Capsule::table('rights_tk_label')
+            ->leftJoin('rights_tk_label_i18n', function ($join) {
+                $join->on('rights_tk_label_i18n.id', '=', 'rights_tk_label.id')
+                     ->where('rights_tk_label_i18n.culture', '=', 'en');
             })
-            ->leftJoin('tk_label_category', Capsule::raw('tk_label_category.id'), '=', Capsule::raw('tk_label.tk_label_category_id'))
-            ->leftJoin('tk_label_category_i18n', function ($join) {
-                $join->on(Capsule::raw('tk_label_category_i18n.tk_label_category_id'), '=', Capsule::raw('tk_label_category.id'))
-                     ->where(Capsule::raw('tk_label_category_i18n.culture'), '=', 'en');
-            })
-            ->where(Capsule::raw('tk_label.is_active'), '=', 1)
-            ->orderBy(Capsule::raw('tk_label_category.sort_order'))
-            ->orderBy(Capsule::raw('tk_label.sort_order'))
+            ->where('rights_tk_label.is_active', '=', 1)
+            ->orderBy('rights_tk_label.category')
+            ->orderBy('rights_tk_label.sort_order')
             ->select(
-                Capsule::raw('tk_label.id'),
-                Capsule::raw('tk_label.code'),
-                Capsule::raw('tk_label.uri'),
-                Capsule::raw('tk_label.icon_url'),
-                Capsule::raw('tk_label_category.code as category_code'),
-                Capsule::raw('tk_label_category_i18n.name as category_name'),
-                Capsule::raw('tk_label_i18n.name as name')
+                'rights_tk_label.id',
+                'rights_tk_label.code',
+                'rights_tk_label.uri',
+                'rights_tk_label.category',
+                'rights_tk_label.color',
+                'rights_tk_label_i18n.name'
             )
             ->get();
     }
@@ -188,18 +192,20 @@ class extendedRightsComponents extends sfComponents
         $this->getDb();
 
         $this->stats = (object) [
-            'total_objects' => Capsule::table('information_object')->count(),
+            'total_objects' => Capsule::table('information_object')->where('id', '>', 1)->count(),
             'with_rights_statement' => Capsule::table('object_rights_statement')->distinct()->count('object_id'),
-            'with_creative_commons' => Capsule::table('object_creative_commons')->distinct()->count('object_id'),
-            'with_tk_labels' => Capsule::table('object_tk_label')->distinct()->count('object_id'),
+            'with_creative_commons' => Capsule::table('extended_rights')->whereNotNull('cc_license_id')->distinct()->count('object_id'),
+            'with_tk_labels' => Capsule::table('rights_object_tk_label')->distinct()->count('object_id'),
             'active_embargoes' => Capsule::table('rights_embargo')->where('status', 'active')->count(),
         ];
     }
+
     public function executeEmbargoStatus(sfWebRequest $request)
     {
         $objectId = $this->objectId ?? null;
         if (!$objectId) {
             $this->embargo = null;
+
             return sfView::NONE;
         }
 
@@ -214,24 +220,5 @@ class extendedRightsComponents extends sfComponents
                       ->orWhere('end_date', '>', date('Y-m-d'));
             })
             ->first();
-
-        // Combine into single rights object for template
-        $this->rights = null;
-        if ($this->rightsStatement || $this->creativeCommons || count($this->tkLabels) > 0) {
-            $this->rights = (object)[
-                'rs_code' => $this->rightsStatement->code ?? null,
-                'rs_uri' => $this->rightsStatement->uri ?? null,
-                'rs_name' => $this->rightsStatement->name ?? null,
-                'rs_icon_url' => $this->rightsStatement->icon_url ?? null,
-                'rs_category' => $this->rightsStatement->category ?? null,
-                'rs_definition' => $this->rightsStatement->definition ?? null,
-                'cc_code' => $this->creativeCommons->code ?? null,
-                'cc_uri' => $this->creativeCommons->uri ?? null,
-                'cc_name' => $this->creativeCommons->name ?? null,
-                'cc_icon_url' => $this->creativeCommons->icon_url ?? null,
-                'tk_labels' => $this->tkLabels
-            ];
-        }
     }
-
 }

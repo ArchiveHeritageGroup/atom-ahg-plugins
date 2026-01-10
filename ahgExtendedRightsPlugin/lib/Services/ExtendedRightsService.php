@@ -49,9 +49,9 @@ class ExtendedRightsService
      */
     public function getCreativeCommonsLicenses(): Collection
     {
-        return DB::table('creative_commons_license')
+        return DB::table('rights_cc_license')
             ->where('is_active', 1)
-            ->select('id', 'code', 'uri', 'icon_url', 'icon_filename')
+            ->select('id', 'code', 'uri')
             ->orderBy('sort_order')
             ->get()
             ->map(function ($item) {
@@ -65,24 +65,23 @@ class ExtendedRightsService
      */
     public function getTkLabelsByCategory(): array
     {
-        $labels = DB::table('tk_label as tk')
-            ->leftJoin('tk_label_category as cat', 'tk.tk_label_category_id', '=', 'cat.id')
-            ->where('tk.is_active', 1)
-            ->select('tk.id', 'tk.code', 'tk.uri', 'tk.icon_url', 'tk.icon_filename', 'cat.code as category_code', 'cat.code as category_name')
-            ->orderBy('cat.sort_order')
-            ->orderBy('tk.sort_order')
+        $labels = DB::table('rights_tk_label')
+            ->where('is_active', 1)
+            ->select('id', 'code', 'uri', 'icon_path', 'category', 'color')
+            ->orderBy('category')
+            ->orderBy('sort_order')
             ->get();
 
         $grouped = [];
         foreach ($labels as $label) {
-            $category = $label->category_code ?? 'other';
+            $category = $label->category ?? 'other';
             if (!isset($grouped[$category])) {
                 $grouped[$category] = [
-                    'name' => $label->category_name ?? ucfirst($category),
+                    'name' => ucfirst($category),
                     'labels' => [],
                 ];
             }
-            $label->name = $label->code; // Use code as name if no i18n
+            $label->name = $label->code;
             $grouped[$category]['labels'][] = $label;
         }
 
@@ -100,7 +99,7 @@ class ExtendedRightsService
                 $join->on('rs.id', '=', 'rs_i18n.rights_statement_id')
                     ->where('rs_i18n.culture', '=', $this->culture);
             })
-            ->leftJoin('creative_commons_license as cc', 'er.creative_commons_license_id', '=', 'cc.id')
+            ->leftJoin('rights_cc_license as cc', 'er.cc_license_id', '=', 'cc.id')
             ->where('er.object_id', $objectId)
             ->where('er.is_primary', 1)
             ->select([
@@ -127,7 +126,7 @@ class ExtendedRightsService
                 $join->on('rs.id', '=', 'rs_i18n.rights_statement_id')
                     ->where('rs_i18n.culture', '=', $this->culture);
             })
-            ->leftJoin('creative_commons_license as cc', 'er.creative_commons_license_id', '=', 'cc.id')
+            ->leftJoin('rights_cc_license as cc', 'er.cc_license_id', '=', 'cc.id')
             ->where('er.object_id', $objectId)
             ->select([
                 'er.*',
@@ -160,7 +159,7 @@ class ExtendedRightsService
         $record = [
             'object_id' => $objectId,
             'rights_statement_id' => $data['rights_statement_id'] ?? null,
-            'creative_commons_license_id' => $data['creative_commons_license_id'] ?? null,
+            'cc_license_id' => $data['cc_license_id'] ?? null,
             'rights_date' => $data['rights_date'] ?? null,
             'expiry_date' => $data['expiry_date'] ?? null,
             'rights_holder' => $data['rights_holder'] ?? null,
@@ -194,7 +193,7 @@ class ExtendedRightsService
     {
         $record = [
             'rights_statement_id' => $data['rights_statement_id'] ?? null,
-            'creative_commons_license_id' => $data['creative_commons_license_id'] ?? null,
+            'cc_license_id' => $data['cc_license_id'] ?? null,
             'rights_date' => $data['rights_date'] ?? null,
             'expiry_date' => $data['expiry_date'] ?? null,
             'rights_holder' => $data['rights_holder'] ?? null,
@@ -334,7 +333,7 @@ class ExtendedRightsService
     {
         DB::table("extended_rights")->updateOrInsert(
             ["object_id" => $objectId],
-            ["creative_commons_license_id" => $licenseId, "updated_at" => now()]
+            ["cc_license_id" => $licenseId, "updated_at" => now()]
         );
     }
 

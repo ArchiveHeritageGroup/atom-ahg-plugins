@@ -19,8 +19,8 @@ class ExtendedRightsExportService
 
         try {
             $stats['total_with_rights'] = DB::table('object_rights_statement')->distinct()->count('object_id')
-                + DB::table('object_creative_commons')->distinct()->count('object_id')
-                + DB::table('object_tk_label')->distinct()->count('object_id');
+                + DB::table('extended_rights')->distinct()->count('object_id')
+                + DB::table('rights_object_tk_label')->distinct()->count('object_id');
         } catch (\Exception $e) {
             $stats['total_with_rights'] = 0;
         }
@@ -79,16 +79,16 @@ class ExtendedRightsExportService
     public function getCCLicenseCounts()
     {
         try {
-            return DB::table('object_creative_commons')
-                ->join('creative_commons_license', DB::raw('creative_commons_license.id'), '=', DB::raw('object_creative_commons.creative_commons_license_id'))
-                ->leftJoin('creative_commons_license_i18n', function ($join) {
-                    $join->on(DB::raw('creative_commons_license_i18n.creative_commons_license_id'), '=', DB::raw('creative_commons_license.id'))
-                         ->where(DB::raw('creative_commons_license_i18n.culture'), '=', $this->culture);
+            return DB::table('extended_rights')
+                ->join('rights_cc_license', DB::raw('rights_cc_license.id'), '=', DB::raw('extended_rights.creative_commons_license_id'))
+                ->leftJoin('rights_cc_license_i18n', function ($join) {
+                    $join->on(DB::raw('rights_cc_license_i18n.creative_commons_license_id'), '=', DB::raw('rights_cc_license.id'))
+                         ->where(DB::raw('rights_cc_license_i18n.culture'), '=', $this->culture);
                 })
-                ->groupBy(DB::raw('creative_commons_license.id'), DB::raw('creative_commons_license.code'), DB::raw('creative_commons_license_i18n.name'))
+                ->groupBy(DB::raw('rights_cc_license.id'), DB::raw('rights_cc_license.code'), DB::raw('rights_cc_license_i18n.name'))
                 ->select([
-                    DB::raw('creative_commons_license.code'),
-                    DB::raw('creative_commons_license_i18n.name'),
+                    DB::raw('rights_cc_license.code'),
+                    DB::raw('rights_cc_license_i18n.name'),
                     DB::raw('COUNT(*) as count')
                 ])
                 ->get()
@@ -101,15 +101,15 @@ class ExtendedRightsExportService
     public function getTkLabelCounts()
     {
         try {
-            return DB::table('object_tk_label')
-                ->join('tk_label', DB::raw('tk_label.id'), '=', DB::raw('object_tk_label.tk_label_id'))
+            return DB::table('rights_object_tk_label')
+                ->join('rights_tk_label', DB::raw('rights_tk_label.id'), '=', DB::raw('rights_object_rights_tk_label.tk_label_id'))
                 ->leftJoin('tk_label_i18n', function ($join) {
-                    $join->on(DB::raw('tk_label_i18n.tk_label_id'), '=', DB::raw('tk_label.id'))
+                    $join->on(DB::raw('tk_label_i18n.tk_label_id'), '=', DB::raw('rights_tk_label.id'))
                          ->where(DB::raw('tk_label_i18n.culture'), '=', $this->culture);
                 })
-                ->groupBy(DB::raw('tk_label.id'), DB::raw('tk_label.code'), DB::raw('tk_label_i18n.name'))
+                ->groupBy(DB::raw('rights_tk_label.id'), DB::raw('rights_tk_label.code'), DB::raw('tk_label_i18n.name'))
                 ->select([
-                    DB::raw('tk_label.code'),
+                    DB::raw('rights_tk_label.code'),
                     DB::raw('tk_label_i18n.name'),
                     DB::raw('COUNT(*) as count')
                 ])
@@ -134,11 +134,11 @@ class ExtendedRightsExportService
                 $join->on(DB::raw('rights_statement_i18n.rights_statement_id'), '=', DB::raw('rights_statement.id'))
                      ->where(DB::raw('rights_statement_i18n.culture'), '=', $this->culture);
             })
-            ->leftJoin('object_creative_commons', DB::raw('object_creative_commons.object_id'), '=', DB::raw('information_object.id'))
-            ->leftJoin('creative_commons_license', DB::raw('creative_commons_license.id'), '=', DB::raw('object_creative_commons.creative_commons_license_id'))
-            ->leftJoin('creative_commons_license_i18n', function ($join) {
-                $join->on(DB::raw('creative_commons_license_i18n.creative_commons_license_id'), '=', DB::raw('creative_commons_license.id'))
-                     ->where(DB::raw('creative_commons_license_i18n.culture'), '=', $this->culture);
+            ->leftJoin('extended_rights', DB::raw('extended_rights.object_id'), '=', DB::raw('information_object.id'))
+            ->leftJoin('rights_cc_license', DB::raw('rights_cc_license.id'), '=', DB::raw('extended_rights.creative_commons_license_id'))
+            ->leftJoin('rights_cc_license_i18n', function ($join) {
+                $join->on(DB::raw('rights_cc_license_i18n.creative_commons_license_id'), '=', DB::raw('rights_cc_license.id'))
+                     ->where(DB::raw('rights_cc_license_i18n.culture'), '=', $this->culture);
             });
 
         if ($objectId) {
@@ -152,8 +152,8 @@ class ExtendedRightsExportService
             DB::raw('information_object_i18n.title'),
             DB::raw('rights_statement.code as rights_statement_code'),
             DB::raw('rights_statement_i18n.name as rights_statement_name'),
-            DB::raw('creative_commons_license.code as cc_license_code'),
-            DB::raw('creative_commons_license_i18n.name as cc_license_name')
+            DB::raw('rights_cc_license.code as cc_license_code'),
+            DB::raw('rights_cc_license_i18n.name as cc_license_name')
         ])->get();
     }
 }
