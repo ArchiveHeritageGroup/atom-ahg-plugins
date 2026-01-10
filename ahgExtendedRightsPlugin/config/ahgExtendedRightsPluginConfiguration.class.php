@@ -13,6 +13,9 @@ class ahgExtendedRightsPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Autoload EmbargoHelper
+        require_once dirname(__FILE__) . '/../lib/EmbargoHelper.php';
+        
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
 

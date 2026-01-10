@@ -11,6 +11,9 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
+// Embargo access filter
+require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
+
 class ahgMuseumPluginIndexAction extends sfAction
 {
     public function execute($request)
@@ -26,6 +29,11 @@ class ahgMuseumPluginIndexAction extends sfAction
         // Check user authorization using Qubit ACL
         if (!($this->getUser()->isAuthenticated() || QubitAcl::check($this->resource, 'read'))) {
             $this->forward("admin", "secure");
+        }
+        
+        // Check embargo access - blocks full embargo for public users
+        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+            return sfView::NONE;
         }
 
         // Log the access

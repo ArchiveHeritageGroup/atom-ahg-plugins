@@ -1,11 +1,15 @@
 <?php decorate_with('layout_2col'); ?>
+<?php
+// Get raw resource for embargo checks
+$rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource) : (isset($resource) ? sfOutputEscaper::unescape($resource) : null);
+?>
 
 <?php slot('sidebar'); ?>
 
   <!-- Digital Object / Image -->
   <div class="card mb-4">
     <div class="card-body text-center">
-      <?php if ($digitalObject): ?>
+      <?php if ($digitalObject && $rawResource && EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
         <?php
           $fullPath = $digitalObject->path . $digitalObject->name;
           $ext = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));

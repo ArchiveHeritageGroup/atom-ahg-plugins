@@ -313,4 +313,248 @@ class EmbargoService
         }
     }
     protected string $auditModule = 'ahgExtendedRightsPlugin';
+
+    // ==========================================
+    // ACCESS CONTROL METHODS
+    // ==========================================
+
+    /**
+     * Embargo type constants for access control
+     */
+    public const TYPE_FULL = 'full';
+    public const TYPE_METADATA_ONLY = 'metadata_only';
+    public const TYPE_DIGITAL_ONLY = 'digital_only';
+    public const TYPE_PARTIAL = 'partial';
+
+    /**
+     * Cache for embargo lookups (per-request)
+     */
+    private static array $accessCache = [];
+
+    /**
+     * Check if user can access the record at all
+     * Returns false for 'full' embargo (unless user has edit permission)
+     */
+    public function canAccessRecord(int $objectId, ?object $user = null): bool
+    {
+        if ($this->userCanBypassEmbargo($objectId, $user)) {
+            return true;
+        }
+
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return true;
+        }
+
+        // Full embargo blocks all access for public
+        return $embargo->embargo_type !== self::TYPE_FULL;
+    }
+
+    /**
+     * Check if user can view metadata
+     */
+    public function canViewMetadata(int $objectId, ?object $user = null): bool
+    {
+        if ($this->userCanBypassEmbargo($objectId, $user)) {
+            return true;
+        }
+
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return true;
+        }
+
+        // Full embargo blocks metadata
+        return $embargo->embargo_type !== self::TYPE_FULL;
+    }
+
+    /**
+     * Check if user can view thumbnail
+     */
+    public function canViewThumbnail(int $objectId, ?object $user = null): bool
+    {
+        if ($this->userCanBypassEmbargo($objectId, $user)) {
+            return true;
+        }
+
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return true;
+        }
+
+        // full and metadata_only block thumbnails
+        return !in_array($embargo->embargo_type, [self::TYPE_FULL, self::TYPE_METADATA_ONLY]);
+    }
+
+    /**
+     * Check if user can view full digital object (master/reference)
+     */
+    public function canViewDigitalObject(int $objectId, ?object $user = null): bool
+    {
+        if ($this->userCanBypassEmbargo($objectId, $user)) {
+            return true;
+        }
+
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return true;
+        }
+
+        // All embargo types except partial block full digital object
+        return $embargo->embargo_type === self::TYPE_PARTIAL;
+    }
+
+    /**
+     * Check if user can download
+     */
+    public function canDownload(int $objectId, ?object $user = null): bool
+    {
+        if ($this->userCanBypassEmbargo($objectId, $user)) {
+            return true;
+        }
+
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return true;
+        }
+
+        // All embargo types block downloads
+        return false;
+    }
+
+    /**
+     * Check if user has permission to bypass embargo
+     */
+    private function userCanBypassEmbargo(int $objectId, ?object $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // Check if user is authenticated
+        if (method_exists($user, 'isAuthenticated') && !$user->isAuthenticated()) {
+            return false;
+        }
+
+        // Check if user has update permission on the object
+        try {
+            $resource = \QubitInformationObject::getById($objectId);
+            if ($resource && \QubitAcl::check($resource, 'update')) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+
+        // Check if user is admin
+        if (method_exists($user, 'isAdministrator') && $user->isAdministrator()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get embargo info for display (public-safe)
+     */
+    public function getEmbargoDisplayInfo(int $objectId): ?array
+    {
+        $embargo = $this->getActiveEmbargo($objectId);
+        
+        if (!$embargo) {
+            return null;
+        }
+
+        $typeLabels = [
+            self::TYPE_FULL => 'Full Access Restriction',
+            self::TYPE_METADATA_ONLY => 'Digital Content Restricted',
+            self::TYPE_DIGITAL_ONLY => 'Download Restricted',
+            self::TYPE_PARTIAL => 'Partial Restriction',
+        ];
+
+        return [
+            'type' => $embargo->embargo_type,
+            'type_label' => $typeLabels[$embargo->embargo_type] ?? 'Access Restricted',
+            'public_message' => $embargo->reason ?? null,
+            'end_date' => $embargo->end_date,
+            'is_perpetual' => !$embargo->auto_release,
+        ];
+    }
+
+    /**
+     * Bulk filter - get IDs that are NOT under full embargo
+     * Useful for filtering search results
+     */
+    public function filterAccessibleIds(array $objectIds, ?object $user = null): array
+    {
+        if (empty($objectIds)) {
+            return [];
+        }
+
+        // If user can bypass, return all IDs
+        if ($user && method_exists($user, 'isAuthenticated') && $user->isAuthenticated()) {
+            if (\QubitAcl::check('QubitInformationObject', 'update')) {
+                return $objectIds;
+            }
+        }
+
+        $now = date('Y-m-d');
+
+        // Get IDs under full embargo
+        $embargoedIds = DB::table('rights_embargo')
+            ->whereIn('object_id', $objectIds)
+            ->where('status', 'active')
+            ->where('embargo_type', self::TYPE_FULL)
+            ->where('start_date', '<=', $now)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $now);
+            })
+            ->pluck('object_id')
+            ->toArray();
+
+        // Return IDs NOT under full embargo
+        return array_values(array_diff($objectIds, $embargoedIds));
+    }
+
+    /**
+     * Get embargo statistics for admin dashboard
+     */
+    public function getStatistics(): array
+    {
+        $stats = DB::table('rights_embargo')
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN embargo_type = 'full' AND status = 'active' THEN 1 ELSE 0 END) as full_active,
+                SUM(CASE WHEN embargo_type = 'metadata_only' AND status = 'active' THEN 1 ELSE 0 END) as metadata_only_active,
+                SUM(CASE WHEN embargo_type = 'digital_only' AND status = 'active' THEN 1 ELSE 0 END) as digital_only_active,
+                SUM(CASE WHEN end_date IS NOT NULL AND end_date < CURDATE() AND status = 'active' THEN 1 ELSE 0 END) as expired_not_lifted
+            ")
+            ->first();
+
+        return [
+            'total' => (int) ($stats->total ?? 0),
+            'active' => (int) ($stats->active ?? 0),
+            'by_type' => [
+                'full' => (int) ($stats->full_active ?? 0),
+                'metadata_only' => (int) ($stats->metadata_only_active ?? 0),
+                'digital_only' => (int) ($stats->digital_only_active ?? 0),
+            ],
+            'expired_not_lifted' => (int) ($stats->expired_not_lifted ?? 0),
+        ];
+    }
+
+    /**
+     * Clear access cache
+     */
+    public static function clearCache(): void
+    {
+        self::$accessCache = [];
+    }
 }

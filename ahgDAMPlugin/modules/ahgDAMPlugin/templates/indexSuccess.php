@@ -1,5 +1,6 @@
 <?php decorate_with('layout_2col.php'); ?>
 <?php use_helper('Date'); ?>
+<?php $rawResource = sfOutputEscaper::unescape($resource); ?>
 
 <?php slot('sidebar'); ?>
   <?php include_component('informationobject', 'contextMenu'); ?>
@@ -30,31 +31,43 @@
 
   <!-- Digital Object Display -->
   <?php if (isset($digitalObject) && $digitalObject): ?>
-  <section class="card mb-3">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Digital Object'); ?></h5>
-    </div>
-    <div class="card-body text-center">
-      <?php
-        $mimeType = $digitalObject->mimeType ?? '';
-        $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-        $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-        $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-        $refPath = $refObj ? $refObj->getFullPath() : null;
-        $masterPath = $digitalObject->getFullPath();
-        $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-      ?>
-      <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
-        <a href="<?php echo $masterPath; ?>" target="_blank">
-          <img src="<?php echo $displayPath; ?>" alt="<?php echo render_title($resource); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
-        </a>
-      <?php else: ?>
-        <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
-          <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
-        </a>
-      <?php endif; ?>
-    </div>
-  </section>
+    <?php if (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
+    <section class="card mb-3">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Digital Object'); ?></h5>
+      </div>
+      <div class="card-body text-center">
+        <?php
+          $mimeType = $digitalObject->mimeType ?? '';
+          $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
+          $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
+          $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
+          $refPath = $refObj ? $refObj->getFullPath() : null;
+          $masterPath = $digitalObject->getFullPath();
+          $displayPath = $refPath ?: $thumbPath ?: $masterPath;
+        ?>
+        <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
+          <a href="<?php echo $masterPath; ?>" target="_blank">
+            <img src="<?php echo $displayPath; ?>" alt="<?php echo render_title($resource); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
+          </a>
+        <?php else: ?>
+          <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
+            <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
+          </a>
+        <?php endif; ?>
+      </div>
+    </section>
+    <?php else: ?>
+    <!-- Embargo notice -->
+    <section class="card mb-3">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-lock me-2"></i><?php echo __('Digital Object'); ?></h5>
+      </div>
+      <div class="card-body">
+        <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'digital_object']); ?>
+      </div>
+    </section>
+    <?php endif; ?>
   <?php endif; ?>
 
   <!-- Basic Identification -->

@@ -19,6 +19,10 @@ if (!function_exists('checkPluginEnabled')) {
 }
 ?>
 
+<?php
+// Get raw resource for embargo checks
+$rawResource = sfOutputEscaper::unescape($resource);
+?>
 <?php slot('title'); ?>
   <h1><?php echo esc_entities($resource->getTitle(['cultureFallback' => true])); ?></h1>
 <?php end_slot(); ?>
@@ -341,44 +345,43 @@ if (!function_exists('checkPluginEnabled')) {
   <div class="col-md-4">
     <!-- Cover Image -->
     <?php if (isset($digitalObject) && $digitalObject): ?>
-    <section class="card mb-4">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Cover'); ?></h5>
-      </div>
-      <div class="card-body text-center">
-        <?php
-          $mimeType = $digitalObject->mimeType ?? '';
-          $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-          $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-          $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-          $refPath = $refObj ? $refObj->getFullPath() : null;
-          $masterPath = $digitalObject->getFullPath();
-          $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-          $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-          $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-          $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-          $refPath = $refObj ? $refObj->getFullPath() : null;
-          $masterPath = $digitalObject->getFullPath();
-          $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-          $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-          $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-          $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-          $refPath = $refObj ? $refObj->getFullPath() : null;
-          $masterPath = $digitalObject->getFullPath();
-          $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-          $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-        ?>
-        <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
-          <a href="<?php echo $masterPath; ?>" target="_blank">
-            <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
-          </a>
-        <?php else: ?>
-          <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
-            <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
-          </a>
-        <?php endif; ?>
-      </div>
-    </section>
+      <?php if (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
+      <section class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Cover'); ?></h5>
+        </div>
+        <div class="card-body text-center">
+          <?php
+            $mimeType = $digitalObject->mimeType ?? '';
+            $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
+            $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
+            $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
+            $refPath = $refObj ? $refObj->getFullPath() : null;
+            $masterPath = $digitalObject->getFullPath();
+            $displayPath = $refPath ?: $thumbPath ?: $masterPath;
+          ?>
+          <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
+            <a href="<?php echo $masterPath; ?>" target="_blank">
+              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+            </a>
+          <?php else: ?>
+            <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
+              <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
+            </a>
+          <?php endif; ?>
+        </div>
+      </section>
+      <?php else: ?>
+      <!-- Embargo notice for cover -->
+      <section class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-lock me-2"></i><?php echo __('Cover'); ?></h5>
+        </div>
+        <div class="card-body text-center">
+          <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'thumbnail']); ?>
+        </div>
+      </section>
+      <?php endif; ?>
     <?php endif; ?>
 
     <!-- Rights Area -->

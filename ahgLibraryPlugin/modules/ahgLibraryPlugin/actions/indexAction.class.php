@@ -6,6 +6,8 @@ class ahgLibraryPluginIndexAction extends sfAction
 {
     public function execute($request)
     {
+        // Embargo access filter
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
         // Load framework
         $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
         require_once $frameworkPath . '/bootstrap.php';
@@ -33,6 +35,11 @@ class ahgLibraryPluginIndexAction extends sfAction
         // Check read permission
         if (!QubitAcl::check($this->resource, 'read')) {
             QubitAcl::forwardToSecureAction();
+        }
+        
+        // Check embargo access
+        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+            return sfView::NONE;
         }
         
         // Load library extended data

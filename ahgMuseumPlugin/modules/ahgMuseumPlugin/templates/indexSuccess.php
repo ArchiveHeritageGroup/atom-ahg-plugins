@@ -154,15 +154,27 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
 <?php end_slot(); ?>
 
 <?php slot('before-content'); ?>
+  <?php if (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
   <?php echo get_component('digitalobject', 'imageflow', ['resource' => $resource]); ?>
+<?php endif; ?>
 <?php end_slot(); ?>
 
 <?php // Digital Object Viewer ?>
-<?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { ?>
-  <?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj) { ?>
-    <?php echo render_digital_object_viewer($resource, $obj); ?>
-  <?php } ?>
-<?php } ?>
+<?php if (0 < count($resource->digitalObjectsRelatedByobjectId)): ?>
+  <?php if (EmbargoHelper::canViewDigitalObject($rawResource->id)): ?>
+    <?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj): ?>
+      <?php echo render_digital_object_viewer($resource, $obj); ?>
+    <?php endforeach; ?>
+  <?php elseif (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
+    <?php // Show thumbnail only - no full viewer ?>
+    <div class="digital-object-restricted text-center p-4 bg-light rounded mb-3">
+      <i class="fas fa-image fa-3x text-muted mb-2"></i>
+      <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'digital_object']); ?>
+    </div>
+  <?php else: ?>
+    <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'thumbnail']); ?>
+  <?php endif; ?>
+<?php endif; ?>
 
 <!-- Identity Area -->
 
@@ -370,9 +382,9 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
 </section>
 
 <!-- Digital Object Metadata (Access Copies) -->
-<?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { ?>
+<?php if (0 < count($resource->digitalObjectsRelatedByobjectId) && EmbargoHelper::canViewDigitalObject($rawResource->id)): ?>
   <?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
-<?php } ?>
+<?php endif; ?>
 
 
 <?php slot('after-content'); ?>

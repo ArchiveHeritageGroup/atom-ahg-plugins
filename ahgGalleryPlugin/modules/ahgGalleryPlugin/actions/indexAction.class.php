@@ -1,6 +1,9 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
+// Embargo access filter
+require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
+
 class ahgGalleryPluginIndexAction extends sfAction
 {
     public function execute($request)
@@ -106,6 +109,11 @@ class ahgGalleryPluginIndexAction extends sfAction
         
         // Resource already loaded via Laravel - use for ACL components
         $this->qubitResource = QubitInformationObject::getById($this->resource->id);
+        
+        // Check embargo access
+        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+            return sfView::NONE;
+        }
         // Load item physical location
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
         $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();

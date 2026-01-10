@@ -8,6 +8,12 @@ class ahgDAMPluginIndexAction extends InformationObjectIndexAction
     {
         parent::execute($request);
         
+        // Embargo access filter
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
+        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+            return sfView::NONE;
+        }
+        
         // Load digital object for display
         $this->digitalObject = $this->resource->getDigitalObject();
         
