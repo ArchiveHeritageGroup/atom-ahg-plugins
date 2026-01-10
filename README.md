@@ -1195,19 +1195,38 @@ server {
 
 ---
 
-## 📚 Documentation
-
-- [Installation Guide](INSTALLATION.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
-- [RIC - Records In Context](docs/RIC_INTEGRATION_GUIDE.md)
-- [CLI Reference](docs/CLI_REFERENCE.md)
-- [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
-- [Media Features Guide](docs/MEDIA_FEATURES.md)
-- [Library Plugin Explained](docs/AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
 
 ---
 
+## 📚 Documentation
+
+### Technical Documentation
+
+- [Installation Guide](INSTALLATION.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Modified Files Reference](docs/MODIFIED_FILES.md)
+- [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
+- [RIC Integration Guide](docs/RIC_INTEGRATION_GUIDE.md)
+- [CLI Reference](docs/CLI_REFERENCE.md)
+- [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
+- [Media Features Guide](docs/MEDIA_FEATURES.md)
+- [Library Plugin Architecture](docs/AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
+
+### User Guides (Non-Technical)
+
+Step-by-step guides with flow diagrams for end users:
+
+| Guide | Description |
+|-------|-------------|
+| [Spectrum Collections Management](docs/spectrum-user-guide.md) | Museum procedures - loans, condition checks, locations, valuations |
+| [Donor Agreement Management](docs/donor-agreement-user-guide.md) | Creating agreements, restrictions, reminders, linking records |
+| [Security & Compliance](docs/security-compliance-user-guide.md) | Security classifications, privacy (POPIA/GDPR), audit trails |
+| [Exporting Data](docs/export-data-user-guide.md) | Export to CSV, EAD, Dublin Core - single and bulk |
+| [Data Migration](docs/data-migration-user-guide.md) | Import from Vernon, ArchivesSpace, PastPerfect, and more |
+| [Access Requests & Researcher Portal](docs/access-requests-user-guide.md) | Registration, access requests, reading room bookings |
+| [Records in Contexts (RiC)](docs/ric-user-guide.md) | Understanding relationships, graph visualization, semantic search |
+
+---
 ## 🔑 Key Files Reference
 
 | File | Purpose | Modifiable |
