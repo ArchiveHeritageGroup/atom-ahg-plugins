@@ -14,6 +14,14 @@ if ($collectionRootId) {
     $collectionRootSlug = DB::table('slug')->where('object_id', $collectionRootId)->value('slug');
 }
 
+// Check for finding aid
+$hasGeneratedFindingAid = false;
+if ($collectionRootId) {
+    $hasGeneratedFindingAid = DB::table('property')
+        ->where('object_id', $collectionRootId)
+        ->where('name', 'findingAidPath')
+        ->exists();
+}
 
 // Check for children (for calculate dates)
 $hasChildren = DB::table('information_object')->where('parent_id', $resourceId)->exists();
@@ -54,9 +62,33 @@ $hasChildren = DB::table('information_object')->where('parent_id', $resourceId)-
     <?php if ('sfModsPlugin' == $sf_context->getModuleName() && $sf_context->getConfiguration()->isPluginEnabled('sfModsPlugin')) { ?><li><a class="atom-icon-link" href="<?php echo url_for(['module' => 'sfModsPlugin', 'action' => 'index', 'slug' => $slug, 'sf_format' => 'xml']); ?>"><i class="fas fa-fw fa-upload me-1" aria-hidden="true"></i><?php echo __('MODS 3.5 XML'); ?></a></li><?php } ?>
   </ul>
 
-
-  <?php // Finding Aid - use component for full functionality ?>
-  <?php echo get_component('informationobject', 'findingAid', ['resource' => $resource]); ?>
+  <?php // Finding Aid - inline instead of component ?>
+  <?php if ($hasGeneratedFindingAid && $collectionRootSlug) { ?>
+  <h4 class="h5 mb-2"><?php echo __('Finding aid'); ?></h4>
+  <ul class="list-unstyled">
+    <li>
+      <a class="atom-icon-link" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'findingAid', 'slug' => $collectionRootSlug]); ?>">
+        <i class="fas fa-fw fa-file-pdf me-1" aria-hidden="true"></i><?php echo __('Download finding aid'); ?>
+      </a>
+    </li>
+    <?php if ($sf_user->isAdministrator()) { ?>
+    <li>
+      <a class="atom-icon-link" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'generateFindingAid', 'slug' => $collectionRootSlug]); ?>">
+        <i class="fas fa-fw fa-cogs me-1" aria-hidden="true"></i><?php echo __('Generate finding aid'); ?>
+      </a>
+    </li>
+    <?php } ?>
+  </ul>
+  <?php } elseif ($sf_user->isAdministrator() && $collectionRootSlug) { ?>
+  <h4 class="h5 mb-2"><?php echo __('Finding aid'); ?></h4>
+  <ul class="list-unstyled">
+    <li>
+      <a class="atom-icon-link" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'generateFindingAid', 'slug' => $collectionRootSlug]); ?>">
+        <i class="fas fa-fw fa-cogs me-1" aria-hidden="true"></i><?php echo __('Generate finding aid'); ?>
+      </a>
+    </li>
+  </ul>
+  <?php } ?>
 
   <?php // Calculate Dates - inline instead of component ?>
   <?php if ($sf_user->isAdministrator() && $hasChildren && $slug) { ?>

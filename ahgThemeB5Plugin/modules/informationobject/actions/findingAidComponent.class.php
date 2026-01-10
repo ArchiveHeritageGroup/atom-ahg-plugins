@@ -6,90 +6,171 @@ class findingAidComponent extends sfComponent
 {
     public function execute($request)
     {
+        // If Finding Aids are explicitly disabled in QubitSettings, don't show
+        if ('1' !== sfConfig::get('app_findingAidsEnabled', '1')) {
+            return sfView::NONE;
+        }
+
+        // Initialize all display flags
+        $this->showDownload = false;
+        $this->showStatus = false;
+        $this->showUpload = false;
+        $this->showGenerate = false;
+        $this->showDelete = false;
+        $this->path = null;
+        $this->status = null;
+
         // Check if resource exists
         if (!isset($this->resource) || !$this->resource) {
             return sfView::NONE;
         }
 
-        $resourceId = is_object($this->resource) ? ($this->resource->id ?? null) : $this->resource;
-        
-        if (!$resourceId) {
+        // Get collection root (finding aids are at collection level)
+        if (QubitInformationObject::ROOT_ID != $this->resource->parentId) {
+            $this->resource = $this->resource->getCollectionRoot();
+        }
+
+        if (!$this->resource) {
             return sfView::NONE;
         }
 
-        // Get collection root ID
-        $collectionRootId = $this->getCollectionRootId($this->resource);
-        
-        if (!$collectionRootId) {
-            return sfView::NONE;
+        // Use QubitFindingAid class for finding aid operations
+        $findingAid = new QubitFindingAid($this->resource);
+
+        // Public users can only see the download link if the file exists
+        if (!$this->getUser()->isAuthenticated()) {
+            if (empty($findingAid->getPath())) {
+                return sfView::NONE;
+            }
+
+            $this->path = $findingAid->getPath();
+            $this->showDownload = true;
+
+            return;
         }
 
-        // Check if finding aid exists for collection root
-        $this->findingAid = DB::table('property as p')
-            ->leftJoin('property_i18n as pi', function ($join) {
-                $join->on('p.id', '=', 'pi.id');
-            })
-            ->where('p.object_id', $collectionRootId)
-            ->where('p.name', 'findingAidStatus')
-            ->select(['p.id', 'pi.value'])
-            ->first();
+        // Get last job status
+        $lastJobStatus = arFindingAidJob::getStatus($this->resource->id);
 
-        // Get finding aid status
-        $this->status = null;
-        if ($this->findingAid && isset($this->findingAid->value)) {
-            $this->status = $this->findingAid->value;
+        // For authenticated users, if no job has been executed
+        if (!isset($lastJobStatus)) {
+            // Edge case: job status missing but file exists
+            if (!empty($findingAid->getPath())) {
+                $this->path = $findingAid->getPath();
+                $this->showDownload = true;
+
+                // Check ACL to show delete option
+                if (QubitAcl::check($this->resource, 'update')) {
+                    $this->showDelete = true;
+                }
+
+                return;
+            }
+
+            // Show allowed actions or nothing
+            if (!$this->showActions()) {
+                return sfView::NONE;
+            }
+
+            return;
         }
 
-        // Check if there's a generated finding aid
-        $this->hasGeneratedFindingAid = DB::table('property')
-            ->where('object_id', $collectionRootId)
-            ->where('name', 'findingAidPath')
-            ->exists();
+        // If there is a job in progress, show only status
+        if (QubitTerm::JOB_STATUS_IN_PROGRESS_ID == $lastJobStatus) {
+            $this->showStatus = true;
+            $this->status = $this->context->i18n->__('In progress');
 
-        // Store collection root for template
-        $this->collectionRootId = $collectionRootId;
-        $this->collectionRootSlug = $this->getSlug($collectionRootId);
+            return;
+        }
 
-        // Context menu mode
-        $this->contextMenu = isset($this->contextMenu) ? $this->contextMenu : false;
+        // If the last job failed, show error status and allowed actions
+        if (QubitTerm::JOB_STATUS_ERROR_ID == $lastJobStatus) {
+            $this->showStatus = true;
+            $this->showActions();
+            $this->status = $this->context->i18n->__('Error');
+
+            return;
+        }
+
+        // If the last job completed, get finding aid status property
+        if (QubitTerm::JOB_STATUS_COMPLETED_ID == $lastJobStatus) {
+            // If the property is missing, the finding aid was deleted
+            if (empty($findingAid->getStatus())) {
+                if (!$this->showActions()) {
+                    return sfView::NONE;
+                }
+
+                return;
+            }
+
+            // If the property is set but the file is missing
+            if (empty($findingAid->getPath())) {
+                $this->showStatus = true;
+                $this->showActions();
+                $this->status = $this->context->i18n->__('File missing');
+
+                return;
+            }
+
+            // Show status and download link
+            $this->showStatus = true;
+            $this->showDownload = true;
+            $this->path = $findingAid->getPath();
+
+            switch ((int) $findingAid->getStatus()) {
+                case QubitFindingAid::GENERATED_STATUS:
+                    $this->status = $this->context->i18n->__('Generated');
+                    break;
+
+                case QubitFindingAid::UPLOADED_STATUS:
+                    $this->status = $this->context->i18n->__('Uploaded');
+                    break;
+
+                default:
+                    $this->status = $this->context->i18n->__('Unknown');
+            }
+
+            // Check ACL to show delete option
+            if (QubitAcl::check($this->resource, 'update')) {
+                $this->showDelete = true;
+            }
+
+            return;
+        }
+
+        // Unknown status - show status and actions
+        $this->showStatus = true;
+        $this->showActions();
+        $this->status = $this->context->i18n->__('Unknown');
     }
 
     /**
-     * Get collection root ID for resource
+     * Set action flags based on user permissions
      */
-    protected function getCollectionRootId($resource): ?int
+    protected function showActions()
     {
-        if (!$resource) {
-            return null;
+        // Actions only allowed for users with update permissions
+        if (!QubitAcl::check($this->resource, 'update')) {
+            return false;
         }
 
-        // If resource has lft/rgt, find collection root
-        if (isset($resource->lft) && isset($resource->rgt)) {
-            $root = DB::table('information_object')
-                ->where('lft', '<=', $resource->lft)
-                ->where('rgt', '>=', $resource->rgt)
-                ->where('parent_id', 1) // Direct child of ROOT
-                ->orderBy('lft')
-                ->first();
-            
-            return $root ? $root->id : ($resource->id ?? null);
+        // Upload is allowed for drafts
+        $this->showUpload = true;
+
+        // Generate is allowed for published descriptions and for drafts
+        // if the public finding aid setting is set to false
+        $setting = QubitSetting::getByName('publicFindingAid');
+        if (
+            QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID ==
+                $this->resource->getPublicationStatus()->statusId
+            || (
+                isset($setting)
+                && !$setting->getValue(['sourceCulture' => true])
+            )
+        ) {
+            $this->showGenerate = true;
         }
 
-        // Fallback to resource ID
-        return $resource->id ?? null;
-    }
-
-    /**
-     * Get slug for object
-     */
-    protected function getSlug($objectId): ?string
-    {
-        if (!$objectId) {
-            return null;
-        }
-
-        return DB::table('slug')
-            ->where('object_id', $objectId)
-            ->value('slug');
+        return true;
     }
 }
