@@ -348,13 +348,13 @@ $hasOais = isPluginActive('arOaisPlugin');
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'browse']); ?>"><i class="fas fa-copyright me-2 text-muted"></i><?php echo __('Rights Statements'); ?></a>
+                        <a href="<?php echo url_for(['module' => 'taxonomy', 'action' => 'index', 'slug' => 'rights-statements']); ?>"><i class="fas fa-copyright me-2 text-muted"></i><?php echo __('Rights Statements'); ?></a>
                     </li>
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'browse']) . '#creative-commons'; ?>"><i class="fab fa-creative-commons me-2 text-muted"></i><?php echo __('Creative Commons'); ?></a>
+                        <a href="<?php echo url_for(['module' => 'taxonomy', 'action' => 'index', 'slug' => 'creative-commons']); ?>"><i class="fab fa-creative-commons me-2 text-muted"></i><?php echo __('Creative Commons'); ?></a>
                     </li>
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'browse']) . '#tk-labels'; ?>"><i class="fas fa-globe-africa me-2 text-muted"></i><?php echo __('TK Labels'); ?></a>
+                        <a href="<?php echo url_for(['module' => 'taxonomy', 'action' => 'index', 'slug' => 'tk-labels']); ?>"><i class="fas fa-globe-africa me-2 text-muted"></i><?php echo __('TK Labels'); ?></a>
                     </li>
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'actor', 'action' => 'browse', 'type' => 'rightsHolder']); ?>"><i class="fas fa-user-tie me-2 text-muted"></i><?php echo __('Rights Holders'); ?></a>
