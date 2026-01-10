@@ -14,7 +14,7 @@ $hasRights = \Illuminate\Database\Capsule\Manager::table('extended_rights')
     ->exists();
 
 // Check if has active embargo and get its ID
-$activeEmbargo = \Illuminate\Database\Capsule\Manager::table('embargo')
+$activeEmbargo = \Illuminate\Database\Capsule\Manager::table('rights_embargo')
     ->where('object_id', $resource->id)
     ->where('status', 'active')
     ->first();

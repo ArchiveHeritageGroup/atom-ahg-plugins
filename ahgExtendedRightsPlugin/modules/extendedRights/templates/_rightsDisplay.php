@@ -15,17 +15,17 @@ $embargoType = $embargoTypes[$embargo->embargo_type ?? 'full'] ?? __('Access Res
     <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
     <div>
       <h5 class="alert-heading mb-1"><?php echo $embargoType; ?></h5>
-      <?php if ($embargo->public_message): ?>
-        <p class="mb-1"><?php echo esc_entities($embargo->public_message); ?></p>
+      <?php if (!empty($embargo->lift_reason)): ?>
+        <p class="mb-1"><?php echo esc_entities($embargo->lift_reason); ?></p>
       <?php else: ?>
         <p class="mb-1"><?php echo __('Access to this material is currently restricted.'); ?></p>
       <?php endif; ?>
-      <?php if (!$embargo->is_perpetual && $embargo->end_date): ?>
+      <?php if (!!$embargo->auto_release && $embargo->end_date): ?>
         <small class="text-muted">
           <i class="fas fa-calendar-alt me-1"></i>
           <?php echo __('Available from: %1%', ['%1%' => date('j F Y', strtotime($embargo->end_date))]); ?>
         </small>
-      <?php elseif ($embargo->is_perpetual): ?>
+      <?php elseif (!$embargo->auto_release): ?>
         <small class="text-muted">
           <i class="fas fa-lock me-1"></i>
           <?php echo __('Indefinite restriction'); ?>
