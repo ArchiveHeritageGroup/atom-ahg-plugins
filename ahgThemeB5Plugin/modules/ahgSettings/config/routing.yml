@@ -1,0 +1,3 @@
+settings_api_keys:
+  url: /settings/apiKeys
+  param: { module: ahgSettings, action: apiKeys }

@@ -1,0 +1,20 @@
+{
+    "name": "AHG API Plugin",
+    "machine_name": "ahgAPIPlugin",
+    "version": "1.0.0",
+    "description": "Enhanced REST API v2 with full CRUD, batch operations, webhooks, and rate limiting",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "tables": [
+        "ahg_api_key",
+        "ahg_api_log",
+        "ahg_api_rate_limit",
+        "ahg_webhook",
+        "ahg_webhook_delivery"
+    ]
+}

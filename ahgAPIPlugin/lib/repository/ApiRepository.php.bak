@@ -1,0 +1,381 @@
+<?php
+
+namespace AhgAPIPlugin\Repository;
+
+use Illuminate\Database\Capsule\Manager as DB;
+
+class ApiRepository
+{
+    protected $culture;
+
+    public function __construct($culture = 'en')
+    {
+        $this->culture = $culture;
+    }
+
+    public function getDescriptions(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('information_object as io')
+            ->join('information_object_i18n as ioi', function ($join) {
+                $join->on('io.id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->leftJoin('term_i18n as lod', function ($join) {
+                $join->on('io.level_of_description_id', '=', 'lod.id')
+                     ->where('lod.culture', '=', $this->culture);
+            })
+            ->where('io.id', '!=', 1)
+            ->select([
+                'io.id',
+                'slug.slug',
+                'ioi.title',
+                'io.level_of_description_id',
+                'lod.name as level_of_description',
+                'io.repository_id',
+                'io.parent_id',
+                'io.lft',
+                'io.rgt'
+            ]);
+
+        if (!empty($params['repository'])) {
+            $repoId = $this->getObjectIdBySlug($params['repository']);
+            if ($repoId) {
+                $query->where('io.repository_id', $repoId);
+            }
+        }
+
+        if (!empty($params['level'])) {
+            $levelId = $this->getLevelOfDescriptionId($params['level']);
+            if ($levelId) {
+                $query->where('io.level_of_description_id', $levelId);
+            }
+        }
+
+        $total = $query->count();
+        $results = $query->orderBy('io.id', 'desc')->skip($skip)->take($limit)->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'slug' => $row->slug,
+                    'title' => $row->title,
+                    'level_of_description' => $row->level_of_description,
+                    'repository_id' => $row->repository_id,
+                    'parent_id' => $row->parent_id != 1 ? $row->parent_id : null
+                ];
+            })->toArray()
+        ];
+    }
+
+    public function getDescriptionBySlug(string $slug): ?array
+    {
+        $row = DB::table('information_object as io')
+            ->join('information_object_i18n as ioi', function ($join) {
+                $join->on('io.id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->join('slug', 'io.id', '=', 'slug.object_id')
+            ->leftJoin('term_i18n as lod', function ($join) {
+                $join->on('io.level_of_description_id', '=', 'lod.id')
+                     ->where('lod.culture', '=', $this->culture);
+            })
+            ->where('slug.slug', $slug)
+            ->select([
+                'io.id',
+                'io.identifier',
+                'io.level_of_description_id',
+                'io.repository_id',
+                'io.parent_id',
+                'slug.slug',
+                'ioi.title',
+                'ioi.scope_and_content',
+                'ioi.extent_and_medium',
+                'ioi.archival_history',
+                'ioi.acquisition',
+                'ioi.arrangement',
+                'ioi.access_conditions',
+                'ioi.reproduction_conditions',
+                'lod.name as level_of_description'
+            ])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'id' => $row->id,
+            'slug' => $row->slug,
+            'identifier' => $row->identifier,
+            'title' => $row->title,
+            'level_of_description' => $row->level_of_description,
+            'scope_and_content' => $row->scope_and_content,
+            'extent_and_medium' => $row->extent_and_medium,
+            'archival_history' => $row->archival_history,
+            'acquisition' => $row->acquisition,
+            'arrangement' => $row->arrangement,
+            'access_conditions' => $row->access_conditions,
+            'reproduction_conditions' => $row->reproduction_conditions,
+            'repository_id' => $row->repository_id,
+            'parent_id' => $row->parent_id != 1 ? $row->parent_id : null
+        ];
+    }
+
+    public function getAuthorities(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('actor as a')
+            ->join('actor_i18n as ai', function ($join) {
+                $join->on('a.id', '=', 'ai.id')
+                     ->where('ai.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
+            ->leftJoin('term_i18n as et', function ($join) {
+                $join->on('a.entity_type_id', '=', 'et.id')
+                     ->where('et.culture', '=', $this->culture);
+            })
+            ->where('a.id', '!=', 1)
+            ->select([
+                'a.id',
+                'slug.slug',
+                'ai.authorized_form_of_name',
+                'a.entity_type_id',
+                'et.name as entity_type'
+            ]);
+
+        $total = $query->count();
+        $results = $query->orderBy('ai.authorized_form_of_name', 'asc')
+                         ->skip($skip)->take($limit)->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'slug' => $row->slug,
+                    'authorized_form_of_name' => $row->authorized_form_of_name,
+                    'entity_type' => $row->entity_type
+                ];
+            })->toArray()
+        ];
+    }
+
+    public function getAuthorityBySlug(string $slug): ?array
+    {
+        $row = DB::table('actor as a')
+            ->join('actor_i18n as ai', function ($join) {
+                $join->on('a.id', '=', 'ai.id')
+                     ->where('ai.culture', '=', $this->culture);
+            })
+            ->join('slug', 'a.id', '=', 'slug.object_id')
+            ->leftJoin('term_i18n as et', function ($join) {
+                $join->on('a.entity_type_id', '=', 'et.id')
+                     ->where('et.culture', '=', $this->culture);
+            })
+            ->where('slug.slug', $slug)
+            ->select(['a.id', 'slug.slug', 'ai.*', 'et.name as entity_type'])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'id' => $row->id,
+            'slug' => $row->slug,
+            'authorized_form_of_name' => $row->authorized_form_of_name,
+            'entity_type' => $row->entity_type,
+            'dates_of_existence' => $row->dates_of_existence,
+            'history' => $row->history,
+            'places' => $row->places,
+            'functions' => $row->functions
+        ];
+    }
+
+    public function getRepositories(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('repository as r')
+            ->join('actor as a', 'r.id', '=', 'a.id')
+            ->join('actor_i18n as ai', function ($join) {
+                $join->on('a.id', '=', 'ai.id')
+                     ->where('ai.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'r.id', '=', 'slug.object_id')
+            ->select(['r.id', 'slug.slug', 'ai.authorized_form_of_name', 'r.identifier']);
+
+        $total = $query->count();
+        $results = $query->orderBy('ai.authorized_form_of_name', 'asc')
+                         ->skip($skip)->take($limit)->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'slug' => $row->slug,
+                    'name' => $row->authorized_form_of_name,
+                    'identifier' => $row->identifier
+                ];
+            })->toArray()
+        ];
+    }
+
+    public function getTaxonomies(): array
+    {
+        $results = DB::table('taxonomy as t')
+            ->join('taxonomy_i18n as ti', function ($join) {
+                $join->on('t.id', '=', 'ti.id')
+                     ->where('ti.culture', '=', $this->culture);
+            })
+            ->where('t.id', '!=', 1)
+            ->select(['t.id', 'ti.name', 't.usage'])
+            ->orderBy('ti.name', 'asc')
+            ->get();
+
+        return $results->map(function ($row) {
+            return ['id' => $row->id, 'name' => $row->name, 'usage' => $row->usage];
+        })->toArray();
+    }
+
+    public function getTaxonomyTerms(int $taxonomyId): array
+    {
+        $results = DB::table('term as t')
+            ->join('term_i18n as ti', function ($join) {
+                $join->on('t.id', '=', 'ti.id')
+                     ->where('ti.culture', '=', $this->culture);
+            })
+            ->where('t.taxonomy_id', $taxonomyId)
+            ->where('t.id', '!=', 1)
+            ->select(['t.id', 'ti.name', 't.parent_id'])
+            ->orderBy('t.lft', 'asc')
+            ->get();
+
+        return $results->map(function ($row) {
+            return [
+                'id' => $row->id,
+                'name' => $row->name,
+                'parent_id' => $row->parent_id != 1 ? $row->parent_id : null
+            ];
+        })->toArray();
+    }
+
+    protected function getObjectIdBySlug(string $slug): ?int
+    {
+        $row = DB::table('slug')->where('slug', $slug)->first();
+        return $row ? $row->object_id : null;
+    }
+
+    protected function getLevelOfDescriptionId(string $name): ?int
+    {
+        $row = DB::table('term_i18n as ti')
+            ->join('term as t', 'ti.id', '=', 't.id')
+            ->where('t.taxonomy_id', 34)
+            ->whereRaw('LOWER(ti.name) = ?', [strtolower($name)])
+            ->first();
+        return $row ? $row->id : null;
+    }
+}
+
+    /**
+     * Get sector code for an information object based on display_standard_id
+     * Uses term.code field instead of hardcoded IDs
+     *
+     * @param int $displayStandardId
+     * @return string|null Sector code (archive, museum, library, gallery, dam)
+     */
+    public function getSectorCode(?int $displayStandardId): ?string
+    {
+        if (!$displayStandardId) {
+            return 'archive'; // Default sector
+        }
+
+        $term = DB::table('term')
+            ->where('id', $displayStandardId)
+            ->select('code')
+            ->first();
+
+        if (!$term || !$term->code) {
+            return 'archive';
+        }
+
+        // Map term codes to sector codes
+        $codeToSector = [
+            'isad'    => 'archive',
+            'rad'     => 'archive',
+            'dacs'    => 'archive',
+            'dc'      => 'archive',
+            'mods'    => 'archive',
+            'museum'  => 'museum',
+            'library' => 'library',
+            'gallery' => 'gallery',
+            'dam'     => 'dam',
+        ];
+
+        return $codeToSector[$term->code] ?? 'archive';
+    }
+
+    /**
+     * Get sector code for a description by its ID
+     *
+     * @param int $informationObjectId
+     * @return string|null
+     */
+    public function getSectorCodeByObjectId(int $informationObjectId): ?string
+    {
+        $row = DB::table('information_object')
+            ->where('id', $informationObjectId)
+            ->select('display_standard_id')
+            ->first();
+
+        return $this->getSectorCode($row->display_standard_id ?? null);
+    }
+
+    /**
+     * Get display standard info (id, name, code, sector)
+     *
+     * @param int $displayStandardId
+     * @return array|null
+     */
+    public function getDisplayStandardInfo(?int $displayStandardId): ?array
+    {
+        if (!$displayStandardId) {
+            return null;
+        }
+
+        $term = DB::table('term as t')
+            ->join('term_i18n as ti', function ($join) {
+                $join->on('t.id', '=', 'ti.id')
+                     ->where('ti.culture', '=', $this->culture);
+            })
+            ->where('t.id', $displayStandardId)
+            ->select(['t.id', 't.code', 'ti.name'])
+            ->first();
+
+        if (!$term) {
+            return null;
+        }
+
+        return [
+            'id' => $term->id,
+            'code' => $term->code,
+            'name' => $term->name,
+            'sector' => $this->getSectorCode($displayStandardId)
+        ];
+    }
