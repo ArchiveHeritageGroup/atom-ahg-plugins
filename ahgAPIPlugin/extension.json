@@ -1,8 +1,8 @@
 {
     "name": "AHG API Plugin",
     "machine_name": "ahgAPIPlugin",
-    "version": "1.0.0",
-    "description": "Enhanced REST API v2 with full CRUD, batch operations, webhooks, and rate limiting",
+    "version": "1.1.0",
+    "description": "Enhanced REST API v2 with API key management, full CRUD operations, batch processing, webhooks, rate limiting, and GLAM/DAM sector support",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "requires": {
@@ -15,6 +15,26 @@
         "ahg_api_log",
         "ahg_api_rate_limit",
         "ahg_webhook",
-        "ahg_webhook_delivery"
-    ]
+        "ahg_webhook_delivery",
+        "display_standard_sector"
+    ],
+    "features": [
+        "REST API v2 endpoints",
+        "API key management with scopes (read/write/delete)",
+        "Rate limiting per API key",
+        "Request logging and analytics",
+        "Webhook notifications",
+        "Batch operations",
+        "Full data export with ?full=true",
+        "GLAM/DAM sector filtering"
+    ],
+    "endpoints": {
+        "descriptions": "/api/v2/descriptions",
+        "authorities": "/api/v2/authorities",
+        "repositories": "/api/v2/repositories",
+        "taxonomies": "/api/v2/taxonomies",
+        "search": "/api/v2/search",
+        "batch": "/api/v2/batch",
+        "keys": "/api/v2/keys"
+    }
 }

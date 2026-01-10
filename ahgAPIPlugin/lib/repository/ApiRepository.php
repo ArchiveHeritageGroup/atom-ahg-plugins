@@ -585,7 +585,7 @@ public function getAuthorities(array $params = []): array
             ->toArray();
     }
 
-    protected function getObjectIdBySlug(string $slug): ?int
+    public function getObjectIdBySlug(string $slug): ?int
     {
         $row = DB::table('slug')->where('slug', $slug)->first();
         return $row ? $row->object_id : null;
@@ -599,5 +599,639 @@ public function getAuthorities(array $params = []): array
             ->whereRaw('LOWER(ti.name) = ?', [strtolower($name)])
             ->first();
         return $row ? $row->id : null;
+    }
+
+    // ========================================================================
+    // CONDITION ASSESSMENT METHODS (Mobile)
+    // ========================================================================
+
+    public function getConditions(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('spectrum_condition_check as c')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('c.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'c.object_id', '=', 'slug.object_id')
+            ->select([
+                'c.id',
+                'c.object_id',
+                'slug.slug as object_slug',
+                'ioi.title as object_title',
+                'c.condition_reference',
+                'c.check_date',
+                'c.check_reason',
+                'c.checked_by',
+                'c.overall_condition',
+                'c.condition_note',
+                'c.treatment_priority',
+                'c.next_check_date'
+            ]);
+
+        if (!empty($params['object_id'])) {
+            $query->where('c.object_id', $params['object_id']);
+        }
+
+        if (!empty($params['object_slug'])) {
+            $objectId = $this->getObjectIdBySlug($params['object_slug']);
+            if ($objectId) {
+                $query->where('c.object_id', $objectId);
+            }
+        }
+
+        if (!empty($params['overall_condition'])) {
+            $query->where('c.overall_condition', $params['overall_condition']);
+        }
+
+        if (!empty($params['checked_by'])) {
+            $query->where('c.checked_by', 'LIKE', '%' . $params['checked_by'] . '%');
+        }
+
+        $total = $query->count();
+        $results = $query->orderBy('c.check_date', 'desc')
+                         ->skip($skip)
+                         ->take($limit)
+                         ->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return (array) $row;
+            })->toArray()
+        ];
+    }
+
+    public function getConditionById(int $id): ?array
+    {
+        $row = DB::table('spectrum_condition_check as c')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('c.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'c.object_id', '=', 'slug.object_id')
+            ->where('c.id', $id)
+            ->select(['c.*', 'slug.slug as object_slug', 'ioi.title as object_title'])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        $result = (array) $row;
+
+        // Get photos
+        $result['photos'] = $this->getConditionPhotos($id);
+
+        return $result;
+    }
+
+    public function createCondition(array $data): int
+    {
+        $now = date('Y-m-d H:i:s');
+
+        return DB::table('spectrum_condition_check')->insertGetId([
+            'object_id' => $data['object_id'],
+            'condition_reference' => $data['condition_reference'] ?? $this->generateConditionReference(),
+            'check_date' => $data['check_date'] ?? $now,
+            'check_reason' => $data['check_reason'] ?? null,
+            'checked_by' => $data['checked_by'],
+            'overall_condition' => $data['overall_condition'] ?? null,
+            'condition_note' => $data['condition_note'] ?? null,
+            'completeness_note' => $data['completeness_note'] ?? null,
+            'hazard_note' => $data['hazard_note'] ?? null,
+            'technical_assessment' => $data['technical_assessment'] ?? null,
+            'recommended_treatment' => $data['recommended_treatment'] ?? null,
+            'treatment_priority' => $data['treatment_priority'] ?? null,
+            'next_check_date' => $data['next_check_date'] ?? null,
+            'environment_recommendation' => $data['environment_recommendation'] ?? null,
+            'handling_recommendation' => $data['handling_recommendation'] ?? null,
+            'display_recommendation' => $data['display_recommendation'] ?? null,
+            'storage_recommendation' => $data['storage_recommendation'] ?? null,
+            'packing_recommendation' => $data['packing_recommendation'] ?? null
+        ]);
+    }
+
+    public function updateCondition(int $id, array $data): bool
+    {
+        $updateData = array_filter([
+            'check_date' => $data['check_date'] ?? null,
+            'check_reason' => $data['check_reason'] ?? null,
+            'checked_by' => $data['checked_by'] ?? null,
+            'overall_condition' => $data['overall_condition'] ?? null,
+            'condition_note' => $data['condition_note'] ?? null,
+            'completeness_note' => $data['completeness_note'] ?? null,
+            'hazard_note' => $data['hazard_note'] ?? null,
+            'technical_assessment' => $data['technical_assessment'] ?? null,
+            'recommended_treatment' => $data['recommended_treatment'] ?? null,
+            'treatment_priority' => $data['treatment_priority'] ?? null,
+            'next_check_date' => $data['next_check_date'] ?? null,
+            'environment_recommendation' => $data['environment_recommendation'] ?? null,
+            'handling_recommendation' => $data['handling_recommendation'] ?? null,
+            'display_recommendation' => $data['display_recommendation'] ?? null,
+            'storage_recommendation' => $data['storage_recommendation'] ?? null,
+            'packing_recommendation' => $data['packing_recommendation'] ?? null
+        ], function ($v) { return $v !== null; });
+
+        if (empty($updateData)) {
+            return false;
+        }
+
+        return DB::table('spectrum_condition_check')
+            ->where('id', $id)
+            ->update($updateData) > 0;
+    }
+
+    public function deleteCondition(int $id): bool
+    {
+        // Delete photos first
+        DB::table('spectrum_condition_photo')->where('condition_check_id', $id)->delete();
+        return DB::table('spectrum_condition_check')->where('id', $id)->delete() > 0;
+    }
+
+    protected function generateConditionReference(): string
+    {
+        return 'CC-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
+    }
+
+    // ========================================================================
+    // CONDITION PHOTOS (Mobile Upload)
+    // ========================================================================
+
+    public function getConditionPhotos(int $conditionId): array
+    {
+        $photos = DB::table('spectrum_condition_photo')
+            ->where('condition_check_id', $conditionId)
+            ->orderBy('sort_order')
+            ->get();
+
+        return $photos->map(function ($row) {
+            return [
+                'id' => $row->id,
+                'photo_type' => $row->photo_type,
+                'caption' => $row->caption,
+                'description' => $row->description,
+                'location_on_object' => $row->location_on_object,
+                'filename' => $row->filename,
+                'file_path' => $row->file_path,
+                'mime_type' => $row->mime_type,
+                'file_size' => $row->file_size,
+                'width' => $row->width,
+                'height' => $row->height,
+                'photographer' => $row->photographer,
+                'photo_date' => $row->photo_date,
+                'is_primary' => (bool) $row->is_primary,
+                'thumbnail_url' => $row->file_path ? '/uploads/conditions/' . basename($row->file_path) : null,
+                'full_url' => $row->file_path ? '/uploads/conditions/' . basename($row->file_path) : null
+            ];
+        })->toArray();
+    }
+
+    public function createConditionPhoto(int $conditionId, array $data): int
+    {
+        $sortOrder = DB::table('spectrum_condition_photo')
+            ->where('condition_check_id', $conditionId)
+            ->max('sort_order') ?? 0;
+
+        return DB::table('spectrum_condition_photo')->insertGetId([
+            'condition_check_id' => $conditionId,
+            'photo_type' => $data['photo_type'] ?? 'detail',
+            'caption' => $data['caption'] ?? null,
+            'description' => $data['description'] ?? null,
+            'location_on_object' => $data['location_on_object'] ?? null,
+            'filename' => $data['filename'],
+            'original_filename' => $data['original_filename'] ?? $data['filename'],
+            'file_path' => $data['file_path'],
+            'file_size' => $data['file_size'] ?? null,
+            'mime_type' => $data['mime_type'] ?? null,
+            'width' => $data['width'] ?? null,
+            'height' => $data['height'] ?? null,
+            'photographer' => $data['photographer'] ?? null,
+            'photo_date' => $data['photo_date'] ?? date('Y-m-d'),
+            'camera_info' => $data['camera_info'] ?? null,
+            'sort_order' => $sortOrder + 1,
+            'is_primary' => $data['is_primary'] ?? 0
+        ]);
+    }
+
+    public function deleteConditionPhoto(int $photoId): bool
+    {
+        $photo = DB::table('spectrum_condition_photo')->where('id', $photoId)->first();
+        if ($photo && $photo->file_path && file_exists($photo->file_path)) {
+            @unlink($photo->file_path);
+        }
+        return DB::table('spectrum_condition_photo')->where('id', $photoId)->delete() > 0;
+    }
+
+    // ========================================================================
+    // HERITAGE ASSETS (International Standards)
+    // ========================================================================
+
+    public function getAssets(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('heritage_asset as ha')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('ha.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'ha.object_id', '=', 'slug.object_id')
+            ->leftJoin('heritage_asset_class as hac', 'ha.asset_class_id', '=', 'hac.id')
+            ->select([
+                'ha.id',
+                'ha.object_id',
+                'slug.slug as object_slug',
+                'ioi.title as object_title',
+                'ha.recognition_status',
+                'hac.name as asset_class',
+                'ha.acquisition_date',
+                'ha.acquisition_cost',
+                'ha.current_carrying_amount',
+                'ha.fair_value_at_acquisition',
+                'ha.nominal_value',
+                'ha.measurement_basis',
+                'ha.acquisition_method',
+                'ha.donor_name'
+            ]);
+
+        if (!empty($params['asset_class_id'])) {
+            $query->where('ha.asset_class_id', $params['asset_class_id']);
+        }
+
+        if (!empty($params['object_slug'])) {
+            $objectId = $this->getObjectIdBySlug($params['object_slug']);
+            if ($objectId) {
+                $query->where('ha.object_id', $objectId);
+            }
+        }
+
+        $total = $query->count();
+        $results = $query->orderBy('ha.id', 'desc')
+                         ->skip($skip)
+                         ->take($limit)
+                         ->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return (array) $row;
+            })->toArray()
+        ];
+    }
+
+    public function getAssetById(int $id): ?array
+    {
+        $row = DB::table('heritage_asset as ha')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('ha.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug', 'ha.object_id', '=', 'slug.object_id')
+            ->leftJoin('heritage_asset_class as hac', 'ha.asset_class_id', '=', 'hac.id')
+            ->where('ha.id', $id)
+            ->select(['ha.*', 'slug.slug as object_slug', 'ioi.title as object_title', 'hac.name as asset_class'])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        $result = (array) $row;
+
+        // Get valuation history
+        $result['valuations'] = $this->getAssetValuations($id);
+
+        return $result;
+    }
+
+    public function getAssetByObjectId(int $objectId): ?array
+    {
+        $asset = DB::table('heritage_asset')->where('object_id', $objectId)->first();
+        if (!$asset) {
+            return null;
+        }
+        return $this->getAssetById($asset->id);
+    }
+
+    public function createAsset(array $data): int
+    {
+        return DB::table('heritage_asset')->insertGetId([
+            'object_id' => $data['object_id'],
+            'asset_number' => $data['asset_number'] ?? $this->generateAssetNumber(),
+            'asset_class_id' => $data['asset_class_id'] ?? null,
+            'acquisition_date' => $data['acquisition_date'] ?? null,
+            'acquisition_cost' => $data['acquisition_cost'] ?? null,
+            'acquisition_method' => $data['acquisition_method'] ?? null,
+            'current_value' => $data['current_value'] ?? null,
+            'last_valuation_date' => $data['last_valuation_date'] ?? null,
+            'valuation_method' => $data['valuation_method'] ?? null,
+            'currency_code' => $data['currency_code'] ?? 'ZAR',
+            'is_insured' => $data['is_insured'] ?? 0,
+            'insurance_value' => $data['insurance_value'] ?? null,
+            'insurance_policy' => $data['insurance_policy'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    public function updateAsset(int $id, array $data): bool
+    {
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        $updateData = array_filter($data, function ($v, $k) {
+            return $v !== null && !in_array($k, ['id', 'object_id', 'created_at']);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return DB::table('heritage_asset')
+            ->where('id', $id)
+            ->update($updateData) > 0;
+    }
+
+    protected function generateAssetNumber(): string
+    {
+        return 'HA-' . date('Y') . '-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+    }
+
+    // ========================================================================
+    // VALUATIONS
+    // ========================================================================
+
+    public function getAssetValuations(int $assetId): array
+    {
+        $valuations = DB::table('heritage_valuation_history')
+            ->where('asset_id', $assetId)
+            ->orderBy('valuation_date', 'desc')
+            ->get();
+
+        return $valuations->map(function ($row) {
+            return (array) $row;
+        })->toArray();
+    }
+
+    public function createValuation(array $data): int
+    {
+        $id = DB::table('heritage_valuation_history')->insertGetId([
+            'asset_id' => $data['asset_id'],
+            'valuation_date' => $data['valuation_date'] ?? date('Y-m-d'),
+            'valuation_amount' => $data['valuation_amount'],
+            'valuation_method' => $data['valuation_method'] ?? null,
+            'valuer_name' => $data['valuer_name'] ?? null,
+            'valuer_organization' => $data['valuer_organization'] ?? null,
+            'valuation_notes' => $data['valuation_notes'] ?? null,
+            'currency_code' => $data['currency_code'] ?? 'ZAR',
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        // Update asset current value
+        DB::table('heritage_asset')
+            ->where('id', $data['asset_id'])
+            ->update([
+                'current_value' => $data['valuation_amount'],
+                'last_valuation_date' => $data['valuation_date'] ?? date('Y-m-d'),
+                'valuation_method' => $data['valuation_method'] ?? null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+        return $id;
+    }
+
+    // ========================================================================
+    // PRIVACY/COMPLIANCE (International)
+    // ========================================================================
+
+    public function getDsars(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('privacy_dsar')
+            ->select([
+                'id',
+                'reference_number',
+                'jurisdiction',
+                'request_type',
+                'status',
+                'priority',
+                'requestor_name',
+                'requestor_email',
+                'requestor_phone',
+                'is_verified',
+                'received_date',
+                'due_date',
+                'completed_date',
+                'assigned_to'
+            ]);
+
+        if (!empty($params['status'])) {
+            $query->where('status', $params['status']);
+        }
+
+        if (!empty($params['request_type'])) {
+            $query->where('request_type', $params['request_type']);
+        }
+
+        if (!empty($params['jurisdiction'])) {
+            $query->where('jurisdiction', $params['jurisdiction']);
+        }
+
+        $total = $query->count();
+        $results = $query->orderBy('received_date', 'desc')
+                         ->skip($skip)
+                         ->take($limit)
+                         ->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return (array) $row;
+            })->toArray()
+        ];
+    }
+
+    public function getDsarById(int $id): ?array
+    {
+        $row = DB::table('privacy_dsar as d')
+            ->leftJoin('privacy_dsar_i18n as di', function ($join) {
+                $join->on('d.id', '=', 'di.id')
+                     ->where('di.culture', '=', $this->culture);
+            })
+            ->where('d.id', $id)
+            ->select(['d.*', 'di.*'])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        $result = (array) $row;
+
+        // Get logs
+        $result['logs'] = DB::table('privacy_dsar_log')
+            ->where('dsar_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($r) { return (array) $r; })
+            ->toArray();
+
+        return $result;
+    }
+
+    public function createDsar(array $data): int
+    {
+        $id = DB::table('privacy_dsar')->insertGetId([
+            'reference_number' => $data['reference_number'] ?? $this->generateDsarReference(),
+            'request_type' => $data['request_type'] ?? 'access',
+            'status' => 'pending',
+            'requester_name' => $data['requester_name'],
+            'requester_email' => $data['requester_email'] ?? null,
+            'requester_phone' => $data['requester_phone'] ?? null,
+            'requester_address' => $data['requester_address'] ?? null,
+            'date_received' => $data['date_received'] ?? date('Y-m-d'),
+            'date_due' => $data['date_due'] ?? date('Y-m-d', strtotime('+30 days')),
+            'assigned_to' => $data['assigned_to'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        // Insert i18n
+        DB::table('privacy_dsar_i18n')->insert([
+            'id' => $id,
+            'culture' => $this->culture,
+            'subject_matter' => $data['subject_matter'] ?? null,
+            'notes' => $data['notes'] ?? null
+        ]);
+
+        return $id;
+    }
+
+    public function updateDsar(int $id, array $data): bool
+    {
+        $mainData = array_filter([
+            'status' => $data['status'] ?? null,
+            'date_due' => $data['date_due'] ?? null,
+            'date_completed' => $data['date_completed'] ?? null,
+            'assigned_to' => $data['assigned_to'] ?? null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ], function ($v) { return $v !== null; });
+
+        if (!empty($mainData)) {
+            DB::table('privacy_dsar')->where('id', $id)->update($mainData);
+        }
+
+        // Update i18n if provided
+        $i18nData = array_filter([
+            'subject_matter' => $data['subject_matter'] ?? null,
+            'notes' => $data['notes'] ?? null
+        ], function ($v) { return $v !== null; });
+
+        if (!empty($i18nData)) {
+            DB::table('privacy_dsar_i18n')
+                ->where('id', $id)
+                ->where('culture', $this->culture)
+                ->update($i18nData);
+        }
+
+        // Log status change
+        if (!empty($data['status'])) {
+            DB::table('privacy_dsar_log')->insert([
+                'dsar_id' => $id,
+                'action' => 'status_change',
+                'details' => json_encode(['new_status' => $data['status']]),
+                'user_id' => $data['user_id'] ?? null,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        return true;
+    }
+
+    protected function generateDsarReference(): string
+    {
+        return 'DSAR-' . date('Y') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getBreaches(array $params = []): array
+    {
+        $limit = min($params['limit'] ?? 10, 100);
+        $skip = $params['skip'] ?? 0;
+
+        $query = DB::table('privacy_breach as b')
+            ->leftJoin('privacy_breach_i18n as bi', function ($join) {
+                $join->on('b.id', '=', 'bi.id')
+                     ->where('bi.culture', '=', $this->culture);
+            })
+            ->select([
+                'b.id',
+                'b.reference_number',
+                'b.breach_date',
+                'b.discovery_date',
+                'b.severity',
+                'b.status',
+                'b.breach_type',
+                'b.affected_count',
+                'bi.description',
+                'bi.impact_assessment'
+            ]);
+
+        if (!empty($params['status'])) {
+            $query->where('b.status', $params['status']);
+        }
+
+        if (!empty($params['severity'])) {
+            $query->where('b.severity', $params['severity']);
+        }
+
+        $total = $query->count();
+        $results = $query->orderBy('b.breach_date', 'desc')
+                         ->skip($skip)
+                         ->take($limit)
+                         ->get();
+
+        return [
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'results' => $results->map(function ($row) {
+                return (array) $row;
+            })->toArray()
+        ];
+    }
+
+    public function createBreach(array $data): int
+    {
+        $id = DB::table('privacy_breach')->insertGetId([
+            'reference_number' => $data['reference_number'] ?? 'BR-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 4)),
+            'breach_date' => $data['breach_date'] ?? date('Y-m-d'),
+            'discovery_date' => $data['discovery_date'] ?? date('Y-m-d'),
+            'severity' => $data['severity'] ?? 'medium',
+            'status' => 'investigating',
+            'breach_type' => $data['breach_type'] ?? null,
+            'affected_count' => $data['affected_count'] ?? null,
+            'reported_by' => $data['reported_by'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        DB::table('privacy_breach_i18n')->insert([
+            'id' => $id,
+            'culture' => $this->culture,
+            'description' => $data['description'] ?? null,
+            'impact_assessment' => $data['impact_assessment'] ?? null,
+            'containment_actions' => $data['containment_actions'] ?? null,
+            'remediation_steps' => $data['remediation_steps'] ?? null
+        ]);
+
+        return $id;
     }
 }

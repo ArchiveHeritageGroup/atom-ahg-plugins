@@ -3,7 +3,7 @@
 class ahgAPIPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Enhanced REST API v2';
-    public static $version = '1.0.0';
+    public static $version = '1.1.0';
 
     protected $routing;
 
@@ -46,7 +46,48 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         // Batch
         $this->addRoute('POST', '/api/v2/batch', ['module' => 'apiv2', 'action' => 'batch']);
 
-        // API Keys management
+        // Condition Assessment (Mobile)
+        $this->addRoute('GET', '/api/v2/conditions', ['module' => 'apiv2', 'action' => 'conditionsBrowse']);
+        $this->addRoute('POST', '/api/v2/conditions', ['module' => 'apiv2', 'action' => 'conditionsCreate']);
+        $this->addRoute('GET', '/api/v2/conditions/:id', ['module' => 'apiv2', 'action' => 'conditionsRead', 'params' => ['id' => '\d+']]);
+        $this->addRoute('PUT,PATCH', '/api/v2/conditions/:id', ['module' => 'apiv2', 'action' => 'conditionsUpdate', 'params' => ['id' => '\d+']]);
+        $this->addRoute('DELETE', '/api/v2/conditions/:id', ['module' => 'apiv2', 'action' => 'conditionsDelete', 'params' => ['id' => '\d+']]);
+        $this->addRoute('GET', '/api/v2/descriptions/:slug/conditions', ['module' => 'apiv2', 'action' => 'descriptionConditions', 'params' => ['slug' => '[a-z0-9_-]+']]);
+
+        // Condition Photos (Mobile Upload)
+        $this->addRoute('GET', '/api/v2/conditions/:id/photos', ['module' => 'apiv2', 'action' => 'conditionPhotos', 'params' => ['id' => '\d+']]);
+        $this->addRoute('POST', '/api/v2/conditions/:id/photos', ['module' => 'apiv2', 'action' => 'conditionPhotoUpload', 'params' => ['id' => '\d+']]);
+        $this->addRoute('DELETE', '/api/v2/conditions/:id/photos/:photoId', ['module' => 'apiv2', 'action' => 'conditionPhotoDelete', 'params' => ['id' => '\d+', 'photoId' => '\d+']]);
+
+        // Heritage Assets (International Standards)
+        $this->addRoute('GET', '/api/v2/assets', ['module' => 'apiv2', 'action' => 'assetsBrowse']);
+        $this->addRoute('POST', '/api/v2/assets', ['module' => 'apiv2', 'action' => 'assetsCreate']);
+        $this->addRoute('GET', '/api/v2/assets/:id', ['module' => 'apiv2', 'action' => 'assetsRead', 'params' => ['id' => '\d+']]);
+        $this->addRoute('PUT,PATCH', '/api/v2/assets/:id', ['module' => 'apiv2', 'action' => 'assetsUpdate', 'params' => ['id' => '\d+']]);
+        $this->addRoute('GET', '/api/v2/descriptions/:slug/asset', ['module' => 'apiv2', 'action' => 'descriptionAsset', 'params' => ['slug' => '[a-z0-9_-]+']]);
+
+        // Valuations
+        $this->addRoute('GET', '/api/v2/valuations', ['module' => 'apiv2', 'action' => 'valuationsBrowse']);
+        $this->addRoute('POST', '/api/v2/valuations', ['module' => 'apiv2', 'action' => 'valuationsCreate']);
+        $this->addRoute('GET', '/api/v2/assets/:id/valuations', ['module' => 'apiv2', 'action' => 'assetValuations', 'params' => ['id' => '\d+']]);
+
+        // Privacy/Compliance (International)
+        $this->addRoute('GET', '/api/v2/privacy/dsars', ['module' => 'apiv2', 'action' => 'dsarsBrowse']);
+        $this->addRoute('POST', '/api/v2/privacy/dsars', ['module' => 'apiv2', 'action' => 'dsarsCreate']);
+        $this->addRoute('GET', '/api/v2/privacy/dsars/:id', ['module' => 'apiv2', 'action' => 'dsarsRead', 'params' => ['id' => '\d+']]);
+        $this->addRoute('PUT,PATCH', '/api/v2/privacy/dsars/:id', ['module' => 'apiv2', 'action' => 'dsarsUpdate', 'params' => ['id' => '\d+']]);
+        $this->addRoute('GET', '/api/v2/privacy/breaches', ['module' => 'apiv2', 'action' => 'breachesBrowse']);
+        $this->addRoute('POST', '/api/v2/privacy/breaches', ['module' => 'apiv2', 'action' => 'breachesCreate']);
+
+        // File Upload (Generic - for mobile)
+        $this->addRoute('POST', '/api/v2/upload', ['module' => 'apiv2', 'action' => 'fileUpload']);
+        $this->addRoute('POST', '/api/v2/descriptions/:slug/upload', ['module' => 'apiv2', 'action' => 'descriptionUpload', 'params' => ['slug' => '[a-z0-9_-]+']]);
+
+        // Mobile Sync
+        $this->addRoute('GET', '/api/v2/sync/changes', ['module' => 'apiv2', 'action' => 'syncChanges']);
+        $this->addRoute('POST', '/api/v2/sync/batch', ['module' => 'apiv2', 'action' => 'syncBatch']);
+
+                // API Keys management
         $this->addRoute('GET', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysBrowse']);
         $this->addRoute('POST', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysCreate']);
         $this->addRoute('DELETE', '/api/v2/keys/:id', ['module' => 'apiv2', 'action' => 'keysDelete', 'params' => ['id' => '\d+']]);
