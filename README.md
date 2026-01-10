@@ -50,6 +50,7 @@ The AtoM AHG Framework extends Access to Memory 2.8+ with Laravel Query Builder 
 | 📋 [Compliance](#-compliance--governance) | 2 | Privacy (6 jurisdictions) and Heritage Accounting (10 standards) |
 | 🛠️ [Utilities](#-utility-plugins) | 5 | Backup, audit, rights, vendor, donor management and data migration |
 | 🎬 [Media](#-media--enhanced-features) | 6 | 3D viewers, audio/video players, transcription, metadata |
+| 🤖 [AI/NLP](#-ai--nlp) | 1 | Named Entity Recognition for automatic metadata extraction |
 
 ---
 
@@ -447,6 +448,7 @@ These are installed automatically with the framework:
 | [ahgAuditTrailPlugin](extensions/ahgAuditTrailPlugin.md) | Comprehensive audit logging | 1.0.x | ✅ Stable |
 | [ahgDonorAgreementPlugin](extensions/ahgDonorAgreementPlugin.md) | Donor agreements & reminders | 1.0.x | ✅ Stable |
 | [ahgVendorPlugin](extensions/ahgVendorPlugin.md) | Vendor/supplier management | 1.0.x | ✅ Stable |
+| [ahgNerPlugin](extensions/ahgNerPlugin.md) | Named Entity Recognition | 1.0.x | ✅ Stable |
 
 ---
 
@@ -562,14 +564,58 @@ Made with ❤️ for the archival community
 
 </div>
 
-## API Documentation
+
+---
+
+## 🤖 AI & NLP
+
+Automated metadata extraction using machine learning:
+
+| Feature | Description |
+|---------|-------------|
+| **Named Entity Recognition** | Extract people, places, organizations from text |
+| **Entity Types** | Person, Organization, Place, Date, Event, Work |
+| **Review Dashboard** | Staff review and approve extracted entities |
+| **Authority Linking** | Link entities to existing authority records |
+| **Batch Processing** | Process multiple records at once |
+| **Python/spaCy Backend** | Industry-standard NLP with 90+ language support |
+
+📖 **User Guide:** [Named Entity Recognition](docs/user-guide-ner.md)
+
+---
+
+## 📖 Technical Documentation
+
+Detailed technical reference with architecture diagrams, ERD schemas, and service methods.
+
+**[View All Technical Documentation →](docs/technical/README.md)**
+
+| Plugin | Category | Documentation |
+|--------|----------|---------------|
+| ahgAPIPlugin | Integration | [Technical Docs](docs/technical/ahgAPIPlugin.md) |
+| ahgAuditTrailPlugin | Compliance | [Technical Docs](docs/technical/ahgAuditTrailPlugin.md) |
+| ahgBackupPlugin | Administration | [Technical Docs](docs/technical/ahgBackupPlugin.md) |
+| ahgSecurityClearancePlugin | Security | [Technical Docs](docs/technical/ahgSecurityClearancePlugin.md) |
+| ahgPrivacyPlugin | Compliance | [Technical Docs](docs/technical/ahgPrivacyPlugin.md) |
+| ahgEmbargoPlugin | Access Control | [Technical Docs](docs/technical/ahgEmbargoPlugin.md) |
+| ahgConditionPlugin | Conservation | [Technical Docs](docs/technical/ahgConditionPlugin.md) |
+| ahgSpectrumPlugin | Museum | [Technical Docs](docs/technical/ahgSpectrumPlugin.md) |
+| ahgGrapPlugin | Financial | [Technical Docs](docs/technical/ahgGrapPlugin.md) |
+| ahgDonorPlugin | Acquisitions | [Technical Docs](docs/technical/ahgDonorPlugin.md) |
+| ahgVendorPlugin | Administration | [Technical Docs](docs/technical/ahgVendorPlugin.md) |
+| ahgResearchPlugin | Public Services | [Technical Docs](docs/technical/ahgResearchPlugin.md) |
+| ahgNerPlugin | AI/NLP | [Technical Docs](docs/technical/ahgNerPlugin.md) |
+
+---
+
+## 🔌 API Documentation
 
 | Document | Description |
 |----------|-------------|
 | [REST API User Guide](docs/api-user-guide.md) | Non-technical guide for using the API |
-| [REST API Technical Reference](docs/api-technical-reference.md) | Detailed technical documentation for developers |
+| [REST API Technical Reference](docs/api-technical-reference.md) | Detailed technical documentation |
 
-### API Quick Start
+### Quick Start
 
 ```bash
 # Test API connection
