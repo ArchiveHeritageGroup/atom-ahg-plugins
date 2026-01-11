@@ -2,69 +2,64 @@
 
 **Transform Access to Memory into a Complete GLAM Solution**
 
-## What is AtoM?
+## What is AtoM + AtoM Extensions?
 
-[Access to Memory (AtoM)](https://www.accesstomemory.org) is a powerful, open-source archival management system trusted by institutions worldwide. AtoM provides:
+[Access to Memory (AtoM)](https://www.accesstomemory.org) is a powerful, open-source archival management system trusted by institutions worldwide. **AtoM Extensions** transforms it into a complete GLAM solution (Galleries, Libraries, Archives, Museums) with modern architecture, international compliance, and enterprise features.
 
-### Core AtoM Capabilities
-
-| Feature | Description |
-|---------|-------------|
-| **Archival Description** | Full ISAD(G), RAD, DACS standards support |
-| **Authority Records** | ISAAR(CPF) compliant entity management |
-| **Hierarchical Arrangement** | Unlimited fonds/series/file/item levels |
-| **Multi-Repository** | Host multiple archives in one instance |
-| **Multilingual** | 20+ languages with i18n support |
-| **Digital Objects** | Upload and link files to descriptions |
-| **Finding Aids** | Generate EAD, Dublin Core exports |
-| **Search & Browse** | Elasticsearch-powered discovery |
-| **Access Control** | User groups and permissions |
-| **Accessions** | Track incoming materials |
-| **Deaccessions** | Document disposals |
-| **Physical Storage** | Location tracking |
-| **Import/Export** | CSV, EAD, EAC-CPF, SKOS |
-| **OAI-PMH Harvesting** | Share metadata with aggregators |
-| **Theming** | Customizable appearance |
-| **API Access** | REST API for integrations |
-
-**AtoM is excellent archival software.** It handles the core archival workflow beautifully.
-
----
-
-## What AtoM Extensions Adds
-
-AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Libraries, Archives, Museums) with modern architecture, international compliance, and enterprise features.
-
-### Feature Comparison
+### Complete Feature Comparison
 
 | Capability | Base AtoM | + AtoM Extensions |
 |------------|:---------:|:-----------------:|
-| Core Archival Functions | ✅ | ✅ Enhanced |
-| Modern Bootstrap 5 UI | ❌ | ✅ |
+| **Core Archival Functions** | | |
+| Archival Description (ISAD(G), RAD, DACS) | ✅ | ✅ |
+| Authority Records (ISAAR-CPF) | ✅ | ✅ |
+| Hierarchical Arrangement | ✅ | ✅ |
+| Multi-Repository Support | ✅ | ✅ |
+| Multilingual (20+ languages) | ✅ | ✅ |
+| Digital Objects | ✅ | ✅ Enhanced |
+| Finding Aids (EAD, Dublin Core) | ✅ | ✅ |
+| Elasticsearch Search & Browse | ✅ | ✅ |
+| Access Control & Permissions | ✅ | ✅ Enhanced |
+| Accessions Tracking | ✅ | ✅ |
+| Deaccessions Tracking | ✅ | ✅ |
+| Physical Storage Locations | ✅ | ✅ |
+| Import/Export (CSV, EAD, EAC-CPF, SKOS) | ✅ | ✅ |
+| OAI-PMH Harvesting | ✅ | ✅ |
+| Theming | ✅ Basic | ✅ Bootstrap 5 |
+| REST API | ✅ | ✅ |
+| **Modern Architecture** | | |
+| Bootstrap 5 Responsive UI | ❌ | ✅ |
 | Laravel Query Builder Integration | ❌ | ✅ |
+| Plugin Extension System | ❌ | ✅ |
+| **Security & Compliance** | | |
 | Security Classification System | ❌ | ✅ |
 | GDPR Compliance (EU) | ❌ | ✅ |
 | POPIA Compliance (South Africa) | ❌ | ✅ |
 | CCPA Compliance (California) | ❌ | ✅ |
 | PIPEDA Compliance (Canada) | ❌ | ✅ |
 | Comprehensive Audit Trail | ❌ | ✅ |
-| Archives Support | ✅ | ✅ Enhanced |
-| Libraries Support | Partial | ✅ Full |
+| **GLAM Sector Support** | | |
+| Archives | ✅ | ✅ Enhanced |
+| Libraries | Partial | ✅ Full |
 | Museums (Spectrum 5.0) | ❌ | ✅ |
 | Galleries (CCO) | ❌ | ✅ |
 | Digital Asset Management | ❌ | ✅ |
+| **Heritage & Finance** | | |
 | GRAP 103 Heritage Accounting | ❌ | ✅ |
 | Asset Valuation & Depreciation | ❌ | ✅ |
 | Insurance Management | ❌ | ✅ |
+| **Research & Access** | | |
 | Research Portal | ❌ | ✅ |
 | Reading Room Booking | ❌ | ✅ |
 | Access Request Workflow | ❌ | ✅ |
 | Embargo Management | ❌ | ✅ |
+| **Collection Management** | | |
 | Donor Agreement Tracking | ❌ | ✅ |
 | Condition Assessment | ❌ | ✅ |
 | Conservation Tracking | ❌ | ✅ |
 | Provenance Research | ❌ | ✅ |
 | Vendor/Supplier Management | ❌ | ✅ |
+| **Advanced Features** | | |
 | Landing Page Builder | ❌ | ✅ |
 | Display Profile System | ❌ | ✅ |
 | IIIF Image Viewer | ❌ | ✅ |
