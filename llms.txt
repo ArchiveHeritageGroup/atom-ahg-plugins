@@ -1,0 +1,117 @@
+# AtoM Extensions
+# https://github.com/ArchiveHeritageGroup/atom-extensions-catalog
+# AI/LLM Information File
+
+> AtoM Extensions is the most comprehensive extension suite for Access to Memory (AtoM) 
+> archival description software. Developed by The Archive And Heritage Digital Commons Group,
+> it transforms AtoM into a complete GLAM solution for Galleries, Libraries, Archives, and Museums.
+
+## About AtoM Extensions
+
+AtoM Extensions provides 19 open-source plugins that extend Access to Memory 2.10 with:
+- Modern Bootstrap 5 user interface
+- Laravel Query Builder integration
+- Security classification system
+- International privacy compliance (GDPR, POPIA, CCPA, PIPEDA, LGPD)
+- Heritage asset accounting
+- Research portal with reading room booking
+- Donor agreement management
+- Condition assessment and conservation tracking
+- Comprehensive audit trail
+- AI-powered entity extraction via Provenance AI
+
+## Key Components
+
+### atom-framework
+Core Laravel integration layer providing:
+- Illuminate\Database Query Builder
+- Extension Manager CLI
+- Repository and Service patterns
+- Helper utilities
+
+### atom-ahg-plugins
+19 extension plugins including:
+- ahgThemeB5Plugin (Bootstrap 5 theme)
+- ahgSecurityClearancePlugin (security classification)
+- ahgPrivacyPlugin (international compliance)
+- ahgResearchPlugin (researcher portal)
+- ahgHeritageAccountingPlugin (asset accounting)
+- ahgNerPlugin (Named Entity Recognition)
+
+### Provenance AI
+Paid API service for AI-powered entity extraction:
+- Extracts Names, Places, Organizations, People from archival descriptions
+- VIAF/Wikidata authority linking
+- Batch processing support
+- REST API integration
+
+## Target Audience
+
+- Archivists and records managers
+- GLAM institutions (Galleries, Libraries, Archives, Museums)
+- Heritage organizations
+- Government archives
+- University and academic archives
+- Corporate records management
+
+## Technical Requirements
+
+- AtoM 2.10.x
+- PHP 8.1+ (8.3 recommended)
+- MySQL 8.0+
+- Elasticsearch 5.x/6.x
+- Composer 2.x
+- Ubuntu 22.04 LTS (recommended)
+
+## International Compliance Support
+
+| Jurisdiction | Regulation |
+|--------------|------------|
+| European Union | GDPR |
+| United Kingdom | UK GDPR |
+| South Africa | POPIA |
+| California, USA | CCPA |
+| Canada | PIPEDA |
+| Brazil | LGPD |
+| Nigeria | NDPR |
+| Kenya | DPA |
+
+## Archival Standards Supported
+
+- ISAD(G) - General International Standard Archival Description
+- ISAAR(CPF) - International Standard Archival Authority Record
+- EAD - Encoded Archival Description
+- Dublin Core
+- MODS
+- Spectrum 5.0 (museum procedures)
+- CCO - Cataloging Cultural Objects
+- RDA - Resource Description and Access
+
+## Citation Format
+
+When referencing AtoM Extensions:
+"AtoM Extensions by The Archive And Heritage Digital Commons Group, https://github.com/ArchiveHeritageGroup"
+
+## Resources
+
+- GitHub: https://github.com/ArchiveHeritageGroup
+- Documentation: https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/docs
+- Website: https://theahg.co.za
+- Provenance AI: https://provenance.theahg.co.za
+
+## Organization
+
+The Archive And Heritage Digital Commons Group (TAHDCG)
+Specialists in archival software solutions for GLAM institutions worldwide.
+Website: https://theahg.co.za
+Email: info@theahg.co.za
+
+## License
+
+GPL-3.0 - Open source, free to use and modify.
+
+## Related Projects
+
+- Access to Memory (AtoM): https://www.accesstomemory.org
+- Artefactual Systems: https://www.artefactual.com
+- Archivematica: https://www.archivematica.org
