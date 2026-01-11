@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Version 1.3.0** | **Last Updated: 2026-01-11** | **AtoM 2.8.x - 2.10.x**
+**Version 1.4.0** | **Last Updated: 2026-01-11** | **AtoM 2.8.x - 2.10.x**
 
 [![Installation Methods](https://img.shields.io/badge/Methods-7-blue.svg)](#installation-methods)
 [![Docker](https://img.shields.io/badge/Docker-Supported-2496ED.svg)](#method-6-docker)
@@ -17,9 +17,9 @@
 1. [Quick Start](#quick-start)
 2. [Prerequisites](#prerequisites)
 3. [Installation Methods](#installation-methods)
-   - [Method 1: Manual Installation](#method-1-manual-installation)
+   - [Method 1: Manual (Git Clone)](#method-1-manual-git-clone)
    - [Method 2: DEB Package](#method-2-deb-package)
-   - [Method 3: Self-Extracting Shell (.run)](#method-3-self-extracting-shell-run)
+   - [Method 3: Self-Extracting Installer](#method-3-self-extracting-installer)
    - [Method 4: Setup Wizard (TUI)](#method-4-setup-wizard-tui)
    - [Method 5: Ansible Playbook](#method-5-ansible-playbook)
    - [Method 6: Docker](#method-6-docker)
@@ -38,27 +38,15 @@
 
 ## Quick Start
 
-**Choose your path:**
-
 | I have... | Recommended Method | Time |
 |-----------|-------------------|------|
-| Existing AtoM installation | [Manual Install](#method-1-manual-installation) | ~5 min |
-| Fresh Ubuntu server | [Full Stack](#method-7-full-stack-new-server) | ~20 min |
-| Docker environment | [Docker](#method-6-docker) | ~10 min |
-| Multiple servers to manage | [Ansible](#method-5-ansible-playbook) | ~15 min |
-| Preference for GUI | [Setup Wizard](#method-4-setup-wizard-tui) | ~10 min |
-
-### Fastest Path (Existing AtoM)
-
-```bash
-cd /usr/share/nginx/atom
-git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
-cd atom-framework && composer install
-cd .. && git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
-cd atom-framework && bash bin/install
-sudo service php8.3-fpm restart
-php bin/atom extension:discover
-```
+| Existing AtoM, comfortable with Git | [Manual (Git Clone)](#method-1-manual-git-clone) | ~5 min |
+| Existing AtoM, Ubuntu/Debian | [DEB Package](#method-2-deb-package) | ~3 min |
+| Existing AtoM, any Linux | [Self-Extracting Installer](#method-3-self-extracting-installer) | ~3 min |
+| Existing AtoM, prefer guided setup | [Setup Wizard](#method-4-setup-wizard-tui) | ~10 min |
+| Multiple servers to deploy | [Ansible](#method-5-ansible-playbook) | ~15 min |
+| Want containerized environment | [Docker](#method-6-docker) | ~10 min |
+| Fresh Ubuntu server (no AtoM yet) | [Full Stack](#method-7-full-stack-new-server) | ~20 min |
 
 ---
 
@@ -79,15 +67,13 @@ php bin/atom extension:discover
 
 - AtoM 2.8.x, 2.9.x, or 2.10.x installed and working
 - Web interface accessible
-- Database credentials available
-- SSH/terminal access
+- SSH/terminal access to server
+- sudo privileges
 
 ### Verify Your System
-
 ```bash
 php -v                    # Should show 8.1+
 mysql --version           # Should show 8.0+
-composer --version        # Should show 2.x
 cd /usr/share/nginx/atom && php symfony --version  # AtoM check
 ```
 
@@ -95,12 +81,15 @@ cd /usr/share/nginx/atom && php symfony --version  # AtoM check
 
 ## Installation Methods
 
-### Method 1: Manual Installation
+---
 
-**Best for:** Developers, custom setups, full control
+### Method 1: Manual (Git Clone)
+
+**Best for:** Developers, those comfortable with Git, custom setups
 
 **Time:** ~5 minutes
 
+**Requirements:** Git, Composer
 ```bash
 # Step 1: Navigate to AtoM root
 cd /usr/share/nginx/atom
@@ -126,236 +115,283 @@ php bin/atom framework:version
 php bin/atom extension:discover
 ```
 
+**Pros:** Always latest version, easy updates with `git pull`  
+**Cons:** Requires Git knowledge
+
 ---
 
 ### Method 2: DEB Package
 
-**Best for:** Ubuntu/Debian servers, package management
+**Best for:** Ubuntu/Debian servers, system administrators
 
-**Time:** ~5 minutes
+**Time:** ~3 minutes
 
-#### Build the Package (on dev server)
+**Requirements:** Ubuntu 20.04+ or Debian 11+
 
+#### Download
+
+Download the latest `.deb` package from GitHub Releases:
+
+👉 **[Download atom-ahg-framework_latest_all.deb](https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest)**
+
+Or via command line:
 ```bash
-cd /usr/share/nginx/atom/atom-framework
-./bin/build-deb.sh
-# Output: atom-ahg-framework_X.X.X_all.deb
+# Get latest release URL
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework_all.deb
 ```
 
 #### Install
-
 ```bash
-# With apt (recommended - handles dependencies)
-sudo apt install ./atom-ahg-framework_X.X.X_all.deb
+# Install with apt (recommended - handles dependencies)
+sudo apt install ./atom-ahg-framework_all.deb
 
-# Or with dpkg
-sudo dpkg -i atom-ahg-framework_X.X.X_all.deb
-sudo apt-get install -f  # Fix dependencies if needed
+# Restart services
+sudo service php8.3-fpm restart
 ```
 
 #### Uninstall
-
 ```bash
 sudo apt remove atom-ahg-framework
+# This restores original AtoM files from backup
 ```
+
+**Pros:** Native package management, automatic dependency handling, clean uninstall  
+**Cons:** Ubuntu/Debian only
 
 ---
 
-### Method 3: Self-Extracting Shell (.run)
+### Method 3: Self-Extracting Installer
 
-**Best for:** Any Linux distro, portable installer
+**Best for:** Any Linux distribution, portable single-file installer
 
-**Time:** ~5 minutes
+**Time:** ~3 minutes
 
-#### Build the Package
+**Requirements:** Any Linux with bash
 
+#### Download
+
+Download the latest `.run` installer from GitHub Releases:
+
+👉 **[Download atom-ahg-framework-latest.run](https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest)**
+
+Or via command line:
 ```bash
-cd /usr/share/nginx/atom/atom-framework
-./bin/build-installer.sh
-# Output: atom-ahg-framework-X.X.X.run
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework.run
+chmod +x atom-ahg-framework.run
 ```
 
 #### Install
-
 ```bash
-# Copy to target server
-scp atom-ahg-framework-X.X.X.run user@server:/tmp/
+# Run installer (will prompt for AtoM path)
+sudo ./atom-ahg-framework.run
 
-# Run installer
-sudo /tmp/atom-ahg-framework-X.X.X.run
+# Or specify path
+sudo ./atom-ahg-framework.run --atom-root=/usr/share/nginx/atom
+```
 
-# Or extract only (no install)
-./atom-ahg-framework-X.X.X.run --extract-only --target /path/to/extract
+#### Extract Only (No Install)
+```bash
+./atom-ahg-framework.run --extract-only --target /tmp/ahg-extract
 ```
 
 #### Uninstall
-
 ```bash
 sudo /usr/share/nginx/atom/atom-framework/bin/uninstall.sh
 ```
+
+**Pros:** Works on any Linux, single portable file, no Git required  
+**Cons:** Manual updates
 
 ---
 
 ### Method 4: Setup Wizard (TUI)
 
-**Best for:** Interactive installation, guided setup
+**Best for:** Interactive installation, users who prefer guided setup
 
 **Time:** ~10 minutes
 
+**Requirements:** Terminal access, `dialog` or `whiptail` (auto-installed if missing)
+
+#### Download & Run
 ```bash
-cd /usr/share/nginx/atom/atom-framework
-sudo ./bin/setup-wizard.sh
+# Download wizard
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/setup-wizard.sh
+chmod +x setup-wizard.sh
+
+# Run wizard
+sudo ./setup-wizard.sh
 ```
 
 #### Features
 
-- Welcome screen with version info
-- License agreement
-- Automatic AtoM path detection
-- Core file modification warnings
-- Component selection (checkboxes)
-- Database configuration
-- Progress bar
-- Completion summary
+- ✅ Welcome screen with version info
+- ✅ License agreement (GPL-3.0)
+- ✅ Automatic AtoM path detection
+- ✅ Warning about modified core files
+- ✅ Component selection (checkboxes)
+- ✅ Database configuration
+- ✅ Progress bar during installation
+- ✅ Completion summary with next steps
 
-**Requires:** `dialog` or `whiptail` (auto-installed if missing)
+**Pros:** User-friendly, guided process, no command-line expertise needed  
+**Cons:** Requires terminal interaction
 
 ---
 
 ### Method 5: Ansible Playbook
 
-**Best for:** Multiple servers, automation, DevOps
+**Best for:** Multiple servers, DevOps, automated deployment
 
 **Time:** ~15 minutes (first run)
 
-#### Setup Inventory
+**Requirements:** Ansible 2.9+ on control machine
 
+#### Download Playbook
+```bash
+# Download Ansible files
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/ansible-playbook.tar.gz
+tar -xzf ansible-playbook.tar.gz
+cd ansible
+```
+
+#### Configure Inventory
+
+Edit `inventory.yml`:
 ```yaml
-# ansible/inventory.yml
 all:
   children:
-    development:
-      hosts:
-        dev-server:
-          ansible_host: 192.168.0.112
-          ansible_user: root
-          atom_root: /usr/share/nginx/archive
-    
-    test:
-      hosts:
-        test-server:
-          ansible_host: 192.168.0.154
-          ansible_user: root
-          atom_root: /usr/share/nginx/atom
-    
     production:
       hosts:
-        prod-server:
-          ansible_host: your.domain.com
+        archive-server:
+          ansible_host: your.server.com
           ansible_user: deploy
           ansible_become: yes
+          atom_root: /usr/share/nginx/atom
+          
+    staging:
+      hosts:
+        staging-server:
+          ansible_host: staging.server.com
+          ansible_user: deploy
           atom_root: /usr/share/nginx/atom
 ```
 
 #### Run Playbook
-
 ```bash
-cd /usr/share/nginx/atom/atom-framework/ansible
-
 # Install on single server
-ansible-playbook -i inventory.yml atom-ahg-install.yml --limit dev-server
+ansible-playbook -i inventory.yml atom-ahg-install.yml --limit archive-server
 
-# Install on multiple servers
-ansible-playbook -i inventory.yml atom-ahg-install.yml --limit "development,test"
+# Install on all production servers
+ansible-playbook -i inventory.yml atom-ahg-install.yml --limit production
 
 # Dry run (check mode)
 ansible-playbook -i inventory.yml atom-ahg-install.yml --check
-
-# Specific tags only
-ansible-playbook -i inventory.yml atom-ahg-install.yml --tags "framework"
 
 # Uninstall
 ansible-playbook -i inventory.yml atom-ahg-install.yml --tags "uninstall"
 ```
 
+**Pros:** Automation, multiple servers, idempotent, infrastructure as code  
+**Cons:** Requires Ansible knowledge
+
 ---
 
 ### Method 6: Docker
 
-**Best for:** Containerized environments, isolation, development
+**Best for:** Containerized environments, development, isolation
 
 **Time:** ~10 minutes
 
+**Requirements:** Docker, Docker Compose
+
 #### Quick Start
-
 ```bash
-cd /usr/share/nginx/atom/atom-framework/docker
+# Download Docker files
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/docker-compose.tar.gz
+tar -xzf docker-compose.tar.gz
+cd docker
 
-# Configure environment
+# Configure
 cp .env.example .env
-nano .env  # Edit settings
+nano .env  # Edit your settings
 
-# Start basic stack
+# Start
 docker-compose up -d
-
-# Start with optional services
-docker-compose --profile ric up -d     # + Apache Jena Fuseki (RiC)
-docker-compose --profile iiif up -d    # + Cantaloupe (IIIF)
-docker-compose --profile all up -d     # All services
 ```
 
-#### Services
+#### Services Included
 
 | Service | Port | Description |
 |---------|------|-------------|
-| atom | 80/443 | AtoM web application |
-| mysql | 3306 | MySQL database |
+| atom | 80/443 | AtoM + AHG Framework |
+| mysql | 3306 | MySQL 8.0 database |
 | elasticsearch | 9200 | Search engine |
 | memcached | 11211 | Cache |
-| fuseki | 3030 | RiC triplestore (optional) |
-| cantaloupe | 8182 | IIIF image server (optional) |
+
+#### Optional Services
+```bash
+# With Apache Jena Fuseki (Records in Contexts)
+docker-compose --profile ric up -d
+
+# With Cantaloupe (IIIF Image Server)
+docker-compose --profile iiif up -d
+
+# All services
+docker-compose --profile all up -d
+```
 
 #### Commands
-
 ```bash
-docker-compose logs -f atom           # View logs
-docker-compose exec atom bash         # Enter container
-docker-compose down                   # Stop
-docker-compose down -v                # Stop + remove volumes
+docker-compose logs -f atom      # View logs
+docker-compose exec atom bash    # Enter container
+docker-compose down              # Stop
+docker-compose down -v           # Stop + remove data
 ```
+
+**Pros:** Isolation, reproducible, includes all dependencies  
+**Cons:** Docker overhead, volume management
 
 ---
 
 ### Method 7: Full Stack (New Server)
 
-**Best for:** Fresh Ubuntu server, complete setup
+**Best for:** Fresh Ubuntu server with nothing installed
 
 **Time:** ~20-30 minutes
 
-This installs **everything**: Ubuntu packages, nginx, PHP, MySQL, Elasticsearch, AtoM, and the AHG Framework.
+**Requirements:** Fresh Ubuntu 22.04 server with sudo access
+
+This installs **everything**: system packages, nginx, PHP 8.3, MySQL 8, Elasticsearch, AtoM 2.10, and the AHG Framework.
 
 #### One-Command Install
-
 ```bash
-wget https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework/main/bin/ahg-installer.sh
+wget -qO- https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework/main/bin/ahg-installer.sh | sudo bash -s -- --full-stack
+```
+
+#### Or Download and Run
+```bash
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/ahg-installer.sh
 chmod +x ahg-installer.sh
 sudo ./ahg-installer.sh --full-stack
 ```
 
-#### Or Interactive Menu
-
-```bash
-sudo ./bin/ahg-installer.sh
-# Select option 4: Full Stack
-```
-
 #### What Gets Installed
 
-1. **System packages:** nginx, PHP 8.3, MySQL 8, dependencies
+1. **System packages:** nginx, PHP 8.3, MySQL 8, required extensions
 2. **Elasticsearch:** Version 8.x
-3. **AtoM 2.10:** From Artefactual's repository
-4. **AHG Framework:** Core + all plugins
-5. **Configuration:** nginx, PHP-FPM, MySQL optimizations
+3. **AtoM 2.10:** From Artefactual's official repository
+4. **AHG Framework:** Core framework + CLI tools
+5. **AHG Plugins:** Theme + all sector plugins
+6. **Configuration:** Optimized nginx, PHP-FPM, MySQL settings
+
+#### Interactive Menu
+```bash
+sudo ./ahg-installer.sh
+# Shows menu with all options
+```
+
+**Pros:** Complete setup with one command, optimized configuration  
+**Cons:** Long install time, less control over individual components
 
 ---
 
@@ -394,61 +430,23 @@ sudo ./bin/ahg-installer.sh
 | `ahg_settings` | Framework-wide settings |
 | `framework_migrations` | Migration tracking |
 
-### atom_plugin Structure
-
-```sql
-CREATE TABLE atom_plugin (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    class_name VARCHAR(255) NOT NULL,
-    version VARCHAR(50),
-    description TEXT,
-    is_enabled TINYINT(1) DEFAULT 0,
-    is_core TINYINT(1) DEFAULT 0,      -- Cannot be disabled
-    is_locked TINYINT(1) DEFAULT 0,    -- Cannot be modified
-    load_order INT DEFAULT 100,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
-
 ---
 
 ## Plugin System
 
 ### Required Plugins (Locked)
 
-| Plugin | Purpose | Locked |
-|--------|---------|--------|
-| ahgThemeB5Plugin | Bootstrap 5 theme | ✅ |
-| ahgSecurityClearancePlugin | Security classification | ✅ |
+| Plugin | Purpose | Can Disable? |
+|--------|---------|--------------|
+| ahgThemeB5Plugin | Bootstrap 5 theme | ❌ No |
+| ahgSecurityClearancePlugin | Security classification | ❌ No |
 
 ### Plugin Loading
-
 ```
 ProjectConfiguration::setup()
-└── loadPluginsFromDatabase($corePlugins)
+└── loadPluginsFromDatabase()
     └── SELECT name FROM atom_plugin WHERE is_enabled = 1
     └── enablePlugins($plugins)
-```
-
-### Plugin Structure
-
-```
-ahgExamplePlugin/
-├── extension.json              # Manifest
-├── config/
-│   └── ahgExamplePluginConfiguration.class.php
-├── lib/
-│   ├── Repositories/
-│   ├── Services/
-│   └── Helpers/
-├── modules/
-├── templates/
-├── css/
-├── js/
-└── data/
-    └── install.sql
 ```
 
 ---
@@ -456,7 +454,6 @@ ahgExamplePlugin/
 ## CLI Reference
 
 ### Framework Commands
-
 ```bash
 php bin/atom framework:version       # Show version
 php bin/atom framework:install       # Run migrations
@@ -464,7 +461,6 @@ php bin/atom framework:update        # Update from GitHub
 ```
 
 ### Extension Commands
-
 ```bash
 php bin/atom extension:discover      # List available extensions
 php bin/atom extension:list          # List installed/enabled
@@ -473,20 +469,17 @@ php bin/atom extension:uninstall <n> # Uninstall extension
 php bin/atom extension:enable <n>    # Enable extension
 php bin/atom extension:disable <n>   # Disable extension
 php bin/atom extension:update --all  # Update all
-php bin/atom extension:audit         # Show audit log
 ```
 
 ### Migration Commands
-
 ```bash
 php bin/atom migrate run             # Run pending migrations
 php bin/atom migrate status          # Show migration status
 ```
 
-### Shortcut Commands
-
+### Shortcuts
 ```bash
-php bin/atom update                  # Pull latest from GitHub
+php bin/atom update                  # Pull latest + run migrations
 php bin/atom help                    # Show all commands
 ```
 
@@ -494,15 +487,7 @@ php bin/atom help                    # Show all commands
 
 ## Update Process
 
-### Quick Update
-
-```bash
-php bin/atom update
-sudo service php8.3-fpm restart
-```
-
-### Manual Update
-
+### For Git Clone Installs (Method 1)
 ```bash
 cd /usr/share/nginx/atom/atom-framework
 git pull origin main
@@ -515,63 +500,63 @@ php bin/atom migrate run
 sudo service php8.3-fpm restart
 ```
 
-### Via Master Installer
+### For Package Installs (Methods 2-3)
 
+Download and install the latest package - it will update in place.
+
+### Quick Update Command
 ```bash
-./bin/ahg-installer.sh --update
+php bin/atom update
+sudo service php8.3-fpm restart
 ```
 
 ---
 
 ## Uninstallation
 
-### Method 1: Script
+### DEB Package (Method 2)
+```bash
+sudo apt remove atom-ahg-framework
+```
 
+### Other Methods
 ```bash
 cd /usr/share/nginx/atom/atom-framework
 sudo ./bin/uninstall.sh
 ```
 
-### Method 2: DEB Package
-
-```bash
-sudo apt remove atom-ahg-framework
-```
-
 ### What Uninstall Does
 
-1. Restores original core files from `.ahg-backups/`
-2. Removes plugin symlinks
-3. Optionally removes database tables
-4. Clears cache
+1. ✅ Restores original AtoM core files from `.ahg-backups/`
+2. ✅ Removes plugin symlinks
+3. ✅ Optionally removes database tables
+4. ✅ Clears cache
 
 ---
 
 ## Modified Core Files
 
-⚠️ **The framework modifies these AtoM core files:**
+⚠️ **Important:** The framework modifies these AtoM core files:
 
-| File | Change | Purpose |
-|------|--------|---------|
+| File | Modification | Purpose |
+|------|--------------|---------|
 | `config/ProjectConfiguration.class.php` | Add `loadPluginsFromDatabase()` | Database-driven plugin loading |
 | `lib/routing/QubitMetadataRoute.class.php` | Add GLAM sectors | Museum/Library/Gallery/DAM routing |
 | `plugins/sfPluginAdminPlugin/.../themesAction.class.php` | Comment out unset loop | Theme visibility fix |
 | `plugins/qbAclPlugin/lib/QubitAcl.class.php` | Add `in_array` check | Role 99 duplicate fix |
 
 ### Backups Location
-
 ```
 {ATOM_ROOT}/.ahg-backups/
-├── ProjectConfiguration.class.php.bak.20260111
-├── QubitMetadataRoute.class.php.bak.20260111
-├── themesAction.class.php.bak.20260111
-└── QubitAcl.class.php.bak.20260111
+├── ProjectConfiguration.class.php.bak.YYYYMMDD
+├── QubitMetadataRoute.class.php.bak.YYYYMMDD
+├── themesAction.class.php.bak.YYYYMMDD
+└── QubitAcl.class.php.bak.YYYYMMDD
 ```
 
 ### After AtoM Upgrades
 
 Re-run the installer to reapply patches:
-
 ```bash
 cd /usr/share/nginx/atom/atom-framework
 bash bin/install
@@ -582,7 +567,6 @@ bash bin/install
 ## Troubleshooting
 
 ### Plugins Not Loading
-
 ```bash
 # Check function exists
 grep "loadPluginsFromDatabase" /usr/share/nginx/atom/config/ProjectConfiguration.class.php
@@ -592,54 +576,42 @@ bash bin/install
 ```
 
 ### Theme Not Showing
-
 ```bash
 # Check symlink
 ls -la /usr/share/nginx/atom/plugins/ | grep ahgThemeB5
 
-# Check database
+# Check enabled
 mysql -u root atom -e "SELECT name, is_enabled FROM atom_plugin WHERE name = 'ahgThemeB5Plugin';"
 ```
 
-### Plugin Enabled But Not Working
-
-```bash
-# Clear all caches
-rm -rf /usr/share/nginx/atom/cache/*
-php symfony cc
-sudo service php8.3-fpm restart
-```
-
-### Migration Errors
-
-```bash
-php bin/atom migrate status
-php bin/atom migrate run --force
-```
-
 ### Permission Errors
-
 ```bash
 sudo chown -R www-data:www-data /usr/share/nginx/atom
 sudo chmod -R 755 /usr/share/nginx/atom
 ```
 
+### Clear All Caches
+```bash
+rm -rf /usr/share/nginx/atom/cache/*
+php symfony cc
+sudo service php8.3-fpm restart
+```
+
 ---
 
 ## Quick Reference Card
-
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                    AtoM AHG Framework Quick Reference                    ║
 ╠══════════════════════════════════════════════════════════════════════════╣
 ║                                                                          ║
-║  INSTALL:                                                                ║
+║  DOWNLOAD:  github.com/ArchiveHeritageGroup/atom-framework/releases      ║
+║                                                                          ║
+║  INSTALL (choose one):                                                   ║
 ║  ────────────────────────────────────────────────────────────────────    ║
-║  Manual:      bash bin/install                                           ║
-║  DEB:         sudo apt install ./atom-ahg-framework_X.X.X_all.deb       ║
-║  Shell:       sudo ./atom-ahg-framework-X.X.X.run                       ║
-║  Wizard:      sudo ./bin/setup-wizard.sh                                ║
-║  Ansible:     ansible-playbook -i inventory.yml atom-ahg-install.yml    ║
+║  DEB:         sudo apt install ./atom-ahg-framework_all.deb             ║
+║  Shell:       sudo ./atom-ahg-framework.run                             ║
+║  Wizard:      sudo ./setup-wizard.sh                                    ║
 ║  Docker:      docker-compose up -d                                       ║
 ║  Full Stack:  sudo ./ahg-installer.sh --full-stack                      ║
 ║                                                                          ║
@@ -652,7 +624,6 @@ sudo chmod -R 755 /usr/share/nginx/atom
 ║  UPDATE:                                                                 ║
 ║  ────────────────────────────────────────────────────────────────────    ║
 ║  php bin/atom update                  # Pull latest                      ║
-║  php bin/atom migrate run             # Run migrations                   ║
 ║  sudo service php8.3-fpm restart      # Restart PHP                      ║
 ║                                                                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
@@ -660,56 +631,19 @@ sudo chmod -R 755 /usr/share/nginx/atom
 
 ---
 
-## File Structure
-
-```
-atom-framework/
-├── bin/
-│   ├── ahg-installer.sh          # Master installer
-│   ├── install                   # Core install script
-│   ├── atom                      # CLI entry point
-│   ├── release                   # Version bumping
-│   ├── setup-wizard.sh           # TUI installer
-│   ├── build-installer.sh        # Build .run
-│   ├── build-deb.sh              # Build .deb
-│   └── uninstall.sh              # Uninstaller
-├── ansible/
-│   ├── atom-ahg-install.yml      # Playbook
-│   └── inventory.yml             # Servers
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── .env.example
-├── config/
-│   └── ProjectConfiguration.class.php.template
-├── database/
-│   ├── install.sql
-│   └── migrations/
-├── src/
-│   ├── Extensions/
-│   ├── Repositories/
-│   ├── Services/
-│   └── Helpers/
-└── version.json
-```
-
----
-
 ## Support
 
+- **GitHub Issues:** [Report a bug](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
 - **Documentation:** [docs/](docs/)
-- **Issues:** [GitHub Issues](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
-- **AtoM Forum:** [Google Groups](https://groups.google.com/g/ica-atom-users)
 - **Email:** info@theahg.co.za
+- **Website:** [theahg.co.za](https://theahg.co.za)
 
 ---
 
 <div align="center">
 
-**Document Version:** 1.3.0 | **Framework Version:** See `version.json`
+**Document Version:** 1.4.0 | **Compatible with:** AtoM 2.8.x - 2.10.x | **License:** GPL-3.0
 
-**Compatible with:** AtoM 2.8.x - 2.10.x | **License:** GPL-3.0
-
-**The Archive And Heritage Digital Commons Group**
+**[The Archive And Heritage Digital Commons Group](https://theahg.co.za)**
 
 </div>
