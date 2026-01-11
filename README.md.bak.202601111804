@@ -25,170 +25,80 @@
 
 ## 🎯 What is AtoM?
 
-**AtoM (Access to Memory)** is an open-source, web-based archival description application developed by Artefactual Systems. It's trusted by national archives, universities, and cultural institutions worldwide.
+**AtoM (Access to Memory)** is an open-source, web-based archival description application developed by Artefactual Systems. It's trusted by national archives, universities, and cultural institutions worldwide for managing archival collections according to international standards (ISAD(G), ISAAR(CPF), ISDF, ISDIAH).
+
+**AtoM handles core archival workflow beautifully.**
+
+---
+
+## 🚀 What AtoM Extensions Adds
+
+AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Libraries, Archives, Museums) with modern architecture, international compliance, and enterprise features.
 
 ---
 
 ## 📊 Feature Comparison
 
-### Base AtoM Features (Native)
-
-| Feature | Description | Status |
-|---------|-------------|:------:|
-| **Archival Description** | | |
-| ISAD(G) Templates | International Standard Archival Description | ✅ |
-| RAD Templates | Rules for Archival Description (Canadian) | ✅ |
-| DACS Templates | Describing Archives: A Content Standard (US) | ✅ |
-| Dublin Core Templates | Simple metadata standard | ✅ |
-| MODS Templates | Metadata Object Description Schema | ✅ |
-| Multi-level Descriptions | Fonds → Series → Files → Items | ✅ |
-| Hierarchical Browse | Tree-view navigation | ✅ |
-| | | |
-| **Authority Records** | | |
-| ISAAR(CPF) | Corporate bodies, Persons, Families | ✅ |
-| Actor Relations | Relationships between authorities | ✅ |
-| Maintenance History | Track changes to authorities | ✅ |
-| | | |
-| **Archival Institutions** | | |
-| ISDIAH | Repository descriptions | ✅ |
-| Contact Information | Address, phone, email, hours | ✅ |
-| Holdings Statistics | Collection counts | ✅ |
-| | | |
-| **Functions** | | |
-| ISDF | Functions/activities descriptions | ✅ |
-| Function Relations | Link functions to records | ✅ |
-| | | |
-| **Access Points** | | |
-| Subject Terms | Controlled vocabulary subjects | ✅ |
-| Place Terms | Geographic access points | ✅ |
-| Name Access Points | Link to authority records | ✅ |
-| Genre Terms | Material types | ✅ |
-| | | |
-| **Digital Objects** | | |
-| File Upload | Images, PDFs, audio, video | ✅ |
-| Thumbnail Generation | Automatic derivatives | ✅ |
-| Compound Objects | Multi-page documents | ✅ |
-| External Links | URI references | ✅ |
-| | | |
-| **Import/Export** | | |
-| CSV Import | Bulk data loading | ✅ |
-| EAD 2002 Import/Export | Encoded Archival Description | ✅ |
-| EAD3 Export | Latest EAD version | ✅ |
-| Dublin Core Export | Simple XML | ✅ |
-| MODS Export | Library metadata | ✅ |
-| SKOS Export | Taxonomy terms | ✅ |
-| Clipboard Export | Select and export | ✅ |
-| | | |
-| **Search & Discovery** | | |
-| Elasticsearch | Full-text search | ✅ |
-| Faceted Search | Filter by repository, date, subject | ✅ |
-| Advanced Search | Boolean operators | ✅ |
-| Browse by Repository | Institution grouping | ✅ |
-| | | |
-| **User Management** | | |
-| User Accounts | Login/registration | ✅ |
-| User Groups | Role-based permissions | ✅ |
-| LDAP Integration | Enterprise authentication | ✅ |
-| Two-Factor Auth | OTP security | ✅ |
-| | | |
-| **Administration** | | |
-| Taxonomy Management | Edit controlled vocabularies | ✅ |
-| Static Pages | Custom content pages | ✅ |
-| Theming | Customize appearance | ✅ |
-| Multi-language | Interface translation | ✅ |
-| OAI-PMH | Harvesting protocol | ✅ |
-| Accessions | Acquisition records | ✅ |
-| Deaccessions | Disposal records | ✅ |
-| Physical Storage | Location tracking | ✅ |
-| Jobs | Background processing | ✅ |
-
----
-
-### AtoM Extensions Adds
-
-| Feature | Base AtoM | + Extensions |
-|---------|:---------:|:------------:|
-| **User Interface** | | |
+| Capability | Base AtoM | + AtoM Extensions |
+|------------|:---------:|:-----------------:|
+| **Core Archival Functions** | ✅ Full | ✅ Enhanced |
 | Modern Bootstrap 5 UI | ❌ | ✅ |
-| Responsive Mobile Design | Partial | ✅ Full |
-| Dark Mode Support | ❌ | ✅ |
-| Drag-and-Drop Landing Pages | ❌ | ✅ |
-| Display Profile System | ❌ | ✅ |
-| | | |
-| **Architecture** | | |
-| Laravel Query Builder | ❌ | ✅ |
-| Extension Manager CLI | ❌ | ✅ |
-| Database-driven Plugin System | ❌ | ✅ |
-| PHP 8.3 Optimized | Partial | ✅ Full |
+| Laravel Query Builder Integration | ❌ | ✅ |
 | | | |
 | **Security & Compliance** | | |
-| Security Classification (5 levels) | ❌ | ✅ |
-| GDPR Compliance Tools | ❌ | ✅ |
-| POPIA Compliance Tools | ❌ | ✅ |
-| CCPA Compliance Tools | ❌ | ✅ |
-| PIPEDA Compliance Tools | ❌ | ✅ |
-| LGPD Compliance Tools | ❌ | ✅ |
-| PAIA Request Management | ❌ | ✅ |
-| DSAR Management | ❌ | ✅ |
-| Data Breach Register | ❌ | ✅ |
-| Consent Management | ❌ | ✅ |
+| Security Classification System | ❌ | ✅ |
+| GDPR Compliance (EU) | ❌ | ✅ |
+| POPIA Compliance (South Africa) | ❌ | ✅ |
+| CCPA Compliance (California) | ❌ | ✅ |
+| PIPEDA Compliance (Canada) | ❌ | ✅ |
+| LGPD Compliance (Brazil) | ❌ | ✅ |
 | Comprehensive Audit Trail | ❌ | ✅ |
 | | | |
 | **GLAM Sector Support** | | |
 | Archives (ISAD/EAD) | ✅ | ✅ Enhanced |
 | Libraries (RDA/MARC) | Partial | ✅ Full |
-| Museums (Spectrum 5.0) | ❌ | ✅ |
-| Museums (CCO) | ❌ | ✅ |
+| Museums (Spectrum 5.0/CCO) | ❌ | ✅ |
 | Galleries (CCO/CDWA) | ❌ | ✅ |
 | Digital Asset Management | ❌ | ✅ |
-| Unified GLAM Browse | ❌ | ✅ |
 | | | |
 | **Heritage & Finance** | | |
 | GRAP 103 Heritage Accounting | ❌ | ✅ |
 | IPSAS 17 (International) | ❌ | ✅ |
 | FRS 102 (UK) | ❌ | ✅ |
 | GASB 34 (USA) | ❌ | ✅ |
-| FASAB (USA Federal) | ❌ | ✅ |
-| AASB 116 (Australia) | ❌ | ✅ |
-| PSAB/PS 3150 (Canada) | ❌ | ✅ |
 | Asset Valuation & Depreciation | ❌ | ✅ |
 | Insurance Management | ❌ | ✅ |
 | 10 Accounting Standards | ❌ | ✅ |
 | | | |
 | **Research & Access** | | |
 | Research Portal | ❌ | ✅ |
-| Researcher Workspace | ❌ | ✅ |
 | Reading Room Booking | ❌ | ✅ |
 | Access Request Workflow | ❌ | ✅ |
 | Embargo Management | ❌ | ✅ |
+| PAIA Requests (SA) | ❌ | ✅ |
+| DSAR Management | ❌ | ✅ |
 | | | |
 | **Collection Management** | | |
 | Donor Agreement Tracking | ❌ | ✅ |
-| Donor Reminders | ❌ | ✅ |
 | Condition Assessment | ❌ | ✅ |
 | Conservation Tracking | ❌ | ✅ |
-| Condition Annotator | ❌ | ✅ |
 | Provenance Research | ❌ | ✅ |
 | Vendor/Supplier Management | ❌ | ✅ |
 | | | |
 | **Advanced Features** | | |
+| Landing Page Builder | ❌ | ✅ |
+| Display Profile System | ❌ | ✅ |
 | IIIF Deep Zoom Viewer | ❌ | ✅ |
 | 3D Model Viewer | ❌ | ✅ |
-| 3D Thumbnail Generation | ❌ | ✅ |
 | Records in Contexts (RiC) | ❌ | ✅ |
-| Graph Visualization | ❌ | ✅ |
-| AI Entity Extraction (NER) | ❌ | ✅ |
+| AI Entity Extraction | ❌ | ✅ |
 | Automated Backups | ❌ | ✅ |
-| TIFF to PDF/A Merge | ❌ | ✅ |
-| Metadata Extraction (EXIF/IPTC/XMP) | ❌ | ✅ |
-
----
 
 ### Why Both Together?
 
-**AtoM** = Rock-solid archival foundation trusted by national archives, universities, and cultural institutions worldwide.
+**AtoM** = Rock-solid archival foundation trusted by national archives, universities, and cultural institutions.
 
-**AtoM Extensions** = Enterprise features, multi-sector support, regulatory compliance, modern UI, and AI capabilities.
+**AtoM Extensions** = Enterprise features, multi-sector support, regulatory compliance, and modern UI.
 
 ---
 
@@ -245,12 +155,24 @@
 
 ### Git Clone
 ```bash
+# Navigate to your AtoM installation directory
 cd /path/to/your/atom
+
+# Clone framework and plugins
 git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
 git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
-cd atom-framework && composer install
+
+# Install dependencies
+cd atom-framework
+composer install
+
+# Run installer
 bash bin/install
+
+# Restart PHP
 sudo systemctl restart php8.3-fpm
+
+# Verify
 php bin/atom framework:version
 ```
 
@@ -258,8 +180,13 @@ php bin/atom framework:version
 
 Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
 ```bash
+# Download latest .deb
 wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework_all.deb
+
+# Install
 sudo apt install ./atom-ahg-framework_all.deb
+
+# Restart PHP
 sudo systemctl restart php8.3-fpm
 ```
 
@@ -267,38 +194,58 @@ sudo systemctl restart php8.3-fpm
 
 Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
 ```bash
+# Download latest .run
 wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework.run
 chmod +x atom-ahg-framework.run
+
+# Install (will prompt for AtoM path)
 sudo ./atom-ahg-framework.run
 ```
 
 ### Setup Wizard
 ```bash
+# Download wizard
 wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/setup-wizard.sh
 chmod +x setup-wizard.sh
+
+# Run interactive wizard
 sudo ./setup-wizard.sh
 ```
 
 ### Ansible
 ```bash
+# Download playbook
 wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/ansible-playbook.tar.gz
-tar -xzf ansible-playbook.tar.gz && cd ansible
-nano inventory.yml  # Add your servers
+tar -xzf ansible-playbook.tar.gz
+cd ansible
+
+# Edit inventory.yml with your server details
+nano inventory.yml
+
+# Run
 ansible-playbook -i inventory.yml atom-ahg-install.yml
 ```
 
 ### Docker
 ```bash
+# Download docker files
 wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/docker-compose.tar.gz
-tar -xzf docker-compose.tar.gz && cd docker
-cp .env.example .env && nano .env
+tar -xzf docker-compose.tar.gz
+cd docker
+
+# Configure
+cp .env.example .env
+nano .env
+
+# Start
 docker-compose up -d
 ```
 
 ### Full Stack
 
-For a fresh Ubuntu server:
+For a fresh Ubuntu server with nothing installed:
 ```bash
+# One-command install (AtoM + Framework + Everything)
 curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework/main/bin/ahg-installer.sh | sudo bash -s -- --full-stack
 ```
 
@@ -310,7 +257,7 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 
 | Extension | Description |
 |-----------|-------------|
-| **ahgThemeB5Plugin** | Bootstrap 5 responsive theme |
+| **ahgThemeB5Plugin** | Bootstrap 5 responsive theme with modern UI |
 | **ahgSecurityClearancePlugin** | Security classification (Public to Top Secret) |
 
 ### GLAM Sector Plugins
@@ -320,7 +267,7 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 | **ahgLibraryPlugin** | Library cataloging | RDA, MARC21 |
 | **ahgMuseumPlugin** | Museum cataloging | CCO, Spectrum 5.0 |
 | **arGalleryPlugin** | Visual arts/gallery | CCO, CDWA |
-| **ahgDAMPlugin** | Digital Asset Management | Dublin Core, IPTC |
+| **ahgDAMPlugin** | Digital Asset Management | Dublin Core |
 
 ### Research & Access
 
@@ -376,51 +323,54 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 
 ### Heritage Accounting Standards
 
-| Standard | Region |
-|----------|--------|
-| **GRAP 103** | South Africa |
-| **IPSAS 17** | International |
-| **FRS 102** | United Kingdom |
-| **FASAB** | USA Federal |
-| **GASB 34** | USA State/Local |
-| **AASB 116** | Australia |
-| **PSAB/PS 3150** | Canada |
-| **NZ PBE IPSAS 17** | New Zealand |
-| **mGAAP** | Germany |
-| **Custom** | Configurable |
+| Standard | Region | Coverage |
+|----------|--------|----------|
+| **GRAP 103** | South Africa | ✅ Full |
+| **IPSAS 17** | International | ✅ Full |
+| **FRS 102** | United Kingdom | ✅ Full |
+| **FASAB** | USA Federal | ✅ Full |
+| **GASB 34** | USA State/Local | ✅ Full |
+| **AASB 116** | Australia | ✅ Full |
+| **PSAB/PS 3150** | Canada | ✅ Full |
+| **NZ PBE IPSAS 17** | New Zealand | ✅ Full |
+| **mGAAP** | Germany | ✅ Full |
+| **Custom** | Any | ✅ Configurable |
 
 ---
 
 ## 🔧 CLI Reference
+
+After installation, manage extensions from your AtoM directory:
 ```bash
 # Extension Management
-php bin/atom extension:discover          # List available
-php bin/atom extension:enable <name>     # Enable
-php bin/atom extension:disable <name>    # Disable
+php bin/atom extension:discover          # List available extensions
+php bin/atom extension:enable <name>     # Enable an extension
+php bin/atom extension:disable <name>    # Disable an extension
 
 # Framework Management
-php bin/atom framework:version           # Version
-php bin/atom update                      # Update
-php bin/atom migrate run                 # Migrations
+php bin/atom framework:version           # Show version
+php bin/atom update                      # Update from GitHub
+php bin/atom migrate run                 # Run database migrations
 
 # Maintenance
-php bin/atom backup:create               # Backup
+php bin/atom backup:create               # Create backup
+php bin/atom backup:restore <file>       # Restore backup
 php bin/atom cc                          # Clear cache
-php bin/atom help                        # Help
+php bin/atom help                        # Show all commands
 ```
 
 ---
 
 ## 🤖 Provenance AI
 
-AI-powered entity extraction for archivists:
+AI-powered entity extraction for archivists. Extract and link:
 
 - **People** - Names, roles, relationships
-- **Places** - Locations, coordinates
-- **Organizations** - Companies, institutions
-- **Dates** - Events, periods
+- **Places** - Locations, addresses, coordinates
+- **Organizations** - Companies, institutions, agencies
+- **Dates** - Events, periods, timelines
 
-[Learn more →](https://theahg.co.za/provenance-ai)
+[Learn more about Provenance AI →](https://theahg.co.za/provenance-ai)
 
 ---
 
@@ -431,6 +381,33 @@ AI-powered entity extraction for archivists:
 | **[INSTALLATION.md](INSTALLATION.md)** | Complete installation guide (7 methods) |
 | [docs/](docs/) | User guides for each plugin |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
+
+### User Guides
+
+- [Spectrum 5.0 Guide](docs/spectrum-user-guide.md) - Museum procedures
+- [Donor Agreements Guide](docs/donor-agreement-user-guide.md) - Donation tracking
+- [Security & Compliance Guide](docs/security-compliance-user-guide.md) - Classification system
+- [Heritage Accounting Guide](docs/heritage-accounting-user-guide.md) - Asset valuation
+- [Privacy Compliance Guide](docs/privacy-compliance-user-guide.md) - GDPR/POPIA
+- [Access Requests Guide](docs/access-requests-user-guide.md) - Researcher access
+- [Records in Contexts Guide](docs/ric-user-guide.md) - RiC implementation
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create feature branch
+3. Follow PHP CS Fixer standards
+4. Submit Pull Request
+
+---
+
+## 📄 License
+
+GPL-3.0 - see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -447,9 +424,11 @@ Developed by **The Archive And Heritage Digital Commons Group**
 
 ---
 
-## 📄 License
+## 💬 Support
 
-GPL-3.0 - see [LICENSE](LICENSE) for details.
+- **GitHub Issues:** [Report a bug](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
+- **AtoM Forum:** [Community discussions](https://groups.google.com/g/ica-atom-users)
+- **Email:** info@theahg.co.za
 
 ---
 
