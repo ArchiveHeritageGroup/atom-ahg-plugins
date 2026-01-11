@@ -42,6 +42,7 @@ $height = $height ?? ($dbSettings['homepage_carousel_height'] ?? '450px');
 $autoplay = $autoplay ?? (($dbSettings['homepage_carousel_autoplay'] ?? '1') === '1');
 $interval = $interval ?? (int)($dbSettings['homepage_carousel_interval'] ?? 5000);
 $showTitle = $showTitle ?? true;
+$customSubtitle = $customSubtitle ?? null;
 $showCaptions = $showCaptions ?? (($dbSettings['homepage_show_captions'] ?? '1') === '1');
 $showViewAll = $showViewAll ?? true;
 
@@ -225,7 +226,7 @@ $carouselId = 'featured-collection-' . $collection->id;
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4 mb-0">
             <i class="fas fa-images me-2 text-primary"></i>
-            <?php echo esc_entities($collection->name) ?>
+            <?php echo esc_entities($customTitle ?: $collection->name) ?>
         </h2>
         <?php if ($showViewAll): ?>
         <a href="/index.php/manifest-collection/<?php echo $collection->id ?>/view" class="btn btn-sm btn-primary">
@@ -233,8 +234,8 @@ $carouselId = 'featured-collection-' . $collection->id;
         </a>
         <?php endif ?>
     </div>
-    <?php if ($collection->description): ?>
-    <p class="text-muted mb-3"><?php echo esc_entities($collection->description) ?></p>
+    <?php if ($customSubtitle ?: $collection->description): ?>
+    <p class="text-muted mb-3"><?php echo esc_entities($customSubtitle ?: $collection->description) ?></p>
     <?php endif ?>
     <?php endif ?>
 

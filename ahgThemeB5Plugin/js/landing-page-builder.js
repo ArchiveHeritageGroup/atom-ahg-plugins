@@ -114,11 +114,22 @@
         bindEvents: function() {
             // Block actions (delegated)
             this.container.addEventListener('click', (e) => {
+                // Handle nested block buttons first
+                if (e.target.closest('.btn-edit-nested')) {
+                    const blockId = e.target.closest('.btn-edit-nested').dataset.blockId;
+                    this.openConfig(blockId);
+                    return;
+                }
+                if (e.target.closest('.btn-delete-nested')) {
+                    const nestedBlock = e.target.closest('.nested-block');
+                    const blockId = e.target.closest('.btn-delete-nested').dataset.blockId;
+                    this.deleteBlock(blockId, nestedBlock);
+                    return;
+                }
+                // Handle regular block card buttons
                 const card = e.target.closest('.block-card');
                 if (!card) return;
-
                 const blockId = card.dataset.blockId;
-
                 if (e.target.closest('.btn-edit')) {
                     this.openConfig(blockId);
                 } else if (e.target.closest('.btn-delete')) {
@@ -174,7 +185,7 @@
                 });
             });
 
-            // Collapse/expand all
+            // Collapse/expand all 
             document.getElementById('btn-collapse-all')?.addEventListener('click', () => {
                 this.container.querySelectorAll('.block-preview').forEach(el => {
                     el.style.display = 'none';
@@ -773,7 +784,8 @@
                 if (result.success) {
                     this.showToast('Block saved', 'success');
                     // Update card label if title changed
-                    const card = this.container.querySelector(`[data-block-id="${blockId}"]`);
+					const card = this.container.querySelector(`[data-block-id="${blockId}"]`);
+					
                     if (card && formData.get('title')) {
                         card.querySelector('.block-label').textContent = formData.get('title');
                     }

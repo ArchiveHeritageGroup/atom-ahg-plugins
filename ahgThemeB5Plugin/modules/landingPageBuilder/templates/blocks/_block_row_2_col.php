@@ -44,6 +44,7 @@ $col2Class = 'col-md-' . ($colMap[$col2Width] ?? '6');
           $templateFile = dirname(__FILE__) . '/_block_' . $childMachineName . '.php';
           if (file_exists($templateFile)) {
               $config = $childConfig;
+              $data = is_object($childBlock) ? ($childBlock->computed_data ?? null) : ($childBlock['computed_data'] ?? null);
               $block = $childBlock;
               include $templateFile;
           }
@@ -63,6 +64,7 @@ $col2Class = 'col-md-' . ($colMap[$col2Width] ?? '6');
           $templateFile = dirname(__FILE__) . '/_block_' . $childMachineName . '.php';
           if (file_exists($templateFile)) {
               $config = $childConfig;
+              $data = is_object($childBlock) ? ($childBlock->computed_data ?? null) : ($childBlock['computed_data'] ?? null);
               $block = $childBlock;
               include $templateFile;
           }

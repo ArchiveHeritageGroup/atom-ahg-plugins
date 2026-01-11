@@ -162,7 +162,6 @@ document.addEventListener('click', function(e) {
         if (window.LandingPageBuilderUI && window.LandingPageBuilderUI.openEditModal) {
             window.LandingPageBuilderUI.openEditModal(blockId);
         } else {
-            alert('Edit functionality loading...');
         }
         e.preventDefault();
         e.stopPropagation();

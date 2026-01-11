@@ -60,7 +60,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_2_col', 'row_3_col']);
                   <div class="nested-block card mb-1" data-block-id="<?php echo $childBlock->id ?>" draggable="true">
                     <div class="card-body py-1 px-2 small d-flex align-items-center">
                       <span class="drag-handle me-1" style="cursor: grab;">☰</span>
-                      <span class="flex-grow-1 text-truncate"><?php echo $childBlock->type_label ?></span>
+                      <span class="flex-grow-1 text-truncate"><?php echo $childBlock->title ?: $childBlock->type_label ?></span>
                       <button type="button" class="btn btn-link btn-sm p-0 px-1 btn-edit-nested text-primary" 
                               data-block-id="<?php echo $childBlock->id ?>" title="Edit">✏️</button>
                       <button type="button" class="btn btn-link btn-sm p-0 btn-delete-nested text-danger" 
