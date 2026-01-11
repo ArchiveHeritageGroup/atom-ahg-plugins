@@ -10,7 +10,7 @@
 [![Extensions](https://img.shields.io/badge/Extensions-18+-orange.svg)](#available-extensions)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952b3.svg)](https://getbootstrap.com/)
 
-[Quick Start](#-quick-start) • [Extensions](#-available-extensions) • [Installation](#installation) • [Documentation](#-documentation) • [Nginx Config](#-nginx-configuration)
+[Quick Start](#-quick-start) • [Extensions](#-available-extensions) • [User Guides](#-user-guides) • [Installation](#installation) • [Documentation](#-documentation)
 
 </div>
 
@@ -21,7 +21,6 @@
 The AtoM AHG Framework extends Access to Memory 2.8+ with Laravel Query Builder (Illuminate\Database) integration while maintaining full Symfony 1.x compatibility. This catalog provides a modular plugin ecosystem designed for GLAM institutions (Galleries, Libraries, Archives, Museums) with comprehensive support for South African legislative compliance (POPIA, NARSSA, GRAP 103), international standards (GDPR, ISAD(G), Spectrum 5.0), and Records in Contexts (RiC) integration.
 
 ### Architecture
-
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     AtoM 2.10 BASE (Symfony 1.x)                │
@@ -51,6 +50,63 @@ The AtoM AHG Framework extends Access to Memory 2.8+ with Laravel Query Builder 
 | 📋 [Compliance](#-compliance--governance) | 2 | Privacy (6 jurisdictions) and Heritage Accounting (10 standards) |
 | 🛠️ [Utilities](#-utility-plugins) | 5 | Backup, audit, rights, vendor, donor management and data migration |
 | 🎬 [Media](#-media--enhanced-features) | 6 | 3D viewers, audio/video players, transcription, metadata |
+| 🤖 [AI/NLP](#-ai--nlp) | 1 | Named Entity Recognition for automatic metadata extraction |
+
+---
+
+## 📖 User Guides
+
+Step-by-step guides with visual flow diagrams for end users (non-technical):
+
+### Core Features
+
+| Guide | Description |
+|-------|-------------|
+| [Advanced Search](docs/advanced-search-user-guide.md) | Boolean operators, filters, saved searches, facets |
+| [Audit Trail](docs/audit-trail-user-guide.md) | Track changes, view history, export logs |
+| [Backup & Restore](docs/backup-restore-user-guide.md) | Create backups, restore data, download copies |
+| [Barcode System](docs/barcode-user-guide.md) | Generate, print, and scan barcodes for tracking |
+| [Reports Dashboard](docs/reports-dashboard-user-guide.md) | Generate collection, activity, and compliance reports |
+
+### GLAM Sector Modules
+
+| Guide | Description |
+|-------|-------------|
+| [Museum Module](docs/museum-module-user-guide.md) | CCO/Spectrum cataloging, provenance, locations |
+| [Library Module](docs/library-module-user-guide.md) | Dublin Core/MARC cataloging, serials, call numbers |
+| [Gallery Module](docs/gallery-module-user-guide.md) | CCO visual arts, artists, exhibitions, editions |
+| [DAM Module](docs/dam-module-user-guide.md) | Digital assets, IPTC metadata, batch upload |
+| [Spectrum 5.0](docs/spectrum-user-guide.md) | Museum procedures - loans, movements, condition, valuations |
+
+### Media & Viewers
+
+| Guide | Description |
+|-------|-------------|
+| [3D Model Viewer](docs/3d-model-viewer-user-guide.md) | View GLB/GLTF models, AR support, controls |
+| [Audio Player](docs/audio-player-user-guide.md) | Waveform display, snippets, transcription |
+| [OpenSeadragon](docs/openseadragon-user-guide.md) | Deep zoom for high-resolution images |
+| [Mirador Viewer](docs/mirador-user-guide.md) | IIIF comparison, annotations, multi-page |
+| [IIIF Integration](docs/iiif-integration-user-guide.md) | Image server features, sharing, navigation |
+
+### Security & Compliance
+
+| Guide | Description |
+|-------|-------------|
+| [Security Classification](docs/security-classification-user-guide.md) | Clearance levels, classifying records, access control |
+| [Privacy Compliance](docs/privacy-compliance-user-guide.md) | POPIA/GDPR, DSAR requests, breach management |
+| [Embargo System](docs/embargo-user-guide.md) | Setting embargoes, types, propagation |
+| [Extended Rights](docs/extended-rights-user-guide.md) | Copyright, Creative Commons, TK Labels |
+
+### Workflows & Tools
+
+| Guide | Description |
+|-------|-------------|
+| [Researcher Portal](docs/researcher-user-guide.md) | Registration, workspace, bookings, favorites |
+| [Condition Assessment](docs/condition-assessment-user-guide.md) | Damage categories, annotations, recommendations |
+| [Heritage Accounting](docs/heritage-accounting-user-guide.md) | GRAP 103 valuations, movements, compliance |
+| [Vendor Management](docs/vendor-user-guide.md) | Track items at external vendors, transactions |
+| [PDF Merge Tool](docs/pdf-merge-user-guide.md) | Combine images into PDF/A documents |
+| [Data Migration](docs/data-migration-user-guide.md) | Import from Vernon, ArchivesSpace, PastPerfect, CSV/Excel |
 
 ---
 
@@ -251,7 +307,6 @@ Heritage accounting features:
 | **Donor Agreement Plugin** | Donor tracking, agreements, restrictions, and reminders |
 | **Vendor Plugin** | Supplier management for conservation, digitization, storage |
 
-
 ---
 
 ## 🔄 Data Migration Tool
@@ -279,15 +334,6 @@ Universal data migration and field mapping system for importing from legacy syst
 | **Gallery** | VRA Core | Artwork title, Artist, Medium, Dimensions |
 | **DAM** | Dublin Core | Identifier, Title, Creator, Rights |
 
-### Migration Workflow
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   UPLOAD    │ →  │   DETECT    │ →  │    MAP      │ →  │   OUTPUT    │
-│  CSV/XML/   │    │   Source    │    │   Fields    │    │  Preview &  │
-│    EAD      │    │   System    │    │  to Sector  │    │   Import    │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-```
-
 ### Features
 
 | Feature | Description |
@@ -302,23 +348,6 @@ Universal data migration and field mapping system for importing from legacy syst
 | **Validation** | Check for required fields, data types, duplicates |
 | **Direct Import** | Import directly to AtoM database |
 | **Export CSV** | Generate AtoM-compatible CSV for manual import |
-
-### CLI Commands
-```bash
-php bin/atom migration:import <file> --template=vernon    # Import with template
-php bin/atom migration:validate <file>                    # Validate without importing
-php bin/atom migration:templates                          # List available templates
-```
-
-### Component Locations
-
-| Component | Path |
-|-----------|------|
-| Plugin | `atom-ahg-plugins/ahgDataMigrationPlugin/` |
-| Parsers | `lib/Parsers/` (CsvParser, XmlParser, EadParser) |
-| Sectors | `lib/Sectors/` (ArchivesSector, MuseumSector, etc.) |
-| Templates | `data/templates/` (vernon.json, archivesspace.json, etc.) |
-| UI Module | `modules/dataMigration/` |
 
 ---
 
@@ -348,7 +377,6 @@ php bin/atom migration:templates                          # List available templ
 | Apache Jena Fuseki | RiC triplestore for SPARQL queries |
 
 ### Installation Overview
-
 ```bash
 # Clone framework
 cd /usr/share/nginx/atom
@@ -420,11 +448,11 @@ These are installed automatically with the framework:
 | [ahgAuditTrailPlugin](extensions/ahgAuditTrailPlugin.md) | Comprehensive audit logging | 1.0.x | ✅ Stable |
 | [ahgDonorAgreementPlugin](extensions/ahgDonorAgreementPlugin.md) | Donor agreements & reminders | 1.0.x | ✅ Stable |
 | [ahgVendorPlugin](extensions/ahgVendorPlugin.md) | Vendor/supplier management | 1.0.x | ✅ Stable |
+| [ahgNerPlugin](extensions/ahgNerPlugin.md) | Named Entity Recognition | 1.0.x | ✅ Stable |
 
 ---
 
 ## 🔧 CLI Commands
-
 ```bash
 # Framework commands
 php bin/atom framework:install    # Initial framework setup
@@ -445,11 +473,6 @@ php atom-framework/bin/generate-3d-thumbnails.php --id=X # Single 3D thumbnail
 # Migration commands
 php bin/atom migrate run          # Run pending migrations
 php bin/atom migrate status       # Show migration status
-
-# Shortcut commands
-php bin/atom discover             # Same as extension:discover
-php bin/atom install <name>       # Same as extension:install
-php bin/atom enable <name>        # Same as extension:enable
 
 # Version release
 ./bin/release patch "message"     # Bump patch version
@@ -478,733 +501,27 @@ php bin/atom enable <name>        # Same as extension:enable
 
 ## 🌐 Nginx Configuration
 
-### HTTPS Configuration (Production)
-
-Full-featured nginx configuration with IIIF support, RiC integration, bot protection, and rate limiting:
-
-```nginx
-##
-# Access to Memory (AtoM) - HTTPS with IIIF Support
-# Updated: 2025-01-08 - Added bot protection
-##
-
-server {
-    listen 80;
-    listen [::]:80;
-    server_name your-domain.example.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    server_name your-domain.example.com;
-
-    client_max_body_size 2G;
-
-    root /usr/share/nginx/atom;
-    index index.php index.html;
-
-    # SSL Configuration - Update paths to your certificates
-    ssl_certificate     /path/to/your/fullchain.pem;
-    ssl_certificate_key /path/to/your/privkey.pem;
-    ssl_trusted_certificate /path/to/your/chain.pem;
-
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-    ssl_prefer_server_ciphers on;
-
-    access_log /var/log/nginx/atom_access.log;
-    error_log  /var/log/nginx/atom_error.log;
-
-    # ======================================
-    # SECURITY HEADERS
-    # ======================================
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-    # ======================================
-    # BOT PROTECTION (uses maps from conf.d)
-    # ======================================
-    
-    # Block bad bots by user agent
-    if ($bad_bot) {
-        return 444;
-    }
-    
-    # Block listed IPs
-    if ($blocked_ip) {
-        return 403;
-    }
-
-    # ======================================
-    # BLOCK COMMON PHP EXPLOIT SCANNERS
-    # ======================================
-    location ~* (eval-stdin\.php|phpunit|pearcmd|thinkphp|invokefunction|\.env|\.git|shell|cmd) {
-        return 444;
-    }
-
-    # Block attempts to include remote files
-    if ($query_string ~* "allow_url_include" ) { return 444; }
-    if ($query_string ~* "auto_prepend_file" ) { return 444; }
-
-    # ======================================
-    # BLOCK PATH TRAVERSAL
-    # ======================================
-    if ($request_uri ~ "\.\./") { return 444; }
-    if ($request_uri ~ "\.%2e%2e/") { return 444; }
-
-    # ======================================
-    # RATE-LIMITED BROWSE ENDPOINTS (bot targets)
-    # ======================================
-    
-    # GLAM browse - heavy bot target
-    location ~ ^/index\.php/glam/browse {
-        limit_req zone=browse_limit burst=10 nodelay;
-        limit_conn conn_limit 5;
-        
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-    
-    # Information object browse
-    location ~ ^/index\.php/informationobject/browse {
-        limit_req zone=browse_limit burst=10 nodelay;
-        limit_conn conn_limit 5;
-        
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-    
-    # Search endpoint
-    location ~ ^/index\.php/.*/search {
-        limit_req zone=search_limit burst=15 nodelay;
-        limit_conn conn_limit 10;
-        
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 300;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    # ======================================
-    # RiC EXPLORER & APIs
-    # ======================================
-    
-    # RiC Explorer - serve static files (must be before PHP handlers)
-    location ^~ /ric/ {
-        alias /usr/share/nginx/atom/web/ric/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-    
-    # RiC Semantic Search API proxy
-    location ^~ /api/ric/ {
-        proxy_pass http://127.0.0.1:5001/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_connect_timeout 30;
-        proxy_read_timeout 30;
-    }
-
-    # RiC Provenance API
-    location ^~ /api/provenance/ {
-        proxy_pass http://127.0.0.1:5003/api/provenance/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # RiC Editor API
-    location ^~ /api/editor/ {
-        proxy_pass http://127.0.0.1:5002/api/editor/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # SPARQL Proxy for RiC Explorer
-    location ^~ /sparql/ {
-        proxy_pass http://127.0.0.1:3030/ric/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        add_header Access-Control-Allow-Origin "*" always;
-        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Content-Type" always;
-    }
-
-    # RiC Dashboard
-    location ^~ /ric-dashboard/ {
-        alias /usr/share/nginx/atom/web/ric-dashboard/;
-        index index.php index.html;
-        
-        location ~ \.php$ {
-            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-            fastcgi_param SCRIPT_FILENAME $request_filename;
-            include fastcgi_params;
-        }
-    }
-
-    # RiC Provenance UI
-    location ^~ /ric-provenance/ {
-        alias /usr/share/nginx/atom/web/ric-provenance/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-
-    # RiC Editor UI
-    location ^~ /ric-editor/ {
-        alias /usr/share/nginx/atom/web/ric-editor/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-
-    # ======================================
-    # MEDIA API ROUTES (snippets, streaming, etc)
-    # ======================================
-    location ~ ^/media/ {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/Media/public/routes.php;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-    }
-
-    location ~ ^/media/(metadata|extract|waveform)/([0-9]+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/media/(transcription|transcribe)/([0-9]+)(.*)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        fastcgi_read_timeout 600;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/media/search {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # PHP HANDLING
-    # ======================================
-    
-    # PHP handling with PATH_INFO support for AtoM
-    location ~ ^/(index|qubit_dev)\.php(/|$) {
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 3600;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    # ======================================
-    # DIGITAL OBJECT VIEWERS
-    # ======================================
-    
-    # Fix black viewer – allow inline JS on all digitalobject pages
-    location ~* /index\.php/.*/digitalobject/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:; 
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; 
-                                            style-src 'self' 'unsafe-inline'; 
-                                            img-src 'self' data: blob: https:;" always;
-    }
-
-    # ZoomPan viewer — must be routed by Symfony (NO ^~ !!!)
-    location /zoompan/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                            style-src 'self' 'unsafe-inline';
-                                            img-src 'self' data: blob: https:;" always;
-        try_files $uri $uri/ /index.php$args;
-    }
-
-    # 3D Viewer – Allow inline JS
-    location = /3D-image.php {
-        root /usr/share/nginx/atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        add_header Content-Security-Policy "default-src 'self' data: blob:; 
-                                            script-src 'self' 'unsafe-inline'; 
-                                            img-src 'self' data: blob:; 
-                                            style-src 'self' 'unsafe-inline';" always;
-    }
-
-    # 3D folder
-    location ^~ /atom/3d/ {
-        alias /usr/share/nginx/atom/3d/;
-        try_files $uri =404;
-    }
-
-    # ======================================
-    # STANDALONE REPORT EXTENSION
-    # ======================================
-    location ^~ /ext/reports/ {
-        alias /usr/share/nginx/atom/atom-extensions/extensions/reports/public/;
-        index index.php index.html;
-        
-        location ~ \.php$ {
-            try_files $uri =404;
-            include fastcgi_params;
-            fastcgi_param SCRIPT_FILENAME $request_filename;
-            fastcgi_param DOCUMENT_ROOT /usr/share/nginx/atom/atom-extensions/extensions/reports/public;
-            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        }
-    }
-
-    # ======================================
-    # IIIF (Cantaloupe)
-    # ======================================
-
-    # IIIF Viewer Framework Routes (must be before generic /iiif/ proxy)
-    location ~ ^/iiif/manifest/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/collection/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/viewer/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/embed/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/annotations {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/ocr {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/text {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/search {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location /atom-framework/src/Extensions/IiifViewer/public/ {
-        alias /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/;
-        expires 7d;
-    }
-
-    # IIIF Cantaloupe proxy
-    location /iiif/ {
-        proxy_pass http://127.0.0.1:8182/iiif/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        add_header Access-Control-Allow-Origin "*" always;
-    }
-
-    location ^~ /atom/iiif/ {
-        rewrite ^/atom/iiif/(.*)$ /iiif/$1 break;
-        proxy_pass http://127.0.0.1:8182/iiif/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        add_header Access-Control-Allow-Origin "*" always;
-        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept" always;
-    }
-
-    # IIIF Manifest endpoint
-    location = /iiif-manifest.php {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # STATIC ASSETS
-    # ======================================
-    
-    # Theme Plugin JS & CSS
-    location ^~ /plugins/ahgThemeB5Plugin/js/dist/ {
-        alias /usr/share/nginx/atom/dist/js/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /plugins/ahgThemeB5Plugin/css/dist/ {
-        alias /usr/share/nginx/atom/dist/css/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /atom/dist/js/ {
-        alias /usr/share/nginx/atom/dist/js/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location ^~ /atom/dist/css/ {
-        alias /usr/share/nginx/atom/dist/css/;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Static content
-    location ~* ^/(css|dist|js|images|plugins|vendor|ahgThemeB5Plugin)/.*\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
-        root /usr/share/nginx/atom;
-        try_files $uri $uri/ =404;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # ======================================
-    # SECURITY - BLOCK DIRECT PHP ACCESS
-    # ======================================
-    location ~ \.php$ {
-        deny all;
-        return 404;
-    }
-
-    location ~ /\.(ht|git|svn) {
-        deny all;
-    }
-
-    # ======================================
-    # MAIN ROUTER (catch-all with rate limiting)
-    # ======================================
-    location / {
-        limit_req zone=slow burst=40 nodelay;
-        try_files $uri /index.php?$args;
-    }
-}
-```
-
-### Rate Limiting Configuration
-
-Add to `/etc/nginx/conf.d/rate-limits.conf`:
-
-```nginx
-# Rate limiting zones
-limit_req_zone $binary_remote_addr zone=browse_limit:10m rate=5r/s;
-limit_req_zone $binary_remote_addr zone=search_limit:10m rate=10r/s;
-limit_req_zone $binary_remote_addr zone=slow:10m rate=20r/s;
-limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
-
-# Bot blocking map (add to http block or conf.d)
-map $http_user_agent $bad_bot {
-    default 0;
-    ~*bot 0;          # Allow legitimate bots
-    ~*crawl 0;
-    ~*spider 0;
-    ~*Googlebot 0;
-    ~*Bingbot 0;
-    ~*python-requests 1;
-    ~*curl 1;
-    ~*wget 1;
-    ~*libwww 1;
-    ~*Scrapy 1;
-    ~*sqlmap 1;
-    ~*nikto 1;
-}
-
-map $remote_addr $blocked_ip {
-    default 0;
-    # Add specific IPs to block:
-    # "1.2.3.4" 1;
-}
-```
+📖 **See [INSTALLATION.md](INSTALLATION.md) for complete nginx configurations including:**
+- HTTPS with SSL/TLS (Production)
+- HTTP only (Development)
+- IIIF/Cantaloupe integration
+- RiC Explorer & SPARQL proxy
+- Bot protection & rate limiting
+- Media API routes
 
 ---
 
-### HTTP Configuration (Development/Internal)
-
-Simplified configuration for development or internal networks without SSL:
-
-```nginx
-##
-# Access to Memory (AtoM) - HTTP Only (Development)
-# Use for internal/development environments only
-##
-
-server {
-    listen 80;
-    listen [::]:80;
-    server_name localhost atom.local;
-
-    client_max_body_size 2G;
-
-    root /usr/share/nginx/atom;
-    index index.php index.html;
-
-    access_log /var/log/nginx/atom_access.log;
-    error_log  /var/log/nginx/atom_error.log;
-
-    # ======================================
-    # SECURITY HEADERS (basic)
-    # ======================================
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-
-    # ======================================
-    # PHP HANDLING
-    # ======================================
-    
-    location ~ ^/(index|qubit_dev)\.php(/|$) {
-        include fastcgi_params;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_read_timeout 3600;
-        fastcgi_buffer_size 128k;
-        fastcgi_buffers 4 256k;
-        fastcgi_busy_buffers_size 256k;
-    }
-
-    # ======================================
-    # RiC EXPLORER & APIs (if needed)
-    # ======================================
-    
-    location ^~ /ric/ {
-        alias /usr/share/nginx/atom/web/ric/;
-        index index.html;
-        try_files $uri $uri/ =404;
-    }
-    
-    location ^~ /api/ric/ {
-        proxy_pass http://127.0.0.1:5001/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location ^~ /sparql/ {
-        proxy_pass http://127.0.0.1:3030/ric/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        add_header Access-Control-Allow-Origin "*" always;
-    }
-
-    # ======================================
-    # MEDIA API ROUTES
-    # ======================================
-    location ~ ^/media/ {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/Media/public/routes.php;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-    }
-
-    location ~ ^/media/(metadata|extract|waveform)/([0-9]+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/media/(transcription|transcribe)/([0-9]+)(.*)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        fastcgi_read_timeout 600;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # DIGITAL OBJECT VIEWERS
-    # ======================================
-    
-    location ~* /index\.php/.*/digitalobject/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:; 
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; 
-                                            style-src 'self' 'unsafe-inline'; 
-                                            img-src 'self' data: blob: https:;" always;
-    }
-
-    location /zoompan/ {
-        add_header Content-Security-Policy "default-src 'self' data: blob:;
-                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-                                            style-src 'self' 'unsafe-inline';
-                                            img-src 'self' data: blob: https:;" always;
-        try_files $uri $uri/ /index.php$args;
-    }
-
-    location = /3D-image.php {
-        root /usr/share/nginx/atom;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        add_header Content-Security-Policy "default-src 'self' data: blob:; 
-                                            script-src 'self' 'unsafe-inline'; 
-                                            img-src 'self' data: blob:; 
-                                            style-src 'self' 'unsafe-inline';" always;
-    }
-
-    # ======================================
-    # IIIF (Cantaloupe)
-    # ======================================
-    
-    location ~ ^/iiif/manifest/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/collection/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location ~ ^/iiif/(viewer|embed)/(.+)$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-    }
-
-    location ~ ^/iiif/(annotations|ocr|text|search) {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /usr/share/nginx/atom/atom-framework/src/Extensions/IiifViewer/public/router.php;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    location /iiif/ {
-        proxy_pass http://127.0.0.1:8182/iiif/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        add_header Access-Control-Allow-Origin "*" always;
-    }
-
-    location = /iiif-manifest.php {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        add_header Access-Control-Allow-Origin * always;
-    }
-
-    # ======================================
-    # STATIC ASSETS
-    # ======================================
-    
-    location ~* ^/(css|dist|js|images|plugins|vendor)/.*\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
-        root /usr/share/nginx/atom;
-        try_files $uri $uri/ =404;
-        expires 7d;
-        add_header Cache-Control "public";
-    }
-
-    # ======================================
-    # SECURITY
-    # ======================================
-    location ~ \.php$ {
-        deny all;
-        return 404;
-    }
-
-    location ~ /\.(ht|git|svn) {
-        deny all;
-    }
-
-    # ======================================
-    # MAIN ROUTER
-    # ======================================
-    location / {
-        try_files $uri /index.php?$args;
-    }
-}
-```
-
----
-
-## 📚 Documentation
+## 📚 Technical Documentation
 
 - [Installation Guide](INSTALLATION.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
+- [Modified Files Reference](docs/MODIFIED_FILES.md)
 - [Plugin Development](docs/PLUGIN_DEVELOPMENT.md)
-- [RIC - Records In Context](docs/RIC_INTEGRATION_GUIDE.md)
+- [RIC Integration Guide](docs/RIC_INTEGRATION_GUIDE.md)
 - [CLI Reference](docs/CLI_REFERENCE.md)
 - [API, Reporting and Data Export](docs/API_REPORTING_EXPORT.md)
 - [Media Features Guide](docs/MEDIA_FEATURES.md)
-- [Library Plugin Explained](docs/AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
+- [Library Plugin Architecture](docs/AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
 
 ---
 
@@ -1246,3 +563,70 @@ Made with ❤️ for the archival community
 [Report Bug](https://github.com/ArchiveHeritageGroup/atom-framework/issues) • [Request Feature](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
 
 </div>
+
+
+---
+
+## 🤖 AI & NLP
+
+Automated metadata extraction using machine learning:
+
+| Feature | Description |
+|---------|-------------|
+| **Named Entity Recognition** | Extract people, places, organizations from text |
+| **Entity Types** | Person, Organization, Place, Date, Event, Work |
+| **Review Dashboard** | Staff review and approve extracted entities |
+| **Authority Linking** | Link entities to existing authority records |
+| **Batch Processing** | Process multiple records at once |
+| **Python/spaCy Backend** | Industry-standard NLP with 90+ language support |
+
+📖 **User Guide:** [Named Entity Recognition](docs/user-guide-ner.md)
+
+---
+
+## 📖 Technical Documentation
+
+Detailed technical reference with architecture diagrams, ERD schemas, and service methods.
+
+**[View All Technical Documentation →](docs/technical/README.md)**
+
+| Plugin | Category | Documentation |
+|--------|----------|---------------|
+| ahgAPIPlugin | Integration | [Technical Docs](docs/technical/ahgAPIPlugin.md) |
+| ahgAuditTrailPlugin | Compliance | [Technical Docs](docs/technical/ahgAuditTrailPlugin.md) |
+| ahgBackupPlugin | Administration | [Technical Docs](docs/technical/ahgBackupPlugin.md) |
+| ahgSecurityClearancePlugin | Security | [Technical Docs](docs/technical/ahgSecurityClearancePlugin.md) |
+| ahgPrivacyPlugin | Compliance | [Technical Docs](docs/technical/ahgPrivacyPlugin.md) |
+| ahgEmbargoPlugin | Access Control | [Technical Docs](docs/technical/ahgEmbargoPlugin.md) |
+| ahgConditionPlugin | Conservation | [Technical Docs](docs/technical/ahgConditionPlugin.md) |
+| ahgSpectrumPlugin | Museum | [Technical Docs](docs/technical/ahgSpectrumPlugin.md) |
+| ahgGrapPlugin | Financial | [Technical Docs](docs/technical/ahgGrapPlugin.md) |
+| ahgDonorPlugin | Acquisitions | [Technical Docs](docs/technical/ahgDonorPlugin.md) |
+| ahgVendorPlugin | Administration | [Technical Docs](docs/technical/ahgVendorPlugin.md) |
+| ahgResearchPlugin | Public Services | [Technical Docs](docs/technical/ahgResearchPlugin.md) |
+| ahgNerPlugin | AI/NLP | [Technical Docs](docs/technical/ahgNerPlugin.md) |
+
+---
+
+## 🔌 API Documentation
+
+| Document | Description |
+|----------|-------------|
+| [REST API User Guide](docs/api-user-guide.md) | Non-technical guide for using the API |
+| [REST API Technical Reference](docs/api-technical-reference.md) | Detailed technical documentation |
+
+### Quick Start
+
+```bash
+# Test API connection
+curl -H "X-API-Key: your-key" https://your-site.com/api/v2
+
+# Get archival descriptions
+curl -H "X-API-Key: your-key" https://your-site.com/api/v2/descriptions?sector=archive
+
+# Search collections
+curl -X POST -H "X-API-Key: your-key" -H "Content-Type: application/json" \
+    -d '{"query":"meeting minutes"}' \
+    https://your-site.com/api/v2/search
+```
+
