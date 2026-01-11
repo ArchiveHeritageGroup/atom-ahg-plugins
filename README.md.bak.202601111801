@@ -13,7 +13,7 @@
 
 **The most comprehensive extension suite for AtoM archival software**
 
-[Installation](#-installation) • [Feature Comparison](#-feature-comparison) • [Extensions](#-available-extensions) • [Compliance](#-compliance-support) • [Documentation](#-documentation)
+[Installation](#-installation) • [Extensions](#-available-extensions) • [Compliance](#-compliance-support) • [CLI Reference](#-cli-reference) • [Documentation](#-documentation)
 
 ---
 
@@ -23,82 +23,28 @@
 
 ---
 
-## 🎯 What is AtoM?
+## 🎯 Why AtoM Extensions?
 
-**AtoM (Access to Memory)** is an open-source, web-based archival description application developed by Artefactual Systems. It's trusted by national archives, universities, and cultural institutions worldwide for managing archival collections according to international standards (ISAD(G), ISAAR(CPF), ISDF, ISDIAH).
+AtoM Extensions transforms Access to Memory into a complete **GLAM solution** (Galleries, Libraries, Archives, Museums) with modern architecture, international compliance, and features not available in base AtoM.
 
-**AtoM handles core archival workflow beautifully.**
-
----
-
-## 🚀 What AtoM Extensions Adds
-
-AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Libraries, Archives, Museums) with modern architecture, international compliance, and enterprise features.
-
----
-
-## 📊 Feature Comparison
-
-| Capability | Base AtoM | + AtoM Extensions |
-|------------|:---------:|:-----------------:|
-| **Core Archival Functions** | ✅ Full | ✅ Enhanced |
+| Capability | Base AtoM | AtoM Extensions |
+|------------|:---------:|:---------------:|
 | Modern Bootstrap 5 UI | ❌ | ✅ |
 | Laravel Query Builder Integration | ❌ | ✅ |
-| | | |
-| **Security & Compliance** | | |
 | Security Classification System | ❌ | ✅ |
-| GDPR Compliance (EU) | ❌ | ✅ |
-| POPIA Compliance (South Africa) | ❌ | ✅ |
-| CCPA Compliance (California) | ❌ | ✅ |
-| PIPEDA Compliance (Canada) | ❌ | ✅ |
-| LGPD Compliance (Brazil) | ❌ | ✅ |
+| International Privacy Compliance | ❌ | ✅ |
+| Heritage Asset Accounting (10 standards) | ❌ | ✅ |
+| Research Portal with Booking | ❌ | ✅ |
+| Donor Agreement Management | ❌ | ✅ |
+| Condition Assessment & Conservation | ❌ | ✅ |
 | Comprehensive Audit Trail | ❌ | ✅ |
-| | | |
-| **GLAM Sector Support** | | |
-| Archives (ISAD/EAD) | ✅ | ✅ Enhanced |
-| Libraries (RDA/MARC) | Partial | ✅ Full |
-| Museums (Spectrum 5.0/CCO) | ❌ | ✅ |
-| Galleries (CCO/CDWA) | ❌ | ✅ |
-| Digital Asset Management | ❌ | ✅ |
-| | | |
-| **Heritage & Finance** | | |
-| GRAP 103 Heritage Accounting | ❌ | ✅ |
-| IPSAS 17 (International) | ❌ | ✅ |
-| FRS 102 (UK) | ❌ | ✅ |
-| GASB 34 (USA) | ❌ | ✅ |
-| Asset Valuation & Depreciation | ❌ | ✅ |
-| Insurance Management | ❌ | ✅ |
-| 10 Accounting Standards | ❌ | ✅ |
-| | | |
-| **Research & Access** | | |
-| Research Portal | ❌ | ✅ |
-| Reading Room Booking | ❌ | ✅ |
-| Access Request Workflow | ❌ | ✅ |
-| Embargo Management | ❌ | ✅ |
-| PAIA Requests (SA) | ❌ | ✅ |
-| DSAR Management | ❌ | ✅ |
-| | | |
-| **Collection Management** | | |
-| Donor Agreement Tracking | ❌ | ✅ |
-| Condition Assessment | ❌ | ✅ |
-| Conservation Tracking | ❌ | ✅ |
-| Provenance Research | ❌ | ✅ |
-| Vendor/Supplier Management | ❌ | ✅ |
-| | | |
-| **Advanced Features** | | |
 | Landing Page Builder | ❌ | ✅ |
-| Display Profile System | ❌ | ✅ |
+| Unified GLAM/DAM Support | Partial | ✅ |
+| Vendor/Supplier Management | ❌ | ✅ |
+| AI Entity Extraction (Provenance AI) | ❌ | ✅ |
+| Records in Contexts (RiC) Support | ❌ | ✅ |
 | IIIF Deep Zoom Viewer | ❌ | ✅ |
 | 3D Model Viewer | ❌ | ✅ |
-| Records in Contexts (RiC) | ❌ | ✅ |
-| AI Entity Extraction | ❌ | ✅ |
-| Automated Backups | ❌ | ✅ |
-
-### Why Both Together?
-
-**AtoM** = Rock-solid archival foundation trusted by national archives, universities, and cultural institutions.
-
-**AtoM Extensions** = Enterprise features, multi-sector support, regulatory compliance, and modern UI.
 
 ---
 
@@ -123,40 +69,22 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### Repository Structure
+
+| Repository | Purpose |
+|------------|---------|
+| [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework) | Core Laravel foundation, CLI tools, services |
+| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | All AHG plugins (themes + extensions) |
+| [atom-extensions-catalog](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog) | Documentation and user guides |
+
 ---
 
 ## ⚡ Installation
 
-### Prerequisites
-
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| **AtoM** | 2.8.0 | 2.10.x |
-| **PHP** | 8.1 | 8.3 |
-| **MySQL** | 8.0 | 8.0+ |
-| **Elasticsearch** | 5.x | 6.x / 8.x |
-| **OS** | Ubuntu 20.04 | Ubuntu 22.04 LTS |
-
-### Installation Methods
-
-| Method | Best For | Time |
-|--------|----------|------|
-| **[Git Clone](#git-clone)** | Developers, easy updates | ~5 min |
-| **[DEB Package](#deb-package)** | Ubuntu/Debian servers | ~3 min |
-| **[Self-Extracting](#self-extracting)** | Any Linux, offline install | ~3 min |
-| **[Setup Wizard](#setup-wizard)** | Guided interactive setup | ~10 min |
-| **[Ansible](#ansible)** | Multiple servers | ~15 min |
-| **[Docker](#docker)** | Containers, testing | ~10 min |
-| **[Full Stack](#full-stack)** | Fresh server, complete setup | ~20 min |
-
-📖 **[See INSTALLATION.md for complete step-by-step instructions →](INSTALLATION.md)**
-
----
-
-### Git Clone
+### Quick Start (Existing AtoM - Git Clone)
 ```bash
-# Navigate to your AtoM installation directory
-cd /path/to/your/atom
+# Navigate to your AtoM installation
+cd /usr/share/nginx/atom
 
 # Clone framework and plugins
 git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
@@ -169,85 +97,27 @@ composer install
 # Run installer
 bash bin/install
 
-# Restart PHP
+# Restart services
 sudo systemctl restart php8.3-fpm
 
-# Verify
+# Verify installation
 php bin/atom framework:version
+php bin/atom extension:discover
 ```
 
-### DEB Package
+### All Installation Methods
 
-Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
-```bash
-# Download latest .deb
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework_all.deb
+| Method | Best For | Time | Description |
+|--------|----------|------|-------------|
+| **Git Clone** | Developers | ~5 min | Clone repos, run installer |
+| **DEB Package** | Ubuntu/Debian | ~3 min | Download from [Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases) |
+| **Self-Extracting** | Any Linux | ~3 min | Download `.run` from [Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases) |
+| **Setup Wizard** | Guided Setup | ~10 min | Interactive TUI interface |
+| **Ansible** | Multiple Servers | ~15 min | Automated remote deployment |
+| **Docker** | Containers | ~10 min | Full stack containerized |
+| **Full Stack** | Fresh Server | ~20 min | Installs AtoM + Framework + Everything |
 
-# Install
-sudo apt install ./atom-ahg-framework_all.deb
-
-# Restart PHP
-sudo systemctl restart php8.3-fpm
-```
-
-### Self-Extracting
-
-Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
-```bash
-# Download latest .run
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework.run
-chmod +x atom-ahg-framework.run
-
-# Install (will prompt for AtoM path)
-sudo ./atom-ahg-framework.run
-```
-
-### Setup Wizard
-```bash
-# Download wizard
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/setup-wizard.sh
-chmod +x setup-wizard.sh
-
-# Run interactive wizard
-sudo ./setup-wizard.sh
-```
-
-### Ansible
-```bash
-# Download playbook
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/ansible-playbook.tar.gz
-tar -xzf ansible-playbook.tar.gz
-cd ansible
-
-# Edit inventory.yml with your server details
-nano inventory.yml
-
-# Run
-ansible-playbook -i inventory.yml atom-ahg-install.yml
-```
-
-### Docker
-```bash
-# Download docker files
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/docker-compose.tar.gz
-tar -xzf docker-compose.tar.gz
-cd docker
-
-# Configure
-cp .env.example .env
-nano .env
-
-# Start
-docker-compose up -d
-```
-
-### Full Stack
-
-For a fresh Ubuntu server with nothing installed:
-```bash
-# One-command install (AtoM + Framework + Everything)
-curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework/main/bin/ahg-installer.sh | sudo bash -s -- --full-stack
-```
+📖 **[See INSTALLATION.md for complete instructions →](INSTALLATION.md)**
 
 ---
 
@@ -266,7 +136,7 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 |-----------|-------------|-----------|
 | **ahgLibraryPlugin** | Library cataloging | RDA, MARC21 |
 | **ahgMuseumPlugin** | Museum cataloging | CCO, Spectrum 5.0 |
-| **arGalleryPlugin** | Visual arts/gallery | CCO, CDWA |
+| **arGalleryPlugin** | Visual arts/gallery | CCO |
 | **ahgDAMPlugin** | Digital Asset Management | Dublin Core |
 
 ### Research & Access
@@ -280,7 +150,7 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 
 | Extension | Description |
 |-----------|-------------|
-| **ahgPrivacyPlugin** | Multi-jurisdiction privacy (GDPR, POPIA, CCPA, PIPEDA, LGPD) |
+| **ahgPrivacyPlugin** | Multi-jurisdiction privacy compliance |
 | **ahgHeritageAccountingPlugin** | Heritage asset accounting (10 standards) |
 | **ahgExtendedRightsPlugin** | Rights statements & embargo management |
 
@@ -325,7 +195,7 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 
 | Standard | Region | Coverage |
 |----------|--------|----------|
-| **GRAP 103** | South Africa | ✅ Full |
+| **GRAP 103** | South Africa | ✅ Full - Detailed |
 | **IPSAS 17** | International | ✅ Full |
 | **FRS 102** | United Kingdom | ✅ Full |
 | **FASAB** | USA Federal | ✅ Full |
@@ -339,13 +209,12 @@ curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework
 ---
 
 ## 🔧 CLI Reference
-
-After installation, manage extensions from your AtoM directory:
 ```bash
 # Extension Management
 php bin/atom extension:discover          # List available extensions
 php bin/atom extension:enable <name>     # Enable an extension
 php bin/atom extension:disable <name>    # Disable an extension
+php bin/atom extension:install <name>    # Install extension
 
 # Framework Management
 php bin/atom framework:version           # Show version
@@ -381,27 +250,47 @@ AI-powered entity extraction for archivists. Extract and link:
 | **[INSTALLATION.md](INSTALLATION.md)** | Complete installation guide (7 methods) |
 | [docs/](docs/) | User guides for each plugin |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 
 ### User Guides
 
-- [Spectrum 5.0 Guide](docs/spectrum-user-guide.md) - Museum procedures
-- [Donor Agreements Guide](docs/donor-agreement-user-guide.md) - Donation tracking
-- [Security & Compliance Guide](docs/security-compliance-user-guide.md) - Classification system
-- [Heritage Accounting Guide](docs/heritage-accounting-user-guide.md) - Asset valuation
-- [Privacy Compliance Guide](docs/privacy-compliance-user-guide.md) - GDPR/POPIA
-- [Access Requests Guide](docs/access-requests-user-guide.md) - Researcher access
-- [Records in Contexts Guide](docs/ric-user-guide.md) - RiC implementation
+- [Spectrum 5.0 Guide](docs/spectrum-user-guide.md)
+- [Donor Agreements Guide](docs/donor-agreement-user-guide.md)
+- [Security & Compliance Guide](docs/security-compliance-user-guide.md)
+- [Heritage Accounting Guide](docs/heritage-accounting-user-guide.md)
+- [Privacy Compliance Guide](docs/privacy-compliance-user-guide.md)
+- [Access Requests Guide](docs/access-requests-user-guide.md)
+- [Records in Contexts Guide](docs/ric-user-guide.md)
+
+---
+
+## 🧪 Development
+
+### Server Environment
+
+| Server | IP | Purpose | Database |
+|--------|----|---------|---------
+| Dev | 192.168.0.112 | Development | archive |
+| Test | 192.168.0.154 | Testing | atom |
+
+### Version Release
+```bash
+./bin/release patch "Bug fixes"
+./bin/release minor "New features"
+./bin/release major "Breaking changes"
+```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
 1. Fork the repository
-2. Create feature branch
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Follow PHP CS Fixer standards
-4. Submit Pull Request
+4. Test on development server
+5. Commit changes
+6. Push to branch
+7. Open a Pull Request
 
 ---
 
@@ -420,15 +309,6 @@ Developed by **The Archive And Heritage Digital Commons Group**
 | 🌐 Website | [theahg.co.za](https://theahg.co.za) |
 | 📧 Email | [info@theahg.co.za](mailto:info@theahg.co.za) |
 | 🐙 GitHub | [ArchiveHeritageGroup](https://github.com/ArchiveHeritageGroup) |
-| 📦 Releases | [Download](https://github.com/ArchiveHeritageGroup/atom-framework/releases) |
-
----
-
-## 💬 Support
-
-- **GitHub Issues:** [Report a bug](https://github.com/ArchiveHeritageGroup/atom-framework/issues)
-- **AtoM Forum:** [Community discussions](https://groups.google.com/g/ica-atom-users)
-- **Email:** info@theahg.co.za
 
 ---
 
