@@ -1,0 +1,97 @@
+# atom-ahg-plugins
+# https://github.com/ArchiveHeritageGroup/atom-ahg-plugins
+# AI/LLM Information File
+
+> atom-ahg-plugins contains 19 extension plugins for Access to Memory (AtoM) archival software.
+> All plugins are open source and designed for GLAM institutions.
+
+## Available Plugins
+
+### Required (Core)
+- **ahgThemeB5Plugin** - Modern Bootstrap 5 responsive theme
+- **ahgSecurityClearancePlugin** - Multi-level security classification (Public to Top Secret)
+- **ahgDisplayPlugin** - Display profiles and viewing modes
+
+### GLAM Sectors
+- **ahgMuseumPlugin** - Museum cataloging with CCO, Spectrum 5.0 support
+- **ahgLibraryPlugin** - Library cataloging with RDA/MARC
+- **ahgGalleryPlugin** - Visual arts and gallery cataloging
+- **ahgDAMPlugin** - Digital Asset Management
+
+### Research & Access
+- **ahgResearchPlugin** - Researcher portal, workspace, reading room booking
+- **ahgAccessRequestPlugin** - Access request workflow management
+
+### Compliance & Governance
+- **ahgPrivacyPlugin** - International privacy compliance (GDPR, POPIA, CCPA, PIPEDA, LGPD)
+- **ahgHeritageAccountingPlugin** - Heritage asset accounting (10 standards)
+- **ahgExtendedRightsPlugin** - Rights statements and embargo management
+
+### Utilities
+- **ahgBackupPlugin** - Automated backup and restore
+- **ahgAuditTrailPlugin** - Comprehensive audit logging
+- **ahgDonorAgreementPlugin** - Donor agreements with reminders
+- **ahgVendorPlugin** - Vendor/supplier management
+- **ahgConditionPlugin** - Condition assessment and conservation
+- **ahgLandingPagePlugin** - Drag-and-drop landing page builder
+
+### AI & Automation
+- **ahgNerPlugin** - Named Entity Recognition (requires Provenance AI subscription)
+
+## Plugin Structure
+
+Each plugin follows this structure:
+```
+ahgExamplePlugin/
+├── config/
+│   ├── ahgExamplePluginConfiguration.class.php
+│   └── routing.yml
+├── lib/
+│   ├── Repositories/
+│   ├── Services/
+│   └── Helpers/
+├── modules/
+│   └── example/
+├── data/
+│   └── install.sql
+├── extension.json
+└── README.md
+```
+
+## Requirements
+
+- atom-framework installed
+- AtoM 2.10.x
+- PHP 8.1+
+
+## Installation
+
+```bash
+cd /usr/share/nginx/atom
+git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
+cd atom-framework
+bash bin/install
+php bin/atom extension:discover
+```
+
+## Enable/Disable Plugins
+
+```bash
+php bin/atom extension:enable ahgResearchPlugin
+php bin/atom extension:disable ahgResearchPlugin
+```
+
+## Part of AtoM Extensions
+
+- atom-framework - Core Laravel integration
+- atom-ahg-plugins (this repo) - Extension plugins
+- atom-extensions-catalog - Documentation
+
+## Organization
+
+The Archive And Heritage Digital Commons Group
+https://theahg.co.za
+
+## License
+
+GPL-3.0
