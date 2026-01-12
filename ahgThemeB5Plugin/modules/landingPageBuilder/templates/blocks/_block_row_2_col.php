@@ -1,12 +1,12 @@
 <?php
 /**
  * 2 Column Row Block Template
+ * With Column Span Support for Nested Blocks
  */
 $gap = $config['gap'] ?? '30px';
 $stackMobile = $config['stack_mobile'] ?? true;
 $col1Width = str_replace('%', '', $config['col1_width'] ?? '50');
 $col2Width = str_replace('%', '', $config['col2_width'] ?? '50');
-error_log("DEBUG ROW2COL: col1_width=" . ($config["col1_width"] ?? "null") . " col2_width=" . ($config["col2_width"] ?? "null") . " => col1Class=" . $col1Width . " col2Class=" . $col2Width);
 
 // Handle various types of child_blocks
 $childBlocks = $block->child_blocks ?? [];
@@ -35,40 +35,62 @@ $col2Class = 'col-md-' . ($colMap[$col2Width] ?? '6');
 ?>
 <div class="row-2-col">
   <div class="row g-4">
+    <!-- Column 1 -->
     <div class="<?php echo $stackMobile ? 'col-12' : '' ?> <?php echo $col1Class ?>">
       <?php if (!empty($col1Blocks)): ?>
+        <div class="row g-3">
         <?php foreach ($col1Blocks as $childBlock):
           $childConfig = is_object($childBlock) ? ($childBlock->config ?? []) : ($childBlock['config'] ?? []);
           $childMachineName = is_object($childBlock) ? ($childBlock->machine_name ?? '') : ($childBlock['machine_name'] ?? '');
+          $childColSpan = is_object($childBlock) ? ($childBlock->col_span ?? 12) : ($childBlock['col_span'] ?? 12);
+          // Ensure col_span is valid (1-12), default to 12 (full width within column)
+          $childColSpan = max(1, min(12, (int)$childColSpan ?: 12));
+          
           if (!is_array($childConfig)) $childConfig = json_decode($childConfig, true) ?? [];
           $templateFile = dirname(__FILE__) . '/_block_' . $childMachineName . '.php';
-          if (file_exists($templateFile)) {
+          if (file_exists($templateFile)):
+        ?>
+          <div class="col-md-<?php echo $childColSpan ?>">
+            <?php
               $config = $childConfig;
               $data = is_object($childBlock) ? ($childBlock->computed_data ?? null) : ($childBlock['computed_data'] ?? null);
               $block = $childBlock;
               include $templateFile;
-          }
-        endforeach ?>
+            ?>
+          </div>
+        <?php endif; endforeach ?>
+        </div>
       <?php elseif ($isEditorMode): ?>
         <div class="empty-column-preview text-center text-muted py-4 bg-light rounded border border-dashed">
           <small>Column 1 (empty)</small>
         </div>
       <?php endif ?>
     </div>
+    
+    <!-- Column 2 -->
     <div class="<?php echo $stackMobile ? 'col-12' : '' ?> <?php echo $col2Class ?>">
       <?php if (!empty($col2Blocks)): ?>
+        <div class="row g-3">
         <?php foreach ($col2Blocks as $childBlock):
           $childConfig = is_object($childBlock) ? ($childBlock->config ?? []) : ($childBlock['config'] ?? []);
           $childMachineName = is_object($childBlock) ? ($childBlock->machine_name ?? '') : ($childBlock['machine_name'] ?? '');
+          $childColSpan = is_object($childBlock) ? ($childBlock->col_span ?? 12) : ($childBlock['col_span'] ?? 12);
+          $childColSpan = max(1, min(12, (int)$childColSpan ?: 12));
+          
           if (!is_array($childConfig)) $childConfig = json_decode($childConfig, true) ?? [];
           $templateFile = dirname(__FILE__) . '/_block_' . $childMachineName . '.php';
-          if (file_exists($templateFile)) {
+          if (file_exists($templateFile)):
+        ?>
+          <div class="col-md-<?php echo $childColSpan ?>">
+            <?php
               $config = $childConfig;
               $data = is_object($childBlock) ? ($childBlock->computed_data ?? null) : ($childBlock['computed_data'] ?? null);
               $block = $childBlock;
               include $templateFile;
-          }
-        endforeach ?>
+            ?>
+          </div>
+        <?php endif; endforeach ?>
+        </div>
       <?php elseif ($isEditorMode): ?>
         <div class="empty-column-preview text-center text-muted py-4 bg-light rounded border border-dashed">
           <small>Column 2 (empty)</small>

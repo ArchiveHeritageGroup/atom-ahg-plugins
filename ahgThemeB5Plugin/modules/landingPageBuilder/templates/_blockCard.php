@@ -6,7 +6,7 @@ $hiddenClass = $block->is_visible ? '' : 'block-hidden';
 $config = is_array($block->config) ? $block->config : [];
 
 // Check if this is a column layout block
-$isColumnLayout = in_array($block->machine_name, ['row_2_col', 'row_3_col']);
+$isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row_3_col']);
 ?>
 
 <div class="block-card card mb-3 <?php echo $hiddenClass ?>" data-block-id="<?php echo $block->id ?>">
@@ -36,7 +36,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_2_col', 'row_3_col']);
     <?php if ($isColumnLayout): ?>
       <?php 
       // Render actual column layout with drop zones
-      $numCols = $block->machine_name === 'row_3_col' ? 3 : 2;
+      $numCols = $block->machine_name === 'row_3_col' ? 3 : ($block->machine_name === 'row_2_col' ? 2 : 1);
       $childBlocks = $block->child_blocks ?? [];
       ?>
       <div class="row g-2">

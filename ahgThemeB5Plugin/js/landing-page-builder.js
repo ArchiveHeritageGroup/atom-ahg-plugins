@@ -232,18 +232,43 @@
 
         // Append block card to canvas
         appendBlockCard: function(block) {
-            const template = document.getElementById('block-card-template');
+            const template = document.getElementById("block-card-template");
             const clone = template.content.cloneNode(true);
-            const card = clone.querySelector('.block-card');
-
+            const card = clone.querySelector(".block-card");
             card.dataset.blockId = block.id;
-            card.querySelector('.block-icon').classList.add(block.type_icon);
-            card.querySelector('.block-label').textContent = block.type_label;
-
+            card.querySelector(".block-icon").classList.add(block.type_icon);
+            card.querySelector(".block-label").textContent = block.type_label;
+            
+            // Check if column layout - add drop zones
+            const columnLayouts = ["row_1_col", "row_2_col", "row_3_col"];
+            if (columnLayouts.includes(block.machine_name)) {
+                const numCols = block.machine_name === "row_3_col" ? 3 : (block.machine_name === "row_2_col" ? 2 : 1);
+                let colHtml = "<div class=\"row g-2\">";
+                for (let i = 1; i <= numCols; i++) {
+                    colHtml += `<div class="col">
+                        <div class="column-drop-zone border border-2 border-dashed rounded p-2 text-center"
+                             data-parent-block="${block.id}"
+                             data-column="col${i}"
+                             style="min-height: 80px; background: #fff;">
+                            <div class="empty-column text-muted py-2">
+                                <small>⬇ Col ${i}</small>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                colHtml += "</div>";
+                card.querySelector(".block-preview").innerHTML = colHtml;
+            }
+            
             this.container.appendChild(clone);
-
+            
+            // Re-initialize column drop zones
+            if (window.ColumnDropZones && typeof window.ColumnDropZones.init === "function") {
+                setTimeout(() => window.ColumnDropZones.init(), 100);
+            }
+            
             // Open config immediately for new blocks
-            setTimeout(() => this.openConfig(block.id), 100);
+            setTimeout(() => this.openConfig(block.id), 150);
         },
 
         // Delete block
@@ -472,6 +497,21 @@
                                             ${[0,1,2,3,4,5].map(n => `<option value="${n}" ${block.padding_bottom == n ? 'selected' : ''}>${n}</option>`).join('')}
                                         </select>
                                     </div>
+                                
+                                <div class="row g-2 mt-3">
+                                    <div class="col-12">
+                                        <label class="form-label small"><i class="bi bi-grid-3x3-gap me-1"></i>Column Span</label>
+                                        <select name="col_span" class="form-select form-select-sm">
+                                            <option value="1" ${block.col_span == 1 ? 'selected' : ''}>1 Column (default)</option>
+                                            <option value="2" ${block.col_span == 2 ? 'selected' : ''}>2 Columns</option>
+                                            <option value="3" ${block.col_span == 3 ? 'selected' : ''}>3 Columns</option>
+                                            <option value="4" ${block.col_span == 4 ? 'selected' : ''}>4 Columns</option>
+                                            <option value="6" ${block.col_span == 6 ? 'selected' : ''}>6 Columns (Half)</option>
+                                            <option value="12" ${block.col_span == 12 ? 'selected' : ''}>12 Columns (Full Width)</option>
+                                        </select>
+                                        <small class="text-muted">Number of grid columns this block spans (Bootstrap 12-column grid)</small>
+                                    </div>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -758,11 +798,18 @@
                 }
             }
 
-            // Merge repeaters into config
             for (const [key, items] of Object.entries(repeaters)) {
                 config[key] = items.filter(item => item !== undefined);
             }
-
+            // Handle checkboxes - set true/false based on checked state
+            const form = document.getElementById("block-config-form");
+            form.querySelectorAll("input[type=checkbox][name^=config]").forEach(cb => {
+                const matches = cb.name.match(/config\[([^\]]+)\]/);
+                if (matches) {
+                    config[matches[1]] = cb.checked;
+                }
+            });
+            console.log("Config before submit:", config);
             const submitData = new FormData();
             submitData.append('block_id', blockId);
             submitData.append('config', JSON.stringify(config));
@@ -773,6 +820,7 @@
             submitData.append('text_color', formData.get('text_color') || '');
             submitData.append('padding_top', formData.get('padding_top') || '3');
             submitData.append('padding_bottom', formData.get('padding_bottom') || '3');
+            submitData.append('col_span', formData.get('col_span') || '1');
 
             try {
                 const response = await fetch(LandingPageBuilder.urls.updateBlock, {
@@ -784,13 +832,15 @@
                 if (result.success) {
                     this.showToast('Block saved', 'success');
                     // Update card label if title changed
-					const card = this.container.querySelector(`[data-block-id="${blockId}"]`);
-					
-                    if (card && formData.get('title')) {
-                        card.querySelector('.block-label').textContent = formData.get('title');
+                    const card = this.container.querySelector(`[data-block-id="${blockId}"]`);
+                    if (card) {
+                        const label = card.querySelector(".block-label");
+                        if (label && formData.get("title")) {
+                            label.textContent = formData.get("title");
+                        }
                     }
                 } else {
-                    this.showToast(result.error || 'Failed to save', 'danger');
+                    this.showToast(result.error || "Failed to save", "danger");
                 }
             } catch (error) {
                 console.error('Save config error:', error);

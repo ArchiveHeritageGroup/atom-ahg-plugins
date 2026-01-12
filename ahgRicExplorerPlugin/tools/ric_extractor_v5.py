@@ -153,6 +153,24 @@ class RiCExtractor:
         """
         self.cursor.execute(query)
         return self.cursor.fetchall()
+
+    def list_standalone(self) -> List[Dict]:
+        """List top-level records that are not fonds (standalone records)"""
+        query = """
+            SELECT
+                io.id, io.identifier, ioi.title,
+                COALESCE(ti.name, 'No level') as level,
+                (SELECT COUNT(*) FROM information_object d
+                 WHERE d.lft > io.lft AND d.rgt < io.rgt) as descendant_count
+            FROM information_object io
+            LEFT JOIN information_object_i18n ioi ON io.id = ioi.id AND ioi.culture = 'en'
+            LEFT JOIN term_i18n ti ON io.level_of_description_id = ti.id AND ti.culture = 'en'
+            WHERE io.parent_id = 1 AND io.id > 1
+            AND (ti.name IS NULL OR LOWER(ti.name) != 'fonds')
+            ORDER BY ioi.title
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
     
     def extract_fonds(self, fonds_id: int) -> Dict:
         self.cursor.execute("SELECT id FROM information_object WHERE id = %s", (fonds_id,))
@@ -1653,6 +1671,7 @@ def main():
     parser.add_argument('--fonds-id', type=int, help='ID of fonds to extract')
     parser.add_argument('--output', '-o', type=str, default='output.jsonld', help='Output file')
     parser.add_argument('--pretty', action='store_true', help='Pretty-print JSON')
+    parser.add_argument('--list-standalone', action='store_true', help='List standalone records (non-fonds)')
     
     args = parser.parse_args()
     
@@ -1678,6 +1697,14 @@ def main():
             print("-" * 90)
             for f in fonds_list:
                 print(f"{f['id']:<8} {(f['identifier'] or ''):<20} {(f['title'] or '')[:48]:<50} {f['descendant_count']:<10}")
+
+        elif args.list_standalone:
+            standalone_list = extractor.list_standalone()
+            print("\nStandalone records (non-fonds):\n")
+            print(f"{'ID':<8} {'Identifier':<15} {'Level':<20} {'Title':<45} {'Desc':<6}")
+            print("-" * 95)
+            for r in standalone_list:
+                print(f"{r['id']:<8} {(r['identifier'] or '')[:13]:<15} {(r['level'] or '')[:18]:<20} {(r['title'] or '')[:43]:<45} {r['descendant_count']}") 
                       
         elif args.fonds_id:
             print(f"\nExtracting fonds ID: {args.fonds_id}")

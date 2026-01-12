@@ -1,12 +1,24 @@
 <?php
+
 use Illuminate\Database\Capsule\Manager as DB;
 
+/**
+ * RIC Sync Listener
+ *
+ * Listens to AtoM entity events and syncs changes to the RIC triplestore.
+ * Uses singleton pattern with static handler methods for Symfony dispatcher.
+ *
+ * @package    ahgRicExplorerPlugin
+ * @author     The AHG / Plain Sailing
+ * @version    1.0.1
+ */
 class RicSyncListener
 {
     protected static $instance = null;
     protected $syncService = null;
     protected $enabled = true;
     protected $useQueue = true;
+    protected $initialized = false;
 
     protected const SYNCABLE_ENTITIES = [
         'QubitInformationObject' => 'informationobject',
@@ -15,6 +27,41 @@ class RicSyncListener
         'QubitFunction' => 'function',
         'QubitEvent' => 'event',
     ];
+
+    // =========================================================================
+    // STATIC HANDLERS (Called by Symfony event dispatcher)
+    // =========================================================================
+
+    /**
+     * Static handler for save events (insert/update)
+     */
+    public static function handleSave(sfEvent $event): void
+    {
+        $instance = self::getInstance();
+        $instance->onSave($event);
+    }
+
+    /**
+     * Static handler for delete events
+     */
+    public static function handleDelete(sfEvent $event): void
+    {
+        $instance = self::getInstance();
+        $instance->onDelete($event);
+    }
+
+    /**
+     * Static handler for move events
+     */
+    public static function handleMove(sfEvent $event): void
+    {
+        $instance = self::getInstance();
+        $instance->onMove($event);
+    }
+
+    // =========================================================================
+    // SINGLETON
+    // =========================================================================
 
     public static function getInstance(): self
     {
@@ -32,11 +79,23 @@ class RicSyncListener
 
     protected function initializeService(): void
     {
+        if ($this->initialized) {
+            return;
+        }
+
         try {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            $this->syncService = new \AtomFramework\Services\RicSyncService();
+            $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($frameworkBootstrap)) {
+                require_once $frameworkBootstrap;
+                $this->syncService = new \AtomFramework\Services\RicSyncService();
+                $this->initialized = true;
+                $this->log('RIC Sync: Service initialized successfully');
+            } else {
+                $this->log('RIC Sync: Framework bootstrap not found at ' . $frameworkBootstrap, 'err');
+                $this->enabled = false;
+            }
         } catch (\Exception $e) {
-            sfContext::getInstance()->getLogger()->err('RIC Sync: Failed to initialize service: ' . $e->getMessage());
+            $this->log('RIC Sync: Failed to initialize service: ' . $e->getMessage(), 'err');
             $this->enabled = false;
         }
     }
@@ -44,19 +103,30 @@ class RicSyncListener
     protected function loadConfiguration(): void
     {
         try {
-            $config = DB::table('setting')->join('setting_i18n', 'setting_i18n.id', '=', 'setting.id')->where('setting.name', 'ric_sync_enabled')->value('setting_i18n.value');
-            $this->enabled = $config ? (bool)$config->getValue(['sourceCulture' => true]) : true;
+            // Load from ric_sync_config table
+            $syncEnabled = DB::table('ric_sync_config')
+                ->where('config_key', 'sync_enabled')
+                ->value('config_value');
+            $this->enabled = $syncEnabled === null || $syncEnabled === '1';
 
-            $queueConfig = DB::table('setting')->join('setting_i18n', 'setting_i18n.id', '=', 'setting.id')->where('setting.name', 'ric_queue_enabled')->value('setting_i18n.value');
-            $this->useQueue = $queueConfig ? (bool)$queueConfig->getValue(['sourceCulture' => true]) : true;
+            $queueEnabled = DB::table('ric_sync_config')
+                ->where('config_key', 'queue_enabled')
+                ->value('config_value');
+            $this->useQueue = $queueEnabled === null || $queueEnabled === '1';
         } catch (\Exception $e) {
-            // Use defaults
+            // Use defaults if table doesn't exist yet
+            $this->enabled = true;
+            $this->useQueue = true;
         }
     }
 
+    // =========================================================================
+    // INSTANCE HANDLERS
+    // =========================================================================
+
     public function onSave(sfEvent $event): void
     {
-        if (!$this->enabled || !$this->syncService) {
+        if (!$this->enabled) {
             return;
         }
 
@@ -69,24 +139,29 @@ class RicSyncListener
 
         $entityType = self::SYNCABLE_ENTITIES[$className];
         $entityId = $object->id;
-        $operation = $object->isNew() ? 'create' : 'update';
+
+        // Determine if this is create or update based on event name
+        $eventName = $event->getName();
+        $operation = strpos($eventName, '.insert.') !== false ? 'create' : 'update';
+
+        $this->log("RIC Sync: Processing {$operation} for {$entityType}/{$entityId}");
 
         try {
             if ($this->useQueue) {
                 $this->queueSync($entityType, $entityId, $operation);
-            } else {
+                $this->log("RIC Sync: Queued {$operation} for {$entityType}/{$entityId}");
+            } elseif ($this->syncService) {
                 $this->syncService->syncRecord($entityType, $entityId, $operation);
+                $this->log("RIC Sync: Immediate sync completed for {$entityType}/{$entityId}");
             }
         } catch (\Exception $e) {
-            sfContext::getInstance()->getLogger()->err(
-                'RIC Sync: Failed to sync ' . $entityType . '/' . $entityId . ': ' . $e->getMessage()
-            );
+            $this->log("RIC Sync: Failed to sync {$entityType}/{$entityId}: " . $e->getMessage(), 'err');
         }
     }
 
     public function onDelete(sfEvent $event): void
     {
-        if (!$this->enabled || !$this->syncService) {
+        if (!$this->enabled) {
             return;
         }
 
@@ -100,53 +175,64 @@ class RicSyncListener
         $entityType = self::SYNCABLE_ENTITIES[$className];
         $entityId = $object->id;
 
+        $this->log("RIC Sync: Processing delete for {$entityType}/{$entityId}");
+
         try {
             if ($this->useQueue) {
                 $this->queueSync($entityType, $entityId, 'delete');
-            } else {
+                $this->log("RIC Sync: Queued delete for {$entityType}/{$entityId}");
+            } elseif ($this->syncService) {
                 $this->syncService->handleDeletion($entityType, $entityId, true);
+                $this->log("RIC Sync: Immediate delete completed for {$entityType}/{$entityId}");
             }
         } catch (\Exception $e) {
-            sfContext::getInstance()->getLogger()->err(
-                'RIC Sync: Failed to delete ' . $entityType . '/' . $entityId . ': ' . $e->getMessage()
-            );
+            $this->log("RIC Sync: Failed to delete {$entityType}/{$entityId}: " . $e->getMessage(), 'err');
         }
     }
 
     public function onMove(sfEvent $event): void
     {
-        if (!$this->enabled || !$this->syncService) {
+        if (!$this->enabled) {
             return;
         }
 
         $object = $event->getSubject();
         $className = get_class($object);
 
-        if (!isset(self::SYNCABLE_ENTITIES[$className])) {
+        if ($className !== 'QubitInformationObject') {
             return;
         }
 
-        $entityType = self::SYNCABLE_ENTITIES[$className];
+        $entityType = 'informationobject';
         $entityId = $object->id;
-        $oldParentId = $event->offsetGet('oldParentId');
+        $oldParentId = $event->offsetExists('oldParentId') ? $event->offsetGet('oldParentId') : null;
         $newParentId = $object->parentId;
+
+        // Only process if parent actually changed
+        if ($oldParentId === $newParentId) {
+            return;
+        }
+
+        $this->log("RIC Sync: Processing move for {$entityType}/{$entityId} from {$oldParentId} to {$newParentId}");
 
         try {
             if ($this->useQueue) {
                 $this->queueMove($entityType, $entityId, $oldParentId, $newParentId);
-            } else {
+            } elseif ($this->syncService) {
                 $this->syncService->handleMove($entityType, $entityId, $oldParentId, $newParentId);
             }
         } catch (\Exception $e) {
-            sfContext::getInstance()->getLogger()->err(
-                'RIC Sync: Failed to handle move for ' . $entityType . '/' . $entityId . ': ' . $e->getMessage()
-            );
+            $this->log("RIC Sync: Failed to handle move for {$entityType}/{$entityId}: " . $e->getMessage(), 'err');
         }
     }
 
+    // =========================================================================
+    // QUEUE OPERATIONS
+    // =========================================================================
+
     protected function queueSync(string $entityType, int $entityId, string $operation): void
     {
-        \Illuminate\Database\Capsule\Manager::table('ric_sync_queue')->insert([
+        DB::table('ric_sync_queue')->insert([
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'operation' => $operation,
@@ -159,7 +245,7 @@ class RicSyncListener
 
     protected function queueMove(string $entityType, int $entityId, ?int $oldParentId, ?int $newParentId): void
     {
-        \Illuminate\Database\Capsule\Manager::table('ric_sync_queue')->insert([
+        DB::table('ric_sync_queue')->insert([
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'operation' => 'move',
@@ -170,6 +256,26 @@ class RicSyncListener
             'scheduled_at' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    // =========================================================================
+    // UTILITIES
+    // =========================================================================
+
+    protected function log(string $message, string $level = 'info'): void
+    {
+        try {
+            if (sfContext::hasInstance()) {
+                $logger = sfContext::getInstance()->getLogger();
+                if ($level === 'err') {
+                    $logger->err($message);
+                } else {
+                    $logger->info($message);
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail if logging not available
+        }
     }
 
     public function isEnabled(): bool
@@ -185,28 +291,5 @@ class RicSyncListener
     public function enable(): void
     {
         $this->enabled = true;
-    }
-}
-
-class RicSyncBehavior
-{
-    public static function postSave(BaseObject $object): void
-    {
-        $listener = RicSyncListener::getInstance();
-        if (!$listener->isEnabled()) {
-            return;
-        }
-        $event = new sfEvent($object, get_class($object) . '.save');
-        $listener->onSave($event);
-    }
-
-    public static function preDelete(BaseObject $object): void
-    {
-        $listener = RicSyncListener::getInstance();
-        if (!$listener->isEnabled()) {
-            return;
-        }
-        $event = new sfEvent($object, get_class($object) . '.delete');
-        $listener->onDelete($event);
     }
 }

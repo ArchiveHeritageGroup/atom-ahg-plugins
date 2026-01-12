@@ -215,7 +215,7 @@ class landingPageBuilderActions extends sfActions
 
         // Handle style settings
         foreach (['title', 'css_classes', 'container_type', 'background_color', 
-                  'text_color', 'padding_top', 'padding_bottom'] as $field) {
+                  'text_color', 'padding_top', 'padding_bottom', 'col_span'] as $field) {
             if ($request->hasParameter($field)) {
                 $data[$field] = $request->getParameter($field);
             }
@@ -401,6 +401,7 @@ class landingPageBuilderActions extends sfActions
                 'text_color' => $block->text_color,
                 'padding_top' => $block->padding_top,
                 'padding_bottom' => $block->padding_bottom,
+                'col_span' => $block->col_span,
                 'is_visible' => $block->is_visible
             ]
         ]));

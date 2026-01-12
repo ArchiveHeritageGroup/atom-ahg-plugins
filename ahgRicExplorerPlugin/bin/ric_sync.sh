@@ -20,11 +20,11 @@
 set -e
 
 # Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXTRACTOR="${SCRIPT_DIR}/ric_extractor_v5.py"
-AUTHORITY_LINKER="${SCRIPT_DIR}/ric_authority_linker.py"
-SHACL_VALIDATOR="${SCRIPT_DIR}/ric_shacl_validator.py"
-SHACL_SHAPES="${SCRIPT_DIR}/ric_shacl_shapes.ttl"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+EXTRACTOR="${SCRIPT_DIR}/../tools/ric_extractor_v5.py"
+AUTHORITY_LINKER="${SCRIPT_DIR}/../tools/ric_authority_linker.py"
+SHACL_VALIDATOR="${SCRIPT_DIR}/../tools/ric_shacl_validator.py"
+SHACL_SHAPES="${SCRIPT_DIR}/../tools/ric_shacl_shapes.ttl"
 
 FUSEKI_URL="http://192.168.0.112:3030"
 FUSEKI_DATASET="${FUSEKI_DATASET:-ric}"
@@ -37,7 +37,7 @@ LOG_FILE="${LOG_FILE:-/var/log/ric_sync.log}"
 
 export ATOM_DB_HOST="${ATOM_DB_HOST:-localhost}"
 export ATOM_DB_USER="${ATOM_DB_USER:-root}"
-export ATOM_DB_PASSWORD="${ATOM_DB_PASSWORD:-}"
+export ATOM_DB_PASSWORD="${ATOM_DB_PASSWORD:-Merlot@123}"
 export ATOM_DB_NAME="${ATOM_DB_NAME:-archive}"
 export RIC_BASE_URI="${RIC_BASE_URI:-https://archives.theahg.co.za/ric}"
 export ATOM_INSTANCE_ID="${ATOM_INSTANCE_ID:-atom-psis}"
@@ -219,6 +219,10 @@ get_fonds_list() {
     python3 "$EXTRACTOR" --list-fonds 2>/dev/null | grep -E '^\s*[0-9]+' | awk '{print $1}'
 }
 
+get_standalone_list() {
+    python3 "$EXTRACTOR" --list-standalone 2>/dev/null | grep -E "^\s*[0-9]+" | awk "{print \$1}"
+}
+
 # Extract and load a fonds
 extract_fonds() {
     local fonds_id=$1
@@ -322,33 +326,48 @@ main() {
     local total=$(echo "$fonds_list" | wc -w)
     log "Found $total fonds to process"
     
-    local processed=0
     local skipped=0
-    
     for fonds_id in $fonds_list; do
         if extract_fonds "$fonds_id"; then
-            ((processed++))
+            processed=$((processed + 1))
         else
-            ((skipped++))
+            skipped=$((skipped + 1))
         fi
     done
-    
+
+    # Process standalone records (non-fonds at top level)
+    log "Processing standalone records..."
+    local standalone_list
+    standalone_list=$(get_standalone_list)
+    local standalone_total=$(echo "$standalone_list" | wc -w)
+    log "Found $standalone_total standalone records to process"
+    local standalone_processed=0
+    local standalone_skipped=0
+    for record_id in $standalone_list; do
+        if extract_fonds "$record_id"; then
+            standalone_processed=$((standalone_processed + 1))
+        else
+            standalone_skipped=$((standalone_skipped + 1))
+        fi
+    done
+    processed=$((processed + standalone_processed))
+    skipped=$((skipped + standalone_skipped))
+
     # Post-sync tasks
     if [ "$VALIDATE" = true ]; then
         run_validation
     fi
-    
+
     if [ "$LINK_AUTHORITIES" = true ]; then
         run_authority_linking
     fi
-    
+
     # Final status
     local final_count=$(get_status)
-    
     log "=========================================="
     log "RiC Sync Complete"
-    log "  Processed: $processed fonds"
-    log "  Skipped: $skipped fonds"
+    log "  Processed: $processed records ($standalone_processed standalone)"
+    log "  Skipped: $skipped records"
     log "  Total triples: $final_count"
     log "=========================================="
 }
