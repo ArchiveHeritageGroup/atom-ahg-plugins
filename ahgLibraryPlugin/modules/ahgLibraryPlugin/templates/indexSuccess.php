@@ -404,6 +404,9 @@ $rawResource = sfOutputEscaper::unescape($resource);
         <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'edit', 'slug' => $resource->slug]); ?>" class="btn btn-primary w-100 mb-2">
           <i class="fas fa-edit me-2"></i><?php echo __('Edit'); ?>
         </a>
+        <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'add', 'parent' => $resource->slug]); ?>" class="btn btn-success w-100 mb-2">
+          <i class="fas fa-plus me-2"></i><?php echo __('Add new'); ?>
+        </a>
         <a href="<?php echo url_for([$resource, 'module' => 'informationobject', 'action' => 'delete']); ?>" class="btn btn-danger w-100 mb-2">
           <i class="fas fa-trash me-2"></i><?php echo __('Delete'); ?>
         </a>
