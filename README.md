@@ -252,6 +252,7 @@ cd atom-framework && composer install
 bash bin/install
 sudo systemctl restart php8.3-fpm
 php bin/atom framework:version
+php bin/atom discover
 ```
 
 ### DEB Package
