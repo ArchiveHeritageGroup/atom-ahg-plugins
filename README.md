@@ -256,57 +256,37 @@ php bin/atom framework:version
 
 ### DEB Package
 
-Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
-```bash
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework_all.deb
-sudo apt install ./atom-ahg-framework_all.deb
-sudo systemctl restart php8.3-fpm
+
 ```
 
 ### Self-Extracting
 
-Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases):
-```bash
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-ahg-framework.run
-chmod +x atom-ahg-framework.run
-sudo ./atom-ahg-framework.run
+
 ```
 
 ### Setup Wizard
-```bash
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/setup-wizard.sh
-chmod +x setup-wizard.sh
-sudo ./setup-wizard.sh
+
 ```
 
 ### Ansible
-```bash
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/ansible-playbook.tar.gz
-tar -xzf ansible-playbook.tar.gz && cd ansible
-nano inventory.yml  # Add your servers
-ansible-playbook -i inventory.yml atom-ahg-install.yml
+```
 ```
 
 ### Docker
-```bash
-wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/docker-compose.tar.gz
-tar -xzf docker-compose.tar.gz && cd docker
-cp .env.example .env && nano .env
-docker-compose up -d
+```
 ```
 
 ### Full Stack
 
 For a fresh Ubuntu server:
-```bash
-curl -fsSL https://raw.githubusercontent.com/ArchiveHeritageGroup/atom-framework/main/bin/ahg-installer.sh | sudo bash -s -- --full-stack
+```
 ```
 
 ---
 
 ## 📦 Available Extensions
 
-### Required (Core - Locked)
+### Required (Core - Locked) 
 
 | Extension | Description |
 |-----------|-------------|
