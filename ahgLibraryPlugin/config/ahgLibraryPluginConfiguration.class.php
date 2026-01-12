@@ -86,5 +86,11 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
             '/api/library/isbn/:isbn',
             ['module' => 'ahgLibraryPlugin', 'action' => 'apiIsbnLookup']
         ));
+
+        // Cover proxy route
+        $routing->prependRoute('library_cover_proxy', new sfRoute(
+            '/library/cover/:isbn',
+            ['module' => 'ahgLibraryPlugin', 'action' => 'coverProxy']
+        ));
     }
 }
