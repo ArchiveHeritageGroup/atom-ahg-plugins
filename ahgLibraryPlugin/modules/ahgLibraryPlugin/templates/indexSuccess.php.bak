@@ -1,4 +1,4 @@
-<?php decorate_with('layout_3col'); ?>
+<?php decorate_with('layout_1col'); ?>
 <?php
 // Check if a plugin is enabled
 if (!function_exists('checkPluginEnabled')) {
@@ -26,9 +26,10 @@ $rawResource = sfOutputEscaper::unescape($resource);
 <?php slot('title'); ?>
   <h1><?php echo esc_entities($resource->getTitle(['cultureFallback' => true])); ?></h1>
 <?php end_slot(); ?>
-<?php slot('sidebar'); ?>
-  <?php include_partial('ahgLibraryPlugin/librarySidebar', ['resource' => $rawResource, 'sf_user' => $sf_user]); ?>
-<?php end_slot(); ?>
+
+<div class="row">
+  <div class="col-md-8">
+
     <!-- Basic Information -->
     <section class="card mb-4">
       <div class="card-header bg-primary text-white">
@@ -339,7 +340,13 @@ $rawResource = sfOutputEscaper::unescape($resource);
     </section>
     <?php endif; ?>
 
-<?php slot('context-menu'); ?>
+  </div>
+
+  <div class="col-md-4">
+    <!-- Holdings / Context Menu -->
+    <?php echo get_component('informationobject', 'treeView'); ?>
+    <?php echo get_component('menu', 'staticPagesMenu'); ?>
+    <?php include_partial('informationobject/contextMenuExtras', ['resource' => $resource]); ?>
     <!-- Cover Image -->
     <?php if (isset($digitalObject) && $digitalObject): ?>
       <?php if (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
@@ -502,8 +509,11 @@ $rawResource = sfOutputEscaper::unescape($resource);
         <h5 class="mb-0"><i class="fas fa-link me-2"></i><?php echo __('Related records'); ?></h5>
       </div>
       <div class="card-body">
+        <a href="<?php echo url_for([$resource, 'module' => 'informationobject']); ?>" class="btn btn-outline-primary w-100 mb-2">
+          <i class="fas fa-archive me-2"></i><?php echo __('View archival description'); ?>
+        </a>
         <?php if ($resource->parent && $resource->parent->id != QubitInformationObject::ROOT_ID): ?>
-        <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $resource->parent->slug]); ?>" class="btn btn-outline-secondary w-100 mb-2">
+        <a href="<?php echo url_for([$resource->parent, 'module' => 'informationobject']); ?>" class="btn btn-outline-secondary w-100 mb-2">
           <i class="fas fa-level-up-alt me-2"></i><?php echo __('Parent record'); ?>
         </a>
         <?php endif; ?>
@@ -654,4 +664,5 @@ $rawResource = sfOutputEscaper::unescape($resource);
     </section>
     <?php endif; ?>
 
-<?php end_slot(); ?>
+  </div>
+</div>
