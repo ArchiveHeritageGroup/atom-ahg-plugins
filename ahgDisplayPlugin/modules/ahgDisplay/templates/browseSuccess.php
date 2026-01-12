@@ -332,6 +332,11 @@ function getItemUrl($obj) {
 <?php slot('before-content'); ?>
   <!-- Active Filters -->
   <div class="d-flex flex-wrap gap-2 mb-3">
+    <?php if ($topLevelOnly): ?>
+      <a href="<?php echo buildUrl($fp, ['topLevel' => '0'], []) ?>" class="badge bg-primary p-2 text-decoration-none text-white">
+        <?php echo __("Only top-level descriptions"); ?> <i class="fas fa-times ms-1"></i>
+      </a>
+    <?php endif ?>
     <?php if ($typeFilter): $cfg = $typeConfig[$typeFilter] ?? ['icon' => 'fa-tag', 'color' => 'secondary', 'label' => ucfirst($typeFilter)]; ?>
       <a href="<?php echo buildUrl($fp, [], ['type']) ?>" class="badge bg-<?php echo $cfg['color'] ?> p-2 text-decoration-none text-white">
         <i class="fas <?php echo $cfg['icon'] ?>"></i> <?php echo $cfg['label'] ?> <i class="fas fa-times ms-1"></i>
