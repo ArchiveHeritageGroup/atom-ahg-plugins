@@ -12,5 +12,5 @@
     "php": ">=8.1"
   },
   "dependencies": [],
-  "tables": ["favorites"]
+  "tables": ["favorites", "favorites_folder"]
 }

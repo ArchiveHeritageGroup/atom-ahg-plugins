@@ -39,3 +39,11 @@ CREATE TABLE IF NOT EXISTS `favorites_folder` (
   PRIMARY KEY (`id`),
   INDEX `idx_user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add missing columns to existing table if needed
+-- Note: Run these manually if upgrading from old schema
+-- ALTER TABLE favorites ADD COLUMN notes TEXT DEFAULT NULL AFTER slug;
+-- ALTER TABLE favorites ADD COLUMN folder_id INT DEFAULT NULL AFTER notes;
+-- ALTER TABLE favorites ADD COLUMN sort_order INT DEFAULT 0 AFTER folder_id;
+-- ALTER TABLE favorites ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+-- ALTER TABLE favorites ADD UNIQUE KEY unique_user_item (user_id, archival_description_id);
