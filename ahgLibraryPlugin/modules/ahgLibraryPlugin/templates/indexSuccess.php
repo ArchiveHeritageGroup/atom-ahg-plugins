@@ -435,6 +435,10 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <?php endif; ?>
+            <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>"><i class="fas fa-comment me-2"></i><?php echo __('Item Feedback'); ?></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'label', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             

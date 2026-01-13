@@ -339,7 +339,7 @@ $ancestors = cco_get_ancestors($resource);
     }
     ?>
     
-    <a href="<?php echo cco_build_url($resource, 'informationobject', 'editFeedback'); ?>" class="c-btn c-btn-submit"><?php echo __('Item Feedback'); ?></a>
+    <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?><a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="c-btn c-btn-submit"><?php echo __('Item Feedback'); ?></a><?php endif; ?>
     
     <?php if ($favoriteId && $userId) { ?>
         <a href="<?php echo cco_build_url($resource, 'informationobject', 'removeFavorites'); ?>" class="c-btn c-btn-submit"><?php echo __('Remove from Favorites'); ?></a>

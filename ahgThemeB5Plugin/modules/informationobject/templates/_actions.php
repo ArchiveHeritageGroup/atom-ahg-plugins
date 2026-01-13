@@ -256,6 +256,10 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 
           <li><hr class="dropdown-divider"></li>
           <li><?php echo link_to(__('Create new rights'), [$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit'], ['class' => 'dropdown-item']); ?></li>
+          <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+          <li><hr class="dropdown-divider"></li>
+          <li><?php echo link_to(__('Item Feedback'), ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resourceSlug], ['class' => 'dropdown-item']); ?></li>
+          <?php endif; ?>
 		  <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgHeritageAccountingPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin') || checkPluginEnabled('ahgConditionPlugin')): ?>
           <!-- Extensions Submenu with Flyout -->
           <li class="dropend" >

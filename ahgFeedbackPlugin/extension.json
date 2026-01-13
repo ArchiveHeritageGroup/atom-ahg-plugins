@@ -1,0 +1,18 @@
+{
+  "name": "AHG Feedback Plugin",
+  "machine_name": "ahgFeedbackPlugin",
+  "version": "1.0.0",
+  "description": "User feedback and suggestions management for archival records",
+  "author": "The Archive and Heritage Group",
+  "license": "GPL-3.0",
+  "requires": {
+    "atom_framework": ">=1.0.0",
+    "atom": ">=2.8",
+    "php": ">=8.1"
+  },
+  "dependencies": [],
+  "theme_support": ["ahgThemeB5Plugin"],
+  "tables": [],
+  "shared_tables": ["feedback", "feedback_i18n"],
+  "category": "user_engagement"
+}

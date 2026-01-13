@@ -102,8 +102,8 @@ model-viewer {
           <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
         <?php endif; ?>
       <?php endif; ?>
-      <?php if (class_exists('QubitFeedback')): ?>
-        <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), [$resource, 'module' => 'informationobject', 'action' => 'editFeedback'], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
+      <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+        <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
       <?php endif; ?>
       <?php if (class_exists('QubitRequestToPublish')): ?>
         <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), [$resource, 'module' => 'informationobject', 'action' => 'editRequestToPublish'], ['class' => 'btn btn-sm btn-outline-primary']); ?>

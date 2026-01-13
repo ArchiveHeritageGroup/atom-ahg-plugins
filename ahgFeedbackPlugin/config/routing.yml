@@ -1,0 +1,31 @@
+# AHG Feedback Plugin Routes
+
+ahg_feedback_browse:
+  url: /feedback
+  param: { module: ahgFeedback, action: browse }
+
+ahg_feedback_general:
+  url: /feedback/general
+  param: { module: ahgFeedback, action: general }
+
+ahg_feedback_submit:
+  url: /informationobject/:slug/feedback
+  param: { module: ahgFeedback, action: submit }
+
+ahg_feedback_edit:
+  url: /feedback/:id/edit
+  param: { module: ahgFeedback, action: edit }
+  requirements:
+    id: \d+
+
+ahg_feedback_delete:
+  url: /feedback/:id/delete
+  param: { module: ahgFeedback, action: delete }
+  requirements:
+    id: \d+
+
+ahg_feedback_view:
+  url: /feedback/:id
+  param: { module: ahgFeedback, action: view }
+  requirements:
+    id: \d+

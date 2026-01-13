@@ -601,6 +601,10 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
+            <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>"><i class="fas fa-comment me-2"></i><?php echo __('Item Feedback'); ?></a></li>
+            <?php endif; ?>
           </ul>
         </li>
       </ul>
