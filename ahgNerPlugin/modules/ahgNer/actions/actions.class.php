@@ -113,7 +113,7 @@ class ahgNerActions extends sfActions
             } elseif ($type === 'GPE') {
                 $matches = $this->findMatchingPlaces($entity->entity_value);
             } elseif ($type === 'DATE') {
-                $matches = $this->findMatchingSubjects($entity->entity_value);
+                $matches = ['exact' => [], 'partial' => []]; // Dates create Events, not Subject links
             } else {
                 $matches = ['exact' => [], 'partial' => []];
             }
@@ -554,6 +554,78 @@ class ahgNerActions extends sfActions
         $this->linkPlaceToObject($objectId, $termId);
     }
 
+    private function linkDateToObject($objectId, $dateString, $eventTypeId = 111)
+    {
+        $parsedDate = $this->parseDateString($dateString);
+        if (!$parsedDate) {
+            return false;
+        }
+        $exists = Illuminate\Database\Capsule\Manager::table('event')
+            ->where('object_id', $objectId)
+            ->where('type_id', $eventTypeId)
+            ->where('start_date', $parsedDate['start'])
+            ->exists();
+        if (!$exists) {
+            $nextId = Illuminate\Database\Capsule\Manager::table('object')->insertGetId([
+                'class_name' => 'QubitEvent',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            Illuminate\Database\Capsule\Manager::table('event')->insert([
+                'id' => $nextId,
+                'object_id' => $objectId,
+                'type_id' => $eventTypeId,
+                'start_date' => $parsedDate['start'],
+                'end_date' => $parsedDate['end'],
+                'source_culture' => 'en'
+            ]);
+            Illuminate\Database\Capsule\Manager::table('event_i18n')->insert([
+                'id' => $nextId,
+                'culture' => 'en',
+                'date' => $dateString
+            ]);
+            return $nextId;
+        }
+        return false;
+    }
+
+    private function parseDateString($dateString)
+    {
+        $dateString = trim($dateString);
+        $months = [
+            'january' => '01', 'february' => '02', 'march' => '03', 'april' => '04',
+            'may' => '05', 'june' => '06', 'july' => '07', 'august' => '08',
+            'september' => '09', 'october' => '10', 'november' => '11', 'december' => '12'
+        ];
+        if (preg_match('/^(\d{1,2})\s+(\w+)\s+(\d{4})$/i', $dateString, $m)) {
+            $day = str_pad($m[1], 2, '0', STR_PAD_LEFT);
+            $month = $months[strtolower($m[2])] ?? null;
+            $year = $m[3];
+            if ($month) {
+                $date = "{$year}-{$month}-{$day}";
+                return ['start' => $date, 'end' => $date];
+            }
+        }
+        if (preg_match('/^(\w+)\s+(\d{4})$/i', $dateString, $m)) {
+            $month = $months[strtolower($m[1])] ?? null;
+            $year = $m[2];
+            if ($month) {
+                $startDate = "{$year}-{$month}-01";
+                $lastDay = date('t', strtotime($startDate));
+                $endDate = "{$year}-{$month}-{$lastDay}";
+                return ['start' => $startDate, 'end' => $endDate];
+            }
+        }
+        if (preg_match('/^(\d{4})$/', $dateString, $m)) {
+            $year = $m[1];
+            return ['start' => "{$year}-01-01", 'end' => "{$year}-12-31"];
+        }
+        if (preg_match('/^(\d{4})-(\d{4})$/', $dateString, $m)) {
+            return ['start' => "{$m[1]}-01-01", 'end' => "{$m[2]}-12-31"];
+        }
+        return null;
+    }
+
     public function executeBulkSave(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
@@ -776,6 +848,11 @@ class ahgNerActions extends sfActions
             Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
                 ->where('id', $entity->id)
                 ->update(['status' => 'linked', 'linked_actor_id' => $termId, 'reviewed_at' => date('Y-m-d H:i:s')]);
+        } elseif ($type === 'date') {
+            $eventId = $this->linkDateToObject($entity->object_id, $entity->entity_value);
+            Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+                ->where('id', $entity->id)
+                ->update(['status' => 'linked', 'linked_actor_id' => $eventId, 'reviewed_at' => date('Y-m-d H:i:s')]);
         }
     }
     
@@ -804,7 +881,7 @@ class ahgNerActions extends sfActions
         } elseif ($entity->entity_type === 'GPE') {
             $this->linkPlaceToObject($entity->object_id, $targetId);
         } else {
-            $this->linkSubjectToObject($entity->object_id, $targetId);
+            $this->linkDateToObject($entity->object_id, $entity->entity_value);
         }
         
         Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
