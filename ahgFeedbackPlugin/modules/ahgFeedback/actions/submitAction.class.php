@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Submit Feedback on Information Object.
  *
@@ -30,7 +32,6 @@ class ahgFeedbackSubmitAction extends sfAction
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        // Add form fields
         foreach (self::$NAMES as $name) {
             $this->addField($name);
         }
@@ -97,24 +98,53 @@ class ahgFeedbackSubmitAction extends sfAction
 
     protected function processForm()
     {
-        $culture = sfContext::getInstance()->user->getCulture();
-        
-        $feedback = new QubitFeedback();
-        $feedback->feedName = $this->form->getValue('feed_name');
-        $feedback->feedSurname = $this->form->getValue('feed_surname');
-        $feedback->feedPhone = $this->form->getValue('feed_phone');
-        $feedback->feedEmail = $this->form->getValue('feed_email');
-        $feedback->feedRelationship = $this->form->getValue('feed_relationship');
-        $feedback->feedTypeId = $this->form->getValue('feed_type_id');
-        $feedback->sourceCulture = $culture;
-        $feedback->name = $this->informationObject->getTitle(['cultureFallback' => true]);
-        $feedback->remarks = $this->form->getValue('remarks');
-        $feedback->objectId = $this->informationObject->id;
-        $feedback->statusId = QubitTerm::PENDING_ID;
-        $feedback->createdAt = date('Y-m-d H:i:s');
+        // Initialize Laravel
+        if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
+            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
+        }
 
-        $feedback->save();
+        $culture = $this->getUser()->getCulture();
+        $now = date('Y-m-d H:i:s');
+        $className = 'QubitFeedback';
 
-        $this->feedback = $feedback;
+        // Insert into object table first
+        $objectId = DB::table('object')->insertGetId([
+            'class_name' => $className,
+            'created_at' => $now,
+            'updated_at' => $now,
+            'serial_number' => 0,
+        ]);
+
+        // Get nested set values
+        $maxRgt = DB::table('feedback')->max('rgt') ?? 0;
+
+        // Insert into feedback table
+        DB::table('feedback')->insert([
+            'id' => $objectId,
+            'feed_name' => $this->form->getValue('feed_name'),
+            'feed_surname' => $this->form->getValue('feed_surname'),
+            'feed_phone' => $this->form->getValue('feed_phone'),
+            'feed_email' => $this->form->getValue('feed_email'),
+            'feed_relationship' => $this->form->getValue('feed_relationship'),
+            'feed_type_id' => $this->form->getValue('feed_type_id'),
+            'parent_id' => null,
+            'lft' => $maxRgt + 1,
+            'rgt' => $maxRgt + 2,
+            'source_culture' => $culture,
+        ]);
+
+        // Insert into feedback_i18n table
+        DB::table('feedback_i18n')->insert([
+            'id' => $objectId,
+            'culture' => $culture,
+            'name' => $this->informationObject->getTitle(['cultureFallback' => true]),
+            'remarks' => $this->form->getValue('remarks'),
+            'object_id' => $this->informationObject->id,
+            'status_id' => QubitTerm::PENDING_ID,
+            'created_at' => $now,
+            'completed_at' => null,
+        ]);
+
+        $this->feedbackId = $objectId;
     }
 }

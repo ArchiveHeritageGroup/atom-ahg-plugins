@@ -57,7 +57,7 @@
             <i class="fas fa-reply me-1"></i> <?php echo __('Reply by Email') ?>
         </a>
         <?php endif; ?>
-        <a href="<?php echo url_for([$resource, 'module' => 'ahgFeedback', 'action' => 'delete']) ?>" 
+        <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'delete', 'id' => $feedback->id]) ?>"
            class="btn btn-outline-danger btn-sm"
            onclick="return confirm('<?php echo __('Are you sure you want to delete this feedback?') ?>');">
             <i class="fas fa-trash me-1"></i> <?php echo __('Delete') ?>
@@ -68,7 +68,7 @@
 
 <?php slot('content') ?>
 <?php echo $form->renderGlobalErrors() ?>
-<?php echo $form->renderFormTag(url_for([$resource, 'module' => 'ahgFeedback', 'action' => 'edit']), ['class' => 'form-vertical']) ?>
+<?php echo $form->renderFormTag(url_for(['module' => 'ahgFeedback', 'action' => 'edit', 'id' => $feedback->id]), ['class' => 'form-vertical']) ?>
 <?php echo $form->renderHiddenFields() ?>
 
 <!-- Feedback Content -->

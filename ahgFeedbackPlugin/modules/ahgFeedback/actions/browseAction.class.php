@@ -1,7 +1,9 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
- * Feedback Browse/List action.
+ * Feedback Browse/List action using Laravel Query Builder.
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
@@ -14,6 +16,11 @@ class ahgFeedbackBrowseAction extends sfAction
             QubitAcl::forwardUnauthorized();
         }
 
+        // Initialize Laravel
+        if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
+            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
+        }
+
         $title = $this->context->i18n->__('Feedback Management');
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
 
@@ -21,59 +28,76 @@ class ahgFeedbackBrowseAction extends sfAction
         $this->limit = $request->getParameter('limit', sfConfig::get('app_hits_per_page', 25));
         $this->filter = $request->getParameter('filter', 'all');
         $this->sort = $request->getParameter('sort', 'dateDown');
+        $this->page = $request->getParameter('page', 1);
 
-        // Build criteria
-        $criteria = new Criteria();
-        $criteria->addJoin(QubitFeedback::ID, QubitFeedbackI18n::ID);
+        $culture = $this->getUser()->getCulture();
+
+        // Get counts
+        $this->totalCount = DB::table('feedback_i18n')->where('culture', $culture)->count();
+        $this->pendingCount = DB::table('feedback_i18n')
+            ->where('culture', $culture)
+            ->where('status_id', QubitTerm::PENDING_ID)
+            ->count();
+        $this->completedCount = DB::table('feedback_i18n')
+            ->where('culture', $culture)
+            ->where('status_id', QubitTerm::COMPLETED_ID)
+            ->count();
+
+        // Build query
+        $query = DB::table('feedback')
+            ->join('feedback_i18n', 'feedback.id', '=', 'feedback_i18n.id')
+            ->where('feedback_i18n.culture', $culture)
+            ->select(
+                'feedback.id',
+                'feedback.feed_name',
+                'feedback.feed_surname',
+                'feedback.feed_phone',
+                'feedback.feed_email',
+                'feedback.feed_relationship',
+                'feedback.feed_type_id',
+                'feedback_i18n.name',
+                'feedback_i18n.remarks',
+                'feedback_i18n.object_id',
+                'feedback_i18n.status_id',
+                'feedback_i18n.created_at',
+                'feedback_i18n.completed_at'
+            );
 
         // Apply filter
-        switch ($this->filter) {
-            case 'pending':
-                $criteria->add(QubitFeedbackI18n::STATUS_ID, QubitTerm::PENDING_ID);
-                break;
-            case 'completed':
-                $criteria->add(QubitFeedbackI18n::STATUS_ID, QubitTerm::COMPLETED_ID);
-                break;
+        if ($this->filter === 'pending') {
+            $query->where('feedback_i18n.status_id', QubitTerm::PENDING_ID);
+        } elseif ($this->filter === 'completed') {
+            $query->where('feedback_i18n.status_id', QubitTerm::COMPLETED_ID);
         }
 
         // Apply sorting
         switch ($this->sort) {
             case 'nameUp':
-                $criteria->addAscendingOrderByColumn(QubitFeedbackI18n::NAME);
+                $query->orderBy('feedback_i18n.name', 'asc');
                 break;
             case 'nameDown':
-                $criteria->addDescendingOrderByColumn(QubitFeedbackI18n::NAME);
+                $query->orderBy('feedback_i18n.name', 'desc');
                 break;
             case 'dateUp':
-                $criteria->addAscendingOrderByColumn(QubitFeedbackI18n::CREATED_AT);
+                $query->orderBy('feedback_i18n.created_at', 'asc');
                 break;
             case 'dateDown':
             default:
-                $criteria->addDescendingOrderByColumn(QubitFeedbackI18n::CREATED_AT);
+                $query->orderBy('feedback_i18n.created_at', 'desc');
                 break;
         }
 
-        // Get counts for badges
-        $this->totalCount = $this->getCount();
-        $this->pendingCount = $this->getCount(QubitTerm::PENDING_ID);
-        $this->completedCount = $this->getCount(QubitTerm::COMPLETED_ID);
+        // Get total for pagination
+        $total = $query->count();
 
-        // Page results
-        $this->pager = new QubitPager('QubitFeedback');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($this->limit);
-        $this->pager->setPage($request->getParameter('page', 1));
-    }
+        // Apply pagination
+        $offset = ($this->page - 1) * $this->limit;
+        $this->feedbackItems = $query->skip($offset)->take($this->limit)->get();
 
-    protected function getCount($statusId = null)
-    {
-        $criteria = new Criteria();
-        $criteria->addJoin(QubitFeedback::ID, QubitFeedbackI18n::ID);
-        
-        if (null !== $statusId) {
-            $criteria->add(QubitFeedbackI18n::STATUS_ID, $statusId);
-        }
-        
-        return BasePeer::doCount($criteria)->fetchColumn(0);
+        // Simple pagination info
+        $this->totalPages = ceil($total / $this->limit);
+        $this->currentPage = $this->page;
+        $this->hasMorePages = $this->page < $this->totalPages;
+        $this->totalResults = $total;
     }
 }

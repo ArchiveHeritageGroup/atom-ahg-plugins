@@ -47,51 +47,39 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<?php
-// Get raw request to avoid escaper issues
-$rawRequest = $sf_data->getRaw('sf_request');
-$currentSort = $rawRequest->getParameter('sort', 'dateDown');
-$currentFilter = $rawRequest->getParameter('filter', 'all');
-$currentPage = $rawRequest->getParameter('page', 1);
-?>
 <div class="card shadow-sm">
     <div class="card-body p-0">
-        <?php if ($pager->getNbResults() > 0): ?>
+        <?php if (count($feedbackItems) > 0): ?>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
                         <th style="width:5%">#</th>
                         <th style="width:20%">
-                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $currentFilter, 'sort' => ($currentSort === 'nameUp') ? 'nameDown' : 'nameUp']) ?>" class="text-decoration-none text-dark">
+                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $filter, 'sort' => ($sort === 'nameUp') ? 'nameDown' : 'nameUp']) ?>" class="text-decoration-none text-dark">
                                 <?php echo __('Subject/Record') ?>
-                                <?php if ('nameUp' === $currentSort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('nameDown' === $currentSort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
+                                <?php if ('nameUp' === $sort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('nameDown' === $sort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
                             </a>
                         </th>
                         <th style="width:10%"><?php echo __('Type') ?></th>
                         <th style="width:25%"><?php echo __('Remarks') ?></th>
                         <th style="width:20%"><?php echo __('Contact') ?></th>
                         <th style="width:12%">
-                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $currentFilter, 'sort' => ($currentSort === 'dateUp') ? 'dateDown' : 'dateUp']) ?>" class="text-decoration-none text-dark">
+                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $filter, 'sort' => ($sort === 'dateUp') ? 'dateDown' : 'dateUp']) ?>" class="text-decoration-none text-dark">
                                 <?php echo __('Date') ?>
-                                <?php if ('dateUp' === $currentSort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('dateDown' === $currentSort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
+                                <?php if ('dateUp' === $sort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('dateDown' === $sort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
                             </a>
                         </th>
                         <th style="width:8%" class="text-center"><?php echo __('Actions') ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php $counter = ($pager->getPage() - 1) * $pager->getMaxPerPage(); ?>
-                <?php foreach ($pager->getResults() as $item): ?>
+                <?php $counter = ($currentPage - 1) * $limit; ?>
+                <?php foreach ($feedbackItems as $item): ?>
                 <?php $counter++; ?>
                 <?php
-                    // Get raw item
-                    $rawItem = $sf_data->getRaw('item');
+                    $isPending = ($item->status_id == QubitTerm::PENDING_ID);
                     
-                    // Get status
-                    $isPending = ($rawItem->status_id == QubitTerm::PENDING_ID);
-                    
-                    // Type badges
                     $typeLabels = [
                         0 => ['label' => 'General', 'class' => 'bg-secondary'],
                         1 => ['label' => 'Error', 'class' => 'bg-danger'],
@@ -99,10 +87,9 @@ $currentPage = $rawRequest->getParameter('page', 1);
                         3 => ['label' => 'Correction', 'class' => 'bg-primary'],
                         4 => ['label' => 'Assistance', 'class' => 'bg-warning text-dark']
                     ];
-                    $type = $typeLabels[$rawItem->feed_type_id] ?? $typeLabels[0];
+                    $type = $typeLabels[$item->feed_type_id] ?? $typeLabels[0];
                     
-                    // Get linked object
-                    $linkedObject = $rawItem->object_id ? QubitInformationObject::getById($rawItem->object_id) : null;
+                    $linkedObject = $item->object_id ? QubitInformationObject::getById($item->object_id) : null;
                 ?>
                 <tr class="<?php echo $isPending ? '' : 'table-light' ?>">
                     <td class="text-muted"><?php echo $counter ?></td>
@@ -112,7 +99,7 @@ $currentPage = $rawRequest->getParameter('page', 1);
                                 <?php echo esc_entities(mb_strimwidth($linkedObject->getTitle(['cultureFallback' => true]), 0, 40, '...')) ?>
                             </a>
                         <?php else: ?>
-                            <span class="fst-italic"><?php echo esc_entities($rawItem->name) ?: __('General Feedback') ?></span>
+                            <span class="fst-italic"><?php echo esc_entities($item->name) ?: __('General Feedback') ?></span>
                         <?php endif; ?>
                         <br>
                         <?php if ($isPending): ?>
@@ -123,29 +110,29 @@ $currentPage = $rawRequest->getParameter('page', 1);
                     </td>
                     <td><span class="badge <?php echo $type['class'] ?>"><?php echo __($type['label']) ?></span></td>
                     <td>
-                        <div class="text-truncate" style="max-width:200px" title="<?php echo esc_entities($rawItem->remarks) ?>">
-                            <?php echo esc_entities(mb_strimwidth($rawItem->remarks, 0, 60, '...')) ?>
+                        <div class="text-truncate" style="max-width:200px" title="<?php echo esc_entities($item->remarks) ?>">
+                            <?php echo esc_entities(mb_strimwidth($item->remarks, 0, 60, '...')) ?>
                         </div>
                     </td>
                     <td>
-                        <strong><?php echo esc_entities($rawItem->feed_name . ' ' . $rawItem->feed_surname) ?></strong>
-                        <?php if ($rawItem->feed_email): ?>
-                            <br><small class="text-muted"><i class="fas fa-envelope me-1"></i><?php echo esc_entities($rawItem->feed_email) ?></small>
+                        <strong><?php echo esc_entities($item->feed_name . ' ' . $item->feed_surname) ?></strong>
+                        <?php if ($item->feed_email): ?>
+                            <br><small class="text-muted"><i class="fas fa-envelope me-1"></i><?php echo esc_entities($item->feed_email) ?></small>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <small><?php echo date('d M Y', strtotime($rawItem->created_at)) ?></small>
-                        <?php if ($rawItem->completed_at): ?>
-                            <br><small class="text-success"><i class="fas fa-check me-1"></i><?php echo date('d M Y', strtotime($rawItem->completed_at)) ?></small>
+                        <small><?php echo date('d M Y', strtotime($item->created_at)) ?></small>
+                        <?php if ($item->completed_at): ?>
+                            <br><small class="text-success"><i class="fas fa-check me-1"></i><?php echo date('d M Y', strtotime($item->completed_at)) ?></small>
                         <?php endif; ?>
                     </td>
                     <td class="text-center">
                         <div class="btn-group btn-group-sm">
-                            <a href="<?php echo url_for([$rawItem, 'module' => 'ahgFeedback', 'action' => 'edit']) ?>" 
+                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'edit', 'id' => $item->id]) ?>" 
                                class="btn btn-outline-primary" title="<?php echo __('Edit') ?>">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="<?php echo url_for([$rawItem, 'module' => 'ahgFeedback', 'action' => 'delete']) ?>" 
+                            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'delete', 'id' => $item->id]) ?>" 
                                class="btn btn-outline-danger" title="<?php echo __('Delete') ?>"
                                onclick="return confirm('<?php echo __('Are you sure?') ?>');">
                                 <i class="fas fa-trash"></i>
@@ -166,9 +153,34 @@ $currentPage = $rawRequest->getParameter('page', 1);
         <?php endif; ?>
     </div>
     
-    <?php if ($pager->haveToPaginate()): ?>
+    <?php if ($totalPages > 1): ?>
     <div class="card-footer bg-white">
-        <?php echo get_partial('default/pager', ['pager' => $pager]) ?>
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                <?php if ($currentPage > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $filter, 'sort' => $sort, 'page' => $currentPage - 1]) ?>">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                <?php endif; ?>
+                
+                <?php for ($p = max(1, $currentPage - 2); $p <= min($totalPages, $currentPage + 2); $p++): ?>
+                <li class="page-item <?php echo ($p == $currentPage) ? 'active' : '' ?>">
+                    <a class="page-link" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $filter, 'sort' => $sort, 'page' => $p]) ?>"><?php echo $p ?></a>
+                </li>
+                <?php endfor; ?>
+                
+                <?php if ($currentPage < $totalPages): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'browse', 'filter' => $filter, 'sort' => $sort, 'page' => $currentPage + 1]) ?>">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <p class="text-center text-muted small mb-0"><?php echo __('Showing %1% of %2% results', ['%1%' => count($feedbackItems), '%2%' => $totalResults]) ?></p>
     </div>
     <?php endif; ?>
 </div>
