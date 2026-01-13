@@ -580,20 +580,36 @@ class ahgNerActions extends sfActions
                     continue;
                 }
                 
-                // Handle edited value
-                if (isset($decision['edited_value']) && !empty($decision['edited_value'])) {
-                    Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
-                        ->where('id', $entityId)
-                        ->update(['entity_value' => $decision['edited_value']]);
+                                // Track corrections for training feedback
+                $hasValueEdit = isset($decision['edited_value']) && !empty($decision['edited_value']) && $decision['edited_value'] !== $entity->entity_value;
+                $hasTypeEdit = isset($decision['edited_type']) && !empty($decision['edited_type']) && $decision['edited_type'] !== $entity->entity_type;
+                
+                // Store original values before updating
+                $updateData = [];
+                if ($hasValueEdit) {
+                    $updateData['original_value'] = $entity->entity_value;
+                    $updateData['entity_value'] = $decision['edited_value'];
                     $entity->entity_value = $decision['edited_value'];
                 }
+                if ($hasTypeEdit) {
+                    $updateData['original_type'] = $entity->entity_type;
+                    $updateData['entity_type'] = $decision['edited_type'];
+                    $entity->entity_type = $decision['edited_type'];
+                }
                 
-                // Handle edited type
-                if (isset($decision['edited_type']) && !empty($decision['edited_type'])) {
+                // Set correction type for training
+                if ($hasValueEdit && $hasTypeEdit) {
+                    $updateData['correction_type'] = 'both';
+                } elseif ($hasValueEdit) {
+                    $updateData['correction_type'] = 'value_edit';
+                } elseif ($hasTypeEdit) {
+                    $updateData['correction_type'] = 'type_change';
+                }
+                
+                if (!empty($updateData)) {
                     Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
                         ->where('id', $entityId)
-                        ->update(['entity_type' => $decision['edited_type']]);
-                    $entity->entity_type = $decision['edited_type'];
+                        ->update($updateData);
                 }
                 
                 if ($action === 'create') {
@@ -603,10 +619,12 @@ class ahgNerActions extends sfActions
                     $targetId = $decision['target_id'];
                     $this->processLink($entity, $targetId);
                 } elseif ($action === 'reject' || $action === 'approved') {
+                    $correctionType = $action === 'reject' ? 'rejected' : 'approved';
                     Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
                         ->where('id', $entityId)
                         ->update([
                             'status' => $action,
+                            'correction_type' => $correctionType,
                             'reviewed_at' => date('Y-m-d H:i:s')
                         ]);
                 }
