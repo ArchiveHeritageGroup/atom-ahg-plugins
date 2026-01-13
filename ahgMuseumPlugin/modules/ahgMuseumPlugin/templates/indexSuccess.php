@@ -206,6 +206,9 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
       <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
         <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
       <?php endif; ?>
+      <?php if (class_exists('ahgRequestToPublishPluginConfiguration')): ?>
+        <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), ['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-primary']); ?>
+      <?php endif; ?>
     </div>
   </div>
 </div>

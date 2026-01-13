@@ -347,7 +347,9 @@ $ancestors = cco_get_ancestors($resource);
         <a href="<?php echo cco_build_url($resource, 'informationobject', 'addFavorites'); ?>" class="c-btn c-btn-submit"><?php echo __('Add to Favorites'); ?></a>
     <?php } ?>
     
-    <a href="<?php echo cco_build_url($resource, 'informationobject', 'editRequestToPublish'); ?>" class="c-btn c-btn-submit"><?php echo __('Request to Publish'); ?></a>
+    <?php if (class_exists('ahgRequestToPublishPluginConfiguration')): ?>
+    <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="c-btn c-btn-submit"><?php echo __('Request to Publish'); ?></a>
+    <?php endif; ?>
 
     <?php
     $cartId = null;

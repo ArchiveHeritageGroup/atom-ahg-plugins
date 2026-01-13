@@ -105,8 +105,8 @@ model-viewer {
       <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
         <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
       <?php endif; ?>
-      <?php if (class_exists('ahgRequestToPublishPluginConfiguration')): ?>
-        <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), ['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-primary']); ?>
+      <?php if (class_exists('QubitRequestToPublish')): ?>
+        <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), [$resource, 'module' => 'informationobject', 'action' => 'editRequestToPublish'], ['class' => 'btn btn-sm btn-outline-primary']); ?>
       <?php endif; ?>
       <?php if (class_exists('QubitCart')): ?>
         <?php $cart_id = QubitCart::getByUserIDandObjectId($userId, $resource->id); ?>
