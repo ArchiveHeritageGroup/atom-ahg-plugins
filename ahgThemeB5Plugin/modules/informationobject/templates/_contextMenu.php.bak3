@@ -32,7 +32,7 @@ if (isset($resource)) {
   } elseif (is_object($resource) && isset($resource->slug)) {
     $resourceSlug = $resource->slug;
   }
-
+  
   // Check which plugins are enabled
   $hasCco = isPluginActive('ahgCcoPlugin');
   $hasCondition = isPluginActive('ahgConditionPlugin');
@@ -41,7 +41,7 @@ if (isset($resource)) {
   $hasOais = isPluginActive('ahgOaisPlugin');
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
-
+  
   // Only show section if at least one plugin is enabled
   if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
 ?>
@@ -72,6 +72,7 @@ if (isset($resource)) {
   }
 }
 ?>
+<!-- EXTENDED RIGHTS CONTEXT MENU (Only if plugin enabled) -->
 
 <!-- NER Extract Section -->
 <?php if (isset($resource) && $sf_user->isAuthenticated()): ?>
@@ -114,7 +115,7 @@ function extractEntities(objectId) {
   modal.show();
   document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting...</p></div>';
   document.getElementById('nerReviewBtn').style.display = 'none';
-
+  
   fetch('/ner/extract/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
     .then(function(data) {

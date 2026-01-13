@@ -1,0 +1,16 @@
+{
+  "name": "AHG Cart Plugin",
+  "machine_name": "ahgCartPlugin",
+  "version": "1.0.0",
+  "description": "Shopping cart for reproduction requests and image orders",
+  "author": "The Archive and Heritage Group",
+  "license": "GPL-3.0",
+  "category": "ahg",
+  "requires": {
+    "atom_framework": ">=1.0.0",
+    "atom": ">=2.8",
+    "php": ">=8.1"
+  },
+  "dependencies": [],
+  "tables": ["cart"]
+}

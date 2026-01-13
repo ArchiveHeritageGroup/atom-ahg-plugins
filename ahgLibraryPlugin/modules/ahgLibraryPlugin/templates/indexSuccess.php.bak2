@@ -381,40 +381,78 @@ $rawResource = sfOutputEscaper::unescape($resource);
       <?php endif; ?>
     <?php endif; ?>
 
-    <!-- User Actions (compact with tooltips) -->
+    <!-- Rights Area -->
+    <section class="card mb-4">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-copyright me-2"></i><?php echo __('Rights area'); ?></h5>
+      </div>
+      <div class="card-body">
+        <?php echo get_component('right', 'relatedRights', ['resource' => $resource]); ?>
+      </div>
+    </section>
+
+    <!-- User Action Buttons -->
     <?php
     use Illuminate\Database\Capsule\Manager as DB;
     $userId = $sf_user->getAttribute('user_id');
     $favoriteId = null;
     $cartId = null;
+    $hasDigitalObject = false;
     if ($userId) {
-        $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-        $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
+        $favoriteId = DB::table('favorites')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $resource->id)
+            ->value('id');
+        $cartId = DB::table('cart')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $resource->id)
+            ->value('id');
     }
-    $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
+    $hasDigitalObject = DB::table('digital_object')
+        ->where('object_id', $resource->id)
+        ->exists();
     ?>
-    <div class="d-flex flex-wrap gap-1 mb-3">
-      <?php if (class_exists('ahgFavoritesPluginConfiguration') && $userId): ?>
-        <?php if ($favoriteId): ?>
-          <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
-        <?php else: ?>
-          <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
-        <?php endif; ?>
-      <?php endif; ?>
-      <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
-        <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
-      <?php endif; ?>
-      <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
-        <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
-      <?php endif; ?>
-      <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
-        <?php if ($cartId): ?>
-          <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
-        <?php else: ?>
-          <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Add to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-cart-plus"></i></a>
-        <?php endif; ?>
-      <?php endif; ?>
-    </div>
+    <section class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-user me-2"></i><?php echo __('User Actions'); ?></h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          <?php if (class_exists('ahgFavoritesPluginConfiguration') && $userId): ?>
+            <?php if ($favoriteId): ?>
+              <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-sm btn-outline-danger">
+                <i class="fas fa-heart-broken me-1"></i><?php echo __('Remove from Favorites'); ?>
+              </a>
+            <?php else: ?>
+              <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-sm btn-outline-danger">
+                <i class="fas fa-heart me-1"></i><?php echo __('Add to Favorites'); ?>
+              </a>
+            <?php endif; ?>
+          <?php endif; ?>
+          <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+            <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-comment me-1"></i><?php echo __('Item Feedback'); ?>
+            </a>
+          <?php endif; ?>
+          <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
+            <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-paper-plane me-1"></i><?php echo __('Request to Publish'); ?>
+            </a>
+          <?php endif; ?>
+          <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
+            <?php if ($cartId): ?>
+              <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-shopping-cart me-1"></i><?php echo __('Go to Cart'); ?>
+              </a>
+            <?php else: ?>
+              <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-cart-plus me-1"></i><?php echo __('Add to Cart'); ?>
+              </a>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+    </section>
     <!-- Actions (authenticated users only) -->
     <?php if ($sf_user->isAuthenticated()): ?>
     <section class="card mb-4">
@@ -457,6 +495,10 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <?php if (checkPluginEnabled('ahgGrapPlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('View GRAP data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
+            <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>"><i class="fas fa-comment me-2"></i><?php echo __('Item Feedback'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <?php endif; ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'label', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>

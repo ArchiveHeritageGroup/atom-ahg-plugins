@@ -88,41 +88,40 @@ model-viewer {
 }
 </style>
 <?php } ?>
-<!-- User Actions (compact with tooltips) -->
-<?php
-use Illuminate\Database\Capsule\Manager as DB;
-$userId = $sf_user->getAttribute('user_id');
-$favoriteId = null;
-$cartId = null;
-if ($userId) {
-    $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-    $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-}
-$hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
-?>
-<div class="d-flex flex-wrap gap-1 mb-3">
-  <?php if (class_exists('ahgFavoritesPluginConfiguration') && $userId): ?>
-    <?php if ($favoriteId): ?>
-      <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
-    <?php else: ?>
-      <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
-    <?php endif; ?>
-  <?php endif; ?>
-  <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
-    <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
-  <?php endif; ?>
-  <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
-    <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
-  <?php endif; ?>
-  <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
-    <?php if ($cartId): ?>
-      <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
-    <?php else: ?>
-      <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Add to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-cart-plus"></i></a>
-    <?php endif; ?>
-  <?php endif; ?>
+<!-- User Action Buttons -->
+<?php if (class_exists('QubitFavorites') || class_exists('QubitCart')): ?>
+<div class="card mb-4 mt-3" style="position: relative; z-index: 100;">
+  <div class="card-body py-2">
+    <div class="d-flex flex-wrap gap-2">
+      <?php $userId = $this->context->user->getAttribute('user_id'); ?>
+      <?php if (class_exists('QubitFavorites')): ?>
+        <?php $favorate_id = QubitFavorites::getByUserIDandObjectId($userId, $resource->id); ?>
+        <?php if ('' != $favorate_id->id && '' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'removeFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php elseif ('' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'), [$resource, 'module' => 'informationobject', 'action' => 'addFavorites'], ['class' => 'btn btn-sm btn-outline-danger']); ?>
+        <?php endif; ?>
+      <?php endif; ?>
+      <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+        <?php echo link_to('<i class="fas fa-comment me-1"></i>' . __('Item Feedback'), ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-secondary']); ?>
+      <?php endif; ?>
+      <?php if (class_exists('ahgRequestToPublishPluginConfiguration')): ?>
+        <?php echo link_to('<i class="fas fa-paper-plane me-1"></i>' . __('Request to Publish'), ['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug], ['class' => 'btn btn-sm btn-outline-primary']); ?>
+      <?php endif; ?>
+      <?php if (class_exists('QubitCart')): ?>
+        <?php $cart_id = QubitCart::getByUserIDandObjectId($userId, $resource->id); ?>
+        <?php if ('' != $cart_id->id && '' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'), [$resource, 'module' => 'cart', 'action' => 'browse'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+        <?php elseif ('' != $userId): ?>
+          <?php echo link_to('<i class="fas fa-cart-plus me-1"></i>' . __('Add to Cart'), [$resource, 'module' => 'informationobject', 'action' => 'addCart'], ['class' => 'btn btn-sm btn-outline-success']); ?>
+        <?php endif; ?>
+      <?php endif; ?>
+    </div>
+  </div>
 </div>
+<?php endif; ?>
 <?php
+    // TODO: Move this to the controller when we only have B5 themes
     $headingsCondition = SecurityPrivileges::editCredentials($sf_user, 'informationObject');
     $headingsUrl = [$resource, 'module' => 'informationobject', 'action' => 'edit'];
 ?>

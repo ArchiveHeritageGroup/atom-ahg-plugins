@@ -70,42 +70,6 @@
     <?php endif; ?>
   <?php endif; ?>
 
-
-  <!-- User Actions (compact with tooltips) -->
-  <?php
-  use Illuminate\Database\Capsule\Manager as DB;
-  $userId = $sf_user->getAttribute('user_id');
-  $favoriteId = null;
-  $cartId = null;
-  if ($userId) {
-      $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-      $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-  }
-  $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
-  ?>
-  <div class="d-flex flex-wrap gap-1 mb-3">
-    <?php if (class_exists('ahgFavoritesPluginConfiguration') && $userId): ?>
-      <?php if ($favoriteId): ?>
-        <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
-      <?php else: ?>
-        <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
-      <?php endif; ?>
-    <?php endif; ?>
-    <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
-      <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
-    <?php endif; ?>
-    <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
-      <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
-    <?php endif; ?>
-    <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
-      <?php if ($cartId): ?>
-        <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
-      <?php else: ?>
-        <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Add to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-cart-plus"></i></a>
-      <?php endif; ?>
-    <?php endif; ?>
-  </div>
-
   <!-- Basic Identification -->
   <section class="card mb-3">
     <div class="card-header bg-light">
