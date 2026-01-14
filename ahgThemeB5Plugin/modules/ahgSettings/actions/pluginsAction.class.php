@@ -64,11 +64,14 @@ class AhgSettingsPluginsAction extends sfAction
                 $sql = "UPDATE atom_plugin SET is_enabled = 1, updated_at = NOW() WHERE name = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([$pluginName]);
-                
+
+                // Sync to setting_i18n (legacy support)
+                $this->syncToSettingI18n($conn, $pluginName, true);
+
                 // Audit log
                 $this->logAudit($conn, $pluginName, 'enabled', $userId);
                 $this->getUser()->setFlash('notice', "Plugin '$pluginName' enabled successfully.");
-                
+
             } elseif ($action === 'disable') {
                 // Check dependencies first
                 $deps = $this->checkDependencies($conn, $pluginName);
@@ -76,15 +79,21 @@ class AhgSettingsPluginsAction extends sfAction
                     $this->getUser()->setFlash('error', "Cannot disable '$pluginName'. Required by: " . implode(', ', $deps));
                     return;
                 }
-                
+
                 $sql = "UPDATE atom_plugin SET is_enabled = 0, updated_at = NOW() WHERE name = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([$pluginName]);
-                
+
+                // Sync to setting_i18n (legacy support)
+                $this->syncToSettingI18n($conn, $pluginName, false);
+
                 // Audit log
                 $this->logAudit($conn, $pluginName, 'disabled', $userId);
                 $this->getUser()->setFlash('notice', "Plugin '$pluginName' disabled successfully.");
             }
+
+            // Clear Symfony cache to apply changes
+            $this->clearCache();
 
             // Redirect to refresh
             $this->redirect(['module' => 'ahgSettings', 'action' => 'plugins']);
@@ -92,6 +101,62 @@ class AhgSettingsPluginsAction extends sfAction
         } catch (Exception $e) {
             error_log("Plugin Manager: Error: " . $e->getMessage());
             $this->getUser()->setFlash('error', "Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync plugin enable/disable to setting_i18n (legacy Symfony plugin loading)
+     */
+    protected function syncToSettingI18n($conn, $pluginName, $enable)
+    {
+        try {
+            $sql = "SELECT value FROM setting_i18n WHERE id = 1 AND culture = 'en'";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row || empty($row['value'])) {
+                return;
+            }
+
+            $plugins = @unserialize($row['value']);
+            if (!is_array($plugins)) {
+                $plugins = [];
+            }
+
+            $key = array_search($pluginName, $plugins);
+
+            if ($enable && $key === false) {
+                // Add plugin
+                $plugins[] = $pluginName;
+            } elseif (!$enable && $key !== false) {
+                // Remove plugin
+                unset($plugins[$key]);
+                $plugins = array_values($plugins); // Re-index
+            }
+
+            $sql = "UPDATE setting_i18n SET value = ? WHERE id = 1 AND culture = 'en'";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([serialize($plugins)]);
+
+        } catch (Exception $e) {
+            error_log("Plugin Manager: Error syncing to setting_i18n: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clear Symfony cache after plugin changes
+     */
+    protected function clearCache()
+    {
+        try {
+            $cacheDir = sfConfig::get('sf_cache_dir');
+            if ($cacheDir && is_dir($cacheDir)) {
+                // Clear template cache
+                sfToolkit::clearDirectory($cacheDir);
+            }
+        } catch (Exception $e) {
+            error_log("Plugin Manager: Cache clear failed: " . $e->getMessage());
         }
     }
 
