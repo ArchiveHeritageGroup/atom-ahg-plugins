@@ -253,11 +253,11 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
           <?php if (($repositoryUploadLimit === null || $repositoryUploadLimit != 0) && $uploadAllowed) { ?>
             <li><a href="<?php echo io_url($resource, 'informationobject', 'multiFileUpload'); ?>" class="dropdown-item"><?php echo __('Import digital objects'); ?></a></li>
           <?php } ?>
-
           <li><hr class="dropdown-divider"></li>
           <li><?php echo link_to(__('Create new rights'), [$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit'], ['class' => 'dropdown-item']); ?></li>
 		  <?php if (checkPluginEnabled('ahgExtendedRightsPlugin') || checkPluginEnabled('ahgHeritageAccountingPlugin') || checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin') || checkPluginEnabled('ahgCcoPlugin') || checkPluginEnabled('ahgConditionPlugin')): ?>
           <!-- Extensions Submenu with Flyout -->
+          <li><hr class="dropdown-divider"></li>
           <li class="dropend" >
             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">
               <i class="fas fa-puzzle-piece fa-fw me-2"></i><?php echo __('Extensions'); ?>

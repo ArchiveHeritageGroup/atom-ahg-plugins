@@ -456,13 +456,13 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit']); ?>"><i class="fas fa-copyright me-2"></i><?php echo __('Create new rights'); ?></a></li>
             <?php if (checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-balance-scale me-2"></i><?php echo __('Extended Rights'); ?></a></li>
-            <li><hr class="dropdown-divider"></li>
             <?php endif; ?>
             <?php if (checkPluginEnabled('ahgGrapPlugin')): ?>
+            <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('View GRAP data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
-            <li><hr class="dropdown-divider"></li>
             <?php endif; ?>
+            <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'label', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             
