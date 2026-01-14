@@ -122,8 +122,11 @@
         
         <!-- Copy general settings to maintain state -->
         <input type="hidden" name="is_enabled" value="<?php echo ($settings && $settings->is_enabled) ? '1' : '0'; ?>">
-        <input type="hidden" name="currency" value="<?php echo $settings->currency ?? 'ZAR'; ?>">
+        <input type="hidden" name="currency" value="<?php echo esc_entities($settings->currency ?? 'ZAR'); ?>">
         <input type="hidden" name="vat_rate" value="<?php echo $settings->vat_rate ?? 15.00; ?>">
+        <input type="hidden" name="vat_number" value="<?php echo esc_entities($settings->vat_number ?? ''); ?>">
+        <input type="hidden" name="admin_notification_email" value="<?php echo esc_entities($settings->admin_notification_email ?? ''); ?>">
+        <input type="hidden" name="terms_conditions" value="<?php echo esc_entities($settings->terms_conditions ?? ''); ?>">
         
         <div class="card shadow-sm">
           <div class="card-header bg-success text-white">
@@ -266,7 +269,7 @@
   </div>
 
   <div class="mt-4">
-    <a href="<?php echo url_for(['module' => 'admin', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
+    <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
       <i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Admin'); ?>
     </a>
     <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'adminOrders']); ?>" class="btn btn-outline-primary ms-2">

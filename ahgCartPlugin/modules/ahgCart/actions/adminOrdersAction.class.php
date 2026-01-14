@@ -19,7 +19,7 @@ class ahgCartAdminOrdersAction extends sfAction
             return;
         }
 
-        if (!QubitAcl::check('systemAdmin')) {
+        if (!$this->context->user->hasCredential("administrator")) {
             $this->forward404();
             return;
         }

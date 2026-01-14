@@ -111,14 +111,28 @@ class EcommerceRepository
     public function savePricing(array $data): int
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
+        
+        // Check if pricing already exists for this product_type_id and repository_id
+        $existing = DB::table('ahg_product_pricing')
+            ->where('product_type_id', $data['product_type_id'])
+            ->where(function($query) use ($data) {
+                if (isset($data['repository_id']) && $data['repository_id'] !== null) {
+                    $query->where('repository_id', $data['repository_id']);
+                } else {
+                    $query->whereNull('repository_id');
+                }
+            })
+            ->first();
 
-        if (isset($data['id']) && $data['id']) {
-            $id = $data['id'];
-            unset($data['id']);
-            DB::table('ahg_product_pricing')->where('id', $id)->update($data);
-            return $id;
+        if ($existing) {
+            // Update existing record
+            DB::table('ahg_product_pricing')
+                ->where('id', $existing->id)
+                ->update($data);
+            return $existing->id;
         }
 
+        // Insert new record
         $data['created_at'] = date('Y-m-d H:i:s');
         return DB::table('ahg_product_pricing')->insertGetId($data);
     }

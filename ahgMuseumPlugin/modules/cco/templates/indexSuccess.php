@@ -350,7 +350,8 @@ $ancestors = cco_get_ancestors($resource);
       <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
         <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
       <?php endif; ?>
-      <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
+      <!-- DEBUG: hasDigitalObject=<?php echo $hasDigitalObject ? "true" : "false"; ?>, cartClass=<?php echo class_exists("ahgCartPluginConfiguration") ? "true" : "false"; ?> -->
+      <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject): ?>
         <?php if ($cartId): ?>
           <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
         <?php else: ?>

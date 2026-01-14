@@ -2,209 +2,181 @@
 
 namespace AtomAhgPlugins\ahgCartPlugin\Services;
 
-require_once dirname(__DIR__) . '/Repositories/CartRepository.php';
-
-use AtomAhgPlugins\ahgCartPlugin\Repositories\CartRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Cart Service - Business logic for shopping cart
- * Supports both Standard (Request to Publish) and E-Commerce modes
+ * Cart Service - Handles cart operations for both users and guests
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
 class CartService
 {
-    private CartRepository $repository;
-
-    public function __construct()
-    {
-        $this->repository = new CartRepository();
-    }
-
-    /**
-     * Check if e-commerce is enabled for any repository
-     */
-    public function isEcommerceEnabled(?int $repositoryId = null): bool
-    {
-        $settings = DB::table('ahg_ecommerce_settings')
-            ->where(function($q) use ($repositoryId) {
-                if ($repositoryId) {
-                    $q->where('repository_id', $repositoryId);
-                } else {
-                    $q->whereNull('repository_id');
-                }
-            })
-            ->where('is_enabled', 1)
-            ->first();
-
-        return $settings !== null;
-    }
-
-    /**
-     * Get user's cart items with full details
-     */
-    public function getUserCart(int $userId): array
-    {
-        $items = $this->repository->getByUserId($userId);
-        $result = [];
-
-        foreach ($items as $item) {
-            $title = DB::table('information_object_i18n')
-                ->where('id', $item->archival_description_id)
-                ->where('culture', 'en')
-                ->value('title');
-
-            $slug = DB::table('slug')
-                ->where('object_id', $item->archival_description_id)
-                ->value('slug');
-
-            $hasDigitalObject = DB::table('digital_object')
-                ->where('object_id', $item->archival_description_id)
-                ->exists();
-
-            // Get product info if set
-            $productName = null;
-            if (isset($item->product_type_id) && $item->product_type_id) {
-                $productName = DB::table('ahg_product_type')
-                    ->where('id', $item->product_type_id)
-                    ->value('name');
-            }
-
-            $result[] = (object) [
-                'id' => $item->id,
-                'user_id' => $item->user_id,
-                'archival_description_id' => $item->archival_description_id,
-                'title' => $title ?? $item->archival_description ?? 'Untitled',
-                'slug' => $slug ?? $item->slug,
-                'has_digital_object' => $hasDigitalObject,
-                'product_type_id' => $item->product_type_id ?? null,
-                'product_name' => $productName,
-                'quantity' => $item->quantity ?? 1,
-                'unit_price' => $item->unit_price ?? null,
-                'notes' => $item->notes ?? null,
-                'created_at' => $item->created_at,
-            ];
-        }
-
-        return $result;
-    }
-
     /**
      * Add item to cart
      */
-    public function addToCart(int $userId, int $objectId, ?string $title = null, ?string $slug = null): array
+    public function addToCart($userId, $objectId, $title, $slug, $sessionId = null): array
     {
-        if ($this->repository->exists($userId, $objectId)) {
+        // Check if item already in cart
+        $query = DB::table('cart')
+            ->where('archival_description_id', $objectId)
+            ->whereNull('completed_at');
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where('session_id', $sessionId);
+        }
+        
+        $existing = $query->first();
+        
+        if ($existing) {
             return ['success' => false, 'message' => 'Item is already in your cart.'];
         }
-
-        if (!$title) {
-            $title = DB::table('information_object_i18n')
-                ->where('id', $objectId)
-                ->where('culture', 'en')
-                ->value('title') ?? 'Untitled';
-        }
-
-        if (!$slug) {
-            $slug = DB::table('slug')
-                ->where('object_id', $objectId)
-                ->value('slug');
-        }
-
-        $id = $this->repository->add([
+        
+        // Add to cart
+        $cartId = DB::table('cart')->insertGetId([
             'user_id' => $userId,
+            'session_id' => $sessionId,
             'archival_description_id' => $objectId,
-            'archival_description' => $title,
+            'archival_description' => $title ?? 'Untitled',
             'slug' => $slug,
+            'quantity' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
-
-        return ['success' => true, 'message' => 'Added to cart.', 'id' => $id];
+        
+        return ['success' => true, 'message' => 'Item added to cart.', 'cart_id' => $cartId];
     }
-
+    
+    /**
+     * Get cart items for user or session
+     */
+    public function getCart($userId = null, $sessionId = null): array
+    {
+        $query = DB::table('cart')
+            ->whereNull('completed_at');
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return [];
+        }
+        
+        return $query->orderBy('created_at', 'desc')->get()->toArray();
+    }
+    
+    /**
+     * Get cart for user (backward compatibility)
+     */
+    public function getUserCart($userId): array
+    {
+        return $this->getCart($userId, null);
+    }
+    
     /**
      * Remove item from cart
      */
-    public function removeFromCart(int $userId, int $cartId): array
+    public function removeItem($cartId, $userId = null, $sessionId = null): bool
     {
-        $item = $this->repository->getById($cartId);
-
-        if (!$item) {
-            return ['success' => false, 'message' => 'Item not found.'];
+        $query = DB::table('cart')->where('id', $cartId);
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
         }
-
-        if ($item->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
-        }
-
-        $this->repository->remove($cartId);
-        return ['success' => true, 'message' => 'Item removed from cart.'];
+        
+        return $query->delete() > 0;
     }
-
+    
     /**
      * Clear all cart items
      */
-    public function clearAll(int $userId): array
+    public function clearAll($userId = null, $sessionId = null): int
     {
-        $count = $this->repository->clearByUserId($userId);
-        return ['success' => true, 'message' => "Cleared {$count} item(s) from cart."];
-    }
-
-    /**
-     * Update cart item product selection
-     */
-    public function updateItemProduct(int $cartId, int $productTypeId, int $userId): array
-    {
-        $item = $this->repository->getById($cartId);
+        $query = DB::table('cart')->whereNull('completed_at');
         
-        if (!$item || $item->user_id != $userId) {
-            return ['success' => false, 'message' => 'Item not found.'];
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
         }
-
-        $pricing = DB::table('ahg_product_pricing')
-            ->where('product_type_id', $productTypeId)
-            ->where('is_active', 1)
-            ->first();
-
-        if (!$pricing) {
-            return ['success' => false, 'message' => 'Product not available.'];
+        
+        return $query->delete();
+    }
+    
+    /**
+     * Merge guest cart with user cart after login
+     */
+    public function mergeGuestCart($sessionId, $userId): int
+    {
+        if (empty($sessionId) || empty($userId)) {
+            return 0;
         }
-
-        $this->repository->update($cartId, [
-            'product_type_id' => $productTypeId,
-            'unit_price' => $pricing->price,
-        ]);
-
-        return ['success' => true, 'message' => 'Product updated.', 'price' => $pricing->price];
-    }
-
-    /**
-     * Get cart count for user
-     */
-    public function getCartCount(int $userId): int
-    {
-        return $this->repository->getCount($userId);
-    }
-
-    /**
-     * Check if item is in cart
-     */
-    public function isInCart(int $userId, int $objectId): bool
-    {
-        return $this->repository->exists($userId, $objectId);
-    }
-
-    /**
-     * Get cart item by object ID
-     */
-    public function getCartItem(int $userId, int $objectId): ?object
-    {
-        $items = $this->repository->getByUserId($userId);
-        foreach ($items as $item) {
-            if ($item->archival_description_id == $objectId) {
-                return $item;
+        
+        // Get guest cart items
+        $guestItems = DB::table('cart')
+            ->where('session_id', $sessionId)
+            ->whereNull('completed_at')
+            ->get();
+        
+        $merged = 0;
+        
+        foreach ($guestItems as $item) {
+            // Check if user already has this item
+            $exists = DB::table('cart')
+                ->where('user_id', $userId)
+                ->where('archival_description_id', $item->archival_description_id)
+                ->whereNull('completed_at')
+                ->exists();
+            
+            if (!$exists) {
+                // Transfer to user
+                DB::table('cart')
+                    ->where('id', $item->id)
+                    ->update([
+                        'user_id' => $userId,
+                        'session_id' => null,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                $merged++;
+            } else {
+                // Delete duplicate
+                DB::table('cart')->where('id', $item->id)->delete();
             }
         }
-        return null;
+        
+        return $merged;
+    }
+    
+    /**
+     * Get cart count
+     */
+    public function getCartCount($userId = null, $sessionId = null): int
+    {
+        $query = DB::table('cart')->whereNull('completed_at');
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return 0;
+        }
+        
+        return $query->count();
+    }
+
+    /**
+     * Clear all cart items for a session (guest users)
+     */
+    public function clearAllBySession($sessionId): int
+    {
+        return DB::table('cart')
+            ->where('session_id', $sessionId)
+            ->whereNull('completed_at')
+            ->delete();
     }
 }

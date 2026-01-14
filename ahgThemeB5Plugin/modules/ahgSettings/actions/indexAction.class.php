@@ -201,5 +201,22 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'privacyAdmin'
             ];
         }
+
+        // E-Commerce / Cart Plugin
+        $hasCart = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasCart) {
+            $this->sections['ecommerce'] = [
+                'label' => 'E-Commerce',
+                'icon' => 'fa-store',
+                'description' => 'Shopping cart, product pricing, payment gateway and order management',
+                'url' => 'admin/ecommerce'
+            ];
+            $this->sections['orders'] = [
+                'label' => 'Order Management',
+                'icon' => 'fa-shopping-bag',
+                'description' => 'View and manage customer orders',
+                'url' => 'admin/orders'
+            ];
+        }
     }
 }

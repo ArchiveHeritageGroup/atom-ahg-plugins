@@ -39,6 +39,9 @@ class ahgDisplayActions extends sfActions
 
     public function executeBrowse(sfWebRequest $request)
     {
+        // Check if user is authenticated (can see drafts)
+        $this->isAuthenticated = sfContext::getInstance()->getUser()->isAuthenticated();
+        
         // Get all filter parameters
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
@@ -69,100 +72,134 @@ class ahgDisplayActions extends sfActions
         $this->genreSearchFilter = $request->getParameter("genreSearch");
         $this->repoFilter = $request->getParameter('repo');
 
-        // GLAM Type facet
-        $this->types = DB::table('display_object_config')
-            ->select('object_type', DB::raw('COUNT(*) as count'))
-            ->groupBy('object_type')
-            ->orderBy('count', 'desc')
-            ->get()->toArray();
+        // GLAM Type facet - filter by published status for guests
+        $glamQuery = DB::table('display_object_config as doc')
+            ->join('information_object as io', 'doc.object_id', '=', 'io.id')
+            ->select('doc.object_type', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $glamQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->types = $glamQuery->groupBy('doc.object_type')->orderBy('count', 'desc')->get()->toArray();
 
-        // Level of description facet
-        $this->levels = DB::table('information_object as io')
+        // Level of description facet - filter by published status for guests
+        $levelQuery = DB::table('information_object as io')
             ->join('term as t', 'io.level_of_description_id', '=', 't.id')
             ->join('term_i18n as ti', function($j) {
                 $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
             })
             ->where('io.id', '>', 1)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('t.id', 'ti.name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $levelQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->levels = $levelQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Repository facet
-        $this->repositories = DB::table('information_object as io')
+        // Repository facet - filter by published status for guests
+        $repoQuery = DB::table('information_object as io')
             ->join('repository as r', 'io.repository_id', '=', 'r.id')
             ->join('actor_i18n as ai', function($j) {
                 $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
             })
             ->where('io.id', '>', 1)
-            ->select('r.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(*) as count'))
-            ->groupBy('r.id', 'ai.authorized_form_of_name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('r.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $repoQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->repositories = $repoQuery->groupBy('r.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Creator facet
-        $this->creators = DB::table('event as e')
+        // Creator facet - filter by published status for guests
+        $creatorQuery = DB::table('event as e')
             ->join('actor as a', 'e.actor_id', '=', 'a.id')
             ->join('actor_i18n as ai', function($j) {
                 $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
             })
             ->whereNotNull('e.actor_id')
-            ->select('a.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT e.object_id) as count'))
-            ->groupBy('a.id', 'ai.authorized_form_of_name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('a.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT e.object_id) as count'));
+        if (!$this->isAuthenticated) {
+            $creatorQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = e.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->creators = $creatorQuery->groupBy('a.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Subject facet (taxonomy_id = 35)
-        $this->subjects = DB::table('object_term_relation as otr')
+        // Subject facet (taxonomy_id = 35) - filter by published status for guests
+        $subjectQuery = DB::table('object_term_relation as otr')
             ->join('term as t', 'otr.term_id', '=', 't.id')
             ->join('term_i18n as ti', function($j) {
                 $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
             })
             ->where('t.taxonomy_id', 35)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('t.id', 'ti.name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $subjectQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->subjects = $subjectQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Place facet (taxonomy_id = 42)
-        $this->places = DB::table('object_term_relation as otr')
+        // Place facet (taxonomy_id = 42) - filter by published status for guests
+        $placeQuery = DB::table('object_term_relation as otr')
             ->join('term as t', 'otr.term_id', '=', 't.id')
             ->join('term_i18n as ti', function($j) {
                 $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
             })
             ->where('t.taxonomy_id', 42)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('t.id', 'ti.name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $placeQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->places = $placeQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Genre facet (taxonomy_id = 78)
-        $this->genres = DB::table('object_term_relation as otr')
+        // Genre facet (taxonomy_id = 78) - filter by published status for guests
+        $genreQuery = DB::table('object_term_relation as otr')
             ->join('term as t', 'otr.term_id', '=', 't.id')
             ->join('term_i18n as ti', function($j) {
                 $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
             })
             ->where('t.taxonomy_id', 78)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('t.id', 'ti.name')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $genreQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->genres = $genreQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
-        // Media type facet
-        $this->mediaTypes = DB::table('digital_object as do')
+        // Media type facet - filter by published status for guests
+        $mediaQuery = DB::table('digital_object as do')
             ->whereNull('do.parent_id')
             ->whereNotNull('do.mime_type')
-            ->select(DB::raw('SUBSTRING_INDEX(mime_type, "/", 1) as media_type'), DB::raw('COUNT(*) as count'))
-            ->groupBy('media_type')
-            ->orderBy('count', 'desc')
-            ->limit(10)
-            ->get()->toArray();
+            ->select(DB::raw('SUBSTRING_INDEX(mime_type, "/", 1) as media_type'), DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $mediaQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = do.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->mediaTypes = $mediaQuery->groupBy('media_type')->orderBy('count', 'desc')->limit(10)->get()->toArray();
 
         // Build count query
         $countQuery = DB::table('information_object as io')
@@ -327,6 +364,18 @@ class ahgDisplayActions extends sfActions
 
     protected function applyFilters($query)
     {
+        // Filter by publication status - only show Published items (status_id = 160) for guests
+        // Authenticated users (editors/admins) can see all items
+        if (!sfContext::getInstance()->getUser()->isAuthenticated()) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)  // publication status type
+                  ->where('status.status_id', 160); // Published
+            });
+        }
+
         if ($this->parentId) {
             $query->where('io.parent_id', $this->parentId);
         } elseif ($this->topLevelOnly === '1') {

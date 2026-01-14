@@ -1,28 +1,39 @@
-
 dam_dashboard:
   url: /dam/dashboard
-  param: { module: dam, action: dashboard }
+  param: { module: ahgDam, action: dashboard }
 
 dam_create:
   url: /dam/create
-  param: { module: dam, action: create }
+  param: { module: ahgDam, action: create }
 
 dam_edit_iptc:
   url: /dam/iptc/:slug
-  param: { module: dam, action: editIptc }
+  param: { module: ahgDam, action: editIptc }
 
 dam_extract_metadata:
   url: /dam/extract/:id
-  param: { module: dam, action: extractMetadata }
+  param: { module: ahgDam, action: extractMetadata }
 
 dam_browse:
   url: /dam/browse
-  param: { module: dam, action: browse }
+  param: { module: ahgDam, action: browse }
 
 dam_bulk_create:
   url: /dam/bulk
-  param: { module: dam, action: bulkCreate }
+  param: { module: ahgDam, action: bulkCreate }
 
 dam_convert:
   url: /dam/convert/:id
-  param: { module: dam, action: convert }
+  param: { module: ahgDam, action: convert }
+
+dam_index:
+  url: /dam
+  param: { module: ahgDam, action: index }
+
+dam_lightbox:
+  url: /dam/lightbox
+  param: { module: ahgDam, action: lightbox }
+
+dam_reports:
+  url: /dam/reports
+  param: { module: damReports, action: index }

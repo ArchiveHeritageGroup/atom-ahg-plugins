@@ -239,7 +239,7 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="post">
-        <input type="hidden" name="do" value="create_collection">
+        <input type="hidden" name="booking_action" value="create_collection">
         <div class="modal-header">
           <h5 class="modal-title"><i class="fas fa-folder-plus me-2"></i><?php echo __('Create New Collection'); ?></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

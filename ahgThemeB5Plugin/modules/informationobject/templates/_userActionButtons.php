@@ -33,6 +33,13 @@ if (!$resourceId) {
 // Get user ID
 $userId = sfContext::getInstance()->getUser()->getAttribute('user_id');
 
+// Get session ID for guests
+$sessionId = session_id();
+if (empty($sessionId) && !$userId) {
+    @session_start();
+    $sessionId = session_id();
+}
+
 // Check for digital object
 $hasDigitalObject = DB::table('digital_object')
     ->where('object_id', $resourceId)
@@ -50,6 +57,16 @@ if ($userId) {
     $cartId = DB::table('cart')
         ->where('user_id', $userId)
         ->where('archival_description_id', $resourceId)
+        ->whereNull('completed_at')
+        ->value('id');
+}
+
+// Check cart for guest users
+if (!$cartId && $sessionId) {
+    $cartId = DB::table('cart')
+        ->where('session_id', $sessionId)
+        ->where('archival_description_id', $resourceId)
+        ->whereNull('completed_at')
         ->value('id');
 }
 
@@ -100,7 +117,7 @@ $cartEnabled = class_exists('ahgCartPluginConfiguration');
       <?php endif; ?>
 
       <?php // ===== CART BUTTON (only if has digital object AND user logged in) ===== ?>
-      <?php if ($cartEnabled && $hasDigitalObject && $userId): ?>
+      <?php if ($cartEnabled && $hasDigitalObject): ?>
         <?php if ($cartId): ?>
           <?php echo link_to(
             '<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'),

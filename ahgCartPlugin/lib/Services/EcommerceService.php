@@ -52,9 +52,9 @@ class EcommerceService
     /**
      * Get cart items with pricing information
      */
-    public function getCartWithPricing(int $userId, ?int $repositoryId = null): array
+    public function getCartWithPricing($userId = null, ?int $repositoryId = null, $sessionId = null): array
     {
-        $items = $this->cartRepo->getByUserId($userId);
+        $items = $this->cartRepo->getCart($userId, $sessionId);
         $result = [];
         $settings = $this->getSettings($repositoryId);
         $vatRate = $settings->vat_rate ?? 15.00;
@@ -169,9 +169,9 @@ class EcommerceService
     /**
      * Create order from cart (E-Commerce mode)
      */
-    public function createOrderFromCart(int $userId, array $customerData, ?int $repositoryId = null): array
+    public function createOrderFromCart(?int $userId, array $customerData, ?string $sessionId = null, ?int $repositoryId = null): array
     {
-        $items = $this->getCartWithPricing($userId, $repositoryId);
+        $items = $this->getCartWithPricing($userId, $repositoryId, $sessionId);
         
         if (empty($items)) {
             return ['success' => false, 'message' => 'Cart is empty.'];
@@ -182,6 +182,7 @@ class EcommerceService
         // Create order
         $orderId = $this->ecommerceRepo->createOrder([
             'user_id' => $userId,
+            'session_id' => $sessionId,
             'repository_id' => $repositoryId,
             'status' => 'pending',
             'subtotal' => $totals['net_amount'],
@@ -249,36 +250,59 @@ class EcommerceService
             ? 'https://sandbox.payfast.co.za/eng/process'
             : 'https://www.payfast.co.za/eng/process';
 
-        // Build PayFast data
-        $data = [
-            'merchant_id' => $settings->payfast_merchant_id,
-            'merchant_key' => $settings->payfast_merchant_key,
-            'return_url' => sfConfig::get('app_siteBaseUrl') . '/cart/payment/success/' . $order->order_number,
-            'cancel_url' => sfConfig::get('app_siteBaseUrl') . '/cart/payment/cancel/' . $order->order_number,
-            'notify_url' => sfConfig::get('app_siteBaseUrl') . '/cart/payment/notify',
-            'name_first' => explode(' ', $order->customer_name)[0] ?? '',
-            'name_last' => explode(' ', $order->customer_name)[1] ?? '',
-            'email_address' => $order->customer_email,
-            'cell_number' => preg_replace('/[^0-9]/', '', $order->customer_phone ?? ''),
-            'm_payment_id' => $order->order_number,
-            'amount' => number_format($order->total, 2, '.', ''),
-            'item_name' => 'Archive Order ' . $order->order_number,
-        ];
+        // Get site URL
+        $siteUrl = \sfConfig::get('app_siteBaseUrl', 'https://psis.theahg.co.za');
+        
+        // Parse customer name
+        $nameParts = explode(' ', trim($order->customer_name ?? ''));
+        $firstName = $nameParts[0] ?? '';
+        $lastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
 
-        // Generate signature
+        // Build PayFast data array - ORDER MATTERS for signature!
+        $pfData = [
+            'merchant_id' => trim($settings->payfast_merchant_id),
+            'merchant_key' => trim($settings->payfast_merchant_key),
+            'return_url' => $siteUrl . '/index.php/cart/order/' . $order->order_number,
+            'cancel_url' => $siteUrl . '/index.php/cart',
+            'notify_url' => $siteUrl . '/index.php/cart/payment/notify',
+        ];
+        
+        // Add optional buyer details
+        if (!empty($firstName)) {
+            $pfData['name_first'] = substr($firstName, 0, 100);
+        }
+        if (!empty($lastName)) {
+            $pfData['name_last'] = substr($lastName, 0, 100);
+        }
+        if (!empty($order->customer_email)) {
+            $pfData['email_address'] = trim($order->customer_email);
+        }
+        
+        // Transaction details
+        $pfData['m_payment_id'] = $order->order_number;
+        $pfData['amount'] = number_format((float)$order->total, 2, '.', '');
+        $pfData['item_name'] = 'Order-' . $order->order_number;
+
+        // Generate signature string - do NOT urlencode for signature calculation
         $signatureString = '';
-        foreach ($data as $key => $val) {
-            if ($val !== '') {
+        foreach ($pfData as $key => $val) {
+            if ($val !== null && $val !== '') {
                 $signatureString .= $key . '=' . urlencode(trim($val)) . '&';
             }
         }
+        // Remove trailing &
         $signatureString = rtrim($signatureString, '&');
         
-        if (!empty($settings->payfast_passphrase)) {
-            $signatureString .= '&passphrase=' . urlencode(trim($settings->payfast_passphrase));
+        // Add passphrase if set (for sandbox, leave empty)
+        $passphrase = trim($settings->payfast_passphrase ?? '');
+        if (!empty($passphrase)) {
+            $signatureString .= '&passphrase=' . urlencode($passphrase);
         }
         
-        $data['signature'] = md5($signatureString);
+        // Generate MD5 signature
+        error_log('PayFast Signature String: ' . $signatureString);
+        $pfData['signature'] = md5($signatureString);
+        error_log('PayFast Signature: ' . $pfData['signature']);
 
         // Create payment record
         $this->ecommerceRepo->createPayment([
@@ -292,7 +316,7 @@ class EcommerceService
         return [
             'success' => true,
             'payment_url' => $baseUrl,
-            'payment_data' => $data,
+            'payment_data' => $pfData,
             'method' => 'POST',
         ];
     }
@@ -398,6 +422,11 @@ class EcommerceService
     }
 
     public function getPricing(?int $repositoryId = null): array
+    {
+        return $this->ecommerceRepo->getPricing($repositoryId);
+    }
+
+    public function getAllPricing(?int $repositoryId = null): array
     {
         return $this->ecommerceRepo->getPricing($repositoryId);
     }

@@ -23,5 +23,6 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('dam_browse', new sfRoute('/dam/browse', ['module' => 'ahgDam', 'action' => 'browse']));
         $routing->prependRoute('dam_lightbox', new sfRoute('/dam/lightbox', ['module' => 'ahgDam', 'action' => 'lightbox']));
         $routing->prependRoute('dam_reports', new sfRoute('/dam/reports', ['module' => 'damReports', 'action' => 'index']));
+        $routing->prependRoute('dam_dashboard', new sfRoute('/dam/dashboard', ['module' => 'ahgDam', 'action' => 'dashboard']));
     }
 }

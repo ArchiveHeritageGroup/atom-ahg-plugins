@@ -11,6 +11,15 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
     public static $summary = 'Shopping cart for reproduction requests and e-commerce';
     public static $version = '2.0.0';
 
+    public function initialize()
+    {
+        // Connect to routing event
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
+        
+        // Connect to context load for Laravel initialization
+        $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
+    }
+
     public function contextLoadFactories(sfEvent $event)
     {
         // Initialize Laravel database if needed
@@ -20,11 +29,6 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
         if (file_exists($bootstrapFile)) {
             require_once $bootstrapFile;
         }
-    }
-
-    public function initialize()
-    {
-        $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
     }
 
     public function routingLoadConfiguration(sfEvent $event)
@@ -58,6 +62,10 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
         ));
 
         // Checkout
+        $routing->prependRoute('ahg_cart_thank_you', new sfRoute(
+            '/cart/thank-you',
+            ['module' => 'ahgCart', 'action' => 'thankYou']
+        ));
         $routing->prependRoute('ahg_cart_checkout', new sfRoute(
             '/cart/checkout',
             ['module' => 'ahgCart', 'action' => 'checkout']
@@ -69,7 +77,31 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
             ['module' => 'ahgCart', 'action' => 'updateProducts']
         ));
 
+        // Update single cart item (AJAX)
+        $routing->prependRoute('ahg_cart_update_item', new sfRoute(
+            '/cart/update-item',
+            ['module' => 'ahgCart', 'action' => 'updateItem']
+        ));
+
+        // Save product selections (AJAX)
+        $routing->prependRoute('ahg_cart_save_selections', new sfRoute(
+            '/cart/save-selections',
+            ['module' => 'ahgCart', 'action' => 'saveSelections']
+        ));
+
         // Payment Page (E-Commerce)
+        $routing->prependRoute('ahg_cart_payment_return', new sfRoute(
+            '/cart/payment-return/:order',
+            ['module' => 'ahgCart', 'action' => 'paymentReturn']
+        ));
+        $routing->prependRoute('ahg_cart_payment_cancel', new sfRoute(
+            '/cart/payment-cancel/:order',
+            ['module' => 'ahgCart', 'action' => 'paymentCancel']
+        ));
+        $routing->prependRoute('ahg_cart_order_confirmation', new sfRoute(
+            '/cart/order/:order',
+            ['module' => 'ahgCart', 'action' => 'orderConfirmation']
+        ));
         $routing->prependRoute('ahg_cart_payment', new sfRoute(
             '/cart/payment/:order',
             ['module' => 'ahgCart', 'action' => 'payment'],

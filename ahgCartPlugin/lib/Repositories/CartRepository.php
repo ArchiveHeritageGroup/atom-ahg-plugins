@@ -6,6 +6,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Cart Repository - Database operations for shopping cart
+ * Supports both user-based and session-based (guest) carts
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
@@ -13,14 +14,38 @@ class CartRepository
 {
     protected string $table = 'cart';
 
-    public function getByUserId(int $userId): array
+    /**
+     * Get cart items by user ID or session ID
+     */
+    public function getCart($userId = null, $sessionId = null): array
     {
-        return DB::table($this->table)
-            ->where('user_id', $userId)
-            ->whereNull('completed_at')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->all();
+        $query = DB::table($this->table)->whereNull('completed_at');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return [];
+        }
+
+        return $query->orderBy('created_at', 'desc')->get()->all();
+    }
+
+    /**
+     * Get by user ID (backward compatibility)
+     */
+    public function getByUserId($userId): array
+    {
+        return $this->getCart($userId, null);
+    }
+
+    /**
+     * Get by session ID (guests)
+     */
+    public function getBySessionId(string $sessionId): array
+    {
+        return $this->getCart(null, $sessionId);
     }
 
     public function getById(int $id): ?object
@@ -28,18 +53,25 @@ class CartRepository
         return DB::table($this->table)->where('id', $id)->first();
     }
 
-    public function exists(int $userId, int $objectId): bool
+    public function exists($userId, int $objectId, $sessionId = null): bool
     {
-        return DB::table($this->table)
-            ->where('user_id', $userId)
+        $query = DB::table($this->table)
             ->where('archival_description_id', $objectId)
-            ->whereNull('completed_at')
-            ->exists();
+            ->whereNull('completed_at');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        }
+
+        return $query->exists();
     }
 
     public function add(array $data): int
     {
         $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
         return DB::table($this->table)->insertGetId($data);
     }
 
@@ -54,30 +86,56 @@ class CartRepository
         return DB::table($this->table)->where('id', $id)->delete() > 0;
     }
 
-    public function clearByUserId(int $userId): int
+    public function clearCart($userId = null, $sessionId = null): int
     {
-        return DB::table($this->table)
-            ->where('user_id', $userId)
-            ->whereNull('completed_at')
-            ->delete();
+        $query = DB::table($this->table)->whereNull('completed_at');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return 0;
+        }
+
+        return $query->delete();
     }
 
-    public function markCompleted(int $userId): int
+    public function clearByUserId($userId): int
     {
-        return DB::table($this->table)
-            ->where('user_id', $userId)
-            ->whereNull('completed_at')
-            ->update([
-                'completed_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
+        return $this->clearCart($userId, null);
     }
 
-    public function getCount(int $userId): int
+    public function markCompleted($userId = null, $sessionId = null): int
     {
-        return DB::table($this->table)
-            ->where('user_id', $userId)
-            ->whereNull('completed_at')
-            ->count();
+        $query = DB::table($this->table)->whereNull('completed_at');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return 0;
+        }
+
+        return $query->update([
+            'completed_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function getCount($userId = null, $sessionId = null): int
+    {
+        $query = DB::table($this->table)->whereNull('completed_at');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($sessionId) {
+            $query->where('session_id', $sessionId);
+        } else {
+            return 0;
+        }
+
+        return $query->count();
     }
 }

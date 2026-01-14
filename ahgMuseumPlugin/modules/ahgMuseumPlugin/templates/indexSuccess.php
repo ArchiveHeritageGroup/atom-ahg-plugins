@@ -178,11 +178,15 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
 <!-- User Actions (compact with tooltips) -->
 <?php
 $userId = $sf_user->getAttribute('user_id');
+$sessionId = session_id();
+if (empty($sessionId) && !$userId) { @session_start(); $sessionId = session_id(); }
 $favoriteId = null;
 $cartId = null;
 if ($userId) {
     $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $rawResource->id)->value('id');
-    $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $rawResource->id)->value('id');
+    $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $rawResource->id)->whereNull('completed_at')->value('id');
+} elseif ($sessionId) {
+    $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $rawResource->id)->whereNull('completed_at')->value('id');
 }
 $hasDigitalObject = DB::table('digital_object')->where('object_id', $rawResource->id)->exists();
 ?>
@@ -200,7 +204,7 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
   <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
     <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
   <?php endif; ?>
-  <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject && $userId): ?>
+  <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject): ?>
     <?php if ($cartId): ?>
       <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
     <?php else: ?>
