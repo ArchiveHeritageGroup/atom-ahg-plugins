@@ -127,7 +127,7 @@ class ahgLibraryPluginEditAction extends sfAction
         $savedId = $this->resource->id;
 
         // Save library_item
-        $libraryItemId = $this->saveLibraryItem($request);
+        $libraryItemId = $this->saveLibraryItem($request, $isNew);
 
         // Save creators
         $creators = $request->getParameter('creators', []);
@@ -171,7 +171,7 @@ class ahgLibraryPluginEditAction extends sfAction
         return $savedId;
     }
 
-    protected function saveLibraryItem($request): int
+    protected function saveLibraryItem($request, $isNew = false): int
     {
         $db = \Illuminate\Database\Capsule\Manager::connection();
 
@@ -180,20 +180,25 @@ class ahgLibraryPluginEditAction extends sfAction
 
         // Get ISBN for Open Library cover lookup
         $isbn = $request->getParameter('isbn');
-        // If no digital object and we have ISBN, queue cover download for async processing
+        // If no digital object and we have ISBN
         if (!$hasDigitalObject && !empty($isbn)) {
-            // Queue for background processing (avoids transaction issues on first save)
-            $db->table('atom_library_cover_queue')->updateOrInsert(
-                ['information_object_id' => $this->resource->id],
-                [
-                    'isbn' => $isbn,
-                    'status' => 'pending',
-                    'attempts' => 0,
-                    'error_message' => null,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'processed_at' => null,
-                ]
-            );
+            if ($isNew) {
+                // Queue for background processing (avoids transaction issues on first save)
+                $db->table('atom_library_cover_queue')->updateOrInsert(
+                    ['information_object_id' => $this->resource->id],
+                    [
+                        'isbn' => $isbn,
+                        'status' => 'pending',
+                        'attempts' => 0,
+                        'error_message' => null,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'processed_at' => null,
+                    ]
+                );
+            } else {
+                // For existing records, download immediately
+                $this->downloadCoverNow($isbn);
+            }
         }
 
         $data = [
@@ -436,4 +441,54 @@ class ahgLibraryPluginEditAction extends sfAction
         }
     }
 
+
+    protected function downloadCoverNow($isbn)
+    {
+        $cleanIsbn = preg_replace('/[^0-9X]/i', '', $isbn);
+        if (empty($cleanIsbn)) return;
+
+        $coverUrl = "https://covers.openlibrary.org/b/isbn/{$cleanIsbn}-L.jpg";
+
+        $ch = curl_init($coverUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_USERAGENT => 'AtoM/2.10 (Library Cover Fetcher)',
+        ]);
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // Check if we got a valid image
+        if ($httpCode !== 200 || strlen($imageData) < 1000) {
+            return;
+        }
+
+        // Save temp file and create digital object
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cover_') . '.jpg';
+        file_put_contents($tmpFile, $imageData);
+
+        try {
+            QubitSearch::disable();
+            $do = new QubitDigitalObject();
+            $do->objectId = $this->resource->id;
+            $do->usageId = QubitTerm::MASTER_ID;
+            $do->mediaTypeId = QubitTerm::IMAGE_ID;
+            $do->assets[] = new QubitAsset($tmpFile);
+            $do->save();
+            QubitSearch::enable();
+
+            // Update library_item with cover URL
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+            $db->table('library_item')
+                ->where('information_object_id', $this->resource->id)
+                ->update(['cover_url' => $coverUrl, 'cover_url_original' => $coverUrl]);
+        } catch (Exception $e) {
+            error_log('Cover download error: ' . $e->getMessage());
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
 }
