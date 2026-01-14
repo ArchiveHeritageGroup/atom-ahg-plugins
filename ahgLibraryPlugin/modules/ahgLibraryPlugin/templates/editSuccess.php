@@ -22,7 +22,7 @@
           <div class="mb-3">
             <label class="form-label required"><?php echo __('Title'); ?></label>
             <input type="text" name="title" class="form-control" required
-                   value="<?php echo esc_entities(($resource->title ?? "")); ?>">
+                   value="<?php echo esc_specialchars(html_entity_decode($resource->title ?? "", ENT_QUOTES, 'UTF-8')); ?>">
           </div>
 
           <div class="row">
