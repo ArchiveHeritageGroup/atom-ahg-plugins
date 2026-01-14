@@ -74,7 +74,7 @@ if (isset($resource)) {
 ?>
 
 <!-- NER Extract Section -->
-<?php if (isset($resource) && $sf_user->isAuthenticated() && class_exists('ahgNerPluginConfiguration')): ?>
+<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgNerPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Named Entity Recognition'); ?></h4>
   <ul>
