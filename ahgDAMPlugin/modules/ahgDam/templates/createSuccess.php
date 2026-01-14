@@ -186,6 +186,7 @@
                 <option value="Sound"><?php echo __('Sound'); ?></option>
                 <option value="Music"><?php echo __('Music'); ?></option>
                 <option value="Cast"><?php echo __('Cast'); ?></option>
+                <option value="Sponsor"><?php echo __('Sponsor'); ?></option>
                 <option value="Other"><?php echo __('Other'); ?></option>
               </select>
             </div>
@@ -574,7 +575,7 @@
       addCreditBtn.addEventListener('click', function() {
         var row = document.createElement('div');
         row.className = 'row credit-row mb-2';
-        row.innerHTML = '<div class="col-md-4"><select class="form-select" name="credit_role[]"><option value="">-- Role --</option><option value="Director">Director</option><option value="Producer">Producer</option><option value="Writer">Writer</option><option value="Photography">Photography</option><option value="Editor">Editor</option><option value="Sound">Sound</option><option value="Music">Music</option><option value="Cast">Cast</option><option value="Other">Other</option></select></div><div class="col-md-6"><input type="text" class="form-control" name="credit_name[]" placeholder="Name"></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger btn-remove-credit"><i class="fas fa-times"></i></button></div>';
+        row.innerHTML = '<div class="col-md-4"><select class="form-select" name="credit_role[]"><option value="">-- Role --</option><option value="Director">Director</option><option value="Producer">Producer</option><option value="Writer">Writer</option><option value="Photography">Photography</option><option value="Editor">Editor</option><option value="Sound">Sound</option><option value="Music">Music</option><option value="Cast">Cast</option><option value="Sponsor">Sponsor</option><option value="Other">Other</option></select></div><div class="col-md-6"><input type="text" class="form-control" name="credit_name[]" placeholder="Name"></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger btn-remove-credit"><i class="fas fa-times"></i></button></div>';
         creditsContainer.appendChild(row);
       });
 

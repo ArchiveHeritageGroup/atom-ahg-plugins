@@ -17,9 +17,9 @@
   <?php echo $form->renderGlobalErrors(); ?>
 
   <?php if (isset($sf_request->getAttribute('sf_route')->resource)) { ?>
-    <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'informationobject', 'action' => 'edit']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
+    <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'ahgDAMPlugin', 'action' => 'edit']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
   <?php } else { ?>
-    <?php echo $form->renderFormTag(url_for(['module' => 'ahgDAMPlugin', 'action' => 'add']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
+    <?php echo $form->renderFormTag(url_for(['module' => 'ahgDam', 'action' => 'create']), ['id' => 'editForm', 'data-sector' => 'dam']); ?>
   <?php } ?>
 
     <?php echo $form->renderHiddenFields(); ?>
@@ -54,6 +54,163 @@
             <?php echo render_field($form->extentAndMedium
                 ->help(__('File format, size, dimensions'))
                 ->label(__('Extent and medium')), $resource, ['class' => 'resizable']); ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Type Selection -->
+    <div class="card mb-3 border-primary">
+      <div class="card-header bg-primary text-white">
+        <i class="fas fa-tag"></i> <?php echo __('Asset Type'); ?>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold"><?php echo __('Asset Type'); ?></label>
+            <select class="form-select form-select-lg" name="asset_type" id="assetTypeSelect">
+              <option value=""><?php echo __('-- Select Asset Type --'); ?></option>
+              <optgroup label="<?php echo __('Image'); ?>">
+                <option value="photo" <?php echo ($iptc->asset_type ?? '') == 'photo' ? 'selected' : ''; ?>><?php echo __('Photo / Image'); ?></option>
+                <option value="artwork" <?php echo ($iptc->asset_type ?? '') == 'artwork' ? 'selected' : ''; ?>><?php echo __('Artwork / Painting'); ?></option>
+                <option value="scan" <?php echo ($iptc->asset_type ?? '') == 'scan' ? 'selected' : ''; ?>><?php echo __('Scan / Digitized'); ?></option>
+              </optgroup>
+              <optgroup label="<?php echo __('Video / Film'); ?>">
+                <option value="documentary" <?php echo ($iptc->asset_type ?? '') == 'documentary' ? 'selected' : ''; ?>><?php echo __('Documentary'); ?></option>
+                <option value="feature" <?php echo ($iptc->asset_type ?? '') == 'feature' ? 'selected' : ''; ?>><?php echo __('Feature Film'); ?></option>
+                <option value="short" <?php echo ($iptc->asset_type ?? '') == 'short' ? 'selected' : ''; ?>><?php echo __('Short Film'); ?></option>
+                <option value="news" <?php echo ($iptc->asset_type ?? '') == 'news' ? 'selected' : ''; ?>><?php echo __('News / Footage'); ?></option>
+                <option value="interview" <?php echo ($iptc->asset_type ?? '') == 'interview' ? 'selected' : ''; ?>><?php echo __('Interview'); ?></option>
+                <option value="home_movie" <?php echo ($iptc->asset_type ?? '') == 'home_movie' ? 'selected' : ''; ?>><?php echo __('Home Movie'); ?></option>
+              </optgroup>
+              <optgroup label="<?php echo __('Audio'); ?>">
+                <option value="oral_history" <?php echo ($iptc->asset_type ?? '') == 'oral_history' ? 'selected' : ''; ?>><?php echo __('Oral History'); ?></option>
+                <option value="music" <?php echo ($iptc->asset_type ?? '') == 'music' ? 'selected' : ''; ?>><?php echo __('Music Recording'); ?></option>
+                <option value="podcast" <?php echo ($iptc->asset_type ?? '') == 'podcast' ? 'selected' : ''; ?>><?php echo __('Podcast / Radio'); ?></option>
+                <option value="speech" <?php echo ($iptc->asset_type ?? '') == 'speech' ? 'selected' : ''; ?>><?php echo __('Speech / Lecture'); ?></option>
+              </optgroup>
+              <optgroup label="<?php echo __('Document'); ?>">
+                <option value="document" <?php echo ($iptc->asset_type ?? '') == 'document' ? 'selected' : ''; ?>><?php echo __('Document / PDF'); ?></option>
+                <option value="manuscript" <?php echo ($iptc->asset_type ?? '') == 'manuscript' ? 'selected' : ''; ?>><?php echo __('Manuscript'); ?></option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label"><?php echo __('Genre'); ?></label>
+            <input type="text" class="form-control" name="genre" value="<?php echo esc_entities($iptc->genre ?? ''); ?>" placeholder="<?php echo __('e.g., Documentary, Drama, Portrait'); ?>">
+          </div>
+          <div class="col-md-4 mb-3 field-video field-audio" style="display:none;">
+            <label class="form-label"><?php echo __('Color'); ?></label>
+            <select class="form-select" name="color_type">
+              <option value=""><?php echo __('-- Select --'); ?></option>
+              <option value="color" <?php echo ($iptc->color_type ?? '') == 'color' ? 'selected' : ''; ?>><?php echo __('Color'); ?></option>
+              <option value="black_and_white" <?php echo ($iptc->color_type ?? '') == 'black_and_white' ? 'selected' : ''; ?>><?php echo __('Black & White'); ?></option>
+              <option value="mixed" <?php echo ($iptc->color_type ?? '') == 'mixed' ? 'selected' : ''; ?>><?php echo __('Mixed'); ?></option>
+              <option value="colorized" <?php echo ($iptc->color_type ?? '') == 'colorized' ? 'selected' : ''; ?>><?php echo __('Colorized'); ?></option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Film/Video Production (Only for video types) -->
+    <div class="card mb-3 field-video" style="display:none;">
+      <div class="card-header bg-danger text-white">
+        <i class="fas fa-film"></i> <?php echo __('Production Details'); ?>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Production Company'); ?></label>
+            <input type="text" class="form-control" name="production_company" value="<?php echo esc_entities($iptc->production_company ?? ''); ?>" placeholder="<?php echo __('e.g., VPRO, SABC'); ?>">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Distributor / Broadcaster'); ?></label>
+            <input type="text" class="form-control" name="distributor" value="<?php echo esc_entities($iptc->distributor ?? ''); ?>">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label"><?php echo __('Broadcast / Release Date'); ?></label>
+            <input type="text" class="form-control" name="broadcast_date" value="<?php echo esc_entities($iptc->broadcast_date ?? ''); ?>" placeholder="<?php echo __('e.g., 2006'); ?>">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label"><?php echo __('Series Title'); ?></label>
+            <input type="text" class="form-control" name="series_title" value="<?php echo esc_entities($iptc->series_title ?? ''); ?>">
+          </div>
+          <div class="col-md-2 mb-3">
+            <label class="form-label"><?php echo __('Season'); ?></label>
+            <input type="number" class="form-control" name="season_number" value="<?php echo esc_entities($iptc->season_number ?? ''); ?>">
+          </div>
+          <div class="col-md-2 mb-3">
+            <label class="form-label"><?php echo __('Episode'); ?></label>
+            <input type="number" class="form-control" name="episode_number" value="<?php echo esc_entities($iptc->episode_number ?? ''); ?>">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><?php echo __('Awards / Recognition'); ?></label>
+          <textarea class="form-control" name="awards" rows="2" placeholder="<?php echo __('e.g., Nominated for Golden Calf Award 2006'); ?>"><?php echo esc_entities($iptc->awards ?? ''); ?></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Production Credits (Video/Audio) -->
+    <div class="card mb-3 field-video field-audio" style="display:none;">
+      <div class="card-header bg-secondary text-white">
+        <i class="fas fa-users"></i> <?php echo __('Production Credits'); ?>
+      </div>
+      <div class="card-body">
+        <div id="creditsContainer">
+          <?php
+          $rawIptc = $sf_data->getRaw('iptc'); $contributors = json_decode($rawIptc->contributors_json ?? '[]', true) ?: [];
+          if (empty($contributors)) {
+            $contributors = [['role' => '', 'name' => '']];
+          }
+          foreach ($contributors as $index => $contributor):
+          ?>
+          <div class="row credit-row mb-2">
+            <div class="col-md-4">
+              <select class="form-select" name="credit_role[]">
+                <option value=""><?php echo __('-- Role --'); ?></option>
+                <option value="Director" <?php echo ($contributor['role'] ?? '') == 'Director' ? 'selected' : ''; ?>><?php echo __('Director'); ?></option>
+                <option value="Producer" <?php echo ($contributor['role'] ?? '') == 'Producer' ? 'selected' : ''; ?>><?php echo __('Producer'); ?></option>
+                <option value="Writer" <?php echo ($contributor['role'] ?? '') == 'Writer' ? 'selected' : ''; ?>><?php echo __('Writer'); ?></option>
+                <option value="Photography" <?php echo ($contributor['role'] ?? '') == 'Photography' ? 'selected' : ''; ?>><?php echo __('Photography'); ?></option>
+                <option value="Editor" <?php echo ($contributor['role'] ?? '') == 'Editor' ? 'selected' : ''; ?>><?php echo __('Editor'); ?></option>
+                <option value="Sound" <?php echo ($contributor['role'] ?? '') == 'Sound' ? 'selected' : ''; ?>><?php echo __('Sound'); ?></option>
+                <option value="Music" <?php echo ($contributor['role'] ?? '') == 'Music' ? 'selected' : ''; ?>><?php echo __('Music'); ?></option>
+                <option value="Cast" <?php echo ($contributor['role'] ?? '') == 'Cast' ? 'selected' : ''; ?>><?php echo __('Cast'); ?></option>
+                <option value="Sponsor" <?php echo ($contributor['role'] ?? '') == 'Sponsor' ? 'selected' : ''; ?>><?php echo __('Sponsor'); ?></option>
+                <option value="Other" <?php echo ($contributor['role'] ?? '') == 'Other' ? 'selected' : ''; ?>><?php echo __('Other'); ?></option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <input type="text" class="form-control" name="credit_name[]" value="<?php echo esc_entities($contributor['name'] ?? ''); ?>" placeholder="<?php echo __('Name'); ?>">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-danger btn-remove-credit"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="addCreditBtn"><i class="fas fa-plus"></i> <?php echo __('Add Credit'); ?></button>
+      </div>
+    </div>
+
+    <!-- Language (Video/Audio) -->
+    <div class="card mb-3 field-video field-audio" style="display:none;">
+      <div class="card-header bg-info text-white">
+        <i class="fas fa-language"></i> <?php echo __('Language'); ?>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Audio Language'); ?></label>
+            <input type="text" class="form-control" name="audio_language" value="<?php echo esc_entities($iptc->audio_language ?? ''); ?>" placeholder="<?php echo __('e.g., Afrikaans, English'); ?>">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Subtitle Language'); ?></label>
+            <input type="text" class="form-control" name="subtitle_language" value="<?php echo esc_entities($iptc->subtitle_language ?? ''); ?>" placeholder="<?php echo __('e.g., English'); ?>">
           </div>
         </div>
       </div>
@@ -361,6 +518,84 @@
       </div>
     </div>
 
+
+    <!-- Access Points -->
+    <div class="card mb-3">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#accessPointsSection" style="cursor:pointer;">
+        <i class="fas fa-tags"></i> <?php echo __('Access Points'); ?>
+        <i class="fas fa-chevron-down float-end mt-1"></i>
+      </div>
+      <div class="collapse" id="accessPointsSection">
+        <div class="card-body">
+            <?php
+                $taxonomy = QubitTaxonomy::getById(QubitTaxonomy::SUBJECT_ID);
+                $taxonomyUrl = url_for([$taxonomy, 'module' => 'taxonomy']);
+                $extraInputs = '<input class="list" type="hidden" value="'
+                    .url_for(['module' => 'term', 'action' => 'autocomplete', 'taxonomy' => $taxonomyUrl])
+                    .'">';
+                if (\AtomExtensions\Services\AclService::check($taxonomy, 'createTerm')) {
+                    $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
+                        .url_for(['module' => 'term', 'action' => 'add', 'taxonomy' => $taxonomyUrl])
+                        .' #name">';
+                }
+                echo render_field(
+                    $form->subjectAccessPoints->label(__('Subject access points')),
+                    null,
+                    ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
+                );
+            ?>
+            <?php
+                $taxonomy = QubitTaxonomy::getById(QubitTaxonomy::PLACE_ID);
+                $taxonomyUrl = url_for([$taxonomy, 'module' => 'taxonomy']);
+                $extraInputs = '<input class="list" type="hidden" value="'
+                    .url_for(['module' => 'term', 'action' => 'autocomplete', 'taxonomy' => $taxonomyUrl])
+                    .'">';
+                if (\AtomExtensions\Services\AclService::check($taxonomy, 'createTerm')) {
+                    $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
+                        .url_for(['module' => 'term', 'action' => 'add', 'taxonomy' => $taxonomyUrl])
+                        .' #name">';
+                }
+                echo render_field(
+                    $form->placeAccessPoints->label(__('Place access points')),
+                    null,
+                    ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
+                );
+            ?>
+            <?php
+                $taxonomy = QubitTaxonomy::getById(QubitTaxonomy::GENRE_ID);
+                $taxonomyUrl = url_for([$taxonomy, 'module' => 'taxonomy']);
+                $extraInputs = '<input class="list" type="hidden" value="'
+                    .url_for(['module' => 'term', 'action' => 'autocomplete', 'taxonomy' => $taxonomyUrl])
+                    .'">';
+                if (\AtomExtensions\Services\AclService::check($taxonomy, 'createTerm')) {
+                    $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
+                        .url_for(['module' => 'term', 'action' => 'add', 'taxonomy' => $taxonomyUrl])
+                        .' #name">';
+                }
+                echo render_field(
+                    $form->genreAccessPoints->label(__('Genre access points')),
+                    null,
+                    ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
+                );
+            ?>
+            <?php
+                $extraInputs = '<input class="list" type="hidden" value="'
+                    .url_for(['module' => 'actor', 'action' => 'autocomplete', 'showOnlyActors' => 'true'])
+                    .'">';
+                if (\AtomExtensions\Services\AclService::check(QubitActor::getRoot(), 'create')) {
+                    $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
+                        .url_for(['module' => 'actor', 'action' => 'add'])
+                        .' #authorizedFormOfName">';
+                }
+                echo render_field(
+                    $form->nameAccessPoints->label(__('Name access points (subjects)')),
+                    null,
+                    ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
+                );
+            ?>
+        </div>
+      </div>
+    </div>
     <!-- Repository -->
     <div class="card mb-3">
       <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#repositorySection" style="cursor:pointer;">
@@ -415,4 +650,93 @@
 
   </form>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const fieldGroups = {
+    photo: [],
+    artwork: ['field-artwork'],
+    scan: [],
+    documentary: ['field-video'],
+    feature: ['field-video'],
+    short: ['field-video'],
+    news: ['field-video'],
+    interview: ['field-video', 'field-audio'],
+    home_movie: ['field-video'],
+    oral_history: ['field-audio'],
+    music: ['field-audio'],
+    podcast: ['field-audio'],
+    speech: ['field-audio'],
+    document: [],
+    manuscript: []
+  };
+
+  const assetSelect = document.getElementById('assetTypeSelect');
+  if (!assetSelect) return;
+
+  function updateFieldVisibility() {
+    const assetType = assetSelect.value;
+    // Hide all conditional fields first
+    document.querySelectorAll('.field-photo, .field-video, .field-audio, .field-artwork').forEach(el => {
+      el.style.display = 'none';
+    });
+    // Show relevant fields
+    if (assetType && fieldGroups[assetType]) {
+      fieldGroups[assetType].forEach(cls => {
+        document.querySelectorAll('.' + cls).forEach(el => {
+          el.style.display = '';
+        });
+      });
+    }
+  }
+
+  assetSelect.addEventListener('change', updateFieldVisibility);
+  updateFieldVisibility();
+
+  // Credits management
+  const creditsContainer = document.getElementById('creditsContainer');
+  const addCreditBtn = document.getElementById('addCreditBtn');
+  
+  if (addCreditBtn) {
+    addCreditBtn.addEventListener('click', function() {
+      const row = document.createElement('div');
+      row.className = 'row credit-row mb-2';
+      row.innerHTML = `
+        <div class="col-md-4">
+          <select class="form-select" name="credit_role[]">
+            <option value=""><?php echo __('-- Role --'); ?></option>
+            <option value="Director"><?php echo __('Director'); ?></option>
+            <option value="Producer"><?php echo __('Producer'); ?></option>
+            <option value="Writer"><?php echo __('Writer'); ?></option>
+            <option value="Photography"><?php echo __('Photography'); ?></option>
+            <option value="Editor"><?php echo __('Editor'); ?></option>
+            <option value="Sound"><?php echo __('Sound'); ?></option>
+            <option value="Music"><?php echo __('Music'); ?></option>
+            <option value="Cast"><?php echo __('Cast'); ?></option>
+            <option value="Sponsor"><?php echo __('Sponsor'); ?></option>
+            <option value="Other"><?php echo __('Other'); ?></option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <input type="text" class="form-control" name="credit_name[]" placeholder="<?php echo __('Name'); ?>">
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-outline-danger btn-remove-credit"><i class="fas fa-times"></i></button>
+        </div>
+      `;
+      creditsContainer.appendChild(row);
+    });
+  }
+
+  // Remove credit row
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.btn-remove-credit')) {
+      const row = e.target.closest('.credit-row');
+      if (row && creditsContainer.querySelectorAll('.credit-row').length > 1) {
+        row.remove();
+      }
+    }
+  });
+});
+</script>
 <?php end_slot(); ?>

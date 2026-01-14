@@ -66,6 +66,15 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
             }
         }
 
+
+        // Load IPTC data for template
+        if ($this->resource->id) {
+            $this->iptc = \Illuminate\Database\Capsule\Manager::table('dam_iptc_metadata')
+                ->where('object_id', $this->resource->id)
+                ->first();
+        } else {
+            $this->iptc = (object)[];
+        }
         QubitDescription::addAssets($this->response);
     }
 
@@ -214,6 +223,19 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 'title' => $request->getParameter('iptc_title'),
                 'job_id' => $request->getParameter('iptc_job_id'),
                 'instructions' => $request->getParameter('iptc_instructions'),
+                'asset_type' => $request->getParameter('asset_type') ?: null,
+                'genre' => $request->getParameter('genre'),
+                'color_type' => $request->getParameter('color_type') ?: null,
+                'audio_language' => $request->getParameter('audio_language'),
+                'subtitle_language' => $request->getParameter('subtitle_language'),
+                'production_company' => $request->getParameter('production_company'),
+                'distributor' => $request->getParameter('distributor'),
+                'broadcast_date' => $request->getParameter('broadcast_date') ?: null,
+                'awards' => $request->getParameter('awards'),
+                'series_title' => $request->getParameter('series_title'),
+                'season_number' => $request->getParameter('season_number') ?: null,
+                'episode_number' => $request->getParameter('episode_number') ?: null,
+                'contributors_json' => $this->buildContributorsJson($request),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
@@ -283,7 +305,7 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
         switch ($name) {
             case 'levelOfDescription':
                 // Filter levels by DAM sector
-                $this->form->setDefault('levelOfDescription', $this->context->routing->generate(null, [$this->resource->levelOfDescription, 'module' => 'term']));
+                $this->form->setDefault('levelOfDescription', $this->resource->levelOfDescription ? sfConfig::get('sf_script_name', '/index.php') . '/' . $this->resource->levelOfDescription->slug : null);
                 $this->form->setValidator('levelOfDescription', new sfValidatorString());
                 $choices = [];
                 $choices[null] = null;
@@ -312,5 +334,26 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
             default:
                 return parent::addField($name);
         }
+    }
+
+    /**
+     * Build contributors JSON from form arrays
+     */
+    protected function buildContributorsJson($request)
+    {
+        $roles = $request->getParameter('credit_role', []);
+        $names = $request->getParameter('credit_name', []);
+        
+        $contributors = [];
+        foreach ($roles as $index => $role) {
+            if (!empty($role) && !empty($names[$index])) {
+                $contributors[] = [
+                    'role' => trim($role),
+                    'name' => trim($names[$index])
+                ];
+            }
+        }
+        
+        return !empty($contributors) ? json_encode($contributors) : null;
     }
 }

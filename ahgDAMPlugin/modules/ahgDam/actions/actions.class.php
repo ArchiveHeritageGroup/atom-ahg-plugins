@@ -194,6 +194,20 @@ class ahgDamActions extends sfActions
                 // Administrative
                 'job_id' => $request->getParameter('iptc_job_id'),
                 'instructions' => $request->getParameter('iptc_instructions'),
+                // PBCore / Film-Video Production
+                'asset_type' => $request->getParameter('asset_type') ?: null,
+                'genre' => $request->getParameter('genre'),
+                'color_type' => $request->getParameter('color_type') ?: null,
+                'audio_language' => $request->getParameter('audio_language'),
+                'subtitle_language' => $request->getParameter('subtitle_language'),
+                'production_company' => $request->getParameter('production_company'),
+                'distributor' => $request->getParameter('distributor'),
+                'broadcast_date' => $request->getParameter('broadcast_date') ?: null,
+                'awards' => $request->getParameter('awards'),
+                'series_title' => $request->getParameter('series_title'),
+                'season_number' => $request->getParameter('season_number') ?: null,
+                'episode_number' => $request->getParameter('episode_number') ?: null,
+                'contributors_json' => $this->buildContributorsJson($request),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
             

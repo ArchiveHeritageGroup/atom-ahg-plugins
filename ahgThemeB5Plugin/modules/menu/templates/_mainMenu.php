@@ -86,7 +86,7 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'add']); ?>"><i class="fas fa-book fa-fw me-2"></i><?php echo __('Library item'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasDam): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDAMPlugin', 'action' => 'add']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDam', 'action' => 'create']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
           <?php endif; ?>
         <?php endif; ?>
 

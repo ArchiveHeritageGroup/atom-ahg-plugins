@@ -194,6 +194,44 @@
   <?php endif; ?>
 
   <!-- IPTC Copyright & Rights -->
+
+  <!-- Film / Video Production (PBCore) -->
+  <?php if ($iptc && (!empty($iptc->asset_type) || !empty($iptc->genre) || !empty($iptc->production_company) || !empty($iptc->contributors_json))): ?>
+  <section class="card mb-3">
+    <div class="card-header bg-dark text-white">
+      <h4 class="mb-0"><i class="fas fa-film"></i> <?php echo __('Film / Video Production'); ?></h4>
+    </div>
+    <div class="card-body">
+      <?php if (!empty($iptc->asset_type)) echo render_show(__('Asset Type'), ucfirst(str_replace('_', ' ', $iptc->asset_type))); ?>
+      <?php if (!empty($iptc->genre)) echo render_show(__('Genre'), $iptc->genre); ?>
+      <?php if (!empty($iptc->color_type)) echo render_show(__('Color'), ucfirst($iptc->color_type)); ?>
+      <?php if (!empty($iptc->audio_language)) echo render_show(__('Audio Language'), $iptc->audio_language); ?>
+      <?php if (!empty($iptc->production_company)) echo render_show(__('Production Company'), $iptc->production_company); ?>
+      <?php if (!empty($iptc->distributor)) echo render_show(__('Distributor'), $iptc->distributor); ?>
+      <?php if (!empty($iptc->broadcast_date)) echo render_show(__('Broadcast Date'), $iptc->broadcast_date); ?>
+      <?php if (!empty($iptc->series_title)) echo render_show(__('Series'), $iptc->series_title . (!empty($iptc->season_number) ? ' - Season ' . $iptc->season_number : '') . (!empty($iptc->episode_number) ? ', Episode ' . $iptc->episode_number : '')); ?>
+      <?php if (!empty($iptc->awards)) echo render_show(__('Awards'), nl2br(esc_entities($iptc->awards))); ?>
+      <?php if (!empty($iptc->contributors_json)): ?>
+        <?php $rawIptc = $sf_data->getRaw("iptc"); $credits = json_decode($rawIptc->contributors_json, true); ?>
+        <?php if ($credits): ?>
+        <div class="field">
+          <h3><?php echo __('Production Credits'); ?></h3>
+          <div>
+            <table class="table table-sm table-striped">
+              <?php foreach ($credits as $credit): ?>
+              <tr>
+                <td class="fw-bold" style="width: 200px;"><?php echo esc_entities($credit['role']); ?></td>
+                <td><?php echo esc_entities($credit['name']); ?></td>
+              </tr>
+              <?php endforeach; ?>
+            </table>
+          </div>
+        </div>
+        <?php endif; ?>
+      <?php endif; ?>
+    </div>
+  </section>
+  <?php endif; ?>
   <?php if ($iptc && (!empty($iptc->copyright_notice) || !empty($iptc->license_type) || !empty($iptc->credit_line))): ?>
   <section class="card mb-3">
     <div class="card-header bg-warning">

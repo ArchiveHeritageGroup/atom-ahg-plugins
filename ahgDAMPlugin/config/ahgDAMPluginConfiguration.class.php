@@ -19,10 +19,13 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
         
+        error_log("DAM Plugin: Loading routes");
         $routing->prependRoute('dam_index', new sfRoute('/dam', ['module' => 'ahgDam', 'action' => 'index']));
         $routing->prependRoute('dam_browse', new sfRoute('/dam/browse', ['module' => 'ahgDam', 'action' => 'browse']));
         $routing->prependRoute('dam_lightbox', new sfRoute('/dam/lightbox', ['module' => 'ahgDam', 'action' => 'lightbox']));
         $routing->prependRoute('dam_reports', new sfRoute('/dam/reports', ['module' => 'damReports', 'action' => 'index']));
         $routing->prependRoute('dam_dashboard', new sfRoute('/dam/dashboard', ['module' => 'ahgDam', 'action' => 'dashboard']));
+        $routing->prependRoute('dam_view', new QubitMetadataRoute('/dam/:slug', ['module' => 'ahgDAMPlugin', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
+        $routing->prependRoute('dam_create', new sfRoute('/dam/create', ['module' => 'ahgDam', 'action' => 'create']));
     }
 }
