@@ -24,7 +24,7 @@ if (!function_exists('checkPluginEnabled')) {
 $rawResource = sfOutputEscaper::unescape($resource);
 ?>
 <?php slot('title'); ?>
-  <h1><?php echo esc_entities($resource->getTitle(['cultureFallback' => true])); ?></h1>
+  <h1><?php echo esc_specialchars(html_entity_decode($resource->getTitle(['cultureFallback' => true]), ENT_QUOTES, 'UTF-8')); ?></h1>
 <?php end_slot(); ?>
 <?php slot('sidebar'); ?>
   <?php include_partial('ahgLibraryPlugin/librarySidebar', ['resource' => $rawResource, 'sf_user' => $sf_user]); ?>
@@ -37,7 +37,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-4"><?php echo __('Title'); ?></dt>
-          <dd class="col-sm-8"><?php echo esc_entities($resource->getTitle(['cultureFallback' => true])); ?></dd>
+          <dd class="col-sm-8"><?php echo esc_specialchars(html_entity_decode($resource->getTitle(['cultureFallback' => true]), ENT_QUOTES, 'UTF-8')); ?></dd>
 
           <?php if (!empty($libraryData['subtitle'])): ?>
             <dt class="col-sm-4"><?php echo __('Subtitle'); ?></dt>
