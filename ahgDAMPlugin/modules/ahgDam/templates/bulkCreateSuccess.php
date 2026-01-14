@@ -63,7 +63,7 @@
         <li><?php echo __('Find the records you want to convert'); ?></li>
         <li><?php echo __('Use the action menu to change type to "Photo/DAM"'); ?></li>
       </ol>
-      <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>" class="btn btn-warning">
+      <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse']); ?>" class="btn btn-warning">
         <i class="fas fa-th-large"></i> <?php echo __('Open GLAM Browser'); ?>
       </a>
     </div>

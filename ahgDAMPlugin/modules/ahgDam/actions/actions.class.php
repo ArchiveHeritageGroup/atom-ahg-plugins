@@ -500,7 +500,7 @@ class ahgDamActions extends sfActions
 
     public function executeBrowse(sfWebRequest $request)
     {
-        $this->redirect('display/browse?type=dam');
+        $this->redirect('ahgDisplay/browse?type=dam');
     }
 
     public function executeBulkCreate(sfWebRequest $request)

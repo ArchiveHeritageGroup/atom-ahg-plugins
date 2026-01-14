@@ -24,10 +24,10 @@
     <a href="<?php echo url_for(['module' => 'dam', 'action' => 'bulkCreate']); ?>" class="list-group-item list-group-item-action">
       <i class="fas fa-upload text-primary me-2"></i><?php echo __('Bulk upload'); ?>
     </a>
-    <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam']); ?>" class="list-group-item list-group-item-action">
+    <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse', 'type' => 'dam']); ?>" class="list-group-item list-group-item-action">
       <i class="fas fa-search text-info me-2"></i><?php echo __('Browse all assets'); ?>
     </a>
-    <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam', 'hasDigital' => 1]); ?>" class="list-group-item list-group-item-action">
+    <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse', 'type' => 'dam', 'hasDigital' => 1]); ?>" class="list-group-item list-group-item-action">
       <i class="fas fa-image text-warning me-2"></i><?php echo __('With digital objects'); ?>
     <a href="<?php echo url_for(['module' => 'damReports', 'action' => 'index']); ?>" class="list-group-item list-group-item-action">
       <i class="fas fa-chart-bar text-info me-2"></i><?php echo __("DAM Reports"); ?>
@@ -98,7 +98,7 @@
           </a>
         </div>
         <div class="col-md-4 mb-2">
-          <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam']); ?>" class="btn btn-info btn-lg w-100">
+          <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse', 'type' => 'dam']); ?>" class="btn btn-info btn-lg w-100">
         </div>
         <div class="col-md-3">
       </div>
@@ -147,7 +147,7 @@
   <div class="card">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
       <span><i class="fas fa-clock"></i> <?php echo __('Recent Assets'); ?></span>
-      <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam', 'sort' => 'date', 'dir' => 'desc']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo __('View all'); ?></a>
+      <a href="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse', 'type' => 'dam', 'sort' => 'date', 'dir' => 'desc']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo __('View all'); ?></a>
     </div>
     <div class="card-body p-0">
       <?php if (empty($recentAssets)): ?>
