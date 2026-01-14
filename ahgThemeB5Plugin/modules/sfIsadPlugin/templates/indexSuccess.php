@@ -7,7 +7,7 @@
 <?php slot('title'); ?>
 
   <?php echo get_component('informationobject', 'descriptionHeader', ['resource' => $resource, 'title' => (string) $isad]); ?>
-  <?php if (class_exists('ahgSecurityClearancePluginConfiguration')): ?>
+  <?php if (in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
   <?php include_partial('ahgSecurityClearance/securityBadge', ['resource' => $resource]); ?>
   <?php endif; ?>
   <?php if (isset($errorSchema)) { ?>
@@ -105,20 +105,20 @@ if ($userId) {
 $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
 ?>
 <div class="d-flex flex-wrap gap-1 mb-3">
-  <?php if (class_exists('ahgFavoritesPluginConfiguration') && $userId): ?>
+  <?php if (in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $userId): ?>
     <?php if ($favoriteId): ?>
       <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
     <?php else: ?>
       <a href="<?php echo url_for(['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
     <?php endif; ?>
   <?php endif; ?>
-  <?php if (class_exists('ahgFeedbackPluginConfiguration')): ?>
+  <?php if (in_array('ahgFeedbackPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
     <a href="<?php echo url_for(['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
   <?php endif; ?>
-  <?php if (class_exists('ahgRequestToPublishPluginConfiguration') && $hasDigitalObject): ?>
+  <?php if (in_array('ahgRequestToPublishPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $hasDigitalObject): ?>
     <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
   <?php endif; ?>
-  <?php if (class_exists('ahgCartPluginConfiguration') && $hasDigitalObject): ?>
+  <?php if (in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $hasDigitalObject): ?>
     <?php if ($cartId): ?>
       <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'browse']); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Go to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-shopping-cart"></i></a>
     <?php else: ?>

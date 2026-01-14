@@ -71,10 +71,10 @@ if (!$cartId && $sessionId) {
 }
 
 // Check which plugins are enabled
-$favoritesEnabled = class_exists('ahgFavoritesPluginConfiguration');
-$feedbackEnabled = class_exists('ahgFeedbackPluginConfiguration');
-$requestToPublishEnabled = class_exists('ahgRequestToPublishPluginConfiguration');
-$cartEnabled = class_exists('ahgCartPluginConfiguration');
+$favoritesEnabled = in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins());
+$feedbackEnabled = in_array('ahgFeedbackPlugin', sfProjectConfiguration::getActive()->getPlugins());
+$requestToPublishEnabled = in_array('ahgRequestToPublishPlugin', sfProjectConfiguration::getActive()->getPlugins());
+$cartEnabled = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->getPlugins());
 ?>
 
 <div class="card mb-4 mt-3">

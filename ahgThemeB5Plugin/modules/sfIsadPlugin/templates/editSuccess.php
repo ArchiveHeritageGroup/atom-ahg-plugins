@@ -398,7 +398,7 @@
         </div>
       </div>
 
-      <?php if (class_exists('ahgSecurityClearancePluginConfiguration')): ?>
+      <?php if (in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
       <?php include_partial('ahgSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
       <?php endif; ?>
       <?php echo get_partial('informationobject/adminInfo', ['form' => $form, 'resource' => $resource]); ?>
