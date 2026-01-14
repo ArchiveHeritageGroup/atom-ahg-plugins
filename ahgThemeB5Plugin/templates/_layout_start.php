@@ -9,7 +9,7 @@
     <script defer src="/dist/js/vendor.bundle.7fd4785c4754082db86b.js"></script><script defer src="/dist/js/ahgThemeB5Plugin.bundle.5143f3ea019729b8aaa0.js"></script><link href="/dist/css/ahgThemeB5Plugin.bundle.7e0f865c257625fdb5ba.css" rel="stylesheet">
     <?php echo get_component_slot('css'); ?>
   </head>
-  <body class="d-flex flex-column min-vh-100 <?php echo $sf_context->getModuleName(); ?> <?php echo $sf_context->getActionName(); ?>">
+  <body class="d-flex flex-column min-vh-100 <?php echo $sf_context->getModuleName(); ?> <?php echo $sf_context->getActionName(); ?><?php echo sfConfig::get('app_show_tooltips') ? ' show-edit-tooltips' : ''; ?>">
     <?php echo get_component('default', 'tagManager', ['code' => 'noscript']); ?>
     <?php echo get_partial('header'); ?>
     <?php include_slot('pre'); ?>
