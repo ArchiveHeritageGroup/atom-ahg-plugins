@@ -73,9 +73,28 @@ class ObjectAddDigitalObjectAction extends sfAction
         if ($request->isMethod('post')) {
             $this->form->bind($request->getPostParameters(), $request->getFiles());
             if ($this->form->isValid()) {
+                // BUG FIX #60: Preserve display_standard_id before save
+                // The Propel save() method can reset display_standard_id to default (ISAD)
+                $preservedDisplayStandardId = null;
+                if ($this->resource instanceof QubitInformationObject && isset($this->resource->displayStandardId)) {
+                    $preservedDisplayStandardId = $this->resource->displayStandardId;
+                }
+
                 $this->processForm();
 
                 $this->resource->save();
+
+                // BUG FIX #60: Restore display_standard_id if it was changed during save
+                if ($preservedDisplayStandardId !== null) {
+                    $currentId = DB::table('information_object')
+                        ->where('id', $this->resource->id)
+                        ->value('display_standard_id');
+                    if ($currentId != $preservedDisplayStandardId) {
+                        DB::table('information_object')
+                            ->where('id', $this->resource->id)
+                            ->update(['display_standard_id' => $preservedDisplayStandardId]);
+                    }
+                }
 
                 // Extract and apply metadata AFTER digital object is created
                 // Wrapped in try-catch to ensure upload succeeds even if metadata fails
