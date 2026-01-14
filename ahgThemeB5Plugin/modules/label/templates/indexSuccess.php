@@ -5,7 +5,7 @@
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
-<h1 class="no-print"><?php echo __('Print Labels'); ?>: <?php echo esc_entities($resource->title ?? $resource->slug); ?></h1>
+<h1 class="no-print"><?php echo __('Print Labels'); ?>: <?php echo esc_specialchars(html_entity_decode($resource->title ?? $resource->slug, ENT_QUOTES, 'UTF-8')); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('context-menu'); ?>
@@ -133,7 +133,7 @@ if (!empty($objectNumber)) {
 // 8. Title as last option
 $barcodeSources['title'] = [
     'label' => __('Title'),
-    'value' => $resource->title ?? '',
+    'value' => html_entity_decode($resource->title ?? '', ENT_QUOTES, 'UTF-8'),
 ];
 
 // Default: use ISBN if available, then identifier, then title
@@ -161,16 +161,16 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 @media print {
     .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
     body { background: white !important; }
-    .label-preview { box-shadow: none !important; border: 1px solid #ccc !important; }
+    .label-preview { width: fit-content; min-width: 200px; box-shadow: none !important; border: 1px solid #ccc !important; }
 }
-.label-preview {
+.label-preview { width: fit-content; min-width: 200px;
     background: white;
     border: 2px solid #333;
     padding: 15px;
     margin: 20px auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-.barcode-img { max-height: 60px; }
+.barcode-img { max-height: 60px; width: auto; max-width: 100%; }
 .qr-img { max-width: 120px; max-height: 120px; }
 </style>
 
@@ -258,7 +258,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <div class="card-body text-center">
                 <div class="label-preview" id="labelContent" style="max-width: 300px;">
                     <div id="labelTitle" class="fw-bold mb-2" style="font-size: 11pt;">
-                        <?php echo esc_entities($resource->title ?? $resource->slug); ?>
+                        <?php echo esc_specialchars(html_entity_decode($resource->title ?? $resource->slug, ENT_QUOTES, 'UTF-8')); ?>
                     </div>
                     
                     <div id="labelRepo" class="small text-muted mb-2">

@@ -468,7 +468,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
             <?php endif; ?>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'label', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo '/index.php/label/' . $rawResource->slug; ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             
           </ul>

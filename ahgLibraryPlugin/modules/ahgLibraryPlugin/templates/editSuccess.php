@@ -1,7 +1,7 @@
 <?php decorate_with('layout_1col'); ?>
 
 <?php slot('title'); ?>
-  <h1><?php echo isset($resource->id) ? __('Edit %1%', ['%1%' => ($resource->title ?? "")]) : __('Add new library item'); ?></h1>
+  <h1><?php echo isset($resource->id) ? __('Edit %1%', ['%1%' => html_entity_decode($resource->title ?? '', ENT_QUOTES, 'UTF-8')]) : __('Add new library item'); ?></h1>
 <?php end_slot(); ?>
 
 <form method="post" action="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'edit', 'slug' => ($resource->slug ?? null)]); ?>" id="library-form">
