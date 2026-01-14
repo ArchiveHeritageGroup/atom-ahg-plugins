@@ -36,9 +36,9 @@ class InformationobjectIsbnLookupAction extends sfAction
 
         try {
             // Initialize services
-            $repository = new \AtomFramework\Repositories\IsbnLookupRepository();
-            $service = new \AtomFramework\Services\WorldCatService($repository);
-            $mapper = new \AtomFramework\Services\IsbnMetadataMapper();
+            $repository = new \ahgLibraryPlugin\Repository\IsbnLookupRepository();
+            $service = new \ahgLibraryPlugin\Service\WorldCatService($repository);
+            $mapper = new \ahgLibraryPlugin\Service\IsbnMetadataMapper();
 
             // Perform lookup
             $result = $service->lookup(
@@ -69,6 +69,7 @@ class InformationobjectIsbnLookupAction extends sfAction
 
         } catch (\Exception $e) {
             // Log error
+            error_log('[ISBN DEBUG] ' . date('Y-m-d H:i:s') . ' ISBN=' . $isbn . ' Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
             sfContext::getInstance()->getLogger()->err(
                 'ISBN lookup failed: '.$e->getMessage()
             );
