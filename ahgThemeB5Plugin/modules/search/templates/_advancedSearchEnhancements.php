@@ -1,5 +1,6 @@
 <?php /* DROPDOWN VERSION 2025-01-14 */ ?>
 <?php
+error_log("PARTIAL LOADED: _advancedSearchEnhancements.php");
 /**
  * Advanced Search Enhancements - Simplified
  */
