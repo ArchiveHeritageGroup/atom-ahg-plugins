@@ -10,6 +10,7 @@
 CREATE TABLE IF NOT EXISTS `cart` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT DEFAULT NULL,
+  `session_id` VARCHAR(255) DEFAULT NULL,
   `archival_description_id` INT DEFAULT NULL,
   `archival_description` VARCHAR(1024) DEFAULT NULL,
   `slug` VARCHAR(1024) DEFAULT NULL,
