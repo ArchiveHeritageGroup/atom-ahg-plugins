@@ -1,3 +1,4 @@
+<?php /* DROPDOWN VERSION 2025-01-14 */ ?>
 <?php
 /**
  * Advanced Search Enhancements - Simplified
@@ -17,7 +18,7 @@ try {
         $savedSearches = \Illuminate\Database\Capsule\Manager::table('saved_search')
             ->where('user_id', $userId)
             ->orderBy('updated_at', 'desc')
-            ->limit(5)
+            ->limit(10)
             ->get()
             ->toArray();
     }
@@ -34,46 +35,48 @@ try {
 }
 ?>
 
-<div class="advanced-search-enhancements mt-4 pt-3 border-top">
-  <div class="row">
-    <?php if (!empty($templates)): ?>
-    <div class="col-md-6 mb-3">
-      <h6 class="text-muted mb-2"><i class="fa fa-bolt me-1"></i><?php echo __('Quick Searches'); ?></h6>
-      <div class="d-flex flex-wrap gap-2">
-        <?php foreach ($templates as $template): ?>
-        <?php $params = json_decode($template->search_params, true) ?: []; ?>
-        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>"
-           class="btn btn-sm btn-outline-<?php echo esc_entities($template->color ?: 'secondary'); ?>">
-          <i class="fa <?php echo esc_entities($template->icon ?: 'fa-search'); ?> me-1"></i>
-          <?php echo esc_entities($template->name); ?>
-        </a>
-        <?php endforeach; ?>
-      </div>
-    </div>
-    <?php endif; ?>
+<div class="advanced-search-enhancements mt-3 pt-2 border-top">
+  <?php if (!empty($templates)): ?>
+  <div class="mb-2">
+    <span class="text-muted small me-2"><i class="fa fa-bolt me-1"></i><?php echo __('Quick Searches'); ?></span>
+    <?php foreach ($templates as $template): ?>
+    <?php $params = json_decode($template->search_params, true) ?: []; ?>
+    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>"
+       class="btn btn-sm btn-outline-<?php echo esc_entities($template->color ?: 'secondary'); ?> py-0 px-2">
+      <i class="fa <?php echo esc_entities($template->icon ?: 'fa-search'); ?> me-1"></i>
+      <?php echo esc_entities($template->name); ?>
+    </a>
+    <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
 
-    <?php if ($isAuthenticated && !empty($savedSearches)): ?>
-    <div class="col-md-6 mb-3">
-      <h6 class="text-muted mb-2"><i class="fa fa-bookmark me-1"></i><?php echo __('Saved Searches'); ?></h6>
-      <div class="d-flex flex-wrap gap-2">
+  <?php if ($isAuthenticated): ?>
+  <div class="d-flex align-items-center flex-wrap gap-2">
+    <?php if (!empty($savedSearches)): ?>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-success dropdown-toggle py-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-bookmark me-1"></i><?php echo __('Saved Searches'); ?> (<?php echo count($savedSearches); ?>)
+      </button>
+      <ul class="dropdown-menu">
         <?php foreach ($savedSearches as $saved): ?>
         <?php $params = json_decode($saved->search_params, true) ?: []; ?>
-        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>"
-           class="btn btn-sm btn-outline-primary">
-          <?php echo esc_entities($saved->name); ?>
-        </a>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>">
+          <i class="fa fa-search me-2 text-muted"></i><?php echo esc_entities($saved->name); ?>
+        </a></li>
         <?php endforeach; ?>
-        <a href="/index.php/searchEnhancement/savedSearches" class="btn btn-sm btn-link"><?php echo __('All'); ?> →</a>
-      </div>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/index.php/searchEnhancement/savedSearches">
+          <i class="fa fa-cog me-2 text-muted"></i><?php echo __('Manage Saved Searches'); ?>
+        </a></li>
+      </ul>
     </div>
     <?php endif; ?>
-  </div>
-
-  <?php if ($isAuthenticated && !empty($_GET)): ?>
-  <div class="text-end mt-2">
-    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
-      <i class="fa fa-bookmark me-1"></i><?php echo __('Save This Search'); ?>
+    
+    <?php if (!empty($_GET)): ?>
+    <button type="button" class="btn btn-sm btn-success py-0 px-2" data-bs-toggle="modal" data-bs-target="#saveSearchModal">
+      <i class="fa fa-bookmark me-1"></i><?php echo __('Save Search'); ?>
     </button>
+    <?php endif; ?>
   </div>
   <?php endif; ?>
 </div>
