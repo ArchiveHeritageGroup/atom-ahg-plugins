@@ -711,7 +711,7 @@ class researchActions extends sfActions
         // 4. Insert into slug table
         DB::table('slug')->insert([
             'object_id' => $objectId,
-            'slug' => $username,
+            'slug' => preg_replace('/[^a-zA-Z0-9-]/', '-', $username),
         ]);
         return $objectId;
     }
