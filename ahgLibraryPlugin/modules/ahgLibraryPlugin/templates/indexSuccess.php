@@ -446,12 +446,17 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <i class="fas fa-ellipsis-h me-2"></i><?php echo __('More'); ?>
           </button>
           <ul class="dropdown-menu dropdown-menu-end w-100">
-            <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'informationobject', 'action' => 'rename']); ?>"><i class="fas fa-i-cursor me-2"></i><?php echo __('Rename'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'rename', 'slug' => $resource->slug]); ?>"><i class="fas fa-i-cursor me-2"></i><?php echo __('Rename'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'informationobject', 'action' => 'updatePublicationStatus']); ?>"><i class="fas fa-eye me-2"></i><?php echo __('Update publication status'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'object', 'action' => 'editPhysicalObjects']); ?>"><i class="fas fa-box me-2"></i><?php echo __('Link physical storage'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="<?php echo url_for([$resource->digitalObjectsRelatedByobjectId[0], 'module' => 'digitalobject', 'action' => 'edit']); ?>"><i class="fas fa-file-upload me-2"></i><?php echo __('Edit digital object'); ?></a></li>
+            <?php if ($hasDigitalObject): ?>
+            <?php $doRecord = DB::table('digital_object')->where('object_id', $resource->id)->first(); ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'digitalobject', 'action' => 'edit', 'id' => $doRecord->id]); ?>"><i class="fas fa-edit me-2"></i><?php echo __('Edit digital object'); ?></a></li>
+            <?php else: ?>
+            <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'object', 'action' => 'addDigitalObject']); ?>"><i class="fas fa-file-upload me-2"></i><?php echo __('Link digital object'); ?></a></li>
+            <?php endif; ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit']); ?>"><i class="fas fa-copyright me-2"></i><?php echo __('Create new rights'); ?></a></li>
             <?php if (checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
