@@ -614,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var pagination = d.pagination || (pages ? pages + ' p.' : '');
                     var byStatement = d.by_statement || '';
                     var subjects = d.subjects ? d.subjects.slice(0, 10).map(function(s) { return {name: s.name, url: s.url}; }) : [];
+                    var description = d.description || (result.preview && result.preview.description) || '';
                     var notes = d.notes || '';
                     var coverUrl = d.cover ? d.cover.medium : '';
                     var openLibraryUrl = d.url || '';
@@ -632,6 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (date) msg += '<?php echo __('Date'); ?>: ' + date + '\n';
                     if (pages) msg += '<?php echo __('Pages'); ?>: ' + pages + '\n';
                     if (subjects.length) msg += '<?php echo __('Subjects'); ?>: ' + subjects.slice(0,3).map(s => s.name).join(', ') + '...\n';
+                    if (description) msg += '<?php echo __("Summary"); ?>: ' + description.substring(0, 150) + '...\n';
                     msg += '\n<?php echo __('Apply to form?'); ?>';
 
                     if (confirm(msg)) {
@@ -658,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setField('call_number', lcClass);
                         setField('dewey_decimal', dewey);
                         setField('general_note', notes);
+                        setField('summary', description);
                         setField('cover_url', coverUrl);
                         setField('ebook_preview_url', ebookUrl);
 

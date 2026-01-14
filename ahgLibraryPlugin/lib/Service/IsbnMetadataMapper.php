@@ -102,13 +102,30 @@ class IsbnMetadataMapper
                 : $this->cleanName($metadata['authors']);
         }
 
-        $pubParts = [];
+        // Individual publisher field for Library form
         if (!empty($metadata['publishers'])) {
             $pubs = is_array($metadata['publishers']) ? $metadata['publishers'] : [$metadata['publishers']];
-            $pubParts[] = $this->cleanName($pubs[0]);
+            $preview['publisher'] = $this->cleanName($pubs[0]);
         }
+
+        // Publication date for Library form
         if (!empty($metadata['publish_date'])) {
-            $pubParts[] = $metadata['publish_date'];
+            $preview['publication_date'] = $metadata['publish_date'];
+        }
+
+        // Publication place for Library form
+        if (!empty($metadata['publish_places'])) {
+            $places = is_array($metadata['publish_places']) ? $metadata['publish_places'] : [$metadata['publish_places']];
+            $preview['publication_place'] = $this->cleanName($places[0] ?? '');
+        }
+
+        // Combined publication for ISAD form
+        $pubParts = [];
+        if (!empty($preview['publisher'])) {
+            $pubParts[] = $preview['publisher'];
+        }
+        if (!empty($preview['publication_date'])) {
+            $pubParts[] = $preview['publication_date'];
         }
         if ($pubParts) {
             $preview['publication'] = implode(', ', $pubParts);
@@ -116,11 +133,15 @@ class IsbnMetadataMapper
 
         if (!empty($metadata['number_of_pages'])) {
             $preview['extent'] = $metadata['number_of_pages'] . ' pages';
+            $preview['pagination'] = $metadata['number_of_pages'];
         }
 
         if (!empty($metadata['subjects'])) {
             $subjects = is_array($metadata['subjects']) ? $metadata['subjects'] : [$metadata['subjects']];
-            $preview['subjects'] = array_slice($subjects, 0, 5);
+            // Extract just the name if subjects are arrays
+            $preview['subjects'] = array_slice(array_map(function($s) {
+                return is_array($s) ? ($s['name'] ?? $s) : $s;
+            }, $subjects), 0, 10);
         }
 
         $preview['identifiers'] = [];
@@ -131,6 +152,18 @@ class IsbnMetadataMapper
             $preview['identifiers']['ISBN-10'] = $metadata['isbn_10'];
         }
 
+        // LCCN
+        if (!empty($metadata['lccn'])) {
+            $preview['lccn'] = $metadata['lccn'];
+            $preview['identifiers']['LCCN'] = $metadata['lccn'];
+        }
+
+        // OCLC Number
+        if (!empty($metadata['oclc_number'])) {
+            $preview['oclc_number'] = $metadata['oclc_number'];
+            $preview['identifiers']['OCLC'] = $metadata['oclc_number'];
+        }
+
         // Language - convert ISO code to name from database
         if (!empty($metadata['language'])) {
             $lang = $metadata['language'];
@@ -138,6 +171,13 @@ class IsbnMetadataMapper
                 $preview['language'] = LanguageService::getNameFromIsoCode($lang);
             } else {
                 $preview['language'] = $lang;
+            }
+        } elseif (!empty($metadata['languages'])) {
+            // Handle languages array from Open Library
+            $langs = is_array($metadata['languages']) ? $metadata['languages'] : [$metadata['languages']];
+            if (!empty($langs[0])) {
+                $langCode = str_replace('/languages/', '', $langs[0]);
+                $preview['language'] = LanguageService::getNameFromIsoCode($langCode);
             }
         }
 
@@ -149,8 +189,34 @@ class IsbnMetadataMapper
             $preview['cover_url'] = $metadata['cover_url'];
         }
 
+        // Open Library URL
+        if (!empty($metadata['url'])) {
+            $preview['openlibrary_url'] = $metadata['url'];
+        }
+
+        // Description / Summary
         if (!empty($metadata['description'])) {
             $preview['description'] = $this->truncate($metadata['description'], 500);
+            $preview['description_source'] = $metadata['description_source'] ?? 'External Source';
+        }
+
+        // Notes
+        if (!empty($metadata['notes'])) {
+            $preview['notes'] = is_array($metadata['notes']) 
+                ? implode("\n", $metadata['notes']) 
+                : $metadata['notes'];
+        }
+
+        // Table of contents
+        if (!empty($metadata['table_of_contents'])) {
+            $preview['table_of_contents'] = is_array($metadata['table_of_contents'])
+                ? implode("\n", array_map(function($t) { return $t['title'] ?? $t; }, $metadata['table_of_contents']))
+                : $metadata['table_of_contents'];
+        }
+
+        // Edition
+        if (!empty($metadata['edition_name'])) {
+            $preview['edition'] = $metadata['edition_name'];
         }
 
         return $preview;

@@ -406,13 +406,20 @@ const IsbnLookup = (function() {
      */
     function getFieldMap() {
         return {
-            'title': 'input[name*="[title]"], #title',
-            'creators': '[name*="[creators]"], #creators',
+            'title': 'input[name="title"], input[name*="[title]"], #title',
+            'creators': 'input[name="creators[0][name]"], [name*="[creators]"], #creators',
             'publication': '[name*="[publication]"]',
-            'extentAndMedium': 'textarea[name*="[extentAndMedium]"], #extentAndMedium',
-            'subjects': '[name*="[subjectAccessPoints]"]',
-            'language': 'select[name*="[language]"]',
-            'scopeAndContent': 'textarea[name*="[scopeAndContent]"], #scopeAndContent'
+            'publisher': 'input[name="publisher"]',
+            'publication_date': 'input[name="publication_date"]',
+            'publication_place': 'input[name="publication_place"]',
+            'extentAndMedium': 'input[name="pagination"], textarea[name*="[extentAndMedium]"], #extentAndMedium',
+            'subjects': 'input[name="subjects[0][heading]"], [name*="[subjectAccessPoints]"]',
+            'language': 'select[name="language"], select[name*="[language]"]',
+            'scopeAndContent': 'textarea[name="summary"], textarea[name="scope_and_content"], textarea[name*="[scopeAndContent]"], #scopeAndContent',
+            'lccn': 'input[name="lccn"]',
+            'oclc_number': 'input[name="oclc_number"]',
+            'openlibrary_url': 'input[name="openlibrary_url"]',
+            'cover_url': 'input[name="cover_url"]'
         };
     }
 
@@ -912,13 +919,20 @@ const IsbnLookup = (function() {
      */
     function getFieldMap() {
         return {
-            'title': 'input[name*="[title]"], #title',
-            'creators': '[name*="[creators]"], #creators',
+            'title': 'input[name="title"], input[name*="[title]"], #title',
+            'creators': 'input[name="creators[0][name]"], [name*="[creators]"], #creators',
             'publication': '[name*="[publication]"]',
-            'extentAndMedium': 'textarea[name*="[extentAndMedium]"], #extentAndMedium',
-            'subjects': '[name*="[subjectAccessPoints]"]',
-            'language': 'select[name*="[language]"]',
-            'scopeAndContent': 'textarea[name*="[scopeAndContent]"], #scopeAndContent'
+            'publisher': 'input[name="publisher"]',
+            'publication_date': 'input[name="publication_date"]',
+            'publication_place': 'input[name="publication_place"]',
+            'extentAndMedium': 'input[name="pagination"], textarea[name*="[extentAndMedium]"], #extentAndMedium',
+            'subjects': 'input[name="subjects[0][heading]"], [name*="[subjectAccessPoints]"]',
+            'language': 'select[name="language"], select[name*="[language]"]',
+            'scopeAndContent': 'textarea[name="summary"], textarea[name="scope_and_content"], textarea[name*="[scopeAndContent]"], #scopeAndContent',
+            'lccn': 'input[name="lccn"]',
+            'oclc_number': 'input[name="oclc_number"]',
+            'openlibrary_url': 'input[name="openlibrary_url"]',
+            'cover_url': 'input[name="cover_url"]'
         };
     }
 

@@ -124,6 +124,7 @@ class WorldCatService
 
     /**
      * Lookup from Open Library API.
+     * Fetches both edition data and description from Works API.
      */
     private function lookupOpenLibrary(string $isbn): array
     {
@@ -142,11 +143,100 @@ class WorldCatService
         }
 
         $book = $data[$key];
+        
+        // Get description from Works API
+        $description = $this->getOpenLibraryDescription($book);
+        
+        // Get first sentence from Works API (if no description)
+        $firstSentence = null;
+        if (empty($description)) {
+            $firstSentence = $this->getOpenLibraryFirstSentence($book);
+        }
 
         return [
             'success' => true,
-            'data' => $this->mapOpenLibraryData($book, $isbn),
+            'data' => $this->mapOpenLibraryData($book, $isbn, $description, $firstSentence),
         ];
+    }
+
+    /**
+     * Fetch description from Open Library Works API.
+     */
+    private function getOpenLibraryDescription(array $book): ?string
+    {
+        // Get the book key (edition ID)
+        $bookKey = $book['key'] ?? null;
+        if (!$bookKey) {
+            return null;
+        }
+
+        // Fetch edition to get Work ID
+        $editionUrl = "https://openlibrary.org{$bookKey}.json";
+        $editionResponse = $this->httpGet($editionUrl);
+        if (!$editionResponse) {
+            return null;
+        }
+
+        $edition = json_decode($editionResponse, true);
+        $workKey = $edition['works'][0]['key'] ?? null;
+        if (!$workKey) {
+            return null;
+        }
+
+        // Fetch Work to get description
+        $workUrl = "https://openlibrary.org{$workKey}.json";
+        $workResponse = $this->httpGet($workUrl);
+        if (!$workResponse) {
+            return null;
+        }
+
+        $work = json_decode($workResponse, true);
+        
+        // Description can be string or object with 'value' key
+        $description = $work['description'] ?? null;
+        if (is_array($description)) {
+            return $description['value'] ?? null;
+        }
+        
+        return $description;
+    }
+
+    /**
+     * Fetch first sentence from Open Library Works API.
+     */
+    private function getOpenLibraryFirstSentence(array $book): ?string
+    {
+        $bookKey = $book['key'] ?? null;
+        if (!$bookKey) {
+            return null;
+        }
+
+        $editionUrl = "https://openlibrary.org{$bookKey}.json";
+        $editionResponse = $this->httpGet($editionUrl);
+        if (!$editionResponse) {
+            return null;
+        }
+
+        $edition = json_decode($editionResponse, true);
+        $workKey = $edition['works'][0]['key'] ?? null;
+        if (!$workKey) {
+            return null;
+        }
+
+        $workUrl = "https://openlibrary.org{$workKey}.json";
+        $workResponse = $this->httpGet($workUrl);
+        if (!$workResponse) {
+            return null;
+        }
+
+        $work = json_decode($workResponse, true);
+        
+        $firstSentence = $work['first_sentence'] ?? null;
+        if (is_array($firstSentence)) {
+            return $firstSentence['value'] ?? null;
+        }
+        
+        return $firstSentence;
     }
 
     /**
@@ -201,19 +291,19 @@ class WorldCatService
     /**
      * Map Open Library response to standard format.
      */
-    private function mapOpenLibraryData(array $book, string $isbn): array
+    private function mapOpenLibraryData(array $book, string $isbn, ?string $description = null, ?string $firstSentence = null): array
     {
         $authors = [];
         if (!empty($book['authors'])) {
             foreach ($book['authors'] as $author) {
-                $authors[] = ['name' => $author['name'], 'url' => $author['url'] ?? '']; 
+                $authors[] = ['name' => $author['name'], 'url' => $author['url'] ?? ''];
             }
         }
 
         $subjects = [];
         if (!empty($book['subjects'])) {
             foreach ($book['subjects'] as $subject) {
-                $subjects[] = ['name' => $subject['name'], 'url' => $subject['url'] ?? '']; 
+                $subjects[] = ['name' => $subject['name'], 'url' => $subject['url'] ?? ''];
             }
         }
 
@@ -247,6 +337,10 @@ class WorldCatService
             'languages' => !empty($book['languages'])
                 ? array_column($book['languages'], 'key')
                 : [],
+            // New fields for summary/abstract (Issue #57)
+            'description' => $description,
+            'first_sentence' => $firstSentence,
+            'description_source' => $description ? 'Open Library' : null,
         ];
     }
 
@@ -280,6 +374,7 @@ class WorldCatService
             'isbn_10' => $isbn10,
             'isbn_13' => $isbn13,
             'description' => $book['description'] ?? null,
+            'description_source' => !empty($book['description']) ? 'Google Books' : null,
             'cover_url' => $book['imageLinks']['thumbnail'] ?? null,
             'language' => $book['language'] ?? null,
             'preview_link' => $book['previewLink'] ?? null,
@@ -318,6 +413,9 @@ class WorldCatService
             return $values;
         };
 
+        // MARC 520 is Summary/Abstract
+        $summary = $getField('520', 'a');
+
         return [
             'success' => true,
             'data' => [
@@ -338,6 +436,9 @@ class WorldCatService
                 'series' => $getField('490', 'a'),
                 'notes' => $getAllSubfields('500', 'a'),
                 'language' => $getField('008') ? substr($getField('008'), 35, 3) : null,
+                // MARC 520 - Summary/Abstract
+                'description' => $summary,
+                'description_source' => $summary ? 'WorldCat MARC 520' : null,
             ],
         ];
     }
