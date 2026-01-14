@@ -87,7 +87,7 @@ class ahgLibraryPluginEditAction extends sfAction
             $oldValues = $this->captureCurrentValues($this->resource->id);
         }
 
-        $this->resource->title = $request->getParameter('title');
+        $this->resource->title = html_entity_decode($request->getParameter('title'), ENT_QUOTES, 'UTF-8');
         $this->resource->identifier = $request->getParameter('identifier');
         $this->resource->levelOfDescriptionId = $request->getParameter('level_of_description_id');
         
