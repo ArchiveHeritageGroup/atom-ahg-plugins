@@ -7,8 +7,8 @@ if ($limit < 10) $limit = 10;
 if ($limit > 100) $limit = 100;
 
 $page = (int) (int) (isset($_GET['page']) ? $_GET['page'] : 1);
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'title';
-$sortDir = isset($_GET['dir']) ? $_GET['dir'] : 'asc';
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'date';
+$sortDir = isset($_GET['dir']) ? $_GET['dir'] : 'desc';
 $viewMode = isset($_GET['view']) ? $_GET['view'] : 'card';
 $typeFilter = $_GET['type'] ?? null;
 $creatorFilter = $_GET['creator'] ?? null;
