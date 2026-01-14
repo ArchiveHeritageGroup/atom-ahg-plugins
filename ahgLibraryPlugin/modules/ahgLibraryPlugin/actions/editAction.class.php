@@ -114,31 +114,17 @@ class ahgLibraryPluginEditAction extends sfAction
         $libraryTerm = $db->table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
             ->where('term.taxonomy_id', QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID)
-            ->where('term_i18n.name', 'Library')
+            ->where('term_i18n.name', 'Library (MARC-inspired)')
             ->where('term_i18n.culture', 'en')
             ->first();
         
-        // BUG FIX #60: Always set Library display standard (1705)
-        $libraryDisplayStandardId = 1705; // Library (MARC-inspired)
         if ($libraryTerm) {
-            $libraryDisplayStandardId = $libraryTerm->id;
+            $this->resource->displayStandardId = $libraryTerm->id;
         }
-        $this->resource->displayStandardId = $libraryDisplayStandardId;
 
         // Save the information object
         $this->resource->save();
         $savedId = $this->resource->id;
-
-        // BUG FIX #60: Restore display_standard_id after save (Propel may reset it)
-        $currentDisplayId = $db->table('information_object')
-            ->where('id', $savedId)
-            ->value('display_standard_id');
-        
-        if ($currentDisplayId != $libraryDisplayStandardId) {
-            $db->table('information_object')
-                ->where('id', $savedId)
-                ->update(['display_standard_id' => $libraryDisplayStandardId]);
-        }
 
         // Save library_item
         $libraryItemId = $this->saveLibraryItem($request, $isNew);

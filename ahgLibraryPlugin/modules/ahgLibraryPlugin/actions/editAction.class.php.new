@@ -1,0 +1,161 @@
+<?php
+
+class ahgLibraryPluginEditAction extends sfAction
+{
+    public function execute($request)
+    {
+        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+        require_once $frameworkPath . '/bootstrap.php';
+
+        $this->resource = null;
+        $this->libraryData = [];
+        $slug = $request->getParameter('slug');
+
+        if ($slug) {
+            $this->resource = QubitInformationObject::getBySlug($slug);
+            if (!$this->resource) {
+                $this->forward404();
+            }
+            if (!QubitAcl::check($this->resource, 'update')) {
+                QubitAcl::forwardUnauthorized();
+            }
+            $this->loadLibraryData($this->resource->id);
+        } else {
+            $this->resource = new QubitInformationObject();
+            $this->itemLocation = [];
+            if (!QubitAcl::check(QubitInformationObject::getRoot(), 'create')) {
+                QubitAcl::forwardUnauthorized();
+            }
+        }
+
+        if ($request->isMethod('post')) {
+            $savedId = $this->processForm($request);
+
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+            $slugRow = $db->table('slug')->where('object_id', $savedId)->first();
+
+            if ($slugRow && $slugRow->slug) {
+                $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $slugRow->slug]);
+            } else {
+                $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'browse']);
+            }
+        }
+
+        $this->loadFormOptions();
+    }
+
+    protected function loadLibraryData(int $informationObjectId): void
+    {
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        $repo = new \AtomFramework\Repositories\LibraryItemRepository();
+        $this->libraryData = $repo->getLibraryData($informationObjectId) ?? [];
+        $libraryItemId = $repo->getLibraryItemId($informationObjectId);
+        if ($libraryItemId) {
+            $this->libraryData['creators'] = $repo->getCreators($libraryItemId);
+            $this->libraryData['subjects'] = $repo->getSubjects($libraryItemId);
+        } else {
+            $this->libraryData['creators'] = [];
+            $this->libraryData['subjects'] = [];
+        }
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
+        $this->itemLocation = $locRepo->getLocationWithContainer($informationObjectId) ?? [];
+    }
+
+    protected function processForm($request): int
+    {
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        $repo = new \AtomFramework\Repositories\LibraryItemRepository();
+        $db = \Illuminate\Database\Capsule\Manager::connection();
+
+        $isNew = !isset($this->resource->id);
+
+        // Capture old values for audit trail
+        $oldValues = [];
+        if (!$isNew && $this->resource) {
+            $oldValues = $this->captureCurrentValues($this->resource->id);
+        }
+
+        $this->resource->title = $request->getParameter('title');
+        $this->resource->identifier = $request->getParameter('identifier');
+        $this->resource->levelOfDescriptionId = $request->getParameter('level_of_description_id');
+        $this->resource->sourceStandard = 'library';
+
+        $scopeAndContent = $request->getParameter('scope_and_content');
+        if ($scopeAndContent) {
+            $this->resource->setScopeAndContent($scopeAndContent);
+        }
+
+        if ($isNew) {
+            $parentSlug = $request->getParameter('parent');
+            if ($parentSlug) {
+                $parent = QubitObject::getBySlug($parentSlug);
+                $this->resource->parentId = $parent ? $parent->id : QubitInformationObject::ROOT_ID;
+            } else {
+                $this->resource->parentId = QubitInformationObject::ROOT_ID;
+            }
+        }
+
+        // Get Library term ID
+        $libraryTermId = $db->table('term')
+            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID)
+            ->where('term_i18n.name', 'Library (MARC-inspired)')
+            ->where('term_i18n.culture', 'en')
+            ->value('term.id');
+
+        // Save the information object (without setting displayStandardId via Propel)
+        $this->resource->save();
+        $savedId = $this->resource->id;
+
+        // BUG FIX #60: Set display_standard_id directly via SQL after Propel save
+        if ($libraryTermId) {
+            $db->table('information_object')
+                ->where('id', $savedId)
+                ->update(['display_standard_id' => $libraryTermId]);
+        }
+
+        // Save library_item
+        $libraryItemId = $this->saveLibraryItem($request, $isNew);
+
+        // Save creators
+        $creators = $request->getParameter('creators', []);
+        if (is_array($creators)) {
+            $repo->saveCreators($libraryItemId, $creators);
+        }
+
+        // Save subjects
+        $subjects = $request->getParameter('subjects', []);
+        if (is_array($subjects)) {
+            $repo->saveSubjects($libraryItemId, $subjects);
+        }
+
+        // Save item physical location
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
+        $locationData = [
+            'physical_object_id' => $request->getParameter('item_physical_object_id') ?: null,
+            'barcode' => $request->getParameter('item_barcode'),
+            'box_number' => $request->getParameter('item_box_number'),
+            'folder_number' => $request->getParameter('item_folder_number'),
+            'shelf' => $request->getParameter('item_shelf'),
+            'row' => $request->getParameter('item_row'),
+            'position' => $request->getParameter('item_position'),
+            'item_number' => $request->getParameter('item_item_number'),
+            'extent_value' => $request->getParameter('item_extent_value') ?: null,
+            'extent_unit' => $request->getParameter('item_extent_unit'),
+            'condition_status' => $request->getParameter('item_condition_status') ?: null,
+            'condition_notes' => $request->getParameter('item_condition_notes'),
+            'access_status' => $request->getParameter('item_access_status') ?: 'available',
+            'notes' => $request->getParameter('item_location_notes'),
+        ];
+        if (array_filter($locationData)) {
+            $locRepo->saveLocationData($savedId, $locationData);
+        }
+
+        // Capture new values and log audit trail
+        $newValues = $this->captureCurrentValues($savedId);
+        $this->logAudit($isNew ? 'create' : 'update', $savedId, $oldValues, $newValues);
+
+        return $savedId;
+    }
