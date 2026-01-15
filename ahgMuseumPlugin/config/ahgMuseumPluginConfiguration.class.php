@@ -32,7 +32,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         ));
 
         // === MUSEUM VIEW/BROWSE/CRUD ===
-        $routing->prependRoute('museum_view', new QubitMetadataRoute(
+        $routing->prependRoute('museum_view', new AhgMetadataRoute(
             '/museum/:slug',
             ['module' => 'ahgMuseumPlugin', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
@@ -49,6 +49,15 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             '/museum/edit/:slug',
             ['module' => 'ahgMuseumPlugin', 'action' => 'edit'],
             ['slug' => '[a-zA-Z0-9_-]+']
+        ));
+        // === VOCABULARY/GETTY API ===
+        $routing->prependRoute('ahgMuseumPlugin_vocabulary', new sfRoute(
+            '/ahgMuseumPlugin/vocabulary',
+            ['module' => 'ahgMuseumPlugin', 'action' => 'vocabulary']
+        ));
+        $routing->prependRoute('ahgMuseumPlugin_getty', new sfRoute(
+            '/ahgMuseumPlugin/getty',
+            ['module' => 'ahgMuseumPlugin', 'action' => 'gettyAutocomplete']
         ));
     }
 }
