@@ -1,7 +1,7 @@
 {
     "name": "Digital Asset Management",
     "machine_name": "ahgDAMPlugin",
-    "version": "1.1.0",
+    "version": "1.1.2",
     "description": "Digital Asset Management with IPTC metadata, watermarks, derivatives, and Creative Commons licensing",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -25,5 +25,8 @@
         "rights_derivative_log",
         "security_watermark_log"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ]
 }

@@ -1,7 +1,7 @@
 {
     "name": "Library & Bibliographic",
     "machine_name": "ahgLibraryPlugin",
-    "version": "1.2.0",
+    "version": "1.2.2",
     "description": "Library cataloging with MARC-inspired fields, ISBN lookup, and bibliographic management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -21,5 +21,8 @@
         "atom_isbn_provider",
         "library_settings"
     ],
-    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "arAHGThemeB5Plugin"
+    ]
 }

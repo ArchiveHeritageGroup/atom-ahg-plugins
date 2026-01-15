@@ -1,7 +1,7 @@
 {
     "name": "Donor Agreement Management",
     "machine_name": "ahgDonorAgreementPlugin",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "description": "Donor Agreement Management with contract uploads, reminders, and rights tracking",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -12,9 +12,13 @@
     },
     "dependencies": [],
     "optional": {
-        "extensions": ["ahgExtendedRightsPlugin"]
+        "extensions": [
+            "ahgExtendedRightsPlugin"
+        ]
     },
-    "theme_support": ["ahgThemeB5Plugin"],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ],
     "tables": [
         "agreement_type",
         "donor_agreement",

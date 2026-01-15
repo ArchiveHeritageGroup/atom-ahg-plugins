@@ -1,7 +1,7 @@
 {
     "name": "Security Clearance",
     "machine_name": "ahgSecurityClearancePlugin",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "Security classification, user clearance, embargo, watermarking and extended rights management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -43,5 +43,8 @@
         "object_rights_holder",
         "object_rights_statement"
     ],
-    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "arAHGThemeB5Plugin"
+    ]
 }

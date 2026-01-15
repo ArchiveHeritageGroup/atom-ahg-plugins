@@ -1,7 +1,7 @@
 {
     "name": "Vendor Management",
     "machine_name": "ahgVendorPlugin",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "Vendor and supplier management with transactions, services, and contact tracking",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -23,5 +23,8 @@
         "ahg_vendor_transaction_history",
         "ahg_vendor_transaction_attachments"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ]
 }

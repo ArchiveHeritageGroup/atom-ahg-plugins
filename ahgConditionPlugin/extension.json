@@ -1,7 +1,7 @@
 {
     "name": "Condition Assessment",
     "machine_name": "ahgConditionPlugin",
-    "version": "1.1.0",
+    "version": "1.1.2",
     "description": "Condition assessment and reporting for museum objects",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -9,13 +9,20 @@
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1",
-        "php_extensions": ["gd"]
+        "php_extensions": [
+            "gd"
+        ]
     },
     "dependencies": [],
     "optional": {
-        "extensions": ["ahgMuseumPlugin"]
+        "extensions": [
+            "ahgMuseumPlugin"
+        ]
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ],
     "tables": [
         "condition_check",
         "condition_check_i18n",

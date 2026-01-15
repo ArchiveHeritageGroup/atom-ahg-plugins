@@ -1,7 +1,7 @@
 {
     "name": "Museum Cataloging (CCO/Spectrum)",
     "machine_name": "ahgMuseumPlugin",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "description": "Museum cataloging with CCO (Cataloging Cultural Objects), CIDOC-CRM, and Spectrum 5.0 integration",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -10,12 +10,20 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgSpectrumPlugin"],
+    "dependencies": [
+        "ahgSpectrumPlugin"
+    ],
     "dependents": [],
     "optional": {
-        "extensions": ["ahgConditionPlugin", "ahgGrapPlugin"]
+        "extensions": [
+            "ahgConditionPlugin",
+            "ahgGrapPlugin"
+        ]
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ],
     "tables": [
         "museum_metadata"
     ],
