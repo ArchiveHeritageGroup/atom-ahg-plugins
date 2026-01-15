@@ -1,15 +1,4 @@
-ahg_favorites_browse:
-  url: /favorites
-  param: { module: ahgFavorites, action: browse }
-
-ahg_favorites_add:
-  url: /favorites/add/:slug
-  param: { module: ahgFavorites, action: add }
-
-ahg_favorites_remove:
-  url: /favorites/remove/:id
-  param: { module: ahgFavorites, action: remove }
-
-ahg_favorites_clear:
-  url: /favorites/clear
-  param: { module: ahgFavorites, action: clear }
+# ============================================================================
+# ahgFavoritesPlugin - Routing
+# NOTE: All routes defined in ahgFavoritesPluginConfiguration.class.php
+# ============================================================================

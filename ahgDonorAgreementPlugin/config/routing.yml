@@ -1,5 +1,4 @@
-
-# Donor Autocomplete
-donor_autocomplete:
-  url: /donor/autocomplete
-  param: { module: donor, action: autocomplete }
+# ============================================================================
+# ahgDonorAgreementPlugin - Routing
+# NOTE: All routes defined in ahgDonorAgreementPluginConfiguration.class.php
+# ============================================================================

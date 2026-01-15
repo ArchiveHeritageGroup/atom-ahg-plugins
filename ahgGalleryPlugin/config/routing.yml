@@ -1,19 +1,4 @@
-gallery_dashboard:
-  url: /gallery
-  param: { module: ahgGalleryPlugin, action: dashboard }
-
-gallery_browse:
-  url: /gallery/browse
-  param: { module: ahgGalleryPlugin, action: dashboard }
-
-gallery_add:
-  url: /gallery/add
-  param: { module: ahgGalleryPlugin, action: add }
-
-gallery_edit:
-  url: /gallery/edit/:slug
-  param: { module: ahgGalleryPlugin, action: edit }
-
-gallery_view:
-  url: /gallery/view/:slug
-  param: { module: ahgGalleryPlugin, action: index }
+# ============================================================================
+# ahgGalleryPlugin - Routing
+# NOTE: All routes defined in ahgGalleryPluginConfiguration.class.php
+# ============================================================================

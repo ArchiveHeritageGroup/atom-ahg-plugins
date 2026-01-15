@@ -1,4 +1,4 @@
-
-ahgSecurityClearance_watermarkSettings:
-  url: /admin/watermark-settings
-  param: { module: ahgSecurityClearance, action: watermarkSettings }
+# ============================================================================
+# ahgSecurityClearancePlugin - Routing
+# NOTE: All routes defined in ahgSecurityClearancePluginConfiguration.class.php
+# ============================================================================
