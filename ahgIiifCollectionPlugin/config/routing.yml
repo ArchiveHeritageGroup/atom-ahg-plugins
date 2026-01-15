@@ -1,52 +1,6 @@
-# IIIF Collection routes - using /manifest-collections to avoid Cantaloupe conflict
-
-iiif_collection_autocomplete:
-  url: /manifest-collections/autocomplete
-  param: { module: ahgIiifCollection, action: autocomplete }
-
-iiif_collection_index:
-  url: /manifest-collections
-  param: { module: ahgIiifCollection, action: index }
-
-iiif_collection_new:
-  url: /manifest-collection/new
-  param: { module: ahgIiifCollection, action: new }
-
-iiif_collection_create:
-  url: /manifest-collection/create
-  param: { module: ahgIiifCollection, action: create }
-  requirements: { sf_method: post }
-
-iiif_collection_reorder:
-  url: /manifest-collection/reorder
-  param: { module: ahgIiifCollection, action: reorder }
-
-iiif_collection_view:
-  url: /manifest-collection/:id/view
-  param: { module: ahgIiifCollection, action: view }
-
-iiif_collection_edit:
-  url: /manifest-collection/:id/edit
-  param: { module: ahgIiifCollection, action: edit }
-
-iiif_collection_update:
-  url: /manifest-collection/:id/update
-  param: { module: ahgIiifCollection, action: update }
-  requirements: { sf_method: post }
-
-iiif_collection_delete:
-  url: /manifest-collection/:id/delete
-  param: { module: ahgIiifCollection, action: delete }
-
-iiif_collection_add_items:
-  url: /manifest-collection/:id/items/add
-  param: { module: ahgIiifCollection, action: addItems }
-
-iiif_collection_remove_item:
-  url: /manifest-collection/item/:item_id/remove
-  param: { module: ahgIiifCollection, action: removeItem }
-
-# JSON manifest output
-iiif_collection_manifest:
-  url: /manifest-collection/:slug/manifest.json
-  param: { module: ahgIiifCollection, action: manifest }
+# ============================================================================
+# ahgIiifCollectionPlugin - Routing
+# NOTE: All routes defined in ahgIiifCollectionPluginConfiguration.class.php
+# This file kept empty to avoid duplicates
+# Routes use prependRoute() for proper priority ordering
+# ============================================================================
