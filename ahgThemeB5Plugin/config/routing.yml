@@ -49,26 +49,6 @@ report_view:
   requirements: { code: '[a-z_]+' }
 
 # TK Labels
-tk_labels:
-  url: /tk-labels
-  param: { module: rightsAdmin, action: tkLabels }
-
-tk_labels_assign:
-  url: /tk-labels/assign
-  param: { module: rightsAdmin, action: assignTkLabel }
-
-tk_labels_remove:
-  url: /tk-labels/remove
-  param: { module: rightsAdmin, action: removeTkLabel }
-
-# Rights Admin
-rights_admin:
-  url: /rights/admin
-  param: { module: rightsAdmin, action: index }
-
-rights_admin_dashboard:
-  url: /admin/rights
-  param: { module: rightsAdmin, action: index }
 
 # Export Module
 export_index:
@@ -162,86 +142,6 @@ spectrum_reports_objectEntry:
 # Specific routes MUST come before :slug catch-all
 # =============================================================================
 
-vendor_index:
-  url: /vendor
-  param: { module: vendor, action: index }
-
-vendor_list:
-  url: /vendor/list
-  param: { module: vendor, action: list }
-
-vendor_add:
-  url: /vendor/add
-  param: { module: vendor, action: add }
-
-vendor_transactions:
-  url: /vendor/transactions
-  param: { module: vendor, action: transactions }
-
-vendor_services:
-  url: /vendor/services
-  param: { module: vendor, action: serviceTypes }
-
-vendor_transaction_add:
-  url: /vendor/transaction/add
-  param: { module: vendor, action: addTransaction }
-
-vendor_transaction_view:
-  url: /vendor/transaction/:id
-  param: { module: vendor, action: viewTransaction }
-  requirements: { id: \d+ }
-
-vendor_transaction_edit:
-  url: /vendor/transaction/:id/edit
-  param: { module: vendor, action: editTransaction }
-  requirements: { id: \d+ }
-
-vendor_transaction_status:
-  url: /vendor/transaction/:id/status
-  param: { module: vendor, action: updateTransactionStatus }
-  requirements: { id: \d+ }
-
-vendor_transaction_add_item:
-  url: /vendor/transaction/:transaction_id/item/add
-  param: { module: vendor, action: addTransactionItem }
-  requirements: { transaction_id: \d+ }
-
-vendor_transaction_update_item:
-  url: /vendor/transaction/:transaction_id/item/:item_id/update
-  param: { module: vendor, action: updateTransactionItem }
-  requirements: { transaction_id: \d+, item_id: \d+ }
-
-vendor_transaction_remove_item:
-  url: /vendor/transaction/:transaction_id/item/:item_id/remove
-  param: { module: vendor, action: removeTransactionItem }
-  requirements: { transaction_id: \d+, item_id: \d+ }
-
-vendor_add_contact:
-  url: /vendor/:slug/contact/add
-  param: { module: vendor, action: addContact }
-
-vendor_update_contact:
-  url: /vendor/:slug/contact/:contact_id/update
-  param: { module: vendor, action: updateContact }
-  requirements: { contact_id: \d+ }
-
-vendor_delete_contact:
-  url: /vendor/:slug/contact/:contact_id/delete
-  param: { module: vendor, action: deleteContact }
-  requirements: { contact_id: \d+ }
-
-vendor_edit:
-  url: /vendor/:slug/edit
-  param: { module: vendor, action: edit }
-
-vendor_delete:
-  url: /vendor/:slug/delete
-  param: { module: vendor, action: delete }
-
-# CATCH-ALL MUST BE LAST
-vendor_view:
-  url: /vendor/:slug
-  param: { module: vendor, action: view }
 
 # API Routes
 api_search_io:
