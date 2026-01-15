@@ -30,11 +30,11 @@ glam_bulk_set_type:
 
 glam_search:
   url: /glam/search
-  param: { module: displaySearch, action: index }
+  param: { module: ahgDisplaySearch, action: index }
 
 glam_search_results:
   url: /glam/search/results
-  param: { module: displaySearch, action: results }
+  param: { module: ahgDisplaySearch, action: results }
 
 glam_browse:
   url: /glam/browse

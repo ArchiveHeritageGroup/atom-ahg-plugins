@@ -23,8 +23,8 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
     private function isAhgThemeActive(): bool
     {
         try {
-            $sql = "SELECT si.value FROM setting s 
-                    JOIN setting_i18n si ON s.id = si.id 
+            $sql = "SELECT si.value FROM setting s
+                    JOIN setting_i18n si ON s.id = si.id
                     WHERE s.name = 'plugins' AND s.scope IS NULL LIMIT 1";
             $value = QubitPdo::fetchColumn($sql);
             if ($value) {
@@ -43,22 +43,12 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        // GLAM routes are always available at /glam/*
-        $routing->prependRoute('glam_index', new sfRoute('/glam', ['module' => 'ahgDisplay', 'action' => 'index']));
-        $routing->prependRoute('glam_browse', new sfRoute('/glam/browse', ['module' => 'ahgDisplay', 'action' => 'browse']));
-        $routing->prependRoute('glam_print', new sfRoute('/glam/print', ['module' => 'ahgDisplay', 'action' => 'print']));
-        $routing->prependRoute('glam_csv', new sfRoute('/glam/csv', ['module' => 'ahgDisplay', 'action' => 'exportCsv']));
-        $routing->prependRoute('glam_change_type', new sfRoute('/glam/changeType', ['module' => 'ahgDisplay', 'action' => 'changeType']));
-        $routing->prependRoute('glam_profiles', new sfRoute('/glam/profiles', ['module' => 'ahgDisplay', 'action' => 'profiles']));
-        $routing->prependRoute('glam_levels', new sfRoute('/glam/levels', ['module' => 'ahgDisplay', 'action' => 'levels']));
-        $routing->prependRoute('glam_fields', new sfRoute('/glam/fields', ['module' => 'ahgDisplay', 'action' => 'fields']));
-        $routing->prependRoute('glam_set_type', new sfRoute('/glam/setType', ['module' => 'ahgDisplay', 'action' => 'setType']));
-        $routing->prependRoute('glam_assign_profile', new sfRoute('/glam/assignProfile', ['module' => 'ahgDisplay', 'action' => 'assignProfile']));
-        $routing->prependRoute('glam_bulk_set_type', new sfRoute('/glam/bulkSetType', ['module' => 'ahgDisplay', 'action' => 'bulkSetType']));
-
-        // Only override /informationobject/browse when ahgThemeB5Plugin is active
+        // Only the conditional route - all other routes are in routing.yml
         if ($this->isAhgThemeActive()) {
-            $routing->prependRoute('informationobject_browse_redirect', new sfRoute('/informationobject/browse', ['module' => 'ahgDisplay', 'action' => 'browse']));
+            $routing->prependRoute('informationobject_browse_redirect', new sfRoute(
+                '/informationobject/browse',
+                ['module' => 'ahgDisplay', 'action' => 'browse']
+            ));
         }
     }
 

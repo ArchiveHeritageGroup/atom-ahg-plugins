@@ -1,51 +1,5 @@
-research_dashboard:
-  url: /research/dashboard
-  param: { module: research, action: dashboard }
-
-research_register:
-  url: /research/register
-  param: { module: research, action: register }
-
-research_public_register:
-  url: /research/public-register
-  param: { module: research, action: publicRegister }
-
-research_profile:
-  url: /research/profile
-  param: { module: research, action: profile }
-
-research_researchers:
-  url: /research/researchers
-  param: { module: research, action: researchers }
-
-research_view_researcher:
-  url: /research/researcher/:id
-  param: { module: research, action: viewResearcher }
-
-research_book:
-  url: /research/book
-  param: { module: research, action: book }
-
-research_bookings:
-  url: /research/bookings
-  param: { module: research, action: bookings }
-
-research_rooms:
-  url: /research/rooms
-  param: { module: research, action: rooms }
-
-research_workspace:
-  url: /research/workspace
-  param: { module: research, action: workspace }
-
-research_collections:
-  url: /research/collections
-  param: { module: research, action: collections }
-
-research_registration_complete:
-  url: /research/registration-complete
-  param: { module: research, action: registrationComplete }
-
-researcher_admin:
-  url: /research/researchers
-  param: { module: research, action: researchers }
+# ============================================================================
+# ahgResearchPlugin - Routing
+# NOTE: All routes defined in ahgResearchPluginConfiguration.class.php
+# This file kept empty to avoid duplicates
+# ============================================================================
