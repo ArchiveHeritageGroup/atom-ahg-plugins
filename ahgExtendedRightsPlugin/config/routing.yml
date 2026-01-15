@@ -1,63 +1,6 @@
-# Extended Rights Routes - Simple routes only (no sfPropelRoute)
-
-extendedRights_index:
-  url: /extendedRights
-  param: { module: extendedRights, action: index }
-
-extendedRights_edit:
-  url: /extendedRights/edit/:slug
-  param: { module: extendedRights, action: edit }
-
-extendedRights_batch:
-  url: /extendedRights/batch
-  param: { module: extendedRights, action: batch }
-
-extendedRights_embargoes:
-  url: /extendedRights/embargoes
-  param: { module: extendedRights, action: embargoes }
-
-extendedRights_liftEmbargo:
-  url: /extendedRights/liftEmbargo/:id
-  param: { module: extendedRights, action: liftEmbargo }
-  requirements: { id: \d+ }
-
-# Admin routes
-extendedRights_dashboard:
-  url: /admin/rights
-  param: { module: extendedRights, action: index }
-
-extendedRights_admin_batch:
-  url: /admin/rights/batch
-  param: { module: extendedRights, action: batch }
-
-extendedRights_browse:
-  url: /extendedRights/browse
-  param: { module: extendedRights, action: browse }
-
-# Embargo routes
-embargo_add:
-  url: /embargo/add
-  param: { module: embargo, action: add }
-
-embargo_edit:
-  url: /embargo/edit
-  param: { module: embargo, action: edit }
-
-embargo_view:
-  url: /embargo/view/:id
-  param: { module: embargo, action: view }
-  requirements: { id: \d+ }
-
-embargo_lift:
-  url: /embargo/lift/:id
-  param: { module: embargo, action: lift }
-  requirements: { id: \d+ }
-
-embargo_index:
-  url: /embargo
-  param: { module: embargo, action: index }
-
-embargo_lift:
-  url: /embargo/lift/:id
-  param: { module: embargo, action: lift }
-  requirements: { id: \d+ }
+# ============================================================================
+# ahgExtendedRightsPlugin - Routing
+# NOTE: All routes defined in ahgExtendedRightsPluginConfiguration.class.php
+# This file kept empty to avoid duplicates
+# Routes use prependRoute() for proper priority ordering
+# ============================================================================
