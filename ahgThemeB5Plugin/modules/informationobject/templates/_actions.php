@@ -283,9 +283,9 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 			  
               <?php if (checkPluginEnabled('ahgSpectrumPlugin') || checkPluginEnabled('sfMuseumPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('SPECTRUM Collections'); ?></h6></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tag fa-fw me-2"></i><?php echo __('Generate label'); ?></a></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resourceSlug]); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Workflow Status'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo '/index.php/' . $resourceSlug . '/spectrum'; ?>"><i class="fas fa-clipboard-list fa-fw me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo '/index.php/' . $resourceSlug . '/spectrum/label'; ?>"><i class="fas fa-tag fa-fw me-2"></i><?php echo __('Generate label'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo '/index.php/spectrum/' . $resourceSlug . '/workflow'; ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Workflow Status'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
               <?php if (checkPluginEnabled('ahgCcoPlugin')): ?>

@@ -75,7 +75,7 @@ if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):
     <li><?php echo link_to(__('Condition assessment'), ['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><?php echo link_to(__('Spectrum data'), ['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?></li>
+    <li><?php echo link_to(__('Spectrum data'), '/index.php/' . $resource->slug . '/spectrum'); ?></li>
     <?php endif; ?>
     <?php if ($hasResearch): ?>
     <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resource->slug]); ?></li>
