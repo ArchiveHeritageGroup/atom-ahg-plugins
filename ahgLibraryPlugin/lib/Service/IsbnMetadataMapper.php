@@ -69,7 +69,7 @@ class IsbnMetadataMapper
 
                         // Handle language ISO codes
                         if ($mapping['taxonomy'] === 'languages' && strlen($v) <= 3) {
-                            $termValue = LanguageService::getNameFromIsoCode($v);
+                            $termValue = \AtomFramework\Services\LanguageService::getNameFromIsoCode($v);
                         }
 
                         $result['terms'][] = [
@@ -168,7 +168,7 @@ class IsbnMetadataMapper
         if (!empty($metadata['language'])) {
             $lang = $metadata['language'];
             if (strlen($lang) <= 3) {
-                $preview['language'] = LanguageService::getNameFromIsoCode($lang);
+                $preview['language'] = \AtomFramework\Services\LanguageService::getNameFromIsoCode($lang);
             } else {
                 $preview['language'] = $lang;
             }
@@ -177,7 +177,7 @@ class IsbnMetadataMapper
             $langs = is_array($metadata['languages']) ? $metadata['languages'] : [$metadata['languages']];
             if (!empty($langs[0])) {
                 $langCode = str_replace('/languages/', '', $langs[0]);
-                $preview['language'] = LanguageService::getNameFromIsoCode($langCode);
+                $preview['language'] = \AtomFramework\Services\LanguageService::getNameFromIsoCode($langCode);
             }
         }
 
