@@ -17,7 +17,7 @@ class ahgGalleryPluginConfiguration extends sfPluginConfiguration
         $routing = $event->getSubject();
         
         // Order matters! Generic route first, then specific ones prepended after
-        $routing->prependRoute('gallery_view', new sfRoute(
+        $routing->prependRoute('gallery_view', new AhgMetadataRoute(
             '/gallery/:slug',
             ['module' => 'ahgGalleryPlugin', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
