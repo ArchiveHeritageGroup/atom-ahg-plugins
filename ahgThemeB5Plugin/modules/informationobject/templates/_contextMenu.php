@@ -148,5 +148,5 @@ function extractEntities(objectId) {
 <?php endif; ?>
 
 <?php if (isPluginActive('ahgExtendedRightsPlugin')): ?>
-<?php include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_extendedRightsContextMenu.php')) { include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); } ?>
 <?php endif; ?>

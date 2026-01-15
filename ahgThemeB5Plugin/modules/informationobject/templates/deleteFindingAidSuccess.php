@@ -1,4 +1,5 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php include_partial('informationobject/cancelModule', ['resource' => $resource]); ?>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Are you sure you want to delete the finding aid of %1%?', ['%1%' => $resource->title]); ?></h1>
@@ -22,7 +23,7 @@
     </div>
 
     <ul class="actions mb-3 nav gap-2">
-      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
+      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
       <li><input class="btn atom-btn-outline-danger" type="submit" value="<?php echo __('Delete'); ?>"></li>
     </ul>
 

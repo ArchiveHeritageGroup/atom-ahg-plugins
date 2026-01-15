@@ -329,7 +329,7 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
 </section>
 <!-- Item Physical Location -->
 <?php if (!empty($itemLocation)): ?>
-<?php include_partial("informationobject/itemPhysicalLocationView", ["itemLocation" => $itemLocation]); ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocationView.php')) { include_partial('informationobject/itemPhysicalLocationView', ['itemLocation' => $itemLocation]); } ?>
 <?php endif; ?>
 
 <!-- GRAP Financial Section -->

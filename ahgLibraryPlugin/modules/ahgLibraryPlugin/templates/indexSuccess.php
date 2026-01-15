@@ -643,7 +643,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
 
     <!-- Item Physical Location -->
     <?php if (!empty($itemLocation)): ?>
-    <?php include_partial("informationobject/itemPhysicalLocationView", ["itemLocation" => $itemLocation]); ?>
+    <?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocationView.php')) { include_partial('informationobject/itemPhysicalLocationView', ['itemLocation' => $itemLocation]); } ?>
     <?php endif; ?>
     <!-- E-book Access -->
     <?php if (!empty($libraryData['ebook_preview_url'])): ?>

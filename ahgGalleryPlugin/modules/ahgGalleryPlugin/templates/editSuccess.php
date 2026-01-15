@@ -614,7 +614,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <?php echo get_partial('informationobject/adminInfo', ['form' => $form, 'resource' => $qubitResource]); ?>
 <?php endif; ?></h1>
 <!-- Item Physical Location -->
-<?php include_partial("informationobject/itemPhysicalLocation", ["resource" => $resource ?? null, "itemLocation" => $itemLocation ?? []]); ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocation.php')) { include_partial('informationobject/itemPhysicalLocation', ['resource' => $resource ?? null, 'itemLocation' => $itemLocation ?? []]); } ?>
 
 <section class="actions">
 

@@ -1,7 +1,7 @@
 {
     "name": "Gallery & Exhibition Management",
     "machine_name": "ahgGalleryPlugin",
-    "version": "1.2.7",
+    "version": "1.2.8",
     "description": "Gallery and exhibition management with artist tracking, loans, insurance, and facility reports",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <?php endforeach; ?>
 </div>
 <!-- Item Physical Location -->
-<?php include_partial("informationobject/itemPhysicalLocation", ["resource" => $resource ?? null, "itemLocation" => $itemLocation ?? []]); ?>
+<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocation.php')) { include_partial('informationobject/itemPhysicalLocation', ['resource' => $resource ?? null, 'itemLocation' => $itemLocation ?? []]); } ?>
 <?php include_partial('ahgMuseumPlugin/watermarkSettings', ['resource' => $resource ?? null, 'resourceId' => $resourceId ?? null]); ?>
 <!-- Administration Area -->
 <div class="accordion mb-3">

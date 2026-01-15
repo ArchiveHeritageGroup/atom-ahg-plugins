@@ -554,7 +554,7 @@
       <?php endif; ?>
 
       <!-- Item Physical Location -->
-      <?php include_partial("informationobject/itemPhysicalLocation", ["resource" => $resource, "itemLocation" => $itemLocation]); ?>
+      <?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocation.php')) { include_partial('informationobject/itemPhysicalLocation', ['resource' => $resource, 'itemLocation' => $itemLocation]); } ?>
       <!-- Quick Links -->
       <section class="card mb-4">
         <div class="card-header">

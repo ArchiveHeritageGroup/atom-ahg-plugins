@@ -1,4 +1,5 @@
 <?php use_helper('Javascript'); ?>
+<?php include_partial('informationobject/cancelModule', ['resource' => $resource]); ?>
 <?php decorate_with('layout_1col.php'); ?>
 
 <?php slot('title'); ?>
@@ -20,7 +21,7 @@
     </div>
 
     <section class="actions mb-3">
-      <?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light']); ?>
+      <?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light']); ?>
     </section>
   </noscript>
 
@@ -32,7 +33,7 @@
       </div>
 
       <section class="actions mb-3">
-        <?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light']); ?>
+        <?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light']); ?>
       </section>
     </div>
 
@@ -144,7 +145,7 @@
         </div>
 
         <ul class="actions mb-3 nav gap-2">
-          <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
+          <li><?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
           <li><input class="btn atom-btn-outline-success" type="submit" value="<?php echo __('Upload'); ?>"></li>
         </ul>
 

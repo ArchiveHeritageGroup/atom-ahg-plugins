@@ -51,8 +51,22 @@
       </div>
     </div>
 
+    <?php
+    // BUG FIX #74: Determine correct module based on display_standard_id
+    $cancelModule = 'informationobject';
+    $displayStandardId = $resource->displayStandardId ?? null;
+    if ($displayStandardId) {
+        switch ($displayStandardId) {
+            case 10: $cancelModule = 'ahgLibrary'; break;
+            case 11: $cancelModule = 'ahgMuseum'; break;
+            case 12: $cancelModule = 'ahgGallery'; break;
+            case 13: $cancelModule = 'ahgDAM'; break;
+        }
+    }
+    ?>
+
     <ul class="actions mb-3 nav gap-2">
-      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
+      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
       <li><input class="btn atom-btn-outline-success" type="submit" value="<?php echo __('Update'); ?>"></li>
     </ul>
 

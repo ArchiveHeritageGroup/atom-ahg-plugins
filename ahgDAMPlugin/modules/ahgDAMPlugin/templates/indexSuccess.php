@@ -401,7 +401,7 @@
 
   <!-- Item Physical Location -->
   <?php if (!empty($itemLocation)): ?>
-  <?php include_partial("informationobject/itemPhysicalLocationView", ["itemLocation" => $itemLocation]); ?>
+  <?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_itemPhysicalLocationView.php')) { include_partial('informationobject/itemPhysicalLocationView', ['itemLocation' => $itemLocation]); } ?>
   <?php endif; ?>
   <!-- Digital object metadata -->
   <?php if (0 < count($resource->digitalObjectsRelatedByobjectId)): ?>

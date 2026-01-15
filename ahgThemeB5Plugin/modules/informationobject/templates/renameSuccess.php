@@ -1,4 +1,5 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php include_partial('informationobject/cancelModule', ['resource' => $resource]); ?>
 
 <?php slot('sidebar'); ?>
 
@@ -77,7 +78,7 @@
     </div>
 
     <ul class="actions mb-3 nav gap-2">
-      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
+      <li><?php echo link_to(__('Cancel'), [$resource, 'module' => $cancelModule], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
       <li><input class="btn atom-btn-outline-success" id="rename-form-submit" type="submit" value="<?php echo __('Update'); ?>"></li>
     </ul>
 

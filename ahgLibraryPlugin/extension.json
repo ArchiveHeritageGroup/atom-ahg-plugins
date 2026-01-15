@@ -1,7 +1,7 @@
 {
     "name": "Library & Bibliographic",
     "machine_name": "ahgLibraryPlugin",
-    "version": "1.9.10",
+    "version": "1.9.11",
     "description": "Library cataloging with MARC-inspired fields, ISBN lookup, and bibliographic management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
