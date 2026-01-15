@@ -1,31 +1,34 @@
 {
-  "name": "AHG Cart Plugin",
-  "machine_name": "ahgCartPlugin",
-  "version": "2.0.0",
-  "description": "Shopping cart with dual-mode support: Standard (Request to Publish) and E-Commerce with PayFast payment integration",
-  "author": "The Archive and Heritage Group",
-  "license": "GPL-3.0",
-  "category": "ahg",
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [],
-  "tables": [
-    "cart",
-    "ahg_ecommerce_settings",
-    "ahg_product_type",
-    "ahg_product_pricing",
-    "ahg_order",
-    "ahg_order_item",
-    "ahg_payment",
-    "ahg_download_token"
-  ],
-  "features": {
-    "standard_mode": "Request to Publish workflow",
-    "ecommerce_mode": "Full e-commerce with payment processing",
-    "payment_gateways": ["PayFast", "Stripe (planned)"],
-    "digital_delivery": "Secure download tokens with expiry"
-  }
+    "name": "AHG Cart Plugin",
+    "machine_name": "ahgCartPlugin",
+    "version": "2.0.1",
+    "description": "Shopping cart with dual-mode support: Standard (Request to Publish) and E-Commerce with PayFast payment integration",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "tables": [
+        "cart",
+        "ahg_ecommerce_settings",
+        "ahg_product_type",
+        "ahg_product_pricing",
+        "ahg_order",
+        "ahg_order_item",
+        "ahg_payment",
+        "ahg_download_token"
+    ],
+    "features": {
+        "standard_mode": "Request to Publish workflow",
+        "ecommerce_mode": "Full e-commerce with payment processing",
+        "payment_gateways": [
+            "PayFast",
+            "Stripe (planned)"
+        ],
+        "digital_delivery": "Secure download tokens with expiry"
+    }
 }

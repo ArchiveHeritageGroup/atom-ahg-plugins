@@ -1,7 +1,7 @@
 {
     "name": "Heritage Asset Accounting",
     "machine_name": "ahgHeritageAccountingPlugin",
-    "version": "1.1.0",
+    "version": "1.2.4",
     "description": "Multi-standard heritage asset financial accounting (GRAP 103, FRS 102, GASB 34, PSAS 3150)",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -13,7 +13,12 @@
     },
     "dependencies": [],
     "optional": {
-        "modules": ["ahgGrapModule", "ahgFrsModule", "ahgGasbModule", "ahgPsasModule"]
+        "modules": [
+            "ahgGrapModule",
+            "ahgFrsModule",
+            "ahgGasbModule",
+            "ahgPsasModule"
+        ]
     },
     "install_sql": "data/install.sql",
     "tables": [
@@ -29,5 +34,8 @@
         "heritage_transaction_log",
         "heritage_regional_data"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ]
 }

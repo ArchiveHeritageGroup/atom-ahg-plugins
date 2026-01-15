@@ -1,7 +1,7 @@
 {
     "name": "Spectrum 5.0 Procedures",
     "machine_name": "ahgSpectrumPlugin",
-    "version": "1.0.1",
+    "version": "1.1.5",
     "description": "Spectrum 5.0 museum procedures - acquisition, loans, movement, conservation, valuation, and workflow management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -11,11 +11,19 @@
         "php": ">=8.1"
     },
     "dependencies": [],
-    "dependents": ["ahgMuseumPlugin"],
+    "dependents": [
+        "ahgMuseumPlugin"
+    ],
     "optional": {
-        "extensions": ["ahgConditionPlugin", "ahgGrapPlugin"]
+        "extensions": [
+            "ahgConditionPlugin",
+            "ahgGrapPlugin"
+        ]
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ],
     "tables": [
         "spectrum_acquisition",
         "spectrum_approval",

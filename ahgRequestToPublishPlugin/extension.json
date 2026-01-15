@@ -1,7 +1,7 @@
 {
     "name": "Request to Publish",
     "machine_name": "ahgRequestToPublishPlugin",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "description": "Manage publication requests for archival images and digital objects",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -12,6 +12,11 @@
     },
     "dependencies": [],
     "category": "user-engagement",
-    "tables": ["request_to_publish"],
-    "shared_tables": ["information_object", "digital_object"]
+    "tables": [
+        "request_to_publish"
+    ],
+    "shared_tables": [
+        "information_object",
+        "digital_object"
+    ]
 }

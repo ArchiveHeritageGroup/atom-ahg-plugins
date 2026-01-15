@@ -1,7 +1,7 @@
 {
     "name": "Privacy Compliance Management",
     "machine_name": "ahgPrivacyPlugin",
-    "version": "1.0.0",
+    "version": "1.1.10",
     "description": "POPIA/GDPR Privacy Compliance Management - DSAR tracking, Breach register, ROPA, Consent management",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "GPL-3.0",
@@ -12,9 +12,14 @@
     },
     "dependencies": [],
     "optional": {
-        "extensions": ["ahgSecurityClearancePlugin"]
+        "extensions": [
+            "ahgSecurityClearancePlugin"
+        ]
     },
-    "theme_support": ["ahgThemeB5Plugin", "arDominionB5Plugin"],
+    "theme_support": [
+        "ahgThemeB5Plugin",
+        "arDominionB5Plugin"
+    ],
     "tables": [
         "privacy_config",
         "privacy_officer",
@@ -28,5 +33,8 @@
     ],
     "shared_tables": [],
     "category": "compliance",
-    "modules": ["ahgPrivacy", "privacyAdmin"]
+    "modules": [
+        "ahgPrivacy",
+        "privacyAdmin"
+    ]
 }

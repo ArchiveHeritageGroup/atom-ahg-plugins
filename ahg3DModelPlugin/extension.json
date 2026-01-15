@@ -1,7 +1,7 @@
 {
     "name": "3D Model Viewer",
     "machine_name": "ahg3DModelPlugin",
-    "version": "1.0.0",
+    "version": "1.1.6",
     "description": "3D model viewing with Google Model Viewer, AR support, hotspots, and IIIF 3D manifests",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -23,5 +23,8 @@
         "iiif_3d_manifest",
         "object_3d_audit_log"
     ],
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"]
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ]
 }

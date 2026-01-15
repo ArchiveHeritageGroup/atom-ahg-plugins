@@ -1,7 +1,7 @@
 {
     "name": "AHG Favorites Plugin",
     "machine_name": "ahgFavoritesPlugin",
-    "version": "1.0.2",
+    "version": "1.0.7",
     "description": "User favorites/bookmarks management for archival descriptions",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

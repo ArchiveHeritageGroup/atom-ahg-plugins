@@ -1,7 +1,7 @@
 {
     "name": "RiC Explorer",
     "machine_name": "ahgRicExplorerPlugin",
-    "version": "1.0.0",
+    "version": "1.1.2",
     "description": "Records in Context (RiC) visualization, exploration, and Fuseki triplestore integration",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -14,7 +14,10 @@
     "optional": {
         "extensions": []
     },
-    "theme_support": ["arDominionB5Plugin", "ahgThemeB5Plugin"],
+    "theme_support": [
+        "arDominionB5Plugin",
+        "ahgThemeB5Plugin"
+    ],
     "tables": [
         "ric_orphan_tracking",
         "ric_queue_status",
