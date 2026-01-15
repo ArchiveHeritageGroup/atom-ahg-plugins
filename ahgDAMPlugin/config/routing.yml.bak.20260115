@@ -1,0 +1,44 @@
+dam_dashboard:
+  url: /dam/dashboard
+  param: { module: ahgDam, action: dashboard }
+
+dam_create:
+  url: /dam/create
+  param: { module: ahgDam, action: create }
+
+dam_edit_iptc:
+  url: /dam/iptc/:slug
+  param: { module: ahgDam, action: editIptc }
+
+dam_extract_metadata:
+  url: /dam/extract/:id
+  param: { module: ahgDam, action: extractMetadata }
+
+dam_browse:
+  url: /dam/browse
+  param: { module: ahgDam, action: browse }
+
+dam_bulk_create:
+  url: /dam/bulk
+  param: { module: ahgDam, action: bulkCreate }
+
+dam_convert:
+  url: /dam/convert/:id
+  param: { module: ahgDam, action: convert }
+
+dam_index:
+  url: /dam
+  param: { module: ahgDam, action: index }
+
+dam_lightbox:
+  url: /dam/lightbox
+  param: { module: ahgDam, action: lightbox }
+
+dam_reports:
+  url: /dam/reports
+  param: { module: damReports, action: index }
+dam_view:
+  url: /dam/:slug
+  param: { module: ahgDAMPlugin, action: index }
+  requirements:
+    slug: '[a-zA-Z0-9\-]+'

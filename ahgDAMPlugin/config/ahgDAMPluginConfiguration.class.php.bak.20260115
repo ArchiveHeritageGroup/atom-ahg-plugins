@@ -15,12 +15,13 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
     public function loadRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
+        error_log("DAM Plugin: Loading routes");
         
         // Base route (must be first - checked last)
         $routing->prependRoute('dam_index', new sfRoute('/dam', ['module' => 'ahgDam', 'action' => 'index']));
         
         // Catch-all slug route (checked second-to-last)
-        $routing->prependRoute('dam_view', new AhgMetadataRoute('/dam/:slug', ['module' => 'ahgDAMPlugin', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
+        $routing->prependRoute('dam_view', new QubitMetadataRoute('/dam/:slug', ['module' => 'ahgDAMPlugin', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
         
         // Specific routes (added last so they are checked first)
         $routing->prependRoute('dam_browse', new sfRoute('/dam/browse', ['module' => 'ahgDam', 'action' => 'browse']));
