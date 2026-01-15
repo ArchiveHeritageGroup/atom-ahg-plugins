@@ -1,7 +1,7 @@
 {
     "name": "Spectrum 5.0 Procedures",
     "machine_name": "ahgSpectrumPlugin",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "description": "Spectrum 5.0 museum procedures - acquisition, loans, movement, conservation, valuation, and workflow management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

@@ -221,7 +221,7 @@ class ObjectAddDigitalObjectAction extends sfAction
     /**
      * Get module name based on resource type
      */
-    protected function getModuleName(): string
+    public function getModuleName(): string
     {
         if ($this->resourceClassName === 'QubitInformationObject') {
             return 'informationobject';
