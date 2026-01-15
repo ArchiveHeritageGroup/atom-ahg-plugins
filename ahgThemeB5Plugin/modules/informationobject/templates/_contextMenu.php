@@ -120,7 +120,7 @@ function extractEntities(objectId) {
   document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting...</p></div>';
   document.getElementById('nerReviewBtn').style.display = 'none';
 
-  fetch('/ner/extract/' + objectId, { method: 'POST' })
+  fetch('/index.php/ner/extract/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data.success) {

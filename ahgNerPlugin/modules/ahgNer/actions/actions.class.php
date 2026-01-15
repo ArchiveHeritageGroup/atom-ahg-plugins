@@ -1022,10 +1022,6 @@ class ahgNerActions extends sfActions
                     ]);
             }
 
-            // Update the information_object updated_at
-            Illuminate\Database\Capsule\Manager::table('information_object')
-                ->where('id', $objectId)
-                ->update(['updated_at' => date('Y-m-d H:i:s')]);
 
             return true;
         } catch (Exception $e) {
