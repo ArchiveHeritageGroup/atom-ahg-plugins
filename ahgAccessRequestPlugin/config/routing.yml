@@ -1,58 +1,6 @@
-security_access_requests:
-  url: /security/access-requests
-  param: { module: ahgAccessRequest, action: pending }
-
-security_request_view:
-  url: /security/request/:id
-  param: { module: ahgAccessRequest, action: view }
-  requirements: { id: \d+ }
-
-security_request_approve:
-  url: /security/request/:id/approve
-  param: { module: ahgAccessRequest, action: approve }
-  requirements: { id: \d+ }
-
-security_request_deny:
-  url: /security/request/:id/deny
-  param: { module: ahgAccessRequest, action: deny }
-  requirements: { id: \d+ }
-
-security_request_new:
-  url: /security/request
-  param: { module: ahgAccessRequest, action: new }
-
-security_request_object:
-  url: /security/request-object/:slug
-  param: { module: ahgAccessRequest, action: requestObject }
-
-security_my_requests:
-  url: /security/my-requests
-  param: { module: ahgAccessRequest, action: myRequests }
-
-access_request_my:
-  url: /access-requests/my
-  param: { module: ahgAccessRequest, action: myRequests }
-
-access_request_create:
-  url: /security/request-access/create
-  param: { module: ahgAccessRequest, action: create }
-
-access_request_view:
-  url: /access-requests/:id
-  param: { module: ahgAccessRequest, action: view }
-  requirements: { id: \d+ }
-
-access_request_approve:
-  url: /access-requests/:id/approve
-  param: { module: ahgAccessRequest, action: approve }
-  requirements: { id: \d+ }
-
-access_request_deny:
-  url: /access-requests/:id/deny
-  param: { module: ahgAccessRequest, action: deny }
-  requirements: { id: \d+ }
-
-access_request_cancel:
-  url: /access-requests/:id/cancel
-  param: { module: ahgAccessRequest, action: cancel }
-  requirements: { id: \d+ }
+# ============================================================================
+# ahgAccessRequestPlugin - Routing
+# NOTE: All routes defined in ahgAccessRequestPluginConfiguration.class.php
+# This file kept empty to avoid duplicates
+# Routes use prependRoute() for proper priority ordering
+# ============================================================================
