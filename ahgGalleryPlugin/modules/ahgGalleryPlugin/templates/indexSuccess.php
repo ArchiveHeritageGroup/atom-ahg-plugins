@@ -211,7 +211,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
     </div>
     <ul class="list-group list-group-flush">
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
-      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'arCondition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
+      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('GRAP data'); ?></a></li>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'oais', 'action' => 'createSip', 'slug' => $resource->slug]); ?>"><i class="fas fa-archive me-2"></i><?php echo __('Digital Preservation (OAIS)'); ?></a></li>

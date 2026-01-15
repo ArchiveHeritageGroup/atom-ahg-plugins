@@ -72,7 +72,7 @@ if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul>
     <?php if ($hasCondition): ?>
-    <li><?php echo link_to(__('Condition assessment'), ['module' => 'arCondition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?></li>
+    <li><?php echo link_to(__('Condition assessment'), ['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
     <li><?php echo link_to(__('Spectrum data'), ['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?></li>

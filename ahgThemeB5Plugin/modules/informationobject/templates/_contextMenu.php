@@ -52,7 +52,7 @@ if (isset($resource)) {
     <li><?php echo link_to(__('Provenance'), ['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasCondition): ?>
-    <li><?php echo link_to(__('Condition assessment'), ['module' => 'arCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Condition assessment'), ['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
     <li><?php echo link_to(__('Spectrum data'), ['module' => 'spectrum', 'action' => 'index', 'slug' => $resourceSlug]); ?></li>
