@@ -888,4 +888,149 @@ class ahgNerActions extends sfActions
             ->where('id', $entity->id)
             ->update(['status' => 'linked', 'linked_actor_id' => $targetId, 'reviewed_at' => date('Y-m-d H:i:s')]);
     }
+    /**
+     * Generate summary and save to Scope & Content field
+     */
+    public function executeSummarize(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $maxLength = $request->getParameter('max_length', 500);
+        $minLength = $request->getParameter('min_length', 100);
+
+        $object = QubitInformationObject::getById($objectId);
+
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        // Get text to summarize - prefer PDF, fallback to metadata
+        $pdfPath = $this->getDigitalObjectPath($object);
+        $nerService = new ahgNerService();
+
+        // Check if summarizer is available
+        if (!$nerService->isSummarizerAvailable()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Summarizer service not available']));
+        }
+
+        $result = null;
+
+        if ($pdfPath && file_exists($pdfPath)) {
+            // Summarize from PDF
+            $result = $nerService->summarizeFromPdf($pdfPath, $maxLength, $minLength);
+        } else {
+            // Summarize from metadata text
+            $text = $this->getObjectTextForSummary($object);
+
+            if (empty(trim($text))) {
+                return $this->renderText(json_encode(['success' => false, 'error' => 'No text content found to summarize']));
+            }
+
+            $result = $nerService->summarize($text, $maxLength, $minLength);
+        }
+
+        if (!isset($result['success']) || !$result['success']) {
+            return $this->renderText(json_encode($result));
+        }
+
+        $summary = $result['summary'] ?? null;
+
+        if (empty($summary)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No summary generated']));
+        }
+
+        // Save summary to Scope & Content field
+        $saved = $this->saveScopeAndContent($objectId, $summary);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'summary' => $summary,
+            'summary_length' => strlen($summary),
+            'original_length' => $result['original_length'] ?? 0,
+            'processing_time_ms' => $result['processing_time_ms'] ?? 0,
+            'saved' => $saved,
+            'source' => $pdfPath ? 'pdf' : 'metadata'
+        ]));
+    }
+
+    /**
+     * Get text suitable for summarization (excludes scope_and_content to avoid circular reference)
+     */
+    private function getObjectTextForSummary($object)
+    {
+        $parts = [];
+
+        // Get title
+        if (!empty($object->title)) {
+            $parts[] = $object->title;
+        }
+
+        // Get archival history
+        if (!empty($object->archivalHistory)) {
+            $parts[] = $object->archivalHistory;
+        }
+
+        // Get extent and medium
+        if (!empty($object->extentAndMedium)) {
+            $parts[] = $object->extentAndMedium;
+        }
+
+        // Get arrangement
+        if (!empty($object->arrangement)) {
+            $parts[] = $object->arrangement;
+        }
+
+        // Get physical characteristics
+        if (!empty($object->physicalCharacteristics)) {
+            $parts[] = $object->physicalCharacteristics;
+        }
+
+        // Get acquisition info
+        if (!empty($object->acquisition)) {
+            $parts[] = $object->acquisition;
+        }
+
+        return implode("\n\n", $parts);
+    }
+
+    /**
+     * Save summary to Scope & Content field
+     */
+    private function saveScopeAndContent($objectId, $summary)
+    {
+        try {
+            // Check if i18n record exists
+            $exists = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', 'en')
+                ->exists();
+
+            if ($exists) {
+                // Update existing
+                Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                    ->where('id', $objectId)
+                    ->where('culture', 'en')
+                    ->update(['scope_and_content' => $summary]);
+            } else {
+                // Insert new
+                Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                    ->insert([
+                        'id' => $objectId,
+                        'culture' => 'en',
+                        'scope_and_content' => $summary
+                    ]);
+            }
+
+            // Update the information_object updated_at
+            Illuminate\Database\Capsule\Manager::table('information_object')
+                ->where('id', $objectId)
+                ->update(['updated_at' => date('Y-m-d H:i:s')]);
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Error saving scope and content: " . $e->getMessage());
+            return false;
+        }
+    }
 }

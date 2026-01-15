@@ -84,6 +84,11 @@ if (isset($resource)) {
       </a>
     </li>
     <li>
+      <a href="#" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>); return false;">
+        <i class="bi bi-file-text me-1"></i><?php echo __('Generate Summary'); ?>
+      </a>
+    </li>
+    <li>
       <a href="/ner/review">
         <i class="bi bi-list-check me-1"></i><?php echo __('Review Dashboard'); ?>
       </a>
@@ -144,6 +149,38 @@ function extractEntities(objectId) {
       document.getElementById('nerModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
     });
 }
+
+function generateSummary(objectId) {
+  var modal = new bootstrap.Modal(document.getElementById('nerModal'));
+  modal.show();
+  document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Generating summary...</p></div>';
+  document.getElementById('nerReviewBtn').style.display = 'none';
+  document.getElementById('nerProcessingTime').textContent = '';
+
+  fetch('/index.php/ner/summarize/' + objectId, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        document.getElementById('nerModalBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Summary generation failed') + '</div>';
+        return;
+      }
+      var savedMsg = data.saved ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Saved to Scope \& Content</span>' : '<span class="text-warning">Generated (not saved)</span>';
+      var html = '<div class="alert alert-success mb-3">' + savedMsg + '</div>';
+      html += '<div class="card"><div class="card-header"><i class="bi bi-file-text me-1"></i>Generated Summary</div>';
+      html += '<div class="card-body">' + data.summary + '</div></div>';
+      html += '<div class="mt-3"><button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Page</button></div>';
+      document.getElementById('nerModalBody').innerHTML = html;
+      document.getElementById('nerProcessingTime').textContent = 'Source: ' + data.source + ' | ' + (data.processing_time_ms||0) + 'ms';
+      if (data.saved && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('Summary Generated', { body: 'Scope \& Content field updated', icon: '/favicon.ico' });
+      }
+    })
+    .catch(function(err) {
+      document.getElementById('nerModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
+    });
+}
+
+if ('Notification' in window && Notification.permission === 'default') { Notification.requestPermission(); }
 </script>
 <?php endif; ?>
 

@@ -1,0 +1,8 @@
+# Security configuration for ahgNer module
+all:
+  is_secure: true
+  credentials: []
+
+summarize:
+  is_secure: true
+  credentials: []
