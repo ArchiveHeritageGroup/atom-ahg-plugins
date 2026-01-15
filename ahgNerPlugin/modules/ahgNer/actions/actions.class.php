@@ -896,7 +896,7 @@ class ahgNerActions extends sfActions
         $this->getResponse()->setContentType('application/json');
 
         $objectId = $request->getParameter('id');
-        $maxLength = $request->getParameter('max_length', 500);
+        $maxLength = $request->getParameter('max_length', 1000);
         $minLength = $request->getParameter('min_length', 100);
 
         $object = QubitInformationObject::getById($objectId);

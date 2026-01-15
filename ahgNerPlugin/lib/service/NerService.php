@@ -77,7 +77,7 @@ class ahgNerService
     /**
      * Generate summary from text (for Scope & Content)
      */
-    public function summarize($text, $maxLength = 150, $minLength = 50)
+    public function summarize($text, $maxLength = 1000, $minLength = 100)
     {
         $response = $this->request('POST', '/summarize', [
             'text' => $text,
@@ -96,7 +96,7 @@ class ahgNerService
     /**
      * Generate summary from PDF
      */
-    public function summarizeFromPdf($filePath, $maxLength = 150, $minLength = 50)
+    public function summarizeFromPdf($filePath, $maxLength = 1000, $minLength = 100)
     {
         if (!file_exists($filePath)) {
             return ['success' => false, 'error' => 'File not found'];
