@@ -14,7 +14,7 @@ class nerSummarizeTask extends sfBaseTask
             new sfCommandOption('all-empty', null, sfCommandOption::PARAMETER_NONE, 'Process records with empty summary'),
             new sfCommandOption('limit', null, sfCommandOption::PARAMETER_OPTIONAL, 'Maximum to process', 100),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Show what would be processed'),
-            new sfCommandOption('field', null, sfCommandOption::PARAMETER_OPTIONAL, 'Target field', 'scopeAndContent'),
+            new sfCommandOption('field', null, sfCommandOption::PARAMETER_OPTIONAL, 'Target field', 'scope_and_content'),
         ]);
         $this->namespace = 'ner';
         $this->name = 'summarize';
@@ -41,7 +41,7 @@ EOD;
             return 1;
         }
 
-        $targetField = $options['field'] ?: ($settings['summary_field'] ?? 'scopeAndContent');
+        $targetField = $options['field'] ?: ($settings['summary_field'] ?? 'scope_and_content');
         $objectIds = $this->getObjectsToProcess($options, $targetField);
 
         if (empty($objectIds)) {
@@ -140,7 +140,7 @@ EOD;
         $data = json_decode($response, true);
         if (!isset($data['summary'])) throw new Exception("Invalid response");
 
-        $setter = 'set' . ucfirst($targetField);
+        $setter = 'set' . str_replace('_', '', ucwords($targetField, '_'));
         $io->$setter($data['summary']);
         $io->save();
     }
