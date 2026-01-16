@@ -222,6 +222,10 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
             'module' => 'ahgSettings',
             'action' => 'plugins'
         ]));
+        $routing->prependRoute('admin_ahg_settings_ai_services', new sfRoute('/admin/ahg-settings/ai-services', [
+            'module' => 'ahgSettings',
+            'action' => 'aiServices'
+        ]));
         $routing->prependRoute('admin_ahg_settings_email', new sfRoute('/admin/ahg-settings/email', [
             'module' => 'ahgSettings',
             'action' => 'email'

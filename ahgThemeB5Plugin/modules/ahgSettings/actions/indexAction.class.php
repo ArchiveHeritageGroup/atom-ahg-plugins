@@ -129,6 +129,18 @@ class AhgSettingsIndexAction extends sfAction
             ];
         }
 
+
+        // AI Services - show when ahgNerPlugin is enabled
+        $hasNer = in_array('ahgNerPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasNer) {
+            $this->sections['ai'] = [
+                'label' => 'AI Services',
+                'icon' => 'fa-brain',
+                'description' => 'NER, Summarization, Spell Check - processing mode and field mappings',
+                'url' => 'admin/ahg-settings/ai-services'
+            ];
+        }
+
         // === OPTIONAL (Plugin-dependent) ===
 
         if ($hasAuditTrail) {
