@@ -390,12 +390,19 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
         <div class="card-body">
           <ul class="list-group list-group-flush">
             <?php foreach ($linkedRecords as $record): ?>
-              <li class="list-group-item">
-                <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $record->slug]) ?>">
-                  <?php echo esc_entities($record->title ?: $record->identifier) ?>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $record->slug]) ?>">
+                    <?php echo esc_entities($record->title ?: $record->identifier) ?>
+                  </a>
+                  <?php if ($record->identifier): ?>
+                    <small class="text-muted">(<?php echo esc_entities($record->identifier) ?>)</small>
+                  <?php endif ?>
+                </div>
+                <?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+                <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $record->slug]) ?>" class="btn btn-sm btn-outline-info" title="<?php echo __('View Provenance') ?>">
+                  <i class="bi bi-clock-history"></i>
                 </a>
-                <?php if ($record->identifier): ?>
-                  <small class="text-muted">(<?php echo esc_entities($record->identifier) ?>)</small>
                 <?php endif ?>
               </li>
             <?php endforeach ?>
