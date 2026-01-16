@@ -1,0 +1,36 @@
+{
+    "name": "Provenance Tracking",
+    "machine_name": "ahgProvenancePlugin",
+    "version": "1.0.0",
+    "description": "Chain of custody and provenance tracking for archival records, museum objects, and library materials",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional": {
+        "extensions": [
+            "ahgDonorAgreementPlugin",
+            "ahgRightsPlugin"
+        ]
+    },
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ],
+    "tables": [
+        "provenance_record",
+        "provenance_record_i18n",
+        "provenance_event",
+        "provenance_event_i18n",
+        "provenance_agent",
+        "provenance_agent_i18n",
+        "provenance_document"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "provenance",
+    "load_order": 45
+}

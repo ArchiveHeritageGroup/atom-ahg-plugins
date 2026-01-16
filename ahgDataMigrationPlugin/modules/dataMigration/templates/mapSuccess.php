@@ -67,6 +67,53 @@ if (!is_array($rawMappings)) $rawMappings = [];
     </div>
   </div>
 
+  <!-- Data Preview Section -->
+  <?php $rawDetection = $sf_data->getRaw('detection'); ?>
+  <?php $rawSourceFields = $sf_data->getRaw('sourceFields'); ?>
+  <div class="card mb-3">
+    <div class="card-header py-2 d-flex justify-content-between align-items-center bg-info text-white">
+      <h6 class="mb-0"><i class="bi bi-eye"></i> Source Data Preview</h6>
+      <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#dataPreviewCollapse">
+        Toggle Preview
+      </button>
+    </div>
+    <div class="collapse show" id="dataPreviewCollapse">
+      <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+          <table class="table table-sm table-bordered table-striped mb-0" style="font-size: 0.75rem;">
+            <thead class="table-dark sticky-top">
+              <tr>
+                <th class="text-center" style="width: 40px;">#</th>
+                <?php foreach ($rawSourceFields as $field): ?>
+                <th class="text-nowrap"><?php echo htmlspecialchars($field) ?></th>
+                <?php endforeach ?>
+              </tr>
+            </thead>
+            <tbody>
+              <?php 
+              $previewRows = array_slice($rawDetection['rows'] ?? [], 0, 5);
+              foreach ($previewRows as $rowIndex => $row): 
+              ?>
+              <tr>
+                <td class="text-center text-muted"><?php echo $rowIndex + 1 ?></td>
+                <?php foreach ($rawSourceFields as $colIndex => $field): ?>
+                <td class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($row[$colIndex] ?? '') ?>">
+                  <?php echo htmlspecialchars(mb_substr($row[$colIndex] ?? '', 0, 80)) ?>
+                  <?php if (strlen($row[$colIndex] ?? '') > 80): ?>...<?php endif ?>
+                </td>
+                <?php endforeach ?>
+              </tr>
+              <?php endforeach ?>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer py-1 small text-muted">
+          Showing first <?php echo count($previewRows) ?> of <?php echo count($rawDetection['rows'] ?? []) ?> rows
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mapping Controls -->
   <div class="card mb-3">
     <div class="card-header py-2 d-flex justify-content-between align-items-center">
@@ -249,23 +296,51 @@ if (!is_array($rawMappings)) $rawMappings = [];
 <div class="modal fade" id="saveMappingModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header py-2">
-        <h6 class="modal-title">💾 Save Mapping</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-header py-2 bg-success text-white">
+        <h6 class="modal-title"><i class="bi bi-save"></i> Save Mapping</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Mapping Name</label>
+          <label class="form-label">Mapping Name <span class="text-danger">*</span></label>
           <input type="text" id="mappingName" class="form-control" placeholder="e.g., NG Church DBText Export">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+          <select id="mappingCategory" class="form-select">
+            <option value="Custom">Custom</option>
+            <option value="ArchivesSpace">ArchivesSpace</option>
+            <option value="Preservica">Preservica</option>
+            <option value="Vernon">Vernon CMS</option>
+            <option value="PSIS">PSIS</option>
+            <option value="DAM">DAM / Digital Assets</option>
+            <option value="WDB">WDB</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div class="mb-3">
           <label class="form-label">Or select existing to overwrite</label>
           <select id="existingMapping" class="form-select">
             <option value="">-- Create New --</option>
-            <?php foreach ($rawMappings as $mapping): ?>
-              <option value="<?php echo htmlspecialchars($mapping->name) ?>"><?php echo htmlspecialchars($mapping->name) ?></option>
+            <?php 
+            $groupedMappings = [];
+            foreach ($rawMappings as $m) {
+                $cat = $m->category ?? 'Custom';
+                if (!isset($groupedMappings[$cat])) $groupedMappings[$cat] = [];
+                $groupedMappings[$cat][] = $m;
+            }
+            ksort($groupedMappings);
+            foreach ($groupedMappings as $category => $mappings): ?>
+              <optgroup label="<?php echo htmlspecialchars($category) ?>">
+              <?php foreach ($mappings as $mapping): ?>
+                <option value="<?php echo $mapping->id ?>" data-default="<?php echo $mapping->is_default ?>">
+                  <?php echo htmlspecialchars($mapping->name) ?><?php if ($mapping->is_default): ?> [Default]<?php endif ?>
+                </option>
+              <?php endforeach ?>
+              </optgroup>
             <?php endforeach ?>
           </select>
+          <small class="text-muted">[Default] = System mapping - changes affect all users</small>
         </div>
         <div class="form-check">
           <input type="checkbox" id="overwriteExisting" class="form-check-input">
@@ -274,12 +349,11 @@ if (!is_array($rawMappings)) $rawMappings = [];
       </div>
       <div class="modal-footer py-2">
         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="confirmSaveMapping">💾 Save</button>
+        <button type="button" class="btn btn-success btn-sm" id="confirmSaveMapping"><i class="bi bi-save"></i> Save</button>
       </div>
     </div>
   </div>
 </div>
-
 <!-- Rename Modal -->
 <div class="modal fade" id="renameModal" tabindex="-1">
   <div class="modal-dialog modal-sm">
@@ -338,12 +412,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // When selecting existing mapping, fill in name
-  document.getElementById('existingMapping').addEventListener('change', function() {
-    if (this.value) {
-      document.getElementById('mappingName').value = this.value;
-      document.getElementById('overwriteExisting').checked = true;
-    }
-  });
   
   // Select All / Deselect All
   document.getElementById('selectAllInclude').addEventListener('click', function() {
@@ -386,20 +454,45 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Save Mapping
+  // Handle existing mapping selection - auto-fill name when selected
+  document.getElementById('existingMapping').addEventListener('change', function() {
+    var selected = this.options[this.selectedIndex];
+    if (this.value) {
+      // Overwriting existing - use selected mapping's name
+      document.getElementById('mappingName').value = selected.text.replace(' [Default]', '').trim();
+      document.getElementById('overwriteExisting').checked = true;
+    } else {
+      document.getElementById('overwriteExisting').checked = false;
+    }
+  });
+
   document.getElementById('confirmSaveMapping').addEventListener('click', function() {
     var name = document.getElementById('mappingName').value.trim();
+    var category = document.getElementById('mappingCategory').value;
     var overwrite = document.getElementById('overwriteExisting').checked ? '1' : '0';
+    var existingId = document.getElementById('existingMapping').value;
     
-    if (!name) { 
-      alert('Please enter a mapping name'); 
-      return; 
+    if (!name && !existingId) {
+      alert('Please enter a mapping name or select an existing mapping to overwrite');
+      return;
+    }
+    
+    // Warn if overwriting a default mapping
+    if (existingId && overwrite === '1') {
+      var selected = document.getElementById('existingMapping').options[document.getElementById('existingMapping').selectedIndex];
+      if (selected.dataset.default === '1') {
+        if (!confirm('Warning: This is a default/system mapping. Changes will affect all users. Continue?')) {
+          return;
+        }
+      }
     }
     
     showLoading('Saving mapping...');
-    
     var formData = new FormData(document.getElementById('mappingForm'));
     formData.append('mapping_name', name);
+    formData.append('category', category);
     formData.append('overwrite', overwrite);
+    formData.append('existing_id', existingId);
     
     fetch('<?php echo url_for(['module' => 'dataMigration', 'action' => 'saveMapping']) ?>', {
       method: 'POST',
@@ -409,14 +502,13 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(function(data) {
       console.log('Save result:', data);
       hideLoading();
-      
       if (data.success) {
-        showToast('Mapping saved! (' + data.field_count + ' fields)', 'success');
+        var msg = data.updated ? 'Mapping updated' : 'Mapping saved';
+        showToast(msg + '! (' + data.field_count + ' fields)', 'success');
         saveModal.hide();
         setTimeout(function() { location.reload(); }, 1000);
       } else if (data.error === 'exists') {
         if (confirm(data.message)) {
-          // Retry with overwrite
           document.getElementById('overwriteExisting').checked = true;
           document.getElementById('confirmSaveMapping').click();
         }
@@ -429,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
       showToast('Error saving: ' + e.message, 'danger');
     });
   });
-  
+
   // Rename
   document.querySelectorAll('.rename-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {

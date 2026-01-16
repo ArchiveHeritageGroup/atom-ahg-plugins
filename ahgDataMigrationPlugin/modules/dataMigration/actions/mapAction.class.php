@@ -46,7 +46,7 @@ class dataMigrationMapAction extends sfAction
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
         $savedMappings = \Illuminate\Database\Capsule\Manager::table('atom_data_mapping')
             ->orderBy('name')
-            ->get();
+            ->get()->toArray();
 
         $this->filename = $filename;
         $this->detection = $detection;
@@ -480,8 +480,82 @@ class dataMigrationMapAction extends sfAction
 
     protected function suggestMapping(string $sourceField, string $type): string
     {
-        $field = strtolower(trim($sourceField));
-        $field = preg_replace('/[^a-z0-9]/', '', $field);
+        $originalField = strtolower(trim($sourceField));
+        
+        // Handle prefixed fields (dc:title, dcterms:extent, Identifier_Reference, etc.)
+        $field = $originalField;
+        
+        // Dublin Core mappings - map to target standard
+        $dcMappings = [
+            'dc:title' => 'title',
+            'dc:creator' => 'creators',
+            'dc:subject' => 'subjectAccessPoints',
+            'dc:description' => 'scopeAndContent',
+            'dc:publisher' => 'repository',
+            'dc:contributor' => 'nameAccessPoints',
+            'dc:date' => 'eventDates',
+            'dc:type' => 'levelOfDescription',
+            'dc:format' => 'extentAndMedium',
+            'dc:identifier' => 'identifier',
+            'dc:source' => 'locationOfOriginals',
+            'dc:language' => 'language',
+            'dc:relation' => 'relatedUnitsOfDescription',
+            'dc:coverage' => 'placeAccessPoints',
+            'dc:rights' => 'accessConditions',
+            'dcterms:extent' => 'extentAndMedium',
+            'dcterms:provenance' => 'archivalHistory',
+            'dcterms:accessrights' => 'accessConditions',
+            'dcterms:created' => 'eventDates',
+            'dcterms:modified' => 'revisionHistory',
+            'dcterms:spatial' => 'placeAccessPoints',
+            'dcterms:temporal' => 'eventDates',
+            // EAD (Encoded Archival Description) prefixed
+            'ead:unittitle' => 'title',
+            'ead:unitid' => 'identifier',
+            'ead:unitdate' => 'eventDates',
+            'ead:origination' => 'creators',
+            'ead:physdesc' => 'extentAndMedium',
+            'ead:scopecontent' => 'scopeAndContent',
+            'ead:bioghist' => 'archivalHistory',
+            'ead:arrangement' => 'arrangement',
+            'ead:accessrestrict' => 'accessConditions',
+            'ead:userestrict' => 'reproductionConditions',
+            'ead:langmaterial' => 'language',
+            'ead:subject' => 'subjectAccessPoints',
+            'ead:geogname' => 'placeAccessPoints',
+            'ead:persname' => 'nameAccessPoints',
+            // MODS prefixed
+            'mods:title' => 'title',
+            'mods:name' => 'creators',
+            'mods:dateissued' => 'eventDates',
+            'mods:datecreated' => 'eventDates',
+            'mods:publisher' => 'repository',
+            'mods:language' => 'language',
+            'mods:extent' => 'extentAndMedium',
+            'mods:abstract' => 'scopeAndContent',
+            'mods:subject' => 'subjectAccessPoints',
+            'mods:identifier' => 'identifier',
+        ];
+        
+        // Check DC mappings first (before stripping special chars)
+        if (isset($dcMappings[$originalField])) {
+            return $dcMappings[$originalField];
+        }
+        
+        // Handle Identifier_Type patterns (from OPEX)
+        if (preg_match('/^identifier[_-]?(.*)/i', $originalField, $matches)) {
+            $idType = strtolower($matches[1] ?? '');
+            if (in_array($idType, ['reference', 'ref', 'code', 'number', ''])) {
+                return 'identifier';
+            }
+            if (in_array($idType, ['atom_id', 'atomid', 'legacy', 'legacyid', 'source'])) {
+                return 'legacyId';
+            }
+            return 'identifier';
+        }
+        
+        // Strip special characters for standard matching
+        $field = preg_replace('/[^a-z0-9]/', '', $originalField);
 
         // Common mappings across all types
         $commonMappings = [
@@ -492,6 +566,62 @@ class dataMigrationMapAction extends sfAction
             'briefdescription' => 'scopeAndContent',
             'notes' => 'generalNote',
             'note' => 'generalNote',
+            'dctitle' => 'title',
+            'dccreator' => 'creators',
+            'dcsubject' => 'subjectAccessPoints',
+            'dcdescription' => 'scopeAndContent',
+            'dcpublisher' => 'repository',
+            'dccontributor' => 'nameAccessPoints',
+            'dcdate' => 'eventDates',
+            'dctype' => 'levelOfDescription',
+            'dcformat' => 'extentAndMedium',
+            'dcidentifier' => 'identifier',
+            'dcsource' => 'locationOfOriginals',
+            'dclanguage' => 'language',
+            'dcrelation' => 'relatedUnitsOfDescription',
+            'dccoverage' => 'placeAccessPoints',
+            'dcrights' => 'accessConditions',
+            'dctermsextent' => 'extentAndMedium',
+            'dctermsprovenance' => 'archivalHistory',
+            'dctermsaccessrights' => 'accessConditions',
+            'dctermscreated' => 'eventDates',
+            'dctermsmodified' => 'revisionHistory',
+            // EAD (Encoded Archival Description) mappings
+            'ead:unittitle' => 'title',
+            'ead:unitid' => 'identifier',
+            'ead:unitdate' => 'eventDates',
+            'ead:origination' => 'creators',
+            'ead:physdesc' => 'extentAndMedium',
+            'ead:extent' => 'extentAndMedium',
+            'ead:scopecontent' => 'scopeAndContent',
+            'ead:bioghist' => 'archivalHistory',
+            'ead:custodhist' => 'archivalHistory',
+            'ead:arrangement' => 'arrangement',
+            'ead:accessrestrict' => 'accessConditions',
+            'ead:userestrict' => 'reproductionConditions',
+            'ead:relatedmaterial' => 'relatedUnitsOfDescription',
+            'ead:originalsloc' => 'locationOfOriginals',
+            'ead:altformavail' => 'locationOfCopies',
+            'ead:langmaterial' => 'language',
+            'ead:subject' => 'subjectAccessPoints',
+            'ead:geogname' => 'placeAccessPoints',
+            'ead:persname' => 'nameAccessPoints',
+            'ead:corpname' => 'nameAccessPoints',
+            // MODS mappings
+            'mods:title' => 'title',
+            'mods:name' => 'creators',
+            'mods:dateissued' => 'eventDates',
+            'mods:datecreated' => 'eventDates',
+            'mods:publisher' => 'repository',
+            'mods:language' => 'language',
+            'mods:extent' => 'extentAndMedium',
+            'mods:abstract' => 'scopeAndContent',
+            'mods:subject' => 'subjectAccessPoints',
+            'mods:geographic' => 'placeAccessPoints',
+            'mods:identifier' => 'identifier',
+            'mods:accesscondition' => 'accessConditions',
+            'dctermsspatial' => 'placeAccessPoints',
+            'dctermstemporal' => 'eventDates',
         ];
 
         // Type-specific mappings
@@ -576,29 +706,31 @@ class dataMigrationMapAction extends sfAction
             ],
             'dam' => [
                 'assetid' => 'identifier',
-                'filename' => 'identifier',
+                'filename' => 'digitalObjectPath',
                 'filepath' => 'digitalObjectPath',
                 'caption' => 'title',
-                'photographer' => 'eventActors',
-                'creator' => 'eventActors',
+                'photographer' => 'creators',
+                'creator' => 'creators',
                 'datecaptured' => 'eventDates',
                 'datetaken' => 'eventDates',
                 'keywords' => 'subjectAccessPoints',
                 'tags' => 'subjectAccessPoints',
                 'copyright' => 'reproductionConditions',
-                'rights' => 'reproductionConditions',
-                'format' => 'fileFormat',
-                'size' => 'fileSize',
-                'width' => 'dimensions',
-                'height' => 'dimensions',
+                'rights' => 'accessConditions',
+                'format' => 'extentAndMedium',
+                'mimetype' => 'extentAndMedium',
+                'size' => 'extentAndMedium',
+                'width' => 'extentAndMedium',
+                'height' => 'extentAndMedium',
+                'duration' => 'extentAndMedium',
             ],
             'archives' => [
                 'referencecode' => 'identifier',
                 'unitid' => 'identifier',
                 'unittitle' => 'title',
                 'unitdate' => 'eventDates',
-                'origination' => 'eventActors',
-                'creator' => 'eventActors',
+                'origination' => 'creators',
+                'creator' => 'creators',
                 'extent' => 'extentAndMedium',
                 'scopecontent' => 'scopeAndContent',
                 'arrangement' => 'arrangement',
@@ -608,6 +740,11 @@ class dataMigrationMapAction extends sfAction
                 'bioghist' => 'archivalHistory',
                 'custodhist' => 'archivalHistory',
                 'acqinfo' => 'acquisition',
+                'relatedmaterial' => 'relatedUnitsOfDescription',
+                'separatedmaterial' => 'relatedUnitsOfDescription',
+                'otherfindaid' => 'findingAids',
+                'originalsloc' => 'locationOfOriginals',
+                'altformavail' => 'locationOfCopies',
             ],
         ];
 

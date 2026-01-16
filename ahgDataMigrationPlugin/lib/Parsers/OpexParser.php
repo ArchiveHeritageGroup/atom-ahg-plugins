@@ -55,6 +55,7 @@ class OpexParser
             'descriptive_metadata' => $this->getDescriptiveMetadata(),
             'files' => $this->getFiles(),
             'folders' => $this->getFolders(),
+            'history' => $this->getHistory(),
         ];
 
         return $result;
@@ -299,6 +300,12 @@ class OpexParser
             }
         }
 
+        // Add provenance events from History
+        if (!empty($data['history'])) {
+            $record['_provenance_events'] = $this->mapHistoryToProvenance($data['history']);
+            $record['_preservica_history'] = $data['history']; // Keep raw for reference
+        }
+
         return $record;
     }
 
@@ -329,4 +336,141 @@ class OpexParser
 
         return $records;
     }
+    /**
+     * Get audit history/provenance events from OPEX.
+     * 
+     * OPEX History contains audit trail events that document
+     * what has happened to the item in the producing system.
+     */
+    protected function getHistory(): array
+    {
+        $history = [];
+
+        $historyNode = $this->xpath->query('//opex:History');
+        if ($historyNode->length === 0) {
+            // Try without namespace
+            $historyNode = $this->xpath->query('//History');
+        }
+
+        if ($historyNode->length === 0) {
+            return $history;
+        }
+
+        $events = $this->xpath->query('.//opex:Event | .//Event', $historyNode->item(0));
+        foreach ($events as $event) {
+            $eventData = [
+                'date' => $event->getAttribute('date') ?: null,
+                'user' => $event->getAttribute('user') ?: null,
+                'type' => null,
+                'action' => null,
+                'detail' => null,
+                'detail_json' => null,
+            ];
+
+            // Get Type
+            $type = $this->xpath->query('.//opex:Type | .//Type', $event);
+            if ($type->length > 0) {
+                $eventData['type'] = $type->item(0)->textContent;
+            }
+
+            // Get Action
+            $action = $this->xpath->query('.//opex:Action | .//Action', $event);
+            if ($action->length > 0) {
+                $eventData['action'] = $action->item(0)->textContent;
+            }
+
+            // Get Detail (may contain JSON)
+            $detail = $this->xpath->query('.//opex:Detail | .//Detail', $event);
+            if ($detail->length > 0) {
+                $detailText = $detail->item(0)->textContent;
+                $eventData['detail'] = $detailText;
+                
+                // Try to parse as JSON
+                $decoded = json_decode($detailText, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $eventData['detail_json'] = $decoded;
+                }
+            }
+
+            $history[] = $eventData;
+        }
+
+        // Sort by date
+        usort($history, function($a, $b) {
+            return strtotime($a['date'] ?? '1900-01-01') - strtotime($b['date'] ?? '1900-01-01');
+        });
+
+        return $history;
+    }
+
+    /**
+     * Map OPEX History events to AtoM Provenance events.
+     * 
+     * Maps Preservica event types to provenance event types:
+     * - Ingest → accessioning
+     * - UpdateProperties → other (metadata update)
+     * - Migrate → conservation
+     * - Characterise → authentication
+     * - Move → transfer
+     * - Delete → deaccessioning
+     */
+    protected function mapHistoryToProvenance(array $history): array
+    {
+        $provenanceEvents = [];
+
+        $typeMapping = [
+            'Ingest' => 'accessioning',
+            'IngestStart' => 'accessioning',
+            'IngestComplete' => 'accessioning',
+            'UpdateProperties' => 'other',
+            'UpdateMetadata' => 'other',
+            'Migrate' => 'conservation',
+            'Migration' => 'conservation',
+            'Characterise' => 'authentication',
+            'Characterisation' => 'authentication',
+            'Move' => 'transfer',
+            'Copy' => 'other',
+            'Delete' => 'deaccessioning',
+            'Restore' => 'recovery',
+            'Export' => 'other',
+            'Import' => 'accessioning',
+            'AddContent' => 'accessioning',
+            'RemoveContent' => 'deaccessioning',
+        ];
+
+        foreach ($history as $event) {
+            $eventType = $typeMapping[$event['type']] ?? 'other';
+            
+            $provenanceEvent = [
+                'event_type' => $eventType,
+                'event_date' => $event['date'] ? date('Y-m-d', strtotime($event['date'])) : null,
+                'event_date_text' => $event['date'] ?? null,
+                'date_certainty' => 'exact',
+                'evidence_type' => 'documentary',
+                'certainty' => 'certain',
+                'notes' => sprintf(
+                    "Preservica %s: %s%s",
+                    $event['type'] ?? 'Event',
+                    $event['action'] ?? '',
+                    $event['user'] ? " (by {$event['user']})" : ''
+                ),
+                'source_reference' => 'Preservica OPEX History',
+                '_preservica_type' => $event['type'],
+                '_preservica_action' => $event['action'],
+                '_preservica_user' => $event['user'],
+                '_preservica_detail' => $event['detail'],
+            ];
+
+            // Extract agent from user field
+            if (!empty($event['user'])) {
+                $provenanceEvent['to_agent_name'] = $event['user'];
+                $provenanceEvent['to_agent_type'] = 'person';
+            }
+
+            $provenanceEvents[] = $provenanceEvent;
+        }
+
+        return $provenanceEvents;
+    }
+
 }

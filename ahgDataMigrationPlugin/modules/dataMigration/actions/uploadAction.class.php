@@ -71,7 +71,7 @@ class dataMigrationUploadAction extends sfAction
     protected function parseFile($filepath, $ext, $sheetIndex, $firstRowHeader, $delimiter, $encoding)
     {
         // Handle Preservica formats
-        if (in_array($ext, ['opex', 'xml'])) {
+        if ($ext === 'opex' || ($ext === 'xml' && $this->isOpexFile($filepath))) {
             return $this->parseOpexFile($filepath);
         }
         
@@ -81,7 +81,6 @@ class dataMigrationUploadAction extends sfAction
 
         $headers = [];
         $rows = [];
-        $rowCount = 0;
 
         if (in_array($ext, ['xls', 'xlsx'])) {
             // Excel file
@@ -90,9 +89,8 @@ class dataMigrationUploadAction extends sfAction
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filepath);
             $sheet = $spreadsheet->getSheet($sheetIndex);
             $data = $sheet->toArray();
-            $rowCount = count($data);
 
-            if ($firstRowHeader && $rowCount > 0) {
+            if ($firstRowHeader && count($data) > 0) {
                 $headers = array_map('trim', array_filter($data[0], function($v) { return $v !== null && $v !== ''; }));
                 $headers = array_values($headers);
                 $rows = array_slice($data, 1);
@@ -136,9 +134,7 @@ class dataMigrationUploadAction extends sfAction
             }
             fclose($handle);
 
-            $rowCount = count($allRows);
-
-            if ($firstRowHeader && $rowCount > 0) {
+            if ($firstRowHeader && count($allRows) > 0) {
                 $headers = array_map('trim', $allRows[0]);
                 $rows = array_slice($allRows, 1);
             } else {
@@ -171,6 +167,9 @@ class dataMigrationUploadAction extends sfAction
                     $rows = array_map('array_values', $data);
                 }
             }
+        } elseif ($ext === 'xml') {
+            // Generic XML
+            return $this->parseGenericXml($filepath);
         }
 
         return [
@@ -183,99 +182,144 @@ class dataMigrationUploadAction extends sfAction
     }
 
     /**
-     * Parse Preservica OPEX XML file.
+     * Check if XML file is OPEX format.
+     */
+    protected function isOpexFile($filepath)
+    {
+        $content = file_get_contents($filepath, false, null, 0, 2000);
+        return strpos($content, 'opex:') !== false 
+            || strpos($content, 'OPEXMetadata') !== false
+            || strpos($content, 'openpreservationexchange.org') !== false;
+    }
+
+    /**
+     * Parse Preservica OPEX XML file - handles multiple Record elements.
      */
     protected function parseOpexFile($filepath)
     {
         $content = file_get_contents($filepath);
         
-        // Check if it's actually OPEX format
-        if (strpos($content, 'opex:') === false && strpos($content, 'OPEXMetadata') === false) {
-            // Might be generic XML, try Dublin Core
-            return $this->parseDublinCoreXml($filepath, $content);
-        }
-
+        // Remove default namespace to make XPath easier
+        $content = preg_replace('/xmlns="[^"]+"/', '', $content);
+        
         $xml = new \SimpleXMLElement($content);
-        $xml->registerXPathNamespace('opex', 'http://www.openpreservationexchange.org/opex/v1.2');
         $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
         $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
 
         $headers = [];
-        $rows = [];
-        $record = [];
+        $records = [];
 
-        // Extract OPEX properties
-        $properties = $xml->xpath('//opex:Properties') ?: $xml->xpath('//Properties');
-        if (!empty($properties)) {
-            $props = $properties[0];
-            foreach ($props->children() as $child) {
-                $name = $child->getName();
-                $value = (string)$child;
-                if (!in_array($name, $headers)) {
-                    $headers[] = $name;
+        // Check for multiple Record elements in DescriptiveMetadata
+        $recordNodes = $xml->xpath('//DescriptiveMetadata/Record');
+        
+        if (!empty($recordNodes) && count($recordNodes) > 0) {
+            // Multiple records - parse each one
+            foreach ($recordNodes as $recordNode) {
+                $record = [];
+                
+                // Get Identifiers with their type attribute
+                foreach ($recordNode->xpath('Identifier') as $id) {
+                    $type = (string)($id['type'] ?? 'ID');
+                    $value = (string)$id;
+                    $key = 'Identifier_' . $type;
+                    $record[$key] = $value;
                 }
-                $record[$name] = $value;
-            }
-        }
-
-        // Extract Transfer info
-        $transfer = $xml->xpath('//opex:Transfer') ?: $xml->xpath('//Transfer');
-        if (!empty($transfer)) {
-            $trans = $transfer[0];
-            foreach ($trans->children() as $child) {
-                $name = 'Transfer_' . $child->getName();
-                $value = (string)$child;
-                if (!in_array($name, $headers)) {
-                    $headers[] = $name;
+                
+                // Get Dublin Core elements
+                $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
+                    'contributor', 'date', 'type', 'format', 'identifier',
+                    'source', 'language', 'coverage', 'rights'];
+                
+                foreach ($dcElements as $elem) {
+                    $nodes = $recordNode->xpath("dc:{$elem}");
+                    if (!empty($nodes)) {
+                        $values = [];
+                        foreach ($nodes as $node) {
+                            $values[] = (string)$node;
+                        }
+                        $record['dc:' . $elem] = implode(' | ', $values);
+                    }
                 }
-                $record[$name] = $value;
+                
+                // Get DC Terms elements
+                $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified'];
+                foreach ($dcTerms as $term) {
+                    $nodes = $recordNode->xpath("dcterms:{$term}");
+                    if (!empty($nodes)) {
+                        $record['dcterms:' . $term] = (string)$nodes[0];
+                    }
+                }
+                
+                if (!empty($record)) {
+                    $records[] = $record;
+                }
             }
-        }
-
-        // Extract Dublin Core metadata
-        $dcElements = [
-            'dc:title', 'dc:creator', 'dc:subject', 'dc:description', 'dc:publisher',
-            'dc:contributor', 'dc:date', 'dc:type', 'dc:format', 'dc:identifier',
-            'dc:source', 'dc:language', 'dc:coverage', 'dc:rights',
-            'dcterms:accessRights', 'dcterms:provenance', 'dcterms:extent'
-        ];
-
-        foreach ($dcElements as $element) {
-            $parts = explode(':', $element);
-            $localName = $parts[1];
-            $nodes = $xml->xpath('//' . $element);
+        } else {
+            // Single record file - extract from Properties and DescriptiveMetadata
+            $record = [];
             
-            if (!empty($nodes)) {
-                $values = [];
-                foreach ($nodes as $node) {
-                    $values[] = (string)$node;
+            // Properties
+            $props = $xml->xpath('//Properties');
+            if (!empty($props)) {
+                foreach ($props[0]->children() as $child) {
+                    $record[$child->getName()] = (string)$child;
                 }
-                $header = $element;
-                if (!in_array($header, $headers)) {
-                    $headers[] = $header;
+            }
+            
+            // Transfer info
+            $transfer = $xml->xpath('//Transfer');
+            if (!empty($transfer)) {
+                foreach ($transfer[0]->children() as $child) {
+                    $record['Transfer_' . $child->getName()] = (string)$child;
                 }
-                $record[$header] = implode(' | ', $values);
+            }
+            
+            // Identifiers
+            $identifiers = $xml->xpath('//Identifier');
+            foreach ($identifiers as $id) {
+                $type = (string)($id['type'] ?? 'ID');
+                $record['Identifier_' . $type] = (string)$id;
+            }
+            
+            // Dublin Core from anywhere
+            $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
+                'contributor', 'date', 'type', 'format', 'identifier',
+                'source', 'language', 'coverage', 'rights'];
+            
+            foreach ($dcElements as $elem) {
+                $nodes = $xml->xpath("//dc:{$elem}");
+                if (!empty($nodes)) {
+                    $values = [];
+                    foreach ($nodes as $node) {
+                        $values[] = (string)$node;
+                    }
+                    $record['dc:' . $elem] = implode(' | ', $values);
+                }
+            }
+            
+            if (!empty($record)) {
+                $records[] = $record;
             }
         }
 
-        // Extract identifiers
-        $identifiers = $xml->xpath('//opex:Identifier') ?: $xml->xpath('//Identifier');
-        foreach ($identifiers as $id) {
-            $type = (string)($id['type'] ?? 'Identifier');
-            $value = (string)$id;
-            $header = 'Identifier_' . $type;
-            if (!in_array($header, $headers)) {
-                $headers[] = $header;
+        // Build headers from all records
+        foreach ($records as $record) {
+            foreach (array_keys($record) as $key) {
+                if (!in_array($key, $headers)) {
+                    $headers[] = $key;
+                }
             }
-            $record[$header] = $value;
         }
 
-        // Build row from record
-        $row = [];
-        foreach ($headers as $h) {
-            $row[] = $record[$h] ?? '';
+        // Build rows
+        $rows = [];
+        foreach ($records as $record) {
+            $row = [];
+            foreach ($headers as $h) {
+                $row[] = $record[$h] ?? '';
+            }
+            $rows[] = $row;
         }
-        $rows[] = $row;
 
         return [
             'headers' => $headers,
@@ -344,12 +388,14 @@ class dataMigrationUploadAction extends sfAction
         $records = [];
         
         try {
+            // Remove default namespace
+            $content = preg_replace('/xmlns="[^"]+"/', '', $content);
+            
             $xml = new \SimpleXMLElement($content);
-            $xml->registerXPathNamespace('xip', 'http://preservica.com/XIP/v6.0');
             $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
 
             // Find all StructuralObjects
-            $objects = $xml->xpath('//xip:StructuralObject') ?: $xml->xpath('//StructuralObject');
+            $objects = $xml->xpath('//StructuralObject');
             
             foreach ($objects as $obj) {
                 $record = [];
@@ -361,12 +407,8 @@ class dataMigrationUploadAction extends sfAction
                 }
 
                 // Extract Dublin Core if present
-                $dcRecord = $xml->xpath("//xip:Metadata[@ref='" . ($record['Ref'] ?? '') . "']//dc:*");
-                if (empty($dcRecord)) {
-                    $dcRecord = $xml->xpath("//Metadata//dc:*");
-                }
-                
-                foreach ($dcRecord as $dc) {
+                $dcNodes = $xml->xpath("//dc:*");
+                foreach ($dcNodes as $dc) {
                     $name = 'dc:' . $dc->getName();
                     $value = (string)$dc;
                     if (isset($record[$name])) {
@@ -381,7 +423,7 @@ class dataMigrationUploadAction extends sfAction
 
             // If no StructuralObjects, try ContentObjects
             if (empty($records)) {
-                $objects = $xml->xpath('//xip:ContentObject') ?: $xml->xpath('//ContentObject');
+                $objects = $xml->xpath('//ContentObject');
                 foreach ($objects as $obj) {
                     $record = [];
                     foreach ($obj->children() as $child) {
@@ -393,62 +435,64 @@ class dataMigrationUploadAction extends sfAction
 
         } catch (\Exception $e) {
             // If XIP parsing fails, try generic XML
-            return $this->parseGenericXml($content);
+            return $this->parseGenericXmlContent($content);
         }
 
         return $records;
     }
 
     /**
-     * Parse generic Dublin Core XML.
+     * Parse generic XML file.
      */
-    protected function parseDublinCoreXml($filepath, $content = null)
+    protected function parseGenericXml($filepath)
     {
-        if ($content === null) {
-            $content = file_get_contents($filepath);
-        }
+        $content = file_get_contents($filepath);
+        return $this->parseGenericXmlFromContent($content);
+    }
+
+    /**
+     * Parse generic XML from content string.
+     */
+    protected function parseGenericXmlFromContent($content)
+    {
+        $records = [];
         
-        $xml = new \SimpleXMLElement($content);
-        $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
-        $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
+        try {
+            $xml = new \SimpleXMLElement($content);
+            $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+            $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
 
+            // Try to find record-like elements
+            foreach ($xml->children() as $child) {
+                $record = $this->xmlToArray($child);
+                if (!empty($record)) {
+                    $records[] = $record;
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+
+        if (empty($records)) {
+            return ['headers' => [], 'rows' => [], 'row_count' => 0, 'format' => 'xml'];
+        }
+
+        // Build headers
         $headers = [];
+        foreach ($records as $record) {
+            foreach (array_keys($record) as $key) {
+                if (!in_array($key, $headers)) {
+                    $headers[] = $key;
+                }
+            }
+        }
+
+        // Build rows
         $rows = [];
-        $record = [];
-
-        // Try to find dc:record or oai_dc:dc elements
-        $dcRecords = $xml->xpath('//dc:record') ?: $xml->xpath('//oai_dc:dc') ?: [$xml];
-
-        foreach ($dcRecords as $dcRecord) {
-            $rec = [];
-            foreach ($dcRecord->children('http://purl.org/dc/elements/1.1/') as $child) {
-                $name = 'dc:' . $child->getName();
-                $value = (string)$child;
-                if (!in_array($name, $headers)) {
-                    $headers[] = $name;
-                }
-                if (isset($rec[$name])) {
-                    $rec[$name] .= ' | ' . $value;
-                } else {
-                    $rec[$name] = $value;
-                }
-            }
-            foreach ($dcRecord->children('http://purl.org/dc/terms/') as $child) {
-                $name = 'dcterms:' . $child->getName();
-                $value = (string)$child;
-                if (!in_array($name, $headers)) {
-                    $headers[] = $name;
-                }
-                if (isset($rec[$name])) {
-                    $rec[$name] .= ' | ' . $value;
-                } else {
-                    $rec[$name] = $value;
-                }
-            }
-            
+        foreach ($records as $record) {
             $row = [];
             foreach ($headers as $h) {
-                $row[] = $rec[$h] ?? '';
+                $row[] = $record[$h] ?? '';
             }
             $rows[] = $row;
         }
@@ -462,27 +506,15 @@ class dataMigrationUploadAction extends sfAction
     }
 
     /**
-     * Parse generic XML to array.
+     * Parse Dublin Core XML.
      */
-    protected function parseGenericXml($content)
+    protected function parseDublinCoreXml($filepath, $content = null)
     {
-        $records = [];
-        
-        try {
-            $xml = new \SimpleXMLElement($content);
-            
-            // Try to find record-like elements
-            foreach ($xml->children() as $child) {
-                $record = $this->xmlToArray($child);
-                if (!empty($record)) {
-                    $records[] = $record;
-                }
-            }
-        } catch (\Exception $e) {
-            // Ignore
+        if ($content === null) {
+            $content = file_get_contents($filepath);
         }
-
-        return $records;
+        
+        return $this->parseGenericXmlFromContent($content);
     }
 
     /**

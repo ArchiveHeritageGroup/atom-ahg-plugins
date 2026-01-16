@@ -1,0 +1,29 @@
+# Provenance Plugin Routing
+
+# Dashboard/Index
+provenance_index:
+  url: /provenance
+  param: { module: provenance, action: index }
+
+# View provenance for an object
+provenance_view:
+  url: /provenance/:slug
+  param: { module: provenance, action: view }
+
+# Edit provenance
+provenance_edit:
+  url: /provenance/:slug/edit
+  param: { module: provenance, action: edit }
+
+# AJAX endpoints
+provenance_search_agents:
+  url: /provenance/searchAgents
+  param: { module: provenance, action: searchAgents }
+
+provenance_add_event:
+  url: /provenance/addEvent
+  param: { module: provenance, action: addEvent }
+
+provenance_delete_event:
+  url: /provenance/deleteEvent
+  param: { module: provenance, action: deleteEvent }
