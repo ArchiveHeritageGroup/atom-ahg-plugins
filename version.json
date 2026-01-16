@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
-  "date": "2026-01-13",
-  "description": "Cart/E-Commerce with guest checkout and PayFast integration"
+    "version": "1.7.1",
+    "name": "atom-extensions-catalog",
+    "updated": "2026-01-16"
 }
