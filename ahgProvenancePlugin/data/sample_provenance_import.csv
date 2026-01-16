@@ -1,0 +1,4 @@
+identifier,legacy_id,provenance_summary,acquisition_type,acquisition_date,certainty_level,event_type,event_date,from_agent,to_agent,event_location,event_notes
+ABC-001,,Donated by Smith Family in 1985,donation,1985-06-15,certain,donation,1985-06-15,Smith Family,City Museum,New York,Gift from estate
+ABC-002,PRES-12345,Purchased at auction 2010,purchase,2010-03-22,certain,auction,2010-03-22,Christie's,City Museum,London,Lot 245
+ABC-003,,Unknown provenance before 1950,unknown,,uncertain,,,,,Requires further research

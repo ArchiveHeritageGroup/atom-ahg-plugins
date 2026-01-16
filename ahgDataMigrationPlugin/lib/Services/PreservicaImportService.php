@@ -812,4 +812,146 @@ class PreservicaImportService
     {
         return $this->errors;
     }
+
+    /**
+     * Create provenance records from OPEX History events.
+     * 
+     * Maps Preservica audit events to provenance_record and provenance_event tables.
+     */
+    protected function createProvenance(int $objectId, array $mapped): void
+    {
+        // Check if ahgProvenancePlugin is enabled
+        if (!in_array('ahgProvenancePlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
+            return;
+        }
+
+        // Check for provenance events from OPEX History
+        $provenanceEvents = $mapped['_provenance_events'] ?? [];
+        $provenanceSummary = $mapped['archivalHistory'] ?? null;
+
+        if (empty($provenanceEvents) && empty($provenanceSummary)) {
+            return;
+        }
+
+        try {
+            // Create provenance record
+            $recordId = DB::table('provenance_record')->insertGetId([
+                'information_object_id' => $objectId,
+                'acquisition_type' => $this->detectAcquisitionType($provenanceEvents),
+                'certainty_level' => 'certain', // Preservica events are documented
+                'research_status' => 'complete',
+                'is_complete' => !empty($provenanceEvents) ? 1 : 0,
+                'is_public' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Create i18n record with summary
+            DB::table('provenance_record_i18n')->insert([
+                'id' => $recordId,
+                'culture' => $this->culture,
+                'provenance_summary' => $provenanceSummary,
+                'research_notes' => 'Imported from Preservica OPEX History',
+            ]);
+
+            // Create provenance events
+            $sequence = 1;
+            foreach ($provenanceEvents as $event) {
+                // Create or find agent if specified
+                $toAgentId = null;
+                if (!empty($event['to_agent_name'])) {
+                    $toAgentId = $this->findOrCreateAgent(
+                        $event['to_agent_name'],
+                        $event['to_agent_type'] ?? 'person'
+                    );
+                }
+
+                $fromAgentId = null;
+                if (!empty($event['from_agent_name'])) {
+                    $fromAgentId = $this->findOrCreateAgent(
+                        $event['from_agent_name'],
+                        $event['from_agent_type'] ?? 'person'
+                    );
+                }
+
+                DB::table('provenance_event')->insert([
+                    'provenance_record_id' => $recordId,
+                    'from_agent_id' => $fromAgentId,
+                    'to_agent_id' => $toAgentId,
+                    'event_type' => $event['event_type'] ?? 'other',
+                    'event_date' => $event['event_date'] ?? null,
+                    'event_date_text' => $event['event_date_text'] ?? null,
+                    'date_certainty' => $event['date_certainty'] ?? 'exact',
+                    'event_location' => $event['event_location'] ?? null,
+                    'evidence_type' => $event['evidence_type'] ?? 'documentary',
+                    'certainty' => $event['certainty'] ?? 'certain',
+                    'sequence_number' => $sequence++,
+                    'notes' => $event['notes'] ?? null,
+                    'is_public' => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            $this->log("Created provenance record with " . count($provenanceEvents) . " events for object $objectId");
+
+        } catch (\Exception $e) {
+            $this->log("Warning: Could not create provenance: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Detect acquisition type from provenance events.
+     */
+    protected function detectAcquisitionType(array $events): string
+    {
+        foreach ($events as $event) {
+            $type = $event['event_type'] ?? '';
+            switch ($type) {
+                case 'donation':
+                case 'gift':
+                    return 'donation';
+                case 'purchase':
+                case 'sale':
+                case 'auction':
+                    return 'purchase';
+                case 'bequest':
+                case 'inheritance':
+                    return 'bequest';
+                case 'transfer':
+                    return 'transfer';
+                case 'loan_out':
+                case 'loan_return':
+                case 'deposit':
+                    return 'loan';
+                case 'accessioning':
+                    return 'transfer';
+            }
+        }
+        return 'unknown';
+    }
+
+    /**
+     * Find or create a provenance agent.
+     */
+    protected function findOrCreateAgent(string $name, string $type = 'person'): int
+    {
+        // Check if agent exists
+        $existing = DB::table('provenance_agent')
+            ->where('name', $name)
+            ->first();
+
+        if ($existing) {
+            return $existing->id;
+        }
+
+        // Create new agent
+        return DB::table('provenance_agent')->insertGetId([
+            'name' => $name,
+            'agent_type' => $type,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
 }
