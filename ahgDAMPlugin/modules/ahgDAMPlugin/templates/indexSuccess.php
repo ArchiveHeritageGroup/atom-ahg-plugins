@@ -408,6 +408,27 @@
     <?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
   <?php endif; ?>
 
+  <!-- Provenance & Chain of Custody -->
+  <?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+  <section class="card mb-3">
+    <div class="card-header bg-secondary text-white">
+      <h4 class="mb-0"><i class="fas fa-history me-2"></i><?php echo __('Provenance & Chain of Custody'); ?></h4>
+    </div>
+    <div class="card-body">
+      <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
+      <?php if ($sf_user->isAuthenticated()): ?>
+      <div class="mt-3">
+        <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-edit me-1"></i><?php echo __('Edit Provenance') ?>
+        </a>
+        <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-clock me-1"></i><?php echo __('View Full Timeline') ?>
+        </a>
+      </div>
+      <?php endif ?>
+    </div>
+  </section>
+  <?php endif ?>
   <!-- Admin Info -->
   
 
