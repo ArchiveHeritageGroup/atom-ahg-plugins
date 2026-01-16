@@ -51,6 +51,20 @@ if (!is_array($rawMappings)) $rawMappings = [];
         </div>
       </div>
     </div>
+    <div class="col-md-3">
+      <div class="card bg-light">
+        <div class="card-body py-2">
+          <h6 class="text-muted mb-1">🎯 Target Sector (for CSV)</h6>
+          <select id="targetSector" class="form-select form-select-sm">
+            <option value="archives">Archives (ISAD-G)</option>
+            <option value="museum">Museum (Spectrum)</option>
+            <option value="library">Library (MARC)</option>
+            <option value="gallery">Gallery (CCO)</option>
+            <option value="dam">DAM (Dublin Core)</option>
+          </select>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Mapping Controls -->
@@ -81,6 +95,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
   <form action="<?php echo url_for(['module' => 'dataMigration', 'action' => 'preview']) ?>" method="post" id="mappingForm">
     <input type="hidden" name="target_type" value="<?php echo htmlspecialchars($targetType) ?>">
     <input type="hidden" name="output_mode" id="outputModeInput" value="preview">
+    <input type="hidden" name="target_sector" id="targetSectorInput" value="archives">
 
     <div class="card">
       <div class="card-header bg-primary text-white py-2">
@@ -298,6 +313,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Output mode sync
   document.getElementById('outputMode').addEventListener('change', function() {
     document.getElementById('outputModeInput').value = this.value;
+  });
+  
+  // Target sector sync
+  document.getElementById('targetSector').addEventListener('change', function() {
+    document.getElementById('targetSectorInput').value = this.value;
   });
   
   // Open Load Mapping Modal

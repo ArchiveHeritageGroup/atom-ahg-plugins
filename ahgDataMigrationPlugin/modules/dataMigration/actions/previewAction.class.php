@@ -28,6 +28,7 @@ class dataMigrationPreviewAction extends sfAction
         $fields = $request->getParameter('fields', []);
         $targetType = $request->getParameter('target_type');
         $outputMode = $request->getParameter('output_mode', 'preview');
+        $targetSector = $request->getParameter('target_sector', 'archives');
         
         // Debug - log what we received
         error_log("Migration: Received " . count($fields) . " fields, output_mode: " . $outputMode);
@@ -40,6 +41,7 @@ class dataMigrationPreviewAction extends sfAction
         // Store mapping in session
         $this->getUser()->setAttribute('migration_mapping', $fields);
         $this->getUser()->setAttribute('migration_output_mode', $outputMode);
+        $this->getUser()->setAttribute('migration_target_sector', $targetSector);
         
         error_log("Migration: Saved mapping with " . count($fields) . " fields to session");
         
