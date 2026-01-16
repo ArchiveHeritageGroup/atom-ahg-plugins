@@ -122,24 +122,36 @@ class arNerExtractJob extends arBaseJob
     {
         $db = \Illuminate\Database\Capsule\Manager::connection();
         
+        // Count total entities (API returns grouped by type)
+        $totalCount = 0;
+        foreach ($entities as $type => $values) {
+            if (is_array($values)) {
+                $totalCount += count($values);
+            }
+        }
+        
         $extractionId = $db->table('ahg_ner_extraction')->insertGetId([
             'object_id' => $objectId,
             'backend_used' => 'local',
             'status' => 'completed',
-            'entity_count' => count($entities),
-            'created_at' => date('Y-m-d H:i:s')
+            'entity_count' => $totalCount,
+            'extracted_at' => date('Y-m-d H:i:s')
         ]);
 
-        foreach ($entities as $entity) {
-            $db->table('ahg_ner_entity')->insert([
-                'extraction_id' => $extractionId,
-                'object_id' => $objectId,
-                'entity_type' => $entity['type'] ?? $entity['label'] ?? 'UNKNOWN',
-                'entity_value' => $entity['text'] ?? $entity['value'] ?? '',
-                'confidence' => $entity['confidence'] ?? $entity['score'] ?? 0.0,
-                'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
+        // API returns: {"PERSON": ["Name1", "Name2"], "ORG": ["Org1"], ...}
+        foreach ($entities as $type => $values) {
+            if (!is_array($values)) continue;
+            foreach ($values as $value) {
+                $db->table('ahg_ner_entity')->insert([
+                    'extraction_id' => $extractionId,
+                    'object_id' => $objectId,
+                    'entity_type' => $type,
+                    'entity_value' => $value,
+                    'confidence' => 0.95,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
         }
     }
 
@@ -238,7 +250,7 @@ class arNerExtractJob extends arBaseJob
                 'errors_json' => json_encode($errors),
                 'error_count' => array_sum(array_map('count', $errors)),
                 'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s')
+                'extracted_at' => date('Y-m-d H:i:s')
             ]);
             $this->info("Spell check: " . array_sum(array_map('count', $errors)) . " issues found");
         }
