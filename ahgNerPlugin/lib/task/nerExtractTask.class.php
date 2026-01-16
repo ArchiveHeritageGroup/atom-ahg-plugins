@@ -16,6 +16,7 @@ class nerExtractTask extends sfBaseTask
             new sfCommandOption('limit', null, sfCommandOption::PARAMETER_OPTIONAL, 'Maximum number to process', 100),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Show what would be processed'),
             new sfCommandOption('queue', null, sfCommandOption::PARAMETER_NONE, 'Queue jobs instead of direct processing'),
+            new sfCommandOption('with-pdf', null, sfCommandOption::PARAMETER_NONE, 'Extract text from PDFs (slower but more content)'),
         ]);
         $this->namespace = 'ner';
         $this->name = 'extract';
@@ -25,20 +26,20 @@ The [ner:extract|INFO] task extracts named entities from records.
 
 Examples:
   [php symfony ner:extract --all --limit=100|INFO]
+  [php symfony ner:extract --all --with-pdf --limit=100|INFO]
   [php symfony ner:extract --object=12345|INFO]
-  [php symfony ner:extract --repository=5|INFO]
-  [php symfony ner:extract --uploaded-today --queue|INFO]
 EOD;
     }
 
     protected function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
-        
-        // Bootstrap Laravel
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
 
         $this->logSection('ner', 'Starting NER extraction task');
+        if ($options['with-pdf']) {
+            $this->logSection('ner', 'PDF extraction enabled');
+        }
 
         $settings = $this->getSettings();
         if (($settings['ner_enabled'] ?? '1') !== '1') {
@@ -64,6 +65,7 @@ EOD;
         $processed = 0;
         $errors = 0;
         $limit = (int)($options['limit'] ?: 100);
+        $withPdf = $options['with-pdf'] || ($settings['extract_from_pdf'] ?? '0') === '1';
 
         foreach ($objectIds as $objectId) {
             if ($processed >= $limit) break;
@@ -73,7 +75,7 @@ EOD;
                     $this->queueJob($objectId);
                     $this->logSection('ner', "Queued: $objectId");
                 } else {
-                    $this->processObject($objectId, $settings);
+                    $this->processObject($objectId, $settings, $withPdf);
                     $this->logSection('ner', "Processed: $objectId");
                 }
                 $processed++;
@@ -135,29 +137,88 @@ EOD;
         $job->save();
     }
 
-    protected function processObject($objectId, $settings)
+    protected function processObject($objectId, $settings, $withPdf = false)
     {
         $io = QubitInformationObject::getById($objectId);
         if (!$io) throw new Exception("Not found");
 
-        $text = $this->extractText($io);
-        if (empty($text)) {
-            $this->logSection('ner', "No text for $objectId", null, 'COMMENT');
+        $text = $this->extractText($io, $withPdf);
+        if (empty($text) || strlen($text) < 10) {
+            // Still create extraction record but with 0 entities
+            $this->storeEntities($objectId, []);
             return;
         }
 
         $this->callNerApi($objectId, $text, $settings);
     }
 
-    protected function extractText($io)
+    protected function extractText($io, $withPdf = false)
     {
         $text = '';
+        
+        // Get metadata text
         foreach (['title', 'scopeAndContent', 'archivalHistory'] as $field) {
             $getter = 'get' . ucfirst($field);
             $val = $io->$getter(['fallback' => true]);
             if ($val) $text .= $val . "\n";
         }
+
+        // Extract from PDF if enabled
+        if ($withPdf) {
+            foreach ($io->digitalObjectsRelatedByobjectId as $do) {
+                if ($do->mimeType === 'application/pdf') {
+                    $pdfText = $this->extractPdfText($do);
+                    if (!empty($pdfText)) {
+                        $text .= "\n" . $pdfText;
+                    }
+                    break; // Only process first PDF
+                }
+            }
+        }
+
         return trim($text);
+    }
+
+    protected function extractPdfText($digitalObject)
+    {
+        // Get the path - need to construct full path
+        $path = $digitalObject->path;
+        $name = $digitalObject->name;
+        
+        // AtoM stores path relative to uploads
+        $basePath = sfConfig::get('sf_root_dir') . $path;
+        
+        // Find the PDF file
+        $pdfFile = null;
+        if (is_dir($basePath)) {
+            $files = glob($basePath . '*.pdf');
+            if (!empty($files)) {
+                $pdfFile = $files[0];
+            }
+        }
+        
+        if (!$pdfFile || !file_exists($pdfFile)) {
+            return '';
+        }
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'pdf_');
+        exec(sprintf('pdftotext -enc UTF-8 %s %s 2>/dev/null', 
+            escapeshellarg($pdfFile), 
+            escapeshellarg($tempFile)
+        ));
+        
+        $text = '';
+        if (file_exists($tempFile)) {
+            $text = file_get_contents($tempFile);
+            unlink($tempFile);
+        }
+
+        // Limit text length to avoid API timeouts
+        if (strlen($text) > 50000) {
+            $text = substr($text, 0, 50000);
+        }
+
+        return $text;
     }
 
     protected function callNerApi($objectId, $text, $settings)
@@ -170,7 +231,7 @@ EOD;
             CURLOPT_POSTFIELDS => json_encode(['text' => $text]),
             CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'X-API-Key: ' . ($settings['api_key'] ?? '')],
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 60
+            CURLOPT_TIMEOUT => 120
         ]);
 
         $response = curl_exec($ch);
