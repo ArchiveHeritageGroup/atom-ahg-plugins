@@ -1,0 +1,30 @@
+{
+  "name": "Preservica XIP/PAX",
+  "target_type": "information_object",
+  "description": "Import from Preservica PAX (Preservica Archive eXchange) packages with XIP metadata",
+  "fields": [
+    {"source_field": "Ref", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "Parent", "atom_field": "parentId", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "Title", "atom_field": "title", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:title", "atom_field": "title", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "Description", "atom_field": "scopeAndContent", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:description", "atom_field": "scopeAndContent", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "\n"},
+    {"source_field": "SecurityTag", "atom_field": "accessConditions", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "CustomType", "atom_field": "levelOfDescription", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:creator", "atom_field": "creators", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:date", "atom_field": "eventDates", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:subject", "atom_field": "subjectAccessPoints", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:coverage", "atom_field": "placeAccessPoints", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:contributor", "atom_field": "nameAccessPoints", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:publisher", "atom_field": "repository", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:type", "atom_field": "levelOfDescription", "constant_value": "", "concatenate": true, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:format", "atom_field": "extentAndMedium", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:identifier", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:source", "atom_field": "locationOfOriginals", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:language", "atom_field": "language", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "dc:rights", "atom_field": "reproductionConditions", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "Filename", "atom_field": "digitalObjectPath", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
+    {"source_field": "FileSize", "atom_field": "extentAndMedium", "constant_value": "File size: ", "concatenate": true, "include": true, "concat_constant": true, "concat_symbol": "\n"},
+    {"source_field": "culture", "atom_field": "culture", "constant_value": "en", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"}
+  ]
+}

@@ -39,6 +39,14 @@ class SourceDetector
         'atom_csv' => [
             'columns' => ['legacyId', 'parentId', 'identifier', 'title', 'levelOfDescription'],
         ],
+        'preservica_opex' => [
+            'xml_root' => 'OPEXMetadata',
+            'namespaces' => ['http://www.openpreservationexchange.org/opex/v1.0', 'http://www.openpreservationexchange.org/opex/v1.1', 'http://www.openpreservationexchange.org/opex/v1.2'],
+        ],
+        'preservica_xip' => [
+            'xml_root' => 'XIP',
+            'namespaces' => ['http://preservica.com/XIP/v6.0', 'http://preservica.com/XIP/v6.1', 'http://preservica.com/XIP/v6.2', 'http://preservica.com/XIP/v6.3'],
+        ],
     ];
 
     protected static $sourceNames = [
@@ -52,6 +60,8 @@ class SourceDetector
         'marc' => 'MARC XML',
         'atom_csv' => 'AtoM CSV',
         'generic_csv' => 'Generic CSV',
+        'preservica_opex' => 'Preservica OPEX',
+        'preservica_xip' => 'Preservica XIP/PAX',
     ];
 
     public static function detect(string $filePath): array
@@ -200,6 +210,70 @@ class SourceDetector
         }
         fclose($handle);
         return max(0, $count - 1);
+    }
+
+    protected static function detectZip(string $filePath): array
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            return [
+                'detected' => false,
+                'source_type' => 'unknown_zip',
+                'source_name' => 'Unknown Archive',
+                'confidence' => 0,
+                'file_type' => 'zip',
+            ];
+        }
+
+        // Check for Preservica PAX structure
+        $hasXip = false;
+        $hasMetadata = false;
+        $hasContent = false;
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (preg_match('/\.xml$/i', $name) && stripos($name, 'metadata') !== false) {
+                $hasMetadata = true;
+                // Check if it's XIP
+                $xmlContent = $zip->getFromIndex($i);
+                if (strpos($xmlContent, 'XIP') !== false || strpos($xmlContent, 'preservica.com') !== false) {
+                    $hasXip = true;
+                }
+            }
+            if (stripos($name, 'content/') !== false || stripos($name, 'Content/') !== false) {
+                $hasContent = true;
+            }
+        }
+
+        $zip->close();
+
+        if ($hasXip) {
+            return [
+                'detected' => true,
+                'source_type' => 'preservica_xip',
+                'source_name' => 'Preservica XIP/PAX',
+                'confidence' => 95,
+                'file_type' => 'zip',
+            ];
+        }
+
+        if ($hasMetadata && $hasContent) {
+            return [
+                'detected' => true,
+                'source_type' => 'preservica_xip',
+                'source_name' => 'Preservica XIP/PAX',
+                'confidence' => 70,
+                'file_type' => 'zip',
+            ];
+        }
+
+        return [
+            'detected' => false,
+            'source_type' => 'unknown_zip',
+            'source_name' => 'Unknown Archive',
+            'confidence' => 0,
+            'file_type' => 'zip',
+        ];
     }
 
     public static function getSupportedSources(): array

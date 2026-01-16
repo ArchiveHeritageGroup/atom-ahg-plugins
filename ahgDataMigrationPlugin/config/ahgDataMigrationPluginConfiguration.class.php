@@ -1,56 +1,57 @@
 <?php
 
+/**
+ * ahgDataMigrationPlugin configuration.
+ * 
+ * Provides data migration capabilities for importing/exporting
+ * archival descriptions from various systems including Preservica.
+ */
 class ahgDataMigrationPluginConfiguration extends sfPluginConfiguration
 {
-    public static $summary = 'Universal data migration tool for importing from external systems';
-    public static $version = '1.0.0';
+    public static $summary = 'Data migration tools for importing and exporting archival data';
+    public static $version = '1.2.0';
+
+    public function contextLoadFactories(sfEvent $event)
+    {
+        // Load framework for services
+        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($frameworkPath)) {
+            require_once $frameworkPath;
+        }
+    }
 
     public function initialize()
     {
-        // Register routes
-        $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
-        
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'dataMigration';
-        sfConfig::set('sf_enabled_modules', $enabledModules);
+        $enabledModules[] = 'ahgDataMigration';
+        sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
+
+        // Connect to context.load_factories for framework loading
+        $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
+        
+        // Tasks are auto-discovered by Symfony from lib/task/ directory
+        // No need to manually register them
     }
 
-    public function routingLoadConfiguration(sfEvent $event)
+    /**
+     * Get plugin info for display.
+     */
+    public static function getPluginInfo()
     {
-        $routing = $event->getSubject();
-        
-        $routing->prependRoute('dataMigration_index', new sfRoute(
-            '/admin/data-migration',
-            ['module' => 'dataMigration', 'action' => 'index']
-        ));
-        $routing->prependRoute('dataMigration_upload', new sfRoute(
-            '/admin/data-migration/upload',
-            ['module' => 'dataMigration', 'action' => 'upload']
-        ));
-        $routing->prependRoute('dataMigration_map', new sfRoute(
-            '/admin/data-migration/map',
-            ['module' => 'dataMigration', 'action' => 'map']
-        ));
-        $routing->prependRoute('dataMigration_preview', new sfRoute(
-            '/admin/data-migration/preview',
-            ['module' => 'dataMigration', 'action' => 'preview']
-        ));
-        $routing->prependRoute('dataMigration_execute', new sfRoute(
-            '/admin/data-migration/execute',
-            ['module' => 'dataMigration', 'action' => 'execute']
-        ));
-        $routing->prependRoute('dataMigration_saveMapping', new sfRoute(
-            '/admin/data-migration/save-mapping',
-            ['module' => 'dataMigration', 'action' => 'saveMapping']
-        ));
-        $routing->prependRoute('dataMigration_loadMapping', new sfRoute(
-            '/admin/data-migration/load-mapping/:id',
-            ['module' => 'dataMigration', 'action' => 'loadMapping']
-        ));
-        $routing->prependRoute('dataMigration_getPreview', new sfRoute(
-            '/admin/data-migration/get-preview',
-            ['module' => 'dataMigration', 'action' => 'getPreview']
-        ));
+        return [
+            'name'        => 'Data Migration Plugin',
+            'version'     => self::$version,
+            'description' => self::$summary,
+            'author'      => 'The Archive and Heritage Group',
+            'features'    => [
+                'Import from Preservica OPEX/PAX',
+                'Export to Preservica OPEX/PAX',
+                'Import from ArchivesSpace, Vernon, PastPerfect',
+                'Custom field mapping',
+                'Batch processing',
+                'Digital object handling',
+            ],
+        ];
     }
 }

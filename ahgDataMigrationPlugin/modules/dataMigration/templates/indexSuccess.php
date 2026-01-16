@@ -7,6 +7,7 @@
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
           <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Data Migration Tool</h5>
+        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'jobs']) ?>" class="btn btn-sm btn-outline-light"><i class="bi bi-list-task me-1"></i>View Jobs</a>
         </div>
         <div class="card-body">
           
@@ -25,11 +26,11 @@
               <h6 class="text-primary"><span class="badge bg-primary me-2">1</span>Select File</h6>
               <div class="border rounded p-4 bg-light text-center" id="dropZone">
                 <input type="file" name="import_file" id="importFile" class="d-none" 
-                       accept=".csv,.xls,.xlsx,.xml,.json">
+                       accept=".csv,.xls,.xlsx,.xml,.json,.opex,.pax,.zip">
                 <div id="dropText">
                   <p class="mb-2"><i class="bi bi-file-earmark-arrow-up" style="font-size: 3rem;"></i></p>
                   <p class="mb-2">Drag & drop file here or <a href="#" onclick="document.getElementById('importFile').click(); return false;">browse</a></p>
-                  <small class="text-muted">Supported: CSV, Excel (XLS/XLSX), XML, JSON</small>
+                  <small class="text-muted">Supported: CSV, Excel (XLS/XLSX), XML, JSON, OPEX, PAX</small>
                 </div>
                 <div id="fileInfo" class="d-none">
                   <p class="mb-1"><strong id="fileName"></strong></p>
@@ -98,6 +99,8 @@
                     <option value="library">Library</option>
                     <option value="museum">Museum (Spectrum)</option>
                     <option value="gallery">Gallery (CCO)</option>
+                    <option value="dam">Digital Assets (DAM)</option>
+                    <option value="dam">Digital Assets (DAM)</option>
                     <option value="accession">Accession Records</option>
                     <option value="actor">Authority Records (ISAAR)</option>
                     <option value="repository">Repositories (ISDIAH)</option>

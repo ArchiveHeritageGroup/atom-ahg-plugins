@@ -1,0 +1,60 @@
+# Data Migration Plugin Routes
+
+ahg_data_migration:
+  url: /admin/data-migration
+  param: { module: ahgDataMigration, action: index }
+
+ahg_data_migration_import:
+  url: /admin/data-migration/import
+  param: { module: ahgDataMigration, action: import }
+
+ahg_data_migration_export:
+  url: /admin/data-migration/export
+  param: { module: ahgDataMigration, action: export }
+
+ahg_preservica_import:
+  url: /admin/data-migration/preservica/import
+  param: { module: ahgDataMigration, action: preservicaImport }
+
+ahg_preservica_export:
+  url: /admin/data-migration/preservica/export
+  param: { module: ahgDataMigration, action: preservicaExport }
+
+ahg_preservica_export_record:
+  url: /admin/data-migration/preservica/export/:id
+  param: { module: ahgDataMigration, action: preservicaExport }
+  requirements: { id: \d+ }
+
+ahg_data_migration_download:
+  url: /admin/data-migration/download
+  param: { module: ahgDataMigration, action: download }
+
+ahg_data_migration_mapping:
+  url: /admin/data-migration/mapping
+  param: { module: ahgDataMigration, action: getMapping }
+
+ahg_data_migration_preview:
+  url: /admin/data-migration/preview
+  param: { module: ahgDataMigration, action: preview }
+
+# Job management routes
+dataMigration_jobs:
+  url: /dataMigration/jobs
+  param: { module: dataMigration, action: jobs }
+
+dataMigration_jobStatus:
+  url: /dataMigration/job/:id
+  param: { module: dataMigration, action: jobStatus }
+  requirements: { id: \d+ }
+
+dataMigration_jobProgress:
+  url: /dataMigration/job/progress
+  param: { module: dataMigration, action: jobProgress }
+
+dataMigration_queueJob:
+  url: /dataMigration/queue
+  param: { module: dataMigration, action: queueJob }
+
+dataMigration_cancelJob:
+  url: /dataMigration/job/cancel
+  param: { module: dataMigration, action: cancelJob }
