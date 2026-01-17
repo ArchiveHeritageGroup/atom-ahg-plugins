@@ -58,3 +58,37 @@ dataMigration_queueJob:
 dataMigration_cancelJob:
   url: /dataMigration/job/cancel
   param: { module: dataMigration, action: cancelJob }
+
+# Export CSV route
+dataMigration_exportCsv:
+  url: /dataMigration/exportCsv
+  param: { module: dataMigration, action: exportCsv }
+
+# Other missing routes for the dataMigration module
+dataMigration_index:
+  url: /dataMigration
+  param: { module: dataMigration, action: index }
+
+dataMigration_upload:
+  url: /dataMigration/upload
+  param: { module: dataMigration, action: upload }
+
+dataMigration_map:
+  url: /dataMigration/map
+  param: { module: dataMigration, action: map }
+
+dataMigration_preview:
+  url: /dataMigration/preview
+  param: { module: dataMigration, action: preview }
+
+dataMigration_saveMapping:
+  url: /dataMigration/saveMapping
+  param: { module: dataMigration, action: saveMapping }
+
+dataMigration_loadMapping:
+  url: /dataMigration/loadMapping
+  param: { module: dataMigration, action: loadMapping }
+
+dataMigration_execute:
+  url: /dataMigration/execute
+  param: { module: dataMigration, action: execute }

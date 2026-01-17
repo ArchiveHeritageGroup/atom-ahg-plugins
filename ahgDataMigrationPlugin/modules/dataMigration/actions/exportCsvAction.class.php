@@ -3,7 +3,7 @@
 /**
  * Export transformed data to sector-specific CSV format for AtoM import.
  */
-class exportCsvAction extends sfAction
+class dataMigrationExportCsvAction extends sfAction
 {
     public function execute($request)
     {

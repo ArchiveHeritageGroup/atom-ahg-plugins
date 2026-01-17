@@ -100,7 +100,6 @@
                     <option value="museum">Museum (Spectrum)</option>
                     <option value="gallery">Gallery (CCO)</option>
                     <option value="dam">Digital Assets (DAM)</option>
-                    <option value="dam">Digital Assets (DAM)</option>
                     <option value="accession">Accession Records</option>
                     <option value="actor">Authority Records (ISAAR)</option>
                     <option value="repository">Repositories (ISDIAH)</option>
