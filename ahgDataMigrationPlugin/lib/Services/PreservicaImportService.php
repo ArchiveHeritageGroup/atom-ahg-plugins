@@ -68,6 +68,8 @@ class PreservicaImportService
             'dry_run'               => false,
             'generate_derivatives'  => true,
             'queue_derivatives'     => false,
+            'path_transform'        => null,
+            'digital_object_path'   => null,
         ], $options);
         
         // Load default mapping based on source type
@@ -539,26 +541,52 @@ class PreservicaImportService
     /**
      * Import digital object for a record.
      */
+    /**
+     * Import digital object for a record.
+     */
     protected function importDigitalObject(int $objectId, array $record, string $basePath): void
     {
-        $filename = $record['Filename'] ?? $record['File'] ?? $record['Bitstream'] ?? null;
+        $filename = $record['Filename'] ?? $record['File'] ?? $record['Bitstream'] ?? $record['digitalObjectPath'] ?? null;
         
         if (!$filename) {
             return;
         }
         
-        // Resolve full path
-        $filePath = $basePath . DIRECTORY_SEPARATOR . $filename;
-        
-        if (!file_exists($filePath)) {
-            // Try in content subdirectory (PAX structure)
-            $filePath = $basePath . '/content/' . $filename;
+        // Apply path transformation if configured
+        if (!empty($this->options['path_transform'])) {
+            $transformType = $this->options['path_transform']['type'] ?? 'filename';
+            $transformOptions = [
+                'find' => $this->options['path_transform']['find'] ?? '',
+                'replace' => $this->options['path_transform']['replace'] ?? '',
+                'prefix' => $this->options['path_transform']['prefix'] ?? '',
+            ];
+            
+            $filename = PathTransformer::transform($filename, $transformType, $transformOptions);
+        } else {
+            // Default: extract just the filename (handles Windows paths)
+            $filename = PathTransformer::extractFilename($filename);
         }
         
-        if (!file_exists($filePath)) {
+        // Resolve full path - try multiple locations
+        $searchPaths = [
+            $basePath . DIRECTORY_SEPARATOR . $filename,                    // Same directory as OPEX
+            $basePath . '/content/' . $filename,                            // PAX content directory
+            $this->options['digital_object_path'] . '/' . $filename,        // Custom path if specified
+            '/usr/share/nginx/archive/uploads/migration/' . $filename,     // Default upload location
+        ];
+        
+        $filePath = null;
+        foreach ($searchPaths as $path) {
+            if (!empty($path) && file_exists($path)) {
+                $filePath = $path;
+                break;
+            }
+        }
+        
+        if (!$filePath) {
             $this->errors[] = [
-                'record'  => $record['Title'] ?? 'Unknown',
-                'message' => "Digital object not found: {$filename}",
+                'record'  => $record['Title'] ?? $record['dc:title'] ?? 'Unknown',
+                'message' => "Digital object not found: {$filename} (searched: " . implode(', ', array_filter($searchPaths)) . ")",
             ];
             return;
         }
@@ -579,16 +607,9 @@ class PreservicaImportService
         }
         
         // Create digital object using AtoM's method
-        $this->createDigitalObject($objectId, $filePath, $filename);
+        $this->createDigitalObject($objectId, $filePath, basename($filename));
     }
 
-    /**
-     * Create digital object record.
-     */
-    /**
-     * Create digital object record with proper derivative generation.
-     * Uses AtoM's native QubitDigitalObject for thumbnails and reference images.
-     */
     protected function createDigitalObject(int $objectId, string $filePath, string $filename): void
     {
         // Option 1: Use AtoM's native QubitDigitalObject (generates derivatives)

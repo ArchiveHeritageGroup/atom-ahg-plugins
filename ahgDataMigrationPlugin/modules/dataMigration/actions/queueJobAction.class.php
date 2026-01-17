@@ -42,6 +42,7 @@ class dataMigrationQueueJobAction extends sfAction
             'first_row_header' => $this->getUser()->getAttribute('migration_options')['first_row_header'] ?? 1,
             'sheet_index' => $this->getUser()->getAttribute('migration_options')['sheet_index'] ?? 0,
             'delimiter' => $this->getUser()->getAttribute('migration_options')['delimiter'] ?? 'auto',
+            'digital_object_path' => $this->getUser()->getAttribute('migration_options')['digital_object_path'] ?? null,
         ];
 
         // Load framework

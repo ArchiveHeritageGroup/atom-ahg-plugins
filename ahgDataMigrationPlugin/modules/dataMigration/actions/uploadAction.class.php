@@ -25,6 +25,10 @@ class dataMigrationUploadAction extends sfAction
         $delimiter = $request->getParameter('delimiter', 'auto');
         $encoding = $request->getParameter('encoding', 'auto');
         $targetType = $request->getParameter('target_type', 'archives');
+        $digitalObjectFolder = $request->getParameter('digital_object_folder', '');
+        $customDigitalPath = $request->getParameter('custom_digital_path', '');
+        // Resolve digital object path
+        $digitalObjectPath = ($digitalObjectFolder === 'custom') ? $customDigitalPath : $digitalObjectFolder;
         $savedMapping = $request->getParameter('saved_mapping', '');
 
         // Save file to temp location
@@ -61,7 +65,8 @@ class dataMigrationUploadAction extends sfAction
             'sheet_index' => $sheetIndex,
             'first_row_header' => $firstRowHeader,
             'delimiter' => $delimiter,
-            'encoding' => $encoding
+            'encoding' => $encoding,
+            'digital_object_path' => $digitalObjectPath
         ]);
 
         // Redirect to mapping page

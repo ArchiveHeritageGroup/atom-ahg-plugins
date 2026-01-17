@@ -84,10 +84,28 @@
                     <option value="ISO-8859-1">ISO-8859-1 (Latin-1)</option>
                     <option value="Windows-1252">Windows-1252</option>
                   </select>
+              </div>
+            </div>
+            <!-- Digital Objects Location -->
+            <div class="mb-4">
+              <h6 class="text-primary"><span class="badge bg-primary me-2">2b</span>Digital Objects (Optional)</h6>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Digital Objects Folder</label>
+                  <select name="digital_object_folder" id="digitalObjectFolder" class="form-select">
+                    <option value="">-- No digital objects / Same folder as import file --</option>
+                    <option value="/usr/share/nginx/archive/uploads/migration/">uploads/migration/</option>
+                    <option value="/usr/share/nginx/archive/uploads/imports/">uploads/imports/</option>
+                    <option value="custom">Custom path...</option>
+                  </select>
+                  <small class="text-muted">Where did you upload your images/files? Filenames are extracted automatically from paths.</small>
+                </div>
+                <div class="col-md-4 d-none" id="customPathDiv">
+                  <label class="form-label">Custom Server Path</label>
+                  <input type="text" name="custom_digital_path" id="customDigitalPath" class="form-control" placeholder="/usr/share/nginx/archive/uploads/myfiles/">
                 </div>
               </div>
             </div>
-            
             <!-- Step 3: Target & Mapping -->
             <div class="mb-4">
               <h6 class="text-primary"><span class="badge bg-primary me-2">3</span>Import Target & Mapping</h6>
@@ -357,6 +375,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+});
+</script>
+
+<script>
+// Show/hide custom path field
+document.getElementById('digitalObjectFolder')?.addEventListener('change', function() {
+  const customDiv = document.getElementById('customPathDiv');
+  if (this.value === 'custom') {
+    customDiv.classList.remove('d-none');
+  } else {
+    customDiv.classList.add('d-none');
   }
 });
 </script>
