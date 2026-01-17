@@ -1,75 +1,5 @@
 <?php decorate_with($_GET['view'] === 'full' ? 'layout_1col' : 'layout_2col'); ?>
 <?php use_helper('Date') ?>
-<style>
-/* Resizable table columns */
-.table-resizable th {
-  position: relative;
-  min-width: 50px;
-}
-.table-resizable th .resize-handle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  cursor: col-resize;
-  background: transparent;
-  z-index: 10;
-}
-.table-resizable th .resize-handle:hover,
-.table-resizable th .resize-handle.resizing {
-  background: rgba(29, 106, 82, 0.3);
-}
-.table-resizable th.resizing {
-  user-select: none;
-}
-/* Remove fixed widths to allow resizing */
-.table-resizable th[style*="width"] {
-  width: auto !important;
-}
-</style>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tables = document.querySelectorAll('.table-resizable');
-  
-  tables.forEach(function(table) {
-    const headers = table.querySelectorAll('th');
-    
-    headers.forEach(function(th) {
-      // Create resize handle
-      const handle = document.createElement('div');
-      handle.className = 'resize-handle';
-      th.appendChild(handle);
-      
-      let startX, startWidth;
-      
-      handle.addEventListener('mousedown', function(e) {
-        startX = e.pageX;
-        startWidth = th.offsetWidth;
-        th.classList.add('resizing');
-        handle.classList.add('resizing');
-        
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        e.preventDefault();
-      });
-      
-      function onMouseMove(e) {
-        const diff = e.pageX - startX;
-        th.style.width = (startWidth + diff) + 'px';
-        th.style.minWidth = (startWidth + diff) + 'px';
-      }
-      
-      function onMouseUp() {
-        th.classList.remove('resizing');
-        handle.classList.remove('resizing');
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      }
-    });
-  });
-});
-</script>
 <?php
 // Get values directly from request as fallback
 $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
@@ -495,15 +425,15 @@ function getItemUrl($obj) {
   <!-- Results -->
   <?php if ($viewMode === 'table'): ?>
     <div class="table-responsive">
-      <table class="table table-hover table-resizable "style="font-size: 0.95rem;">
+      <table class="table table-hover table-sm">
         <thead class="table-light">
           <tr>
-            <th style="width:420px"><?php echo __('Image'); ?></th>
+            <th style="width:180px"></th>
             <th><?php echo __('Title'); ?></th>
             <th style="width:120px"><?php echo __('Identifier'); ?></th>
-            <th style="width:140px"><?php echo __('Level'); ?></th>
-            <th style="width:140px"><?php echo __('Type'); ?></th>
-            <th style="width:80px"><?php echo __('Actions'); ?></th>
+            <th style="width:160px"><?php echo __('Level'); ?></th>
+            <th style="width:160px"><?php echo __('Type'); ?></th>
+            <th style="width:60px"></th>
           </tr>
         </thead>
         <tbody>
@@ -512,30 +442,22 @@ function getItemUrl($obj) {
           <?php else: ?>
             <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary']; ?>
               <tr>
-                <td class="text-center p-2">
+                <td class="text-center p-1">
                   <?php if ($obj->thumbnail): ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded img-thumbnail" style="width:400px;height:400px;object-fit:cover;"></a>
+                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded img-thumbnail" style="width:200px;height:200px;object-fit:cover;"></a>
                   <?php else: ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:400px;height:400px;"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></div></a>
+                    <a href="<?php echo getItemUrl($obj) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:160px;height:160px;"><i class="fas <?php echo $cfg['icon'] ?> text-<?php echo $cfg['color'] ?>"></i></div></a>
                   <?php endif ?>
                 </td>
                 <td class="align-middle">
-                  <a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none fw-semibold"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
-                  <?php if ($obj->scope_and_content): ?>
-                    <p class="text-muted mb-1 small"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 200)) ?>...</p>
-                  <?php endif ?>
-                  <?php if ($obj->child_count > 0): ?>
-                    <a href="<?php echo buildUrl($fp, ['parent' => $obj->id]) ?>" class="text-muted small"><i class="fas fa-folder"></i> <?php echo $obj->child_count ?></a>
-                  <?php endif ?>
+                  <a href="<?php echo getItemUrl($obj) ?>" class="text-success"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
+                  <?php if ($obj->child_count > 0): ?><a href="<?php echo buildUrl($fp, ['parent' => $obj->id]) ?>" class="text-muted ms-1"><small>(<?php echo $obj->child_count ?>)</small></a><?php endif ?>
                 </td>
                 <td class="align-middle small"><?php echo esc_entities($obj->identifier ?: '-') ?></td>
-                <td class="align-middle"><span class="badge bg-light text-dark small"><?php echo esc_entities($obj->level_name ?: '-') ?></span></td>
-                <td class="align-middle"><span class="badge bg-<?php echo $cfg['color'] ?> small"><?php echo ucfirst($obj->object_type ?: '?') ?></span></td>
+                <td class="align-middle"><span class="badge bg-light text-dark"><?php echo esc_entities($obj->level_name ?: '-') ?></span></td>
+                <td class="align-middle"><span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo ucfirst($obj->object_type ?: '?') ?></span></td>
                 <td class="align-middle">
-                  <div class="d-flex flex-column gap-1">
-                    <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a>
-                    <button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
-                  </div>
+                  <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
                 </td>
               </tr>
             <?php endforeach ?>
