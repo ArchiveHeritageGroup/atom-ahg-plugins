@@ -817,6 +817,120 @@ class OpexParser
             $record['_relationships'] = $data['relationships'];
         }
 
+
+        // =====================================================
+        // AHG EXTENDED FIELDS - Flattened for CSV export
+        // =====================================================
+        
+        // Digital Object fields (for CSV mapping)
+        if (!empty($data['files'])) {
+            $contentFiles = array_filter($data['files'], fn($f) => $f['type'] === 'content');
+            if (!empty($contentFiles)) {
+                $first = reset($contentFiles);
+                $record['Filename'] = basename($first['path'] ?? '');
+                $record['digitalObjectPath'] = $first['path'] ?? '';
+                $record['digitalObjectChecksum'] = $first['fixity'] ?? '';
+                $record['digitalObjectMimeType'] = $first['format'] ?? '';
+                $record['digitalObjectSize'] = $first['size'] ?? '';
+            }
+            // All files as pipe-separated list
+            $allFiles = array_map(fn($f) => basename($f['path'] ?? ''), $data['files']);
+            $record['allFilenames'] = implode('|', array_filter($allFiles));
+        }
+
+        // Security Classification (AHG)
+        if (!empty($rights['securityDescriptor'])) {
+            $record['ahgSecurityClassification'] = $rights['securityDescriptor'];
+        }
+        if (!empty($rights['accessLevel'])) {
+            $record['ahgAccessLevel'] = $rights['accessLevel'];
+        }
+
+        // Rights - Flattened text for CSV (AHG Extended Rights)
+        $rightsText = [];
+        if (!empty($rights['dcRights'])) {
+            $rightsText[] = "Rights: " . $rights['dcRights'];
+        }
+        if (!empty($rights['dcLicense'])) {
+            $rightsText[] = "License: " . $rights['dcLicense'];
+        }
+        if (!empty($rights['dcRightsHolder'])) {
+            $rightsText[] = "Rights Holder: " . $rights['dcRightsHolder'];
+        }
+        if (!empty($rights['dcAccessRights'])) {
+            $rightsText[] = "Access: " . $rights['dcAccessRights'];
+        }
+        if (!empty($rightsText)) {
+            $record['ahgRightsStatement'] = implode(' | ', $rightsText);
+        }
+
+        // Rights basis and status (for ahgRightsPlugin)
+        if (!empty($rights['parsedBasis'])) {
+            $record['ahgRightsBasis'] = $rights['parsedBasis'];
+        }
+        if (!empty($rights['parsedStatus'])) {
+            $record['ahgCopyrightStatus'] = $rights['parsedStatus'];
+        }
+
+        // Provenance - Flattened text for CSV (AHG Provenance)
+        if (!empty($data['history'])) {
+            $provenanceText = [];
+            foreach ($data['history'] as $event) {
+                $eventStr = ($event['date'] ?? 'Unknown date') . ': ';
+                $eventStr .= ($event['type'] ?? 'Event');
+                if (!empty($event['action'])) {
+                    $eventStr .= ' - ' . $event['action'];
+                }
+                if (!empty($event['user'])) {
+                    $eventStr .= ' (by ' . $event['user'] . ')';
+                }
+                $provenanceText[] = $eventStr;
+            }
+            $record['ahgProvenanceHistory'] = implode(' || ', $provenanceText);
+            $record['ahgProvenanceEventCount'] = count($data['history']);
+        }
+
+        // Provenance - First and last events (useful for date ranges)
+        if (!empty($data['history'])) {
+            $sorted = $data['history'];
+            usort($sorted, fn($a, $b) => strtotime($a['date'] ?? '1900-01-01') - strtotime($b['date'] ?? '1900-01-01'));
+            $first = reset($sorted);
+            $last = end($sorted);
+            if ($first) {
+                $record['ahgProvenanceFirstDate'] = $first['date'] ?? '';
+                $record['ahgProvenanceFirstEvent'] = $first['type'] ?? '';
+            }
+            if ($last && $last !== $first) {
+                $record['ahgProvenanceLastDate'] = $last['date'] ?? '';
+                $record['ahgProvenanceLastEvent'] = $last['type'] ?? '';
+            }
+        }
+
+        // Relationships - Flattened
+        if (!empty($data['relationships'])) {
+            $relText = [];
+            foreach ($data['relationships'] as $rel) {
+                $relStr = ($rel['type'] ?? 'related') . ': ' . ($rel['target'] ?? 'unknown');
+                $relText[] = $relStr;
+            }
+            $record['ahgRelationships'] = implode(' | ', $relText);
+        }
+
+        // Transfer/Ingest metadata
+        if (!empty($data['transfer'])) {
+            $record['Transfer_SourceID'] = $data['transfer']['sourceId'] ?? '';
+            $record['Transfer_Manifest'] = isset($data['transfer']['manifest']) 
+                ? json_encode($data['transfer']['manifest']) 
+                : '';
+            if (!empty($data['transfer']['fixities'])) {
+                $fixityText = [];
+                foreach ($data['transfer']['fixities'] as $fix) {
+                    $fixityText[] = ($fix['algorithm'] ?? 'unknown') . ':' . ($fix['value'] ?? '');
+                }
+                $record['Transfer_Fixities'] = implode(' | ', $fixityText);
+            }
+        }
+
         return $record;
     }
 
