@@ -1,7 +1,7 @@
 {
     "name": "Data Migration Tool",
     "machine_name": "ahgDataMigrationPlugin",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "description": "Migrate records from external systems (ArchivesSpace, Vernon CMS, Preservica OPEX/PAX) with field mapping, Gearman background jobs, sector-specific CSV export, rights and provenance import",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

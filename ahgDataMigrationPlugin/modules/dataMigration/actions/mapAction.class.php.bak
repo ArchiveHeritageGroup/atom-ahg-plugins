@@ -146,22 +146,6 @@ class dataMigrationMapAction extends sfAction
             // Hierarchy
             'parentId' => 'Parent ID',
             'qubitParentSlug' => 'Parent Slug',
-            // AHG Extended Fields (for Preservica/OPEX import)
-            'ahgSecurityClassification' => 'AHG: Security Classification',
-            'ahgAccessLevel' => 'AHG: Access Level',
-            'ahgRightsStatement' => 'AHG: Rights Statement',
-            'ahgRightsBasis' => 'AHG: Rights Basis',
-            'ahgCopyrightStatus' => 'AHG: Copyright Status',
-            'ahgProvenanceHistory' => 'AHG: Provenance History',
-            'ahgProvenanceFirstDate' => 'AHG: Provenance First Date',
-            'ahgProvenanceLastDate' => 'AHG: Provenance Last Date',
-            'ahgProvenanceEventCount' => 'AHG: Provenance Event Count',
-            'ahgRelationships' => 'AHG: Relationships',
-            'Filename' => 'AHG: Filename',
-            'digitalObjectChecksum' => 'AHG: Digital Object Checksum',
-            'digitalObjectMimeType' => 'AHG: Digital Object MIME Type',
-            'digitalObjectSize' => 'AHG: Digital Object Size',
-            'allFilenames' => 'AHG: All Filenames',
         ];
     }
 

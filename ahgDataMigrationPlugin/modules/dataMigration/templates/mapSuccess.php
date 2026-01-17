@@ -47,6 +47,8 @@ if (!is_array($rawMappings)) $rawMappings = [];
             <option value="import">Import to Database</option>
             <option value="csv">Export to AtoM CSV</option>
             <option value="ead">Export to EAD 2002</option>
+            <option value="ahg_csv">Export to AHG Extended CSV</option>
+            <option value="ahg_import">Direct AHG Import (with plugins)</option>
           </select>
         </div>
       </div>
@@ -392,6 +394,36 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('outputMode').addEventListener('change', function() {
     document.getElementById('outputModeInput').value = this.value;
   });
+
+  // Toggle AHG fields visibility based on output mode
+  function toggleAhgFields() {
+    var mode = document.getElementById("outputMode").value;
+    var showAhg = (mode === "ahg_csv" || mode === "ahg_import");
+    
+    // Find all AHG field options and rows
+    document.querySelectorAll("select[name^=\"fields\"]").forEach(function(select) {
+      // Show/hide AHG options in dropdowns
+      select.querySelectorAll("option").forEach(function(opt) {
+        if (opt.value && opt.value.startsWith("ahg")) {
+          opt.style.display = showAhg ? "" : "none";
+          // If hiding and currently selected, reset to skip
+          if (!showAhg && opt.selected) {
+            select.value = "";
+          }
+        }
+      });
+    });
+    
+    // Update info badge
+    var badge = document.getElementById("ahgModeBadge");
+    if (badge) {
+      badge.style.display = showAhg ? "inline-block" : "none";
+    }
+  }
+  
+  // Run on page load and output mode change
+  toggleAhgFields();
+  document.getElementById("outputMode").addEventListener("change", toggleAhgFields);
   
   // Target sector sync
   document.getElementById('targetSector').addEventListener('change', function() {

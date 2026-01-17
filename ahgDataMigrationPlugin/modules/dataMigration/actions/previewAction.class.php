@@ -56,6 +56,12 @@ class dataMigrationPreviewAction extends sfAction
             case 'ead':
                 $this->redirect(['module' => 'dataMigration', 'action' => 'exportEad']);
                 break;
+            case 'ahg_csv':
+                $this->redirect(['module' => 'dataMigration', 'action' => 'exportAhgCsv']);
+                break;
+            case 'ahg_import':
+                $this->redirect(['module' => 'dataMigration', 'action' => 'executeAhgImport']);
+                break;
             default:
                 $this->redirect(['module' => 'dataMigration', 'action' => 'previewData']);
         }
