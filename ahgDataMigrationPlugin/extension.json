@@ -1,7 +1,7 @@
 {
     "name": "Data Migration Tool",
     "machine_name": "ahgDataMigrationPlugin",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Migrate records between GLAM sectors with field mapping",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
