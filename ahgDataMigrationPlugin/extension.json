@@ -1,8 +1,8 @@
 {
     "name": "Data Migration Tool",
     "machine_name": "ahgDataMigrationPlugin",
-    "version": "1.0.8",
-    "description": "Migrate records between GLAM sectors with field mapping",
+    "version": "1.2.0",
+    "description": "Migrate records from external systems (ArchivesSpace, Vernon CMS, Preservica OPEX/PAX) with field mapping, Gearman background jobs, sector-specific CSV export, rights and provenance import",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "requires": {
@@ -11,7 +11,24 @@
         "php": ">=8.1"
     },
     "tables": [
-        "data_migration_log"
+        "atom_data_mapping",
+        "atom_data_migration_job",
+        "atom_data_migration_log"
     ],
-    "category": "ahg"
+    "category": "ahg",
+    "features": [
+        "Web UI import with visual field mapping",
+        "Preservica OPEX/PAX import and export",
+        "OPEX rights extraction (SecurityDescriptor, dc:rights, MODS, EAD)",
+        "Provenance/history import from OPEX",
+        "Gearman background job processing",
+        "Sector-specific CSV exporters (Archives, Museum, Library, Gallery, DAM)",
+        "CLI import with mapping support",
+        "Automatic slug, publication status, and nested set calculation"
+    ],
+    "changelog": {
+        "1.2.0": "Added Preservica OPEX/PAX support, rights import, provenance import, Gearman jobs",
+        "1.1.0": "Added sector-specific CSV exporters",
+        "1.0.0": "Initial release with field mapping UI"
+    }
 }
