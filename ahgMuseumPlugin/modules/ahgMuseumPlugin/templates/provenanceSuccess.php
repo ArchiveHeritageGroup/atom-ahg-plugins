@@ -36,12 +36,6 @@
       </div>
       <div class="card-body">
         <div class="d-flex flex-wrap gap-2">
-          <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'edit', 'slug' => $sf_request->getParameter('slug')]) ?>#context-collapse" class="btn btn-outline-primary">
-            <i class="fas fa-archive me-1"></i> <?php echo __('Edit Archival/Custodial History') ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $sf_request->getParameter('slug')]) ?>" class="btn btn-outline-success">
-            <i class="fas fa-plus me-1"></i> <?php echo __('Add Detailed Provenance') ?>
-          </a>
           <?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
           <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $sf_request->getParameter('slug')]) ?>" class="btn btn-outline-info">
             <i class="bi bi-clock-history me-1"></i> <?php echo __('Chain of Custody') ?>

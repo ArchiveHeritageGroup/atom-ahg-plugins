@@ -109,14 +109,15 @@ class ProvenanceRepository
     public function saveRecord(array $data): int
     {
         $now = date('Y-m-d H:i:s');
-        
         if (!empty($data['id'])) {
+            $id = $data['id'];
+            unset($data['id']); // Remove id from update data
             DB::table('provenance_record')
-                ->where('id', $data['id'])
+                ->where('id', $id)
                 ->update(array_merge($data, ['updated_at' => $now]));
-            return $data['id'];
+            return $id;
         }
-        
+        unset($data['id']); // Remove null id from insert data
         return DB::table('provenance_record')->insertGetId(
             array_merge($data, ['created_at' => $now, 'updated_at' => $now])
         );

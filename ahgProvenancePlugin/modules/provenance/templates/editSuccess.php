@@ -10,7 +10,7 @@
     </ol>
   </nav>
 
-  <form method="post" id="provenanceForm">
+  <form method="post" id="provenanceForm" enctype="multipart/form-data">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
@@ -18,6 +18,7 @@
         <p class="text-muted mb-0"><?php echo $resource->__toString() ?></p>
       </div>
       <div>
+        <a href="<?php echo url_for([$resource, 'module' => 'informationobject']) ?>" class="btn btn-outline-primary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
         <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2">Cancel</a>
         <button type="submit" class="btn btn-success">
           <i class="bi bi-check-lg me-1"></i> Save Provenance
@@ -151,7 +152,7 @@
                     </div>
                     <div class="col-md-1 d-flex align-items-end">
                       <button type="button" class="btn btn-sm btn-outline-danger remove-event-btn w-100">
-                        <i class="bi bi-trash"></i>
+                        X
                       </button>
                     </div>
                   </div>
@@ -192,6 +193,43 @@
           </div>
         </div>
 
+
+        <!-- Supporting Documents -->
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Supporting Documents</h6>
+            <button type="button" class="btn btn-sm btn-success" id="addDocumentBtn">
+              <i class="bi bi-plus me-1"></i>Add Document
+            </button>
+          </div>
+          <div class="card-body">
+            <!-- Existing Documents -->
+            <?php if (!empty($documents)): ?>
+            <div class="mb-3">
+              <label class="form-label text-muted small">Existing Documents</label>
+              <?php foreach ($documents as $doc): ?>
+              <div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2">
+                <div>
+                  <i class="bi bi-file-earmark me-2"></i>
+                  <strong><?php echo htmlspecialchars($doc->title ?: $doc->original_filename) ?></strong>
+                  <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $doc->document_type)) ?></span>
+                </div>
+                <div>
+                  <?php if ($doc->file_path): ?>
+                  <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-download"></i> View</a>
+                  <?php endif ?>
+                  <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-doc-id="<?php echo $doc->id ?>"><i class="bi bi-trash"></i> Delete</button>
+                </div>
+              </div>
+              <?php endforeach ?>
+            </div>
+            <?php endif ?>
+            
+            <!-- New Documents Container -->
+            <div id="documentsContainer"></div>
+            <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>Click "Add Document" to add supporting documents. Documents will be uploaded when you save the form.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Sidebar -->
@@ -370,9 +408,68 @@
         </div>
         <div class="col-md-1 d-flex align-items-end">
           <button type="button" class="btn btn-sm btn-outline-danger remove-event-btn w-100">
-            <i class="bi bi-trash"></i>
+            X
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="documentTemplate">
+  <div class="document-entry border rounded p-3 mb-2">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <label class="form-label small">Document Type</label>
+        <select name="doc_type[]" class="form-select form-select-sm">
+          <option value="deed_of_gift">Deed of Gift</option>
+          <option value="bill_of_sale">Bill of Sale</option>
+          <option value="invoice">Invoice</option>
+          <option value="receipt">Receipt</option>
+          <option value="auction_catalog">Auction Catalog</option>
+          <option value="exhibition_catalog">Exhibition Catalog</option>
+          <option value="inventory">Inventory</option>
+          <option value="insurance_record">Insurance Record</option>
+          <option value="photograph">Photograph</option>
+          <option value="correspondence">Correspondence</option>
+          <option value="certificate">Certificate</option>
+          <option value="customs_document">Customs Document</option>
+          <option value="export_license">Export License</option>
+          <option value="import_permit">Import Permit</option>
+          <option value="appraisal">Appraisal</option>
+          <option value="condition_report">Condition Report</option>
+          <option value="newspaper_clipping">Newspaper Clipping</option>
+          <option value="publication">Publication</option>
+          <option value="oral_history">Oral History</option>
+          <option value="affidavit">Affidavit</option>
+          <option value="legal_document">Legal Document</option>
+          <option value="other" selected>Other</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small">Title</label>
+        <input type="text" name="doc_title[]" class="form-control form-control-sm" placeholder="Document title...">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Date</label>
+        <input type="date" name="doc_date[]" class="form-control form-control-sm">
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-sm btn-outline-danger remove-doc-btn w-100">
+          X
+        </button>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small">File Upload</label>
+        <input type="file" name="doc_file[]" class="form-control form-control-sm">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small">Or External URL</label>
+        <input type="text" name="doc_url[]" class="form-control form-control-sm" placeholder="https://...">
+      </div>
+      <div class="col-12">
+        <label class="form-label small">Description</label>
+        <input type="text" name="doc_description[]" class="form-control form-control-sm" placeholder="Brief description...">
       </div>
     </div>
   </div>
@@ -401,7 +498,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Toggle Nazi-era clear
   document.getElementById('naziEraChecked').addEventListener('change', function() {
+  });
     document.getElementById('naziEraClearGroup').style.display = this.checked ? '' : 'none';
+
+  // Add document
+  document.getElementById('addDocumentBtn').addEventListener('click', function() {
+    var template = document.getElementById('documentTemplate');
+    var clone = template.content.cloneNode(true);
+    document.getElementById('documentsContainer').appendChild(clone);
+  });
+
+  // Remove document
+  document.getElementById('documentsContainer').addEventListener('click', function(e) {
+    if (e.target.closest('.remove-doc-btn')) {
+      e.target.closest('.document-entry').remove();
+    }
+  });
+
+  // Delete existing document
+  document.querySelectorAll('.delete-doc-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (confirm('Delete this document?')) {
+        var docId = this.dataset.docId;
+        fetch('/index.php/provenance/deleteDocument/' + docId, { method: 'POST' })
+          .then(function() { btn.closest('.d-flex').remove(); });
+      }
+    });
   });
 });
 </script>

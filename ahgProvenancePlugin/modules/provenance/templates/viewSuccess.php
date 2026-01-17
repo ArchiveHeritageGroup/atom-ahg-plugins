@@ -17,8 +17,12 @@
       <p class="text-muted mb-0"><?php echo $resource->__toString() ?></p>
     </div>
     <?php if ($sf_user->isAuthenticated()): ?>
+    <a href="<?php echo url_for([$resource, 'module' => 'informationobject']) ?>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-primary">
       <i class="bi bi-pencil me-1"></i> Edit Provenance
+    </a>
+    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'timeline', 'slug' => $resource->slug]) ?>" class="btn btn-outline-info ms-2">
+      <i class="bi bi-bar-chart me-1"></i> View Timeline
     </a>
     <?php endif ?>
   </div>

@@ -393,6 +393,14 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
 <?php endif; ?>
 
 
+<!-- Provenance & Chain of Custody -->
+<?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<section id="provenanceArea" class="border-bottom">
+  <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), $headingsCondition, $headingsUrl, ['anchor' => 'provenance-collapse']); ?>
+  <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
+</section>
+<?php endif ?>
+
 <?php slot('after-content'); ?>
 
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?>

@@ -41,15 +41,17 @@ if (isset($resource)) {
   $hasOais = isPluginActive('ahgOaisPlugin');
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
+  $hasProvenance = isPluginActive('ahgProvenancePlugin');
 
   // Only show section if at least one plugin is enabled
-  if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
+  if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay || $hasProvenance)) {
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul>
-    <?php if ($hasCco): ?>
-    <li><?php echo link_to(__('Provenance'), ['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?></li>
+    <?php if ($hasProvenance): ?>
+    <li><?php echo link_to(__('Chain of Custody'), ['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Edit Provenance'), ['module' => 'provenance', 'action' => 'edit', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasCondition): ?>
     <li><?php echo link_to(__('Condition assessment'), ['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?></li>

@@ -302,6 +302,7 @@ class ProvenanceService
     public function createRecord(int $objectId, array $data, string $culture = 'en'): int
     {
         $recordData = [
+            'id' => $data['id'] ?? null,
             'information_object_id' => $objectId,
             'provenance_agent_id' => $data['provenance_agent_id'] ?? null,
             'donor_id' => $data['donor_id'] ?? null,

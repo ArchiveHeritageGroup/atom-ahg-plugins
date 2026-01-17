@@ -462,16 +462,6 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 <section id="provenanceArea" class="border-bottom">
   <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), false, null, ['anchor' => 'provenance-collapse']); ?>
   <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
-  <?php if ($sf_user->isAuthenticated()): ?>
-  <div class="mt-2">
-    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-sm btn-outline-primary">
-      <i class="bi bi-pencil me-1"></i><?php echo __('Edit Provenance') ?>
-    </a>
-    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-sm btn-outline-secondary">
-      <i class="bi bi-clock-history me-1"></i><?php echo __('View Full Timeline') ?>
-    </a>
-  </div>
-  <?php endif ?>
 </section> <!-- /section#provenanceArea -->
 <?php endif ?>
 

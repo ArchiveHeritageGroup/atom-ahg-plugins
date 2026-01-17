@@ -27,3 +27,11 @@ provenance_add_event:
 provenance_delete_event:
   url: /provenance/deleteEvent
   param: { module: provenance, action: deleteEvent }
+
+provenance_delete_document:
+  url: /provenance/deleteDocument/:id
+  param: { module: provenance, action: deleteDocument }
+
+provenance_timeline:
+  url: /provenance/:slug/timeline
+  param: { module: provenance, action: timeline }
