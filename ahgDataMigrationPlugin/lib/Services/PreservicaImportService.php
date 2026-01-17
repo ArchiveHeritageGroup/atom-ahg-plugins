@@ -467,6 +467,15 @@ class PreservicaImportService
         $this->createRights($objectId, $mapped);
         $this->createEvents($objectId, $mapped);
         
+
+        // Create slug from title
+        $this->createSlug($objectId, $mapped["title"] ?? "untitled");
+
+        // Set publication status (default: Published = 160, type = 158)
+        $this->setPublicationStatus($objectId, $mapped["publicationStatus"] ?? null);
+
+        // Update nested set (lft/rgt) - append to end of tree
+        $this->updateNestedSet($objectId, $parentId);
         return $objectId;
     }
 
@@ -1066,4 +1075,135 @@ class PreservicaImportService
         }
     }
 
+
+    /**
+     * Create slug for information object.
+     */
+    protected function createSlug(int $objectId, string $title): void
+    {
+        // Generate slug from title
+        $slug = $this->generateSlug($title);
+        
+        // Ensure uniqueness
+        $baseSlug = $slug;
+        $counter = 1;
+        while (DB::table('slug')->where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        
+        DB::table('slug')->insert([
+            'object_id' => $objectId,
+            'slug' => $slug,
+            'serial_number' => 0,
+        ]);
+    }
+
+    /**
+     * Generate URL-safe slug from title.
+     */
+    protected function generateSlug(string $title): string
+    {
+        // Convert to lowercase
+        $slug = strtolower($title);
+        
+        // Replace accented characters
+        $slug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $slug);
+        
+        // Replace non-alphanumeric with hyphens
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        
+        // Remove leading/trailing hyphens
+        $slug = trim($slug, '-');
+        
+        // Limit length
+        if (strlen($slug) > 200) {
+            $slug = substr($slug, 0, 200);
+            $slug = rtrim($slug, '-');
+        }
+        
+        return $slug ?: 'untitled';
+    }
+
+    /**
+     * Set publication status for information object.
+     * 
+     * @param int $objectId
+     * @param string|null $status 'draft' or 'published' (default: use system default or published)
+     */
+    protected function setPublicationStatus(int $objectId, ?string $status = null): void
+    {
+        // Publication status type term ID
+        $typeId = 158;
+        
+        // Determine status ID
+        if ($status === 'draft') {
+            $statusId = 159; // Draft
+        } elseif ($status === 'published') {
+            $statusId = 160; // Published
+        } else {
+            // Get default from system settings or use Published
+            $statusId = $this->getDefaultPublicationStatus();
+        }
+        
+        DB::table('status')->insert([
+            'object_id' => $objectId,
+            'type_id' => $typeId,
+            'status_id' => $statusId,
+            'serial_number' => 0,
+        ]);
+    }
+
+    /**
+     * Get default publication status from system settings.
+     */
+    protected function getDefaultPublicationStatus(): int
+    {
+        // Try to get from settings
+        $setting = DB::table('setting')
+            ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+            ->where('setting.name', 'defaultPubStatus')
+            ->first();
+        
+        if ($setting && !empty($setting->value)) {
+            return (int) $setting->value;
+        }
+        
+        // Default to Published (160) if not set
+        return 160;
+    }
+
+    /**
+     * Update nested set values (lft/rgt) for information object.
+     * Appends new record to the end of the parent's children.
+     */
+    protected function updateNestedSet(int $objectId, int $parentId): void
+    {
+        // Get parent's rgt value
+        $parent = DB::table('information_object')
+            ->where('id', $parentId)
+            ->first();
+        
+        if (!$parent) {
+            return;
+        }
+        
+        $parentRgt = $parent->rgt;
+        
+        // Make room for new node (shift all nodes with lft/rgt >= parent.rgt by 2)
+        DB::table('information_object')
+            ->where('rgt', '>=', $parentRgt)
+            ->increment('rgt', 2);
+        
+        DB::table('information_object')
+            ->where('lft', '>', $parentRgt)
+            ->increment('lft', 2);
+        
+        // Set new node's lft/rgt
+        DB::table('information_object')
+            ->where('id', $objectId)
+            ->update([
+                'lft' => $parentRgt,
+                'rgt' => $parentRgt + 1,
+            ]);
+    }
 }
