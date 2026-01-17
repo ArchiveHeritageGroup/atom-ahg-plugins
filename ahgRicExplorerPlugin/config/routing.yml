@@ -51,3 +51,8 @@ ric_ajax_queue_item:
 ric_ajax_update_orphan:
   url: /admin/ric/ajax/update-orphan
   param: { module: ricDashboard, action: ajaxUpdateOrphan }
+
+# RiC Explorer AJAX endpoint
+ric_explorer_get_data:
+  url: /ric/getData
+  param: { module: ahgRicExplorer, action: getData }
