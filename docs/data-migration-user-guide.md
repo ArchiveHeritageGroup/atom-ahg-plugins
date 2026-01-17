@@ -1,426 +1,438 @@
-# Data Migration Guide
+# AtoM AHG Framework - Data Migration Tool
 
-## Moving Data Into Your Archive System
+## User Guide
 
----
-
-## What is Data Migration?
-
-Data migration means moving your records from one system to another. This guide helps you bring data from other software into AtoM.
+**Plugin Version:** 1.2.0  
+**Last Updated:** 2026-01-17  
+**Plugin:** ahgDataMigrationPlugin
 
 ---
 
-## Supported Source Systems
+## Table of Contents
 
-We can import data from many different systems:
-
-| System | What It's For |
-|--------|---------------|
-| **Vernon CMS** | Museum collections |
-| **ArchivesSpace** | Archival management |
-| **PastPerfect** | Museum/historical societies |
-| **CollectiveAccess** | Multi-purpose collections |
-| **DB/TextWorks** | Text databases |
-| **Excel/CSV** | Any spreadsheet data |
-| **EAD files** | Archival finding aids |
+1. [Overview](#1-overview)
+2. [Accessing the Tool](#2-accessing-the-tool)
+3. [Supported Source Systems](#3-supported-source-systems)
+4. [Web Interface Workflow](#4-web-interface-workflow)
+5. [Field Mapping](#5-field-mapping)
+6. [Preservica Import/Export](#6-preservica-importexport)
+7. [Background Jobs](#7-background-jobs)
+8. [CLI Commands](#8-cli-commands)
+9. [Troubleshooting](#9-troubleshooting)
 
 ---
 
-## The Migration Process
+## 1. Overview
 
-```
-┌──────────────────┐
-│  STEP 1: UPLOAD  │
-│  Your data file  │
-│  (CSV, XML, EAD) │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  STEP 2: DETECT  │
-│  System auto-    │
-│  detects source  │
-│  format          │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  STEP 3: SELECT  │
-│  Choose target   │
-│  type (Archive,  │
-│  Museum, etc.)   │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  STEP 4: MAP     │
-│  Match your      │
-│  fields to our   │
-│  fields          │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  STEP 5: PREVIEW │
-│  Check the       │
-│  results look    │
-│  correct         │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  STEP 6: IMPORT  │
-│  Load into the   │
-│  system OR       │
-│  export to file  │
-└──────────────────┘
-```
+The Data Migration Tool enables importing records from various archival and collection management systems into AtoM. It supports:
+
+- **CSV and Excel files** from multiple source systems
+- **XML formats** (Preservica OPEX, EAD)
+- **Preservica packages** (PAX/XIP with digital objects)
+- **Sector-specific mappings** (Archives, Museum, Library, Gallery, DAM)
+- **Background processing** for large datasets via Gearman
+- **Field transformation** and validation
+- **Rights import** (PREMIS, SecurityDescriptor, dc:rights, MODS, EAD)
+- **Provenance/history import** from OPEX
 
 ---
 
-## Step 1: Prepare Your Data
+## 2. Accessing the Tool
 
-### Before You Start
+### Web Interface
 
-1. **Export from your old system**
-   - Choose CSV or XML format if possible
-   - Include all fields you want to keep
-   - Note the column names
+Navigate to: `https://[your-domain]/dataMigration`
 
-2. **Clean your data**
-   - Remove duplicate records
-   - Fix obvious errors
-   - Standardise date formats
+Or: **Admin → Import/Export → Data Migration**
 
-3. **Make a backup**
-   - Keep the original export file safe
-   - Never work on your only copy
+### Required Permissions
 
-### File Formats We Accept
-
-| Format | Extension | Notes |
-|--------|-----------|-------|
-| CSV | .csv | Most common, opens in Excel |
-| XML | .xml | Structured data |
-| EAD | .xml | Archival finding aids |
-| Excel | .xlsx | We convert to CSV |
+- Administrator access
+- Or `import` permission in user group
 
 ---
 
-## Step 2: Upload Your File
+## 3. Supported Source Systems
 
-1. Go to **Admin → Data Migration**
-2. Click **Upload File**
-3. Select your file
-4. Wait for upload to complete
+### Collection Management Systems
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    UPLOAD YOUR DATA                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │                                                      │   │
-│   │          Drag and drop your file here               │   │
-│   │                                                      │   │
-│   │                    or                                │   │
-│   │                                                      │   │
-│   │              [ Browse Files ]                        │   │
-│   │                                                      │   │
-│   └─────────────────────────────────────────────────────┘   │
-│                                                              │
-│   Supported: CSV, XML, EAD, XLSX                            │
-│   Maximum size: 50MB                                         │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+| System | Formats | Target Sector |
+|--------|---------|---------------|
+| **ArchivesSpace** | CSV/JSON | Archives, Accessions, Agents, Repositories |
+| **Vernon CMS** | CSV/Excel | Museum |
+| **PastPerfect** | CSV | Museum |
+| **CollectiveAccess** | CSV | Multi-sector |
+| **Filemaker Pro** | CSV | Any |
+| **WDB** | CSV | Archives |
+| **PSIS** | Excel (83 fields) | Library |
 
----
+### Preservation Systems
 
-## Step 3: System Detection
+| System | Formats | Features |
+|--------|---------|----------|
+| **Preservica** | OPEX XML | Metadata, rights, provenance import/export |
+| **Preservica** | PAX/XIP (ZIP) | Metadata + digital objects |
 
-The system automatically identifies your source format:
+### Standard Formats
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   SOURCE DETECTED                            │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   ✓ File analysed successfully                              │
-│                                                              │
-│   Source System:    Vernon CMS                               │
-│   Format:           CSV                                      │
-│   Records Found:    1,247                                    │
-│   Columns:          24                                       │
-│                                                              │
-│   Sample Fields Detected:                                    │
-│   • Object Number                                            │
-│   • Object Name                                              │
-│   • Primary Maker                                            │
-│   • Date Made                                                │
-│   • Dimensions                                               │
-│                                                              │
-│                        [ Continue ]                          │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-If detection is wrong, you can manually select the source type.
+| Format | Use Case |
+|--------|----------|
+| CSV | Universal import |
+| Excel (.xlsx, .xls) | Spreadsheet data |
+| XML | EAD, Dublin Core |
 
 ---
 
-## Step 4: Choose Your Target
+## 4. Web Interface Workflow
 
-Select what type of records you're creating:
+### Step 1: Upload File
 
-| Target | Use For |
-|--------|---------|
-| **Archives (ISAD-G)** | Archival descriptions - fonds, series, files |
-| **Museum (Spectrum)** | Museum objects - artworks, specimens, artefacts |
-| **Library (RDA)** | Books, journals, bibliographic records |
-| **Gallery (CCO)** | Art collections, visual resources |
-| **Digital Assets** | Photos, documents, media files |
+1. Go to `/dataMigration`
+2. Click **"Choose File"** or drag-and-drop
+3. Supported: `.csv`, `.xlsx`, `.xls`, `.xml`, `.opex`, `.pax`, `.zip`
+4. Click **"Upload"**
 
+The system auto-detects:
+- File format (CSV, Excel, XML)
+- Source system (based on headers/structure)
+- Sector type (Archives, Museum, Library, etc.)
+
+### Step 2: Select or Create Mapping
+
+**Use Existing Mapping:**
+1. Select from dropdown (e.g., "Vernon CMS (Museum)")
+2. Click **"Load Mapping"**
+
+**Create New Mapping:**
+1. Click **"New Mapping"**
+2. Enter name (e.g., "My Museum Import")
+3. Select target sector
+4. Click **"Create"**
+
+### Step 3: Map Fields
+
+The mapping interface shows:
+- **Left column**: Your source fields (from uploaded file)
+- **Right column**: AtoM target fields
+
+For each source field:
+1. Click the dropdown
+2. Select matching AtoM field
+3. Optionally set **transformation** rules
+
+**Field Transformations:**
+- `trim` - Remove whitespace
+- `uppercase` / `lowercase` - Case conversion
+- `date:Y-m-d` - Date formatting
+- `prepend:/uploads/` - Add prefix to paths
+- `split:|` - Split multi-value fields
+
+### Step 4: Preview
+
+1. Click **"Preview"**
+2. Review first 10-20 records
+3. Check field mappings are correct
+4. Verify hierarchy (parent-child relationships)
+
+### Step 5: Import
+
+**Option A: Export to AtoM CSV**
+1. Click **"Export AtoM CSV"**
+2. Download the transformed CSV
+3. Use AtoM's built-in CSV Import (Admin → Import → CSV)
+
+**Option B: Direct Import (Large Files)**
+1. Click **"Background Job"**
+2. Job queued to Gearman workers
+3. Monitor progress at `/dataMigration/jobs`
+
+---
+
+## 5. Field Mapping
+
+### Core AtoM Fields
+
+| AtoM Field | Description | Required |
+|------------|-------------|----------|
+| `legacyId` | Unique ID from source system | Yes |
+| `parentId` | Parent's legacyId for hierarchy | No |
+| `title` | Record title | Yes |
+| `identifier` | Reference code | No |
+| `scopeAndContent` | Description/scope | No |
+| `levelOfDescription` | Fonds/Series/File/Item | Yes |
+| `repository` | Repository name or ID | No |
+| `culture` | Language code (en, af, etc.) | No |
+
+### Digital Object Fields
+
+| Field | Description |
+|-------|-------------|
+| `digitalObjectPath` | Path to file (relative or absolute) |
+| `digitalObjectURI` | External URL |
+| `digitalObjectChecksum` | MD5/SHA256 for verification |
+
+### Multi-Value Fields
+
+Use pipe `|` separator for multiple values:
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 SELECT TARGET TYPE                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   What type of records are you importing?                   │
-│                                                              │
-│   ○ Archives (ISAD-G)                                       │
-│       Fonds, series, files, items                           │
-│                                                              │
-│   ● Museum (Spectrum)         ← Selected                    │
-│       Objects, specimens, artworks                          │
-│                                                              │
-│   ○ Library (RDA)                                           │
-│       Books, journals, articles                             │
-│                                                              │
-│   ○ Gallery (CCO)                                           │
-│       Art cataloguing                                        │
-│                                                              │
-│   ○ Digital Assets                                          │
-│       Photos, documents, media                              │
-│                                                              │
-│                        [ Continue ]                          │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+subjectAccessPoints: History|World War II|Military
+placeAccessPoints: South Africa|Johannesburg
+nameAccessPoints: Jan Smuts|Louis Botha
+```
+
+### Hierarchy Example
+```csv
+legacyId,parentId,title,levelOfDescription
+F001,,Municipal Archives,Fonds
+S001,F001,Council Minutes,Series
+F001-001,S001,Minutes 1950-1960,File
+F001-001-001,F001-001,Meeting 1950-01-15,Item
 ```
 
 ---
 
-## Step 5: Map Your Fields
+## 6. Preservica Import/Export
 
-This is the most important step. You're telling the system which of your columns match which of our fields.
+### OPEX Import
 
-### The Mapping Screen
+OPEX (Open Preservation Exchange) is Preservica's XML metadata format.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    FIELD MAPPING                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   YOUR FIELD              →    OUR FIELD                    │
-│   ─────────────────────────────────────────────────────     │
-│   Object Number           →    Identifier         [▼]       │
-│   Object Name             →    Title              [▼]       │
-│   Primary Maker           →    Creator            [▼]       │
-│   Date Made               →    Date               [▼]       │
-│   Dimensions              →    Physical Desc.     [▼]       │
-│   Description             →    Scope & Content    [▼]       │
-│   Current Location        →    Location           [▼]       │
-│   Condition               →    Condition Note     [▼]       │
-│   Notes                   →    (Skip)             [▼]       │
-│                                                              │
-│   [ Load Saved Mapping ]  [ Save This Mapping ]             │
-│                                                              │
-│                        [ Preview ]                           │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+**Web Interface:**
+1. Upload `.opex` or `.xml` file
+2. Select "Preservica OPEX" mapping
+3. Map fields or use defaults
+4. Preview and import
+
+**CLI:**
+```bash
+php symfony preservica:import /path/to/file.opex
+php symfony preservica:import /path/to/file.opex --repository=5
+php symfony preservica:import /path/to/file.opex --dry-run
 ```
 
-### Tips for Mapping
+**OPEX Rights Extraction:**
+The importer automatically extracts rights from:
+- `SecurityDescriptor` elements
+- `dc:rights` Dublin Core
+- `dcterms:license` 
+- MODS `<accessCondition>`
+- EAD `<userestrict>` and `<accessrestrict>`
 
-**Direct matches** - When your field name matches ours, it maps automatically.
+**Provenance Import:**
+OPEX `<opex:History>` elements are imported to `provenance_event` table.
 
-**Combine fields** - You can join multiple fields together:
+### PAX/XIP Import
+
+PAX packages contain metadata (XIP XML) plus content files.
+
+**Web Interface:**
+1. Upload `.pax` or `.zip` file
+2. Select "Preservica PAX/XIP" mapping
+3. Digital objects extracted automatically
+4. Preview and import
+
+**CLI:**
+```bash
+php symfony preservica:import /path/to/package.pax --format=xip
+php symfony preservica:import /path/to/directory --batch
 ```
-First Name + Last Name  →  Creator
+
+### Preservica Export
+
+Export AtoM records to Preservica format:
+
+**CLI:**
+```bash
+# Export single record
+php symfony preservica:export 123
+
+# Export with hierarchy
+php symfony preservica:export 123 --hierarchy
+
+# Export to XIP/PAX format
+php symfony preservica:export 123 --format=xip
+
+# Export entire repository
+php symfony preservica:export --repository=5
 ```
 
-**Add constants** - Prepend text to every value:
-```
-"ACC-" + Accession Number  →  Identifier
-Result: ACC-00123
-```
-
-**Skip fields** - Choose "(Skip)" for fields you don't need.
-
-### Save Your Mapping
-
-If you're importing multiple batches, save your mapping to reuse later:
-
-1. Click **Save This Mapping**
-2. Give it a name (e.g., "Vernon to Museum")
-3. Next time, click **Load Saved Mapping**
+**Output Location:** `/uploads/exports/preservica/`
 
 ---
 
-## Step 6: Preview Results
+## 7. Background Jobs
 
-Before importing, check that everything looks correct:
+For large imports (1000+ records), use background processing:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    PREVIEW RESULTS                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   Showing 5 of 1,247 records                                │
-│                                                              │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │ Record 1                                             │   │
-│   │ Identifier: ACC-00123                                │   │
-│   │ Title: Blue Ceramic Vase                             │   │
-│   │ Creator: Unknown                                     │   │
-│   │ Date: circa 1850                                     │   │
-│   │ Description: Decorative vase with floral motifs...  │   │
-│   └─────────────────────────────────────────────────────┘   │
-│                                                              │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │ Record 2                                             │   │
-│   │ Identifier: ACC-00124                                │   │
-│   │ Title: Portrait of Lady Smith                        │   │
-│   │ Creator: John Brown                                  │   │
-│   │ Date: 1892                                           │   │
-│   └─────────────────────────────────────────────────────┘   │
-│                                                              │
-│   [ ← Back to Mapping ]              [ Import Now ]         │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+### Starting a Background Job
 
-### What to Check
+1. Complete field mapping
+2. Click **"Background Job"** instead of direct import
+3. Job queued to Gearman workers
 
-- Are identifiers correct?
-- Are titles appearing properly?
-- Are dates formatted correctly?
-- Is any data missing?
+### Monitoring Jobs
 
-If something is wrong, go back and adjust your mapping.
+Navigate to: `/dataMigration/jobs`
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Waiting for worker |
+| `running` | Currently processing |
+| `completed` | Finished successfully |
+| `failed` | Error occurred |
+
+### Job Details
+
+Click any job to see:
+- Records processed / total
+- Errors encountered
+- Processing time
+- Download results
 
 ---
 
-## Step 7: Choose Output
+## 8. CLI Commands
 
-You can either import directly or export to a file:
-
-### Option A: Import Directly
-
-Records go straight into your database.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    IMPORT PROGRESS                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   Importing records...                                       │
-│                                                              │
-│   ████████████████████░░░░░░░░░░  750 / 1,247               │
-│                                                              │
-│   ✓ 750 records imported                                    │
-│   ⚠ 3 warnings (duplicates skipped)                         │
-│   ✗ 0 errors                                                │
-│                                                              │
-│   Time elapsed: 2 minutes 34 seconds                        │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+### List Available Mappings
+```bash
+php symfony migration:import --list-mappings
 ```
 
-### Option B: Export to File
+Output:
+```
+ARCHIVES:
+  [2] ArchivesSpace Resources
+  [11] Preservica OPEX
+  [12] Preservica PAX/XIP
 
-Create a file to import later or share:
+MUSEUM:
+  [10] Vernon CMS (Museum)
 
-| Format | Use For |
-|--------|---------|
-| **CSV** | Review in Excel first |
-| **EAD** | Share with other archives |
-| **Dublin Core** | Web publishing |
+LIBRARY:
+  [8] PSIS Full Import (83 fields)
+```
 
----
+### Import with Mapping
+```bash
+# By mapping ID
+php symfony migration:import /path/to/file.csv --mapping=10
 
-## Common Migration Scenarios
+# By mapping name
+php symfony migration:import /path/to/file.csv --mapping="Vernon CMS"
 
-### From Vernon CMS
+# With options
+php symfony migration:import /path/to/file.csv --mapping=10 \
+    --repository=5 \
+    --culture=en \
+    --update
+```
 
-Vernon fields map to museum objects:
+### Dry Run (Preview Only)
+```bash
+php symfony migration:import /path/to/file.csv --mapping=10 --dry-run
+```
 
-| Vernon | AtoM |
-|--------|------|
-| Object Number | Identifier |
-| Object Name | Title |
-| Primary Maker | Creator |
-| Date Made | Date |
-| Simple Name | Object type |
-| Dimensions | Physical description |
+### Preservica Commands
+```bash
+# Show Preservica info
+php symfony preservica:info
 
-### From ArchivesSpace
+# Import OPEX
+php symfony preservica:import /path/to/file.opex
 
-ArchivesSpace exports map naturally:
+# Import PAX/XIP
+php symfony preservica:import /path/to/package.pax --format=xip
 
-| ArchivesSpace | AtoM |
-|---------------|------|
-| identifier | Reference code |
-| title | Title |
-| date_expression | Date |
-| extents | Extent |
-| scope_content | Scope and content |
+# Export to OPEX
+php symfony preservica:export 123 --format=opex
 
-### From Excel Spreadsheets
-
-1. Save as CSV
-2. Make sure first row contains column headers
-3. Upload and map manually
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| File won't upload | Check file size (max 50MB) |
-| Wrong source detected | Manually select source type |
-| Fields not mapping | Check column names match |
-| Characters look wrong | Save CSV as UTF-8 |
-| Import very slow | Try smaller batches |
-| Duplicates created | Check identifier mapping |
-
-### Getting Help
-
-If you have problems:
-1. Check the preview carefully
-2. Try a small test batch first
-3. Contact your system administrator
+# Export to PAX
+php symfony preservica:export 123 --format=xip --hierarchy
+```
 
 ---
 
-## Best Practices
+## 9. Troubleshooting
 
-**Start small**
-- Import 10 records first
-- Check they look correct
-- Then import the rest
+### File Upload Fails
 
-**Keep records**
-- Save your mapping
-- Note any issues
-- Keep original files
+**Problem:** File too large  
+**Solution:** Increase PHP limits in `/etc/php/8.3/fpm/php.ini`:
+```ini
+upload_max_filesize = 100M
+post_max_size = 100M
+max_execution_time = 300
+```
 
-**Verify after import**
-- Spot check random records
-- Search for known items
-- Check counts match
+### Mapping Not Found
+
+**Problem:** Source columns not detected  
+**Solution:** Ensure CSV has headers in first row, UTF-8 encoding
+
+### Hierarchy Not Working
+
+**Problem:** Parent-child relationships broken  
+**Solution:** 
+- Ensure `legacyId` is unique
+- Ensure `parentId` matches a valid `legacyId`
+- Parents must appear before children in file
+
+### Digital Objects Not Importing
+
+**Problem:** Files not attaching to records  
+**Solution:**
+- Check `digitalObjectPath` is correct
+- Verify files exist at specified path
+- Use absolute paths or paths relative to AtoM root
+
+### Background Job Stuck
+
+**Problem:** Job shows "running" but no progress  
+**Solution:**
+```bash
+# Check Gearman workers
+ps aux | grep jobs:worker
+
+# Restart workers
+sudo systemctl restart atom-worker
+```
+
+### OPEX Rights Not Importing
+
+**Problem:** Rights not appearing on records  
+**Solution:**
+- Verify OPEX contains `<SecurityDescriptor>` or `<dc:rights>`
+- Check `ahg_rights_statement` table for imported rights
+- Ensure ahgRightsPlugin is enabled
 
 ---
 
-*For technical support, contact your system administrator.*
+## Quick Reference
+
+| Task | Web UI | CLI |
+|------|--------|-----|
+| Import CSV | `/dataMigration` → Upload | `php symfony migration:import file.csv --mapping=X` |
+| Import OPEX | `/dataMigration` → Upload | `php symfony preservica:import file.opex` |
+| Import PAX | `/dataMigration` → Upload | `php symfony preservica:import file.pax --format=xip` |
+| Export OPEX | N/A | `php symfony preservica:export 123` |
+| Export PAX | N/A | `php symfony preservica:export 123 --format=xip` |
+| View Jobs | `/dataMigration/jobs` | N/A |
+| List Mappings | Dropdown | `php symfony migration:import --list-mappings` |
+
+---
+
+## Version History
+
+| Version | Changes |
+|---------|---------|
+| 1.2.0 | Added Preservica OPEX/PAX support, rights import, provenance import, Gearman jobs |
+| 1.1.0 | Added sector-specific CSV exporters |
+| 1.0.0 | Initial release with field mapping UI |
+
+---
+
+**Need Help?**
+
+- Check `/dataMigration/jobs` for import status
+- Review error logs: `/log/qubit.log`
+- Contact: support@theahg.co.za
