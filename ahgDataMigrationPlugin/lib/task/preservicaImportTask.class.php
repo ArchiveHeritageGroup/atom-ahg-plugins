@@ -32,6 +32,8 @@ class preservicaImportTask extends sfBaseTask
             new sfCommandOption('no-hierarchy', null, sfCommandOption::PARAMETER_NONE, 'Import flat (ignore parent references)'),
             new sfCommandOption('batch', null, sfCommandOption::PARAMETER_NONE, 'Batch import all files in directory'),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Simulate import without database changes'),
+            new sfCommandOption('no-derivatives', null, sfCommandOption::PARAMETER_NONE, 'Skip derivative generation (thumbnails, reference images)'),
+            new sfCommandOption('queue-derivatives', null, sfCommandOption::PARAMETER_NONE, 'Queue derivative generation as background job'),
             new sfCommandOption('mapping', null, sfCommandOption::PARAMETER_REQUIRED, 'Custom mapping file (JSON)'),
         ]);
 

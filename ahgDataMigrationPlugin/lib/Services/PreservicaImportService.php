@@ -66,6 +66,8 @@ class PreservicaImportService
             'default_level'         => 'Item',
             'default_status'        => 'Published',
             'dry_run'               => false,
+            'generate_derivatives'  => true,
+            'queue_derivatives'     => false,
         ], $options);
         
         // Load default mapping based on source type
@@ -583,22 +585,53 @@ class PreservicaImportService
     /**
      * Create digital object record.
      */
+    /**
+     * Create digital object record with proper derivative generation.
+     * Uses AtoM's native QubitDigitalObject for thumbnails and reference images.
+     */
     protected function createDigitalObject(int $objectId, string $filePath, string $filename): void
     {
+        // Option 1: Use AtoM's native QubitDigitalObject (generates derivatives)
+        if ($this->options['generate_derivatives'] ?? true) {
+            try {
+                $digitalObject = new \QubitDigitalObject();
+                $digitalObject->informationObjectId = $objectId;
+                $digitalObject->usageId = \QubitTerm::MASTER_ID;
+                $digitalObject->createDerivatives = true;
+                
+                // Create asset from file path
+                $asset = new \QubitAsset($filePath);
+                $digitalObject->assets[] = $asset;
+                
+                // Save triggers derivative creation (thumbnail, reference)
+                $digitalObject->save();
+                
+                $this->stats['digital_objects'] = ($this->stats['digital_objects'] ?? 0) + 1;
+                return;
+            } catch (\Exception $e) {
+                $this->errors[] = [
+                    'record'  => $filename,
+                    'message' => "Failed to create digital object with derivatives: " . $e->getMessage(),
+                ];
+                // Fall back to direct insert without derivatives
+            }
+        }
+        
+        // Option 2: Direct DB insert (no derivatives - faster for batch)
         $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
         $fileSize = filesize($filePath);
         $checksum = hash_file('sha256', $filePath);
-        
+
         // Create object record
         $doId = DB::table('object')->insertGetId([
             'class_name' => 'QubitDigitalObject',
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
-        
+
         // Copy file to uploads
         $uploadPath = $this->copyToUploads($filePath, $doId);
-        
+
         // Create digital_object record
         DB::table('digital_object')->insert([
             'id'                    => $doId,
@@ -612,6 +645,38 @@ class PreservicaImportService
             'path'                  => $uploadPath,
             'sequence'              => 0,
         ]);
+        
+        // Queue derivative generation job if requested
+        if ($this->options['queue_derivatives'] ?? false) {
+            $this->queueDerivativeJob($doId);
+        }
+        
+        $this->stats['digital_objects'] = ($this->stats['digital_objects'] ?? 0) + 1;
+    }
+
+    /**
+     * Queue a Gearman job to generate derivatives later (for batch imports).
+     */
+    protected function queueDerivativeJob(int $digitalObjectId): void
+    {
+        try {
+            // Use AtoM's job system
+            $jobName = 'arGenerateDerivativesJob';
+            
+            // Create job via Gearman
+            $client = new \GearmanClient();
+            $client->addServer();
+            
+            $client->doBackground($jobName, json_encode([
+                'digitalObjectId' => $digitalObjectId,
+            ]));
+        } catch (\Exception $e) {
+            // Log but don't fail - derivatives can be generated later
+            $this->errors[] = [
+                'record'  => "DO-{$digitalObjectId}",
+                'message' => "Failed to queue derivative job: " . $e->getMessage(),
+            ];
+        }
     }
 
     /**
@@ -620,20 +685,20 @@ class PreservicaImportService
     protected function copyToUploads(string $sourcePath, int $digitalObjectId): string
     {
         $uploadsDir = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
-        
-        // Create directory structure
+
+        // Create directory structure (AtoM's standard r/XX pattern)
         $subdir = 'r/' . substr(md5($digitalObjectId), 0, 2);
         $targetDir = $uploadsDir . '/' . $subdir;
-        
+
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
-        
+
         $filename = basename($sourcePath);
         $targetPath = $targetDir . '/' . $digitalObjectId . '_' . $filename;
-        
+
         copy($sourcePath, $targetPath);
-        
+
         return $subdir . '/' . $digitalObjectId . '_' . $filename;
     }
 
