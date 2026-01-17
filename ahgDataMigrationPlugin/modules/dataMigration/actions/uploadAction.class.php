@@ -203,105 +203,32 @@ class dataMigrationUploadAction extends sfAction
     protected function parseOpexFile($filepath)
     {
         $content = file_get_contents($filepath);
-        
+
         // Remove default namespace to make XPath easier
         $content = preg_replace('/xmlns="[^"]+"/', '', $content);
-        
+
         $xml = new \SimpleXMLElement($content);
         $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
         $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
+        $xml->registerXPathNamespace('opex', 'http://www.openpreservationexchange.org/opex/v1.2');
 
         $headers = [];
         $records = [];
 
         // Check for multiple Record elements in DescriptiveMetadata
         $recordNodes = $xml->xpath('//DescriptiveMetadata/Record');
-        
+
         if (!empty($recordNodes) && count($recordNodes) > 0) {
             // Multiple records - parse each one
             foreach ($recordNodes as $recordNode) {
-                $record = [];
-                
-                // Get Identifiers with their type attribute
-                foreach ($recordNode->xpath('Identifier') as $id) {
-                    $type = (string)($id['type'] ?? 'ID');
-                    $value = (string)$id;
-                    $key = 'Identifier_' . $type;
-                    $record[$key] = $value;
-                }
-                
-                // Get Dublin Core elements
-                $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
-                    'contributor', 'date', 'type', 'format', 'identifier',
-                    'source', 'language', 'coverage', 'rights'];
-                
-                foreach ($dcElements as $elem) {
-                    $nodes = $recordNode->xpath("dc:{$elem}");
-                    if (!empty($nodes)) {
-                        $values = [];
-                        foreach ($nodes as $node) {
-                            $values[] = (string)$node;
-                        }
-                        $record['dc:' . $elem] = implode(' | ', $values);
-                    }
-                }
-                
-                // Get DC Terms elements
-                $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified'];
-                foreach ($dcTerms as $term) {
-                    $nodes = $recordNode->xpath("dcterms:{$term}");
-                    if (!empty($nodes)) {
-                        $record['dcterms:' . $term] = (string)$nodes[0];
-                    }
-                }
-                
+                $record = $this->parseOpexRecord($recordNode, $xml);
                 if (!empty($record)) {
                     $records[] = $record;
                 }
             }
         } else {
             // Single record file - extract from Properties and DescriptiveMetadata
-            $record = [];
-            
-            // Properties
-            $props = $xml->xpath('//Properties');
-            if (!empty($props)) {
-                foreach ($props[0]->children() as $child) {
-                    $record[$child->getName()] = (string)$child;
-                }
-            }
-            
-            // Transfer info
-            $transfer = $xml->xpath('//Transfer');
-            if (!empty($transfer)) {
-                foreach ($transfer[0]->children() as $child) {
-                    $record['Transfer_' . $child->getName()] = (string)$child;
-                }
-            }
-            
-            // Identifiers
-            $identifiers = $xml->xpath('//Identifier');
-            foreach ($identifiers as $id) {
-                $type = (string)($id['type'] ?? 'ID');
-                $record['Identifier_' . $type] = (string)$id;
-            }
-            
-            // Dublin Core from anywhere
-            $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
-                'contributor', 'date', 'type', 'format', 'identifier',
-                'source', 'language', 'coverage', 'rights'];
-            
-            foreach ($dcElements as $elem) {
-                $nodes = $xml->xpath("//dc:{$elem}");
-                if (!empty($nodes)) {
-                    $values = [];
-                    foreach ($nodes as $node) {
-                        $values[] = (string)$node;
-                    }
-                    $record['dc:' . $elem] = implode(' | ', $values);
-                }
-            }
-            
+            $record = $this->parseOpexSingleRecord($xml);
             if (!empty($record)) {
                 $records[] = $record;
             }
@@ -315,6 +242,9 @@ class dataMigrationUploadAction extends sfAction
                 }
             }
         }
+
+        // Sort headers to group related fields
+        $headers = $this->sortOpexHeaders($headers);
 
         // Build rows
         $rows = [];
@@ -335,8 +265,355 @@ class dataMigrationUploadAction extends sfAction
     }
 
     /**
-     * Parse Preservica PAX/XIP package.
+     * Parse a single OPEX Record element.
      */
+    protected function parseOpexRecord($recordNode, $xml)
+    {
+        $record = [];
+
+        // Get Identifiers with their type attribute
+        foreach ($recordNode->xpath('Identifier') as $id) {
+            $type = (string)($id['type'] ?? 'ID');
+            $value = (string)$id;
+            $key = 'Identifier_' . $type;
+            $record[$key] = $value;
+            // Also set legacyId from first identifier
+            if (empty($record['legacyId'])) {
+                $record['legacyId'] = $value;
+            }
+        }
+
+        // Get Dublin Core elements
+        $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
+            'contributor', 'date', 'type', 'format', 'identifier',
+            'source', 'language', 'coverage', 'rights'];
+
+        foreach ($dcElements as $elem) {
+            $nodes = $recordNode->xpath("dc:{$elem}");
+            if (!empty($nodes)) {
+                $values = [];
+                foreach ($nodes as $node) {
+                    $values[] = (string)$node;
+                }
+                $record['dc:' . $elem] = implode(' | ', $values);
+            }
+        }
+
+        // Get DC Terms elements
+        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified', 
+                    'license', 'rightsHolder', 'spatial', 'temporal'];
+        foreach ($dcTerms as $term) {
+            $nodes = $recordNode->xpath("dcterms:{$term}");
+            if (!empty($nodes)) {
+                $values = [];
+                foreach ($nodes as $node) {
+                    $values[] = (string)$node;
+                }
+                $record['dcterms:' . $term] = implode(' | ', $values);
+            }
+        }
+
+        // Extract common fields to standard names
+        $this->extractCommonOpexFields($record, $recordNode, $xml);
+
+        return $record;
+    }
+
+    /**
+     * Parse single record OPEX file.
+     */
+    protected function parseOpexSingleRecord($xml)
+    {
+        $record = [];
+
+        // Properties
+        $props = $xml->xpath('//Properties');
+        if (!empty($props)) {
+            foreach ($props[0]->children() as $child) {
+                $name = $child->getName();
+                $record[$name] = (string)$child;
+                
+                // Map to standard fields
+                if ($name === 'Title') $record['title'] = (string)$child;
+                if ($name === 'Description') $record['scopeAndContent'] = (string)$child;
+                if ($name === 'SecurityDescriptor') {
+                    $record['ahgSecurityClassification'] = (string)$child;
+                    $record['accessConditions'] = ucfirst((string)$child);
+                }
+            }
+        }
+
+        // Transfer info
+        $transfer = $xml->xpath('//Transfer');
+        if (!empty($transfer)) {
+            foreach ($transfer[0]->children() as $child) {
+                $name = $child->getName();
+                if ($name === 'SourceID') {
+                    $record['Transfer_SourceID'] = (string)$child;
+                    $record['legacyId'] = (string)$child;
+                } elseif ($name === 'Manifest') {
+                    $files = $child->xpath('Files');
+                    $record['Transfer_Manifest'] = !empty($files) ? (string)$files[0] . ' files' : '';
+                } else {
+                    $record['Transfer_' . $name] = (string)$child;
+                }
+            }
+        }
+
+        // Identifiers
+        $identifiers = $xml->xpath('//Properties/Identifiers/Identifier | //Identifier');
+        foreach ($identifiers as $id) {
+            $type = (string)($id['type'] ?? 'ID');
+            $record['Identifier_' . $type] = (string)$id;
+            if (empty($record['legacyId'])) {
+                $record['legacyId'] = (string)$id;
+            }
+        }
+
+        // Dublin Core from anywhere
+        $dcElements = ['title', 'creator', 'subject', 'description', 'publisher',
+            'contributor', 'date', 'type', 'format', 'identifier',
+            'source', 'language', 'coverage', 'rights'];
+
+        foreach ($dcElements as $elem) {
+            $nodes = $xml->xpath("//dc:{$elem}");
+            if (!empty($nodes)) {
+                $values = [];
+                foreach ($nodes as $node) {
+                    $values[] = (string)$node;
+                }
+                $record['dc:' . $elem] = implode(' | ', $values);
+            }
+        }
+
+        // DC Terms
+        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified', 
+                    'license', 'rightsHolder', 'spatial', 'temporal'];
+        foreach ($dcTerms as $term) {
+            $nodes = $xml->xpath("//dcterms:{$term}");
+            if (!empty($nodes)) {
+                $values = [];
+                foreach ($nodes as $node) {
+                    $values[] = (string)$node;
+                }
+                $record['dcterms:' . $term] = implode(' | ', $values);
+            }
+        }
+
+        // Extract extended fields
+        $this->extractCommonOpexFields($record, null, $xml);
+
+        return $record;
+    }
+
+    /**
+     * Extract common OPEX fields including AHG extended fields.
+     */
+    protected function extractCommonOpexFields(&$record, $recordNode, $xml)
+    {
+        // =====================================================
+        // DIGITAL OBJECT FIELDS
+        // =====================================================
+        
+        // Look for DigitalObject/Filename elements
+        $context = $recordNode ?? $xml;
+        $filenames = $context->xpath('.//DigitalObject/Filename | .//Filename | .//File | .//Bitstream');
+        if (!empty($filenames)) {
+            $record['Filename'] = (string)$filenames[0];
+            $record['digitalObjectPath'] = (string)$filenames[0];
+        }
+
+        // Fixity/Checksum
+        $fixity = $context->xpath('.//DigitalObject/Fixity | .//Fixity | .//Checksum');
+        if (!empty($fixity)) {
+            $algorithm = (string)($fixity[0]['algorithm'] ?? 'SHA-256');
+            $record['digitalObjectChecksum'] = $algorithm . ':' . (string)$fixity[0];
+        }
+
+        // File format
+        $format = $context->xpath('.//DigitalObject/FormatName | .//FormatName');
+        if (!empty($format)) {
+            $record['digitalObjectMimeType'] = (string)$format[0];
+        }
+
+        // File size
+        $size = $context->xpath('.//DigitalObject/FileSize | .//FileSize');
+        if (!empty($size)) {
+            $record['digitalObjectSize'] = (string)$size[0];
+        }
+
+        // =====================================================
+        // SECURITY & ACCESS FIELDS (AHG)
+        // =====================================================
+        
+        $security = $xml->xpath('//Properties/SecurityDescriptor | //SecurityDescriptor');
+        if (!empty($security)) {
+            $record['ahgSecurityClassification'] = (string)$security[0];
+            if (empty($record['accessConditions'])) {
+                $record['accessConditions'] = ucfirst((string)$security[0]);
+            }
+        }
+
+        // =====================================================
+        // RIGHTS FIELDS (AHG Extended)
+        // =====================================================
+        
+        $rightsText = [];
+        
+        // DC Rights
+        if (!empty($record['dc:rights'])) {
+            $rightsText[] = "Rights: " . $record['dc:rights'];
+        }
+        
+        // License
+        if (!empty($record['dcterms:license'])) {
+            $rightsText[] = "License: " . $record['dcterms:license'];
+        }
+        
+        // Rights Holder
+        if (!empty($record['dcterms:rightsHolder'])) {
+            $rightsText[] = "Rights Holder: " . $record['dcterms:rightsHolder'];
+        }
+        
+        // Access Rights
+        if (!empty($record['dcterms:accessRights'])) {
+            $rightsText[] = "Access: " . $record['dcterms:accessRights'];
+        }
+        
+        if (!empty($rightsText)) {
+            $record['ahgRightsStatement'] = implode(' | ', $rightsText);
+        }
+
+        // Parse Rights elements (structured)
+        $rightsElements = $xml->xpath('//Rights/RightsStatement');
+        if (!empty($rightsElements)) {
+            $structuredRights = [];
+            foreach ($rightsElements as $rs) {
+                $basis = (string)($rs->RightsBasis ?? '');
+                $status = (string)($rs->CopyrightStatus ?? '');
+                $note = (string)($rs->CopyrightNote ?? $rs->LicenseNote ?? $rs->PolicyNote ?? $rs->StatuteNote ?? '');
+                
+                $rStr = $basis;
+                if ($status) $rStr .= " ($status)";
+                if ($note) $rStr .= ": $note";
+                $structuredRights[] = $rStr;
+            }
+            $record['ahgRightsStructured'] = implode(' || ', $structuredRights);
+        }
+
+        // =====================================================
+        // PROVENANCE / HISTORY FIELDS (AHG)
+        // =====================================================
+        
+        $historyEvents = $xml->xpath('//History/Event | //opex:History/opex:Event');
+        if (!empty($historyEvents)) {
+            $provenanceText = [];
+            $eventCount = 0;
+            $firstDate = null;
+            $lastDate = null;
+            
+            foreach ($historyEvents as $event) {
+                $eventCount++;
+                $date = (string)($event->EventDate ?? $event->Date ?? '');
+                $type = (string)($event->EventType ?? $event->Type ?? '');
+                $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
+                $desc = (string)($event->EventDescription ?? $event->Description ?? '');
+                
+                // Track first/last dates
+                if ($date) {
+                    if (!$firstDate || strtotime($date) < strtotime($firstDate)) {
+                        $firstDate = $date;
+                    }
+                    if (!$lastDate || strtotime($date) > strtotime($lastDate)) {
+                        $lastDate = $date;
+                    }
+                }
+                
+                $eventStr = $date ?: 'Unknown date';
+                $eventStr .= ': ' . ($type ?: 'Event');
+                if ($desc) $eventStr .= ' - ' . $desc;
+                if ($agent) $eventStr .= ' (by ' . $agent . ')';
+                $provenanceText[] = $eventStr;
+            }
+            
+            $record['ahgProvenanceHistory'] = implode(' || ', $provenanceText);
+            $record['ahgProvenanceEventCount'] = (string)$eventCount;
+            if ($firstDate) $record['ahgProvenanceFirstDate'] = $firstDate;
+            if ($lastDate) $record['ahgProvenanceLastDate'] = $lastDate;
+        }
+
+        // Also check dcterms:provenance
+        if (!empty($record['dcterms:provenance']) && empty($record['ahgProvenanceHistory'])) {
+            $record['ahgProvenanceHistory'] = $record['dcterms:provenance'];
+        }
+
+        // =====================================================
+        // RELATIONSHIPS
+        // =====================================================
+        
+        $relationships = $xml->xpath('//Relationships/Relationship');
+        if (!empty($relationships)) {
+            $relText = [];
+            foreach ($relationships as $rel) {
+                $type = (string)($rel['type'] ?? $rel->Type ?? 'related');
+                $target = (string)($rel['target'] ?? $rel->Target ?? $rel);
+                $relText[] = "$type: $target";
+            }
+            $record['ahgRelationships'] = implode(' | ', $relText);
+        }
+    }
+
+    /**
+     * Sort OPEX headers to group related fields.
+     */
+    protected function sortOpexHeaders($headers)
+    {
+        $priority = [
+            // Core identification
+            'legacyId', 'Identifier_Reference', 'Identifier_AtoM_ID', 'title', 'dc:title',
+            // Description
+            'scopeAndContent', 'dc:description', 'Description',
+            // Dates
+            'dc:date', 'dcterms:created', 'dcterms:modified',
+            // Creators/Contributors
+            'dc:creator', 'dc:contributor', 'dc:publisher',
+            // Access points
+            'dc:subject', 'dc:coverage', 'dcterms:spatial',
+            // Physical description
+            'dc:format', 'dcterms:extent', 'dc:language', 'dc:type',
+            // Digital objects
+            'Filename', 'digitalObjectPath', 'digitalObjectChecksum', 'digitalObjectMimeType', 'digitalObjectSize',
+            // Rights (standard AtoM)
+            'accessConditions', 'reproductionConditions', 'dc:rights', 'dcterms:accessRights', 'dcterms:license',
+            // Security (AHG)
+            'ahgSecurityClassification', 'SecurityDescriptor',
+            // Rights (AHG Extended)
+            'ahgRightsStatement', 'ahgRightsStructured', 'dcterms:rightsHolder',
+            // Provenance (AHG)
+            'ahgProvenanceHistory', 'ahgProvenanceEventCount', 'ahgProvenanceFirstDate', 'ahgProvenanceLastDate',
+            'dcterms:provenance',
+            // Relationships
+            'ahgRelationships',
+            // Transfer metadata
+            'Transfer_SourceID', 'Transfer_Manifest',
+        ];
+
+        usort($headers, function($a, $b) use ($priority) {
+            $posA = array_search($a, $priority);
+            $posB = array_search($b, $priority);
+            
+            if ($posA === false) $posA = 999;
+            if ($posB === false) $posB = 999;
+            
+            if ($posA === $posB) {
+                return strcmp($a, $b);
+            }
+            return $posA - $posB;
+        });
+
+        return $headers;
+    }
+     
     protected function parsePaxFile($filepath)
     {
         $zip = new \ZipArchive();
