@@ -948,9 +948,15 @@ class PreservicaImportService
             return;
         }
 
-        // Check for provenance events from OPEX History
+        // Build provenance events from multiple sources
         $provenanceEvents = $mapped['_provenance_events'] ?? [];
-        $provenanceSummary = $mapped['archivalHistory'] ?? null;
+        
+        // Also check for pipe-delimited fields from CSV
+        if (empty($provenanceEvents) && !empty($mapped['ahgProvenanceEventDates'])) {
+            $provenanceEvents = $this->parsePipeDelimitedProvenance($mapped);
+        }
+        
+        $provenanceSummary = $mapped['ahgProvenanceHistory'] ?? $mapped['archivalHistory'] ?? null;
 
         if (empty($provenanceEvents) && empty($provenanceSummary)) {
             return;
@@ -961,7 +967,7 @@ class PreservicaImportService
             $recordId = DB::table('provenance_record')->insertGetId([
                 'information_object_id' => $objectId,
                 'acquisition_type' => $this->detectAcquisitionType($provenanceEvents),
-                'certainty_level' => 'certain', // Preservica events are documented
+                'certainty_level' => 'certain',
                 'research_status' => 'complete',
                 'is_complete' => !empty($provenanceEvents) ? 1 : 0,
                 'is_public' => 1,
@@ -973,7 +979,7 @@ class PreservicaImportService
             DB::table('provenance_record_i18n')->insert([
                 'id' => $recordId,
                 'culture' => $this->culture,
-                'provenance_summary' => $provenanceSummary,
+                'provenance_summary' => $provenanceSummary ?: null,
                 'research_notes' => 'Imported from Preservica OPEX History',
             ]);
 
@@ -997,7 +1003,8 @@ class PreservicaImportService
                     );
                 }
 
-                DB::table('provenance_event')->insert([
+                // Insert event
+                $eventId = DB::table('provenance_event')->insertGetId([
                     'provenance_record_id' => $recordId,
                     'from_agent_id' => $fromAgentId,
                     'to_agent_id' => $toAgentId,
@@ -1008,12 +1015,24 @@ class PreservicaImportService
                     'event_location' => $event['event_location'] ?? null,
                     'evidence_type' => $event['evidence_type'] ?? 'documentary',
                     'certainty' => $event['certainty'] ?? 'certain',
-                    'sequence_number' => $sequence++,
+                    'sequence_number' => $sequence,
+                    'sort_order' => $sequence,
                     'notes' => $event['notes'] ?? null,
                     'is_public' => 1,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
+
+                // Create event i18n for description
+                if (!empty($event['event_description'])) {
+                    DB::table('provenance_event_i18n')->insert([
+                        'id' => $eventId,
+                        'culture' => $this->culture,
+                        'event_description' => $event['event_description'],
+                    ]);
+                }
+
+                $sequence++;
             }
 
             error_log("Created provenance record with " . count($provenanceEvents) . " events for object $objectId");
@@ -1024,8 +1043,88 @@ class PreservicaImportService
     }
 
     /**
-     * Detect acquisition type from provenance events.
+     * Parse pipe-delimited provenance fields from CSV into events array.
      */
+    protected function parsePipeDelimitedProvenance(array $mapped): array
+    {
+        $events = [];
+        
+        $dates = !empty($mapped['ahgProvenanceEventDates']) 
+            ? explode('|', $mapped['ahgProvenanceEventDates']) 
+            : [];
+        $types = !empty($mapped['ahgProvenanceEventTypes']) 
+            ? explode('|', $mapped['ahgProvenanceEventTypes']) 
+            : [];
+        $descriptions = !empty($mapped['ahgProvenanceEventDescriptions']) 
+            ? explode('|', $mapped['ahgProvenanceEventDescriptions']) 
+            : [];
+        $agents = !empty($mapped['ahgProvenanceEventAgents']) 
+            ? explode('|', $mapped['ahgProvenanceEventAgents']) 
+            : [];
+
+        // Get the max count
+        $count = max(count($dates), count($types), count($descriptions), count($agents));
+
+        for ($i = 0; $i < $count; $i++) {
+            $event = [
+                'event_date' => trim($dates[$i] ?? ''),
+                'event_type' => $this->mapEventType(trim($types[$i] ?? '')),
+                'event_description' => trim($descriptions[$i] ?? ''),
+            ];
+
+            // Handle agent
+            $agent = trim($agents[$i] ?? '');
+            if (!empty($agent)) {
+                $event['to_agent_name'] = $agent;
+                $event['to_agent_type'] = 'organization'; // Default to organization
+            }
+
+            // Only add if we have at least a date or type
+            if (!empty($event['event_date']) || !empty($event['event_type'])) {
+                $events[] = $event;
+            }
+        }
+
+        return $events;
+    }
+
+    /**
+     * Map event type string to valid enum value.
+     */
+    protected function mapEventType(string $type): string
+    {
+        $typeMap = [
+            'ingest' => 'accessioning',
+            'modified' => 'other',
+            'migrate' => 'other',
+            'migration' => 'other',
+            'digitization' => 'other',
+            'digitisation' => 'other',
+            'classification' => 'other',
+            'declassification' => 'other',
+            'creation' => 'creation',
+            'acquisition' => 'accessioning',
+            'transfer' => 'transfer',
+            'donation' => 'donation',
+            'purchase' => 'purchase',
+            'bequest' => 'bequest',
+            'gift' => 'gift',
+            'loan' => 'loan_out',
+            'deposit' => 'deposit',
+            'sale' => 'sale',
+            'auction' => 'auction',
+            'inheritance' => 'inheritance',
+            'theft' => 'theft',
+            'recovery' => 'recovery',
+            'restitution' => 'restitution',
+            'conservation' => 'conservation',
+            'restoration' => 'restoration',
+        ];
+
+        $normalized = strtolower(trim($type));
+        return $typeMap[$normalized] ?? 'other';
+    }
+
     protected function detectAcquisitionType(array $events): string
     {
         foreach ($events as $event) {

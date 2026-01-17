@@ -110,25 +110,29 @@ class dataMigrationExecuteAhgImportAction extends sfAction
     protected function transformToAhgRecords(array $rows, array $headers, array $mapping): array
     {
         $records = [];
-
         foreach ($rows as $row) {
             $record = [
-                '_ahg_fields' => [], // AHG extended fields
+                '_ahg_fields' => [],
             ];
-
+            
+            // Pass through all ahg* source fields directly
+            foreach ($headers as $index => $header) {
+                if (strpos($header, 'ahg') === 0 && isset($row[$index]) && trim($row[$index]) !== '') {
+                    $record['_ahg_fields'][$header] = trim($row[$index]);
+                }
+            }
+            
+            // Process mapping
             foreach ($mapping as $fieldConfig) {
                 if (empty($fieldConfig['include'])) {
                     continue;
                 }
-
                 $sourceField = $fieldConfig['source_field'] ?? '';
                 $atomField = $fieldConfig['atom_field'] ?? '';
                 $constantValue = $fieldConfig['constant_value'] ?? '';
-
                 if (empty($atomField)) {
                     continue;
                 }
-
                 // Get value
                 $value = '';
                 if (!empty($constantValue)) {
@@ -139,11 +143,9 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                         $value = trim($row[$sourceIndex]);
                     }
                 }
-
                 if ($value === '') {
                     continue;
                 }
-
                 // Separate AHG fields from standard fields
                 if (strpos($atomField, 'ahg') === 0) {
                     $record['_ahg_fields'][$atomField] = $value;
@@ -151,18 +153,13 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                     $record[$atomField] = $value;
                 }
             }
-
             if (!empty($record['title']) || !empty($record['identifier'])) {
                 $records[] = $record;
             }
         }
-
         return $records;
     }
 
-    /**
-     * Import a single record with AHG plugin integration
-     */
     protected function importAhgRecord(array $record, $repositoryId, $parentId, $culture, $updateExisting)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
@@ -314,7 +311,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         }
 
         // Provenance
-        if (!empty($ahgFields['ahgProvenanceHistory'])) {
+        if (!empty($ahgFields['ahgProvenanceEventDates']) || !empty($ahgFields['ahgProvenanceHistory'])) {
             $this->createProvenanceRecord($objectId, $ahgFields, $culture);
             $this->stats['provenance_created']++;
         }
@@ -399,21 +396,100 @@ class dataMigrationExecuteAhgImportAction extends sfAction
             'provenance_summary' => $ahgFields['ahgProvenanceHistory'] ?? null,
         ]);
 
-        // Create event if we have dates
-        if (!empty($ahgFields['ahgProvenanceFirstDate'])) {
-            $DB::table('provenance_event')->insert([
+        // Parse pipe-delimited event fields
+        $dates = !empty($ahgFields['ahgProvenanceEventDates']) ? explode('|', $ahgFields['ahgProvenanceEventDates']) : [];
+        $types = !empty($ahgFields['ahgProvenanceEventTypes']) ? explode('|', $ahgFields['ahgProvenanceEventTypes']) : [];
+        $descriptions = !empty($ahgFields['ahgProvenanceEventDescriptions']) ? explode('|', $ahgFields['ahgProvenanceEventDescriptions']) : [];
+        $agents = !empty($ahgFields['ahgProvenanceEventAgents']) ? explode('|', $ahgFields['ahgProvenanceEventAgents']) : [];
+
+        $count = max(count($dates), count($types), count($descriptions), count($agents));
+
+        // Create events
+        for ($i = 0; $i < $count; $i++) {
+            $date = trim($dates[$i] ?? '');
+            $type = trim($types[$i] ?? '');
+            $desc = trim($descriptions[$i] ?? '');
+            $agent = trim($agents[$i] ?? '');
+
+            // Skip if no meaningful data
+            if (empty($date) && empty($type)) continue;
+
+            // Map event type to valid enum
+            $eventType = $this->mapProvenanceEventType($type);
+
+            // Find or create agent
+            $agentId = null;
+            if (!empty($agent)) {
+                $agentId = $this->findOrCreateProvenanceAgent($agent);
+            }
+
+            // Insert event
+            $eventId = $DB::table('provenance_event')->insertGetId([
                 'provenance_record_id' => $recordId,
-                'event_type' => 'creation',
-                'event_date' => $ahgFields['ahgProvenanceFirstDate'],
-                'sort_order' => 1,
+                'to_agent_id' => $agentId,
+                'event_type' => $eventType,
+                'event_date' => $date ?: null,
+                'sequence_number' => $i + 1,
+                'sort_order' => $i + 1,
+                'is_public' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
+
+            // Create event i18n for description
+            if (!empty($desc)) {
+                $DB::table('provenance_event_i18n')->insert([
+                    'id' => $eventId,
+                    'culture' => $culture,
+                    'event_description' => $desc,
+                ]);
+            }
         }
     }
 
-    /**
-     * Create rights record using ahgExtendedRightsPlugin
-     */
+    protected function mapProvenanceEventType(string $type): string
+    {
+        $typeMap = [
+            'creation' => 'creation',
+            'acquisition' => 'accessioning',
+            'digitization' => 'other',
+            'digitisation' => 'other',
+            'migration' => 'other',
+            'classification' => 'other',
+            'declassification' => 'other',
+            'transfer' => 'transfer',
+            'donation' => 'donation',
+            'purchase' => 'purchase',
+            'bequest' => 'bequest',
+            'gift' => 'gift',
+            'sale' => 'sale',
+            'auction' => 'auction',
+            'inheritance' => 'inheritance',
+            'conservation' => 'conservation',
+            'restoration' => 'restoration',
+            'appraisal' => 'appraisal',
+            'discovery' => 'discovery',
+        ];
+        return $typeMap[strtolower(trim($type))] ?? 'other';
+    }
+
+    protected function findOrCreateProvenanceAgent(string $name): int
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        // Check if agent exists
+        $existing = $DB::table('provenance_agent')->where('name', $name)->first();
+        if ($existing) {
+            return $existing->id;
+        }
+
+        // Create new agent
+        return $DB::table('provenance_agent')->insertGetId([
+            'name' => $name,
+            'agent_type' => 'organization',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
     protected function createRightsRecord(int $objectId, array $ahgFields, string $culture)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;

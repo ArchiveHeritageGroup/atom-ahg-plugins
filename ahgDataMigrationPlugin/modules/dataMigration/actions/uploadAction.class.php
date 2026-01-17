@@ -209,19 +209,29 @@ class dataMigrationUploadAction extends sfAction
 
         $xml = new \SimpleXMLElement($content);
         $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+        $headers = [];
+        $records = [];
         $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
         $xml->registerXPathNamespace('opex', 'http://www.openpreservationexchange.org/opex/v1.2');
 
-        $headers = [];
-        $records = [];
-
         // Check for multiple Record elements in DescriptiveMetadata
         $recordNodes = $xml->xpath('//DescriptiveMetadata/Record');
-
+        
+        // Also check for Folder elements (AHG extended OPEX format)
+        $folderNodes = $xml->xpath('//Folder');
+        
         if (!empty($recordNodes) && count($recordNodes) > 0) {
             // Multiple records - parse each one
             foreach ($recordNodes as $recordNode) {
                 $record = $this->parseOpexRecord($recordNode, $xml);
+                if (!empty($record)) {
+                    $records[] = $record;
+                }
+            }
+        } elseif (!empty($folderNodes) && count($folderNodes) > 0) {
+            // Folder-based structure - parse each folder as a record
+            foreach ($folderNodes as $folderNode) {
+                $record = $this->parseOpexFolder($folderNode, $xml);
                 if (!empty($record)) {
                     $records[] = $record;
                 }
@@ -322,6 +332,122 @@ class dataMigrationUploadAction extends sfAction
     /**
      * Parse single record OPEX file.
      */
+    /**
+     * Parse a Folder element from OPEX file.
+     */
+    protected function parseOpexFolder($folderNode, $xml)
+    {
+        $record = [];
+        
+        // Get folder ID
+        $folderId = (string)($folderNode['id'] ?? '');
+        if ($folderId) {
+            $record['legacyId'] = $folderId;
+        }
+        
+        // Get Properties
+        $props = $folderNode->Properties;
+        if ($props) {
+            if (!empty($props->Title)) $record['title'] = (string)$props->Title;
+            if (!empty($props->Description)) $record['scopeAndContent'] = (string)$props->Description;
+            if (!empty($props->SecurityDescriptor)) $record['ahgSecurityClassification'] = (string)$props->SecurityDescriptor;
+        }
+        
+        // Get DescriptiveMetadata
+        $dm = $folderNode->DescriptiveMetadata;
+        if ($dm) {
+            // Dublin Core fields
+            $dcFields = [
+                'dc:title' => 'title',
+                'dc:identifier' => 'identifier',
+                'dc:creator' => 'dc:creator',
+                'dc:date' => 'dc:date',
+                'dc:description' => 'scopeAndContent',
+                'dc:subject' => 'subjectAccessPoints',
+                'dc:type' => 'dc:type',
+                'dc:format' => 'extentAndMedium',
+                'dc:language' => 'language',
+                'dc:coverage' => 'placeAccessPoints',
+                'dc:publisher' => 'dc:publisher',
+                'dc:rights' => 'dc:rights',
+                'dcterms:license' => 'dcterms:license',
+                'dcterms:accessRights' => 'accessConditions',
+                'dcterms:rightsHolder' => 'dcterms:rightsHolder',
+                'dcterms:provenance' => 'dcterms:provenance',
+                'dcterms:extent' => 'extentAndMedium',
+                'dcterms:medium' => 'physicalCharacteristics',
+            ];
+            
+            foreach ($dcFields as $dcField => $atomField) {
+                $parts = explode(':', $dcField);
+                $localName = end($parts);
+                $children = $dm->children('http://purl.org/dc/elements/1.1/');
+                if (isset($children->$localName)) {
+                    $record[$atomField] = (string)$children->$localName;
+                }
+                $children = $dm->children('http://purl.org/dc/terms/');
+                if (isset($children->$localName)) {
+                    $record[$atomField] = (string)$children->$localName;
+                }
+            }
+        }
+        
+        // Get History events for THIS folder only
+        $historyEvents = $folderNode->xpath('.//History/Event');
+        if (!empty($historyEvents)) {
+            $dates = [];
+            $types = [];
+            $descriptions = [];
+            $agents = [];
+            
+            foreach ($historyEvents as $event) {
+                $date = (string)($event->EventDate ?? $event->Date ?? '');
+                $type = (string)($event->EventType ?? $event->Type ?? '');
+                $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
+                $desc = (string)($event->EventDescription ?? $event->Description ?? '');
+                
+                $dates[] = $date;
+                $types[] = $type;
+                $descriptions[] = $desc;
+                $agents[] = $agent;
+            }
+            
+            // Sort by date
+            if (!empty($dates)) {
+                array_multisort($dates, SORT_ASC, $types, $descriptions, $agents);
+            }
+            
+            // Pipe-delimited fields
+            $record['ahgProvenanceEventDates'] = implode('|', $dates);
+            $record['ahgProvenanceEventTypes'] = implode('|', $types);
+            $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
+            $record['ahgProvenanceEventAgents'] = implode('|', $agents);
+            
+            // Summary fields
+            $record['ahgProvenanceEventCount'] = (string)count($dates);
+            $filteredDates = array_filter($dates);
+            if (!empty($filteredDates)) {
+                $record['ahgProvenanceFirstDate'] = reset($filteredDates);
+                $record['ahgProvenanceLastDate'] = end($filteredDates);
+            }
+            
+            // ahgProvenanceHistory stays empty
+            $record['ahgProvenanceHistory'] = '';
+        }
+        
+        // Get Digital Object info
+        $digitalObj = $folderNode->DigitalObject;
+        if ($digitalObj) {
+            if (!empty($digitalObj->Filename)) $record['Filename'] = (string)$digitalObj->Filename;
+            if (!empty($digitalObj->Fixity)) $record['digitalObjectChecksum'] = (string)$digitalObj->Fixity;
+            if (!empty($digitalObj->FormatName)) $record['digitalObjectMimeType'] = (string)$digitalObj->FormatName;
+            if (!empty($digitalObj->FileSize)) $record['digitalObjectSize'] = (string)$digitalObj->FileSize;
+        }
+        
+        return $record;
+    }
+
+
     protected function parseOpexSingleRecord($xml)
     {
         $record = [];
@@ -502,44 +628,47 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // =====================================================
-        // PROVENANCE / HISTORY FIELDS (AHG)
         // =====================================================
-        
+        // PROVENANCE / HISTORY FIELDS (AHG) - Pipe-delimited
+        // =====================================================
         $historyEvents = $xml->xpath('//History/Event | //opex:History/opex:Event');
         if (!empty($historyEvents)) {
-            $provenanceText = [];
-            $eventCount = 0;
-            $firstDate = null;
-            $lastDate = null;
+            $dates = [];
+            $types = [];
+            $descriptions = [];
+            $agents = [];
             
             foreach ($historyEvents as $event) {
-                $eventCount++;
                 $date = (string)($event->EventDate ?? $event->Date ?? '');
                 $type = (string)($event->EventType ?? $event->Type ?? '');
                 $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
                 $desc = (string)($event->EventDescription ?? $event->Description ?? '');
                 
-                // Track first/last dates
-                if ($date) {
-                    if (!$firstDate || strtotime($date) < strtotime($firstDate)) {
-                        $firstDate = $date;
-                    }
-                    if (!$lastDate || strtotime($date) > strtotime($lastDate)) {
-                        $lastDate = $date;
-                    }
-                }
-                
-                $eventStr = $date ?: 'Unknown date';
-                $eventStr .= ': ' . ($type ?: 'Event');
-                if ($desc) $eventStr .= ' - ' . $desc;
-                if ($agent) $eventStr .= ' (by ' . $agent . ')';
-                $provenanceText[] = $eventStr;
+                $dates[] = $date;
+                $types[] = $type;
+                $descriptions[] = $desc;
+                $agents[] = $agent;
             }
             
-            $record['ahgProvenanceHistory'] = implode(' || ', $provenanceText);
-            $record['ahgProvenanceEventCount'] = (string)$eventCount;
-            if ($firstDate) $record['ahgProvenanceFirstDate'] = $firstDate;
-            if ($lastDate) $record['ahgProvenanceLastDate'] = $lastDate;
+            // Sort by date
+            array_multisort($dates, SORT_ASC, $types, $descriptions, $agents);
+            
+            // Pipe-delimited fields
+            $record['ahgProvenanceEventDates'] = implode('|', $dates);
+            $record['ahgProvenanceEventTypes'] = implode('|', $types);
+            $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
+            $record['ahgProvenanceEventAgents'] = implode('|', $agents);
+            
+            // Summary fields
+            $record['ahgProvenanceEventCount'] = (string)count($dates);
+            $filteredDates = array_filter($dates);
+            if (!empty($filteredDates)) {
+                $record['ahgProvenanceFirstDate'] = reset($filteredDates);
+                $record['ahgProvenanceLastDate'] = end($filteredDates);
+            }
+            
+            // ahgProvenanceHistory stays empty - for manual notes only
+            $record['ahgProvenanceHistory'] = '';
         }
 
         // Also check dcterms:provenance

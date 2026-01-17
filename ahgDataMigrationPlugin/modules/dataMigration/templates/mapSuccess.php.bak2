@@ -42,28 +42,16 @@ if (!is_array($rawMappings)) $rawMappings = [];
       <div class="card bg-light">
         <div class="card-body py-2">
           <h6 class="text-muted mb-1">⚙ Output Mode</h6>
-          <div class="btn-group w-100 mb-2" role="group" id="modeToggle">
-            <button type="button" class="btn btn-sm btn-primary active" data-mode="standard" id="btnStandardMode">
-              <i class="bi bi-file-text me-1"></i>Standard ISAD
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-info" data-mode="ahg" id="btnAhgMode">
-              <i class="bi bi-puzzle me-1"></i>AHG Extended
-            </button>
-          </div>
           <select id="outputMode" class="form-select form-select-sm">
             <option value="preview">Preview Only</option>
             <option value="import">Import to Database</option>
             <option value="csv">Export to AtoM CSV</option>
             <option value="ead">Export to EAD 2002</option>
-            <option value="ahg_csv" class="ahg-option">Export to AHG Extended CSV</option>
-            <option value="ahg_import" class="ahg-option">Direct AHG Import (with plugins)</option>
+            <option value="ahg_csv">Export to AHG Extended CSV</option>
+            <option value="ahg_import">Direct AHG Import (with plugins)</option>
           </select>
-          <button type="button" class="btn btn-primary w-100 mt-2" id="topPreviewBtn" onclick="document.getElementById('mappingForm').submit();">
-            <i class="bi bi-play-fill me-1"></i> Preview / Import
-          </button>
         </div>
       </div>
-    </div>
     </div>
     <div class="col-md-3">
       <div class="card bg-light">
@@ -288,15 +276,6 @@ if (!is_array($rawMappings)) $rawMappings = [];
               </td>
             </tr>
             <?php endforeach ?>
-            <!-- Custom Field Rows (user-added) -->
-            <tr id="addFieldRow" class="table-light">
-              <td colspan="8" class="text-center py-2">
-                <button type="button" class="btn btn-sm btn-outline-success" id="addCustomFieldBtn">
-                  <i class="bi bi-plus-circle me-1"></i> Add Custom Field
-                </button>
-                <small class="text-muted ms-2">Add fields not in source (e.g., culture, language, script)</small>
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -376,101 +355,62 @@ if (!is_array($rawMappings)) $rawMappings = [];
 
 <!-- Save Mapping Modal -->
 <div class="modal fade" id="saveMappingModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header py-2 bg-success text-white">
-        <h6 class="modal-title"><i class="bi bi-save me-2"></i>Save Mapping</h6>
+        <h6 class="modal-title"><i class="bi bi-save"></i> Save Mapping</h6>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="row">
-          <!-- Left: File browser -->
-          <div class="col-md-6">
-            <label class="form-label fw-bold"><i class="bi bi-folder me-1"></i>Existing Mappings</label>
-            <div class="border rounded bg-light" style="height: 280px; overflow-y: auto;">
-              <?php
-              $groupedMappings = [];
-              foreach ($rawMappings as $m) {
-                  $cat = $m->category ?? "Custom";
-                  if (!isset($groupedMappings[$cat])) $groupedMappings[$cat] = [];
-                  $groupedMappings[$cat][] = $m;
-              }
-              ksort($groupedMappings);
-              ?>
-              <div class="list-group list-group-flush" id="mappingBrowser">
-                <?php foreach ($groupedMappings as $category => $mappings): ?>
-                <div class="list-group-item bg-secondary text-white py-1 px-2 small">
-                  <i class="bi bi-folder-fill text-warning me-1"></i><?php echo htmlspecialchars($category) ?>
-                </div>
-                <?php foreach ($mappings as $mapping): ?>
-                <a href="javascript:void(0)" class="list-group-item list-group-item-action py-1 px-3 mapping-select-item"
-                   data-id="<?php echo $mapping->id ?>"
-                   data-name="<?php echo htmlspecialchars($mapping->name) ?>"
-                   data-category="<?php echo htmlspecialchars($category) ?>"
-                   data-default="<?php echo $mapping->is_default ? 1 : 0 ?>">
-                  <i class="bi bi-file-earmark-text me-1 text-muted"></i>
-                  <?php echo htmlspecialchars($mapping->name) ?>
-                  <?php if ($mapping->is_default): ?><span class="badge bg-primary ms-1">Default</span><?php endif ?>
-                </a>
-                <?php endforeach ?>
-                <?php endforeach ?>
-                <?php if (empty($groupedMappings)): ?>
-                <div class="text-muted text-center py-4"><i class="bi bi-inbox"></i> No saved mappings</div>
-                <?php endif ?>
-              </div>
-            </div>
-            <small class="text-muted">Click to select for overwrite</small>
-          </div>
-          <!-- Right: Save form -->
-          <div class="col-md-6">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Mapping Name <span class="text-danger">*</span></label>
-              <input type="text" id="mappingName" class="form-control" placeholder="Enter mapping name...">
-              <input type="hidden" id="selectedMappingId" value="">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Category</label>
-              <select id="mappingCategory" class="form-select">
-                <option value="Custom">Custom</option>
-                <option value="ArchivesSpace">ArchivesSpace</option>
-                <option value="Preservica">Preservica</option>
-                <option value="Vernon">Vernon CMS</option>
-                <option value="PSIS">PSIS</option>
-                <option value="DAM">DAM / Digital Assets</option>
-                <option value="WDB">WDB</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Target Type</label>
-              <select id="mappingTargetType" class="form-select">
-                <option value="archives">Archives (ISAD-G)</option>
-                <option value="library">Library</option>
-                <option value="museum">Museum (Spectrum)</option>
-                <option value="gallery">Gallery (CCO)</option>
-                <option value="dam">Digital Assets (DAM)</option>
-              </select>
-            </div>
-            <hr>
-            <div class="form-check mb-2">
-              <input type="checkbox" id="setAsDefault" class="form-check-input">
-              <label class="form-check-label" for="setAsDefault">
-                <i class="bi bi-star text-warning me-1"></i>Set as default for this source type
-              </label>
-            </div>
-            <div class="alert alert-info py-2 small" id="saveInfoAlert">
-              <i class="bi bi-info-circle me-1"></i>Enter a new name to create, or select existing to overwrite.
-            </div>
-            <div class="alert alert-warning py-2 small d-none" id="overwriteWarning">
-              <i class="bi bi-exclamation-triangle me-1"></i>This will overwrite: <strong id="overwriteName"></strong>
-            </div>
-          </div>
+        <div class="mb-3">
+          <label class="form-label">Mapping Name <span class="text-danger">*</span></label>
+          <input type="text" id="mappingName" class="form-control" placeholder="e.g., NG Church DBText Export">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+          <select id="mappingCategory" class="form-select">
+            <option value="Custom">Custom</option>
+            <option value="ArchivesSpace">ArchivesSpace</option>
+            <option value="Preservica">Preservica</option>
+            <option value="Vernon">Vernon CMS</option>
+            <option value="PSIS">PSIS</option>
+            <option value="DAM">DAM / Digital Assets</option>
+            <option value="WDB">WDB</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Or select existing to overwrite</label>
+          <select id="existingMapping" class="form-select">
+            <option value="">-- Create New --</option>
+            <?php 
+            $groupedMappings = [];
+            foreach ($rawMappings as $m) {
+                $cat = $m->category ?? 'Custom';
+                if (!isset($groupedMappings[$cat])) $groupedMappings[$cat] = [];
+                $groupedMappings[$cat][] = $m;
+            }
+            ksort($groupedMappings);
+            foreach ($groupedMappings as $category => $mappings): ?>
+              <optgroup label="<?php echo htmlspecialchars($category) ?>">
+              <?php foreach ($mappings as $mapping): ?>
+                <option value="<?php echo $mapping->id ?>" data-default="<?php echo $mapping->is_default ?>">
+                  <?php echo htmlspecialchars($mapping->name) ?><?php if ($mapping->is_default): ?> [Default]<?php endif ?>
+                </option>
+              <?php endforeach ?>
+              </optgroup>
+            <?php endforeach ?>
+          </select>
+          <small class="text-muted">[Default] = System mapping - changes affect all users</small>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="overwriteExisting" class="form-check-input">
+          <label class="form-check-label" for="overwriteExisting">Overwrite if exists</label>
         </div>
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-outline-secondary" id="clearSelection">Clear Selection</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-success" id="confirmSaveMapping"><i class="bi bi-save me-1"></i>Save</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success btn-sm" id="confirmSaveMapping"><i class="bi bi-save"></i> Save</button>
       </div>
     </div>
   </div>
@@ -519,23 +459,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var mode = document.getElementById("outputMode").value;
     var showAhg = (mode === "ahg_csv" || mode === "ahg_import");
     
-    // Show/hide the AHG optgroup and options in dropdowns
-    document.querySelectorAll("select.atom-field-select").forEach(function(select) {
-      var ahgOptgroup = select.querySelector("optgroup.ahg-fields-group");
-      if (ahgOptgroup) {
-        ahgOptgroup.style.display = showAhg ? "" : "none";
-      }
-      
+    // Find all AHG field options and rows
+    document.querySelectorAll("select[name^=\"fields\"]").forEach(function(select) {
+      // Show/hide AHG options in dropdowns
       select.querySelectorAll("option").forEach(function(opt) {
-        var isAhgField = opt.value && (
-          opt.value.startsWith("ahg") ||
-          opt.value === "Filename" ||
-          (opt.value.startsWith("digitalObject") &&
-           opt.value !== "digitalObjectPath" &&
-           opt.value !== "digitalObjectURI")
-        );
-        if (isAhgField) {
+        if (opt.value && opt.value.startsWith("ahg")) {
           opt.style.display = showAhg ? "" : "none";
+          // If hiding and currently selected, reset to skip
           if (!showAhg && opt.selected) {
             select.value = "";
           }
@@ -543,177 +473,17 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
-    // Show/hide separator rows (table-secondary class)
-    document.querySelectorAll("#mappingTable tr.table-secondary, #mappingTable tr.table-warning").forEach(function(row) {
-      row.style.display = showAhg ? "" : "none";
-    });
-    
-    // Show/hide AHG source field rows
-    document.querySelectorAll("#mappingTable tr[data-row]").forEach(function(row) {
-      var sourceField = row.querySelector("code");
-      if (sourceField) {
-        var fieldName = sourceField.textContent.toLowerCase();
-        var isAhgSource = (
-          fieldName.startsWith("ahg") ||
-          fieldName === "securitydescriptor" ||
-          fieldName === "filename" ||
-          fieldName.startsWith("digitalobjectchecksum") ||
-          fieldName.startsWith("digitalobjectmime") ||
-          fieldName.startsWith("digitalobjectsize") ||
-          fieldName === "allfilenames" ||
-          fieldName.startsWith("transfer_")
-        );
-        if (isAhgSource) {
-          row.style.display = showAhg ? "" : "none";
-        }
-      }
-    });
-    
-    // Show/hide the AHG info alert
-    var ahgInfo = document.getElementById("ahgFieldsInfo");
-    if (ahgInfo) {
-      ahgInfo.style.display = showAhg ? "none" : "";
+    // Update info badge
+    var badge = document.getElementById("ahgModeBadge");
+    if (badge) {
+      badge.style.display = showAhg ? "inline-block" : "none";
     }
   }
   
   // Run on page load and output mode change
   toggleAhgFields();
   document.getElementById("outputMode").addEventListener("change", toggleAhgFields);
-
-  // Mode toggle buttons
-  document.getElementById("btnStandardMode").addEventListener("click", function() {
-    this.classList.remove("btn-outline-primary");
-    this.classList.add("btn-primary", "active");
-    document.getElementById("btnAhgMode").classList.remove("btn-info", "active");
-    document.getElementById("btnAhgMode").classList.add("btn-outline-info");
-    
-    // Set dropdown to standard option
-    var outputMode = document.getElementById("outputMode");
-    if (outputMode.value === "ahg_csv" || outputMode.value === "ahg_import") {
-      outputMode.value = "csv";
-    }
-    document.getElementById("outputModeInput").value = outputMode.value;
-    toggleAhgFields();
-  });
   
-  document.getElementById("btnAhgMode").addEventListener("click", function() {
-    this.classList.remove("btn-outline-info");
-    this.classList.add("btn-info", "active");
-    document.getElementById("btnStandardMode").classList.remove("btn-primary", "active");
-    document.getElementById("btnStandardMode").classList.add("btn-outline-primary");
-    
-    // Set dropdown to AHG option
-    var outputMode = document.getElementById("outputMode");
-    if (outputMode.value !== "ahg_csv" && outputMode.value !== "ahg_import") {
-      outputMode.value = "ahg_csv";
-    }
-    document.getElementById("outputModeInput").value = outputMode.value;
-    toggleAhgFields();
-  });
-  
-  // Sync buttons when dropdown changes
-  document.getElementById("outputMode").addEventListener("change", function() {
-    var isAhg = (this.value === "ahg_csv" || this.value === "ahg_import");
-    var btnStd = document.getElementById("btnStandardMode");
-    var btnAhg = document.getElementById("btnAhgMode");
-    
-    if (isAhg) {
-      btnAhg.classList.remove("btn-outline-info");
-      btnAhg.classList.add("btn-info", "active");
-      btnStd.classList.remove("btn-primary", "active");
-      btnStd.classList.add("btn-outline-primary");
-    } else {
-      btnStd.classList.remove("btn-outline-primary");
-      btnStd.classList.add("btn-primary", "active");
-      btnAhg.classList.remove("btn-info", "active");
-      btnAhg.classList.add("btn-outline-info");
-    }
-  });
-  
-
-  // Custom Field Row Management
-  var customFieldCount = 0;
-  var totalFieldCount = <?php echo count($mappingRows) ?>;
-  
-  document.getElementById("addCustomFieldBtn").addEventListener("click", function() {
-    customFieldCount++;
-    var rowIndex = totalFieldCount + customFieldCount;
-    var mode = document.getElementById("outputMode").value;
-    var showAhg = (mode === "ahg_csv" || mode === "ahg_import");
-    
-    var newRow = document.createElement("tr");
-    newRow.setAttribute("data-row", rowIndex);
-    newRow.setAttribute("data-custom", "true");
-    newRow.className = "table-info";
-    newRow.innerHTML = `
-      <td style="width:16%">
-        <input type="hidden" name="fields[${rowIndex}][source_field]" value="_custom_${customFieldCount}" class="custom-source-hidden">
-        <input type="text" class="form-control form-control-sm custom-source-input" placeholder="Field name or leave empty..." style="font-family:monospace; font-size:0.8rem;">
-        <small class="text-muted">Optional source name</small>
-      </td>
-      <td style="width:16%">
-        <select name="fields[${rowIndex}][atom_field]" class="form-select form-select-sm atom-field-select">
-          <option value="">-- Select Target --</option>
-          <optgroup label="Standard ISAD-G Fields">
-            <?php foreach ($targetFields as $key => $label): ?>
-              <?php if (strpos($key, "ahg") !== 0 && $key !== "Filename" && strpos($key, "digitalObject") !== 0 || $key === "digitalObjectPath" || $key === "digitalObjectURI"): ?>
-            <option value="<?php echo $key ?>"><?php echo htmlspecialchars($label) ?></option>
-              <?php endif ?>
-            <?php endforeach ?>
-          </optgroup>
-          <optgroup label="─── AHG Extended Fields ───" class="ahg-fields-group" ${showAhg ? "" : "style=display:none"}>
-            <?php foreach ($targetFields as $key => $label): ?>
-              <?php if (strpos($key, "ahg") === 0 || ($key === "Filename" || (strpos($key, "digitalObject") === 0 && $key !== "digitalObjectPath" && $key !== "digitalObjectURI"))): ?>
-            <option value="<?php echo $key ?>" ${showAhg ? "" : "style=display:none"}><?php echo htmlspecialchars($label) ?></option>
-              <?php endif ?>
-            <?php endforeach ?>
-          </optgroup>
-        </select>
-      </td>
-      <td style="width:16%">
-        <input type="text" name="fields[${rowIndex}][constant_value]" class="form-control form-control-sm" placeholder="Value (e.g., en, English)">
-      </td>
-      <td style="width:8%" class="text-center">
-        <input type="checkbox" name="fields[${rowIndex}][concat_constant]" value="1" class="form-check-input" checked>
-      </td>
-      <td style="width:8%" class="text-center">
-        <input type="checkbox" name="fields[${rowIndex}][concatenate]" value="1" class="form-check-input">
-      </td>
-      <td style="width:12%">
-        <select name="fields[${rowIndex}][concat_symbol]" class="form-select form-select-sm">
-          <option value="|">| (Pipe)</option>
-          <option value=";">; (Semicolon)</option>
-          <option value=",">, (Comma)</option>
-          <option value="\n">New line</option>
-          <option value=" ">Space</option>
-        </select>
-      </td>
-      <td style="width:6%" class="text-center">
-        <input type="checkbox" name="fields[${rowIndex}][include]" value="1" class="form-check-input" checked>
-      </td>
-      <td style="width:10%">
-        <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
-          <i class="bi bi-trash"></i>
-        </button>
-      </td>
-    `;
-    
-    // Insert before the Add button row
-    document.getElementById("addFieldRow").before(newRow);
-    
-    // Update hidden source field when user types
-    newRow.querySelector(".custom-source-input").addEventListener("input", function() {
-      var hidden = newRow.querySelector(".custom-source-hidden");
-      hidden.value = this.value || "_custom_" + customFieldCount;
-    });
-  });
-  
-  // Remove custom field row
-  document.getElementById("mappingTable").addEventListener("click", function(e) {
-    if (e.target.closest(".remove-custom-field")) {
-      e.target.closest("tr").remove();
-    }
-  });
   // Target sector sync
   document.getElementById('targetSector').addEventListener('change', function() {
     document.getElementById('targetSectorInput').value = this.value;
@@ -723,159 +493,123 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loadMappingBtn').addEventListener('click', function() {
     loadModal.show();
   });
-
-  // Load Mapping - click on Load button in modal
-  document.querySelectorAll(".load-mapping-btn").forEach(function(btn) {
-    btn.addEventListener("click", function() {
+  
+  // Open Save Mapping Modal
+  document.getElementById('saveMappingBtn').addEventListener('click', function() {
+    document.getElementById('mappingName').value = '';
+    document.getElementById('existingMapping').value = '';
+    document.getElementById('overwriteExisting').checked = false;
+    saveModal.show();
+  });
+  
+  // When selecting existing mapping, fill in name
+  
+  // Select All / Deselect All
+  document.getElementById('selectAllInclude').addEventListener('click', function() {
+    document.querySelectorAll('.include-check').forEach(function(cb) { cb.checked = true; });
+  });
+  document.getElementById('deselectAllInclude').addEventListener('click', function() {
+    document.querySelectorAll('.include-check').forEach(function(cb) { cb.checked = false; });
+  });
+  
+  // Load Mapping
+  document.querySelectorAll('.load-mapping-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
       var id = this.dataset.id;
-      showLoading("Loading mapping...");
+      showLoading('Loading mapping...');
       
-      fetch("<?php echo url_for(["module" => "dataMigration", "action" => "loadMapping"]) ?>?id=" + id)
+      fetch('<?php echo url_for(['module' => 'dataMigration', 'action' => 'loadMapping']) ?>?id=' + id)
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          console.log("Load result:", data);
+          console.log('Load result:', data);
           if (data.success && data.mapping && data.mapping.fields) {
             var appliedCount = applyMapping(data.mapping.fields);
             hideLoading();
             loadModal.hide();
             var total = data.mapping.fields.length;
-            var msg = "Applied " + appliedCount + " of " + total + " field mappings";
+            var msg = 'Applied ' + appliedCount + ' of ' + total + ' field mappings';
             if (appliedCount < total) {
-              msg += " (some source fields not in current file)";
+              msg += ' (some source fields not in current file or atom fields empty)';
             }
-            showToast(msg, appliedCount > 0 ? "success" : "warning");
+            showToast(msg, appliedCount > 0 ? 'success' : 'warning');
           } else {
             hideLoading();
-            showToast("Error: " + (data.error || "No fields found"), "danger");
+            showToast('Error: ' + (data.error || 'No fields found'), 'danger');
           }
         })
         .catch(function(e) {
           hideLoading();
-          showToast("Error loading mapping: " + e.message, "danger");
+          showToast('Error loading mapping: ' + e.message, 'danger');
         });
     });
   });
   
-  // Open Save Mapping Modal
-  // Open Save Mapping Modal
-  document.getElementById("saveMappingBtn").addEventListener("click", function() {
-    document.getElementById("mappingName").value = "";
-    document.getElementById("selectedMappingId").value = "";
-    document.getElementById("setAsDefault").checked = false;
-    document.getElementById("saveInfoAlert").classList.remove("d-none");
-    document.getElementById("overwriteWarning").classList.add("d-none");
-    document.querySelectorAll(".mapping-select-item").forEach(function(item) {
-      item.classList.remove("active", "bg-primary", "text-white");
-    });
-    saveModal.show();
-  });
-
-  // File browser - click to select mapping
-  document.querySelectorAll(".mapping-select-item").forEach(function(item) {
-    item.addEventListener("click", function() {
-      // Remove active from all
-      document.querySelectorAll(".mapping-select-item").forEach(function(i) {
-        i.classList.remove("active", "bg-primary", "text-white");
-      });
-      // Add active to this one
-      this.classList.add("active", "bg-primary", "text-white");
-      
-      // Fill in the form
-      var id = this.dataset.id;
-      var name = this.dataset.name;
-      var category = this.dataset.category;
-      var isDefault = this.dataset.default === "1";
-      
-      document.getElementById("selectedMappingId").value = id;
-      document.getElementById("mappingName").value = name;
-      document.getElementById("setAsDefault").checked = isDefault;
-      
-      // Set category dropdown
-      var catSelect = document.getElementById("mappingCategory");
-      for (var i = 0; i < catSelect.options.length; i++) {
-        if (catSelect.options[i].value === category) {
-          catSelect.selectedIndex = i;
-          break;
-        }
-      }
-      
-      // Show overwrite warning
-      document.getElementById("saveInfoAlert").classList.add("d-none");
-      document.getElementById("overwriteWarning").classList.remove("d-none");
-      document.getElementById("overwriteName").textContent = name;
-    });
-  });
-
-  // Clear selection button
-  document.getElementById("clearSelection").addEventListener("click", function() {
-    document.getElementById("selectedMappingId").value = "";
-    document.getElementById("mappingName").value = "";
-    document.getElementById("setAsDefault").checked = false;
-    document.querySelectorAll(".mapping-select-item").forEach(function(item) {
-      item.classList.remove("active", "bg-primary", "text-white");
-    });
-    document.getElementById("saveInfoAlert").classList.remove("d-none");
-    document.getElementById("overwriteWarning").classList.add("d-none");
-  });
-
   // Save Mapping
-  document.getElementById("confirmSaveMapping").addEventListener("click", function() {
-    var name = document.getElementById("mappingName").value.trim();
-    var category = document.getElementById("mappingCategory").value;
-    var targetType = document.getElementById("mappingTargetType").value;
-    var existingId = document.getElementById("selectedMappingId").value;
-    var setAsDefault = document.getElementById("setAsDefault").checked ? "1" : "0";
+  // Handle existing mapping selection - auto-fill name when selected
+  document.getElementById('existingMapping').addEventListener('change', function() {
+    var selected = this.options[this.selectedIndex];
+    if (this.value) {
+      // Overwriting existing - use selected mapping's name
+      document.getElementById('mappingName').value = selected.text.replace(' [Default]', '').trim();
+      document.getElementById('overwriteExisting').checked = true;
+    } else {
+      document.getElementById('overwriteExisting').checked = false;
+    }
+  });
+
+  document.getElementById('confirmSaveMapping').addEventListener('click', function() {
+    var name = document.getElementById('mappingName').value.trim();
+    var category = document.getElementById('mappingCategory').value;
+    var overwrite = document.getElementById('overwriteExisting').checked ? '1' : '0';
+    var existingId = document.getElementById('existingMapping').value;
     
-    if (!name) {
-      alert("Please enter a mapping name");
+    if (!name && !existingId) {
+      alert('Please enter a mapping name or select an existing mapping to overwrite');
       return;
     }
     
-    // Warn if overwriting
-    if (existingId) {
-      var selectedItem = document.querySelector(".mapping-select-item[data-id=\"" + existingId + "\"]");
-      if (selectedItem && selectedItem.dataset.default === "1") {
-        if (!confirm("Warning: This is a default/system mapping. Changes will affect all users. Continue?")) {
+    // Warn if overwriting a default mapping
+    if (existingId && overwrite === '1') {
+      var selected = document.getElementById('existingMapping').options[document.getElementById('existingMapping').selectedIndex];
+      if (selected.dataset.default === '1') {
+        if (!confirm('Warning: This is a default/system mapping. Changes will affect all users. Continue?')) {
           return;
         }
       }
     }
     
-    showLoading("Saving mapping...");
-    var formData = new FormData(document.getElementById("mappingForm"));
-    formData.append("mapping_name", name);
-    formData.append("category", category);
-    formData.append("target_type", targetType);
-    formData.append("existing_id", existingId);
-    formData.append("set_as_default", setAsDefault);
-    formData.append("overwrite", existingId ? "1" : "0");
+    showLoading('Saving mapping...');
+    var formData = new FormData(document.getElementById('mappingForm'));
+    formData.append('mapping_name', name);
+    formData.append('category', category);
+    formData.append('overwrite', overwrite);
+    formData.append('existing_id', existingId);
     
-    fetch("<?php echo url_for(["module" => "dataMigration", "action" => "saveMapping"]) ?>", {
-      method: "POST",
+    fetch('<?php echo url_for(['module' => 'dataMigration', 'action' => 'saveMapping']) ?>', {
+      method: 'POST',
       body: formData
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      console.log("Save result:", data);
+      console.log('Save result:', data);
       hideLoading();
       if (data.success) {
-        var msg = data.updated ? "Mapping updated" : "Mapping saved";
-        if (setAsDefault === "1") msg += " (set as default)";
-        showToast(msg + " (" + data.field_count + " fields)", "success");
+        var msg = data.updated ? 'Mapping updated' : 'Mapping saved';
+        showToast(msg + '! (' + data.field_count + ' fields)', 'success');
         saveModal.hide();
         setTimeout(function() { location.reload(); }, 1000);
-      } else if (data.error === "exists") {
-        if (confirm(data.message + " Overwrite?")) {
-          document.getElementById("selectedMappingId").value = data.existing_id || "";
-          document.getElementById("confirmSaveMapping").click();
+      } else if (data.error === 'exists') {
+        if (confirm(data.message)) {
+          document.getElementById('overwriteExisting').checked = true;
+          document.getElementById('confirmSaveMapping').click();
         }
       } else {
-        showToast("Error: " + (data.error || "Unknown"), "danger");
+        showToast('Error: ' + (data.error || 'Unknown'), 'danger');
       }
     })
     .catch(function(e) {
       hideLoading();
-      showToast("Error saving: " + e.message, "danger");
+      showToast('Error saving: ' + e.message, 'danger');
     });
   });
 
@@ -929,22 +663,6 @@ function applyMapping(fields) {
   console.log('Fields received:', fields.length);
   console.log('First 3 fields:', fields.slice(0, 3));
   
-  // Temporarily show all hidden options so we can set their values
-  document.querySelectorAll("select.atom-field-select option").forEach(function(opt) {
-    opt.removeAttribute("data-was-hidden");
-    if (opt.style.display === "none") {
-      opt.setAttribute("data-was-hidden", "true");
-      opt.style.display = "";
-    }
-  });
-  document.querySelectorAll("select.atom-field-select optgroup").forEach(function(og) {
-    og.removeAttribute("data-was-hidden");
-    if (og.style.display === "none") {
-      og.setAttribute("data-was-hidden", "true");
-      og.style.display = "";
-    }
-  });
-  
   // Build lookup by source field
   var map = {};
   fields.forEach(function(f) {
@@ -973,21 +691,17 @@ function applyMapping(fields) {
     var source = input.value;
     var m = map[source];
     
-      console.log("Processing row:", source, "-> looking for mapping");
     if (m) {
       // Apply atom field
       var atomField = m.atom_field || m.atom || '';
-      console.log("Found mapping for", source, "-> atom_field:", atomField);
       var atomSelect = row.querySelector('.atom-field-select');
       if (atomSelect) {
         if (atomField) {
           atomSelect.value = atomField;
-          console.log("Setting dropdown for", source, "from", atomSelect.value, "to", atomField);
-          console.log("Dropdown options:", Array.from(atomSelect.options).map(o => o.value).slice(0,10));
           if (atomSelect.value === atomField) {
             applied++;
             row.classList.add('table-success'); // Highlight applied rows
-            row.style.cssText = 'background-color: #d4edda !important';
+            row.style.backgroundColor = '#d4edda';
           } else {
             console.warn('Could not set', source, 'to', atomField, '- value not in dropdown');
             row.classList.add('table-warning');
@@ -1021,70 +735,11 @@ function applyMapping(fields) {
   
   console.log('Applied to', applied, 'fields');
   if (notFound.length > 0 && notFound.length < 20) {
-    console.log("Not found in mapping:", notFound.length, "fields");
-  }
-
-  // Handle custom fields (fields that start with _custom_ or have no source match)
-  
-  // Handle custom fields (fields that start with _custom_ or have no source match)
-  var customFieldsToAdd = [];
-  fields.forEach(function(f) {
-    var sourceField = f.source_field || f.source || "";
-    // Check if this is a custom field that needs to be added
-    if (sourceField.startsWith("_custom_") || (sourceField === "" && f.atom_field)) {
-      customFieldsToAdd.push(f);
-    }
-  });
-  console.log("Custom fields check - found:", customFieldsToAdd.length, "fields:", customFieldsToAdd);
-  
-  // Add custom fields as new rows
-  if (customFieldsToAdd.length > 0) {
-    console.log("Adding", customFieldsToAdd.length, "custom fields");
-    customFieldsToAdd.forEach(function(f) {
-      // Simulate clicking the Add Custom Field button
-      var addBtn = document.getElementById("addCustomFieldBtn");
-      if (addBtn) {
-        addBtn.click();
-        // Get the newly added row (last row before addFieldRow)
-        var newRow = document.getElementById("addFieldRow").previousElementSibling;
-        if (newRow) {
-          // Set the values
-          var sourceInput = newRow.querySelector(".custom-source-input");
-          if (sourceInput) sourceInput.value = f.source_field || "";
-          
-          var hiddenInput = newRow.querySelector(".custom-source-hidden");
-          if (hiddenInput) hiddenInput.value = f.source_field || "_custom_loaded";
-          
-          var atomSelect = newRow.querySelector(".atom-field-select");
-          if (atomSelect && f.atom_field) {
-            atomSelect.value = f.atom_field;
-          }
-          
-          var constInput = newRow.querySelector("input[name*=\"constant_value\"]");
-          if (constInput) constInput.value = f.constant_value || "";
-          
-          var prependCb = newRow.querySelector("input[name*=\"concat_constant\"]");
-          if (prependCb) prependCb.checked = (f.concat_constant === true);
-          
-          var concatCb = newRow.querySelector("input[name*=\"concatenate\"]");
-          if (concatCb) concatCb.checked = (f.concatenate === true);
-          
-          var includeCb = newRow.querySelector("input[name*=\"include\"]");
-          if (includeCb) includeCb.checked = (f.include !== false);
-          
-          applied++;
-        }
-      }
-    });
-  }
-  
-  console.log("Applied to", applied, "fields (including", customFieldsToAdd.length, "custom fields)");
-  if (notFound.length > 0 && notFound.length < 20) {
-    console.log("Not found in mapping:", notFound);
+    console.log('Not found in mapping:', notFound);
   } else if (notFound.length >= 20) {
-    console.log("Not found in mapping:", notFound.length, "fields");
+    console.log('Not found in mapping:', notFound.length, 'fields (source fields dont match saved mapping)');
   }
-  console.log("=== END APPLYING MAPPING ===");
+  console.log('=== END APPLYING MAPPING ===');
   
   return applied;
 }

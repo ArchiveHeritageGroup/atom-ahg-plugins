@@ -629,36 +629,59 @@ class OpexParser
     protected function getHistory(): array
     {
         $history = [];
-
-        $historyNode = $this->xpath->query('//opex:History | //History');
-        if ($historyNode->length === 0) return $history;
-
-        $events = $this->xpath->query('.//opex:Event | .//Event', $historyNode->item(0));
-        foreach ($events as $event) {
-            $eventData = [
-                'date' => $event->getAttribute('date') ?: null,
-                'user' => $event->getAttribute('user') ?: null,
-                'type' => $this->queryFirst('.//opex:Type | .//Type', $event),
-                'action' => $this->queryFirst('.//opex:Action | .//Action', $event),
-                'detail' => null,
-                'detail_json' => null,
-            ];
-
-            $detail = $this->xpath->query('.//opex:Detail | .//Detail', $event);
-            if ($detail->length > 0) {
-                $detailText = $detail->item(0)->textContent;
-                $eventData['detail'] = $detailText;
-                $decoded = json_decode($detailText, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $eventData['detail_json'] = $decoded;
+        
+        // Find History nodes - could be at root or inside Folder elements
+        $historyNodes = $this->xpath->query('//opex:History | //History');
+        
+        foreach ($historyNodes as $historyNode) {
+            $events = $this->xpath->query('.//opex:Event | .//Event', $historyNode);
+            
+            foreach ($events as $event) {
+                // Try attribute format first (Preservica native)
+                $date = $event->getAttribute('date') ?: null;
+                $user = $event->getAttribute('user') ?: null;
+                $type = $this->queryFirst('.//opex:Type | .//Type', $event);
+                $action = $this->queryFirst('.//opex:Action | .//Action', $event);
+                
+                // Try child element format (AHG extended)
+                if (!$date) {
+                    $date = $this->queryFirst('.//opex:EventDate | .//EventDate', $event);
                 }
+                if (!$type) {
+                    $type = $this->queryFirst('.//opex:EventType | .//EventType', $event);
+                }
+                if (!$user) {
+                    $user = $this->queryFirst('.//opex:EventAgent | .//EventAgent', $event);
+                }
+                if (!$action) {
+                    $action = $this->queryFirst('.//opex:EventDescription | .//EventDescription', $event);
+                }
+                
+                $eventData = [
+                    'date' => $date,
+                    'user' => $user,
+                    'type' => $type,
+                    'action' => $action,
+                    'detail' => null,
+                    'detail_json' => null,
+                ];
+                
+                // Check for Detail element
+                $detail = $this->xpath->query('.//opex:Detail | .//Detail', $event);
+                if ($detail->length > 0) {
+                    $detailText = $detail->item(0)->textContent;
+                    $eventData['detail'] = $detailText;
+                    $decoded = json_decode($detailText, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $eventData['detail_json'] = $decoded;
+                    }
+                }
+                
+                $history[] = $eventData;
             }
-
-            $history[] = $eventData;
         }
-
+        
         usort($history, fn($a, $b) => strtotime($a['date'] ?? '1900-01-01') - strtotime($b['date'] ?? '1900-01-01'));
-
         return $history;
     }
 
@@ -871,39 +894,36 @@ class OpexParser
         if (!empty($rights['parsedStatus'])) {
             $record['ahgCopyrightStatus'] = $rights['parsedStatus'];
         }
-
-        // Provenance - Flattened text for CSV (AHG Provenance)
+        // Provenance - Pipe-delimited fields for CSV/Import (AtoM standard)
         if (!empty($data['history'])) {
-            $provenanceText = [];
-            foreach ($data['history'] as $event) {
-                $eventStr = ($event['date'] ?? 'Unknown date') . ': ';
-                $eventStr .= ($event['type'] ?? 'Event');
-                if (!empty($event['action'])) {
-                    $eventStr .= ' - ' . $event['action'];
-                }
-                if (!empty($event['user'])) {
-                    $eventStr .= ' (by ' . $event['user'] . ')';
-                }
-                $provenanceText[] = $eventStr;
-            }
-            $record['ahgProvenanceHistory'] = implode(' || ', $provenanceText);
-            $record['ahgProvenanceEventCount'] = count($data['history']);
-        }
-
-        // Provenance - First and last events (useful for date ranges)
-        if (!empty($data['history'])) {
+            // Sort events by date
             $sorted = $data['history'];
             usort($sorted, fn($a, $b) => strtotime($a['date'] ?? '1900-01-01') - strtotime($b['date'] ?? '1900-01-01'));
-            $first = reset($sorted);
-            $last = end($sorted);
-            if ($first) {
-                $record['ahgProvenanceFirstDate'] = $first['date'] ?? '';
-                $record['ahgProvenanceFirstEvent'] = $first['type'] ?? '';
+            
+            // Collect values for pipe-delimited fields
+            $dates = [];
+            $types = [];
+            $descriptions = [];
+            $agents = [];
+            
+            foreach ($sorted as $event) {
+                $dates[] = $event['date'] ?? '';
+                $types[] = $event['type'] ?? '';
+                $descriptions[] = $event['action'] ?? '';
+                $agents[] = $event['user'] ?? '';
             }
-            if ($last && $last !== $first) {
-                $record['ahgProvenanceLastDate'] = $last['date'] ?? '';
-                $record['ahgProvenanceLastEvent'] = $last['type'] ?? '';
-            }
+            
+            // Pipe-delimited fields
+            $record['ahgProvenanceEventDates'] = implode('|', $dates);
+            $record['ahgProvenanceEventTypes'] = implode('|', $types);
+            $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
+            $record['ahgProvenanceEventAgents'] = implode('|', $agents);
+            
+            // Summary fields
+            $record['ahgProvenanceFirstDate'] = $dates[0] ?? '';
+            $record['ahgProvenanceLastDate'] = end($dates) ?: '';
+            $record['ahgProvenanceEventCount'] = count($sorted);
+            $record['ahgProvenanceHistory'] = '';
         }
 
         // Relationships - Flattened
@@ -961,6 +981,31 @@ class OpexParser
             'Export' => 'other',
             'Import' => 'accessioning',
             'AddContent' => 'accessioning',
+            // AHG Extended event types (direct mapping)
+            'creation' => 'creation',
+            'acquisition' => 'accessioning',
+            'digitization' => 'other',
+            'digitisation' => 'other',
+            'migration' => 'other',
+            'classification' => 'other',
+            'declassification' => 'other',
+            'transfer' => 'transfer',
+            'donation' => 'donation',
+            'purchase' => 'purchase',
+            'bequest' => 'bequest',
+            'gift' => 'gift',
+            'sale' => 'sale',
+            'auction' => 'auction',
+            'inheritance' => 'inheritance',
+            'loan' => 'loan_out',
+            'deposit' => 'deposit',
+            'theft' => 'theft',
+            'recovery' => 'recovery',
+            'restitution' => 'restitution',
+            'conservation' => 'conservation',
+            'restoration' => 'restoration',
+            'appraisal' => 'appraisal',
+            'discovery' => 'discovery',
             'RemoveContent' => 'deaccessioning',
         ];
 
@@ -981,6 +1026,7 @@ class OpexParser
                     $event['user'] ? " (by {$event['user']})" : ''
                 ),
                 'source_reference' => 'Preservica OPEX History',
+                'event_description' => $event['action'] ?? null,
                 '_preservica_type' => $event['type'],
                 '_preservica_action' => $event['action'],
                 '_preservica_user' => $event['user'],

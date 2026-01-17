@@ -66,6 +66,10 @@ class PreservicaImportService
             'default_level'         => 'Item',
             'default_status'        => 'Published',
             'dry_run'               => false,
+            'generate_derivatives'  => true,
+            'queue_derivatives'     => false,
+            'path_transform'        => null,
+            'digital_object_path'   => null,
         ], $options);
         
         // Load default mapping based on source type
@@ -169,7 +173,6 @@ class PreservicaImportService
         }
 
         $allRecords = [];
-        $parser = new OpexParser();
         
         // Find all OPEX files
         $files = glob($directoryPath . '/*.opex') ?: [];
@@ -178,8 +181,9 @@ class PreservicaImportService
         
         foreach ($files as $file) {
             try {
-                $records = $parser->parse($file);
-                $allRecords = array_merge($allRecords, $records);
+                $parser = new OpexParser($file);
+                $record = $parser->toAtomRecord();
+                $allRecords[] = $record;
             } catch (\Exception $e) {
                 $this->errors[] = [
                     'file'    => basename($file),
@@ -270,6 +274,20 @@ class PreservicaImportService
     protected function mapFields(array $record): array
     {
         $mapped = [];
+
+        // Check if record is already mapped (has AtoM field names)
+        if (isset($record["title"]) || isset($record["scopeAndContent"]) || isset($record["identifier"])) {
+            // Record is already mapped (from toAtomRecord), pass through with defaults
+            $mapped = $record;
+            if (empty($mapped["levelOfDescription"])) {
+                $mapped["levelOfDescription"] = $this->options["default_level"];
+            }
+            if (empty($mapped["culture"])) {
+                $mapped["culture"] = $this->culture;
+            }
+            return $mapped;
+        }
+
         
         foreach ($this->fieldMapping as $sourceField => $atomField) {
             if (isset($record[$sourceField]) && !empty($record[$sourceField])) {
@@ -453,6 +471,15 @@ class PreservicaImportService
         $this->createRights($objectId, $mapped);
         $this->createEvents($objectId, $mapped);
         
+
+        // Create slug from title
+        $this->createSlug($objectId, $mapped["title"] ?? "untitled");
+
+        // Set publication status (default: Published = 160, type = 158)
+        $this->setPublicationStatus($objectId, $mapped["publicationStatus"] ?? null);
+
+        // Update nested set (lft/rgt) - append to end of tree
+        $this->updateNestedSet($objectId, $parentId);
         return $objectId;
     }
 
@@ -514,26 +541,52 @@ class PreservicaImportService
     /**
      * Import digital object for a record.
      */
+    /**
+     * Import digital object for a record.
+     */
     protected function importDigitalObject(int $objectId, array $record, string $basePath): void
     {
-        $filename = $record['Filename'] ?? $record['File'] ?? $record['Bitstream'] ?? null;
+        $filename = $record['Filename'] ?? $record['File'] ?? $record['Bitstream'] ?? $record['digitalObjectPath'] ?? null;
         
         if (!$filename) {
             return;
         }
         
-        // Resolve full path
-        $filePath = $basePath . DIRECTORY_SEPARATOR . $filename;
-        
-        if (!file_exists($filePath)) {
-            // Try in content subdirectory (PAX structure)
-            $filePath = $basePath . '/content/' . $filename;
+        // Apply path transformation if configured
+        if (!empty($this->options['path_transform'])) {
+            $transformType = $this->options['path_transform']['type'] ?? 'filename';
+            $transformOptions = [
+                'find' => $this->options['path_transform']['find'] ?? '',
+                'replace' => $this->options['path_transform']['replace'] ?? '',
+                'prefix' => $this->options['path_transform']['prefix'] ?? '',
+            ];
+            
+            $filename = PathTransformer::transform($filename, $transformType, $transformOptions);
+        } else {
+            // Default: extract just the filename (handles Windows paths)
+            $filename = PathTransformer::extractFilename($filename);
         }
         
-        if (!file_exists($filePath)) {
+        // Resolve full path - try multiple locations
+        $searchPaths = [
+            $basePath . DIRECTORY_SEPARATOR . $filename,                    // Same directory as OPEX
+            $basePath . '/content/' . $filename,                            // PAX content directory
+            $this->options['digital_object_path'] . '/' . $filename,        // Custom path if specified
+            '/usr/share/nginx/archive/uploads/migration/' . $filename,     // Default upload location
+        ];
+        
+        $filePath = null;
+        foreach ($searchPaths as $path) {
+            if (!empty($path) && file_exists($path)) {
+                $filePath = $path;
+                break;
+            }
+        }
+        
+        if (!$filePath) {
             $this->errors[] = [
-                'record'  => $record['Title'] ?? 'Unknown',
-                'message' => "Digital object not found: {$filename}",
+                'record'  => $record['Title'] ?? $record['dc:title'] ?? 'Unknown',
+                'message' => "Digital object not found: {$filename} (searched: " . implode(', ', array_filter($searchPaths)) . ")",
             ];
             return;
         }
@@ -554,28 +607,52 @@ class PreservicaImportService
         }
         
         // Create digital object using AtoM's method
-        $this->createDigitalObject($objectId, $filePath, $filename);
+        $this->createDigitalObject($objectId, $filePath, basename($filename));
     }
 
-    /**
-     * Create digital object record.
-     */
     protected function createDigitalObject(int $objectId, string $filePath, string $filename): void
     {
+        // Option 1: Use AtoM's native QubitDigitalObject (generates derivatives)
+        if ($this->options['generate_derivatives'] ?? true) {
+            try {
+                $digitalObject = new \QubitDigitalObject();
+                $digitalObject->informationObjectId = $objectId;
+                $digitalObject->usageId = \QubitTerm::MASTER_ID;
+                $digitalObject->createDerivatives = true;
+                
+                // Create asset from file path
+                $asset = new \QubitAsset($filePath);
+                $digitalObject->assets[] = $asset;
+                
+                // Save triggers derivative creation (thumbnail, reference)
+                $digitalObject->save();
+                
+                $this->stats['digital_objects'] = ($this->stats['digital_objects'] ?? 0) + 1;
+                return;
+            } catch (\Exception $e) {
+                $this->errors[] = [
+                    'record'  => $filename,
+                    'message' => "Failed to create digital object with derivatives: " . $e->getMessage(),
+                ];
+                // Fall back to direct insert without derivatives
+            }
+        }
+        
+        // Option 2: Direct DB insert (no derivatives - faster for batch)
         $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
         $fileSize = filesize($filePath);
         $checksum = hash_file('sha256', $filePath);
-        
+
         // Create object record
         $doId = DB::table('object')->insertGetId([
             'class_name' => 'QubitDigitalObject',
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
-        
+
         // Copy file to uploads
         $uploadPath = $this->copyToUploads($filePath, $doId);
-        
+
         // Create digital_object record
         DB::table('digital_object')->insert([
             'id'                    => $doId,
@@ -589,6 +666,38 @@ class PreservicaImportService
             'path'                  => $uploadPath,
             'sequence'              => 0,
         ]);
+        
+        // Queue derivative generation job if requested
+        if ($this->options['queue_derivatives'] ?? false) {
+            $this->queueDerivativeJob($doId);
+        }
+        
+        $this->stats['digital_objects'] = ($this->stats['digital_objects'] ?? 0) + 1;
+    }
+
+    /**
+     * Queue a Gearman job to generate derivatives later (for batch imports).
+     */
+    protected function queueDerivativeJob(int $digitalObjectId): void
+    {
+        try {
+            // Use AtoM's job system
+            $jobName = 'arGenerateDerivativesJob';
+            
+            // Create job via Gearman
+            $client = new \GearmanClient();
+            $client->addServer();
+            
+            $client->doBackground($jobName, json_encode([
+                'digitalObjectId' => $digitalObjectId,
+            ]));
+        } catch (\Exception $e) {
+            // Log but don't fail - derivatives can be generated later
+            $this->errors[] = [
+                'record'  => "DO-{$digitalObjectId}",
+                'message' => "Failed to queue derivative job: " . $e->getMessage(),
+            ];
+        }
     }
 
     /**
@@ -597,20 +706,20 @@ class PreservicaImportService
     protected function copyToUploads(string $sourcePath, int $digitalObjectId): string
     {
         $uploadsDir = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
-        
-        // Create directory structure
+
+        // Create directory structure (AtoM's standard r/XX pattern)
         $subdir = 'r/' . substr(md5($digitalObjectId), 0, 2);
         $targetDir = $uploadsDir . '/' . $subdir;
-        
+
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
-        
+
         $filename = basename($sourcePath);
         $targetPath = $targetDir . '/' . $digitalObjectId . '_' . $filename;
-        
+
         copy($sourcePath, $targetPath);
-        
+
         return $subdir . '/' . $digitalObjectId . '_' . $filename;
     }
 
@@ -622,7 +731,7 @@ class PreservicaImportService
         $accessPointTypes = [
             'subjectAccessPoints' => \QubitTaxonomy::SUBJECT_ID,
             'placeAccessPoints'   => \QubitTaxonomy::PLACE_ID,
-            'nameAccessPoints'    => \QubitTaxonomy::NAME_ACCESS_POINT_ID,
+            // 'nameAccessPoints' handled via actor relations
             'genreAccessPoints'   => \QubitTaxonomy::GENRE_ID,
         ];
         
@@ -644,8 +753,15 @@ class PreservicaImportService
                 $termId = $this->findOrCreateTerm($value, $taxonomyId);
                 
                 // Create object_term_relation
-                DB::table('object_term_relation')->insert([
-                    'object_id' => $objectId,
+                // Create object entry first
+                $relationId = DB::table("object")->insertGetId([
+                    "class_name" => "QubitObjectTermRelation",
+                    "created_at" => date("Y-m-d H:i:s"),
+                    "updated_at" => date("Y-m-d H:i:s"),
+                ]);
+                DB::table("object_term_relation")->insert([
+                    "id"        => $relationId,
+                    "object_id" => $objectId,
                     'term_id'   => $termId,
                 ]);
             }
@@ -672,7 +788,7 @@ class PreservicaImportService
             
             DB::table('event')->insert([
                 'id'                    => $eventId,
-                'information_object_id' => $objectId,
+                'object_id' => $objectId,
                 'type_id'               => \QubitTerm::CREATION_ID,
                 'actor_id'              => $actorId,
                 'source_culture'        => $this->culture,
@@ -753,8 +869,8 @@ class PreservicaImportService
         DB::table('actor')->insert([
             'id'            => $actorId,
             'source_culture'=> $this->culture,
-            'lft'           => 0,
-            'rgt'           => 0,
+            
+            
         ]);
         
         DB::table('actor_i18n')->insert([
@@ -900,10 +1016,10 @@ class PreservicaImportService
                 ]);
             }
 
-            $this->log("Created provenance record with " . count($provenanceEvents) . " events for object $objectId");
+            error_log("Created provenance record with " . count($provenanceEvents) . " events for object $objectId");
 
         } catch (\Exception $e) {
-            $this->log("Warning: Could not create provenance: " . $e->getMessage());
+            error_log("Warning: Could not create provenance: " . $e->getMessage());
         }
     }
 
@@ -1045,252 +1161,135 @@ class PreservicaImportService
         }
     }
 
+
     /**
-     * Create rights records from OPEX metadata.
-     * 
-     * Uses RightsImportService to create proper PREMIS rights records
-     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     * Create slug for information object.
      */
-    protected function createRights(int $objectId, array $mapped): void
+    protected function createSlug(int $objectId, string $title): void
     {
-        // Check if ahgRightsPlugin is enabled
-        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
-            return;
-        }
-
-        // Check for rights data
-        $rightsData = $mapped['_rights'] ?? [];
+        // Generate slug from title
+        $slug = $this->generateSlug($title);
         
-        // Also check direct fields
-        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
-        $dcLicense = $rightsData['dcLicense'] ?? null;
-        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
-        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
-
-        // Skip if no rights info
-        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
-            return;
+        // Ensure uniqueness
+        $baseSlug = $slug;
+        $counter = 1;
+        while (DB::table('slug')->where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
         }
-
-        try {
-            $rightsService = new RightsImportService();
-
-            // Build rights data array for import
-            $importData = [];
-
-            // Set basis and status from parsed values
-            if (!empty($rightsData['parsedBasis'])) {
-                $importData['basis_id'] = $rightsData['parsedBasis'];
-            }
-            if (!empty($rightsData['parsedStatus'])) {
-                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
-            }
-
-            // Set notes
-            if ($dcRights) {
-                // Determine if it's copyright or license
-                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
-                    $importData['license_terms'] = $dcRights;
-                } else {
-                    $importData['copyright_note'] = $dcRights;
-                }
-            }
-
-            if ($dcLicense) {
-                $importData['license_terms'] = $dcLicense;
-                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
-            }
-
-            // Set access level from security descriptor
-            if (!empty($rightsData['accessLevel'])) {
-                $importData['access_level'] = $rightsData['accessLevel'];
-            }
-
-            // Handle rights holder
-            if ($rightsHolder) {
-                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
-                $importData['rights_holder_id'] = $holderId;
-            }
-
-            // Set default dates
-            $importData['start_date'] = date('Y-m-d');
-
-            // Create the rights record
-            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
-
-            if ($rightsId) {
-                // Log success if debugging
-                error_log("Created rights record {$rightsId} for object {$objectId}");
-            }
-
-        } catch (\Exception $e) {
-            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
-        }
+        
+        DB::table('slug')->insert([
+            'object_id' => $objectId,
+            'slug' => $slug,
+            'serial_number' => 0,
+        ]);
     }
 
     /**
-     * Create rights records from OPEX metadata.
-     * 
-     * Uses RightsImportService to create proper PREMIS rights records
-     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     * Generate URL-safe slug from title.
      */
-    protected function createRights(int $objectId, array $mapped): void
+    protected function generateSlug(string $title): string
     {
-        // Check if ahgRightsPlugin is enabled
-        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
-            return;
-        }
-
-        // Check for rights data
-        $rightsData = $mapped['_rights'] ?? [];
+        // Convert to lowercase
+        $slug = strtolower($title);
         
-        // Also check direct fields
-        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
-        $dcLicense = $rightsData['dcLicense'] ?? null;
-        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
-        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
-
-        // Skip if no rights info
-        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
-            return;
+        // Replace accented characters
+        $slug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $slug);
+        
+        // Replace non-alphanumeric with hyphens
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        
+        // Remove leading/trailing hyphens
+        $slug = trim($slug, '-');
+        
+        // Limit length
+        if (strlen($slug) > 200) {
+            $slug = substr($slug, 0, 200);
+            $slug = rtrim($slug, '-');
         }
-
-        try {
-            $rightsService = new RightsImportService();
-
-            // Build rights data array for import
-            $importData = [];
-
-            // Set basis and status from parsed values
-            if (!empty($rightsData['parsedBasis'])) {
-                $importData['basis_id'] = $rightsData['parsedBasis'];
-            }
-            if (!empty($rightsData['parsedStatus'])) {
-                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
-            }
-
-            // Set notes
-            if ($dcRights) {
-                // Determine if it's copyright or license
-                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
-                    $importData['license_terms'] = $dcRights;
-                } else {
-                    $importData['copyright_note'] = $dcRights;
-                }
-            }
-
-            if ($dcLicense) {
-                $importData['license_terms'] = $dcLicense;
-                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
-            }
-
-            // Set access level from security descriptor
-            if (!empty($rightsData['accessLevel'])) {
-                $importData['access_level'] = $rightsData['accessLevel'];
-            }
-
-            // Handle rights holder
-            if ($rightsHolder) {
-                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
-                $importData['rights_holder_id'] = $holderId;
-            }
-
-            // Set default dates
-            $importData['start_date'] = date('Y-m-d');
-
-            // Create the rights record
-            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
-
-            if ($rightsId) {
-                // Log success if debugging
-                error_log("Created rights record {$rightsId} for object {$objectId}");
-            }
-
-        } catch (\Exception $e) {
-            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
-        }
+        
+        return $slug ?: 'untitled';
     }
 
     /**
-     * Create rights records from OPEX metadata.
+     * Set publication status for information object.
      * 
-     * Uses RightsImportService to create proper PREMIS rights records
-     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     * @param int $objectId
+     * @param string|null $status 'draft' or 'published' (default: use system default or published)
      */
-    protected function createRights(int $objectId, array $mapped): void
+    protected function setPublicationStatus(int $objectId, ?string $status = null): void
     {
-        // Check if ahgRightsPlugin is enabled
-        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
-            return;
-        }
-
-        // Check for rights data
-        $rightsData = $mapped['_rights'] ?? [];
+        // Publication status type term ID
+        $typeId = 158;
         
-        // Also check direct fields
-        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
-        $dcLicense = $rightsData['dcLicense'] ?? null;
-        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
-        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
+        // Determine status ID
+        if ($status === 'draft') {
+            $statusId = 159; // Draft
+        } elseif ($status === 'published') {
+            $statusId = 160; // Published
+        } else {
+            // Get default from system settings or use Published
+            $statusId = $this->getDefaultPublicationStatus();
+        }
+        
+        DB::table('status')->insert([
+            'object_id' => $objectId,
+            'type_id' => $typeId,
+            'status_id' => $statusId,
+            'serial_number' => 0,
+        ]);
+    }
 
-        // Skip if no rights info
-        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
+    /**
+     * Get default publication status from system settings.
+     */
+    protected function getDefaultPublicationStatus(): int
+    {
+        // Try to get from settings
+        $setting = DB::table('setting')
+            ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+            ->where('setting.name', 'defaultPubStatus')
+            ->first();
+        
+        if ($setting && !empty($setting->value)) {
+            return (int) $setting->value;
+        }
+        
+        // Default to Published (160) if not set
+        return 160;
+    }
+
+    /**
+     * Update nested set values (lft/rgt) for information object.
+     * Appends new record to the end of the parent's children.
+     */
+    protected function updateNestedSet(int $objectId, int $parentId): void
+    {
+        // Get parent's rgt value
+        $parent = DB::table('information_object')
+            ->where('id', $parentId)
+            ->first();
+        
+        if (!$parent) {
             return;
         }
-
-        try {
-            $rightsService = new RightsImportService();
-
-            // Build rights data array for import
-            $importData = [];
-
-            // Set basis and status from parsed values
-            if (!empty($rightsData['parsedBasis'])) {
-                $importData['basis_id'] = $rightsData['parsedBasis'];
-            }
-            if (!empty($rightsData['parsedStatus'])) {
-                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
-            }
-
-            // Set notes
-            if ($dcRights) {
-                // Determine if it's copyright or license
-                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
-                    $importData['license_terms'] = $dcRights;
-                } else {
-                    $importData['copyright_note'] = $dcRights;
-                }
-            }
-
-            if ($dcLicense) {
-                $importData['license_terms'] = $dcLicense;
-                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
-            }
-
-            // Set access level from security descriptor
-            if (!empty($rightsData['accessLevel'])) {
-                $importData['access_level'] = $rightsData['accessLevel'];
-            }
-
-            // Handle rights holder
-            if ($rightsHolder) {
-                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
-                $importData['rights_holder_id'] = $holderId;
-            }
-
-            // Set default dates
-            $importData['start_date'] = date('Y-m-d');
-
-            // Create the rights record
-            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
-
-            if ($rightsId) {
-                // Log success if debugging
-                error_log("Created rights record {$rightsId} for object {$objectId}");
-            }
-
-        } catch (\Exception $e) {
-            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
-        }
+        
+        $parentRgt = $parent->rgt;
+        
+        // Make room for new node (shift all nodes with lft/rgt >= parent.rgt by 2)
+        DB::table('information_object')
+            ->where('rgt', '>=', $parentRgt)
+            ->increment('rgt', 2);
+        
+        DB::table('information_object')
+            ->where('lft', '>', $parentRgt)
+            ->increment('lft', 2);
+        
+        // Set new node's lft/rgt
+        DB::table('information_object')
+            ->where('id', $objectId)
+            ->update([
+                'lft' => $parentRgt,
+                'rgt' => $parentRgt + 1,
+            ]);
     }
 }

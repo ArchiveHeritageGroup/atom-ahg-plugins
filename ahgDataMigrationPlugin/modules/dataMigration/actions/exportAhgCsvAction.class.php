@@ -105,6 +105,10 @@ class dataMigrationExportAhgCsvAction extends sfAction
             'ahgRightsBasis',
             'ahgCopyrightStatus',
             'ahgProvenanceHistory',
+            'ahgProvenanceEventDates',
+            'ahgProvenanceEventTypes',
+            'ahgProvenanceEventDescriptions',
+            'ahgProvenanceEventAgents',
             'ahgProvenanceFirstDate',
             'ahgProvenanceLastDate',
             'ahgProvenanceEventCount',
@@ -148,30 +152,35 @@ class dataMigrationExportAhgCsvAction extends sfAction
 
     /**
      * Transform source data using field mapping
+     * For AHG export, also pass through ahg* source fields directly
      */
     protected function transformData(array $rows, array $headers, array $mapping): array
     {
         $transformed = [];
-
         foreach ($rows as $row) {
             $record = [];
-
+            
+            // First, pass through all ahg* source fields directly
+            foreach ($headers as $index => $header) {
+                if (strpos($header, 'ahg') === 0 && isset($row[$index])) {
+                    $record[$header] = trim($row[$index]);
+                }
+            }
+            
+            // Then process the mapping
             foreach ($mapping as $fieldConfig) {
                 if (empty($fieldConfig['include'])) {
                     continue;
                 }
-
                 $sourceField = $fieldConfig['source_field'] ?? '';
                 $atomField = $fieldConfig['atom_field'] ?? '';
                 $constantValue = $fieldConfig['constant_value'] ?? '';
                 $concatenate = !empty($fieldConfig['concatenate']);
                 $concatConstant = !empty($fieldConfig['concat_constant']);
                 $concatSymbol = $fieldConfig['concat_symbol'] ?? '|';
-
                 if (empty($atomField)) {
                     continue;
                 }
-
                 // Get value from source or use constant
                 $value = '';
                 if ($concatConstant && !empty($constantValue)) {
@@ -182,11 +191,9 @@ class dataMigrationExportAhgCsvAction extends sfAction
                         $value = trim($row[$sourceIndex]);
                     }
                 }
-
                 if ($value === '') {
                     continue;
                 }
-
                 // Handle concatenation
                 if ($concatenate && isset($record[$atomField]) && $record[$atomField] !== '') {
                     $symbol = ($concatSymbol === '\n' || $concatSymbol === "\\n") ? "\n" : $concatSymbol;
@@ -200,12 +207,10 @@ class dataMigrationExportAhgCsvAction extends sfAction
                     }
                 }
             }
-
             if (!empty($record)) {
                 $transformed[] = $record;
             }
         }
-
         return $transformed;
     }
 }

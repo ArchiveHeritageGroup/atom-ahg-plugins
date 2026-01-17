@@ -88,25 +88,66 @@
             </div>
             <!-- Digital Objects Location -->
             <div class="mb-4">
-              <h6 class="text-primary"><span class="badge bg-primary me-2">2b</span>Digital Objects (Optional)</h6>
+              <h6 class="text-primary"><span class="badge bg-primary me-2">2b</span>Digital Objects Location (Optional)</h6>
+              <div class="alert alert-info small py-2 mb-3">
+                <i class="bi bi-info-circle me-1"></i>
+                <strong>Note:</strong> Digital objects must be pre-uploaded to the server via FTP/SFTP before import.
+                The browser cannot access files on your local PC for security reasons.
+              </div>
               <div class="row g-3">
-                <div class="col-md-8">
-                  <label class="form-label">Digital Objects Folder</label>
+                <div class="col-md-6">
+                  <label class="form-label">File Location</label>
+                  <select name="digital_object_source" id="digitalObjectSource" class="form-select">
+                    <option value="none">No digital objects to import</option>
+                    <option value="server">Files already on server (FTP/SFTP uploaded)</option>
+                    <option value="same">Same folder as import file</option>
+                  </select>
+                </div>
+                <div class="col-md-6 d-none" id="serverPathDiv">
+                  <label class="form-label">Server Folder Path</label>
                   <select name="digital_object_folder" id="digitalObjectFolder" class="form-select">
-                    <option value="">-- No digital objects / Same folder as import file --</option>
                     <option value="/usr/share/nginx/archive/uploads/migration/">uploads/migration/</option>
                     <option value="/usr/share/nginx/archive/uploads/imports/">uploads/imports/</option>
+                    <option value="/usr/share/nginx/archive/uploads/digital_objects/">uploads/digital_objects/</option>
                     <option value="custom">Custom path...</option>
                   </select>
-                  <small class="text-muted">Where did you upload your images/files? Filenames are extracted automatically from paths.</small>
-                </div>
-                <div class="col-md-4 d-none" id="customPathDiv">
-                  <label class="form-label">Custom Server Path</label>
-                  <input type="text" name="custom_digital_path" id="customDigitalPath" class="form-control" placeholder="/usr/share/nginx/archive/uploads/myfiles/">
                 </div>
               </div>
+              <div class="row g-3 mt-2 d-none" id="customPathRow">
+                <div class="col-md-12">
+                  <label class="form-label">Custom Server Path</label>
+                  <input type="text" name="custom_digital_path" id="customDigitalPath" class="form-control" 
+                         placeholder="/usr/share/nginx/archive/uploads/myfiles/">
+                  <small class="text-muted">Full server path where digital objects are stored</small>
+                </div>
+              </div>
+              <div class="mt-2">
+                <small class="text-muted">
+                  <i class="bi bi-windows me-1"></i><strong>Windows users:</strong> Use WinSCP, FileZilla, or similar to upload files to the server first.
+                </small>
+              </div>
             </div>
-            <!-- Step 3: Target & Mapping -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <div class="mb-4">
               <h6 class="text-primary"><span class="badge bg-primary me-2">3</span>Import Target & Mapping</h6>
               <div class="row g-3">
@@ -380,13 +421,26 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-// Show/hide custom path field
-document.getElementById('digitalObjectFolder')?.addEventListener('change', function() {
-  const customDiv = document.getElementById('customPathDiv');
-  if (this.value === 'custom') {
-    customDiv.classList.remove('d-none');
+// Digital object source handling
+document.getElementById("digitalObjectSource")?.addEventListener("change", function() {
+  const serverPathDiv = document.getElementById("serverPathDiv");
+  const customPathRow = document.getElementById("customPathRow");
+  
+  if (this.value === "server") {
+    serverPathDiv.classList.remove("d-none");
   } else {
-    customDiv.classList.add('d-none');
+    serverPathDiv.classList.add("d-none");
+    customPathRow.classList.add("d-none");
+  }
+});
+
+// Show/hide custom path field
+document.getElementById("digitalObjectFolder")?.addEventListener("change", function() {
+  const customPathRow = document.getElementById("customPathRow");
+  if (this.value === "custom") {
+    customPathRow.classList.remove("d-none");
+  } else {
+    customPathRow.classList.add("d-none");
   }
 });
 </script>
