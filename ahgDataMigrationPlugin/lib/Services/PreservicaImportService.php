@@ -6,6 +6,7 @@ use ahgDataMigrationPlugin\Parsers\OpexParser;
 use ahgDataMigrationPlugin\Parsers\PaxParser;
 use ahgDataMigrationPlugin\Mappings\PreservicaMapping;
 use Illuminate\Database\Capsule\Manager as DB;
+use ahgDataMigrationPlugin\Services\RightsImportService;
 
 /**
  * Service for importing data from Preservica OPEX and XIP/PAX formats into AtoM.
@@ -444,6 +445,12 @@ class PreservicaImportService
         $this->createAccessPoints($objectId, $mapped);
         
         // Create events (dates, creators)
+
+        // Create provenance from OPEX History
+        $this->createProvenance($objectId, $mapped);
+
+        // Create rights records from OPEX SecurityDescriptor and dc:rights
+        $this->createRights($objectId, $mapped);
         $this->createEvents($objectId, $mapped);
         
         return $objectId;
@@ -954,4 +961,336 @@ class PreservicaImportService
         ]);
     }
 
+
+    /**
+     * Create rights records from OPEX metadata.
+     * 
+     * Uses RightsImportService to create proper PREMIS rights records
+     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     */
+    protected function createRights(int $objectId, array $mapped): void
+    {
+        // Check if ahgRightsPlugin is enabled
+        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
+            return;
+        }
+
+        // Check for rights data
+        $rightsData = $mapped['_rights'] ?? [];
+        
+        // Also check direct fields
+        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
+        $dcLicense = $rightsData['dcLicense'] ?? null;
+        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
+        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
+
+        // Skip if no rights info
+        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
+            return;
+        }
+
+        try {
+            $rightsService = new RightsImportService();
+
+            // Build rights data array for import
+            $importData = [];
+
+            // Set basis and status from parsed values
+            if (!empty($rightsData['parsedBasis'])) {
+                $importData['basis_id'] = $rightsData['parsedBasis'];
+            }
+            if (!empty($rightsData['parsedStatus'])) {
+                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
+            }
+
+            // Set notes
+            if ($dcRights) {
+                // Determine if it's copyright or license
+                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
+                    $importData['license_terms'] = $dcRights;
+                } else {
+                    $importData['copyright_note'] = $dcRights;
+                }
+            }
+
+            if ($dcLicense) {
+                $importData['license_terms'] = $dcLicense;
+                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
+            }
+
+            // Set access level from security descriptor
+            if (!empty($rightsData['accessLevel'])) {
+                $importData['access_level'] = $rightsData['accessLevel'];
+            }
+
+            // Handle rights holder
+            if ($rightsHolder) {
+                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
+                $importData['rights_holder_id'] = $holderId;
+            }
+
+            // Set default dates
+            $importData['start_date'] = date('Y-m-d');
+
+            // Create the rights record
+            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
+
+            if ($rightsId) {
+                // Log success if debugging
+                error_log("Created rights record {$rightsId} for object {$objectId}");
+            }
+
+        } catch (\Exception $e) {
+            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create rights records from OPEX metadata.
+     * 
+     * Uses RightsImportService to create proper PREMIS rights records
+     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     */
+    protected function createRights(int $objectId, array $mapped): void
+    {
+        // Check if ahgRightsPlugin is enabled
+        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
+            return;
+        }
+
+        // Check for rights data
+        $rightsData = $mapped['_rights'] ?? [];
+        
+        // Also check direct fields
+        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
+        $dcLicense = $rightsData['dcLicense'] ?? null;
+        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
+        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
+
+        // Skip if no rights info
+        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
+            return;
+        }
+
+        try {
+            $rightsService = new RightsImportService();
+
+            // Build rights data array for import
+            $importData = [];
+
+            // Set basis and status from parsed values
+            if (!empty($rightsData['parsedBasis'])) {
+                $importData['basis_id'] = $rightsData['parsedBasis'];
+            }
+            if (!empty($rightsData['parsedStatus'])) {
+                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
+            }
+
+            // Set notes
+            if ($dcRights) {
+                // Determine if it's copyright or license
+                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
+                    $importData['license_terms'] = $dcRights;
+                } else {
+                    $importData['copyright_note'] = $dcRights;
+                }
+            }
+
+            if ($dcLicense) {
+                $importData['license_terms'] = $dcLicense;
+                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
+            }
+
+            // Set access level from security descriptor
+            if (!empty($rightsData['accessLevel'])) {
+                $importData['access_level'] = $rightsData['accessLevel'];
+            }
+
+            // Handle rights holder
+            if ($rightsHolder) {
+                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
+                $importData['rights_holder_id'] = $holderId;
+            }
+
+            // Set default dates
+            $importData['start_date'] = date('Y-m-d');
+
+            // Create the rights record
+            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
+
+            if ($rightsId) {
+                // Log success if debugging
+                error_log("Created rights record {$rightsId} for object {$objectId}");
+            }
+
+        } catch (\Exception $e) {
+            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create rights records from OPEX metadata.
+     * 
+     * Uses RightsImportService to create proper PREMIS rights records
+     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     */
+    protected function createRights(int $objectId, array $mapped): void
+    {
+        // Check if ahgRightsPlugin is enabled
+        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
+            return;
+        }
+
+        // Check for rights data
+        $rightsData = $mapped['_rights'] ?? [];
+        
+        // Also check direct fields
+        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
+        $dcLicense = $rightsData['dcLicense'] ?? null;
+        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
+        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
+
+        // Skip if no rights info
+        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
+            return;
+        }
+
+        try {
+            $rightsService = new RightsImportService();
+
+            // Build rights data array for import
+            $importData = [];
+
+            // Set basis and status from parsed values
+            if (!empty($rightsData['parsedBasis'])) {
+                $importData['basis_id'] = $rightsData['parsedBasis'];
+            }
+            if (!empty($rightsData['parsedStatus'])) {
+                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
+            }
+
+            // Set notes
+            if ($dcRights) {
+                // Determine if it's copyright or license
+                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
+                    $importData['license_terms'] = $dcRights;
+                } else {
+                    $importData['copyright_note'] = $dcRights;
+                }
+            }
+
+            if ($dcLicense) {
+                $importData['license_terms'] = $dcLicense;
+                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
+            }
+
+            // Set access level from security descriptor
+            if (!empty($rightsData['accessLevel'])) {
+                $importData['access_level'] = $rightsData['accessLevel'];
+            }
+
+            // Handle rights holder
+            if ($rightsHolder) {
+                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
+                $importData['rights_holder_id'] = $holderId;
+            }
+
+            // Set default dates
+            $importData['start_date'] = date('Y-m-d');
+
+            // Create the rights record
+            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
+
+            if ($rightsId) {
+                // Log success if debugging
+                error_log("Created rights record {$rightsId} for object {$objectId}");
+            }
+
+        } catch (\Exception $e) {
+            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create rights records from OPEX metadata.
+     * 
+     * Uses RightsImportService to create proper PREMIS rights records
+     * from SecurityDescriptor, dc:rights, dcterms:license, etc.
+     */
+    protected function createRights(int $objectId, array $mapped): void
+    {
+        // Check if ahgRightsPlugin is enabled
+        if (!in_array('ahgRightsPlugin', \sfProjectConfiguration::getActive()->getPlugins())) {
+            return;
+        }
+
+        // Check for rights data
+        $rightsData = $mapped['_rights'] ?? [];
+        
+        // Also check direct fields
+        $dcRights = $mapped['reproductionConditions'] ?? $rightsData['dcRights'] ?? null;
+        $dcLicense = $rightsData['dcLicense'] ?? null;
+        $securityDescriptor = $rightsData['securityDescriptor'] ?? null;
+        $rightsHolder = $rightsData['dcRightsHolder'] ?? null;
+
+        // Skip if no rights info
+        if (empty($dcRights) && empty($dcLicense) && empty($securityDescriptor)) {
+            return;
+        }
+
+        try {
+            $rightsService = new RightsImportService();
+
+            // Build rights data array for import
+            $importData = [];
+
+            // Set basis and status from parsed values
+            if (!empty($rightsData['parsedBasis'])) {
+                $importData['basis_id'] = $rightsData['parsedBasis'];
+            }
+            if (!empty($rightsData['parsedStatus'])) {
+                $importData['copyright_status_id'] = $rightsData['parsedStatus'];
+            }
+
+            // Set notes
+            if ($dcRights) {
+                // Determine if it's copyright or license
+                if (($importData['basis_id'] ?? null) === RightsImportService::BASIS_LICENSE) {
+                    $importData['license_terms'] = $dcRights;
+                } else {
+                    $importData['copyright_note'] = $dcRights;
+                }
+            }
+
+            if ($dcLicense) {
+                $importData['license_terms'] = $dcLicense;
+                $importData['basis_id'] = RightsImportService::BASIS_LICENSE;
+            }
+
+            // Set access level from security descriptor
+            if (!empty($rightsData['accessLevel'])) {
+                $importData['access_level'] = $rightsData['accessLevel'];
+            }
+
+            // Handle rights holder
+            if ($rightsHolder) {
+                $holderId = $rightsService->getOrCreateRightsHolder($rightsHolder);
+                $importData['rights_holder_id'] = $holderId;
+            }
+
+            // Set default dates
+            $importData['start_date'] = date('Y-m-d');
+
+            // Create the rights record
+            $rightsId = $rightsService->createRightsRecord($objectId, $importData);
+
+            if ($rightsId) {
+                // Log success if debugging
+                error_log("Created rights record {$rightsId} for object {$objectId}");
+            }
+
+        } catch (\Exception $e) {
+            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
+        }
+    }
 }
