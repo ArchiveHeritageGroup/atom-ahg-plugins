@@ -79,7 +79,7 @@
           <a href="<?php echo url_for(['module' => 'ahgGalleryPlugin', 'action' => 'browse']); ?>" class="btn btn-outline-primary w-100 mb-2">
             <i class="fas fa-list me-2"></i><?php echo __('Browse all items'); ?>
           </a>
-          <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'displayStandard' => 1696]); ?>" class="btn btn-outline-secondary w-100">
+          <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'displayStandard' => \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery')]); ?>" class="btn btn-outline-secondary w-100">
           <a href="<?php echo url_for(['module' => 'galleryReports', 'action' => 'index']); ?>" class="btn btn-outline-success w-100 mt-2">
             <i class="fas fa-chart-bar me-2"></i><?php echo __("Gallery Reports"); ?>
           </a>

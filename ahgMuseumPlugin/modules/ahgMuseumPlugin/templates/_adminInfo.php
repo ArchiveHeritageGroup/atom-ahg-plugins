@@ -7,7 +7,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 // Get available display standards (filtered by enabled plugins)
 $displayStandards = \AtomFramework\Helpers\DisplayStandardHelper::getAvailable();
 
-// Get current display standard - default to 449 (Museum CCO)
+// Get current display standard - default to museum code (Museum CCO)
 // Get museum term ID dynamically
 $currentDisplayStandard = \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('museum') ?? 353;
 if (isset($resource) && $resource && isset($resource->display_standard_id) && $resource->display_standard_id) {

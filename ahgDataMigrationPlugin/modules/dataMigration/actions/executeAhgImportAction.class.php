@@ -198,6 +198,26 @@ class dataMigrationExecuteAhgImportAction extends sfAction
     /**
      * Create a new information object
      */
+
+    /**
+     * Get display_standard_id for a sector by looking up taxonomy 70
+     */
+    protected function getDisplayStandardId(string $sector): ?int
+    {
+        // Map target_type to display standard code
+        $sectorToCode = [
+            'archives' => 'isad',
+            'museum'   => 'museum',
+            'library'  => 'library',
+            'gallery'  => 'gallery',
+            'dam'      => 'dam',
+        ];
+        
+        $code = $sectorToCode[$sector] ?? 'isad';
+        
+        return \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode($code) ?? 353;
+    }
+
     protected function createRecord(array $record, $repositoryId, $parentId, $culture): int
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
@@ -228,6 +248,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
             'lft' => 0,
             'rgt' => 0,
             'source_culture' => $culture,
+            'display_standard_id' => $this->getDisplayStandardId($this->getUser()->getAttribute('migration_target_type', 'archives')),
         ]);
 
         // Create slug

@@ -11,7 +11,7 @@ class ahgGalleryPluginDashboardAction extends sfAction
 
         // Get gallery items count
         $this->totalItems = DB::table('information_object')
-            ->where('display_standard_id', 1696)
+            ->where('display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'))
             ->count();
 
         // Get recent gallery items
@@ -21,7 +21,7 @@ class ahgGalleryPluginDashboardAction extends sfAction
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
-            ->where('io.display_standard_id', 1696)
+            ->where('io.display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'))
             ->orderBy('io.id', 'desc')
             ->limit(10)
             ->select('io.id', 'io.identifier', 'ioi.title', 's.slug', 'do.id as digital_object_id')
@@ -35,7 +35,7 @@ class ahgGalleryPluginDashboardAction extends sfAction
             })
             ->join('information_object as io', 'p.object_id', '=', 'io.id')
             ->where('p.name', 'galleryData')
-            ->where('io.display_standard_id', 1696)
+            ->where('io.display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'))
             ->select('pi.value')
             ->get()
             ->all();
@@ -43,7 +43,7 @@ class ahgGalleryPluginDashboardAction extends sfAction
         // Count items with digital objects
         $this->itemsWithMedia = DB::table('information_object as io')
             ->join('digital_object as do', 'io.id', '=', 'do.object_id')
-            ->where('io.display_standard_id', 1696)
+            ->where('io.display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'))
             ->count();
     }
 }

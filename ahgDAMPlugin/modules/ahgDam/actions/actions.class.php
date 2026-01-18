@@ -129,7 +129,7 @@ class ahgDamActions extends sfActions
             $informationObject->identifier = $identifier;
             $informationObject->setTitle($title);
             $informationObject->levelOfDescriptionId = $levelId;
-            $informationObject->displayStandardId = 1691; // Photo/DAM (IPTC/XMP)
+            $informationObject->displayStandardId = \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('dam'); // Photo/DAM (IPTC/XMP)
             $informationObject->sourceStandard = 'dam';
 
             if ($scopeContent) {

@@ -32,7 +32,7 @@ class ahgGalleryPluginBrowseAction extends sfAction
                 $j->on('do_thumb.parent_id', '=', 'do_master.id')
                   ->where('do_thumb.usage_id', '=', $thumbnailUsageId);
             })
-            ->where('io.display_standard_id', 1696);
+            ->where('io.display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'));
 
         $this->total = $query->count();
         $this->totalPages = ceil($this->total / $limit);
