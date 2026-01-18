@@ -101,7 +101,7 @@ if ($isAdmin && $hasResearch) {
     <?php if ($hasRic): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('RiC'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-1"></i><?php echo __('RiC Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-1"></i><?php echo __('RiC Dashboard'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasDataMigration): ?>

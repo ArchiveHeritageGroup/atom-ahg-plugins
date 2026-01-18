@@ -31,8 +31,6 @@ class dataMigrationExecuteAhgImportAction extends sfAction
 
     /** @var array Records that need parent linking (have parentId) */
     protected $pendingLinks = [];
-    /** @var array Pending digital objects to create after import */
-    protected $pendingDigitalObjects = [];
 
     public function execute($request)
     {
@@ -207,9 +205,6 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         $this->rebuildFullNestedSet();
 
         // Store stats and redirect to results
-        // Process pending digital objects after all records are created and nested set is rebuilt
-        $this->processPendingDigitalObjects();
-        
         $this->getUser()->setAttribute('ahg_import_stats', $this->stats);
         $this->redirect(['module' => 'dataMigration', 'action' => 'ahgImportResults']);
     }
@@ -1073,123 +1068,37 @@ class dataMigrationExecuteAhgImportAction extends sfAction
      */
     protected function processDigitalObject($objectId, array $record)
     {
-        $path = $record["digitalObjectPath"] ?? $record["Filename"] ?? $record["_digitalObjectPath"] ?? null;
-        
+        $path = $record['digitalObjectPath'] ?? $record['Filename'] ?? $record['_digitalObjectPath'] ?? null;
+
         if (empty($path)) {
             return;
         }
-        
+
         // Check if file exists
         $fullPath = $path;
         if (!file_exists($fullPath)) {
-            $fullPath = sfConfig::get("sf_upload_dir") . "/" . ltrim($path, "/");
+            // Try relative to uploads
+            $fullPath = sfConfig::get('sf_upload_dir') . '/' . ltrim($path, '/');
         }
-        
+
         if (!file_exists($fullPath)) {
-            $this->stats["errors"][] = "Digital object not found: $path";
+            $this->stats['errors'][] = "Digital object not found: $path";
             return;
         }
-        
-        // Store for later processing (after all records created and Propel can see them)
-        $this->pendingDigitalObjects[] = [
-            "objectId" => $objectId,
-            "path" => $fullPath,
-        ];
-    }
-    
-    /**
-     * Process all pending digital objects after import is complete
-     */
-    protected function processPendingDigitalObjects()
-    {
-        if (empty($this->pendingDigitalObjects)) {
-            return;
-        }
-        
-        error_log("Processing " . count($this->pendingDigitalObjects) . " pending digital objects");
-        $DB = \Illuminate\Database\Capsule\Manager::class;
-        
-        foreach ($this->pendingDigitalObjects as $pending) {
-            $objectId = $pending["objectId"];
-            $fullPath = $pending["path"];
-            
-            try {
-                // Get file info
-                $filename = basename($fullPath);
-                $filesize = filesize($fullPath);
-                $mimeType = mime_content_type($fullPath);
-                $checksum = sha1_file($fullPath);
-                
-                // Determine media type
-                $mediaTypeId = $this->getMediaTypeId($mimeType);
-                
-                // Get repository slug for path
-                $repoSlug = "null";
-                $io = $DB::table("information_object")->where("id", $objectId)->first();
-                if ($io && $io->repository_id) {
-                    $repo = $DB::table("slug")->where("object_id", $io->repository_id)->first();
-                    if ($repo) {
-                        $repoSlug = $repo->slug;
-                    }
-                }
-                
-                // Create upload directory structure
-                $checksumPath = implode("/", str_split(substr($checksum, 0, 4)));
-                $relativePath = "/uploads/r/" . $repoSlug . "/" . $checksumPath . "/";
-                $absolutePath = sfConfig::get("sf_web_dir") . $relativePath;
-                
-                if (!is_dir($absolutePath)) {
-                    mkdir($absolutePath, 0755, true);
-                }
-                
-                // Copy file to destination
-                $destFile = $absolutePath . $filename;
-                if (!copy($fullPath, $destFile)) {
-                    throw new \Exception("Failed to copy file to $destFile");
-                }
-                
-                // Create object record first
-                $doObjectId = $DB::table("object")->insertGetId([
-                    "class_name" => "QubitDigitalObject",
-                    "created_at" => date("Y-m-d H:i:s"),
-                    "updated_at" => date("Y-m-d H:i:s"),
-                ]);
-                
-                // Create digital_object record
-                $DB::table("digital_object")->insert([
-                    "id" => $doObjectId,
-                    "object_id" => $objectId,
-                    "usage_id" => QubitTerm::MASTER_ID,
-                    "mime_type" => $mimeType,
-                    "media_type_id" => $mediaTypeId,
-                    "name" => $filename,
-                    "path" => $relativePath,
-                    "byte_size" => $filesize,
-                    "checksum" => $checksum,
-                    "checksum_type" => "sha1",
-                ]);
-                
-                error_log("SUCCESS: Digital object created for IO $objectId (DO ID: $doObjectId)");
-                
-            } catch (\Exception $e) {
-                $this->stats["errors"][] = "Digital object error for $objectId: " . $e->getMessage();
-                error_log("Digital object error for $objectId: " . $e->getMessage());
+
+        // Use AtoM's digital object creation
+        try {
+            $informationObject = QubitInformationObject::getById($objectId);
+            if ($informationObject) {
+                $digitalObject = new QubitDigitalObject();
+                $digitalObject->informationObjectId = $objectId;
+                $digitalObject->usageId = QubitTerm::MASTER_ID;
+                $digitalObject->assets[] = new QubitAsset($fullPath);
+                $digitalObject->save();
             }
+        } catch (\Exception $e) {
+            $this->stats['errors'][] = "Digital object error: " . $e->getMessage();
         }
-    }
-    
-    protected function getMediaTypeId($mimeType)
-    {
-        if (strpos($mimeType, "image/") === 0) {
-            return QubitTerm::IMAGE_ID;
-        } elseif (strpos($mimeType, "audio/") === 0) {
-            return QubitTerm::AUDIO_ID;
-        } elseif (strpos($mimeType, "video/") === 0) {
-            return QubitTerm::VIDEO_ID;
-        } elseif ($mimeType === "application/pdf") {
-            return QubitTerm::TEXT_ID;
-        }
-        return QubitTerm::OTHER_ID;
     }
 
     /**

@@ -253,6 +253,12 @@ class OpexParser
             $custom = $this->parseCustomMetadata($node);
             if (!empty($custom)) {
                 $allMetadata['custom'][] = $custom;
+                // Merge flat custom fields into merged array
+                foreach ($custom as $key => $value) {
+                    if (is_string($value)) {
+                        $allMetadata['merged'][$key] = $value;
+                    }
+                }
             }
         }
 
@@ -810,6 +816,46 @@ class OpexParser
             $record['levelOfDescription'] = 'Series';
         } elseif (empty($record['levelOfDescription'])) {
             $record['levelOfDescription'] = 'Item';
+        }
+
+        // =====================================================
+        // HIERARCHY FIELDS - Extract LegacyId and ParentId
+        // =====================================================
+        $customRaw = $data['descriptive_metadata']['custom'][0] ?? [];
+        // Handle nested Record structure
+        $custom = $customRaw['Record'] ?? $customRaw;
+        $merged = $data['descriptive_metadata']['merged'] ?? [];
+        
+        // LegacyId - try multiple sources
+        if (empty($record['legacyId'])) {
+            $record['legacyId'] = $custom['LegacyId'] 
+                ?? $merged['LegacyId'] 
+                ?? $custom['legacyId'] 
+                ?? $merged['legacyId'] 
+                ?? $record['identifier'] 
+                ?? null;
+        }
+        // ParentId - for hierarchy linking (handle empty arrays)
+        $parentIdRaw = $custom['ParentId'] 
+            ?? $merged['ParentId'] 
+            ?? $custom['parentId'] 
+            ?? $merged['parentId'] 
+            ?? $custom['Parent'] 
+            ?? $merged['Parent'] 
+            ?? null;
+        // Ensure parentId is a non-empty string or null
+        if (is_array($parentIdRaw)) {
+            $record['parentId'] = null;
+        } elseif (is_string($parentIdRaw) && trim($parentIdRaw) !== '') {
+            $record['parentId'] = trim($parentIdRaw);
+        } else {
+            $record['parentId'] = null;
+        }
+        // LevelOfDescription from custom metadata (override default)
+        if (!empty($custom['LevelOfDescription'])) {
+            $record['levelOfDescription'] = $custom['LevelOfDescription'];
+        } elseif (!empty($merged['LevelOfDescription'])) {
+            $record['levelOfDescription'] = $merged['LevelOfDescription'];
         }
 
         // Digital object path

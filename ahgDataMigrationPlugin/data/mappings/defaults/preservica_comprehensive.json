@@ -1,0 +1,255 @@
+{
+  "name": "Preservica Comprehensive",
+  "description": "Complete OPEX import mapping with Dublin Core, Dublin Core Terms, and AHG extended metadata (Security, Condition, Provenance)",
+  "version": "1.0.0",
+  "created": "2026-01-18",
+  "author": "The Archive and Heritage Group",
+  "importType": "opex",
+  "mappings": {
+    "dc:title": {
+      "target": "title",
+      "table": "information_object_i18n",
+      "required": true
+    },
+    "dc:description": {
+      "target": "scopeAndContent",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dc:creator": {
+      "target": "creators",
+      "table": "event",
+      "eventType": "creation",
+      "required": false
+    },
+    "dc:date": {
+      "target": "eventDates",
+      "table": "event",
+      "eventType": "creation",
+      "required": false
+    },
+    "dc:subject": {
+      "target": "subjectAccessPoints",
+      "table": "object_term_relation",
+      "taxonomyId": 35,
+      "required": false,
+      "multiValue": true
+    },
+    "dc:type": {
+      "target": "radGeneralMaterialDesignation",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dc:format": {
+      "target": "physicalCharacteristics",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dc:identifier": {
+      "target": "identifier",
+      "table": "information_object",
+      "required": false
+    },
+    "dc:language": {
+      "target": "language",
+      "table": "information_object_i18n",
+      "required": false,
+      "multiValue": true
+    },
+    "dc:publisher": {
+      "target": "publishers",
+      "table": "event",
+      "eventType": "publication",
+      "required": false
+    },
+    "dc:coverage": {
+      "target": "placeAccessPoints",
+      "table": "object_term_relation",
+      "taxonomyId": 42,
+      "required": false,
+      "multiValue": true
+    },
+    "dc:rights": {
+      "target": "accessConditions",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dcterms:provenance": {
+      "target": "archivalHistory",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dcterms:extent": {
+      "target": "extentAndMedium",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dcterms:medium": {
+      "target": "physicalCharacteristics",
+      "table": "information_object_i18n",
+      "appendTo": "dc:format",
+      "required": false
+    },
+    "dcterms:accrualMethod": {
+      "target": "acquisition",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "dcterms:accrualPeriodicity": {
+      "target": "accruals",
+      "table": "information_object_i18n",
+      "required": false
+    },
+    "ahg:securityClassification": {
+      "target": "classificationLevel",
+      "table": "ahg_security_clearance",
+      "plugin": "ahgSecurityClearancePlugin",
+      "required": false,
+      "valueMap": {
+        "Unclassified": "unclassified",
+        "Restricted": "restricted",
+        "Confidential": "confidential",
+        "Secret": "secret",
+        "Top Secret": "top_secret"
+      }
+    },
+    "ahg:accessRestriction": {
+      "target": "accessRestriction",
+      "table": "ahg_security_clearance",
+      "plugin": "ahgSecurityClearancePlugin",
+      "required": false,
+      "valueMap": {
+        "Open": "open",
+        "Restricted": "restricted",
+        "Closed": "closed"
+      }
+    },
+    "ahg:accessRestrictionNote": {
+      "target": "restrictionNote",
+      "table": "ahg_security_clearance",
+      "plugin": "ahgSecurityClearancePlugin",
+      "required": false
+    },
+    "ahg:conditionNote": {
+      "target": "conditionNote",
+      "table": "ahg_condition_assessment",
+      "plugin": "ahgConditionPlugin",
+      "required": false
+    },
+    "ahg:conservationPriority": {
+      "target": "conservationPriority",
+      "table": "ahg_condition_assessment",
+      "plugin": "ahgConditionPlugin",
+      "required": false,
+      "valueMap": {
+        "Low": "low",
+        "Medium": "medium",
+        "High": "high",
+        "Critical": "critical"
+      }
+    },
+    "ahg:conservationNote": {
+      "target": "conservationNote",
+      "table": "ahg_condition_assessment",
+      "plugin": "ahgConditionPlugin",
+      "required": false
+    },
+    "ahg:physicalCondition": {
+      "target": "physicalCondition",
+      "table": "ahg_condition_assessment",
+      "plugin": "ahgConditionPlugin",
+      "required": false,
+      "valueMap": {
+        "Excellent": "excellent",
+        "Good": "good",
+        "Fair": "fair",
+        "Poor": "poor",
+        "Critical": "critical"
+      }
+    },
+    "ahg:dimensions": {
+      "target": "dimensions",
+      "table": "ahg_condition_assessment",
+      "plugin": "ahgConditionPlugin",
+      "required": false
+    },
+    "ahg:acquisitionType": {
+      "target": "acquisitionType",
+      "table": "ahg_provenance",
+      "plugin": "ahgProvenancePlugin",
+      "required": false,
+      "valueMap": {
+        "Donation": "donation",
+        "Purchase": "purchase",
+        "Transfer": "transfer",
+        "Bequest": "bequest",
+        "Deposit": "deposit"
+      }
+    },
+    "ahg:acquisitionDate": {
+      "target": "acquisitionDate",
+      "table": "ahg_provenance",
+      "plugin": "ahgProvenancePlugin",
+      "required": false,
+      "dataType": "date"
+    },
+    "ahg:acquisitionNote": {
+      "target": "acquisitionNote",
+      "table": "ahg_provenance",
+      "plugin": "ahgProvenancePlugin",
+      "required": false
+    },
+    "ahg:appraisalNote": {
+      "target": "appraisalNote",
+      "table": "ahg_provenance",
+      "plugin": "ahgProvenancePlugin",
+      "required": false
+    },
+    "ahg:custodialHistory": {
+      "target": "custodialHistory",
+      "table": "ahg_provenance",
+      "plugin": "ahgProvenancePlugin",
+      "required": false
+    },
+    "ahg:storageLocation": {
+      "target": "storageLocation",
+      "table": "physical_object",
+      "required": false,
+      "createIfNotExists": true
+    },
+    "ahg:arrangement": {
+      "target": "arrangement",
+      "table": "information_object_i18n",
+      "required": false
+    }
+  },
+  "digitalObjectSettings": {
+    "importDigitalObjects": true,
+    "generateDerivatives": true,
+    "calculateChecksums": true,
+    "checksumAlgorithm": "sha256",
+    "preserveFilenames": true
+  },
+  "hierarchySettings": {
+    "deriveFromFolders": true,
+    "legacyIdField": "SourceID",
+    "defaultLevelOfDescription": "Item"
+  },
+  "pluginRequirements": [
+    {
+      "plugin": "ahgSecurityClearancePlugin",
+      "required": false,
+      "fieldsUsed": ["ahg:securityClassification", "ahg:accessRestriction", "ahg:accessRestrictionNote"]
+    },
+    {
+      "plugin": "ahgConditionPlugin",
+      "required": false,
+      "fieldsUsed": ["ahg:conditionNote", "ahg:conservationPriority", "ahg:conservationNote", "ahg:physicalCondition", "ahg:dimensions"]
+    },
+    {
+      "plugin": "ahgProvenancePlugin",
+      "required": false,
+      "fieldsUsed": ["ahg:acquisitionType", "ahg:acquisitionDate", "ahg:acquisitionNote", "ahg:appraisalNote", "ahg:custodialHistory"]
+    }
+  ]
+}

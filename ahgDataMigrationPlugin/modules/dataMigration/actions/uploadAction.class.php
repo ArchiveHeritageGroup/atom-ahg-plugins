@@ -342,43 +342,82 @@ class dataMigrationUploadAction extends sfAction
     {
         $allRecords = [];
         $allHeaders = [];
-
+        
+        // ================================================================
+        // STEP 1: Build folder hierarchy map from OPEX file paths
+        // Maps folder path => legacyId (from Identifier or folder name)
+        // ================================================================
+        $folderToLegacyId = [];
+        $opexByFolder = [];
+        
+        // First pass: collect all OPEX files and their folder paths
         foreach ($opexFiles as $opexFile) {
+            $folderPath = dirname($opexFile);
+            $opexByFolder[$folderPath] = $opexFile;
+        }
+        
+        // Sort by path depth (parents before children)
+        uksort($opexByFolder, function($a, $b) {
+            return substr_count($a, '/') - substr_count($b, '/');
+        });
+        
+        foreach ($opexByFolder as $folderPath => $opexFile) {
             // Parse each OPEX file
-            $content = file_get_contents($opexFile);
-            $content = preg_replace('/xmlns="[^"]+"/', '', $content);
-
+            $fileContent = file_get_contents($opexFile);
+            $fileContent = preg_replace('/xmlns="[^"]+"/', '', $fileContent);
+            
             try {
-                $xml = new \SimpleXMLElement($content);
+                $xml = new \SimpleXMLElement($fileContent);
                 $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
                 $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
-
+                
                 // Get the OPEX basename for digital object lookup
                 $opexBasename = pathinfo($opexFile, PATHINFO_FILENAME);
                 $opexRelPath = basename(dirname($opexFile)) . '/' . basename($opexFile);
-
+                
                 // Parse the OPEX file
                 $records = $this->parseOpexXml($xml);
-
-                // Add digital object paths to records
+                
+                // ================================================================
+                // STEP 2: Derive legacyId and parentId from folder structure
+                // ================================================================
                 foreach ($records as &$record) {
+                    // Derive legacyId: Use Identifier_Reference > Identifier > SourceID > folder name
+                    $legacyId = $record['Identifier_Reference'] 
+                        ?? $record['Identifier'] 
+                        ?? $record['SourceID']
+                        ?? $record['Transfer_SourceID']
+                        ?? $opexBasename;
+                    
+                    // Clean up legacyId - take first value if pipe-separated
+                    if (strpos($legacyId, '|') !== false) {
+                        $legacyId = trim(explode('|', $legacyId)[0]);
+                    }
+                    
+                    $record['legacyId'] = $legacyId;
+                    $folderToLegacyId[$folderPath] = $legacyId;
+                    
+                    // Derive parentId from parent folder's legacyId
+                    $parentFolderPath = dirname($folderPath);
+                    if (isset($folderToLegacyId[$parentFolderPath])) {
+                        $record['parentId'] = $folderToLegacyId[$parentFolderPath];
+                    } else {
+                        $record['parentId'] = ''; // Top-level record
+                    }
+                    
                     // Try to find digital objects for this record
                     $doFiles = $digitalObjectMappings[$opexBasename] ?? $digitalObjectMappings[$opexRelPath] ?? [];
-
                     if (!empty($doFiles)) {
-                        // Add primary digital object
                         $record['_digitalObjectPath'] = $doFiles[0];
                         $record['_digitalObjectFilename'] = basename($doFiles[0]);
-
-                        // Add all digital objects as pipe-separated list
                         if (count($doFiles) > 1) {
                             $record['_digitalObjectPaths'] = implode('|', $doFiles);
                         }
                     }
-
+                    
                     // Add source OPEX file path for reference
                     $record['_sourceOpexFile'] = $opexFile;
-
+                    
                     // Collect headers
                     foreach (array_keys($record) as $key) {
                         if (!in_array($key, $allHeaders)) {
@@ -386,7 +425,6 @@ class dataMigrationUploadAction extends sfAction
                         }
                     }
                 }
-
                 unset($record); // Break the reference to prevent PHP foreach bug
                 $allRecords = array_merge($allRecords, $records);
 
@@ -886,6 +924,15 @@ class dataMigrationUploadAction extends sfAction
                 $record[$name] = $value;
             }
         }
+
+        // Override legacyId with LegacyId element if present (takes priority over Identifier)
+        if (!empty($record['LegacyId'])) {
+            $record['legacyId'] = $record['LegacyId'];
+        }
+        // Set parentId from ParentId element
+        if (!empty($record['ParentId'])) {
+            $record['parentId'] = $record['ParentId'];
+        }
         $this->extractCommonOpexFields($record, $recordNode, $xml);
 
         return $record;
@@ -917,6 +964,15 @@ class dataMigrationUploadAction extends sfAction
 
         // Extract ALL fields directly from the Folder node
         $this->extractAllElements($folderNode, $record, '');
+
+        // Copy LegacyId to legacyId if found (extractAllElements uses exact element name)
+        if (!empty($record['LegacyId']) && empty($record['legacyId'])) {
+            $record['legacyId'] = $record['LegacyId'];
+        }
+        // Copy ParentId to parentId if found
+        if (!empty($record['ParentId']) && empty($record['parentId'])) {
+            $record['parentId'] = $record['ParentId'];
+        }
 
         // Extract Identifier elements with type attribute
         $identifiers = $folderNode->xpath('.//Identifier');
@@ -1108,6 +1164,20 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // Extract extended fields
+
+        // Extract LegacyId and ParentId from Record element
+        $legacyIdNodes = $xml->xpath('//LegacyId');
+        if (!empty($legacyIdNodes)) {
+            $record['LegacyId'] = (string)$legacyIdNodes[0];
+            if (empty($record['legacyId'])) {
+                $record['legacyId'] = (string)$legacyIdNodes[0];
+            }
+        }
+        $parentIdNodes = $xml->xpath('//ParentId');
+        if (!empty($parentIdNodes)) {
+            $record['ParentId'] = (string)$parentIdNodes[0];
+            $record['parentId'] = (string)$parentIdNodes[0];
+        }
         $this->extractCommonOpexFields($record, null, $xml);
 
         return $record;
@@ -1230,7 +1300,7 @@ class dataMigrationUploadAction extends sfAction
     protected function sortOpexHeaders($headers)
     {
         $priority = [
-            'legacyId', 'Identifier_Reference', 'Identifier_AtoM_ID', 'title', 'dc:title',
+            'legacyId', 'LegacyId', 'ParentId', 'LevelOfDescription', 'Identifier_Reference', 'Identifier_AtoM_ID', 'title', 'dc:title',
             'scopeAndContent', 'dc:description', 'Description',
             'dc:date', 'dcterms:created', 'dcterms:modified',
             'dc:creator', 'dc:contributor', 'dc:publisher',

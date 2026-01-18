@@ -26,6 +26,15 @@ class dataMigrationMapAction extends sfAction
 
         // Get source fields from detection
         $sourceFields = $detection['headers'] ?? [];
+        
+        // Filter out system/internal fields only for OPEX imports
+        // (these are derived automatically from folder structure)
+        $format = $detection['format'] ?? '';
+        if (in_array($format, ['opex', 'pax'])) {
+            $systemFields = ['legacyId', 'parentId', '_sourceOpexFile', '_digitalObjectPath', '_digitalObjectFilename', '_digitalObjectPaths'];
+            $sourceFields = array_filter($sourceFields, fn($f) => !in_array($f, $systemFields));
+            $sourceFields = array_values($sourceFields); // Re-index
+        }
 
         // Get target fields based on type
         $targetFields = $this->getTargetFields($targetType);
