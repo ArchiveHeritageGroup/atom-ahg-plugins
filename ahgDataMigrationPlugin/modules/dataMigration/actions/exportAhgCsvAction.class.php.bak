@@ -59,7 +59,6 @@ class dataMigrationExportAhgCsvAction extends sfAction
             'parentId',
             'qubitParentSlug',
             'identifier',
-            'culture',
             'title',
             'levelOfDescription',
             'extentAndMedium',
@@ -98,7 +97,6 @@ class dataMigrationExportAhgCsvAction extends sfAction
             'nameAccessPoints',
             'genreAccessPoints',
             'digitalObjectPath',
-            'digitalObjectFilename',
             'digitalObjectURI',
             // AHG Extended Fields
             'ahgSecurityClassification',
@@ -115,18 +113,6 @@ class dataMigrationExportAhgCsvAction extends sfAction
             'ahgProvenanceLastDate',
             'ahgProvenanceEventCount',
             'ahgRelationships',
-            // AHG Condition Fields
-            'ahgConditionOverallRating',
-            'ahgConditionSummary',
-            'ahgConditionRecommendations',
-            'ahgConditionPriority',
-            'ahgConditionContext',
-            'ahgConditionAssessmentDate',
-            'ahgConditionNextCheckDate',
-            'ahgConditionEnvironmentalNotes',
-            'ahgConditionHandlingNotes',
-            'ahgConditionDisplayNotes',
-            'ahgConditionStorageNotes',
             'Filename',
             'digitalObjectChecksum',
             'digitalObjectMimeType',
@@ -176,7 +162,7 @@ class dataMigrationExportAhgCsvAction extends sfAction
             
             // First, pass through all ahg* source fields directly
             foreach ($headers as $index => $header) {
-                if ((strpos($header, 'ahg') === 0 || strpos($header, '_digitalObject') === 0) && isset($row[$index])) {
+                if (strpos($header, 'ahg') === 0 && isset($row[$index])) {
                     $record[$header] = trim($row[$index]);
                 }
             }
@@ -208,17 +194,6 @@ class dataMigrationExportAhgCsvAction extends sfAction
                 if ($value === '') {
                     continue;
                 }
-                
-                // Also process ahg_field mapping (AHG Extended column)
-                $ahgField = $fieldConfig['ahg_field'] ?? '';
-                if (!empty($ahgField) && $value !== '') {
-                    if (!isset($record[$ahgField]) || $record[$ahgField] === '') {
-                        $record[$ahgField] = $value;
-                    } elseif ($concatenate) {
-                        $symbol = ($concatSymbol === '\n' || $concatSymbol === "\\n") ? "\n" : $concatSymbol;
-                        $record[$ahgField] .= $symbol . $value;
-                    }
-                }
                 // Handle concatenation
                 if ($concatenate && isset($record[$atomField]) && $record[$atomField] !== '') {
                     $symbol = ($concatSymbol === '\n' || $concatSymbol === "\\n") ? "\n" : $concatSymbol;
@@ -231,16 +206,6 @@ class dataMigrationExportAhgCsvAction extends sfAction
                         $record[$atomField] .= $symbol . $value;
                     }
                 }
-            }
-            // Map internal _digitalObject fields to export columns
-            if (!empty($record["_digitalObjectPath"])) {
-                $record["digitalObjectPath"] = $record["_digitalObjectPath"];
-            }
-            if (!empty($record["_digitalObjectFilename"])) {
-                $record["digitalObjectFilename"] = $record["_digitalObjectFilename"];
-            }
-            if (!empty($record["_digitalObjectPaths"])) {
-                $record["allFilenames"] = $record["_digitalObjectPaths"];
             }
             if (!empty($record)) {
                 $transformed[] = $record;

@@ -9,6 +9,7 @@ class GallerySector extends BaseSector
     protected string $icon = 'easel';
     protected array $fields = [
         'identifier' => ['type' => 'string', 'required' => true],
+        'culture' => ['type' => 'string', 'default' => 'en'],
         'title' => ['type' => 'string', 'required' => true],
         'creator' => ['type' => 'string'],
         'creation_date' => ['type' => 'date'],

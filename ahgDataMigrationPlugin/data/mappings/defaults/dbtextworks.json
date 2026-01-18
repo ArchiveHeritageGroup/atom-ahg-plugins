@@ -1,6 +1,7 @@
 {
   "name": "DB/TextWorks (Afrikaans Church Archives)",
   "target_type": "archives",
+  "category": "Archives",
   "description": "Import records from Inmagic DB/TextWorks - DRC Church Archives format",
   "fields": [
     {"source_field": "AUTOID", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

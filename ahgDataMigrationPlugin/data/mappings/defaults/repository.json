@@ -1,6 +1,7 @@
 {
   "name": "Repository (ISDIAH)",
   "target_type": "repository",
+  "category": "ArchivesSpace",
   "description": "Import archival institutions following ISDIAH standard",
   "fields": [
     {"source_field": "repo_code", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

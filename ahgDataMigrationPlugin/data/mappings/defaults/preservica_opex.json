@@ -1,6 +1,7 @@
 {
   "name": "Preservica OPEX (Extended)",
   "target_type": "information_object",
+  "category": "Preservica",
   "description": "Import from Preservica OPEX with Dublin Core, Rights, Provenance, and Digital Objects",
   "fields": [
     {"source_field": "legacyId", "atom_field": "legacyId", "include": true, "section": "core"},

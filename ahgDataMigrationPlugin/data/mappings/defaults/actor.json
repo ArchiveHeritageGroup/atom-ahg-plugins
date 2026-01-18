@@ -1,6 +1,7 @@
 {
   "name": "Authority Record (ISAAR-CPF)",
   "target_type": "actor",
+  "category": "ArchivesSpace",
   "description": "Import authority records (people, corporate bodies, families)",
   "fields": [
     {"source_field": "title", "atom_field": "authorizedFormOfName", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

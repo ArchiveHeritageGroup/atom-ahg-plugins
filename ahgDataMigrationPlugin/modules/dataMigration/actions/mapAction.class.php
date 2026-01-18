@@ -21,11 +21,20 @@ class dataMigrationMapAction extends sfAction
         $targetType = $request->getParameter('target_type', $this->getUser()->getAttribute('migration_target_type', 'archives'));
         $this->getUser()->setAttribute('migration_target_type', $targetType);
 
+        // Check if we should auto-load a mapping (after save)
+        $this->autoLoadMappingId = $request->getParameter("load_mapping", null);
+
         // Get source fields from detection
         $sourceFields = $detection['headers'] ?? [];
 
         // Get target fields based on type
         $targetFields = $this->getTargetFields($targetType);
+        // Sort target fields alphabetically by label, keeping standard and AHG separate
+        $standardFields = array_filter($targetFields, fn($k) => strpos($k, "ahg") !== 0, ARRAY_FILTER_USE_KEY);
+        $ahgFields = array_filter($targetFields, fn($k) => strpos($k, "ahg") === 0, ARRAY_FILTER_USE_KEY);
+        asort($standardFields);
+        asort($ahgFields);
+        $targetFields = array_merge($standardFields, $ahgFields);
 
         // Build mapping rows
         $mappingRows = [];
@@ -157,11 +166,39 @@ class dataMigrationMapAction extends sfAction
             "ahgProvenanceEventTypes" => "AHG: Provenance Event Types",
             "ahgProvenanceEventDescriptions" => "AHG: Provenance Event Descriptions",
             "ahgProvenanceEventAgents" => "AHG: Provenance Event Agents",
+            'ahgAccessLevel' => 'AHG: Access Level',
+            'ahgCopyrightStatus' => 'AHG: Copyright Status',
+            'ahgRelationships' => 'AHG: Relationships',
+            'ahgRightsBasis' => 'AHG: Rights Basis',
+            'ahgRightsStatement' => 'AHG: Rights Statement',
+            'ahgSecurityClassification' => 'AHG: Security Classification',
+            'ahgConditionOverallRating' => 'AHG: Condition Overall Rating',
+            'ahgConditionSummary' => 'AHG: Condition Summary',
+            'ahgConditionRecommendations' => 'AHG: Condition Recommendations',
+            'ahgConditionPriority' => 'AHG: Condition Priority',
+            'ahgConditionContext' => 'AHG: Condition Context',
+            'ahgConditionAssessmentDate' => 'AHG: Condition Assessment Date',
+            'ahgConditionNextCheckDate' => 'AHG: Condition Next Check Date',
+            'ahgConditionEnvironmentalNotes' => 'AHG: Environmental Notes',
+            'ahgConditionHandlingNotes' => 'AHG: Handling Notes',
+            'ahgConditionDisplayNotes' => 'AHG: Display Notes',
+            'ahgConditionStorageNotes' => 'AHG: Storage Notes',
             "ahgProvenanceLastDate" => "AHG: Provenance Last Date",
             "ahgRelationships" => "AHG: Relationships",
             "ahgRightsBasis" => "AHG: Rights Basis",
             "ahgRightsStatement" => "AHG: Rights Statement",
             "ahgSecurityClassification" => "AHG: Security Classification",
+            "ahgConditionOverallRating" => "AHG: Condition Overall Rating",
+            "ahgConditionSummary" => "AHG: Condition Summary",
+            "ahgConditionRecommendations" => "AHG: Condition Recommendations",
+            "ahgConditionPriority" => "AHG: Condition Priority",
+            "ahgConditionContext" => "AHG: Condition Context",
+            "ahgConditionAssessmentDate" => "AHG: Condition Assessment Date",
+            "ahgConditionNextCheckDate" => "AHG: Condition Next Check Date",
+            "ahgConditionEnvironmentalNotes" => "AHG: Environmental Notes",
+            "ahgConditionHandlingNotes" => "AHG: Handling Notes",
+            "ahgConditionDisplayNotes" => "AHG: Display Notes",
+            "ahgConditionStorageNotes" => "AHG: Storage Notes",
             "allFilenames" => "AHG: All Filenames",
             "digitalObjectChecksum" => "AHG: Digital Object Checksum",
             "digitalObjectMimeType" => "AHG: Digital Object MIME Type",
@@ -174,6 +211,7 @@ class dataMigrationMapAction extends sfAction
         return [
             // Object Identification
             'identifier' => 'Object Number',
+            'culture' => 'Culture (language code)',
             'legacyId' => 'Legacy/Accession Number',
             'title' => 'Object Name / Title',
             'alternateTitle' => 'Other Name',
@@ -253,6 +291,33 @@ class dataMigrationMapAction extends sfAction
             'valuationMethod' => 'Valuation Method',
             'valuationType' => 'Valuation Type',
             
+            // AHG Provenance Fields
+            'ahgProvenanceHistory' => 'AHG: Provenance History',
+            'ahgProvenanceEventCount' => 'AHG: Provenance Event Count',
+            'ahgProvenanceFirstDate' => 'AHG: Provenance First Date',
+            'ahgProvenanceLastDate' => 'AHG: Provenance Last Date',
+            'ahgProvenanceEventDates' => 'AHG: Provenance Event Dates',
+            'ahgProvenanceEventTypes' => 'AHG: Provenance Event Types',
+            'ahgProvenanceEventDescriptions' => 'AHG: Provenance Event Descriptions',
+            'ahgProvenanceEventAgents' => 'AHG: Provenance Event Agents',
+            'ahgAccessLevel' => 'AHG: Access Level',
+            'ahgCopyrightStatus' => 'AHG: Copyright Status',
+            'ahgRelationships' => 'AHG: Relationships',
+            'ahgRightsBasis' => 'AHG: Rights Basis',
+            'ahgRightsStatement' => 'AHG: Rights Statement',
+            'ahgSecurityClassification' => 'AHG: Security Classification',
+            'ahgConditionOverallRating' => 'AHG: Condition Overall Rating',
+            'ahgConditionSummary' => 'AHG: Condition Summary',
+            'ahgConditionRecommendations' => 'AHG: Condition Recommendations',
+            'ahgConditionPriority' => 'AHG: Condition Priority',
+            'ahgConditionContext' => 'AHG: Condition Context',
+            'ahgConditionAssessmentDate' => 'AHG: Condition Assessment Date',
+            'ahgConditionNextCheckDate' => 'AHG: Condition Next Check Date',
+            'ahgConditionEnvironmentalNotes' => 'AHG: Environmental Notes',
+            'ahgConditionHandlingNotes' => 'AHG: Handling Notes',
+            'ahgConditionDisplayNotes' => 'AHG: Display Notes',
+            'ahgConditionStorageNotes' => 'AHG: Storage Notes',
+
             // Hierarchy
             'parentId' => 'Parent ID',
             'qubitParentSlug' => 'Parent Slug',
@@ -264,6 +329,7 @@ class dataMigrationMapAction extends sfAction
         return [
             // Identification
             'identifier' => 'Call Number / Control Number',
+            'culture' => 'Culture (language code)',
             'legacyId' => 'Legacy ID / System Number',
             'isbn' => 'ISBN',
             'issn' => 'ISSN',
@@ -329,6 +395,32 @@ class dataMigrationMapAction extends sfAction
             'rules' => 'Cataloguing Rules (RDA/AACR2)',
             
             // Parent
+            // AHG Extended Fields
+            'ahgProvenanceHistory' => 'AHG: Provenance History',
+            'ahgProvenanceEventCount' => 'AHG: Provenance Event Count',
+            'ahgProvenanceFirstDate' => 'AHG: Provenance First Date',
+            'ahgProvenanceLastDate' => 'AHG: Provenance Last Date',
+            'ahgProvenanceEventDates' => 'AHG: Provenance Event Dates',
+            'ahgProvenanceEventTypes' => 'AHG: Provenance Event Types',
+            'ahgProvenanceEventDescriptions' => 'AHG: Provenance Event Descriptions',
+            'ahgProvenanceEventAgents' => 'AHG: Provenance Event Agents',
+            'ahgAccessLevel' => 'AHG: Access Level',
+            'ahgCopyrightStatus' => 'AHG: Copyright Status',
+            'ahgRelationships' => 'AHG: Relationships',
+            'ahgRightsBasis' => 'AHG: Rights Basis',
+            'ahgRightsStatement' => 'AHG: Rights Statement',
+            'ahgSecurityClassification' => 'AHG: Security Classification',
+            'ahgConditionOverallRating' => 'AHG: Condition Overall Rating',
+            'ahgConditionSummary' => 'AHG: Condition Summary',
+            'ahgConditionRecommendations' => 'AHG: Condition Recommendations',
+            'ahgConditionPriority' => 'AHG: Condition Priority',
+            'ahgConditionContext' => 'AHG: Condition Context',
+            'ahgConditionAssessmentDate' => 'AHG: Condition Assessment Date',
+            'ahgConditionNextCheckDate' => 'AHG: Condition Next Check Date',
+            'ahgConditionEnvironmentalNotes' => 'AHG: Environmental Notes',
+            'ahgConditionHandlingNotes' => 'AHG: Handling Notes',
+            'ahgConditionDisplayNotes' => 'AHG: Display Notes',
+            'ahgConditionStorageNotes' => 'AHG: Storage Notes',
             'parentId' => 'Parent ID (for analytics)',
             'qubitParentSlug' => 'Parent Slug',
         ];
@@ -340,6 +432,7 @@ class dataMigrationMapAction extends sfAction
             // Work Identification
             'identifier' => 'Accession Number / Work ID',
             'legacyId' => 'Legacy ID',
+            'culture' => 'Culture (language code)',
             'title' => 'Title',
             'alternateTitle' => 'Alternate / Former Title',
             'workType' => 'Work Type (painting, sculpture, etc.)',
@@ -404,6 +497,32 @@ class dataMigrationMapAction extends sfAction
             'generalNote' => 'Notes',
             'cataloguerNote' => 'Cataloguer Note',
             'catalogueDate' => 'Catalogue Date',
+            // AHG Extended Fields
+            'ahgProvenanceHistory' => 'AHG: Provenance History',
+            'ahgProvenanceEventCount' => 'AHG: Provenance Event Count',
+            'ahgProvenanceFirstDate' => 'AHG: Provenance First Date',
+            'ahgProvenanceLastDate' => 'AHG: Provenance Last Date',
+            'ahgProvenanceEventDates' => 'AHG: Provenance Event Dates',
+            'ahgProvenanceEventTypes' => 'AHG: Provenance Event Types',
+            'ahgProvenanceEventDescriptions' => 'AHG: Provenance Event Descriptions',
+            'ahgProvenanceEventAgents' => 'AHG: Provenance Event Agents',
+            'ahgAccessLevel' => 'AHG: Access Level',
+            'ahgCopyrightStatus' => 'AHG: Copyright Status',
+            'ahgRelationships' => 'AHG: Relationships',
+            'ahgRightsBasis' => 'AHG: Rights Basis',
+            'ahgRightsStatement' => 'AHG: Rights Statement',
+            'ahgSecurityClassification' => 'AHG: Security Classification',
+            'ahgConditionOverallRating' => 'AHG: Condition Overall Rating',
+            'ahgConditionSummary' => 'AHG: Condition Summary',
+            'ahgConditionRecommendations' => 'AHG: Condition Recommendations',
+            'ahgConditionPriority' => 'AHG: Condition Priority',
+            'ahgConditionContext' => 'AHG: Condition Context',
+            'ahgConditionAssessmentDate' => 'AHG: Condition Assessment Date',
+            'ahgConditionNextCheckDate' => 'AHG: Condition Next Check Date',
+            'ahgConditionEnvironmentalNotes' => 'AHG: Environmental Notes',
+            'ahgConditionHandlingNotes' => 'AHG: Handling Notes',
+            'ahgConditionDisplayNotes' => 'AHG: Display Notes',
+            'ahgConditionStorageNotes' => 'AHG: Storage Notes',
             
             // Digital
             'digitalObjectPath' => 'Image Path',
@@ -422,6 +541,7 @@ class dataMigrationMapAction extends sfAction
             // Asset Identification
             'identifier' => 'Asset ID / Filename',
             'legacyId' => 'Legacy ID',
+            'culture' => 'Culture (language code)',
             'title' => 'Title / Caption',
             'alternateTitle' => 'Alternative Title',
             'assetType' => 'Asset Type (image, video, audio, document)',
@@ -476,6 +596,32 @@ class dataMigrationMapAction extends sfAction
             'relatedUnitsOfDescription' => 'Related Assets',
             'parentId' => 'Parent Collection / Folder',
             'linkedRecord' => 'Linked Catalogue Record',
+            // AHG Extended Fields
+            'ahgProvenanceHistory' => 'AHG: Provenance History',
+            'ahgProvenanceEventCount' => 'AHG: Provenance Event Count',
+            'ahgProvenanceFirstDate' => 'AHG: Provenance First Date',
+            'ahgProvenanceLastDate' => 'AHG: Provenance Last Date',
+            'ahgProvenanceEventDates' => 'AHG: Provenance Event Dates',
+            'ahgProvenanceEventTypes' => 'AHG: Provenance Event Types',
+            'ahgProvenanceEventDescriptions' => 'AHG: Provenance Event Descriptions',
+            'ahgProvenanceEventAgents' => 'AHG: Provenance Event Agents',
+            'ahgAccessLevel' => 'AHG: Access Level',
+            'ahgCopyrightStatus' => 'AHG: Copyright Status',
+            'ahgRelationships' => 'AHG: Relationships',
+            'ahgRightsBasis' => 'AHG: Rights Basis',
+            'ahgRightsStatement' => 'AHG: Rights Statement',
+            'ahgSecurityClassification' => 'AHG: Security Classification',
+            'ahgConditionOverallRating' => 'AHG: Condition Overall Rating',
+            'ahgConditionSummary' => 'AHG: Condition Summary',
+            'ahgConditionRecommendations' => 'AHG: Condition Recommendations',
+            'ahgConditionPriority' => 'AHG: Condition Priority',
+            'ahgConditionContext' => 'AHG: Condition Context',
+            'ahgConditionAssessmentDate' => 'AHG: Condition Assessment Date',
+            'ahgConditionNextCheckDate' => 'AHG: Condition Next Check Date',
+            'ahgConditionEnvironmentalNotes' => 'AHG: Environmental Notes',
+            'ahgConditionHandlingNotes' => 'AHG: Handling Notes',
+            'ahgConditionDisplayNotes' => 'AHG: Display Notes',
+            'ahgConditionStorageNotes' => 'AHG: Storage Notes',
             
             // Status
             'status' => 'Status (active, archived, deleted)',

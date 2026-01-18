@@ -1,6 +1,7 @@
 {
   "name": "Place Terms",
   "target_type": "place",
+  "category": "ArchivesSpace",
   "description": "Import geographic/place access points",
   "fields": [
     {"source_field": "term", "atom_field": "name", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

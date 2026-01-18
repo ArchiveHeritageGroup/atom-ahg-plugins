@@ -9,6 +9,7 @@ class ArchivesSector extends BaseSector
     protected string $icon = 'archive';
     protected array $fields = [
         'identifier' => ['type' => 'string', 'required' => true],
+        'culture' => ['type' => 'string', 'default' => 'en'],
         'title' => ['type' => 'string', 'required' => true],
         'level_of_description' => ['type' => 'string'],
         'extent_and_medium' => ['type' => 'text'],

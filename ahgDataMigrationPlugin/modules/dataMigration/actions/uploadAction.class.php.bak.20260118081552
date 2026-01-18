@@ -253,12 +253,6 @@ class dataMigrationUploadAction extends sfAction
             }
         }
 
-        // Remove auto-generated AHG provenance fields from headers (they are internal)
-        $headers = array_filter($headers, function($h) {
-            return strpos($h, "ahgProvenance") !== 0 && strpos($h, "ahgCondition") !== 0 && strpos($h, "ahgRights") !== 0 && strpos($h, "Rights_") !== 0;
-        });
-        $headers = array_values($headers); // Re-index
-
         // Sort headers to group related fields
         $headers = $this->sortOpexHeaders($headers);
 
@@ -345,42 +339,60 @@ class dataMigrationUploadAction extends sfAction
     {
         $record = [];
         
-        // Get folder ID attribute
+        // Get folder ID
         $folderId = (string)($folderNode['id'] ?? '');
         if ($folderId) {
             $record['legacyId'] = $folderId;
         }
         
-        // Extract ALL fields from Properties
-        if (isset($folderNode->Properties)) {
-            foreach ($folderNode->Properties->children() as $child) {
-                $name = $child->getName();
-                $value = trim((string)$child);
-                if (!empty($value)) {
-                    $record[$name] = $value;
+        // Get Properties
+        $props = $folderNode->Properties;
+        if ($props) {
+            if (!empty($props->Title)) $record['title'] = (string)$props->Title;
+            if (!empty($props->Description)) $record['scopeAndContent'] = (string)$props->Description;
+            if (!empty($props->SecurityDescriptor)) $record['ahgSecurityClassification'] = (string)$props->SecurityDescriptor;
+        }
+        
+        // Get DescriptiveMetadata
+        $dm = $folderNode->DescriptiveMetadata;
+        if ($dm) {
+            // Dublin Core fields
+            $dcFields = [
+                'dc:title' => 'title',
+                'dc:identifier' => 'identifier',
+                'dc:creator' => 'dc:creator',
+                'dc:date' => 'dc:date',
+                'dc:description' => 'scopeAndContent',
+                'dc:subject' => 'subjectAccessPoints',
+                'dc:type' => 'dc:type',
+                'dc:format' => 'extentAndMedium',
+                'dc:language' => 'language',
+                'dc:coverage' => 'placeAccessPoints',
+                'dc:publisher' => 'dc:publisher',
+                'dc:rights' => 'dc:rights',
+                'dcterms:license' => 'dcterms:license',
+                'dcterms:accessRights' => 'accessConditions',
+                'dcterms:rightsHolder' => 'dcterms:rightsHolder',
+                'dcterms:provenance' => 'dcterms:provenance',
+                'dcterms:extent' => 'extentAndMedium',
+                'dcterms:medium' => 'physicalCharacteristics',
+            ];
+            
+            foreach ($dcFields as $dcField => $atomField) {
+                $parts = explode(':', $dcField);
+                $localName = end($parts);
+                $children = $dm->children('http://purl.org/dc/elements/1.1/');
+                if (isset($children->$localName)) {
+                    $record[$atomField] = (string)$children->$localName;
+                }
+                $children = $dm->children('http://purl.org/dc/terms/');
+                if (isset($children->$localName)) {
+                    $record[$atomField] = (string)$children->$localName;
                 }
             }
         }
         
-        // Extract ALL fields directly from the Folder node (Folder IS inside DescriptiveMetadata)
-        // Extract all children of this Folder node directly
-        if (true) {
-            $this->extractAllElements($folderNode, $record, '');
-        }
-        
-        // Extract Identifier elements with type attribute
-        $identifiers = $folderNode->xpath('.//Identifier');
-        foreach ($identifiers as $id) {
-            $type = (string)($id['type'] ?? 'identifier');
-            $value = trim((string)$id);
-            if (!empty($value)) {
-                // Use type as field name if present
-                $fieldName = 'Identifier_' . preg_replace('/[^a-zA-Z0-9]/', '', $type);
-                $record[$fieldName] = $value;
-            }
-        }
-        
-        // Extract History events
+        // Get History events for THIS folder only
         $historyEvents = $folderNode->xpath('.//History/Event');
         if (!empty($historyEvents)) {
             $dates = [];
@@ -394,95 +406,47 @@ class dataMigrationUploadAction extends sfAction
                 $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
                 $desc = (string)($event->EventDescription ?? $event->Description ?? '');
                 
-                if (!empty($date) || !empty($type) || !empty($agent) || !empty($desc)) {
-                    $dates[] = $date;
-                    $types[] = $type;
-                    $descriptions[] = $desc;
-                    $agents[] = $agent;
-                }
+                $dates[] = $date;
+                $types[] = $type;
+                $descriptions[] = $desc;
+                $agents[] = $agent;
             }
             
+            // Sort by date
             if (!empty($dates)) {
-                // Sort by date
                 array_multisort($dates, SORT_ASC, $types, $descriptions, $agents);
-                
-                // Pipe-delimited fields for provenance
-                $record['ahgProvenanceEventDates'] = implode('|', $dates);
-                $record['ahgProvenanceEventTypes'] = implode('|', $types);
-                $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
-                $record['ahgProvenanceEventAgents'] = implode('|', $agents);
-                $record['ahgProvenanceEventCount'] = (string)count($dates);
-                
-                $filteredDates = array_filter($dates);
-                if (!empty($filteredDates)) {
-                    $record['ahgProvenanceFirstDate'] = reset($filteredDates);
-                    $record['ahgProvenanceLastDate'] = end($filteredDates);
-                }
             }
+            
+            // Pipe-delimited fields
+            $record['ahgProvenanceEventDates'] = implode('|', $dates);
+            $record['ahgProvenanceEventTypes'] = implode('|', $types);
+            $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
+            $record['ahgProvenanceEventAgents'] = implode('|', $agents);
+            
+            // Summary fields
+            $record['ahgProvenanceEventCount'] = (string)count($dates);
+            $filteredDates = array_filter($dates);
+            if (!empty($filteredDates)) {
+                $record['ahgProvenanceFirstDate'] = reset($filteredDates);
+                $record['ahgProvenanceLastDate'] = end($filteredDates);
+            }
+            
+            // ahgProvenanceHistory stays empty
+            $record['ahgProvenanceHistory'] = '';
         }
         
-        // Extract Rights elements
-        $rights = $folderNode->xpath('.//Rights/RightsStatement');
-        foreach ($rights as $i => $rs) {
-            $prefix = count($rights) > 1 ? "Rights{$i}_" : "Rights_";
-            foreach ($rs->children() as $child) {
-                $name = $child->getName();
-                $value = trim((string)$child);
-                if (!empty($value)) {
-                    $record[$prefix . $name] = $value;
-                }
-            }
+        // Get Digital Object info
+        $digitalObj = $folderNode->DigitalObject;
+        if ($digitalObj) {
+            if (!empty($digitalObj->Filename)) $record['Filename'] = (string)$digitalObj->Filename;
+            if (!empty($digitalObj->Fixity)) $record['digitalObjectChecksum'] = (string)$digitalObj->Fixity;
+            if (!empty($digitalObj->FormatName)) $record['digitalObjectMimeType'] = (string)$digitalObj->FormatName;
+            if (!empty($digitalObj->FileSize)) $record['digitalObjectSize'] = (string)$digitalObj->FileSize;
         }
         
         return $record;
     }
-    
-    /**
-     * Recursively extract all elements from an XML node
-     */
-    protected function extractAllElements($node, &$record, $prefix)
-    {
-        // Get children in default namespace
-        foreach ($node->children() as $child) {
-            $name = $child->getName();
-            $value = trim((string)$child);
-            
-            // If has children, recurse (but not for simple text nodes)
-            $childCount = count($child->children());
-            if ($childCount > 0 && empty($value)) {
-                // Has nested elements - recurse with prefix
-                $this->extractAllElements($child, $record, $name . '_');
-            } elseif (!empty($value)) {
-                $fieldName = $prefix . $name;
-                // Don't overwrite existing values, append instead
-                if (isset($record[$fieldName]) && $record[$fieldName] !== $value) {
-                    $record[$fieldName] .= ' | ' . $value;
-                } else {
-                    $record[$fieldName] = $value;
-                }
-            }
-        }
-        
-        // Also get Dublin Core namespaced children
-        $dcNs = 'http://purl.org/dc/elements/1.1/';
-        $dctermsNs = 'http://purl.org/dc/terms/';
-        
-        foreach ($node->children($dcNs) as $child) {
-            $name = 'dc:' . $child->getName();
-            $value = trim((string)$child);
-            if (!empty($value)) {
-                $record[$name] = $value;
-            }
-        }
-        
-        foreach ($node->children($dctermsNs) as $child) {
-            $name = 'dcterms:' . $child->getName();
-            $value = trim((string)$child);
-            if (!empty($value)) {
-                $record[$name] = $value;
-            }
-        }
-    }
+
 
     protected function parseOpexSingleRecord($xml)
     {

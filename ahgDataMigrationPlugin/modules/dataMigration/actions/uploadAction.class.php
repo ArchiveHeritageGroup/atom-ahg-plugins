@@ -12,6 +12,16 @@ class dataMigrationUploadAction extends sfAction
             $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
         }
 
+        // Get source format and folder options
+        $sourceFormat = $request->getParameter('source_format', 'csv');
+        $sourceFolder = $request->getParameter('source_folder', '');
+
+        // Check if this is a folder-based import (Preservica server folder)
+        if ($this->isPreservicaFormat($sourceFormat) && !empty($sourceFolder)) {
+            return $this->handleFolderImport($request, $sourceFormat, $sourceFolder);
+        }
+
+        // Otherwise handle file upload
         $file = $request->getFiles('import_file');
 
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
@@ -27,7 +37,6 @@ class dataMigrationUploadAction extends sfAction
         $targetType = $request->getParameter('target_type', 'archives');
         $digitalObjectFolder = $request->getParameter('digital_object_folder', '');
         $customDigitalPath = $request->getParameter('custom_digital_path', '');
-        // Resolve digital object path
         $digitalObjectPath = ($digitalObjectFolder === 'custom') ? $customDigitalPath : $digitalObjectFolder;
         $savedMapping = $request->getParameter('saved_mapping', '');
 
@@ -46,11 +55,33 @@ class dataMigrationUploadAction extends sfAction
             $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
         }
 
+        // Handle ZIP files for Preservica formats
+        $digitalObjectMappings = [];
+        $extractedFolder = null;
+
+        if (in_array($ext, ['zip', 'pax']) && $this->isPreservicaFormat($sourceFormat)) {
+            $result = $this->extractAndScanPreservicaPackage($tempFile, $sourceFormat);
+            if ($result['success']) {
+                $extractedFolder = $result['extracted_folder'];
+                $digitalObjectMappings = $result['digital_object_mappings'];
+                // Use the combined OPEX data file
+                $tempFile = $result['combined_file'];
+                $ext = 'opex';
+            } else {
+                unlink($tempFile);
+                $this->getUser()->setFlash('error', $result['error']);
+                $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+            }
+        }
+
         // Parse file and detect headers/rows
         try {
             $detection = $this->parseFile($tempFile, $ext, $sheetIndex, $firstRowHeader, $delimiter, $encoding);
         } catch (\Exception $e) {
             unlink($tempFile);
+            if ($extractedFolder && is_dir($extractedFolder)) {
+                $this->removeDirectory($extractedFolder);
+            }
             $this->getUser()->setFlash('error', 'Error parsing file: ' . $e->getMessage());
             $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
         }
@@ -66,11 +97,527 @@ class dataMigrationUploadAction extends sfAction
             'first_row_header' => $firstRowHeader,
             'delimiter' => $delimiter,
             'encoding' => $encoding,
-            'digital_object_path' => $digitalObjectPath
+            'digital_object_path' => $digitalObjectPath,
+            'source_format' => $sourceFormat,
+            'extracted_folder' => $extractedFolder,
+            'digital_object_mappings' => $digitalObjectMappings
         ]);
 
         // Redirect to mapping page
         $this->redirect(['module' => 'dataMigration', 'action' => 'map', 'mapping_id' => $savedMapping]);
+    }
+
+    /**
+     * Check if source format is a Preservica format.
+     */
+    protected function isPreservicaFormat($format)
+    {
+        return in_array($format, ['preservica_opex', 'preservica_xip', 'opex', 'xip']);
+    }
+
+    /**
+     * Handle import from server folder (Preservica export folder).
+     */
+    protected function handleFolderImport($request, $sourceFormat, $sourceFolder)
+    {
+        // Validate folder exists
+        if (!is_dir($sourceFolder)) {
+            $this->getUser()->setFlash('error', 'Folder not found: ' . $sourceFolder);
+            $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+        }
+
+        // Get other options
+        $targetType = $request->getParameter('target_type', 'archives');
+        $savedMapping = $request->getParameter('saved_mapping', '');
+
+        // Scan folder for OPEX files
+        $result = $this->scanPreservicaFolder($sourceFolder);
+
+        if (!$result['success']) {
+            $this->getUser()->setFlash('error', $result['error']);
+            $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+        }
+
+        if (empty($result['opex_files'])) {
+            $this->getUser()->setFlash('error', 'No OPEX files found in folder: ' . $sourceFolder);
+            $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+        }
+
+        // Create combined OPEX file for mapping
+        $uploadDir = sfConfig::get('sf_upload_dir') . '/migration';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $combinedFile = $this->createCombinedOpexFile($result['opex_files'], $result['digital_object_mappings'], $uploadDir);
+
+        // Parse the combined file
+        try {
+            $detection = $this->parseFile($combinedFile, 'opex', 0, 1, 'auto', 'auto');
+        } catch (\Exception $e) {
+            unlink($combinedFile);
+            $this->getUser()->setFlash('error', 'Error parsing OPEX files: ' . $e->getMessage());
+            $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+        }
+
+        // Store in session
+        $this->getUser()->setAttribute('migration_file', $combinedFile);
+        $this->getUser()->setAttribute('migration_filename', basename($sourceFolder) . ' (folder)');
+        $this->getUser()->setAttribute('migration_detection', $detection);
+        $this->getUser()->setAttribute('migration_target_type', $targetType);
+        $this->getUser()->setAttribute('migration_saved_mapping', $savedMapping);
+        $this->getUser()->setAttribute('migration_options', [
+            'sheet_index' => 0,
+            'first_row_header' => 1,
+            'delimiter' => 'auto',
+            'encoding' => 'auto',
+            'digital_object_path' => $sourceFolder,
+            'source_format' => $sourceFormat,
+            'source_folder' => $sourceFolder,
+            'extracted_folder' => null,
+            'digital_object_mappings' => $result['digital_object_mappings']
+        ]);
+
+        // Redirect to mapping page
+        $this->redirect(['module' => 'dataMigration', 'action' => 'map', 'mapping_id' => $savedMapping]);
+    }
+
+    /**
+     * Extract ZIP/PAX and scan for OPEX files with associated digital objects.
+     */
+    protected function extractAndScanPreservicaPackage($zipPath, $sourceFormat)
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath) !== true) {
+            return ['success' => false, 'error' => 'Cannot open ZIP file'];
+        }
+
+        // Create extraction directory
+        $extractDir = sfConfig::get('sf_upload_dir') . '/migration/extracted_' . uniqid();
+        if (!mkdir($extractDir, 0755, true)) {
+            $zip->close();
+            return ['success' => false, 'error' => 'Cannot create extraction directory'];
+        }
+
+        // Extract all files
+        $zip->extractTo($extractDir);
+        $zip->close();
+
+        // Scan for OPEX files
+        $result = $this->scanPreservicaFolder($extractDir);
+        $result['extracted_folder'] = $extractDir;
+
+        if ($result['success'] && !empty($result['opex_files'])) {
+            // Create combined file
+            $uploadDir = sfConfig::get('sf_upload_dir') . '/migration';
+            $combinedFile = $this->createCombinedOpexFile($result['opex_files'], $result['digital_object_mappings'], $uploadDir);
+            $result['combined_file'] = $combinedFile;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Scan folder recursively for OPEX files and their associated digital objects.
+     */
+    protected function scanPreservicaFolder($folder)
+    {
+        $opexFiles = [];
+        $digitalObjectMappings = [];
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    $ext = strtolower($file->getExtension());
+
+                    if ($ext === 'opex') {
+                        $opexPath = $file->getPathname();
+                        $opexDir = $file->getPath();
+                        $opexBasename = $file->getBasename('.opex');
+
+                        $opexFiles[] = $opexPath;
+
+                        // Find associated digital objects in the same directory
+                        $siblingFiles = $this->findSiblingDigitalObjects($opexDir, $opexBasename);
+
+                        if (!empty($siblingFiles)) {
+                            // Use relative path from source folder as key
+                            $relativePath = str_replace($folder . '/', '', $opexPath);
+                            $digitalObjectMappings[$relativePath] = $siblingFiles;
+
+                            // Also map by basename for easier lookup
+                            $digitalObjectMappings[$opexBasename] = $siblingFiles;
+                        }
+                    }
+                }
+            }
+
+            return [
+                'success' => true,
+                'opex_files' => $opexFiles,
+                'digital_object_mappings' => $digitalObjectMappings,
+                'total_opex' => count($opexFiles),
+                'total_digital_objects' => array_sum(array_map('count', $digitalObjectMappings))
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => 'Error scanning folder: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Find digital object files that are siblings of an OPEX file.
+     */
+    protected function findSiblingDigitalObjects($directory, $opexBasename)
+    {
+        $digitalObjects = [];
+
+        // Common digital object extensions
+        $mediaExtensions = [
+            // Images
+            'jpg', 'jpeg', 'png', 'gif', 'tif', 'tiff', 'bmp', 'webp', 'svg',
+            // Documents
+            'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp',
+            // Audio
+            'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a',
+            // Video
+            'mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm',
+            // 3D
+            'obj', 'stl', 'glb', 'gltf', 'fbx', 'dae',
+            // Archives (content files, not packages)
+            'txt', 'rtf', 'html', 'htm', 'xml', 'json'
+        ];
+
+        $files = scandir($directory);
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $filePath = $directory . '/' . $file;
+
+            if (!is_file($filePath)) {
+                continue;
+            }
+
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+            // Skip OPEX files
+            if ($ext === 'opex') {
+                continue;
+            }
+
+            // Check if it's a media file
+            if (in_array($ext, $mediaExtensions)) {
+                $fileBasename = pathinfo($file, PATHINFO_FILENAME);
+
+                // Prioritize files with matching basename
+                if (strcasecmp($fileBasename, $opexBasename) === 0) {
+                    // Exact match - put at front
+                    array_unshift($digitalObjects, $filePath);
+                } else {
+                    // Other files in directory
+                    $digitalObjects[] = $filePath;
+                }
+            }
+        }
+
+        return $digitalObjects;
+    }
+
+    /**
+     * Create a combined OPEX file from multiple OPEX files.
+     * This allows mapping UI to work with all records at once.
+     */
+    protected function createCombinedOpexFile($opexFiles, $digitalObjectMappings, $outputDir)
+    {
+        $allRecords = [];
+        $allHeaders = [];
+
+        foreach ($opexFiles as $opexFile) {
+            // Parse each OPEX file
+            $content = file_get_contents($opexFile);
+            $content = preg_replace('/xmlns="[^"]+"/', '', $content);
+
+            try {
+                $xml = new \SimpleXMLElement($content);
+                $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+                $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
+
+                // Get the OPEX basename for digital object lookup
+                $opexBasename = pathinfo($opexFile, PATHINFO_FILENAME);
+                $opexRelPath = basename(dirname($opexFile)) . '/' . basename($opexFile);
+
+                // Parse the OPEX file
+                $records = $this->parseOpexXml($xml);
+
+                // Add digital object paths to records
+                foreach ($records as &$record) {
+                    // Try to find digital objects for this record
+                    $doFiles = $digitalObjectMappings[$opexBasename] ?? $digitalObjectMappings[$opexRelPath] ?? [];
+
+                    if (!empty($doFiles)) {
+                        // Add primary digital object
+                        $record['_digitalObjectPath'] = $doFiles[0];
+                        $record['_digitalObjectFilename'] = basename($doFiles[0]);
+
+                        // Add all digital objects as pipe-separated list
+                        if (count($doFiles) > 1) {
+                            $record['_digitalObjectPaths'] = implode('|', $doFiles);
+                        }
+                    }
+
+                    // Add source OPEX file path for reference
+                    $record['_sourceOpexFile'] = $opexFile;
+
+                    // Collect headers
+                    foreach (array_keys($record) as $key) {
+                        if (!in_array($key, $allHeaders)) {
+                            $allHeaders[] = $key;
+                        }
+                    }
+                }
+
+                unset($record); // Break the reference to prevent PHP foreach bug
+                $allRecords = array_merge($allRecords, $records);
+
+            } catch (\Exception $e) {
+                // Log error but continue with other files
+                error_log("Error parsing OPEX file $opexFile: " . $e->getMessage());
+            }
+        }
+
+        // Sort headers
+        $allHeaders = $this->sortOpexHeaders($allHeaders);
+
+        // Create combined XML file
+        $combinedFile = $outputDir . '/combined_' . uniqid() . '.opex';
+
+        $xmlContent = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xmlContent .= '<OPEXMetadata xmlns="http://www.openpreservationexchange.org/opex/v1.2"' . "\n";
+        $xmlContent .= '              xmlns:dc="http://purl.org/dc/elements/1.1/"' . "\n";
+        $xmlContent .= '              xmlns:dcterms="http://purl.org/dc/terms/">' . "\n";
+        $xmlContent .= '  <DescriptiveMetadata>' . "\n";
+
+        foreach ($allRecords as $record) {
+            $xmlContent .= '    <Record>' . "\n";
+            foreach ($record as $key => $value) {
+                if ($value !== '' && $value !== null) {
+                    $safeKey = preg_replace('/[^a-zA-Z0-9_:]/', '_', $key);
+                    $safeValue = htmlspecialchars($value, ENT_XML1, 'UTF-8');
+                    $xmlContent .= "      <{$safeKey}>{$safeValue}</{$safeKey}>\n";
+                }
+            }
+            $xmlContent .= '    </Record>' . "\n";
+        }
+
+        $xmlContent .= '  </DescriptiveMetadata>' . "\n";
+        $xmlContent .= '</OPEXMetadata>' . "\n";
+
+        file_put_contents($combinedFile, $xmlContent);
+
+        return $combinedFile;
+    }
+
+    /**
+     * Parse OPEX XML and return array of records.
+     */
+    protected function parseOpexXml($xml)
+    {
+        $records = [];
+
+        // Check for multiple Record elements
+        $recordNodes = $xml->xpath('//DescriptiveMetadata/Record');
+
+        if (!empty($recordNodes)) {
+            foreach ($recordNodes as $recordNode) {
+                $record = $this->extractRecordFromNode($recordNode, $xml);
+                if (!empty($record)) {
+                    $records[] = $record;
+                }
+            }
+        } else {
+            // Single record file
+            $record = $this->extractSingleRecord($xml);
+            if (!empty($record)) {
+                $records[] = $record;
+            }
+        }
+
+        return $records;
+    }
+
+    /**
+     * Extract record data from a Record XML node.
+     */
+    protected function extractRecordFromNode($node, $xml)
+    {
+        $record = [];
+
+        // Get all child elements
+        foreach ($node->children() as $child) {
+            $name = $child->getName();
+            $value = trim((string)$child);
+
+            if (!empty($value)) {
+                if (isset($record[$name])) {
+                    $record[$name] .= ' | ' . $value;
+                } else {
+                    $record[$name] = $value;
+                }
+            }
+
+            // Check for type attribute (e.g., Identifier type="Reference")
+            $type = (string)($child['type'] ?? '');
+            if (!empty($type) && !empty($value)) {
+                $record[$name . '_' . $type] = $value;
+            }
+        }
+
+        // Get Dublin Core elements
+        $dcNs = 'http://purl.org/dc/elements/1.1/';
+        foreach ($node->children($dcNs) as $child) {
+            $name = 'dc:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                if (isset($record[$name])) {
+                    $record[$name] .= ' | ' . $value;
+                } else {
+                    $record[$name] = $value;
+                }
+            }
+        }
+
+        // Get DC Terms elements
+        $dctermsNs = 'http://purl.org/dc/terms/';
+        foreach ($node->children($dctermsNs) as $child) {
+            $name = 'dcterms:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                if (isset($record[$name])) {
+                    $record[$name] .= ' | ' . $value;
+                } else {
+                    $record[$name] = $value;
+                }
+            }
+        }
+
+        return $record;
+    }
+
+    /**
+     * Extract single record from OPEX XML.
+     */
+    protected function extractSingleRecord($xml)
+    {
+        $record = [];
+
+        // Properties
+        $props = $xml->xpath('//Properties');
+        if (!empty($props)) {
+            foreach ($props[0]->children() as $child) {
+                $name = $child->getName();
+                $value = trim((string)$child);
+                if (!empty($value)) {
+                    $record[$name] = $value;
+                }
+            }
+        }
+
+        // Transfer info
+        $transfer = $xml->xpath('//Transfer');
+        if (!empty($transfer)) {
+            foreach ($transfer[0]->children() as $child) {
+                $name = 'Transfer_' . $child->getName();
+                $value = trim((string)$child);
+                if (!empty($value)) {
+                    $record[$name] = $value;
+                }
+            }
+        }
+
+        // DescriptiveMetadata - get all elements
+        $dm = $xml->xpath('//DescriptiveMetadata');
+        if (!empty($dm)) {
+            $this->extractAllFromNode($dm[0], $record, '');
+        }
+
+        return $record;
+    }
+
+    /**
+     * Recursively extract all elements from XML node.
+     */
+    protected function extractAllFromNode($node, &$record, $prefix)
+    {
+        foreach ($node->children() as $child) {
+            $name = $prefix . $child->getName();
+            $value = trim((string)$child);
+
+            $childCount = count($child->children());
+
+            if ($childCount > 0) {
+                $this->extractAllFromNode($child, $record, $name . '_');
+            } elseif (!empty($value)) {
+                if (isset($record[$name])) {
+                    $record[$name] .= ' | ' . $value;
+                } else {
+                    $record[$name] = $value;
+                }
+            }
+
+            // Handle type attribute
+            $type = (string)($child['type'] ?? '');
+            if (!empty($type) && !empty($value)) {
+                $record[$name . '_' . $type] = $value;
+            }
+        }
+
+        // DC namespace
+        $dcNs = 'http://purl.org/dc/elements/1.1/';
+        foreach ($node->children($dcNs) as $child) {
+            $name = 'dc:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                $record[$name] = $value;
+            }
+        }
+
+        // DCTerms namespace
+        $dctermsNs = 'http://purl.org/dc/terms/';
+        foreach ($node->children($dctermsNs) as $child) {
+            $name = 'dcterms:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                $record[$name] = $value;
+            }
+        }
+    }
+
+    /**
+     * Remove directory recursively.
+     */
+    protected function removeDirectory($dir)
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . '/' . $file;
+            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
+        }
+        rmdir($dir);
     }
 
     protected function parseFile($filepath, $ext, $sheetIndex, $firstRowHeader, $delimiter, $encoding)
@@ -79,7 +626,7 @@ class dataMigrationUploadAction extends sfAction
         if ($ext === 'opex' || ($ext === 'xml' && $this->isOpexFile($filepath))) {
             return $this->parseOpexFile($filepath);
         }
-        
+
         if (in_array($ext, ['pax', 'zip'])) {
             return $this->parsePaxFile($filepath);
         }
@@ -153,18 +700,18 @@ class dataMigrationUploadAction extends sfAction
             // JSON file
             $content = file_get_contents($filepath);
             $data = json_decode($content, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON file: ' . json_last_error_msg());
             }
-            
+
             // Handle array of objects or nested structure
             if (isset($data['records'])) {
                 $data = $data['records'];
             } elseif (isset($data['data'])) {
                 $data = $data['data'];
             }
-            
+
             if (!empty($data) && is_array($data)) {
                 $firstRow = reset($data);
                 if (is_array($firstRow)) {
@@ -192,7 +739,7 @@ class dataMigrationUploadAction extends sfAction
     protected function isOpexFile($filepath)
     {
         $content = file_get_contents($filepath, false, null, 0, 2000);
-        return strpos($content, 'opex:') !== false 
+        return strpos($content, 'opex:') !== false
             || strpos($content, 'OPEXMetadata') !== false
             || strpos($content, 'openpreservationexchange.org') !== false;
     }
@@ -216,10 +763,10 @@ class dataMigrationUploadAction extends sfAction
 
         // Check for multiple Record elements in DescriptiveMetadata
         $recordNodes = $xml->xpath('//DescriptiveMetadata/Record');
-        
+
         // Also check for Folder elements (AHG extended OPEX format)
         $folderNodes = $xml->xpath('//Folder');
-        
+
         if (!empty($recordNodes) && count($recordNodes) > 0) {
             // Multiple records - parse each one
             foreach ($recordNodes as $recordNode) {
@@ -252,6 +799,12 @@ class dataMigrationUploadAction extends sfAction
                 }
             }
         }
+
+        // Remove auto-generated AHG provenance fields from headers (they are internal)
+        $headers = array_filter($headers, function($h) {
+            return strpos($h, "ahgProvenance") !== 0 && strpos($h, "ahgCondition") !== 0 && strpos($h, "ahgRights") !== 0 && strpos($h, "Rights_") !== 0;
+        });
+        $headers = array_values($headers); // Re-index
 
         // Sort headers to group related fields
         $headers = $this->sortOpexHeaders($headers);
@@ -310,7 +863,7 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // Get DC Terms elements
-        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified', 
+        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified',
                     'license', 'rightsHolder', 'spatial', 'temporal'];
         foreach ($dcTerms as $term) {
             $nodes = $recordNode->xpath("dcterms:{$term}");
@@ -324,130 +877,159 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // Extract common fields to standard names
+
+        // Extract ALL other child elements (including _digitalObjectPath, etc.)
+        foreach ($recordNode->children() as $child) {
+            $name = $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value) && !isset($record[$name])) {
+                $record[$name] = $value;
+            }
+        }
         $this->extractCommonOpexFields($record, $recordNode, $xml);
 
         return $record;
     }
 
     /**
-     * Parse single record OPEX file.
-     */
-    /**
      * Parse a Folder element from OPEX file.
      */
     protected function parseOpexFolder($folderNode, $xml)
     {
         $record = [];
-        
-        // Get folder ID
+
+        // Get folder ID attribute
         $folderId = (string)($folderNode['id'] ?? '');
         if ($folderId) {
             $record['legacyId'] = $folderId;
         }
-        
-        // Get Properties
-        $props = $folderNode->Properties;
-        if ($props) {
-            if (!empty($props->Title)) $record['title'] = (string)$props->Title;
-            if (!empty($props->Description)) $record['scopeAndContent'] = (string)$props->Description;
-            if (!empty($props->SecurityDescriptor)) $record['ahgSecurityClassification'] = (string)$props->SecurityDescriptor;
-        }
-        
-        // Get DescriptiveMetadata
-        $dm = $folderNode->DescriptiveMetadata;
-        if ($dm) {
-            // Dublin Core fields
-            $dcFields = [
-                'dc:title' => 'title',
-                'dc:identifier' => 'identifier',
-                'dc:creator' => 'dc:creator',
-                'dc:date' => 'dc:date',
-                'dc:description' => 'scopeAndContent',
-                'dc:subject' => 'subjectAccessPoints',
-                'dc:type' => 'dc:type',
-                'dc:format' => 'extentAndMedium',
-                'dc:language' => 'language',
-                'dc:coverage' => 'placeAccessPoints',
-                'dc:publisher' => 'dc:publisher',
-                'dc:rights' => 'dc:rights',
-                'dcterms:license' => 'dcterms:license',
-                'dcterms:accessRights' => 'accessConditions',
-                'dcterms:rightsHolder' => 'dcterms:rightsHolder',
-                'dcterms:provenance' => 'dcterms:provenance',
-                'dcterms:extent' => 'extentAndMedium',
-                'dcterms:medium' => 'physicalCharacteristics',
-            ];
-            
-            foreach ($dcFields as $dcField => $atomField) {
-                $parts = explode(':', $dcField);
-                $localName = end($parts);
-                $children = $dm->children('http://purl.org/dc/elements/1.1/');
-                if (isset($children->$localName)) {
-                    $record[$atomField] = (string)$children->$localName;
-                }
-                $children = $dm->children('http://purl.org/dc/terms/');
-                if (isset($children->$localName)) {
-                    $record[$atomField] = (string)$children->$localName;
+
+        // Extract ALL fields from Properties
+        if (isset($folderNode->Properties)) {
+            foreach ($folderNode->Properties->children() as $child) {
+                $name = $child->getName();
+                $value = trim((string)$child);
+                if (!empty($value)) {
+                    $record[$name] = $value;
                 }
             }
         }
-        
-        // Get History events for THIS folder only
+
+        // Extract ALL fields directly from the Folder node
+        $this->extractAllElements($folderNode, $record, '');
+
+        // Extract Identifier elements with type attribute
+        $identifiers = $folderNode->xpath('.//Identifier');
+        foreach ($identifiers as $id) {
+            $type = (string)($id['type'] ?? 'identifier');
+            $value = trim((string)$id);
+            if (!empty($value)) {
+                $fieldName = 'Identifier_' . preg_replace('/[^a-zA-Z0-9]/', '', $type);
+                $record[$fieldName] = $value;
+            }
+        }
+
+        // Extract History events
         $historyEvents = $folderNode->xpath('.//History/Event');
         if (!empty($historyEvents)) {
             $dates = [];
             $types = [];
             $descriptions = [];
             $agents = [];
-            
+
             foreach ($historyEvents as $event) {
                 $date = (string)($event->EventDate ?? $event->Date ?? '');
                 $type = (string)($event->EventType ?? $event->Type ?? '');
                 $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
                 $desc = (string)($event->EventDescription ?? $event->Description ?? '');
-                
-                $dates[] = $date;
-                $types[] = $type;
-                $descriptions[] = $desc;
-                $agents[] = $agent;
+
+                if (!empty($date) || !empty($type) || !empty($agent) || !empty($desc)) {
+                    $dates[] = $date;
+                    $types[] = $type;
+                    $descriptions[] = $desc;
+                    $agents[] = $agent;
+                }
             }
-            
-            // Sort by date
+
             if (!empty($dates)) {
                 array_multisort($dates, SORT_ASC, $types, $descriptions, $agents);
+
+                $record['ahgProvenanceEventDates'] = implode('|', $dates);
+                $record['ahgProvenanceEventTypes'] = implode('|', $types);
+                $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
+                $record['ahgProvenanceEventAgents'] = implode('|', $agents);
+                $record['ahgProvenanceEventCount'] = (string)count($dates);
+
+                $filteredDates = array_filter($dates);
+                if (!empty($filteredDates)) {
+                    $record['ahgProvenanceFirstDate'] = reset($filteredDates);
+                    $record['ahgProvenanceLastDate'] = end($filteredDates);
+                }
             }
-            
-            // Pipe-delimited fields
-            $record['ahgProvenanceEventDates'] = implode('|', $dates);
-            $record['ahgProvenanceEventTypes'] = implode('|', $types);
-            $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
-            $record['ahgProvenanceEventAgents'] = implode('|', $agents);
-            
-            // Summary fields
-            $record['ahgProvenanceEventCount'] = (string)count($dates);
-            $filteredDates = array_filter($dates);
-            if (!empty($filteredDates)) {
-                $record['ahgProvenanceFirstDate'] = reset($filteredDates);
-                $record['ahgProvenanceLastDate'] = end($filteredDates);
+        }
+
+        // Extract Rights elements
+        $rights = $folderNode->xpath('.//Rights/RightsStatement');
+        foreach ($rights as $i => $rs) {
+            $prefix = count($rights) > 1 ? "Rights{$i}_" : "Rights_";
+            foreach ($rs->children() as $child) {
+                $name = $child->getName();
+                $value = trim((string)$child);
+                if (!empty($value)) {
+                    $record[$prefix . $name] = $value;
+                }
             }
-            
-            // ahgProvenanceHistory stays empty
-            $record['ahgProvenanceHistory'] = '';
         }
-        
-        // Get Digital Object info
-        $digitalObj = $folderNode->DigitalObject;
-        if ($digitalObj) {
-            if (!empty($digitalObj->Filename)) $record['Filename'] = (string)$digitalObj->Filename;
-            if (!empty($digitalObj->Fixity)) $record['digitalObjectChecksum'] = (string)$digitalObj->Fixity;
-            if (!empty($digitalObj->FormatName)) $record['digitalObjectMimeType'] = (string)$digitalObj->FormatName;
-            if (!empty($digitalObj->FileSize)) $record['digitalObjectSize'] = (string)$digitalObj->FileSize;
-        }
-        
+
         return $record;
     }
 
+    /**
+     * Recursively extract all elements from an XML node
+     */
+    protected function extractAllElements($node, &$record, $prefix)
+    {
+        foreach ($node->children() as $child) {
+            $name = $child->getName();
+            $value = trim((string)$child);
 
+            $childCount = count($child->children());
+            if ($childCount > 0 && empty($value)) {
+                $this->extractAllElements($child, $record, $name . '_');
+            } elseif (!empty($value)) {
+                $fieldName = $prefix . $name;
+                if (isset($record[$fieldName]) && $record[$fieldName] !== $value) {
+                    $record[$fieldName] .= ' | ' . $value;
+                } else {
+                    $record[$fieldName] = $value;
+                }
+            }
+        }
+
+        // Dublin Core namespace
+        $dcNs = 'http://purl.org/dc/elements/1.1/';
+        foreach ($node->children($dcNs) as $child) {
+            $name = 'dc:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                $record[$name] = $value;
+            }
+        }
+
+        // DC Terms namespace
+        $dctermsNs = 'http://purl.org/dc/terms/';
+        foreach ($node->children($dctermsNs) as $child) {
+            $name = 'dcterms:' . $child->getName();
+            $value = trim((string)$child);
+            if (!empty($value)) {
+                $record[$name] = $value;
+            }
+        }
+    }
+
+    /**
+     * Parse single record OPEX file.
+     */
     protected function parseOpexSingleRecord($xml)
     {
         $record = [];
@@ -458,8 +1040,7 @@ class dataMigrationUploadAction extends sfAction
             foreach ($props[0]->children() as $child) {
                 $name = $child->getName();
                 $record[$name] = (string)$child;
-                
-                // Map to standard fields
+
                 if ($name === 'Title') $record['title'] = (string)$child;
                 if ($name === 'Description') $record['scopeAndContent'] = (string)$child;
                 if ($name === 'SecurityDescriptor') {
@@ -513,7 +1094,7 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // DC Terms
-        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified', 
+        $dcTerms = ['extent', 'provenance', 'accessRights', 'created', 'modified',
                     'license', 'rightsHolder', 'spatial', 'temporal'];
         foreach ($dcTerms as $term) {
             $nodes = $xml->xpath("//dcterms:{$term}");
@@ -537,41 +1118,32 @@ class dataMigrationUploadAction extends sfAction
      */
     protected function extractCommonOpexFields(&$record, $recordNode, $xml)
     {
-        // =====================================================
-        // DIGITAL OBJECT FIELDS
-        // =====================================================
-        
-        // Look for DigitalObject/Filename elements
         $context = $recordNode ?? $xml;
+
+        // Digital Object fields
         $filenames = $context->xpath('.//DigitalObject/Filename | .//Filename | .//File | .//Bitstream');
         if (!empty($filenames)) {
             $record['Filename'] = (string)$filenames[0];
             $record['digitalObjectPath'] = (string)$filenames[0];
         }
 
-        // Fixity/Checksum
         $fixity = $context->xpath('.//DigitalObject/Fixity | .//Fixity | .//Checksum');
         if (!empty($fixity)) {
             $algorithm = (string)($fixity[0]['algorithm'] ?? 'SHA-256');
             $record['digitalObjectChecksum'] = $algorithm . ':' . (string)$fixity[0];
         }
 
-        // File format
         $format = $context->xpath('.//DigitalObject/FormatName | .//FormatName');
         if (!empty($format)) {
             $record['digitalObjectMimeType'] = (string)$format[0];
         }
 
-        // File size
         $size = $context->xpath('.//DigitalObject/FileSize | .//FileSize');
         if (!empty($size)) {
             $record['digitalObjectSize'] = (string)$size[0];
         }
 
-        // =====================================================
-        // SECURITY & ACCESS FIELDS (AHG)
-        // =====================================================
-        
+        // Security fields
         $security = $xml->xpath('//Properties/SecurityDescriptor | //SecurityDescriptor');
         if (!empty($security)) {
             $record['ahgSecurityClassification'] = (string)$security[0];
@@ -580,106 +1152,66 @@ class dataMigrationUploadAction extends sfAction
             }
         }
 
-        // =====================================================
-        // RIGHTS FIELDS (AHG Extended)
-        // =====================================================
-        
+        // Rights fields
         $rightsText = [];
-        
-        // DC Rights
         if (!empty($record['dc:rights'])) {
             $rightsText[] = "Rights: " . $record['dc:rights'];
         }
-        
-        // License
         if (!empty($record['dcterms:license'])) {
             $rightsText[] = "License: " . $record['dcterms:license'];
         }
-        
-        // Rights Holder
         if (!empty($record['dcterms:rightsHolder'])) {
             $rightsText[] = "Rights Holder: " . $record['dcterms:rightsHolder'];
         }
-        
-        // Access Rights
         if (!empty($record['dcterms:accessRights'])) {
             $rightsText[] = "Access: " . $record['dcterms:accessRights'];
         }
-        
         if (!empty($rightsText)) {
             $record['ahgRightsStatement'] = implode(' | ', $rightsText);
         }
 
-        // Parse Rights elements (structured)
-        $rightsElements = $xml->xpath('//Rights/RightsStatement');
-        if (!empty($rightsElements)) {
-            $structuredRights = [];
-            foreach ($rightsElements as $rs) {
-                $basis = (string)($rs->RightsBasis ?? '');
-                $status = (string)($rs->CopyrightStatus ?? '');
-                $note = (string)($rs->CopyrightNote ?? $rs->LicenseNote ?? $rs->PolicyNote ?? $rs->StatuteNote ?? '');
-                
-                $rStr = $basis;
-                if ($status) $rStr .= " ($status)";
-                if ($note) $rStr .= ": $note";
-                $structuredRights[] = $rStr;
-            }
-            $record['ahgRightsStructured'] = implode(' || ', $structuredRights);
-        }
-
-        // =====================================================
-        // =====================================================
-        // PROVENANCE / HISTORY FIELDS (AHG) - Pipe-delimited
-        // =====================================================
+        // Provenance/History fields
         $historyEvents = $xml->xpath('//History/Event | //opex:History/opex:Event');
         if (!empty($historyEvents)) {
             $dates = [];
             $types = [];
             $descriptions = [];
             $agents = [];
-            
+
             foreach ($historyEvents as $event) {
                 $date = (string)($event->EventDate ?? $event->Date ?? '');
                 $type = (string)($event->EventType ?? $event->Type ?? '');
                 $agent = (string)($event->EventAgent ?? $event->Agent ?? '');
                 $desc = (string)($event->EventDescription ?? $event->Description ?? '');
-                
+
                 $dates[] = $date;
                 $types[] = $type;
                 $descriptions[] = $desc;
                 $agents[] = $agent;
             }
-            
-            // Sort by date
+
             array_multisort($dates, SORT_ASC, $types, $descriptions, $agents);
-            
-            // Pipe-delimited fields
+
             $record['ahgProvenanceEventDates'] = implode('|', $dates);
             $record['ahgProvenanceEventTypes'] = implode('|', $types);
             $record['ahgProvenanceEventDescriptions'] = implode('|', $descriptions);
             $record['ahgProvenanceEventAgents'] = implode('|', $agents);
-            
-            // Summary fields
             $record['ahgProvenanceEventCount'] = (string)count($dates);
+
             $filteredDates = array_filter($dates);
             if (!empty($filteredDates)) {
                 $record['ahgProvenanceFirstDate'] = reset($filteredDates);
                 $record['ahgProvenanceLastDate'] = end($filteredDates);
             }
-            
-            // ahgProvenanceHistory stays empty - for manual notes only
+
             $record['ahgProvenanceHistory'] = '';
         }
 
-        // Also check dcterms:provenance
         if (!empty($record['dcterms:provenance']) && empty($record['ahgProvenanceHistory'])) {
             $record['ahgProvenanceHistory'] = $record['dcterms:provenance'];
         }
 
-        // =====================================================
-        // RELATIONSHIPS
-        // =====================================================
-        
+        // Relationships
         $relationships = $xml->xpath('//Relationships/Relationship');
         if (!empty($relationships)) {
             $relText = [];
@@ -698,42 +1230,31 @@ class dataMigrationUploadAction extends sfAction
     protected function sortOpexHeaders($headers)
     {
         $priority = [
-            // Core identification
             'legacyId', 'Identifier_Reference', 'Identifier_AtoM_ID', 'title', 'dc:title',
-            // Description
             'scopeAndContent', 'dc:description', 'Description',
-            // Dates
             'dc:date', 'dcterms:created', 'dcterms:modified',
-            // Creators/Contributors
             'dc:creator', 'dc:contributor', 'dc:publisher',
-            // Access points
             'dc:subject', 'dc:coverage', 'dcterms:spatial',
-            // Physical description
             'dc:format', 'dcterms:extent', 'dc:language', 'dc:type',
-            // Digital objects
+            '_digitalObjectPath', '_digitalObjectFilename', '_digitalObjectPaths',
             'Filename', 'digitalObjectPath', 'digitalObjectChecksum', 'digitalObjectMimeType', 'digitalObjectSize',
-            // Rights (standard AtoM)
             'accessConditions', 'reproductionConditions', 'dc:rights', 'dcterms:accessRights', 'dcterms:license',
-            // Security (AHG)
             'ahgSecurityClassification', 'SecurityDescriptor',
-            // Rights (AHG Extended)
             'ahgRightsStatement', 'ahgRightsStructured', 'dcterms:rightsHolder',
-            // Provenance (AHG)
             'ahgProvenanceHistory', 'ahgProvenanceEventCount', 'ahgProvenanceFirstDate', 'ahgProvenanceLastDate',
             'dcterms:provenance',
-            // Relationships
             'ahgRelationships',
-            // Transfer metadata
             'Transfer_SourceID', 'Transfer_Manifest',
+            '_sourceOpexFile'
         ];
 
         usort($headers, function($a, $b) use ($priority) {
             $posA = array_search($a, $priority);
             $posB = array_search($b, $priority);
-            
+
             if ($posA === false) $posA = 999;
             if ($posB === false) $posB = 999;
-            
+
             if ($posA === $posB) {
                 return strcmp($a, $b);
             }
@@ -742,7 +1263,7 @@ class dataMigrationUploadAction extends sfAction
 
         return $headers;
     }
-     
+
     protected function parsePaxFile($filepath)
     {
         $zip = new \ZipArchive();
@@ -754,7 +1275,6 @@ class dataMigrationUploadAction extends sfAction
         $rows = [];
         $records = [];
 
-        // Find metadata.xml or XIP file
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
             if (preg_match('/metadata\.xml$/i', $name) || preg_match('/\.xip$/i', $name)) {
@@ -765,7 +1285,6 @@ class dataMigrationUploadAction extends sfAction
 
         $zip->close();
 
-        // Build headers from all records
         foreach ($records as $record) {
             foreach (array_keys($record) as $key) {
                 if (!in_array($key, $headers)) {
@@ -774,7 +1293,6 @@ class dataMigrationUploadAction extends sfAction
             }
         }
 
-        // Build rows
         foreach ($records as $record) {
             $row = [];
             foreach ($headers as $h) {
@@ -791,33 +1309,27 @@ class dataMigrationUploadAction extends sfAction
         ];
     }
 
-    /**
-     * Parse XIP content from PAX package.
-     */
     protected function parseXipContent($content)
     {
         $records = [];
-        
+
         try {
-            // Remove default namespace
             $content = preg_replace('/xmlns="[^"]+"/', '', $content);
-            
+
             $xml = new \SimpleXMLElement($content);
             $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
 
-            // Find all StructuralObjects
             $objects = $xml->xpath('//StructuralObject');
-            
+
             foreach ($objects as $obj) {
                 $record = [];
-                
+
                 foreach ($obj->children() as $child) {
                     $name = $child->getName();
                     $value = (string)$child;
                     $record[$name] = $value;
                 }
 
-                // Extract Dublin Core if present
                 $dcNodes = $xml->xpath("//dc:*");
                 foreach ($dcNodes as $dc) {
                     $name = 'dc:' . $dc->getName();
@@ -832,7 +1344,6 @@ class dataMigrationUploadAction extends sfAction
                 $records[] = $record;
             }
 
-            // If no StructuralObjects, try ContentObjects
             if (empty($records)) {
                 $objects = $xml->xpath('//ContentObject');
                 foreach ($objects as $obj) {
@@ -845,35 +1356,27 @@ class dataMigrationUploadAction extends sfAction
             }
 
         } catch (\Exception $e) {
-            // If XIP parsing fails, try generic XML
             return $this->parseGenericXmlContent($content);
         }
 
         return $records;
     }
 
-    /**
-     * Parse generic XML file.
-     */
     protected function parseGenericXml($filepath)
     {
         $content = file_get_contents($filepath);
         return $this->parseGenericXmlFromContent($content);
     }
 
-    /**
-     * Parse generic XML from content string.
-     */
     protected function parseGenericXmlFromContent($content)
     {
         $records = [];
-        
+
         try {
             $xml = new \SimpleXMLElement($content);
             $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
             $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
 
-            // Try to find record-like elements
             foreach ($xml->children() as $child) {
                 $record = $this->xmlToArray($child);
                 if (!empty($record)) {
@@ -888,7 +1391,6 @@ class dataMigrationUploadAction extends sfAction
             return ['headers' => [], 'rows' => [], 'row_count' => 0, 'format' => 'xml'];
         }
 
-        // Build headers
         $headers = [];
         foreach ($records as $record) {
             foreach (array_keys($record) as $key) {
@@ -898,7 +1400,6 @@ class dataMigrationUploadAction extends sfAction
             }
         }
 
-        // Build rows
         $rows = [];
         foreach ($records as $record) {
             $row = [];
@@ -916,28 +1417,18 @@ class dataMigrationUploadAction extends sfAction
         ];
     }
 
-    /**
-     * Parse Dublin Core XML.
-     */
-    protected function parseDublinCoreXml($filepath, $content = null)
+    protected function parseGenericXmlContent($content)
     {
-        if ($content === null) {
-            $content = file_get_contents($filepath);
-        }
-        
         return $this->parseGenericXmlFromContent($content);
     }
 
-    /**
-     * Convert XML element to flat array.
-     */
     protected function xmlToArray($element, $prefix = '')
     {
         $result = [];
-        
+
         foreach ($element->children() as $child) {
             $name = $prefix ? $prefix . '_' . $child->getName() : $child->getName();
-            
+
             if ($child->count() > 0) {
                 $result = array_merge($result, $this->xmlToArray($child, $name));
             } else {
@@ -950,7 +1441,6 @@ class dataMigrationUploadAction extends sfAction
             }
         }
 
-        // Also get attributes
         foreach ($element->attributes() as $attr => $value) {
             $name = $prefix ? $prefix . '_' . $attr : $attr;
             $result[$name] = (string)$value;

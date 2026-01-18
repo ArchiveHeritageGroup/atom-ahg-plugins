@@ -1,0 +1,197 @@
+{
+  "name": "Museum (Spectrum 5.1)",
+  "target_type": "museum",
+  "category": "Museum",
+  "description": "Default mapping for Museum records using Spectrum 5.1 standard",
+  "display_standard_id": 449,
+  "fields": [
+    {
+      "source_field": "objectNumber",
+      "atom_field": "identifier",
+      "include": true
+    },
+    {
+      "source_field": "objectName",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "title",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "briefDescription",
+      "atom_field": "scopeAndContent",
+      "include": true
+    },
+    {
+      "source_field": "physicalDescription",
+      "atom_field": "extentAndMedium",
+      "include": true
+    },
+    {
+      "source_field": "dimensions",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "materials",
+      "atom_field": "physicalCharacteristics",
+      "include": true
+    },
+    {
+      "source_field": "technique",
+      "atom_field": "physicalCharacteristics",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "maker",
+      "atom_field": "eventActors",
+      "include": true
+    },
+    {
+      "source_field": "productionPerson",
+      "atom_field": "eventActors",
+      "include": true
+    },
+    {
+      "source_field": "productionDate",
+      "atom_field": "eventDates",
+      "include": true
+    },
+    {
+      "source_field": "productionPlace",
+      "atom_field": "placeAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "acquisitionMethod",
+      "atom_field": "acquisition",
+      "include": true
+    },
+    {
+      "source_field": "acquisitionDate",
+      "atom_field": "acquisition",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " - "
+    },
+    {
+      "source_field": "acquisitionSource",
+      "atom_field": "acquisition",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " from "
+    },
+    {
+      "source_field": "currentLocation",
+      "atom_field": "locationOfOriginals",
+      "include": true
+    },
+    {
+      "source_field": "normalLocation",
+      "atom_field": "locationOfOriginals",
+      "include": true
+    },
+    {
+      "source_field": "conditionNote",
+      "atom_field": "physicalCharacteristics",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". Condition: "
+    },
+    {
+      "source_field": "inscriptions",
+      "atom_field": "physicalCharacteristics",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". Inscriptions: "
+    },
+    {
+      "source_field": "objectCategory",
+      "atom_field": "subjectAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "classification",
+      "atom_field": "subjectAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "copyright",
+      "atom_field": "reproductionConditions",
+      "include": true
+    },
+    {
+      "source_field": "creditLine",
+      "atom_field": "reproductionConditions",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". "
+    },
+    {
+      "source_field": "associatedPerson",
+      "atom_field": "nameAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "associatedPlace",
+      "atom_field": "placeAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "associatedEvent",
+      "atom_field": "generalNote",
+      "include": true
+    },
+    {
+      "source_field": "bibliography",
+      "atom_field": "publicationNote",
+      "include": true
+    },
+    {
+      "source_field": "exhibitionHistory",
+      "atom_field": "archivalHistory",
+      "include": true
+    },
+    {
+      "source_field": "provenanceHistory",
+      "atom_field": "archivalHistory",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". Provenance: "
+    },
+    {
+      "source_field": "relatedObjects",
+      "atom_field": "relatedUnitsOfDescription",
+      "include": true
+    },
+    {
+      "source_field": "publicNote",
+      "atom_field": "generalNote",
+      "include": true
+    },
+    {
+      "source_field": "curatorNote",
+      "atom_field": "generalNote",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". "
+    },
+    {
+      "source_field": "image",
+      "atom_field": "digitalObjectPath",
+      "include": true
+    },
+    {
+      "source_field": "filename",
+      "atom_field": "digitalObjectPath",
+      "include": true
+    }
+  ]
+}

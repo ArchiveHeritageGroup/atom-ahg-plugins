@@ -1,6 +1,7 @@
 {
   "name": "Information Object (ISAD-G)",
   "target_type": "information_object",
+  "category": "ArchivesSpace",
   "description": "Import archival descriptions following ISAD(G) standard",
   "fields": [
     {"source_field": "id_0", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

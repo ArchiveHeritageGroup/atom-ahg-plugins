@@ -137,6 +137,52 @@
 
 
 
+            <!-- Source Format -->
+            <div class="mb-4">
+              <h6 class="text-primary"><span class="badge bg-primary me-2">2c</span>Source Format</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Import From</label>
+                  <select name="source_format" id="sourceFormat" class="form-select">
+                    <option value="auto">Auto-detect from file</option>
+                    <optgroup label="Industry Standards">
+                      <option value="preservica_opex">Preservica OPEX (folder/ZIP)</option>
+                      <option value="preservica_xip">Preservica XIP/PAX</option>
+                      <option value="archivesspace">ArchivesSpace Export</option>
+                      <option value="vernon">Vernon CMS</option>
+                      <option value="emu">EMu (Museum)</option>
+                      <option value="pastperfect">PastPerfect</option>
+                      <option value="collectiveaccess">CollectiveAccess</option>
+                    </optgroup>
+                    <optgroup label="Standard Formats">
+                      <option value="ead">EAD 2002 (Archives)</option>
+                      <option value="ead3">EAD3 (Archives)</option>
+                      <option value="dc">Dublin Core XML</option>
+                      <option value="mods">MODS (Library)</option>
+                      <option value="marc">MARC XML (Library)</option>
+                      <option value="lido">LIDO (Museum)</option>
+                      <option value="spectrum">Spectrum CSV</option>
+                    </optgroup>
+                    <optgroup label="Generic">
+                      <option value="generic_csv">Generic CSV</option>
+                      <option value="generic_xml">Generic XML</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="col-md-6 d-none" id="folderSourceGroup">
+                  <label class="form-label">Or Select Server Folder</label>
+                  <div class="input-group">
+                    <input type="text" name="source_folder" id="sourceFolder" class="form-control" 
+                           placeholder="/usr/share/nginx/archive/uploads/preservica_export/">
+                    <button type="button" class="btn btn-outline-secondary" onclick="browseServerFolder()">
+                      <i class="bi bi-folder"></i>
+                    </button>
+                  </div>
+                  <small class="text-muted">For Preservica: point to extracted export folder</small>
+                </div>
+              </div>
+            </div>
+
 
 
 
@@ -443,4 +489,22 @@ document.getElementById("digitalObjectFolder")?.addEventListener("change", funct
     customPathRow.classList.add("d-none");
   }
 });
+
+  // Source format handling
+  document.getElementById("sourceFormat").addEventListener("change", function() {
+    var format = this.value;
+    var folderGroup = document.getElementById("folderSourceGroup");
+    // Show folder option for Preservica OPEX (supports folder structure)
+    if (format === "preservica_opex") {
+      folderGroup.classList.remove("d-none");
+    } else {
+      folderGroup.classList.add("d-none");
+    }
+  });
+
+  // Browse server folder (placeholder - would need server-side implementation)
+  function browseServerFolder() {
+    alert("Server folder browser not yet implemented.\nPlease type the full path manually.");
+  }
+
 </script>

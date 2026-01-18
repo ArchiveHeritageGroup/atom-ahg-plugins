@@ -1,6 +1,7 @@
 {
   "name": "Event Record",
   "target_type": "event",
+  "category": "ArchivesSpace",
   "description": "Import event records linked to archival descriptions",
   "fields": [
     {"source_field": "event_type", "atom_field": "eventDescription", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

@@ -40,7 +40,8 @@ class dataMigrationSaveMappingAction extends sfAction
         foreach ($fields as $field) {
             // Skip empty fields
             $sourceField = $field['source_field'] ?? '';
-            $atomField = $field['atom_field'] ?? '';
+            $atomField = $field["atom_field"] ?? "";
+            $ahgField = $field["ahg_field"] ?? "";
             $constantValue = $field['constant_value'] ?? '';
             
             // Include field if it has a mapping or constant value
@@ -48,6 +49,7 @@ class dataMigrationSaveMappingAction extends sfAction
                 $cleanFields[] = [
                     'source_field' => $sourceField,
                     'atom_field' => $atomField,
+                    'ahg_field' => $ahgField,
                     'constant_value' => $constantValue,
                     'include' => isset($field['include']) ? true : false,
                     'concatenate' => isset($field['concatenate']) ? true : false,

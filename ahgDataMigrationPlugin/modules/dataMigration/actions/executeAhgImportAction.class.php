@@ -116,6 +116,20 @@ class dataMigrationExecuteAhgImportAction extends sfAction
             ];
             
             // Pass through all ahg* source fields directly
+
+            // Also pass through digital object fields
+            foreach ($headers as $index => $header) {
+                if ((strpos($header, '_digitalObject') === 0 || $header === 'digitalObjectPath' || $header === 'Filename') && isset($row[$index]) && trim($row[$index]) !== '') {
+                    $record[$header] = trim($row[$index]);
+                }
+            }
+
+            // Also pass through digital object fields
+            foreach ($headers as $index => $header) {
+                if ((strpos($header, '_digitalObject') === 0 || $header === 'digitalObjectPath' || $header === 'Filename') && isset($row[$index]) && trim($row[$index]) !== '') {
+                    $record[$header] = trim($row[$index]);
+                }
+            }
             foreach ($headers as $index => $header) {
                 if (strpos($header, 'ahg') === 0 && isset($row[$index]) && trim($row[$index]) !== '') {
                     $record['_ahg_fields'][$header] = trim($row[$index]);
@@ -152,6 +166,12 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                 } else {
                     $record[$atomField] = $value;
                 }
+
+                // Also process ahg_field mapping (AHG Extended column)
+                $ahgField = $fieldConfig['ahg_field'] ?? '';
+                if (!empty($ahgField) && $value !== '') {
+                    $record['_ahg_fields'][$ahgField] = $value;
+                }
             }
             if (!empty($record['title']) || !empty($record['identifier'])) {
                 $records[] = $record;
@@ -187,9 +207,14 @@ class dataMigrationExecuteAhgImportAction extends sfAction
 
         // Process AHG extended fields
         $ahgFields = $record['_ahg_fields'] ?? [];
-        
         if (!empty($ahgFields)) {
             $this->processAhgFields($objectId, $ahgFields, $culture);
+        }
+
+        // Process digital object if path provided
+        $digitalObjectPath = $record["_digitalObjectPath"] ?? $record["digitalObjectPath"] ?? null;
+        if (!empty($digitalObjectPath) && file_exists($digitalObjectPath)) {
+            $this->createDigitalObject($objectId, $digitalObjectPath);
         }
 
         return $objectId;
@@ -287,6 +312,9 @@ class dataMigrationExecuteAhgImportAction extends sfAction
             ['object_type' => $glamType, 'updated_at' => date('Y-m-d H:i:s')]
         );
 
+
+        // Save sector-specific metadata
+        $this->saveSectorMetadata($objectId, $record, $sector);
         // Fix nested set
         $this->rebuildNestedSet($objectId, $parentId ?: QubitInformationObject::ROOT_ID);
 
@@ -348,7 +376,12 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         // Rights
         if (!empty($ahgFields['ahgRightsStatement']) || !empty($ahgFields['ahgRightsBasis'])) {
             $this->createRightsRecord($objectId, $ahgFields, $culture);
-            $this->stats['rights_created']++;
+        }
+
+        // Condition
+        if (!empty($ahgFields['ahgConditionOverallRating']) || !empty($ahgFields['ahgConditionSummary'])) {
+            $this->createConditionRecord($objectId, $ahgFields, $culture);
+            $this->stats['condition_created'] = ($this->stats['condition_created'] ?? 0) + 1;
         }
     }
 
@@ -549,6 +582,110 @@ class dataMigrationExecuteAhgImportAction extends sfAction
     }
 
     /**
+     * Create condition report using ahgConditionPlugin
+     * Handles pipe-delimited values for multiple condition reports
+     */
+    protected function createConditionRecord(int $objectId, array $ahgFields, string $culture)
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        // Check if table exists
+        if (!$DB::schema()->hasTable('condition_report')) {
+            return;
+        }
+
+        // Parse pipe-delimited fields for multiple condition reports
+        $ratings = !empty($ahgFields['ahgConditionOverallRating']) ? explode('|', $ahgFields['ahgConditionOverallRating']) : [];
+        $summaries = !empty($ahgFields['ahgConditionSummary']) ? explode('|', $ahgFields['ahgConditionSummary']) : [];
+        $recommendations = !empty($ahgFields['ahgConditionRecommendations']) ? explode('|', $ahgFields['ahgConditionRecommendations']) : [];
+        $priorities = !empty($ahgFields['ahgConditionPriority']) ? explode('|', $ahgFields['ahgConditionPriority']) : [];
+        $contexts = !empty($ahgFields['ahgConditionContext']) ? explode('|', $ahgFields['ahgConditionContext']) : [];
+        $assessmentDates = !empty($ahgFields['ahgConditionAssessmentDate']) ? explode('|', $ahgFields['ahgConditionAssessmentDate']) : [];
+        $nextCheckDates = !empty($ahgFields['ahgConditionNextCheckDate']) ? explode('|', $ahgFields['ahgConditionNextCheckDate']) : [];
+        $envNotes = !empty($ahgFields['ahgConditionEnvironmentalNotes']) ? explode('|', $ahgFields['ahgConditionEnvironmentalNotes']) : [];
+        $handlingNotes = !empty($ahgFields['ahgConditionHandlingNotes']) ? explode('|', $ahgFields['ahgConditionHandlingNotes']) : [];
+        $displayNotes = !empty($ahgFields['ahgConditionDisplayNotes']) ? explode('|', $ahgFields['ahgConditionDisplayNotes']) : [];
+        $storageNotes = !empty($ahgFields['ahgConditionStorageNotes']) ? explode('|', $ahgFields['ahgConditionStorageNotes']) : [];
+
+        // Determine count from longest array
+        $count = max(
+            count($ratings), count($summaries), count($recommendations),
+            count($priorities), count($contexts), count($assessmentDates),
+            count($nextCheckDates), count($envNotes), count($handlingNotes),
+            count($displayNotes), count($storageNotes), 1
+        );
+
+        // Create condition reports
+        for ($i = 0; $i < $count; $i++) {
+            $rating = $this->mapConditionRating(trim($ratings[$i] ?? 'good'));
+            $priority = $this->mapConditionPriority(trim($priorities[$i] ?? 'normal'));
+            $context = $this->mapConditionContext(trim($contexts[$i] ?? 'routine'));
+            $assessDate = trim($assessmentDates[$i] ?? '') ?: date('Y-m-d');
+            $nextDate = trim($nextCheckDates[$i] ?? '') ?: null;
+
+            $DB::table('condition_report')->insert([
+                'information_object_id' => $objectId,
+                'assessment_date' => $assessDate,
+                'context' => $context,
+                'overall_rating' => $rating,
+                'summary' => trim($summaries[$i] ?? '') ?: null,
+                'recommendations' => trim($recommendations[$i] ?? '') ?: null,
+                'priority' => $priority,
+                'next_check_date' => $nextDate,
+                'environmental_notes' => trim($envNotes[$i] ?? '') ?: null,
+                'handling_notes' => trim($handlingNotes[$i] ?? '') ?: null,
+                'display_notes' => trim($displayNotes[$i] ?? '') ?: null,
+                'storage_notes' => trim($storageNotes[$i] ?? '') ?: null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
+    protected function mapConditionRating(string $rating): string
+    {
+        $map = [
+            'excellent' => 'excellent',
+            'good' => 'good',
+            'fair' => 'fair',
+            'poor' => 'poor',
+            'unacceptable' => 'unacceptable',
+            '5' => 'excellent',
+            '4' => 'good',
+            '3' => 'fair',
+            '2' => 'poor',
+            '1' => 'unacceptable',
+        ];
+        return $map[strtolower($rating)] ?? 'good';
+    }
+
+    protected function mapConditionPriority(string $priority): string
+    {
+        $map = [
+            'low' => 'low',
+            'normal' => 'normal',
+            'high' => 'high',
+            'urgent' => 'urgent',
+            '1' => 'low',
+            '2' => 'normal',
+            '3' => 'high',
+            '4' => 'urgent',
+        ];
+        return $map[strtolower($priority)] ?? 'normal';
+    }
+
+    protected function mapConditionContext(string $context): string
+    {
+        $validContexts = [
+            'acquisition', 'loan_out', 'loan_in', 'loan_return',
+            'exhibition', 'storage', 'conservation', 'routine',
+            'incident', 'insurance', 'deaccession'
+        ];
+        $ctx = strtolower(str_replace(' ', '_', $context));
+        return in_array($ctx, $validContexts) ? $ctx : 'routine';
+    }
+
+    /**
      * Generate URL-safe slug
      */
     protected function generateSlug(string $title): string
@@ -634,4 +771,282 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                 'rgt' => $parentRgt + 1,
             ]);
     }
+
+    /**
+     * Save sector-specific metadata to appropriate tables
+     */
+    protected function saveSectorMetadata(int $objectId, array $record, string $sector)
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        switch ($sector) {
+            case 'museum':
+                $this->saveMuseumMetadata($objectId, $record);
+                break;
+            case 'library':
+                $this->saveLibraryMetadata($objectId, $record);
+                break;
+            case 'gallery':
+                $this->saveGalleryMetadata($objectId, $record);
+                break;
+            case 'dam':
+                $this->saveDamMetadata($objectId, $record);
+                break;
+            // archives uses standard information_object fields
+        }
+    }
+
+    /**
+     * Save museum-specific metadata to museum_metadata table
+     */
+    protected function saveMuseumMetadata(int $objectId, array $record)
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        $data = [
+            'object_id' => $objectId,
+            'object_type' => $record['objectType'] ?? null,
+            'classification' => $record['classification'] ?? null,
+            'materials' => $record['extentAndMedium'] ?? $record['materials'] ?? null,
+            'techniques' => $record['physicalCharacteristics'] ?? $record['techniques'] ?? null,
+            'dimensions' => $record['dimensions'] ?? null,
+            'measurements' => $record['measurements'] ?? null,
+            'inscriptions' => $record['inscriptions'] ?? null,
+            'condition_notes' => $record['conditionNotes'] ?? null,
+            'condition_term' => $record['conditionStatus'] ?? null,
+            'condition_date' => $record['conditionDate'] ?? null,
+            'provenance' => $record['archivalHistory'] ?? $record['provenance'] ?? null,
+            'style_period' => $record['stylePeriod'] ?? null,
+            'cultural_context' => $record['culturalContext'] ?? null,
+            'current_location' => $record['currentLocation'] ?? null,
+            'creation_place' => $record['creationPlace'] ?? $record['placeAccessPoints'] ?? null,
+            'creator_identity' => $record['eventActors'] ?? null,
+            'creator_role' => $record['eventTypes'] ?? null,
+            'creation_date_display' => $record['eventDates'] ?? null,
+            'cataloger_name' => $record['catalogerName'] ?? null,
+            'cataloging_date' => !empty($record['catalogingDate']) ? $record['catalogingDate'] : date('Y-m-d'),
+        ];
+
+        // Remove null values
+        $data = array_filter($data, fn($v) => $v !== null);
+
+        if (count($data) > 1) { // More than just object_id
+            $DB::table('museum_metadata')->updateOrInsert(
+                ['object_id' => $objectId],
+                $data
+            );
+        }
+    }
+
+    /**
+     * Save library-specific metadata (placeholder - implement when library_metadata table exists)
+     */
+    protected function saveLibraryMetadata(int $objectId, array $record)
+    {
+        // TODO: Implement when ahgLibraryPlugin has metadata table
+        // For now, library uses standard information_object fields
+    }
+
+    /**
+     * Save gallery-specific metadata (placeholder - implement when gallery_metadata table exists)
+     */
+    protected function saveGalleryMetadata(int $objectId, array $record)
+    {
+        // TODO: Implement when ahgGalleryPlugin has metadata table
+        // For now, gallery uses standard information_object fields
+    }
+
+    /**
+     * Save DAM-specific metadata (placeholder - implement when dam_metadata table exists)
+     */
+    protected function saveDamMetadata(int $objectId, array $record)
+    {
+        // TODO: Implement when ahgDAMPlugin has metadata table
+        // For now, DAM uses standard information_object fields
+    }
+
+
+
+    /**
+     * Create digital object from file path
+     * Hybrid approach: copy file manually, use QubitDigitalObject for DB insert
+     */
+    protected function createDigitalObject(int $objectId, string $sourcePath): ?int
+    {
+        if (!file_exists($sourcePath) || !is_readable($sourcePath)) {
+            $this->stats["errors"][] = "Digital object file not found or not readable: " . $sourcePath;
+            return null;
+        }
+
+        try {
+            $DB = \Illuminate\Database\Capsule\Manager::class;
+            
+            $filename = basename($sourcePath);
+            $mimeType = mime_content_type($sourcePath);
+            $fileSize = filesize($sourcePath);
+
+            // Determine media type
+            $mediaTypeId = QubitTerm::IMAGE_ID;
+            if (strpos($mimeType, 'audio/') === 0) {
+                $mediaTypeId = QubitTerm::AUDIO_ID;
+            } elseif (strpos($mimeType, 'video/') === 0) {
+                $mediaTypeId = QubitTerm::VIDEO_ID;
+            } elseif ($mimeType === 'application/pdf' || strpos($mimeType, 'text/') === 0) {
+                $mediaTypeId = QubitTerm::TEXT_ID;
+            }
+
+            // Get repository slug for path
+            $infoObject = $DB::table('information_object')->where('id', $objectId)->first();
+            $repoSlug = 'null';
+            if ($infoObject && $infoObject->repository_id) {
+                $repoSlugRow = $DB::table('slug')->where('object_id', $infoObject->repository_id)->first();
+                if ($repoSlugRow) {
+                    $repoSlug = $repoSlugRow->slug;
+                }
+            }
+
+            // Generate checksum and path
+            $checksum = sha1_file($sourcePath);
+            $pathSegment = implode('/', str_split(substr($checksum, 0, 9), 3));
+            $relativePath = 'uploads/r/' . $repoSlug . '/' . $pathSegment;
+            $absolutePath = sfConfig::get('sf_web_dir') . '/' . $relativePath;
+
+            // Create directory
+            if (!is_dir($absolutePath)) {
+                mkdir($absolutePath, 0755, true);
+            }
+
+            // Copy master file
+            $destFile = $absolutePath . '/' . $filename;
+            if (!copy($sourcePath, $destFile)) {
+                $this->stats["errors"][] = "Failed to copy digital object: " . $sourcePath;
+                return null;
+            }
+
+            // Create object record for digital object
+            $digitalObjectId = $DB::table('object')->insertGetId([
+                'class_name' => 'QubitDigitalObject',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Insert digital_object record
+            $DB::table('digital_object')->insert([
+                'id' => $digitalObjectId,
+                'object_id' => $objectId,
+                'usage_id' => QubitTerm::MASTER_ID,
+                'media_type_id' => $mediaTypeId,
+                'mime_type' => $mimeType,
+                'byte_size' => $fileSize,
+                'name' => $filename,
+                'path' => $relativePath . '/',
+                'checksum' => $checksum,
+                'checksum_type' => 'sha1',
+                'sequence' => 0,
+            ]);
+
+            // Generate derivatives (thumbnail and reference)
+            $this->generateDerivativesForFile($digitalObjectId, $destFile, $relativePath, $mimeType, $filename);
+
+            if (!isset($this->stats["digital_objects_created"])) {
+                $this->stats["digital_objects_created"] = 0;
+            }
+            $this->stats["digital_objects_created"]++;
+
+            return $digitalObjectId;
+
+        } catch (Exception $e) {
+            $this->stats["errors"][] = "Digital object creation failed for object $objectId: " . $e->getMessage();
+            return null;
+        }
+    }
+
+    /**
+     * Generate thumbnail and reference derivatives for an image
+     */
+    protected function generateDerivativesForFile(int $parentId, string $masterPath, string $relativePath, string $mimeType, string $filename): void
+    {
+        // Only generate derivatives for images
+        if (strpos($mimeType, 'image/') !== 0) {
+            return;
+        }
+
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+        $absolutePath = sfConfig::get('sf_web_dir') . '/' . $relativePath;
+
+        // Get image dimensions
+        $imageInfo = @getimagesize($masterPath);
+        if (!$imageInfo) {
+            return;
+        }
+
+        $origWidth = $imageInfo[0];
+        $origHeight = $imageInfo[1];
+
+        // Derivative sizes
+        $derivatives = [
+            ['usage_id' => QubitTerm::THUMBNAIL_ID, 'max' => 150, 'suffix' => '_142'],
+            ['usage_id' => QubitTerm::REFERENCE_ID, 'max' => 480, 'suffix' => '_141'],
+        ];
+
+        foreach ($derivatives as $deriv) {
+            // Calculate new dimensions
+            $ratio = min($deriv['max'] / $origWidth, $deriv['max'] / $origHeight);
+            if ($ratio >= 1) {
+                $newWidth = $origWidth;
+                $newHeight = $origHeight;
+            } else {
+                $newWidth = (int)($origWidth * $ratio);
+                $newHeight = (int)($origHeight * $ratio);
+            }
+
+            // Create resized image
+            $srcImage = @imagecreatefromstring(file_get_contents($masterPath));
+            if (!$srcImage) {
+                continue;
+            }
+
+            $dstImage = imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Preserve transparency for PNG
+            if ($mimeType === 'image/png') {
+                imagealphablending($dstImage, false);
+                imagesavealpha($dstImage, true);
+            }
+
+            imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+
+            // Generate derivative filename
+            $baseName = pathinfo($filename, PATHINFO_FILENAME);
+            $derivFilename = $baseName . $deriv['suffix'] . '.jpg';
+            $derivPath = $absolutePath . '/' . $derivFilename;
+
+            // Save as JPEG
+            imagejpeg($dstImage, $derivPath, 85);
+            imagedestroy($srcImage);
+            imagedestroy($dstImage);
+
+            // Create object record
+            $derivObjectId = $DB::table('object')->insertGetId([
+                'class_name' => 'QubitDigitalObject',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Insert derivative record
+            $DB::table('digital_object')->insert([
+                'id' => $derivObjectId,
+                'object_id' => null,
+                'parent_id' => $parentId,
+                'usage_id' => $deriv['usage_id'],
+                'media_type_id' => QubitTerm::IMAGE_ID,
+                'mime_type' => 'image/jpeg',
+                'byte_size' => filesize($derivPath),
+                'name' => $derivFilename,
+                'path' => $relativePath . '/',
+                'sequence' => 0,
+            ]);
+        }
+    }
+
 }

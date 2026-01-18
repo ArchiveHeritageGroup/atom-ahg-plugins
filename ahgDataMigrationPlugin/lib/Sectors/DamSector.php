@@ -9,6 +9,7 @@ class DamSector extends BaseSector
     protected string $icon = 'file-earmark-image';
     protected array $fields = [
         'identifier' => ['type' => 'string', 'required' => true],
+        'culture' => ['type' => 'string', 'default' => 'en'],
         'title' => ['type' => 'string', 'required' => true],
         'dc_creator' => ['type' => 'string'],
         'dc_description' => ['type' => 'text'],

@@ -9,6 +9,7 @@ class MuseumSector extends BaseSector
     protected string $icon = 'bank';
     protected array $fields = [
         'identifier' => ['type' => 'string', 'required' => true],
+        'culture' => ['type' => 'string', 'default' => 'en'],
         'title' => ['type' => 'string', 'required' => true],
         'object_name' => ['type' => 'string'],
         'object_type' => ['type' => 'string'],

@@ -9,6 +9,7 @@ class LibrarySector extends BaseSector
     protected string $icon = 'book';
     protected array $fields = [
         'identifier' => ['type' => 'string', 'required' => true],
+        'culture' => ['type' => 'string', 'default' => 'en'],
         'title' => ['type' => 'string', 'required' => true],
         'author' => ['type' => 'string'],
         'publisher' => ['type' => 'string'],

@@ -1,6 +1,7 @@
 {
   "name": "Accession Record",
   "target_type": "accession",
+  "category": "ArchivesSpace",
   "description": "Import accession/acquisition records",
   "fields": [
     {"source_field": "id_0", "atom_field": "identifier", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

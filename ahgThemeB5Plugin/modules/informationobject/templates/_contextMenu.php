@@ -50,8 +50,8 @@ if (isset($resource)) {
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul>
     <?php if ($hasProvenance): ?>
-    <li><?php echo link_to(__('Chain of Custody'), ['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
-    <li><?php echo link_to(__('Edit Provenance'), ['module' => 'provenance', 'action' => 'edit', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Chain of Custody'), ['module' => 'provenance', 'action' => 'timeline', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Edit Provenance'), ['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasCondition): ?>
     <li><?php echo link_to(__('Condition assessment'), ['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?></li>
@@ -60,7 +60,7 @@ if (isset($resource)) {
     <li><?php echo link_to(__('Spectrum data'), '/index.php/' . $resourceSlug . '/spectrum'); ?></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
-    <li><?php echo link_to(__('GRAP data'), ['module' => 'grap', 'action' => 'index', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('GRAP data'), ['module' => 'grap', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
     <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'oais', 'action' => 'createSip', 'slug' => $resourceSlug]); ?></li>

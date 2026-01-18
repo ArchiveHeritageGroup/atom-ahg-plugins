@@ -1,6 +1,7 @@
 {
   "name": "Subject Terms",
   "target_type": "subject",
+  "category": "ArchivesSpace",
   "description": "Import subject terms and controlled vocabulary",
   "fields": [
     {"source_field": "term", "atom_field": "name", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},

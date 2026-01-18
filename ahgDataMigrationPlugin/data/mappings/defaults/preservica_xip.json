@@ -1,6 +1,7 @@
 {
   "name": "Preservica XIP/PAX",
   "target_type": "information_object",
+  "category": "Preservica",
   "description": "Import from Preservica PAX (Preservica Archive eXchange) packages with XIP metadata",
   "fields": [
     {"source_field": "Ref", "atom_field": "legacyId", "constant_value": "", "concatenate": false, "include": true, "concat_constant": false, "concat_symbol": "|"},
