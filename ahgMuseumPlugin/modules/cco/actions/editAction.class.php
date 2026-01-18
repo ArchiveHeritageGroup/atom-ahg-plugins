@@ -756,29 +756,24 @@ class ccoEditAction extends InformationObjectEditAction
 
     protected function fetchOne($sql, $params = [])
     {
-        $connection = Propel::getConnection();
-        $statement = $connection->prepare($sql);
-        $statement->execute($params);
-
-        return $statement->fetch(PDO::FETCH_OBJ);
+        $results = DB::select($sql, $params);
+        return !empty($results) ? $results[0] : null;
     }
 
     protected function fetchAll($sql, $params = [])
     {
-        $connection = Propel::getConnection();
-        $statement = $connection->prepare($sql);
-        $statement->execute($params);
-
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        $results = DB::select($sql, $params);
+        return array_map(fn ($row) => (array) $row, $results);
     }
 
     protected function fetchColumn($sql, $params = [])
     {
-        $connection = Propel::getConnection();
-        $statement = $connection->prepare($sql);
-        $statement->execute($params);
-
-        return $statement->fetchColumn();
+        $results = DB::select($sql, $params);
+        if (empty($results)) {
+            return null;
+        }
+        $row = (array) $results[0];
+        return reset($row);
     }
 
 protected function executeQuery($sql, $params = [])

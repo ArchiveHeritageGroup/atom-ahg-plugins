@@ -1,7 +1,7 @@
 {
     "name": "AHG Cart Plugin",
     "machine_name": "ahgCartPlugin",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "Shopping cart with dual-mode support: Standard (Request to Publish) and E-Commerce with PayFast payment integration",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

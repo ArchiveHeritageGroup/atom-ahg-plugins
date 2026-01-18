@@ -30,18 +30,18 @@ $photoTypes = [
     <h1><i class="fas fa-draw-polygon me-2"></i><?php echo __('Annotate Condition Photo') ?></h1>
     
     <div class="object-info">
-        <strong><?php echo $conditionCheck->identifier ?></strong> - 
-        <?php echo $conditionCheck->object_title ?>
+        <strong><?php echo esc_entities($conditionCheck->identifier) ?></strong> -
+        <?php echo esc_entities($conditionCheck->object_title) ?>
     </div>
     
     <div class="check-meta">
         <div class="meta-item">
             <span class="meta-label"><?php echo __('Photo Type') ?></span>
-            <span class="meta-value"><span class="photo-type <?php echo $photo->photo_type ?>"><?php echo $photoTypes[$photo->photo_type] ?? $photo->photo_type ?></span></span>
+            <span class="meta-value"><span class="photo-type <?php echo esc_entities($photo->photo_type) ?>"><?php echo esc_entities($photoTypes[$photo->photo_type] ?? $photo->photo_type) ?></span></span>
         </div>
         <div class="meta-item">
             <span class="meta-label"><?php echo __('Caption') ?></span>
-            <span class="meta-value"><?php echo $photo->caption ?: __('No caption') ?></span>
+            <span class="meta-value"><?php echo esc_entities($photo->caption ?: __('No caption')) ?></span>
         </div>
         <div class="meta-item">
             <span class="meta-label"><?php echo __('Uploaded') ?></span>
@@ -125,9 +125,9 @@ $photoTypes = [
                     </button>
                 </form>
                 <?php else: ?>
-                <p><strong><?php echo __('Filename:') ?></strong><br><?php echo $photo->original_name ?></p>
+                <p><strong><?php echo __('Filename:') ?></strong><br><?php echo esc_entities($photo->original_name) ?></p>
                 <p><strong><?php echo __('Size:') ?></strong><br><?php echo number_format($photo->file_size / 1024, 1) ?> KB</p>
-                <p><strong><?php echo __('Type:') ?></strong><br><?php echo $photo->mime_type ?></p>
+                <p><strong><?php echo __('Type:') ?></strong><br><?php echo esc_entities($photo->mime_type) ?></p>
                 <?php endif ?>
             </div>
         </div>

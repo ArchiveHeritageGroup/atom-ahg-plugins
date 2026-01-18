@@ -412,20 +412,19 @@ class ahgDataMigrationActions extends sfActions
     {
         $repos = [];
         $culture = $this->context->user->getCulture();
-        
-        // Use direct SQL query to avoid constant issues
-        $sql = "SELECT r.id, ai.authorized_form_of_name 
-                FROM repository r 
-                LEFT JOIN actor_i18n ai ON r.id = ai.id AND ai.culture = ?
-                WHERE ai.authorized_form_of_name IS NOT NULL
-                ORDER BY ai.authorized_form_of_name";
-        
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$culture]);
-        
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $repos[$row['id']] = $row['authorized_form_of_name'];
+
+        $rows = \Illuminate\Database\Capsule\Manager::table('repository as r')
+            ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
+                $join->on('r.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', $culture);
+            })
+            ->whereNotNull('ai.authorized_form_of_name')
+            ->orderBy('ai.authorized_form_of_name')
+            ->select('r.id', 'ai.authorized_form_of_name')
+            ->get();
+
+        foreach ($rows as $row) {
+            $repos[$row->id] = $row->authorized_form_of_name;
         }
 
         return $repos;

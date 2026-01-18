@@ -1,7 +1,7 @@
 {
     "name": "Extended Rights Management",
     "machine_name": "ahgExtendedRightsPlugin",
-    "version": "1.2.8",
+    "version": "1.2.9",
     "description": "Extended rights management with RightsStatements.org integration, embargo management, Traditional Knowledge labels, and batch rights assignment",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

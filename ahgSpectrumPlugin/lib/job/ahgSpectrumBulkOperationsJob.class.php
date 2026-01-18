@@ -60,12 +60,11 @@ class ahgSpectrumBulkOperationsJob extends arBaseJob
      */
     protected function regenerateAllThumbnails($parameters)
     {
-        $conn = Propel::getConnection();
-        $sql = "SELECT id FROM spectrum_condition_photo ORDER BY id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        
-        $photos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $photos = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_photo')
+            ->orderBy('id')
+            ->pluck('id')
+            ->toArray();
+
         $total = count($photos);
         
         $this->info("Regenerating thumbnails for {$total} photos");
@@ -182,37 +181,23 @@ class ahgSpectrumBulkOperationsJob extends arBaseJob
         $format = $parameters['format'] ?? 'csv';
         $dateFrom = $parameters['date_from'] ?? null;
         $dateTo = $parameters['date_to'] ?? null;
-        
-        $conn = Propel::getConnection();
-        
-        $sql = "SELECT 
-                    cc.*,
-                    io.identifier as object_identifier
-                FROM spectrum_condition_check cc
-                LEFT JOIN information_object io ON cc.object_id = io.id
-                WHERE 1=1";
-        
-        $params = [];
-        
+
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check as cc')
+            ->leftJoin('information_object as io', 'cc.object_id', '=', 'io.id')
+            ->select('cc.*', 'io.identifier as object_identifier');
+
         if ($dateFrom) {
-            $sql .= " AND cc.check_date >= :date_from";
-            $params[':date_from'] = $dateFrom;
+            $query->where('cc.check_date', '>=', $dateFrom);
         }
-        
+
         if ($dateTo) {
-            $sql .= " AND cc.check_date <= :date_to";
-            $params[':date_to'] = $dateTo;
+            $query->where('cc.check_date', '<=', $dateTo);
         }
-        
-        $sql .= " ORDER BY cc.check_date DESC";
-        
-        $stmt = $conn->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-        
-        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $records = $query->orderBy('cc.check_date', 'desc')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
         
         $this->info(sprintf('Exporting %d condition reports', count($records)));
         
@@ -271,46 +256,39 @@ class ahgSpectrumBulkOperationsJob extends arBaseJob
     protected function bulkUpdateLocations($parameters)
     {
         $updates = $parameters['updates'] ?? [];
-        
+
         if (empty($updates)) {
             $this->error('No location updates provided');
             return false;
         }
-        
-        $conn = Propel::getConnection();
+
         $processed = 0;
-        
+
         foreach ($updates as $update) {
-            $sql = "UPDATE spectrum_location 
-                    SET current_location = :new_location,
-                        location_date = :move_date,
-                        updated_at = NOW()
-                    WHERE object_id = :object_id";
-            
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':new_location', $update['new_location']);
-            $stmt->bindValue(':move_date', $update['move_date'] ?? date('Y-m-d'));
-            $stmt->bindValue(':object_id', $update['object_id'], PDO::PARAM_INT);
-            $stmt->execute();
-            
+            // Update location
+            \Illuminate\Database\Capsule\Manager::table('spectrum_location')
+                ->where('object_id', $update['object_id'])
+                ->update([
+                    'current_location' => $update['new_location'],
+                    'location_date' => $update['move_date'] ?? date('Y-m-d'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
             // Create movement record
-            $sql = "INSERT INTO spectrum_movement 
-                    (object_id, movement_date, location_from, location_to, movement_reason, created_at)
-                    VALUES (:object_id, :move_date, :from, :to, :reason, NOW())";
-            
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':object_id', $update['object_id'], PDO::PARAM_INT);
-            $stmt->bindValue(':move_date', $update['move_date'] ?? date('Y-m-d'));
-            $stmt->bindValue(':from', $update['old_location'] ?? 'Unknown');
-            $stmt->bindValue(':to', $update['new_location']);
-            $stmt->bindValue(':reason', $update['reason'] ?? 'Bulk location update');
-            $stmt->execute();
-            
+            \Illuminate\Database\Capsule\Manager::table('spectrum_movement')->insert([
+                'object_id' => $update['object_id'],
+                'movement_date' => $update['move_date'] ?? date('Y-m-d'),
+                'location_from' => $update['old_location'] ?? 'Unknown',
+                'location_to' => $update['new_location'],
+                'movement_reason' => $update['reason'] ?? 'Bulk location update',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
             $processed++;
         }
-        
+
         $this->info("Location update complete. Processed: {$processed} objects");
-        
+
         return true;
     }
     
@@ -319,62 +297,56 @@ class ahgSpectrumBulkOperationsJob extends arBaseJob
      */
     protected function calculateStatistics($parameters)
     {
-        $conn = Propel::getConnection();
-        
         $stats = [];
-        
-        // Total objects with Spectrum data
-        $sql = "SELECT COUNT(DISTINCT object_id) as total FROM (
-                    SELECT object_id FROM spectrum_entry
-                    UNION SELECT object_id FROM spectrum_condition_check
-                    UNION SELECT object_id FROM spectrum_location
-                    UNION SELECT object_id FROM spectrum_conservation
-                ) as all_objects";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['total_objects'] = $stmt->fetchColumn();
-        
+
+        // Total objects with Spectrum data (using raw for UNION)
+        $result = \Illuminate\Database\Capsule\Manager::select("
+            SELECT COUNT(DISTINCT object_id) as total FROM (
+                SELECT object_id FROM spectrum_entry
+                UNION SELECT object_id FROM spectrum_condition_check
+                UNION SELECT object_id FROM spectrum_location
+                UNION SELECT object_id FROM spectrum_conservation
+            ) as all_objects
+        ");
+        $stats['total_objects'] = $result[0]->total ?? 0;
+
         // Condition checks this month
-        $sql = "SELECT COUNT(*) FROM spectrum_condition_check 
-                WHERE check_date >= DATE_FORMAT(NOW(), '%Y-%m-01')";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['condition_checks_this_month'] = $stmt->fetchColumn();
-        
+        $stats['condition_checks_this_month'] = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check')
+            ->whereRaw("check_date >= DATE_FORMAT(NOW(), '%Y-%m-01')")
+            ->count();
+
         // Condition by status
-        $sql = "SELECT condition_status, COUNT(*) as count 
-                FROM spectrum_condition_check 
-                GROUP BY condition_status";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['condition_by_status'] = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-        
+        $statusCounts = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check')
+            ->selectRaw('condition_status, COUNT(*) as count')
+            ->groupBy('condition_status')
+            ->get();
+        $stats['condition_by_status'] = [];
+        foreach ($statusCounts as $row) {
+            $stats['condition_by_status'][$row->condition_status] = $row->count;
+        }
+
         // Active loans
-        $sql = "SELECT COUNT(*) FROM spectrum_loan_out 
-                WHERE return_date IS NULL OR return_date > NOW()";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['active_loans'] = $stmt->fetchColumn();
-        
+        $stats['active_loans'] = \Illuminate\Database\Capsule\Manager::table('spectrum_loan_out')
+            ->where(function ($query) {
+                $query->whereNull('return_date')
+                    ->orWhereRaw('return_date > NOW()');
+            })
+            ->count();
+
         // Total photos
-        $sql = "SELECT COUNT(*) FROM spectrum_condition_photo";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['total_photos'] = $stmt->fetchColumn();
-        
+        $stats['total_photos'] = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_photo')->count();
+
         // Conservation treatments this year
-        $sql = "SELECT COUNT(*) FROM spectrum_conservation 
-                WHERE YEAR(treatment_date) = YEAR(NOW())";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $stats['treatments_this_year'] = $stmt->fetchColumn();
-        
+        $stats['treatments_this_year'] = \Illuminate\Database\Capsule\Manager::table('spectrum_conservation')
+            ->whereRaw('YEAR(treatment_date) = YEAR(NOW())')
+            ->count();
+
         // Store statistics
         $this->job->setOutput(['statistics' => $stats, 'generated_at' => date('c')]);
         $this->job->save();
-        
+
         $this->info('Statistics calculated: ' . json_encode($stats));
-        
+
         return true;
     }
     
@@ -384,121 +356,129 @@ class ahgSpectrumBulkOperationsJob extends arBaseJob
     protected function cleanupOrphanedPhotos($parameters)
     {
         $dryRun = $parameters['dry_run'] ?? true;
-        
-        $conn = Propel::getConnection();
-        
+
         // Find photos without valid condition checks
-        $sql = "SELECT cp.id, cp.file_path 
-                FROM spectrum_condition_photo cp
-                LEFT JOIN spectrum_condition_check cc ON cp.condition_check_id = cc.id
-                WHERE cc.id IS NULL";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        
-        $orphans = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+        $orphans = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_photo as cp')
+            ->leftJoin('spectrum_condition_check as cc', 'cp.condition_check_id', '=', 'cc.id')
+            ->whereNull('cc.id')
+            ->select('cp.id', 'cp.file_path')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
+
         $this->info(sprintf('Found %d orphaned photos', count($orphans)));
-        
+
         if ($dryRun) {
             $this->info('Dry run - no files deleted');
             $this->job->setOutput(['orphans' => $orphans]);
             $this->job->save();
             return true;
         }
-        
+
         $deleted = 0;
-        
+
         foreach ($orphans as $orphan) {
             // Delete file
             $filePath = sfConfig::get('sf_upload_dir') . '/' . $orphan['file_path'];
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
-            
+
             // Delete thumbnails
             $basePath = dirname($filePath);
             $filename = pathinfo($filePath, PATHINFO_FILENAME);
             $ext = pathinfo($filePath, PATHINFO_EXTENSION);
-            
+
             foreach (['small', 'medium', 'large'] as $size) {
                 $thumbPath = $basePath . '/' . $filename . '_' . $size . '.' . $ext;
                 if (file_exists($thumbPath)) {
                     unlink($thumbPath);
                 }
             }
-            
+
             // Delete database record
-            $sql = "DELETE FROM spectrum_condition_photo WHERE id = :id";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':id', $orphan['id'], PDO::PARAM_INT);
-            $stmt->execute();
-            
+            \Illuminate\Database\Capsule\Manager::table('spectrum_condition_photo')
+                ->where('id', $orphan['id'])
+                ->delete();
+
             $deleted++;
         }
-        
+
         $this->info("Cleanup complete. Deleted: {$deleted} orphaned photos");
-        
+
         return true;
     }
     
     /**
      * Archive old records
+     *
+     * Uses allowlist validation to prevent SQL injection via table names
      */
     protected function archiveOldRecords($parameters)
     {
+        // Allowlist of valid table names with their date columns
+        $validTables = [
+            'spectrum_condition_check' => 'check_date',
+            'spectrum_movement' => 'movement_date',
+            'spectrum_conservation' => 'treatment_date',
+            'spectrum_loan_out' => 'created_at',
+            'spectrum_loan_in' => 'created_at',
+        ];
+
         $years = $parameters['years'] ?? 5;
-        $tables = $parameters['tables'] ?? ['spectrum_condition_check', 'spectrum_movement'];
-        
+        $requestedTables = $parameters['tables'] ?? ['spectrum_condition_check', 'spectrum_movement'];
+
+        // Validate and filter to only allowed tables
+        $tables = array_intersect($requestedTables, array_keys($validTables));
+
+        if (empty($tables)) {
+            $this->error('No valid tables specified for archiving');
+            return false;
+        }
+
         $cutoffDate = date('Y-m-d', strtotime("-{$years} years"));
-        
+
         $this->info("Archiving records older than {$cutoffDate}");
-        
-        $conn = Propel::getConnection();
+
         $archived = [];
-        
+
         foreach ($tables as $table) {
-            $dateColumn = 'created_at';
-            
-            // Determine date column
-            if ($table === 'spectrum_condition_check') {
-                $dateColumn = 'check_date';
-            } elseif ($table === 'spectrum_movement') {
-                $dateColumn = 'movement_date';
-            }
-            
-            // Count records to archive
-            $sql = "SELECT COUNT(*) FROM {$table} WHERE {$dateColumn} < :cutoff";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':cutoff', $cutoffDate);
-            $stmt->execute();
-            $count = $stmt->fetchColumn();
-            
+            // Get the validated date column from allowlist
+            $dateColumn = $validTables[$table];
+
+            // Count records to archive using Query Builder
+            $count = \Illuminate\Database\Capsule\Manager::table($table)
+                ->where($dateColumn, '<', $cutoffDate)
+                ->count();
+
             $archived[$table] = $count;
-            
-            // Create archive table if not exists
-            $archiveTable = $table . '_archive';
-            $sql = "CREATE TABLE IF NOT EXISTS {$archiveTable} LIKE {$table}";
-            $conn->exec($sql);
-            
-            // Move records to archive
-            $sql = "INSERT INTO {$archiveTable} SELECT * FROM {$table} WHERE {$dateColumn} < :cutoff";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':cutoff', $cutoffDate);
-            $stmt->execute();
-            
-            // Delete from main table
-            $sql = "DELETE FROM {$table} WHERE {$dateColumn} < :cutoff";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':cutoff', $cutoffDate);
-            $stmt->execute();
-            
+
+            // Use quoted identifiers for DDL operations
+            $quotedTable = '`' . str_replace('`', '``', $table) . '`';
+            $quotedArchiveTable = '`' . str_replace('`', '``', $table . '_archive') . '`';
+
+            // Create archive table if not exists (DDL requires raw statement)
+            \Illuminate\Database\Capsule\Manager::statement(
+                "CREATE TABLE IF NOT EXISTS {$quotedArchiveTable} LIKE {$quotedTable}"
+            );
+
+            // Move records to archive (complex INSERT...SELECT requires raw)
+            \Illuminate\Database\Capsule\Manager::statement(
+                "INSERT INTO {$quotedArchiveTable} SELECT * FROM {$quotedTable} WHERE `{$dateColumn}` < ?",
+                [$cutoffDate]
+            );
+
+            // Delete from main table using Query Builder
+            \Illuminate\Database\Capsule\Manager::table($table)
+                ->where($dateColumn, '<', $cutoffDate)
+                ->delete();
+
             $this->info("{$table}: Archived {$count} records");
         }
-        
+
         $this->job->setOutput(['archived' => $archived]);
         $this->job->save();
-        
+
         return true;
     }
 }

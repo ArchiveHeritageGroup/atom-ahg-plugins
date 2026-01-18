@@ -7,7 +7,7 @@
       <?php echo __('Import multiple digital objects'); ?>
     </h1>
     <span class="small" id="heading-label">
-      <?php echo render_title(new sfIsadPlugin($resource)); ?>
+      <?php echo $resource->title ?? $resource->slug; ?>
     </span>
   </div>
 <?php end_slot(); ?>

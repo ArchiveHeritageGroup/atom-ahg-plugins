@@ -3,8 +3,34 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class ahgRicExplorerActions extends sfActions
 {
-    protected $fusekiEndpoint = 'http://192.168.0.112:3030/ric/query';
-    protected $baseUri = 'https://archives.theahg.co.za/ric/atom-psis';
+    protected $fusekiEndpoint;
+    protected $fusekiUsername;
+    protected $fusekiPassword;
+    protected $baseUri;
+
+    public function preExecute()
+    {
+        parent::preExecute();
+        // Load from database settings (AHG Settings UI), fallback to sfConfig
+        $config = $this->getConfigSettings();
+        $this->fusekiEndpoint = ($config['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')) . '/query';
+        $this->fusekiUsername = $config['fuseki_username'] ?? sfConfig::get('app_ric_fuseki_username', 'admin');
+        $this->fusekiPassword = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
+        $this->baseUri = sfConfig::get('app_ric_base_uri', sfConfig::get('app_siteBaseUrl', '') . '/ric');
+    }
+
+    protected function getConfigSettings(): array
+    {
+        try {
+            // Read from ahg_settings table (AHG Settings UI) - fuseki section
+            return DB::table('ahg_settings')
+                ->where('setting_group', 'fuseki')
+                ->pluck('setting_value', 'setting_key')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 
     public function executeGetData(sfWebRequest $request)
     {

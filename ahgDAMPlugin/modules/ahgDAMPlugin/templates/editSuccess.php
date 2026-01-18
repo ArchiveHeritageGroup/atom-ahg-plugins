@@ -8,7 +8,7 @@
 <?php slot('title'); ?>
   <h1><?php echo __('Photo/DAM (IPTC/XMP)'); ?></h1>
   <?php if (isset($sf_request->getAttribute('sf_route')->resource)): ?>
-    <span class="text-muted"><?php echo render_title($resource); ?></span>
+    <span class="text-muted"><?php echo esc_entities($resource->title ?? $resource->slug); ?></span>
   <?php endif; ?>
 <?php end_slot(); ?>
 

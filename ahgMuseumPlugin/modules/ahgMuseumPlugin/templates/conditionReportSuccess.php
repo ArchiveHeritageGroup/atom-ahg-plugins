@@ -6,7 +6,7 @@
       <?php echo __('Condition Reports'); ?>
     </h1>
     <span class="small" id="heading-label">
-      <?php echo render_title($resource); ?>
+      <?php echo $resource->title ?? $resource->slug; ?>
     </span>
   </div>
 <?php end_slot(); ?>

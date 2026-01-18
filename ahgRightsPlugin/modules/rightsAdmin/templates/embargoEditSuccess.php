@@ -25,7 +25,7 @@
                 <div class="mb-3">
                   <label class="form-label"><?php echo __('Information Object ID'); ?> <span class="text-danger">*</span></label>
                   <input type="number" name="object_id" class="form-control" required
-                         value="<?php echo $embargo->object_id ?? $sf_request->getParameter('object_id', ''); ?>">
+                         value="<?php echo esc_entities($embargo->object_id ?? $sf_request->getParameter('object_id', '')); ?>">
                   <small class="form-text text-muted">Enter the ID of the information object to embargo</small>
                 </div>
               </div>
@@ -86,7 +86,7 @@
 
                 <div class="mb-3">
                   <label class="form-label"><?php echo __('Reason Note'); ?></label>
-                  <textarea name="reason_note" class="form-control" rows="3"><?php echo $embargo->reason_note ?? ''; ?></textarea>
+                  <textarea name="reason_note" class="form-control" rows="3"><?php echo esc_entities($embargo->reason_note ?? ''); ?></textarea>
                 </div>
               </div>
             </div>
@@ -140,8 +140,8 @@
                 <h5 class="mb-0"><?php echo __('Internal Note'); ?></h5>
               </div>
               <div class="card-body">
-                <textarea name="internal_note" class="form-control" rows="3" 
-                          placeholder="Internal notes not visible to users"><?php echo $embargo->internal_note ?? ''; ?></textarea>
+                <textarea name="internal_note" class="form-control" rows="3"
+                          placeholder="Internal notes not visible to users"><?php echo esc_entities($embargo->internal_note ?? ''); ?></textarea>
               </div>
             </div>
 
@@ -158,11 +158,11 @@
                 <ul class="list-group list-group-flush">
                   <?php foreach ($embargoLog as $log): ?>
                   <li class="list-group-item">
-                    <strong><?php echo ucfirst($log->action); ?></strong>
+                    <strong><?php echo esc_entities(ucfirst($log->action)); ?></strong>
                     <br>
                     <small class="text-muted"><?php echo date('d M Y H:i', strtotime($log->performed_at)); ?></small>
                     <?php if ($log->notes): ?>
-                      <br><small><?php echo $log->notes; ?></small>
+                      <br><small><?php echo esc_entities($log->notes); ?></small>
                     <?php endif; ?>
                   </li>
                   <?php endforeach; ?>

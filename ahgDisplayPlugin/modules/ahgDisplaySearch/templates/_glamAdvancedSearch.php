@@ -2,8 +2,8 @@
 /**
  * GLAM Advanced Search Panel - Full ISAD(G) Fields with Sector Groupings
  */
-$showAdvanced = isset($_GET['showAdvanced']) && $_GET['showAdvanced'] == '1';
-$params = $_GET;
+$params = $sf_request->getParameterHolder()->getAll();
+$showAdvanced = ($params['showAdvanced'] ?? '') === '1';
 $currentType = $params['type'] ?? '';
 
 // Get levels filtered by sector

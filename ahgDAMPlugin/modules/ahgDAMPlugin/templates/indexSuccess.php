@@ -7,7 +7,7 @@
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
-  <h1><?php echo render_title($resource); ?></h1>
+  <h1><?php echo esc_entities($resource->title ?? $resource->slug); ?></h1>
   <span class="badge bg-danger"><?php echo __('Photo/DAM (IPTC/XMP)'); ?></span>
 <?php end_slot(); ?>
 
@@ -48,7 +48,7 @@
         ?>
         <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
           <a href="<?php echo $masterPath; ?>" target="_blank">
-            <img src="<?php echo $displayPath; ?>" alt="<?php echo render_title($resource); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
+            <img src="<?php echo $displayPath; ?>" alt="<?php echo esc_entities($resource->title ?? $resource->slug); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
           </a>
         <?php else: ?>
           <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
@@ -117,7 +117,7 @@
     </div>
     <div class="card-body">
       <?php echo render_show(__('Identifier'), $resource->identifier); ?>
-      <?php echo render_show(__('Title'), render_title($resource)); ?>
+      <?php echo render_show(__('Title'), $resource->title ?? $resource->slug); ?>
       
       <?php foreach ($resource->getDates() as $item) { ?>
         <?php echo render_show(__('Date'), render_value_inline(Qubit::renderDateStartEnd($item->getDate(['cultureFallback' => true]), $item->startDate, $item->endDate))); ?>
@@ -394,7 +394,7 @@
       <h4 class="mb-0"><?php echo __('Repository'); ?></h4>
     </div>
     <div class="card-body">
-      <?php echo link_to(render_title($resource->repository), [$resource->repository, 'module' => 'repository']); ?>
+      <?php echo link_to($resource->repository->authorizedFormOfName ?? $resource->repository->slug, [$resource->repository, 'module' => 'repository']); ?>
     </div>
   </section>
   <?php endif; ?>

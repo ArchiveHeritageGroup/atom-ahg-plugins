@@ -212,45 +212,32 @@ class statisticsApiAction extends sfAction
 
     protected function getTimeline($eventService, $repositoryId, $dateFrom, $dateTo)
     {
-        // Get events grouped by date
-        $conn = Propel::getConnection();
-        
-        $sql = "SELECT DATE(e.created_at) as event_date,
-                       e.event_type,
-                       COUNT(*) as event_count
-                FROM spectrum_event e
-                JOIN information_object io ON e.object_id = io.id
-                WHERE 1=1";
-
-        $params = [];
+        // Get events grouped by date using Laravel Query Builder
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
+            ->join('information_object as io', 'e.object_id', '=', 'io.id')
+            ->selectRaw('DATE(e.created_at) as event_date, e.event_type, COUNT(*) as event_count');
 
         if ($repositoryId) {
-            $sql .= " AND io.repository_id = :repository_id";
-            $params[':repository_id'] = $repositoryId;
+            $query->where('io.repository_id', $repositoryId);
         }
 
         if ($dateFrom) {
-            $sql .= " AND e.created_at >= :date_from";
-            $params[':date_from'] = $dateFrom . ' 00:00:00';
+            $query->where('e.created_at', '>=', $dateFrom . ' 00:00:00');
         }
 
         if ($dateTo) {
-            $sql .= " AND e.created_at <= :date_to";
-            $params[':date_to'] = $dateTo . ' 23:59:59';
+            $query->where('e.created_at', '<=', $dateTo . ' 23:59:59');
         }
 
-        $sql .= " GROUP BY event_date, e.event_type
-                  ORDER BY event_date DESC
-                  LIMIT 365";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $query->groupBy('event_date', 'e.event_type')
+            ->orderBy('event_date', 'desc')
+            ->limit(365)
+            ->get();
 
         // Organize by date
         $timeline = [];
         foreach ($results as $row) {
-            $date = $row['event_date'];
+            $date = $row->event_date;
             if (!isset($timeline[$date])) {
                 $timeline[$date] = [
                     'date' => $date,
@@ -258,8 +245,8 @@ class statisticsApiAction extends sfAction
                     'events' => []
                 ];
             }
-            $timeline[$date]['total'] += $row['event_count'];
-            $timeline[$date]['events'][$row['event_type']] = (int)$row['event_count'];
+            $timeline[$date]['total'] += $row->event_count;
+            $timeline[$date]['events'][$row->event_type] = (int)$row->event_count;
         }
 
         return [

@@ -18,7 +18,7 @@ $photoTypes = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Condition Report - <?php echo $conditionCheck->identifier ?></title>
+    <title>Condition Report - <?php echo esc_entities($conditionCheck->identifier) ?></title>
     <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         * { box-sizing: border-box; }
         body { 
@@ -58,25 +58,25 @@ $photoTypes = [
 <body>
     <div class="header">
         <h1>Condition Check Report</h1>
-        <div class="subtitle"><?php echo $conditionCheck->identifier ?> - <?php echo $conditionCheck->object_title ?></div>
+        <div class="subtitle"><?php echo esc_entities($conditionCheck->identifier) ?> - <?php echo esc_entities($conditionCheck->object_title) ?></div>
     </div>
     
     <table class="meta-table">
         <tr>
             <td>Reference</td>
-            <td><?php echo $conditionCheck->condition_reference ?: 'CC-' . $conditionCheck->id ?></td>
+            <td><?php echo esc_entities($conditionCheck->condition_reference ?: 'CC-' . $conditionCheck->id) ?></td>
             <td>Date</td>
             <td><?php echo date('j F Y', strtotime($conditionCheck->check_date)) ?></td>
         </tr>
         <tr>
             <td>Checked By</td>
-            <td><?php echo $conditionCheck->checked_by ?></td>
+            <td><?php echo esc_entities($conditionCheck->checked_by) ?></td>
             <td>Overall Condition</td>
-            <td><strong><?php echo ucfirst($conditionCheck->overall_condition ?: 'Not assessed') ?></strong></td>
+            <td><strong><?php echo esc_entities(ucfirst($conditionCheck->overall_condition ?: 'Not assessed')) ?></strong></td>
         </tr>
         <tr>
             <td>Check Reason</td>
-            <td colspan="3"><?php echo $conditionCheck->check_reason ?: '-' ?></td>
+            <td colspan="3"><?php echo esc_entities($conditionCheck->check_reason ?: '-') ?></td>
         </tr>
     </table>
     
@@ -105,9 +105,9 @@ $photoTypes = [
                 $annotations = json_decode($photo->annotation_data ?: '[]', true);
             ?>
             <div class="photo-item">
-                <span class="photo-type"><?php echo $photoTypes[$photo->photo_type] ?? $photo->photo_type ?></span>
-                <img src="/uploads/condition_photos/<?php echo $photo->filename ?>" alt="<?php echo esc_entities($photo->caption) ?>">
-                <div class="photo-caption"><?php echo $photo->caption ?: 'No caption' ?></div>
+                <span class="photo-type"><?php echo esc_entities($photoTypes[$photo->photo_type] ?? $photo->photo_type) ?></span>
+                <img src="/uploads/condition_photos/<?php echo esc_entities($photo->filename) ?>" alt="<?php echo esc_entities($photo->caption) ?>">
+                <div class="photo-caption"><?php echo esc_entities($photo->caption ?: 'No caption') ?></div>
                 
                 <?php if (!empty($annotations)): ?>
                 <div class="annotation-list">

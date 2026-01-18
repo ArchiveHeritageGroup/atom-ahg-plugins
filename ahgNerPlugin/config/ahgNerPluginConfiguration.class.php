@@ -63,15 +63,17 @@ class ahgNerPluginConfiguration extends sfPluginConfiguration
             throw new sfException('Install SQL file not found: ' . $sqlFile);
         }
         $sql = file_get_contents($sqlFile);
-        $conn = Propel::getConnection();
         $statements = array_filter(
             array_map('trim', explode(';', $sql)),
-            function($stmt) { return !empty($stmt) && strpos($stmt, '--') !== 0; }
+            function ($stmt) { return !empty($stmt) && strpos($stmt, '--') !== 0; }
         );
         foreach ($statements as $statement) {
             if (!empty($statement)) {
-                try { $conn->exec($statement); } 
-                catch (Exception $e) { error_log('NER Plugin install: ' . $e->getMessage()); }
+                try {
+                    \Illuminate\Database\Capsule\Manager::statement($statement);
+                } catch (Exception $e) {
+                    error_log('NER Plugin install: ' . $e->getMessage());
+                }
             }
         }
         return true;
@@ -79,12 +81,16 @@ class ahgNerPluginConfiguration extends sfPluginConfiguration
 
     public static function uninstall($keepData = true)
     {
-        if ($keepData) return true;
+        if ($keepData) {
+            return true;
+        }
         $tables = ['ahg_ner_usage', 'ahg_ner_entity', 'ahg_ner_extraction', 'ahg_ner_settings'];
-        $conn = Propel::getConnection();
         foreach ($tables as $table) {
-            try { $conn->exec("DROP TABLE IF EXISTS {$table}"); } 
-            catch (Exception $e) { error_log('NER Plugin uninstall: ' . $e->getMessage()); }
+            try {
+                \Illuminate\Database\Capsule\Manager::statement("DROP TABLE IF EXISTS `{$table}`");
+            } catch (Exception $e) {
+                error_log('NER Plugin uninstall: ' . $e->getMessage());
+            }
         }
         return true;
     }

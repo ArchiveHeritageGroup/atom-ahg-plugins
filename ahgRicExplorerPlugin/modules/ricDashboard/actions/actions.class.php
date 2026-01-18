@@ -148,16 +148,8 @@ class ricDashboardActions extends sfActions
 
     public function executeConfig(sfWebRequest $request)
     {
-        $this->config = $this->getConfigSettings();
-
-        if ($request->isMethod('post')) {
-            foreach ($request->getParameter('config', []) as $key => $value) {
-                \Illuminate\Database\Capsule\Manager::table('ric_sync_config')
-                    ->where('config_key', $key)->update(['config_value' => $value]);
-            }
-            $this->getUser()->setFlash('notice', 'Configuration saved successfully');
-            $this->redirect(['module' => 'ricDashboard', 'action' => 'config']);
-        }
+        // Redirect to AHG Settings - Fuseki section (centralized config)
+        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']);
     }
 
     // AJAX Endpoints
@@ -309,9 +301,9 @@ class ricDashboardActions extends sfActions
     protected function checkFusekiStatus(): array
     {
         $config = $this->getConfigSettings();
-        $endpoint = $config['fuseki_endpoint'] ?? 'http://192.168.0.112:3030/ric';
-        $username = $config['fuseki_username'] ?? 'admin';
-        $password = $config['fuseki_password'] ?? 'admin123';
+        $endpoint = $config['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric');
+        $username = $config['fuseki_username'] ?? sfConfig::get('app_ric_fuseki_username', 'admin');
+        $password = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
 
         try {
             $ch = curl_init($endpoint . '/query');
@@ -341,8 +333,10 @@ class ricDashboardActions extends sfActions
     protected function getConfigSettings(): array
     {
         try {
-            return \Illuminate\Database\Capsule\Manager::table('ric_sync_config')
-                ->pluck('config_value', 'config_key')
+            // Read from ahg_settings table (AHG Settings UI) - fuseki section
+            return \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_group', 'fuseki')
+                ->pluck('setting_value', 'setting_key')
                 ->toArray();
         } catch (\Exception $e) {
             return [];

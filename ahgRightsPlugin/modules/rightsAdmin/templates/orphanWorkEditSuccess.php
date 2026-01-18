@@ -25,7 +25,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label"><?php echo __('Object ID'); ?> <span class="text-danger">*</span></label>
                     <input type="number" name="object_id" class="form-control" required
-                           value="<?php echo $orphanWork->object_id ?? $sf_request->getParameter('object_id', ''); ?>"
+                           value="<?php echo esc_entities($orphanWork->object_id ?? $sf_request->getParameter('object_id', '')); ?>"
                            <?php echo isset($orphanWork) ? 'readonly' : ''; ?>>
                   </div>
                   <div class="col-md-6 mb-3">
@@ -42,25 +42,25 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label"><?php echo __('Search Jurisdiction'); ?></label>
-                    <input type="text" name="search_jurisdiction" class="form-control" 
-                           value="<?php echo $orphanWork->search_jurisdiction ?? 'ZA'; ?>" placeholder="ISO 3166-1 alpha-2">
+                    <input type="text" name="search_jurisdiction" class="form-control"
+                           value="<?php echo esc_entities($orphanWork->search_jurisdiction ?? 'ZA'); ?>" placeholder="ISO 3166-1 alpha-2">
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label"><?php echo __('Proposed Fee (if any)'); ?></label>
                     <div class="input-group">
                       <span class="input-group-text">R</span>
                       <input type="number" name="proposed_fee" class="form-control" step="0.01"
-                             value="<?php echo $orphanWork->proposed_fee ?? ''; ?>">
+                             value="<?php echo esc_entities($orphanWork->proposed_fee ?? ''); ?>">
                     </div>
                   </div>
                 </div>
                 <div class="mb-3">
                   <label class="form-label"><?php echo __('Intended Use'); ?></label>
-                  <textarea name="intended_use" class="form-control" rows="3"><?php echo $orphanWork->intended_use ?? ''; ?></textarea>
+                  <textarea name="intended_use" class="form-control" rows="3"><?php echo esc_entities($orphanWork->intended_use ?? ''); ?></textarea>
                 </div>
                 <div class="mb-3">
                   <label class="form-label"><?php echo __('Notes'); ?></label>
-                  <textarea name="notes" class="form-control" rows="3"><?php echo $orphanWork->notes ?? ''; ?></textarea>
+                  <textarea name="notes" class="form-control" rows="3"><?php echo esc_entities($orphanWork->notes ?? ''); ?></textarea>
                 </div>
               </div>
             </div>
@@ -100,20 +100,20 @@
                     <tr>
                       <td><?php echo date('d M Y', strtotime($step->search_date)); ?></td>
                       <td>
-                        <strong><?php echo ucfirst(str_replace('_', ' ', $step->source_type)); ?></strong>
-                        <br><small><?php echo $step->source_name; ?></small>
+                        <strong><?php echo esc_entities(ucfirst(str_replace('_', ' ', $step->source_type))); ?></strong>
+                        <br><small><?php echo esc_entities($step->source_name); ?></small>
                         <?php if ($step->source_url): ?>
-                          <br><a href="<?php echo $step->source_url; ?>" target="_blank" class="small">
+                          <br><a href="<?php echo esc_entities($step->source_url); ?>" target="_blank" class="small">
                             <i class="fas fa-external-link-alt"></i> Link
                           </a>
                         <?php endif; ?>
                       </td>
-                      <td><?php echo $step->search_terms ?: '-'; ?></td>
+                      <td><?php echo esc_entities($step->search_terms ?: '-'); ?></td>
                       <td>
                         <?php if ($step->results_found): ?>
                           <span class="badge bg-success">Found</span>
                           <?php if ($step->results_description): ?>
-                            <br><small><?php echo $step->results_description; ?></small>
+                            <br><small><?php echo esc_entities($step->results_description); ?></small>
                           <?php endif; ?>
                         <?php else: ?>
                           <span class="badge bg-secondary">No results</span>
@@ -150,7 +150,7 @@
                     'abandoned' => 'secondary',
                     default => 'light'
                   };
-                ?> fs-6"><?php echo ucfirst(str_replace('_', ' ', $orphanWork->status)); ?></span>
+                ?> fs-6"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $orphanWork->status))); ?></span>
               </p>
               
               <dl class="mb-0">

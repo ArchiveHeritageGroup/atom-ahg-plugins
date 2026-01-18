@@ -103,15 +103,17 @@ class RicSyncListener
     protected function loadConfiguration(): void
     {
         try {
-            // Load from ric_sync_config table
-            $syncEnabled = DB::table('ric_sync_config')
-                ->where('config_key', 'sync_enabled')
-                ->value('config_value');
+            // Load from ahg_settings table (AHG Settings UI) - fuseki section
+            $syncEnabled = DB::table('ahg_settings')
+                ->where('setting_group', 'fuseki')
+                ->where('setting_key', 'fuseki_sync_enabled')
+                ->value('setting_value');
             $this->enabled = $syncEnabled === null || $syncEnabled === '1';
 
-            $queueEnabled = DB::table('ric_sync_config')
-                ->where('config_key', 'queue_enabled')
-                ->value('config_value');
+            $queueEnabled = DB::table('ahg_settings')
+                ->where('setting_group', 'fuseki')
+                ->where('setting_key', 'fuseki_queue_enabled')
+                ->value('setting_value');
             $this->useQueue = $queueEnabled === null || $queueEnabled === '1';
         } catch (\Exception $e) {
             // Use defaults if table doesn't exist yet

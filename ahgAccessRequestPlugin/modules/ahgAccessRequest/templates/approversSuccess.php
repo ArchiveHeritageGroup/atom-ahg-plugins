@@ -104,7 +104,7 @@
                     <label for="min_level" class="form-label">Min Level</label>
                     <select class="form-select" id="min_level" name="min_level">
                       <?php foreach ($classifications as $c): ?>
-                        <option value="<?php echo $c->level; ?>"><?php echo $c->level; ?> - <?php echo $c->name; ?></option>
+                        <option value="<?php echo $c->level; ?>"><?php echo $c->level; ?> - <?php echo esc_entities($c->name); ?></option>
                       <?php endforeach; ?>
                     </select>
                   </div>
@@ -112,7 +112,7 @@
                     <label for="max_level" class="form-label">Max Level</label>
                     <select class="form-select" id="max_level" name="max_level">
                       <?php foreach ($classifications as $c): ?>
-                        <option value="<?php echo $c->level; ?>" <?php echo $c->level == 5 ? 'selected' : ''; ?>><?php echo $c->level; ?> - <?php echo $c->name; ?></option>
+                        <option value="<?php echo $c->level; ?>" <?php echo $c->level == 5 ? 'selected' : ''; ?>><?php echo $c->level; ?> - <?php echo esc_entities($c->name); ?></option>
                       <?php endforeach; ?>
                     </select>
                   </div>

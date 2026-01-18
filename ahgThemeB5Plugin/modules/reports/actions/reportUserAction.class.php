@@ -42,10 +42,10 @@ class reportsReportUserAction extends BaseReportAction
 
          // Initialize resource array to prevent null access
         $this->resource = $this->resource ?? [];
-        // $csrfToken = $request->getParameter('_csrf_token');
+        // Get CSRF token from form or generate a fallback
         $csrfToken = $this->form->getCSRFToken();
         if ('' == $csrfToken) {
-            $csrfToken = '2eee9004cf592d4a92e9021383d1e54e';
+            $csrfToken = md5(session_id() . microtime(true) . mt_rand());
         }
         $defaults = [
             'dateStart' => date('Y-m-d', strtotime('-1 month')),

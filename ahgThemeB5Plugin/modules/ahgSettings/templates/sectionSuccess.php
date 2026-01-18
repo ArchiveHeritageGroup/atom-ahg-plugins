@@ -722,8 +722,8 @@ slot('title', $title);
                                         <div class="row g-3">
                                             <div class="col-md-8">
                                                 <label for="fuseki_endpoint" class="form-label"><?php echo __('Fuseki SPARQL Endpoint'); ?></label>
-                                                <input type="url" class="form-control" id="fuseki_endpoint" name="settings[fuseki_endpoint]" 
-                                                       value="<?php echo esc_specialchars($settings['fuseki_endpoint'] ?? 'http://192.168.0.112:3030/ric'); ?>"
+                                                <input type="url" class="form-control" id="fuseki_endpoint" name="settings[fuseki_endpoint]"
+                                                       value="<?php echo esc_specialchars($settings['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')); ?>"
                                                        placeholder="http://localhost:3030/ric">
                                                 <div class="form-text"><?php echo __('Full URL to Fuseki SPARQL endpoint (e.g., http://localhost:3030/ric)'); ?></div>
                                             </div>
@@ -872,7 +872,8 @@ slot('title', $title);
                                             <a href="/ric-dashboard/" target="_blank" class="btn btn-outline-info">
                                                 <i class="fa fa-external-link-alt me-1"></i><?php echo __('RIC Explorer'); ?>
                                             </a>
-                                            <a href="http://192.168.0.112:3030/" target="_blank" class="btn btn-outline-secondary">
+<?php $fusekiAdmin = preg_replace('#/[^/]+$#', '/', $settings['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')); ?>
+                                            <a href="<?php echo esc_specialchars($fusekiAdmin); ?>" target="_blank" class="btn btn-outline-secondary">
                                                 <i class="fa fa-database me-1"></i><?php echo __('Fuseki Admin'); ?>
                                             </a>
                                         </div>

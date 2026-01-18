@@ -2,7 +2,7 @@
 
 <?php slot('title'); ?>
   <h1><?php echo __('Add Embargo'); ?></h1>
-  <p class="lead"><?php echo render_title($resource); ?></p>
+  <p class="lead"><?php echo $resource->title ?? $resource->slug; ?></p>
 <?php end_slot(); ?>
 
 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'add', 'objectId' => $objectId]); ?>">

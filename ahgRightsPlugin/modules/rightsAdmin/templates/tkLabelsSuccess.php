@@ -44,13 +44,13 @@
             
             <div class="col-md-6 col-lg-4 mb-3">
               <div class="d-flex align-items-start p-2 border rounded">
-                <span class="badge me-3 text-white" style="background-color: <?php echo $label->color; ?>; min-width: 50px; padding: 8px;">
-                  <?php echo $label->code; ?>
+                <span class="badge me-3 text-white" style="background-color: <?php echo esc_entities($label->color); ?>; min-width: 50px; padding: 8px;">
+                  <?php echo esc_entities($label->code); ?>
                 </span>
                 <div class="small">
-                  <strong><?php echo $label->name; ?></strong>
+                  <strong><?php echo esc_entities($label->name); ?></strong>
                   <br>
-                  <span class="text-muted"><?php echo $label->description; ?></span>
+                  <span class="text-muted"><?php echo esc_entities($label->description); ?></span>
                 </div>
               </div>
             </div>
@@ -80,22 +80,22 @@
               <?php foreach ($assignments as $assign): ?>
               <tr>
                 <td>
-                  <span class="badge text-white" style="background-color: <?php echo $assign->color; ?>;">
-                    <?php echo $assign->code; ?>
+                  <span class="badge text-white" style="background-color: <?php echo esc_entities($assign->color); ?>;">
+                    <?php echo esc_entities($assign->code); ?>
                   </span>
-                  <?php echo $assign->label_name; ?>
+                  <?php echo esc_entities($assign->label_name); ?>
                 </td>
                 <td>
                   <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $assign->slug]); ?>">
-                    <?php echo $assign->object_title ?: 'ID: '.$assign->object_id; ?>
+                    <?php echo esc_entities($assign->object_title ?: 'ID: '.$assign->object_id); ?>
                   </a>
                 </td>
-                <td><?php echo $assign->community_name ?: '-'; ?></td>
+                <td><?php echo esc_entities($assign->community_name ?: '-'); ?></td>
                 <td>
                   <?php if ($assign->verified): ?>
                     <i class="fas fa-check-circle text-success"></i>
                     <?php if ($assign->verified_by): ?>
-                      <small class="text-muted"><?php echo $assign->verified_by; ?></small>
+                      <small class="text-muted"><?php echo esc_entities($assign->verified_by); ?></small>
                     <?php endif; ?>
                   <?php else: ?>
                     <i class="fas fa-clock text-warning"></i> Pending
@@ -145,7 +145,7 @@
               <select name="tk_label_id" class="form-select" required>
                 <option value=""><?php echo __('- Select Label -'); ?></option>
                 <?php foreach ($tkLabels as $label): ?>
-                <option value="<?php echo $label->id; ?>"><?php echo $label->code; ?> - <?php echo $label->name; ?></option>
+                <option value="<?php echo $label->id; ?>"><?php echo esc_entities($label->code); ?> - <?php echo esc_entities($label->name); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>

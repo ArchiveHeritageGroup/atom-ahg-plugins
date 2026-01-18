@@ -34,28 +34,32 @@ class SpectrumPhotoService
      */
     protected function loadSettings()
     {
-        $conn = Propel::getConnection();
-        $sql = "SELECT setting_key, setting_value, setting_type FROM spectrum_media_settings";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        
         $this->settings = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $value = $row['setting_value'];
-            
-            switch ($row['setting_type']) {
-                case 'integer':
-                    $value = (int) $value;
-                    break;
-                case 'boolean':
-                    $value = $value === 'true' || $value === '1';
-                    break;
-                case 'json':
-                    $value = json_decode($value, true);
-                    break;
+
+        try {
+            $rows = \Illuminate\Database\Capsule\Manager::table('spectrum_media_settings')
+                ->select('setting_key', 'setting_value', 'setting_type')
+                ->get();
+
+            foreach ($rows as $row) {
+                $value = $row->setting_value;
+
+                switch ($row->setting_type) {
+                    case 'integer':
+                        $value = (int) $value;
+                        break;
+                    case 'boolean':
+                        $value = $value === 'true' || $value === '1';
+                        break;
+                    case 'json':
+                        $value = json_decode($value, true);
+                        break;
+                }
+
+                $this->settings[$row->setting_key] = $value;
             }
-            
-            $this->settings[$row['setting_key']] = $value;
+        } catch (Exception $e) {
+            // Use defaults if database not available
         }
     }
     

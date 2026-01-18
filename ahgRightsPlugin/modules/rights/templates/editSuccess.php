@@ -2,7 +2,7 @@
 
 <?php slot('title'); ?>
 <h1 class="multiline">
-    <?php echo render_title($resource); ?>
+    <?php echo $resource->title ?? $resource->slug; ?>
     <span class="sub"><?php echo $isNew ? __('Add rights') : __('Edit rights'); ?></span>
 </h1>
 <?php end_slot(); ?>

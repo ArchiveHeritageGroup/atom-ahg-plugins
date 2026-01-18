@@ -1,7 +1,7 @@
 {
     "name": "Museum Cataloging (CCO/Spectrum)",
     "machine_name": "ahgMuseumPlugin",
-    "version": "1.4.12",
+    "version": "1.4.13",
     "description": "Museum cataloging with CCO (Cataloging Cultural Objects), CIDOC-CRM, and Spectrum 5.0 integration",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

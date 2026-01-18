@@ -7,5 +7,17 @@ class DonorAgreementForm extends sfForm
         $this->setValidators(['agreement_type_id' => new sfValidatorInteger(['required' => true]), 'title' => new sfValidatorString(['required' => true, 'max_length' => 500]), 'description' => new sfValidatorString(['required' => false]), 'status' => new sfValidatorChoice(['choices' => ['draft', 'pending_review', 'pending_signature', 'active', 'expired', 'terminated']]), 'donor_id' => new sfValidatorInteger(['required' => false]), 'donor_name' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'institution_name' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'legal_representative' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'legal_representative_title' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'repository_representative' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'repository_representative_title' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'agreement_date' => new sfValidatorDate(['required' => false]), 'effective_date' => new sfValidatorDate(['required' => false]), 'expiry_date' => new sfValidatorDate(['required' => false]), 'review_date' => new sfValidatorDate(['required' => false]), 'scope_description' => new sfValidatorString(['required' => false]), 'extent_statement' => new sfValidatorString(['required' => false, 'max_length' => 255]), 'transfer_date' => new sfValidatorDate(['required' => false]), 'general_terms' => new sfValidatorString(['required' => false]), 'special_conditions' => new sfValidatorString(['required' => false]), 'accession_id' => new sfValidatorInteger(['required' => false]), 'information_object_id' => new sfValidatorInteger(['required' => false]), 'internal_notes' => new sfValidatorString(['required' => false]), 'is_template' => new sfValidatorBoolean(['required' => false])]);
         $this->widgetSchema->setNameFormat('agreement[%s]');
     }
-    protected function getAgreementTypeChoices(): array { $c = ['' => '-- Select --']; $conn = Propel::getConnection(); $stmt = $conn->prepare("SELECT id, name FROM agreement_type WHERE is_active = 1 ORDER BY sort_order"); $stmt->execute(); while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) { $c[$r['id']] = $r['name']; } return $c; }
+    protected function getAgreementTypeChoices(): array
+    {
+        $choices = ['' => '-- Select --'];
+        $rows = \Illuminate\Database\Capsule\Manager::table('agreement_type')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->select('id', 'name')
+            ->get();
+        foreach ($rows as $row) {
+            $choices[$row->id] = $row->name;
+        }
+        return $choices;
+    }
 }

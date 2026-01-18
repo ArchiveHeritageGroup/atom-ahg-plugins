@@ -2,7 +2,7 @@
 
 <h1 class="h3 mb-4">
   <i class="fas fa-gavel me-2"></i>
-  <?php echo __('Rights'); ?> - <?php echo render_title($resource); ?>
+  <?php echo __('Rights'); ?> - <?php echo $resource->title ?? $resource->slug; ?>
 </h1>
 
 <?php if ($sf_user->isAuthenticated()): ?>
@@ -121,18 +121,18 @@
       <?php foreach ($tkLabels as $label): ?>
       <div class="col-md-6 mb-3">
         <div class="d-flex align-items-start">
-          <span class="badge me-3" style="background-color: <?php echo $label->color; ?>; width: 60px; padding: 10px;">
-            <?php echo $label->code; ?>
+          <span class="badge me-3" style="background-color: <?php echo esc_entities($label->color); ?>; width: 60px; padding: 10px;">
+            <?php echo esc_entities($label->code); ?>
           </span>
           <div>
-            <strong><?php echo $label->name; ?></strong>
+            <strong><?php echo esc_entities($label->name); ?></strong>
             <?php if ($label->verified): ?>
               <i class="fas fa-check-circle text-success ms-1" title="Verified"></i>
             <?php endif; ?>
             <br>
-            <small class="text-muted"><?php echo $label->description; ?></small>
+            <small class="text-muted"><?php echo esc_entities($label->description); ?></small>
             <?php if ($label->community_name): ?>
-              <br><small>Community: <?php echo $label->community_name; ?></small>
+              <br><small>Community: <?php echo esc_entities($label->community_name); ?></small>
             <?php endif; ?>
           </div>
         </div>

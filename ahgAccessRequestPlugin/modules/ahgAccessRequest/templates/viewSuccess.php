@@ -193,7 +193,7 @@
                       <?php endif; ?>
                     </div>
                     <small class="text-muted">
-                      <?php echo $entry->actor_name ?? 'System'; ?> - 
+                      <?php echo esc_entities($entry->actor_name ?? 'System'); ?> - 
                       <?php echo date('M j, Y H:i', strtotime($entry->created_at)); ?>
                     </small>
                   </div>

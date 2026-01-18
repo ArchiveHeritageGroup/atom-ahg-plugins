@@ -47,7 +47,7 @@
               <tr>
                 <td>
                   <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $work->slug]); ?>">
-                    <?php echo $work->object_title ?: 'ID: '.$work->object_id; ?>
+                    <?php echo esc_entities($work->object_title ?: 'ID: '.$work->object_id); ?>
                   </a>
                 </td>
                 <td><?php echo ucfirst(str_replace('_', ' ', $work->work_type)); ?></td>

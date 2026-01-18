@@ -275,11 +275,9 @@ class ahgSpectrumEventService
         self::EVENT_DISPOSAL_COMPLETED => 'Disposal Completed'
     ];
 
-    protected $conn;
-
     public function __construct()
     {
-        $this->conn = Propel::getConnection();
+        // Uses Laravel Query Builder via Illuminate\Database\Capsule\Manager
     }
 
     /**
@@ -290,34 +288,22 @@ class ahgSpectrumEventService
         $now = date('Y-m-d H:i:s');
         $userId = sfContext::getInstance()->user->getAttribute('user_id');
 
-        $sql = "INSERT INTO spectrum_event 
-                (object_id, procedure_id, event_type, status_from, status_to, 
-                 user_id, assigned_to_id, due_date, completed_date, location, 
-                 notes, metadata, created_at, updated_at)
-                VALUES 
-                (:object_id, :procedure_id, :event_type, :status_from, :status_to,
-                 :user_id, :assigned_to_id, :due_date, :completed_date, :location,
-                 :notes, :metadata, :created_at, :updated_at)";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':object_id' => $objectId,
-            ':procedure_id' => $procedureId,
-            ':event_type' => $eventType,
-            ':status_from' => $data['status_from'] ?? null,
-            ':status_to' => $data['status_to'] ?? null,
-            ':user_id' => $userId,
-            ':assigned_to_id' => $data['assigned_to_id'] ?? null,
-            ':due_date' => $data['due_date'] ?? null,
-            ':completed_date' => $data['completed_date'] ?? null,
-            ':location' => $data['location'] ?? null,
-            ':notes' => $data['notes'] ?? null,
-            ':metadata' => isset($data['metadata']) ? json_encode($data['metadata']) : null,
-            ':created_at' => $now,
-            ':updated_at' => $now
+        return \Illuminate\Database\Capsule\Manager::table('spectrum_event')->insertGetId([
+            'object_id' => $objectId,
+            'procedure_id' => $procedureId,
+            'event_type' => $eventType,
+            'status_from' => $data['status_from'] ?? null,
+            'status_to' => $data['status_to'] ?? null,
+            'user_id' => $userId,
+            'assigned_to_id' => $data['assigned_to_id'] ?? null,
+            'due_date' => $data['due_date'] ?? null,
+            'completed_date' => $data['completed_date'] ?? null,
+            'location' => $data['location'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'metadata' => isset($data['metadata']) ? json_encode($data['metadata']) : null,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
-
-        return $this->conn->lastInsertId();
     }
 
     /**
@@ -325,32 +311,22 @@ class ahgSpectrumEventService
      */
     public function getObjectEvents($objectId, $procedureId = null, $limit = 100, $offset = 0)
     {
-        $sql = "SELECT e.*, 
-                       u.username as user_name,
-                       a.username as assigned_to_name
-                FROM spectrum_event e
-                LEFT JOIN user u ON e.user_id = u.id
-                LEFT JOIN user a ON e.assigned_to_id = a.id
-                WHERE e.object_id = :object_id";
-        
-        $params = [':object_id' => $objectId];
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
+            ->leftJoin('user as u', 'e.user_id', '=', 'u.id')
+            ->leftJoin('user as a', 'e.assigned_to_id', '=', 'a.id')
+            ->where('e.object_id', $objectId)
+            ->select('e.*', 'u.username as user_name', 'a.username as assigned_to_name');
 
         if ($procedureId) {
-            $sql .= " AND e.procedure_id = :procedure_id";
-            $params[':procedure_id'] = $procedureId;
+            $query->where('e.procedure_id', $procedureId);
         }
 
-        $sql .= " ORDER BY e.created_at DESC LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->conn->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $query->orderBy('e.created_at', 'desc')
+            ->limit($limit)
+            ->offset($offset)
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
     }
 
     /**
@@ -358,23 +334,15 @@ class ahgSpectrumEventService
      */
     public function getProcedureStatus($objectId, $procedureId)
     {
-        $sql = "SELECT status_to as current_status, 
-                       assigned_to_id, due_date, location,
-                       created_at as last_update
-                FROM spectrum_event
-                WHERE object_id = :object_id 
-                  AND procedure_id = :procedure_id
-                  AND status_to IS NOT NULL
-                ORDER BY created_at DESC
-                LIMIT 1";
+        $row = \Illuminate\Database\Capsule\Manager::table('spectrum_event')
+            ->where('object_id', $objectId)
+            ->where('procedure_id', $procedureId)
+            ->whereNotNull('status_to')
+            ->orderBy('created_at', 'desc')
+            ->select('status_to as current_status', 'assigned_to_id', 'due_date', 'location', 'created_at as last_update')
+            ->first();
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':object_id' => $objectId,
-            ':procedure_id' => $procedureId
-        ]);
-
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $row ? (array) $row : null;
 
         if (!$result) {
             return [
@@ -566,41 +534,24 @@ class ahgSpectrumEventService
      */
     public function getRecentEvents($repositoryId = null, $procedureId = null, $limit = 100)
     {
-        $sql = "SELECT e.*, 
-                       io.identifier as object_identifier,
-                       io.slug as object_slug,
-                       u.username as user_name
-                FROM spectrum_event e
-                JOIN information_object io ON e.object_id = io.id
-                LEFT JOIN user u ON e.user_id = u.id";
-
-        $where = [];
-        $params = [];
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
+            ->join('information_object as io', 'e.object_id', '=', 'io.id')
+            ->leftJoin('user as u', 'e.user_id', '=', 'u.id')
+            ->select('e.*', 'io.identifier as object_identifier', 'io.slug as object_slug', 'u.username as user_name');
 
         if ($repositoryId) {
-            $where[] = "io.repository_id = :repository_id";
-            $params[':repository_id'] = $repositoryId;
+            $query->where('io.repository_id', $repositoryId);
         }
 
         if ($procedureId) {
-            $where[] = "e.procedure_id = :procedure_id";
-            $params[':procedure_id'] = $procedureId;
+            $query->where('e.procedure_id', $procedureId);
         }
 
-        if (!empty($where)) {
-            $sql .= " WHERE " . implode(' AND ', $where);
-        }
-
-        $sql .= " ORDER BY e.created_at DESC LIMIT :limit";
-
-        $stmt = $this->conn->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $query->orderBy('e.created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
     }
 
     /**
@@ -608,38 +559,27 @@ class ahgSpectrumEventService
      */
     public function getOverdueProcedures($repositoryId = null)
     {
-        $sql = "SELECT e.object_id, e.procedure_id, e.due_date, e.assigned_to_id,
-                       io.identifier as object_identifier, io.slug as object_slug,
-                       u.username as assigned_to_name,
-                       DATEDIFF(CURDATE(), e.due_date) as days_overdue
-                FROM spectrum_event e
-                JOIN information_object io ON e.object_id = io.id
-                LEFT JOIN user u ON e.assigned_to_id = u.id
-                WHERE e.due_date < CURDATE()
-                  AND e.id = (
-                      SELECT MAX(e2.id) FROM spectrum_event e2 
-                      WHERE e2.object_id = e.object_id 
-                        AND e2.procedure_id = e.procedure_id
-                        AND e2.status_to IS NOT NULL
-                  )
-                  AND e.status_to NOT IN (:completed, :cancelled)";
-
-        $params = [
-            ':completed' => self::STATUS_COMPLETED,
-            ':cancelled' => self::STATUS_CANCELLED
-        ];
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
+            ->join('information_object as io', 'e.object_id', '=', 'io.id')
+            ->leftJoin('user as u', 'e.assigned_to_id', '=', 'u.id')
+            ->whereRaw('e.due_date < CURDATE()')
+            ->whereRaw('e.id = (SELECT MAX(e2.id) FROM spectrum_event e2 WHERE e2.object_id = e.object_id AND e2.procedure_id = e.procedure_id AND e2.status_to IS NOT NULL)')
+            ->whereNotIn('e.status_to', [self::STATUS_COMPLETED, self::STATUS_CANCELLED])
+            ->select(
+                'e.object_id', 'e.procedure_id', 'e.due_date', 'e.assigned_to_id',
+                'io.identifier as object_identifier', 'io.slug as object_slug',
+                'u.username as assigned_to_name',
+                \Illuminate\Database\Capsule\Manager::raw('DATEDIFF(CURDATE(), e.due_date) as days_overdue')
+            );
 
         if ($repositoryId) {
-            $sql .= " AND io.repository_id = :repository_id";
-            $params[':repository_id'] = $repositoryId;
+            $query->where('io.repository_id', $repositoryId);
         }
 
-        $sql .= " ORDER BY days_overdue DESC";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $query->orderBy('days_overdue', 'desc')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
     }
 
     /**
@@ -650,66 +590,65 @@ class ahgSpectrumEventService
         $stats = [];
 
         foreach (self::$procedures as $procedureId => $procedure) {
-            $sql = "SELECT 
+            $sql = "SELECT
                         COUNT(DISTINCT e.object_id) as total_objects,
-                        SUM(CASE WHEN latest.status = :completed THEN 1 ELSE 0 END) as completed,
-                        SUM(CASE WHEN latest.status = :in_progress THEN 1 ELSE 0 END) as in_progress,
-                        SUM(CASE WHEN latest.status = :pending_review THEN 1 ELSE 0 END) as pending_review,
-                        SUM(CASE WHEN latest.due_date < CURDATE() AND latest.status NOT IN (:completed2, :cancelled) THEN 1 ELSE 0 END) as overdue
+                        SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as completed,
+                        SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as in_progress,
+                        SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as pending_review,
+                        SUM(CASE WHEN latest.due_date < CURDATE() AND latest.status NOT IN (?, ?) THEN 1 ELSE 0 END) as overdue
                     FROM (
-                        SELECT e.object_id, 
-                               (SELECT status_to FROM spectrum_event e2 
-                                WHERE e2.object_id = e.object_id 
-                                  AND e2.procedure_id = :procedure_id
+                        SELECT e.object_id,
+                               (SELECT status_to FROM spectrum_event e2
+                                WHERE e2.object_id = e.object_id
+                                  AND e2.procedure_id = ?
                                   AND e2.status_to IS NOT NULL
                                 ORDER BY e2.created_at DESC LIMIT 1) as status,
                                (SELECT due_date FROM spectrum_event e3
                                 WHERE e3.object_id = e.object_id
-                                  AND e3.procedure_id = :procedure_id2
+                                  AND e3.procedure_id = ?
                                   AND e3.due_date IS NOT NULL
                                 ORDER BY e3.created_at DESC LIMIT 1) as due_date
                         FROM spectrum_event e
                         JOIN information_object io ON e.object_id = io.id
-                        WHERE e.procedure_id = :procedure_id3";
+                        WHERE e.procedure_id = ?";
 
             $params = [
-                ':procedure_id' => $procedureId,
-                ':procedure_id2' => $procedureId,
-                ':procedure_id3' => $procedureId,
-                ':completed' => self::STATUS_COMPLETED,
-                ':completed2' => self::STATUS_COMPLETED,
-                ':in_progress' => self::STATUS_IN_PROGRESS,
-                ':pending_review' => self::STATUS_PENDING_REVIEW,
-                ':cancelled' => self::STATUS_CANCELLED
+                self::STATUS_COMPLETED,
+                self::STATUS_IN_PROGRESS,
+                self::STATUS_PENDING_REVIEW,
+                self::STATUS_COMPLETED,
+                self::STATUS_CANCELLED,
+                $procedureId,
+                $procedureId,
+                $procedureId,
             ];
 
             if ($repositoryId) {
-                $sql .= " AND io.repository_id = :repository_id";
-                $params[':repository_id'] = $repositoryId;
+                $sql .= " AND io.repository_id = ?";
+                $params[] = $repositoryId;
             }
 
             if ($dateFrom) {
-                $sql .= " AND e.created_at >= :date_from";
-                $params[':date_from'] = $dateFrom;
+                $sql .= " AND e.created_at >= ?";
+                $params[] = $dateFrom;
             }
 
             if ($dateTo) {
-                $sql .= " AND e.created_at <= :date_to";
-                $params[':date_to'] = $dateTo;
+                $sql .= " AND e.created_at <= ?";
+                $params[] = $dateTo;
             }
 
             $sql .= " GROUP BY e.object_id) as latest";
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute($params);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $results = \Illuminate\Database\Capsule\Manager::select($sql, $params);
+            $result = !empty($results) ? (array) $results[0] : [];
 
             $stats[$procedureId] = array_merge($procedure, [
-                'total_objects' => (int)($result['total_objects'] ?? 0),
-                'completed' => (int)($result['completed'] ?? 0),
-                'in_progress' => (int)($result['in_progress'] ?? 0),
-                'pending_review' => (int)($result['pending_review'] ?? 0),
-                'overdue' => (int)($result['overdue'] ?? 0)
+                'total_objects' => (int) ($result['total_objects'] ?? 0),
+                'completed' => (int) ($result['completed'] ?? 0),
+                'in_progress' => (int) ($result['in_progress'] ?? 0),
+                'pending_review' => (int) ($result['pending_review'] ?? 0),
+                'overdue' => (int) ($result['overdue'] ?? 0),
             ]);
         }
 

@@ -33,9 +33,14 @@ EOF;
 
         if (!$options['keep-data']) {
             $this->logSection('ner', 'Removing database tables...');
-            
+
             $databaseManager = new sfDatabaseManager($this->configuration);
-            $conn = Propel::getConnection();
+
+            // Load Laravel Query Builder
+            $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($frameworkBootstrap)) {
+                require_once $frameworkBootstrap;
+            }
 
             $tables = [
                 'ahg_ner_usage',
@@ -46,7 +51,7 @@ EOF;
 
             foreach ($tables as $table) {
                 try {
-                    $conn->exec("DROP TABLE IF EXISTS {$table}");
+                    \Illuminate\Database\Capsule\Manager::statement("DROP TABLE IF EXISTS `{$table}`");
                     $this->logSection('ner', "Dropped table: {$table}");
                 } catch (Exception $e) {
                     $this->logSection('ner', 'Warning: ' . $e->getMessage(), null, 'COMMENT');

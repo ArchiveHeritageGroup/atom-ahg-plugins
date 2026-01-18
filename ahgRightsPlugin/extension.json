@@ -1,7 +1,7 @@
 {
     "name": "Rights Management",
     "machine_name": "ahgRightsPlugin",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Core rights management including PREMIS rights, Creative Commons, rights holders, and orphan works tracking",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

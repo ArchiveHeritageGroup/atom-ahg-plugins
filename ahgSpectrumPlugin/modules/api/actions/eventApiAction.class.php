@@ -62,16 +62,15 @@ class eventApiAction extends sfAction
 
     protected function getEvent($eventService, $eventId)
     {
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare("SELECT * FROM spectrum_event WHERE id = :id");
-        $stmt->execute([':id' => $eventId]);
-        
-        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+        $event = \Illuminate\Database\Capsule\Manager::table('spectrum_event')
+            ->where('id', $eventId)
+            ->first();
+
         if (!$event) {
             throw new Exception('Event not found', 404);
         }
 
-        return $this->formatEvent($event);
+        return $this->formatEvent((array) $event);
     }
 
     protected function getObjectEvents($eventService, $objectId, $procedureId, $request)

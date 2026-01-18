@@ -6,41 +6,34 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-// Load database credentials from AtoM config
-$config = require __DIR__ . '/config/config.php';
-$dsn = $config['all']['propel']['param']['dsn'];
-$dbUser = $config['all']['propel']['param']['username'];
-$dbPass = $config['all']['propel']['param']['password'];
-
-try {
-    $pdo = new PDO($dsn, $dbUser, $dbPass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-    ]);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Database connection failed']);
-    exit;
+// Load Laravel Query Builder via framework bootstrap
+$frameworkBootstrap = __DIR__ . '/../../atom-framework/bootstrap.php';
+if (file_exists($frameworkBootstrap)) {
+    require_once $frameworkBootstrap;
 }
 
-$objectId = $_GET['id'] ?? '';
+use Illuminate\Database\Capsule\Manager as DB;
 
-if (empty($objectId)) {
+$objectId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (empty($objectId) || $objectId <= 0) {
     http_response_code(400);
-    echo json_encode(['error' => 'Missing id parameter']);
+    echo json_encode(['error' => 'Missing or invalid id parameter']);
     exit;
 }
 
 // Look up the information object
-$stmt = $pdo->prepare("
-    SELECT io.id, io.identifier, i18n.title, s.slug
-    FROM information_object io
-    LEFT JOIN information_object_i18n i18n ON io.id = i18n.id AND i18n.culture = 'en'
-    LEFT JOIN slug s ON io.id = s.object_id
-    WHERE io.id = ?
-");
-$stmt->execute([$objectId]);
-$object = $stmt->fetch(PDO::FETCH_ASSOC);
+$result = DB::table('information_object as io')
+    ->leftJoin('information_object_i18n as i18n', function ($join) {
+        $join->on('io.id', '=', 'i18n.id')
+            ->where('i18n.culture', '=', 'en');
+    })
+    ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+    ->where('io.id', $objectId)
+    ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+    ->first();
+
+$object = $result ? (array) $result : null;
 
 if (!$object) {
     http_response_code(404);
@@ -49,14 +42,13 @@ if (!$object) {
 }
 
 // Get 3D digital objects
-$stmt = $pdo->prepare("
-    SELECT do.id, do.name, do.path, do.mime_type
-    FROM digital_object do
-    WHERE do.object_id = ?
-    ORDER BY do.id
-");
-$stmt->execute([$object['id']]);
-$digitalObjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$digitalObjects = DB::table('digital_object as do')
+    ->where('do.object_id', $object['id'])
+    ->orderBy('do.id')
+    ->select('do.id', 'do.name', 'do.path', 'do.mime_type')
+    ->get()
+    ->map(fn ($row) => (array) $row)
+    ->toArray();
 
 // Filter for 3D formats
 $threeDFormats = ['glb', 'gltf', 'obj', 'stl', 'ply', 'fbx', 'usdz'];

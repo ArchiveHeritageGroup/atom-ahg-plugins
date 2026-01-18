@@ -35,19 +35,24 @@ EOF;
 
         $this->logSection('ner', 'Running database migrations...');
 
-        // Get database connection
+        // Initialize database connection
         $databaseManager = new sfDatabaseManager($this->configuration);
-        $conn = Propel::getConnection();
+
+        // Load Laravel Query Builder
+        $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($frameworkBootstrap)) {
+            require_once $frameworkBootstrap;
+        }
 
         $sql = file_get_contents($sqlFile);
-        
+
         // Split and execute statements
         $statements = array_filter(
             array_map('trim', preg_split('/;[\r\n]+/', $sql)),
-            function($stmt) {
+            function ($stmt) {
                 $stmt = trim($stmt);
-                return !empty($stmt) && 
-                       strpos($stmt, '--') !== 0 && 
+                return !empty($stmt) &&
+                       strpos($stmt, '--') !== 0 &&
                        strpos($stmt, '/*') !== 0;
             }
         );
@@ -56,7 +61,7 @@ EOF;
         foreach ($statements as $statement) {
             if (!empty(trim($statement))) {
                 try {
-                    $conn->exec($statement);
+                    \Illuminate\Database\Capsule\Manager::statement($statement);
                     $executed++;
                 } catch (Exception $e) {
                     $this->logSection('ner', 'Warning: ' . $e->getMessage(), null, 'COMMENT');

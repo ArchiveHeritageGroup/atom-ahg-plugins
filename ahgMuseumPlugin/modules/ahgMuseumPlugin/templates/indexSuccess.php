@@ -221,7 +221,7 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
   ); ?>
 
   <?php echo render_show(__('Reference code'), $resource->identifier, ['fieldLabel' => 'referenceCode']); ?>
-  <?php echo render_show(__('Title'), render_title($resource), ['fieldLabel' => 'title']); ?>
+  <?php echo render_show(__('Title'), $resource->title ?? $resource->slug, ['fieldLabel' => 'title']); ?>
 
   <div class="field <?php echo render_b5_show_field_css_classes(); ?>">
     <?php echo render_b5_show_label(__('Date(s)')); ?>

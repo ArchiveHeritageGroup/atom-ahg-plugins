@@ -1,4 +1,4 @@
-<?php decorate_with($_GET['view'] === 'full' ? 'layout_1col' : 'layout_2col'); ?>
+<?php decorate_with($sf_request->getParameter('view') === 'full' ? 'layout_1col' : 'layout_2col'); ?>
 <?php use_helper('Date') ?>
 <style>
 /* Resizable table columns */
@@ -71,25 +71,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php
-// Get values directly from request as fallback
-$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
+// Get values from Symfony request object
+$limit = (int) $sf_request->getParameter('limit', 10);
 if ($limit < 10) $limit = 10;
 if ($limit > 100) $limit = 100;
 
-$page = (int) (int) (isset($_GET['page']) ? $_GET['page'] : 1);
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'date';
-$sortDir = isset($_GET['dir']) ? $_GET['dir'] : 'desc';
-$viewMode = isset($_GET['view']) ? $_GET['view'] : 'card';
-$typeFilter = $_GET['type'] ?? null;
-$creatorFilter = $_GET['creator'] ?? null;
-$placeFilter = $_GET['place'] ?? null;
-$subjectFilter = $_GET['subject'] ?? null;
-$genreFilter = $_GET['genre'] ?? null;
-$levelFilter = $_GET['level'] ?? null;
-$mediaFilter = $_GET['media'] ?? null;
-$repoFilter = $_GET['repo'] ?? null;
-$hasDigital = $_GET['hasDigital'] ?? null;
-$parentId = $_GET['parent'] ?? null;
+$page = (int) $sf_request->getParameter('page', 1);
+$sort = $sf_request->getParameter('sort', 'date');
+$sortDir = $sf_request->getParameter('dir', 'desc');
+$viewMode = $sf_request->getParameter('view', 'card');
+$typeFilter = $sf_request->getParameter('type');
+$creatorFilter = $sf_request->getParameter('creator');
+$placeFilter = $sf_request->getParameter('place');
+$subjectFilter = $sf_request->getParameter('subject');
+$genreFilter = $sf_request->getParameter('genre');
+$levelFilter = $sf_request->getParameter('level');
+$mediaFilter = $sf_request->getParameter('media');
+$repoFilter = $sf_request->getParameter('repo');
+$hasDigital = $sf_request->getParameter('hasDigital');
+$parentId = $sf_request->getParameter('parent');
 
 // Get data from action
 $total = $sf_data->getRaw('total') ?: 0;

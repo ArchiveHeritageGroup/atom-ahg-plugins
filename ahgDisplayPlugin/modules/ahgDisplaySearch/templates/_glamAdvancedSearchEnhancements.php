@@ -45,7 +45,7 @@ try {
     </div>
     <?php endif; ?>
     
-    <?php if (!empty($_GET)): ?>
+    <?php if (!empty($sf_request->getParameterHolder()->getAll())): ?>
     <button type="button" class="btn btn-sm btn-success py-0 px-2" data-bs-toggle="modal" data-bs-target="#saveGlamSearchModal">
       <i class="fas fa-bookmark me-1"></i><?php echo __('Save Search'); ?>
     </button>

@@ -1,7 +1,7 @@
 {
     "name": "Named Entity Recognition",
     "machine_name": "ahgNerPlugin",
-    "version": "1.0.16",
+    "version": "1.0.17",
     "description": "Extract and link named entities (persons, organizations, places, dates) from archival descriptions using AI/NLP",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

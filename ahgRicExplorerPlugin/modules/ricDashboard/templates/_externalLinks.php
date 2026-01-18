@@ -14,7 +14,9 @@
             <a href="/ric-dashboard/categories.php" target="_blank" class="btn btn-outline-secondary">
                 <i class="fa fa-tags"></i> <?php echo __('RIC Categories Reference'); ?>
             </a>
-            <a href="http://192.168.0.112:3030/" target="_blank" class="btn btn-outline-dark">
+<?php $fusekiEndpoint = sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric');
+$fusekiAdmin = preg_replace('#/[^/]+$#', '/', $fusekiEndpoint); ?>
+            <a href="<?php echo esc_specialchars($fusekiAdmin); ?>" target="_blank" class="btn btn-outline-dark">
                 <i class="fa fa-database"></i> <?php echo __('Fuseki Admin'); ?>
             </a>
         </div>

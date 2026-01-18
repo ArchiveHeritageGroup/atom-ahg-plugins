@@ -127,7 +127,7 @@ $formOptions = sfOutputEscaper::unescape($formOptions ?? []);
                   <tr>
                     <td>
                       <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $embargo->slug]); ?>">
-                        <?php echo $embargo->object_title ?: 'ID: '.$embargo->object_id; ?>
+                        <?php echo esc_entities($embargo->object_title ?: 'ID: '.$embargo->object_id); ?>
                       </a>
                     </td>
                     <td>
@@ -169,7 +169,7 @@ $formOptions = sfOutputEscaper::unescape($formOptions ?? []);
                   <tr>
                     <td>
                       <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $embargo->slug]); ?>">
-                        <?php echo $embargo->object_title ?: 'ID: '.$embargo->object_id; ?>
+                        <?php echo esc_entities($embargo->object_title ?: 'ID: '.$embargo->object_id); ?>
                       </a>
                     </td>
                     <td><?php echo date('d M Y', strtotime($embargo->review_date)); ?></td>
@@ -214,7 +214,7 @@ $formOptions = sfOutputEscaper::unescape($formOptions ?? []);
                 <ul class="list-group list-group-flush">
                   <?php foreach ($stats['by_rights_statement'] as $code => $count): ?>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <?php echo $code; ?>
+                    <?php echo esc_entities($code); ?>
                     <span class="badge bg-primary rounded-pill"><?php echo $count; ?></span>
                   </li>
                   <?php endforeach; ?>

@@ -41,10 +41,10 @@
                 <div class="card h-100">
                   <div class="card-body">
                     <h6 class="card-title">
-                      <span class="badge bg-<?php echo $meta['color']; ?> me-2"><?php echo $stmt->code; ?></span>
-                      <?php echo $stmt->name; ?>
+                      <span class="badge bg-<?php echo $meta['color']; ?> me-2"><?php echo esc_entities($stmt->code); ?></span>
+                      <?php echo esc_entities($stmt->name); ?>
                     </h6>
-                    <p class="card-text small text-muted"><?php echo $stmt->description; ?></p>
+                    <p class="card-text small text-muted"><?php echo esc_entities($stmt->description); ?></p>
                     <a href="<?php echo $stmt->uri; ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
                       <i class="fas fa-external-link-alt me-1"></i>View Statement
                     </a>
@@ -79,10 +79,10 @@
               <div class="card h-100">
                 <div class="card-body">
                   <div class="d-flex align-items-start">
-                    <img src="<?php echo $license->badge_url; ?>" alt="<?php echo $license->code; ?>" height="31" class="me-3">
+                    <img src="<?php echo esc_entities($license->badge_url); ?>" alt="<?php echo esc_entities($license->code); ?>" height="31" class="me-3">
                     <div>
-                      <h6 class="card-title mb-1"><?php echo $license->name; ?></h6>
-                      <p class="card-text small text-muted mb-2"><?php echo $license->human_readable; ?></p>
+                      <h6 class="card-title mb-1"><?php echo esc_entities($license->name); ?></h6>
+                      <p class="card-text small text-muted mb-2"><?php echo esc_entities($license->human_readable); ?></p>
                       <div class="small">
                         <?php if ($license->allows_commercial): ?>
                           <span class="badge bg-success me-1">Commercial OK</span>

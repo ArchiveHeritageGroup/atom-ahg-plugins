@@ -51,7 +51,7 @@
               <tr>
                 <td>
                   <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $embargo->slug]); ?>">
-                    <?php echo $embargo->object_title ?: 'ID: '.$embargo->object_id; ?>
+                    <?php echo esc_entities($embargo->object_title ?: 'ID: '.$embargo->object_id); ?>
                   </a>
                 </td>
                 <td>
@@ -63,9 +63,9 @@
                       'partial' => 'secondary',
                       default => 'light'
                     };
-                  ?>"><?php echo ucfirst(str_replace('_', ' ', $embargo->embargo_type)); ?></span>
+                  ?>"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $embargo->embargo_type))); ?></span>
                 </td>
-                <td><?php echo ucfirst(str_replace('_', ' ', $embargo->reason)); ?></td>
+                <td><?php echo esc_entities(ucfirst(str_replace('_', ' ', $embargo->reason))); ?></td>
                 <td><?php echo date('d M Y', strtotime($embargo->start_date)); ?></td>
                 <td>
                   <?php if ($embargo->end_date): ?>
@@ -92,7 +92,7 @@
                       'extended' => 'info',
                       default => 'light'
                     };
-                  ?>"><?php echo ucfirst($embargo->status); ?></span>
+                  ?>"><?php echo esc_entities(ucfirst($embargo->status)); ?></span>
                 </td>
                 <td>
                   <div class="btn-group btn-group-sm">

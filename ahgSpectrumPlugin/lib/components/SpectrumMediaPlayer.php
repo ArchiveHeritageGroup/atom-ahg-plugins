@@ -55,21 +55,21 @@ class SpectrumMediaPlayer
     protected function loadSettings()
     {
         try {
-            $conn = Propel::getConnection();
-            $sql = "SELECT setting_key, setting_value, setting_type FROM spectrum_media_settings WHERE setting_group = 'media'";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
-            
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $value = $row['setting_value'];
-                
-                if ($row['setting_type'] === 'boolean') {
+            $rows = \Illuminate\Database\Capsule\Manager::table('spectrum_media_settings')
+                ->where('setting_group', 'media')
+                ->select('setting_key', 'setting_value', 'setting_type')
+                ->get();
+
+            foreach ($rows as $row) {
+                $value = $row->setting_value;
+
+                if ($row->setting_type === 'boolean') {
                     $value = $value === 'true' || $value === '1';
-                } elseif ($row['setting_type'] === 'integer') {
+                } elseif ($row->setting_type === 'integer') {
                     $value = (int) $value;
                 }
-                
-                $this->settings[$row['setting_key']] = $value;
+
+                $this->settings[$row->setting_key] = $value;
             }
         } catch (Exception $e) {
             // Use defaults if database not available

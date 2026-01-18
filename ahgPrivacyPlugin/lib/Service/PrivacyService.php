@@ -5,548 +5,166 @@ namespace ahgPrivacyPlugin\Service;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Collection;
 
+/**
+ * Privacy Management Service - Main Facade
+ * Delegates to specialized services for better separation of concerns.
+ *
+ * Extracted services:
+ * - PrivacyJurisdictionService: Lawful bases and jurisdiction configs
+ * - PrivacyBreachService: Data breach management
+ * - PrivacyDsarService: DSAR management (standalone service)
+ * - PrivacyNotificationService: Notifications and ROPA approval workflow
+ */
 class PrivacyService
 {
+    protected string $auditModule = 'ahgPrivacyPlugin';
+
     // =====================
-    // Jurisdiction Definitions
+    // Jurisdiction Delegation (backward compatible)
     // =====================
 
-    /**
-     * Get all supported jurisdictions with their configurations
-     */
     public static function getJurisdictions(): array
     {
-        static $cache = null;
-        if ($cache !== null) {
-            return $cache;
-        }
-        
-        $rows = DB::table('privacy_jurisdiction')
-            ->orderBy('sort_order')
-            ->get();
-        
-        $cache = [];
-        foreach ($rows as $row) {
-            $cache[$row->code] = [
-                'id' => $row->id,
-                'name' => $row->name,
-                'full_name' => $row->full_name,
-                'country' => $row->country,
-                'region' => $row->region,
-                'regulator' => $row->regulator,
-                'regulator_url' => $row->regulator_url,
-                'dsar_days' => $row->dsar_days,
-                'breach_hours' => $row->breach_hours,
-                'effective_date' => $row->effective_date,
-                'related_laws' => $row->related_laws ? json_decode($row->related_laws, true) : [],
-                'icon' => $row->icon,
-                'is_active' => (bool)$row->is_active
-            ];
-        }
-        return $cache;
+        return PrivacyJurisdictionService::getJurisdictions();
     }
 
-    /**
-     * OLD HARDCODED - kept for reference, now using database
-     */
-    private static function getJurisdictionsLegacy(): array
+    public static function getAfricanJurisdictions(): array
     {
-        return [
-            // African Jurisdictions
-            'popia' => [
-                'name' => 'POPIA',
-                'full_name' => 'Protection of Personal Information Act',
-                'country' => 'South Africa',
-                'region' => 'Africa',
-                'regulator' => 'Information Regulator',
-                'regulator_url' => 'https://www.justice.gov.za/inforeg/',
-                'dsar_days' => 30,
-                'breach_hours' => 72, // "as soon as reasonably possible"
-                'effective_date' => '2021-07-01',
-                'related_laws' => ['PAIA', 'ECTA', 'RICA'],
-                'icon' => 'za'
-            ],
-            'ndpa' => [
-                'name' => 'NDPA',
-                'full_name' => 'Nigeria Data Protection Act',
-                'country' => 'Nigeria',
-                'region' => 'Africa',
-                'regulator' => 'Nigeria Data Protection Commission (NDPC)',
-                'regulator_url' => 'https://ndpc.gov.ng/',
-                'dsar_days' => 30,
-                'breach_hours' => 72,
-                'effective_date' => '2023-06-14',
-                'related_laws' => ['NITDA Act', 'Cybercrimes Act'],
-                'icon' => 'ng'
-            ],
-            'kenya_dpa' => [
-                'name' => 'Kenya DPA',
-                'full_name' => 'Data Protection Act',
-                'country' => 'Kenya',
-                'region' => 'Africa',
-                'regulator' => 'Office of the Data Protection Commissioner (ODPC)',
-                'regulator_url' => 'https://www.odpc.go.ke/',
-                'dsar_days' => 30,
-                'breach_hours' => 72,
-                'effective_date' => '2019-11-25',
-                'related_laws' => ['Computer Misuse and Cybercrimes Act'],
-                'icon' => 'ke'
-            ],
-            // International Jurisdictions
-            'gdpr' => [
-                'name' => 'GDPR',
-                'full_name' => 'General Data Protection Regulation',
-                'country' => 'European Union',
-                'region' => 'Europe',
-                'regulator' => 'Supervisory Authority (per member state)',
-                'regulator_url' => 'https://edpb.europa.eu/',
-                'dsar_days' => 30, // extendable by 60 days
-                'breach_hours' => 72,
-                'effective_date' => '2018-05-25',
-                'related_laws' => ['ePrivacy Directive'],
-                'icon' => 'eu'
-            ],
-            'pipeda' => [
-                'name' => 'PIPEDA',
-                'full_name' => 'Personal Information Protection and Electronic Documents Act',
-                'country' => 'Canada',
-                'region' => 'North America',
-                'regulator' => 'Office of the Privacy Commissioner of Canada (OPC)',
-                'regulator_url' => 'https://www.priv.gc.ca/',
-                'dsar_days' => 30,
-                'breach_hours' => 0, // "as soon as feasible"
-                'effective_date' => '2000-01-01',
-                'related_laws' => ['CASL', 'Provincial privacy laws'],
-                'icon' => 'ca'
-            ],
-            'ccpa' => [
-                'name' => 'CCPA/CPRA',
-                'full_name' => 'California Consumer Privacy Act / California Privacy Rights Act',
-                'country' => 'USA (California)',
-                'region' => 'North America',
-                'regulator' => 'California Privacy Protection Agency (CPPA)',
-                'regulator_url' => 'https://cppa.ca.gov/',
-                'dsar_days' => 45, // extendable by 45 days
-                'breach_hours' => 0, // "expedient time"
-                'effective_date' => '2020-01-01',
-                'related_laws' => ['CPRA amendments'],
-                'icon' => 'us'
-            ]
-        ];
+        return PrivacyJurisdictionService::getAfricanJurisdictions();
     }
 
-    /**
-     * Get African jurisdictions only
-     */
-    /**
-     * Get only enabled jurisdictions (for forms and public pages)
-     */
+    public static function getJurisdictionConfig(string $code): ?array
+    {
+        return PrivacyJurisdictionService::getJurisdictionConfig($code);
+    }
+
+    public static function getPOPIALawfulBases(): array
+    {
+        return PrivacyJurisdictionService::getPOPIALawfulBases();
+    }
+
+    public static function getPOPIASpecialCategories(): array
+    {
+        return PrivacyJurisdictionService::getPOPIASpecialCategories();
+    }
+
+    public static function getPAIARequestTypes(): array
+    {
+        return PrivacyJurisdictionService::getPAIARequestTypes();
+    }
+
+    public static function getNARSSARequirements(): array
+    {
+        return PrivacyJurisdictionService::getNARSSARequirements();
+    }
+
+    public static function getNDPALawfulBases(): array
+    {
+        return PrivacyJurisdictionService::getNDPALawfulBases();
+    }
+
+    public static function getNDPARights(): array
+    {
+        return PrivacyJurisdictionService::getNDPARights();
+    }
+
+    public static function getKenyaLawfulBases(): array
+    {
+        return PrivacyJurisdictionService::getKenyaLawfulBases();
+    }
+
+    public static function getGDPRLawfulBases(): array
+    {
+        return PrivacyJurisdictionService::getGDPRLawfulBases();
+    }
+
+    public static function getGDPRSpecialCategories(): array
+    {
+        return PrivacyJurisdictionService::getGDPRSpecialCategories();
+    }
+
+    public static function getRequestTypes(string $jurisdiction = 'popia'): array
+    {
+        return PrivacyJurisdictionService::getRequestTypes($jurisdiction);
+    }
+
+    public static function getLawfulBases(string $jurisdiction = 'popia'): array
+    {
+        return PrivacyJurisdictionService::getLawfulBases($jurisdiction);
+    }
+
+    public static function getIdTypes(): array
+    {
+        return PrivacyJurisdictionService::getIdTypes();
+    }
+
+    // =====================
+    // Breach Delegation (backward compatible)
+    // =====================
+
+    public static function getBreachTypes(): array
+    {
+        return PrivacyBreachService::getBreachTypes();
+    }
+
+    public static function getSeverityLevels(): array
+    {
+        return PrivacyBreachService::getSeverityLevels();
+    }
+
+    public static function getBreachStatuses(): array
+    {
+        return PrivacyBreachService::getBreachStatuses();
+    }
+
+    public static function getRiskLevels(): array
+    {
+        return PrivacyBreachService::getRiskLevels();
+    }
+
+    public function getBreachList(array $filters = []): Collection
+    {
+        return (new PrivacyBreachService())->getList($filters);
+    }
+
+    public function getBreach(int $id): ?object
+    {
+        return (new PrivacyBreachService())->get($id);
+    }
+
+    public function createBreach(array $data, ?int $userId = null): int
+    {
+        $id = (new PrivacyBreachService())->create($data, $userId);
+        $this->logAudit('create', 'PrivacyBreach', $id, [], $data, $data['reference'] ?? null);
+        return $id;
+    }
+
+    public function updateBreach(int $id, array $data, ?int $userId = null): bool
+    {
+        return (new PrivacyBreachService())->update($id, $data, $userId);
+    }
+
+    // =====================
+    // Configuration
+    // =====================
+
     public function getEnabledJurisdictions(): array
     {
         $enabled = DB::table('privacy_config')
             ->where('is_active', 1)
             ->pluck('jurisdiction')
             ->toArray();
-        
-        // If none configured, default to popia
+
         if (empty($enabled)) {
             return ['popia' => self::getJurisdictions()['popia']];
         }
-        
+
         return array_filter(
             self::getJurisdictions(),
             fn($code) => in_array($code, $enabled),
             ARRAY_FILTER_USE_KEY
         );
     }
-
-
-    public static function getAfricanJurisdictions(): array
-    {
-        return array_filter(self::getJurisdictions(), fn($j) => $j['region'] === 'Africa');
-    }
-
-    /**
-     * Get jurisdiction config
-     */
-    public static function getJurisdictionConfig(string $code): ?array
-    {
-        return self::getJurisdictions()[$code] ?? null;
-    }
-
-    // =====================
-    // POPIA-Specific (South Africa)
-    // =====================
-
-    /**
-     * POPIA Section 11 - Lawful Processing Conditions
-     */
-    public static function getPOPIALawfulBases(): array
-    {
-        return [
-            'consent' => [
-                'code' => 'POPIA S11(1)(a)',
-                'label' => 'Consent',
-                'description' => 'Data subject has consented to the processing'
-            ],
-            'contract' => [
-                'code' => 'POPIA S11(1)(b)',
-                'label' => 'Contractual Necessity',
-                'description' => 'Processing necessary for contract performance'
-            ],
-            'legal_obligation' => [
-                'code' => 'POPIA S11(1)(c)',
-                'label' => 'Legal Obligation',
-                'description' => 'Processing required to comply with law'
-            ],
-            'vital_interests' => [
-                'code' => 'POPIA S11(1)(d)',
-                'label' => 'Vital Interests',
-                'description' => 'Protecting vital interests of data subject'
-            ],
-            'public_body' => [
-                'code' => 'POPIA S11(1)(e)',
-                'label' => 'Public Body Function',
-                'description' => 'For proper performance of public law duty'
-            ],
-            'legitimate_interests' => [
-                'code' => 'POPIA S11(1)(f)',
-                'label' => 'Legitimate Interests',
-                'description' => 'Necessary for pursuing legitimate interests'
-            ]
-        ];
-    }
-
-    /**
-     * POPIA Special Personal Information (Section 26-33)
-     */
-    public static function getPOPIASpecialCategories(): array
-    {
-        return [
-            'religious_beliefs' => 'Religious or philosophical beliefs',
-            'race_ethnicity' => 'Race or ethnic origin',
-            'trade_union' => 'Trade union membership',
-            'political_opinions' => 'Political persuasion',
-            'health' => 'Health or sex life',
-            'biometric' => 'Biometric information',
-            'criminal' => 'Criminal behaviour (alleged or convicted)'
-        ];
-    }
-
-    /**
-     * PAIA Request Types (Promotion of Access to Information Act)
-     */
-    public static function getPAIARequestTypes(): array
-    {
-        return [
-            'section_18' => [
-                'code' => 'PAIA S18',
-                'label' => 'Request for access to record of public body',
-                'days' => 30
-            ],
-            'section_22' => [
-                'code' => 'PAIA S22',
-                'label' => 'Fees payable',
-                'days' => 30
-            ],
-            'section_23' => [
-                'code' => 'PAIA S23',
-                'label' => 'Access request to private body',
-                'days' => 30
-            ],
-            'section_50' => [
-                'code' => 'PAIA S50',
-                'label' => 'Request for access to record of private body',
-                'days' => 30
-            ],
-            'section_77' => [
-                'code' => 'PAIA S77',
-                'label' => 'Internal appeal',
-                'days' => 30
-            ]
-        ];
-    }
-
-    /**
-     * NARSSA compliance links (National Archives and Records Service)
-     */
-    public static function getNARSSARequirements(): array
-    {
-        return [
-            'file_plan' => [
-                'regulation' => 'NARS Regulation 4',
-                'description' => 'Approved file plan required'
-            ],
-            'disposal_authority' => [
-                'regulation' => 'NARS Regulation 5',
-                'description' => 'Disposal authority from National Archivist'
-            ],
-            'transfer' => [
-                'regulation' => 'NARS Regulation 6',
-                'description' => 'Transfer of records to archives repository'
-            ],
-            'electronic_records' => [
-                'regulation' => 'NARS Regulation 7',
-                'description' => 'Management of electronic records'
-            ]
-        ];
-    }
-
-    // =====================
-    // NDPA-Specific (Nigeria)
-    // =====================
-
-    /**
-     * NDPA Lawful Bases (Nigeria)
-     */
-    public static function getNDPALawfulBases(): array
-    {
-        return [
-            'consent' => [
-                'code' => 'NDPA S25(1)(a)',
-                'label' => 'Consent',
-                'description' => 'Data subject has given consent'
-            ],
-            'contract' => [
-                'code' => 'NDPA S25(1)(b)',
-                'label' => 'Contract Performance',
-                'description' => 'Necessary for contract with data subject'
-            ],
-            'legal_obligation' => [
-                'code' => 'NDPA S25(1)(c)',
-                'label' => 'Legal Obligation',
-                'description' => 'Compliance with legal obligation'
-            ],
-            'vital_interests' => [
-                'code' => 'NDPA S25(1)(d)',
-                'label' => 'Vital Interests',
-                'description' => 'Protect vital interests'
-            ],
-            'public_interest' => [
-                'code' => 'NDPA S25(1)(e)',
-                'label' => 'Public Interest',
-                'description' => 'Performance of task in public interest'
-            ],
-            'legitimate_interests' => [
-                'code' => 'NDPA S25(1)(f)',
-                'label' => 'Legitimate Interests',
-                'description' => 'Legitimate interests of controller'
-            ]
-        ];
-    }
-
-    /**
-     * NDPA Data Subject Rights
-     */
-    public static function getNDPARights(): array
-    {
-        return [
-            'access' => 'Right of access (S34)',
-            'rectification' => 'Right to rectification (S35)',
-            'erasure' => 'Right to erasure (S36)',
-            'restriction' => 'Right to restriction (S37)',
-            'portability' => 'Right to data portability (S38)',
-            'objection' => 'Right to object (S39)',
-            'automated' => 'Rights related to automated decision-making (S40)'
-        ];
-    }
-
-    // =====================
-    // Kenya DPA-Specific
-    // =====================
-
-    /**
-     * Kenya DPA Lawful Bases
-     */
-    public static function getKenyaLawfulBases(): array
-    {
-        return [
-            'consent' => [
-                'code' => 'Kenya DPA S30(1)(a)',
-                'label' => 'Consent',
-                'description' => 'Data subject has consented'
-            ],
-            'contract' => [
-                'code' => 'Kenya DPA S30(1)(b)',
-                'label' => 'Contract',
-                'description' => 'Necessary for contract performance'
-            ],
-            'legal_obligation' => [
-                'code' => 'Kenya DPA S30(1)(c)',
-                'label' => 'Legal Obligation',
-                'description' => 'Compliance with legal obligation'
-            ],
-            'vital_interests' => [
-                'code' => 'Kenya DPA S30(1)(d)',
-                'label' => 'Vital Interests',
-                'description' => 'Protect vital interests'
-            ],
-            'public_interest' => [
-                'code' => 'Kenya DPA S30(1)(e)',
-                'label' => 'Public Interest',
-                'description' => 'Public interest or official authority'
-            ],
-            'legitimate_interests' => [
-                'code' => 'Kenya DPA S30(1)(f)',
-                'label' => 'Legitimate Interests',
-                'description' => 'Legitimate interests pursued by controller'
-            ]
-        ];
-    }
-
-    // =====================
-    // GDPR-Specific (EU)
-    // =====================
-
-    /**
-     * GDPR Article 6 - Lawful Bases
-     */
-    public static function getGDPRLawfulBases(): array
-    {
-        return [
-            'consent' => [
-                'code' => 'GDPR Art.6(1)(a)',
-                'label' => 'Consent',
-                'description' => 'Data subject has given consent'
-            ],
-            'contract' => [
-                'code' => 'GDPR Art.6(1)(b)',
-                'label' => 'Contract',
-                'description' => 'Necessary for contract performance'
-            ],
-            'legal_obligation' => [
-                'code' => 'GDPR Art.6(1)(c)',
-                'label' => 'Legal Obligation',
-                'description' => 'Compliance with legal obligation'
-            ],
-            'vital_interests' => [
-                'code' => 'GDPR Art.6(1)(d)',
-                'label' => 'Vital Interests',
-                'description' => 'Protect vital interests'
-            ],
-            'public_task' => [
-                'code' => 'GDPR Art.6(1)(e)',
-                'label' => 'Public Task',
-                'description' => 'Task in public interest or official authority'
-            ],
-            'legitimate_interests' => [
-                'code' => 'GDPR Art.6(1)(f)',
-                'label' => 'Legitimate Interests',
-                'description' => 'Legitimate interests of controller'
-            ]
-        ];
-    }
-
-    /**
-     * GDPR Article 9 - Special Category Data
-     */
-    public static function getGDPRSpecialCategories(): array
-    {
-        return [
-            'racial_ethnic' => 'Racial or ethnic origin',
-            'political' => 'Political opinions',
-            'religious' => 'Religious or philosophical beliefs',
-            'trade_union' => 'Trade union membership',
-            'genetic' => 'Genetic data',
-            'biometric' => 'Biometric data for identification',
-            'health' => 'Health data',
-            'sex_life' => 'Sex life or sexual orientation'
-        ];
-    }
-
-    // =====================
-    // DSAR Request Types (All Jurisdictions)
-    // =====================
-
-    /**
-     * Get request types for a specific jurisdiction
-     */
-    public static function getRequestTypes(string $jurisdiction = 'popia'): array
-    {
-        $common = [
-            'access' => 'Right of Access',
-            'rectification' => 'Right to Rectification',
-            'erasure' => 'Right to Erasure/Deletion',
-            'restriction' => 'Right to Restriction',
-            'objection' => 'Right to Object',
-            'withdraw_consent' => 'Withdraw Consent'
-        ];
-
-        $jurisdiction_specific = [
-            'popia' => [
-                'access' => 'Right of Access (POPIA S23 / PAIA S50)',
-                'rectification' => 'Right to Rectification (POPIA S24)',
-                'erasure' => 'Right to Erasure (POPIA S24)',
-                'objection' => 'Right to Object (POPIA S11(3))',
-                'paia_access' => 'PAIA Access Request (PAIA S50)'
-            ],
-            'ndpa' => [
-                'access' => 'Right of Access (NDPA S34)',
-                'rectification' => 'Right to Rectification (NDPA S35)',
-                'erasure' => 'Right to Erasure (NDPA S36)',
-                'restriction' => 'Right to Restriction (NDPA S37)',
-                'portability' => 'Right to Data Portability (NDPA S38)',
-                'objection' => 'Right to Object (NDPA S39)',
-                'automated' => 'Automated Decision Rights (NDPA S40)'
-            ],
-            'kenya_dpa' => [
-                'access' => 'Right of Access (Kenya DPA S26)',
-                'rectification' => 'Right to Rectification (Kenya DPA S27)',
-                'erasure' => 'Right to Erasure (Kenya DPA S28)',
-                'portability' => 'Right to Data Portability (Kenya DPA S29)'
-            ],
-            'gdpr' => [
-                'access' => 'Right of Access (GDPR Art.15)',
-                'rectification' => 'Right to Rectification (GDPR Art.16)',
-                'erasure' => 'Right to Erasure (GDPR Art.17)',
-                'restriction' => 'Right to Restriction (GDPR Art.18)',
-                'portability' => 'Right to Data Portability (GDPR Art.20)',
-                'objection' => 'Right to Object (GDPR Art.21)',
-                'automated' => 'Automated Decision Rights (GDPR Art.22)'
-            ],
-            'pipeda' => [
-                'access' => 'Right of Access (PIPEDA Principle 4.9)',
-                'rectification' => 'Right to Rectification (PIPEDA Principle 4.9.5)',
-                'withdraw_consent' => 'Withdraw Consent (PIPEDA Principle 4.3.8)'
-            ],
-            'ccpa' => [
-                'access' => 'Right to Know (CCPA §1798.100)',
-                'erasure' => 'Right to Delete (CCPA §1798.105)',
-                'opt_out' => 'Right to Opt-Out of Sale (CCPA §1798.120)',
-                'non_discrimination' => 'Right to Non-Discrimination (CCPA §1798.125)',
-                'correct' => 'Right to Correct (CPRA §1798.106)',
-                'limit_use' => 'Right to Limit Use (CPRA §1798.121)'
-            ]
-        ];
-
-        return array_merge($common, $jurisdiction_specific[$jurisdiction] ?? []);
-    }
-
-    /**
-     * Get lawful bases for a jurisdiction
-     */
-    public static function getLawfulBases(string $jurisdiction = 'popia'): array
-    {
-        return match($jurisdiction) {
-            'popia' => self::getPOPIALawfulBases(),
-            'ndpa' => self::getNDPALawfulBases(),
-            'kenya_dpa' => self::getKenyaLawfulBases(),
-            'gdpr' => self::getGDPRLawfulBases(),
-            'pipeda' => [
-                'consent' => ['code' => 'PIPEDA 4.3', 'label' => 'Consent', 'description' => 'Knowledge and consent'],
-                'without_consent' => ['code' => 'PIPEDA 7', 'label' => 'Without Consent', 'description' => 'Permitted collection without consent']
-            ],
-            'ccpa' => [
-                'business_purpose' => ['code' => 'CCPA §1798.140(e)', 'label' => 'Business Purpose', 'description' => 'Disclosed business purpose'],
-                'service_provider' => ['code' => 'CCPA §1798.140(ag)', 'label' => 'Service Provider', 'description' => 'Service provider processing']
-            ],
-            default => self::getPOPIALawfulBases()
-        };
-    }
-
-    // =====================
-    // Configuration
-    // =====================
 
     public function getConfig(string $jurisdiction = null, bool $includeInactive = false): ?object
     {
@@ -607,7 +225,7 @@ class PrivacyService
     }
 
     // =====================
-    // Privacy Officers / Information Officers
+    // Privacy Officers
     // =====================
 
     public function getOfficers(string $jurisdiction = null): Collection
@@ -635,7 +253,7 @@ class PrivacyService
             'phone' => (!empty($data['phone'])) ? $data['phone'] : null,
             'title' => (!empty($data['title'])) ? $data['title'] : null,
             'jurisdiction' => $data['jurisdiction'] ?? 'all',
-            'registration_number' => (!empty($data['registration_number'])) ? $data['registration_number'] : null, // For POPIA IO registration
+            'registration_number' => (!empty($data['registration_number'])) ? $data['registration_number'] : null,
             'appointed_date' => (!empty($data['appointed_date'])) ? $data['appointed_date'] : null,
             'user_id' => (!empty($data['user_id'])) ? (int)$data['user_id'] : null,
             'is_active' => isset($data['is_active']) ? 1 : 0,
@@ -663,9 +281,9 @@ class PrivacyService
             })
             ->leftJoin('user as u', 'u.id', '=', 'd.assigned_to')
             ->select([
-                'd.*', 
-                'di.description', 
-                'di.notes', 
+                'd.*',
+                'di.description',
+                'di.notes',
                 'di.response_summary',
                 'u.username as assigned_username'
             ]);
@@ -702,9 +320,9 @@ class PrivacyService
             ->leftJoin('user as u', 'u.id', '=', 'd.assigned_to')
             ->where('d.id', $id)
             ->select([
-                'd.*', 
-                'di.description', 
-                'di.notes', 
+                'd.*',
+                'di.description',
+                'di.notes',
                 'di.response_summary',
                 'u.username as assigned_username'
             ])
@@ -741,7 +359,6 @@ class PrivacyService
 
         $id = DB::table('privacy_dsar')->insertGetId($dsarData);
 
-        // Insert i18n
         if (!empty($data['description']) || !empty($data['notes'])) {
             DB::table('privacy_dsar_i18n')->insert([
                 'id' => $id,
@@ -751,10 +368,9 @@ class PrivacyService
             ]);
         }
 
-        // Log activity
         $this->logDsarActivity($id, 'created', 'DSAR request created', $userId);
+        $this->logAudit('create', 'PrivacyDsar', $id, [], $data, $dsarData['reference_number']);
 
-        $this->logAudit('create', 'PrivacyDsar', $id, [], $data, $data['reference'] ?? null);
         return $id;
     }
 
@@ -774,12 +390,10 @@ class PrivacyService
 
         $updates['updated_at'] = date('Y-m-d H:i:s');
 
-        // Handle completion
         if (isset($data['status']) && $data['status'] === 'completed') {
             $updates['completed_date'] = date('Y-m-d');
         }
 
-        // Handle verification
         if (isset($data['is_verified']) && $data['is_verified']) {
             $updates['verified_at'] = date('Y-m-d H:i:s');
             $updates['verified_by'] = $userId;
@@ -787,7 +401,6 @@ class PrivacyService
 
         $result = DB::table('privacy_dsar')->where('id', $id)->update($updates);
 
-        // Update i18n
         if (!empty($data['notes']) || !empty($data['response_summary'])) {
             DB::table('privacy_dsar_i18n')->updateOrInsert(
                 ['id' => $id, 'culture' => 'en'],
@@ -798,7 +411,6 @@ class PrivacyService
             );
         }
 
-        // Log activity
         if (isset($data['status'])) {
             $this->logDsarActivity($id, 'status_changed', "Status changed to {$data['status']}", $userId);
         }
@@ -828,125 +440,29 @@ class PrivacyService
             ->get();
     }
 
-    // =====================
-    // Breach Management
-    // =====================
-
-    public function getBreachList(array $filters = []): Collection
+    public static function getDsarStatuses(): array
     {
-        $query = DB::table('privacy_breach as b')
-            ->leftJoin('privacy_breach_i18n as bi', function ($j) {
-                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
-            })
-            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions']);
-
-        if (!empty($filters['status'])) {
-            $query->where('b.status', $filters['status']);
-        }
-        if (!empty($filters['severity'])) {
-            $query->where('b.severity', $filters['severity']);
-        }
-        if (!empty($filters['jurisdiction'])) {
-            $query->where('b.jurisdiction', $filters['jurisdiction']);
-        }
-
-        return $query->orderByDesc('b.detected_date')->get();
-    }
-
-    public function getBreach(int $id): ?object
-    {
-        return DB::table('privacy_breach as b')
-            ->leftJoin('privacy_breach_i18n as bi', function ($j) {
-                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
-            })
-            ->where('b.id', $id)
-            ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions', 'bi.lessons_learned'])
-            ->first();
-    }
-
-    public function createBreach(array $data, ?int $userId = null): int
-    {
-        $jurisdiction = $data['jurisdiction'] ?? 'popia';
-        
-        $breachData = [
-            'reference_number' => $this->generateReference('BRE', $jurisdiction),
-            'jurisdiction' => $jurisdiction,
-            'breach_type' => $data['breach_type'],
-            'severity' => $data['severity'] ?? 'medium',
-            'status' => 'detected',
-            'detected_date' => $data['detected_date'] ?? date('Y-m-d H:i:s'),
-            'occurred_date' => (isset($data['occurred_date']) && $data['occurred_date'] !== '') ? $data['occurred_date'] : null,
-            'data_categories_affected' => (isset($data['data_categories']) && $data['data_categories'] !== '') ? $data['data_categories'] : null,
-            'data_subjects_affected' => (isset($data['records_affected']) && $data['records_affected'] !== '') ? (int)$data['records_affected'] : null,
-            
-            'created_by' => $userId,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+        return [
+            'received' => 'Received',
+            'verified' => 'Verified',
+            'in_progress' => 'In Progress',
+            'pending_info' => 'Pending Information',
+            'completed' => 'Completed',
+            'rejected' => 'Rejected',
+            'withdrawn' => 'Withdrawn'
         ];
-
-        $id = DB::table('privacy_breach')->insertGetId($breachData);
-
-        // Insert i18n
-        if (!empty($data['description'])) {
-            DB::table('privacy_breach_i18n')->insert([
-                'id' => $id,
-                'culture' => 'en',
-                'description' => $data['description']
-            ]);
-        }
-
-        $this->logAudit('create', 'PrivacyBreach', $id, [], $data, $data['reference'] ?? null);
-        return $id;
     }
 
-    public function updateBreach(int $id, array $data, ?int $userId = null): bool
+    public static function getDsarOutcomes(): array
     {
-        $updates = [
-            'updated_at' => date('Y-m-d H:i:s')
+        return [
+            '' => '-- Select Outcome --',
+            'granted' => 'Granted',
+            'partially_granted' => 'Partially Granted',
+            'refused' => 'Refused',
+            'not_applicable' => 'Not Applicable'
         ];
-        
-        // Main fields
-        if (isset($data['breach_type'])) $updates['breach_type'] = $data['breach_type'];
-        if (isset($data['severity'])) $updates['severity'] = $data['severity'];
-        if (isset($data['status'])) $updates['status'] = $data['status'];
-        if (isset($data['risk_to_rights'])) $updates['risk_to_rights'] = $data['risk_to_rights'] ?: null;
-        if (isset($data['data_subjects_affected'])) $updates['data_subjects_affected'] = $data['data_subjects_affected'] ?: null;
-        if (isset($data['data_categories_affected'])) $updates['data_categories_affected'] = $data['data_categories_affected'];
-        if (isset($data['assigned_to'])) $updates['assigned_to'] = $data['assigned_to'] ?: null;
-        
-        // Notification flags (checkboxes - 0 if not set)
-        $updates['notification_required'] = isset($data['notification_required']) ? 1 : 0;
-        $updates['regulator_notified'] = isset($data['regulator_notified']) ? 1 : 0;
-        $updates['subjects_notified'] = isset($data['subjects_notified']) ? 1 : 0;
-        
-        // Dates
-        if (isset($data['occurred_date'])) $updates['occurred_date'] = $data['occurred_date'] ?: null;
-        if (isset($data['contained_date'])) $updates['contained_date'] = $data['contained_date'] ?: null;
-        if (isset($data['resolved_date'])) $updates['resolved_date'] = $data['resolved_date'] ?: null;
-        if (isset($data['regulator_notified_date'])) $updates['regulator_notified_date'] = $data['regulator_notified_date'] ?: null;
-        if (isset($data['subjects_notified_date'])) $updates['subjects_notified_date'] = $data['subjects_notified_date'] ?: null;
-        
-        $result = DB::table('privacy_breach')->where('id', $id)->update($updates);
-        
-        // Update i18n
-        $i18nUpdates = [];
-        if (isset($data['title'])) $i18nUpdates['title'] = $data['title'];
-        if (isset($data['description'])) $i18nUpdates['description'] = $data['description'];
-        if (isset($data['cause'])) $i18nUpdates['cause'] = $data['cause'];
-        if (isset($data['impact_assessment'])) $i18nUpdates['impact_assessment'] = $data['impact_assessment'];
-        if (isset($data['remedial_actions'])) $i18nUpdates['remedial_actions'] = $data['remedial_actions'];
-        if (isset($data['lessons_learned'])) $i18nUpdates['lessons_learned'] = $data['lessons_learned'];
-        
-        if (!empty($i18nUpdates)) {
-            DB::table('privacy_breach_i18n')->updateOrInsert(
-                ['id' => $id, 'culture' => 'en'],
-                $i18nUpdates
-            );
-        }
-        
-        return $result >= 0;
     }
-
 
     // =====================
     // ROPA (Processing Activities)
@@ -982,8 +498,8 @@ class PrivacyService
             'jurisdiction' => $data['jurisdiction'] ?? 'popia',
             'lawful_basis' => $data['lawful_basis'] ?? null,
             'lawful_basis_code' => $data['lawful_basis_code'] ?? null,
-            'data_categories' => is_array($data['data_categories'] ?? null) 
-                ? json_encode($data['data_categories']) 
+            'data_categories' => is_array($data['data_categories'] ?? null)
+                ? json_encode($data['data_categories'])
                 : ($data['data_categories'] ?? null),
             'data_subjects' => $data['data_subjects'] ?? null,
             'recipients' => $data['recipients'] ?? null,
@@ -997,11 +513,8 @@ class PrivacyService
             'owner' => $data['responsible_person'] ?? null,
             'department' => $data['department'] ?? null,
             'assigned_officer_id' => !empty($data['assigned_officer_id']) ? (int)$data['assigned_officer_id'] : null,
-            
             'status' => $data['status'] ?? 'draft',
             'next_review_date' => (!empty($data['next_review_date'])) ? $data['next_review_date'] : null,
-            
-            
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -1110,16 +623,15 @@ class PrivacyService
     public function getDashboardStats(string $jurisdiction = null): array
     {
         $now = date('Y-m-d');
+        $breachStats = (new PrivacyBreachService())->getStatistics($jurisdiction);
 
         $dsarQuery = DB::table('privacy_dsar');
-        $breachQuery = DB::table('privacy_breach');
         $ropaQuery = DB::table('privacy_processing_activity');
         $consentQuery = DB::table('privacy_consent_record');
         $complaintQuery = DB::table('privacy_complaint');
 
         if ($jurisdiction) {
             $dsarQuery->where('jurisdiction', $jurisdiction);
-            $breachQuery->where('jurisdiction', $jurisdiction);
             $ropaQuery->where('jurisdiction', $jurisdiction);
             $consentQuery->where('jurisdiction', $jurisdiction);
             $complaintQuery->where('jurisdiction', $jurisdiction);
@@ -1141,24 +653,10 @@ class PrivacyService
                     ->whereYear('completed_date', date('Y'))
                     ->count()
             ],
-            'breach' => [
-                'total' => (clone $breachQuery)->count(),
-                'open' => (clone $breachQuery)
-                    ->whereNotIn('status', ['resolved', 'closed'])
-                    ->count(),
-                'critical' => (clone $breachQuery)
-                    ->where('severity', 'critical')
-                    ->whereNotIn('status', ['resolved', 'closed'])
-                    ->count(),
-                'this_year' => (clone $breachQuery)
-                    ->whereYear('detected_date', date('Y'))
-                    ->count()
-            ],
+            'breach' => $breachStats,
             'ropa' => [
                 'total' => (clone $ropaQuery)->count(),
-                'approved' => (clone $ropaQuery)
-                    ->where('status', 'approved')
-                    ->count(),
+                'approved' => (clone $ropaQuery)->where('status', 'approved')->count(),
                 'requiring_dpia' => (clone $ropaQuery)
                     ->where('dpia_required', 1)
                     ->where('dpia_completed', 0)
@@ -1168,9 +666,7 @@ class PrivacyService
                     ->count()
             ],
             'consent' => [
-                'active' => (clone $consentQuery)
-                    ->where('status', 'active')
-                    ->count(),
+                'active' => (clone $consentQuery)->where('status', 'active')->count(),
                 'withdrawn_this_month' => (clone $consentQuery)
                     ->where('status', 'withdrawn')
                     ->whereMonth('withdrawn_date', date('m'))
@@ -1194,7 +690,6 @@ class PrivacyService
     public function calculateComplianceScore(string $jurisdiction = null): int
     {
         $score = 0;
-
         $ropaQuery = DB::table('privacy_processing_activity');
         $dsarQuery = DB::table('privacy_dsar');
         $breachQuery = DB::table('privacy_breach');
@@ -1239,128 +734,9 @@ class PrivacyService
     }
 
     // =====================
-    // Static Helpers
-    // =====================
-
-    public static function getBreachTypes(): array
-    {
-        return [
-            'confidentiality' => 'Confidentiality Breach (unauthorized disclosure)',
-            'integrity' => 'Integrity Breach (unauthorized alteration)',
-            'availability' => 'Availability Breach (loss or destruction)'
-        ];
-    }
-
-    public static function getSeverityLevels(): array
-    {
-        return [
-            'low' => 'Low - Minor impact, easily contained',
-            'medium' => 'Medium - Moderate impact, limited exposure',
-            'high' => 'High - Significant risk, many affected',
-            'critical' => 'Critical - Severe harm likely'
-        ];
-    }
-
-    public static function getBreachStatuses(): array
-    {
-        return [
-            'detected' => 'Detected',
-            'investigating' => 'Investigating',
-            'contained' => 'Contained',
-            'resolved' => 'Resolved',
-            'closed' => 'Closed'
-        ];
-    }
-
-    public static function getRiskLevels(): array
-    {
-        return [
-            '' => '-- Select --',
-            'unlikely' => 'Unlikely - No significant risk',
-            'possible' => 'Possible - Some risk exists',
-            'likely' => 'Likely - Risk is probable',
-            'high' => 'High - Risk is certain or severe'
-        ];
-    }
-
-    public static function getIdTypes(): array
-    {
-        return [
-            'sa_id' => 'South African ID',
-            'ng_nin' => 'Nigerian NIN',
-            'ke_id' => 'Kenyan ID',
-            'passport' => 'Passport',
-            'drivers_license' => 'Driver\'s License',
-            'other' => 'Other'
-        ];
-    }
-
-    public static function getDsarStatuses(): array
-    {
-        return [
-            'received' => 'Received',
-            'verified' => 'Verified',
-            'in_progress' => 'In Progress',
-            'pending_info' => 'Pending Information',
-            'completed' => 'Completed',
-            'rejected' => 'Rejected',
-            'withdrawn' => 'Withdrawn'
-        ];
-    }
-
-    public static function getDsarOutcomes(): array
-    {
-        return [
-            '' => '-- Select Outcome --',
-            'granted' => 'Granted',
-            'partially_granted' => 'Partially Granted',
-            'refused' => 'Refused',
-            'not_applicable' => 'Not Applicable'
-        ];
-    }
-
-    protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
-    {
-        try {
-            $userId = null;
-            $username = null;
-            if (class_exists('sfContext') && \sfContext::hasInstance()) {
-                $user = \sfContext::getInstance()->getUser();
-                if ($user && $user->isAuthenticated()) {
-                    $userId = $user->getAttribute('user_id');
-                    if ($userId) {
-                        $userRecord = \Illuminate\Database\Capsule\Manager::table('user')->where('id', $userId)->first();
-                        $username = $userRecord->username ?? null;
-                    }
-                }
-            }
-            $changedFields = [];
-            foreach ($newValues as $key => $val) {
-                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
-            }
-            if ($action === 'delete') $changedFields = array_keys($oldValues);
-            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-            \Illuminate\Database\Capsule\Manager::table('ahg_audit_log')->insert([
-                'uuid' => $uuid, 'user_id' => $userId, 'username' => $username,
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
-                'session_id' => session_id() ?: null, 'action' => $action,
-                'entity_type' => $entityType, 'entity_id' => $entityId, 'entity_title' => $title,
-                'module' => $this->auditModule ?? 'ahgPrivacyPlugin', 'action_name' => $action,
-                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
-                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
-                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
-                'status' => 'success', 'created_at' => date('Y-m-d H:i:s'),
-            ]);
-        } catch (\Exception $e) {
-            error_log("AUDIT ERROR: " . $e->getMessage());
-        }
-    }
-    protected string $auditModule = 'ahgPrivacyPlugin';
-
-    // =====================
     // Notifications
     // =====================
+
     public function createNotification(int $userId, string $entityType, int $entityId, string $type, string $subject, ?string $message = null, ?string $link = null, ?int $createdBy = null): int
     {
         return DB::table('privacy_notification')->insertGetId([
@@ -1413,6 +789,7 @@ class PrivacyService
     // =====================
     // ROPA Approval Workflow
     // =====================
+
     public function submitRopaForApproval(int $id, int $userId, ?int $assignedOfficerId = null): bool
     {
         $activity = $this->getRopa($id);
@@ -1585,14 +962,14 @@ class PrivacyService
         $subject = $subjects[$action] ?? 'ROPA Update: ' . $activity->name;
 
         try {
-            $baseUrl = sfConfig::get('app_siteBaseUrl', '');
+            $baseUrl = \sfConfig::get('app_siteBaseUrl', '');
             $link = $baseUrl . '/privacyAdmin/ropaView/id/' . $activity->id;
-            
+
             $body = $this->buildApprovalEmailBody($action, $activity, $comment, $user, $link);
-            
-            $mailer = sfContext::getInstance()->getMailer();
+
+            $mailer = \sfContext::getInstance()->getMailer();
             $message = $mailer->compose(
-                sfConfig::get('app_mail_from', 'noreply@example.com'),
+                \sfConfig::get('app_mail_from', 'noreply@example.com'),
                 $user->email,
                 $subject,
                 $body
@@ -1645,5 +1022,47 @@ class PrivacyService
         $html .= '</body></html>';
 
         return $html;
+    }
+
+    // =====================
+    // Audit Logging
+    // =====================
+
+    protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
+    {
+        try {
+            $userId = null;
+            $username = null;
+            if (class_exists('sfContext') && \sfContext::hasInstance()) {
+                $user = \sfContext::getInstance()->getUser();
+                if ($user && $user->isAuthenticated()) {
+                    $userId = $user->getAttribute('user_id');
+                    if ($userId) {
+                        $userRecord = DB::table('user')->where('id', $userId)->first();
+                        $username = $userRecord->username ?? null;
+                    }
+                }
+            }
+            $changedFields = [];
+            foreach ($newValues as $key => $val) {
+                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
+            }
+            if ($action === 'delete') $changedFields = array_keys($oldValues);
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+            DB::table('ahg_audit_log')->insert([
+                'uuid' => $uuid, 'user_id' => $userId, 'username' => $username,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                'session_id' => session_id() ?: null, 'action' => $action,
+                'entity_type' => $entityType, 'entity_id' => $entityId, 'entity_title' => $title,
+                'module' => $this->auditModule, 'action_name' => $action,
+                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
+                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
+                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
+                'status' => 'success', 'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            error_log("AUDIT ERROR: " . $e->getMessage());
+        }
     }
 }

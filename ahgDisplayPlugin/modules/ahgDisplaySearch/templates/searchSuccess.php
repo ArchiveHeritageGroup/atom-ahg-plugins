@@ -1,4 +1,5 @@
 <?php use_helper('Display'); ?>
+<?php $requestParams = $sf_request->getParameterHolder()->getAll(); ?>
 
 <div class="container-fluid">
     <div class="row">
@@ -54,15 +55,15 @@
                 <div class="d-flex gap-2">
                     <!-- Layout Switcher -->
                     <div class="btn-group btn-group-sm">
-                        <a href="?<?php echo http_build_query(array_merge($_GET, ['layout' => 'card'])); ?>" 
+                        <a href="?<?php echo http_build_query(array_merge($requestParams, ['layout' => 'card'])); ?>" 
                            class="btn btn-<?php echo $layout === 'card' ? 'primary' : 'outline-secondary'; ?>" title="Cards">
                             <i class="fas fa-th-large"></i>
                         </a>
-                        <a href="?<?php echo http_build_query(array_merge($_GET, ['layout' => 'grid'])); ?>" 
+                        <a href="?<?php echo http_build_query(array_merge($requestParams, ['layout' => 'grid'])); ?>" 
                            class="btn btn-<?php echo $layout === 'grid' ? 'primary' : 'outline-secondary'; ?>" title="Grid">
                             <i class="fas fa-th"></i>
                         </a>
-                        <a href="?<?php echo http_build_query(array_merge($_GET, ['layout' => 'list'])); ?>" 
+                        <a href="?<?php echo http_build_query(array_merge($requestParams, ['layout' => 'list'])); ?>" 
                            class="btn btn-<?php echo $layout === 'list' ? 'primary' : 'outline-secondary'; ?>" title="List">
                             <i class="fas fa-list"></i>
                         </a>
@@ -70,11 +71,11 @@
                     
                     <!-- Sort -->
                     <select class="form-select form-select-sm" style="width: auto;" onchange="location=this.value">
-                        <option value="?<?php echo http_build_query(array_merge($_GET, ['sort' => '_score'])); ?>" <?php echo $params['sort'] === '_score' ? 'selected' : ''; ?>>Relevance</option>
-                        <option value="?<?php echo http_build_query(array_merge($_GET, ['sort' => 'title_asc'])); ?>" <?php echo $params['sort'] === 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
-                        <option value="?<?php echo http_build_query(array_merge($_GET, ['sort' => 'title_desc'])); ?>" <?php echo $params['sort'] === 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>
-                        <option value="?<?php echo http_build_query(array_merge($_GET, ['sort' => 'date_desc'])); ?>" <?php echo $params['sort'] === 'date_desc' ? 'selected' : ''; ?>>Date Newest</option>
-                        <option value="?<?php echo http_build_query(array_merge($_GET, ['sort' => 'date_asc'])); ?>" <?php echo $params['sort'] === 'date_asc' ? 'selected' : ''; ?>>Date Oldest</option>
+                        <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => '_score'])); ?>" <?php echo $params['sort'] === '_score' ? 'selected' : ''; ?>>Relevance</option>
+                        <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_asc'])); ?>" <?php echo $params['sort'] === 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
+                        <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_desc'])); ?>" <?php echo $params['sort'] === 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>
+                        <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'date_desc'])); ?>" <?php echo $params['sort'] === 'date_desc' ? 'selected' : ''; ?>>Date Newest</option>
+                        <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'date_asc'])); ?>" <?php echo $params['sort'] === 'date_asc' ? 'selected' : ''; ?>>Date Oldest</option>
                     </select>
                 </div>
             </div>
@@ -96,7 +97,7 @@
                     <ul class="pagination justify-content-center">
                         <?php if ($currentPage > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['from' => ($currentPage - 2) * $size])); ?>">
+                            <a class="page-link" href="?<?php echo http_build_query(array_merge($requestParams, ['from' => ($currentPage - 2) * $size])); ?>">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -108,7 +109,7 @@
                         for ($i = $start; $i <= $end; $i++): 
                         ?>
                         <li class="page-item <?php echo $i === $currentPage ? 'active' : ''; ?>">
-                            <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['from' => ($i - 1) * $size])); ?>">
+                            <a class="page-link" href="?<?php echo http_build_query(array_merge($requestParams, ['from' => ($i - 1) * $size])); ?>">
                                 <?php echo $i; ?>
                             </a>
                         </li>
@@ -116,7 +117,7 @@
                         
                         <?php if ($currentPage < $pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['from' => $currentPage * $size])); ?>">
+                            <a class="page-link" href="?<?php echo http_build_query(array_merge($requestParams, ['from' => $currentPage * $size])); ?>">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>

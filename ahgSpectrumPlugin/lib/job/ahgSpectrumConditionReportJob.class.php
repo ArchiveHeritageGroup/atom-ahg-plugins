@@ -44,14 +44,14 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         }
 
         // Load related object
-        $object = $this->getInformationObjectById($conditionCheck->object_id);
+        $object = $this->getInformationObject($conditionCheck->object_id);
 
         if (!$object) {
             $this->error('Object not found for condition check');
             return false;
         }
 
-        $this->info('Generating report for: ' . ($object->title ?? $object->slug ?? 'Unknown'));
+        $this->info('Generating report for: ' . ($object->title ?? $object->identifier ?? 'Unknown'));
 
         // Load photos if requested
         $photos = [];
@@ -96,7 +96,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
     /**
      * Load condition check
      */
-    protected function loadConditionCheck($id)
+    protected function loadConditionCheck($id): ?object
     {
         return DB::table('spectrum_condition_check')
             ->where('id', $id)
@@ -106,28 +106,27 @@ class ahgSpectrumConditionReportJob extends arBaseJob
     /**
      * Load conservation records
      */
-    protected function loadConservationRecords($objectId)
+    protected function loadConservationRecords($objectId): array
     {
         return DB::table('spectrum_conservation')
             ->where('object_id', $objectId)
-            ->orderBy('treatment_date', 'desc')
+            ->orderByDesc('treatment_date')
             ->get()
             ->toArray();
     }
 
     /**
-     * Get information object by ID with i18n data
+     * Get information object with i18n data
      */
-    protected function getInformationObjectById(int $id): ?object
+    protected function getInformationObject(int $id): ?object
     {
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as i18n', function ($join) {
                 $join->on('io.id', '=', 'i18n.id')
                     ->where('i18n.culture', '=', 'en');
             })
-            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $id)
-            ->select('io.*', 'i18n.title', 'slug.slug')
+            ->select('io.*', 'i18n.title', 'i18n.scope_and_content', 'i18n.physical_characteristics')
             ->first();
     }
 
@@ -138,29 +137,40 @@ class ahgSpectrumConditionReportJob extends arBaseJob
     {
         return DB::table('spectrum_condition_photo')
             ->where('condition_check_id', $conditionCheckId)
-            ->orderBy('sort_order', 'asc')
+            ->orderBy('sort_order')
+            ->orderBy('created_at')
             ->get()
             ->toArray();
     }
 
     /**
-     * Get upload directory
+     * Get uploads directory with fallback
      */
-    protected function getUploadDir(): string
+    protected function getUploadsDir(): string
     {
-        return class_exists('sfConfig')
-            ? sfConfig::get('sf_upload_dir')
-            : sfConfig::get('sf_upload_dir', sfConfig::get('sf_root_dir') . '/uploads');
+        if (class_exists('sfConfig')) {
+            return sfConfig::get('sf_upload_dir', sfConfig::get('sf_upload_dir'));
+        }
+        return sfConfig::get('sf_upload_dir');
     }
 
     /**
-     * Get plugins directory
+     * Get plugins directory with fallback
      */
     protected function getPluginsDir(): string
     {
-        return class_exists('sfConfig')
-            ? sfConfig::get('sf_plugins_dir')
-            : sfConfig::get('sf_plugins_dir', sfConfig::get('sf_root_dir') . '/plugins');
+        if (class_exists('sfConfig')) {
+            return sfConfig::get('sf_plugins_dir', sfConfig::get('sf_plugins_dir'));
+        }
+        return sfConfig::get('sf_plugins_dir');
+    }
+
+    /**
+     * Get object title helper
+     */
+    protected function getObjectTitle(object $object): string
+    {
+        return $object->title ?? $object->identifier ?? 'Untitled';
     }
 
     /**
@@ -179,7 +189,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
             return false;
         }
 
-        $objectTitle = $object->title ?? $object->slug ?? 'Unknown';
+        $objectTitle = $this->getObjectTitle($object);
 
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 
@@ -272,12 +282,12 @@ class ahgSpectrumConditionReportJob extends arBaseJob
             $pdf->SetFont('helvetica', 'B', 14);
             $pdf->Cell(0, 8, 'Condition Photos', 0, 1);
 
+            $uploadDir = $this->getUploadsDir();
             $x = 15;
             $y = $pdf->GetY() + 5;
             $photoWidth = 85;
             $photoHeight = 65;
             $count = 0;
-            $uploadDir = $this->getUploadDir();
 
             foreach ($photos as $photo) {
                 $photoObj = is_array($photo) ? (object) $photo : $photo;
@@ -333,7 +343,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         }
 
         // Save PDF
-        $uploadDir = $this->getUploadDir();
+        $uploadDir = $this->getUploadsDir();
         $outputDir = $uploadDir . '/spectrum/reports/' . date('Y/m');
         if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
@@ -359,7 +369,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $uploadDir = $this->getUploadDir();
+        $uploadDir = $this->getUploadsDir();
         $outputDir = $uploadDir . '/spectrum/reports/' . date('Y/m');
         if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
@@ -380,7 +390,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
     {
         $html = $this->generateHtmlContent($conditionCheck, $object, $photos, $conservation);
 
-        $uploadDir = $this->getUploadDir();
+        $uploadDir = $this->getUploadsDir();
         $outputDir = $uploadDir . '/spectrum/reports/' . date('Y/m');
         if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
@@ -399,8 +409,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
      */
     protected function generateHtmlContent($conditionCheck, $object, $photos, $conservation)
     {
-        $pluginsDir = $this->getPluginsDir();
-        $templatePath = $pluginsDir . '/ahgSpectrumPlugin/templates/_conditionReportHtml.php';
+        $templatePath = $this->getPluginsDir() . '/ahgSpectrumPlugin/templates/_conditionReportHtml.php';
 
         if (file_exists($templatePath)) {
             ob_start();
@@ -409,29 +418,105 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         }
 
         // Fallback: generate basic HTML
-        $objectTitle = $object->title ?? $object->slug ?? 'Unknown';
+        return $this->generateBasicHtml($conditionCheck, $object, $photos, $conservation);
+    }
 
-        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8">';
-        $html .= '<title>Condition Report - ' . htmlspecialchars($objectTitle) . '</title>';
-        $html .= '<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>body{font-family:Arial,sans-serif;margin:20px;}h1{color:#333;}</style>';
-        $html .= '</head><body>';
-        $html .= '<h1>Condition Report</h1>';
-        $html .= '<h2>' . htmlspecialchars($objectTitle) . '</h2>';
-        $html .= '<p><strong>Reference:</strong> ' . htmlspecialchars($conditionCheck->condition_check_reference ?? 'N/A') . '</p>';
-        $html .= '<p><strong>Check Date:</strong> ' . htmlspecialchars($conditionCheck->check_date ?? 'N/A') . '</p>';
-        $html .= '<p><strong>Condition:</strong> ' . htmlspecialchars(ucfirst($conditionCheck->condition_status ?? 'N/A')) . '</p>';
+    /**
+     * Generate basic HTML content (fallback)
+     */
+    protected function generateBasicHtml($conditionCheck, $object, $photos, $conservation): string
+    {
+        $objectTitle = $this->getObjectTitle($object);
+        $uploadDir = $this->getUploadsDir();
+
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Condition Report - ' . htmlspecialchars($objectTitle) . '</title>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; color: #333; }
+        h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .info-row { margin: 8px 0; }
+        .label { font-weight: bold; display: inline-block; width: 150px; }
+        .photos { display: flex; flex-wrap: wrap; gap: 15px; }
+        .photo { text-align: center; max-width: 250px; }
+        .photo img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        .photo-caption { font-size: 12px; color: #666; margin-top: 5px; }
+        .conservation-record { margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Condition Report</h1>
+    
+    <h2>Object Information</h2>
+    <div class="info-row"><span class="label">Title:</span> ' . htmlspecialchars($objectTitle) . '</div>
+    <div class="info-row"><span class="label">Reference:</span> ' . htmlspecialchars($object->identifier ?? 'N/A') . '</div>
+    
+    <h2>Condition Check Details</h2>
+    <div class="info-row"><span class="label">Reference:</span> ' . htmlspecialchars($conditionCheck->condition_check_reference ?? 'N/A') . '</div>
+    <div class="info-row"><span class="label">Check Date:</span> ' . htmlspecialchars($conditionCheck->check_date ?? 'N/A') . '</div>
+    <div class="info-row"><span class="label">Checked By:</span> ' . htmlspecialchars($conditionCheck->checked_by ?? 'N/A') . '</div>
+    <div class="info-row"><span class="label">Condition:</span> ' . htmlspecialchars(ucfirst($conditionCheck->condition_status ?? 'N/A')) . '</div>
+    <div class="info-row"><span class="label">Completeness:</span> ' . htmlspecialchars(ucfirst($conditionCheck->completeness ?? 'N/A')) . '</div>';
 
         if (!empty($conditionCheck->condition_description)) {
-            $html .= '<h3>Condition Description</h3>';
-            $html .= '<p>' . nl2br(htmlspecialchars($conditionCheck->condition_description)) . '</p>';
+            $html .= '
+    <h3>Condition Description</h3>
+    <p>' . nl2br(htmlspecialchars($conditionCheck->condition_description)) . '</p>';
+        }
+
+        if (!empty($conditionCheck->hazards_noted)) {
+            $html .= '
+    <h3>Hazards Noted</h3>
+    <p>' . nl2br(htmlspecialchars($conditionCheck->hazards_noted)) . '</p>';
         }
 
         if (!empty($conditionCheck->recommendations)) {
-            $html .= '<h3>Recommendations</h3>';
-            $html .= '<p>' . nl2br(htmlspecialchars($conditionCheck->recommendations)) . '</p>';
+            $html .= '
+    <h3>Recommendations</h3>
+    <p>' . nl2br(htmlspecialchars($conditionCheck->recommendations)) . '</p>';
         }
 
-        $html .= '</body></html>';
+        if (!empty($photos)) {
+            $html .= '
+    <h2>Condition Photos</h2>
+    <div class="photos">';
+            foreach ($photos as $photo) {
+                $photoObj = is_array($photo) ? (object) $photo : $photo;
+                $photoPath = $uploadDir . '/' . $photoObj->file_path;
+                if (file_exists($photoPath)) {
+                    $html .= '
+        <div class="photo">
+            <img src="file://' . htmlspecialchars($photoPath) . '" alt="Condition photo">
+            <div class="photo-caption">' . htmlspecialchars($photoObj->caption ?? $photoObj->photo_type ?? '') . '</div>
+        </div>';
+                }
+            }
+            $html .= '
+    </div>';
+        }
+
+        if (!empty($conservation)) {
+            $html .= '
+    <h2>Conservation History</h2>';
+            foreach ($conservation as $record) {
+                $recordObj = is_array($record) ? (object) $record : $record;
+                $html .= '
+    <div class="conservation-record">
+        <strong>' . htmlspecialchars($recordObj->conservation_reference ?? '') . '</strong> - ' . htmlspecialchars($recordObj->treatment_date ?? 'N/A') . '
+        <br>Treatment: ' . htmlspecialchars($recordObj->treatment_performed ?? 'N/A') . '
+        <br>Conservator: ' . htmlspecialchars($recordObj->conservator_name ?? 'N/A') . '
+    </div>';
+            }
+        }
+
+        $html .= '
+    <hr>
+    <p style="font-size: 11px; color: #999;">Generated on ' . date('Y-m-d H:i:s') . '</p>
+</body>
+</html>';
 
         return $html;
     }
@@ -447,7 +532,7 @@ class ahgSpectrumConditionReportJob extends arBaseJob
             return false;
         }
 
-        $objectTitle = $object->title ?? $object->slug ?? 'Unknown';
+        $objectTitle = $this->getObjectTitle($object);
 
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
@@ -457,10 +542,92 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         $section->addTextBreak(2);
         $section->addText($objectTitle, ['size' => 18], ['alignment' => 'center']);
 
-        // Add content...
-        // (Similar structure to PDF generation)
+        // Object information
+        $section->addTextBreak(2);
+        $section->addText('Object Information', ['bold' => true, 'size' => 14]);
+        $section->addText('Title: ' . $objectTitle);
+        $section->addText('Reference: ' . ($object->identifier ?? 'N/A'));
 
-        $uploadDir = $this->getUploadDir();
+        // Condition check details
+        $section->addTextBreak(1);
+        $section->addText('Condition Check Details', ['bold' => true, 'size' => 14]);
+        $section->addText('Reference: ' . ($conditionCheck->condition_check_reference ?? 'N/A'));
+        $section->addText('Check Date: ' . ($conditionCheck->check_date ?? 'N/A'));
+        $section->addText('Checked By: ' . ($conditionCheck->checked_by ?? 'N/A'));
+        $section->addText('Condition: ' . ucfirst($conditionCheck->condition_status ?? 'N/A'));
+        $section->addText('Completeness: ' . ucfirst($conditionCheck->completeness ?? 'N/A'));
+
+        if (!empty($conditionCheck->condition_description)) {
+            $section->addTextBreak(1);
+            $section->addText('Condition Description', ['bold' => true]);
+            $section->addText($conditionCheck->condition_description);
+        }
+
+        if (!empty($conditionCheck->hazards_noted)) {
+            $section->addTextBreak(1);
+            $section->addText('Hazards Noted', ['bold' => true]);
+            $section->addText($conditionCheck->hazards_noted);
+        }
+
+        if (!empty($conditionCheck->recommendations)) {
+            $section->addTextBreak(1);
+            $section->addText('Recommendations', ['bold' => true]);
+            $section->addText($conditionCheck->recommendations);
+        }
+
+        // Photos
+        if (!empty($photos)) {
+            $section->addPageBreak();
+            $section->addText('Condition Photos', ['bold' => true, 'size' => 14]);
+
+            $uploadDir = $this->getUploadsDir();
+
+            foreach ($photos as $photo) {
+                $photoObj = is_array($photo) ? (object) $photo : $photo;
+                $photoPath = $uploadDir . '/' . $photoObj->file_path;
+
+                if (file_exists($photoPath)) {
+                    $section->addTextBreak(1);
+                    $section->addImage($photoPath, [
+                        'width' => 300,
+                        'height' => 225,
+                        'alignment' => 'center',
+                    ]);
+                    $section->addText(
+                        $photoObj->caption ?? $photoObj->photo_type ?? '',
+                        ['size' => 10, 'italic' => true],
+                        ['alignment' => 'center']
+                    );
+                }
+            }
+        }
+
+        // Conservation history
+        if (!empty($conservation)) {
+            $section->addPageBreak();
+            $section->addText('Conservation History', ['bold' => true, 'size' => 14]);
+
+            foreach ($conservation as $record) {
+                $recordObj = is_array($record) ? (object) $record : $record;
+
+                $section->addTextBreak(1);
+                $section->addText(
+                    ($recordObj->conservation_reference ?? '') . ' - ' . ($recordObj->treatment_date ?? 'N/A'),
+                    ['bold' => true]
+                );
+
+                if (!empty($recordObj->treatment_performed)) {
+                    $section->addText('Treatment: ' . $recordObj->treatment_performed);
+                }
+
+                if (!empty($recordObj->conservator_name)) {
+                    $section->addText('Conservator: ' . $recordObj->conservator_name);
+                }
+            }
+        }
+
+        // Save document
+        $uploadDir = $this->getUploadsDir();
         $outputDir = $uploadDir . '/spectrum/reports/' . date('Y/m');
         if (!is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);

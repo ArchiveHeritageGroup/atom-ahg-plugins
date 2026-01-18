@@ -162,7 +162,7 @@
                       <td>
                         <?php if ($req->request_type === 'clearance'): ?>
                           <strong><?php echo htmlspecialchars($req->requested_classification ?? 'N/A'); ?></strong>
-                          <br><small class="text-muted">From: <?php echo $req->current_classification ?? 'None'; ?></small>
+                          <br><small class="text-muted">From: <?php echo esc_entities($req->current_classification ?? 'None'); ?></small>
                         <?php elseif (!empty($req->scopes)): ?>
                           <?php foreach ($req->scopes as $scope): ?>
                             <strong><?php echo htmlspecialchars($scope->object_title ?? 'Unknown'); ?></strong>

@@ -18,17 +18,17 @@ class ahgCartPaymentNotifyAction extends sfAction
         $this->setLayout(false);
         sfConfig::set('sf_web_debug', false);
         
-        // Log incoming ITN
-        error_log('PayFast ITN received: ' . print_r($_POST, true));
-        
-        // Get POST data
-        $pfData = $_POST;
-        
+        // Get POST data via request object
+        $pfData = $request->getPostParameters();
+
+        // Log incoming ITN (sanitized)
+        error_log('PayFast ITN received for order: ' . ($pfData['m_payment_id'] ?? 'unknown'));
+
         if (empty($pfData)) {
             error_log('PayFast ITN: No POST data received');
             return $this->renderText('NO_DATA');
         }
-        
+
         // Get the payment ID (order number)
         $orderNumber = $pfData['m_payment_id'] ?? null;
         if (!$orderNumber) {
