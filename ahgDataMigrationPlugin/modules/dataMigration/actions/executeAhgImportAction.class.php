@@ -279,6 +279,14 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         // Set publication status
         $this->setPublicationStatus($objectId);
 
+        // Set GLAM/DAM type in display_object_config
+        $sector = $this->getUser()->getAttribute('migration_target_type', 'archives');
+        $glamType = ($sector === 'archives') ? 'archive' : $sector;
+        $DB::table('display_object_config')->updateOrInsert(
+            ['object_id' => $objectId],
+            ['object_type' => $glamType, 'updated_at' => date('Y-m-d H:i:s')]
+        );
+
         // Fix nested set
         $this->rebuildNestedSet($objectId, $parentId ?: QubitInformationObject::ROOT_ID);
 
