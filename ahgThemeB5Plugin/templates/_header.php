@@ -64,13 +64,13 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ric-tools-menu">
               <li><h6 class="dropdown-header"><?php echo __('RiC Tools'); ?></h6></li>
-              <li><a class="dropdown-item" href="/ric-dashboard/"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboard'); ?></a></li>
-              <li><a class="dropdown-item" href="/ric-editor/"><i class="fas fa-edit me-2"></i><?php echo __('Record Editor'); ?></a></li>
-              <li><a class="dropdown-item" href="/ric-provenance/"><i class="fas fa-history me-2"></i><?php echo __('Provenance Tracker'); ?></a></li>
-              <li><a class="dropdown-item" href="/ric/search/"><i class="fas fa-search me-2"></i><?php echo __('Semantic Search'); ?></a></li>
-              <li><a class="dropdown-item" href="/ric/"><i class="fas fa-project-diagram me-2"></i><?php echo __('Graph Explorer'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboard'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'syncStatus']); ?>"><i class="fas fa-sync me-2"></i><?php echo __('Sync Status'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Queue'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'logs']); ?>"><i class="fas fa-history me-2"></i><?php echo __('Sync Logs'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/ric/about.html"><i class="fas fa-info-circle me-2"></i><?php echo __('About'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']); ?>"><i class="fas fa-cog me-2"></i><?php echo __('Settings'); ?></a></li>
+              <li><a class="dropdown-item" href="https://www.ica.org/standards/RiC/ontology" target="_blank"><i class="fas fa-book me-2"></i><?php echo __('RiC-O Reference'); ?></a></li>
             </ul>
           </li>
           </li>

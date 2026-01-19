@@ -40,8 +40,8 @@ $hasOais = isPluginActive('arOaisPlugin');
 <div class="sidebar-content">
     <h4><?php echo __('Quick Links'); ?></h4>
     <ul class="list-unstyled">
+        <li><a href="/admin/report-builder"><i class="fas fa-tools me-2"></i><?php echo __('Report Builder'); ?></a></li>
         <li><a href="<?php echo url_for('export/index'); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
-<?php // TODO: Create dashboard module ?>
     </ul>
 
     <?php if ($hasVendor): ?>

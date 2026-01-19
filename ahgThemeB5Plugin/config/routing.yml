@@ -10,9 +10,7 @@ ahg_settings_section:
   url: /admin/ahg-settings/section
   param: { module: ahgSettings, action: section }
 
-ahg_settings_save:
-  url: /admin/ahg-settings/save
-  param: { module: ahgSettings, action: save }
+# Note: Save is handled via POST to section action, no separate save action needed
 
 ahg_settings_export:
   url: /admin/ahg-settings/export

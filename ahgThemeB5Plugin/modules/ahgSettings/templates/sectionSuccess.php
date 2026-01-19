@@ -869,8 +869,8 @@ slot('title', $title);
                                             <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>" class="btn btn-outline-primary">
                                                 <i class="fa fa-tachometer-alt me-1"></i><?php echo __('RIC Dashboard'); ?>
                                             </a>
-                                            <a href="/ric-dashboard/" target="_blank" class="btn btn-outline-info">
-                                                <i class="fa fa-external-link-alt me-1"></i><?php echo __('RIC Explorer'); ?>
+                                            <a href="https://www.ica.org/standards/RiC/ontology" target="_blank" class="btn btn-outline-info">
+                                                <i class="fa fa-book me-1"></i><?php echo __('RiC-O Reference'); ?>
                                             </a>
 <?php $fusekiAdmin = preg_replace('#/[^/]+$#', '/', $settings['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')); ?>
                                             <a href="<?php echo esc_specialchars($fusekiAdmin); ?>" target="_blank" class="btn btn-outline-secondary">

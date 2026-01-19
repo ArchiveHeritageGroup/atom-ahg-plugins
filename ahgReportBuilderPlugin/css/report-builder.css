@@ -1,0 +1,160 @@
+/**
+ * Report Builder Styles
+ */
+
+/* Designer Canvas */
+#designerCanvas {
+    min-height: 500px;
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+/* Layout Blocks */
+.layout-block {
+    transition: all 0.2s ease;
+}
+
+.layout-block:hover {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.layout-block.sortable-ghost {
+    opacity: 0.4;
+}
+
+.layout-block.sortable-chosen {
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.3);
+}
+
+/* Drag Handles */
+.drag-handle {
+    cursor: move;
+}
+
+.cursor-move {
+    cursor: move;
+}
+
+/* Column Selection */
+.column-item {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.column-item:hover {
+    background: #f8f9fa;
+}
+
+.column-item .form-check-input:checked ~ span {
+    font-weight: 600;
+}
+
+/* Selected Columns List */
+#selectedColumns li {
+    cursor: grab;
+    transition: all 0.15s ease;
+}
+
+#selectedColumns li:active {
+    cursor: grabbing;
+}
+
+#selectedColumns li.sortable-ghost {
+    opacity: 0.4;
+}
+
+#selectedColumns li.sortable-chosen {
+    background: #e9ecef;
+}
+
+/* Filter Items */
+.filter-item {
+    background: #fff;
+}
+
+.filter-item:hover {
+    background: #f8f9fa;
+}
+
+/* Data Source Selection */
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+}
+
+.btn-check:checked + .btn-outline-primary .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Report Cards */
+.report-row:hover {
+    background: rgba(13, 110, 253, 0.05);
+}
+
+/* Stat Cards */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-warning,
+.card.bg-danger,
+.card.bg-secondary {
+    border: none;
+}
+
+/* Preview Table */
+#previewBody td {
+    font-size: 0.85rem;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 250px;
+}
+
+/* Toolbar */
+.sticky-top {
+    background: #fff;
+    z-index: 1020;
+}
+
+/* Empty State */
+#emptyCanvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .layout-block {
+        margin-bottom: 1rem;
+    }
+
+    #designerCanvas {
+        min-height: 300px;
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.4rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn-group,
+    .breadcrumb,
+    nav,
+    .card-header button,
+    #btnSave,
+    .sticky-top {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+}

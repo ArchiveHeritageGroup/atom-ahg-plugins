@@ -29,8 +29,8 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
     {
         parent::initialize();
 
-        // Register modules from enabled plugins (framework-driven)
-        // $this->registerFrameworkModules(); // Disabled - using settings.yml instead
+        // Enable theme modules programmatically (settings.yml merging is unreliable)
+        $this->enableThemeModules();
 
         // Register audit trail hooks (moved from ProjectConfiguration)
         $this->registerAuditTrailHooks();
@@ -55,6 +55,35 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
 
         // Load plugin routes
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
+    }
+
+    /**
+     * Enable theme modules programmatically.
+     * Settings.yml merging is unreliable for themes, so we do it here like arRestApiPlugin.
+     */
+    private function enableThemeModules(): void
+    {
+        $themeModules = [
+            'ahgSettings',
+            'api',
+            'export',
+            'identifierApi',
+            'informationobject',
+            'label',
+            'landingPageBuilder',
+            'reports',
+            'spectrumReports',
+            'threeDReports',
+            'tiffpdfmerge',
+        ];
+
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+        foreach ($themeModules as $module) {
+            if (!in_array($module, $enabledModules)) {
+                $enabledModules[] = $module;
+            }
+        }
+        sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
     /**

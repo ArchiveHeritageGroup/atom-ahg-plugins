@@ -1,0 +1,27 @@
+# ahgReportBuilderPlugin Routes
+# Note: Routes are defined programmatically in ahgReportBuilderPluginConfiguration.class.php
+# This file serves as documentation reference
+
+# Admin Routes (require authentication)
+# =====================================
+# GET  /admin/report-builder                    - List all custom reports
+# GET  /admin/report-builder/create             - Create new report form
+# GET  /admin/report-builder/:id/edit           - Edit report designer
+# GET  /admin/report-builder/:id/preview        - Preview report
+# GET  /admin/report-builder/:id/export/:format - Export (pdf|xlsx|csv)
+# GET  /admin/report-builder/:id/schedule       - Manage schedules
+# POST /admin/report-builder/:id/schedule       - Create schedule
+# GET  /admin/report-builder/:id/clone          - Clone report
+# POST /admin/report-builder/:id/delete         - Delete report
+# GET  /admin/report-builder/archive            - View archived reports
+
+# Public Routes
+# =============
+# GET  /reports/custom/:id                      - View shared/public report
+
+# API Routes
+# ==========
+# POST /api/report-builder/save                 - Save report definition
+# POST /api/report-builder/data                 - Fetch report data
+# GET  /api/report-builder/columns/:source      - Get available columns for data source
+# POST /api/report-builder/delete/:id           - Delete report via API

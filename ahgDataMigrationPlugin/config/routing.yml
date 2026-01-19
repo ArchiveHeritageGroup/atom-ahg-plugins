@@ -35,7 +35,7 @@ ahg_data_migration_mapping:
 
 ahg_data_migration_preview:
   url: /admin/data-migration/preview
-  param: { module: ahgDataMigration, action: preview }
+  param: { module: dataMigration, action: preview }
 
 # Job management routes
 dataMigration_jobs:

@@ -1,3 +1,2 @@
-settings_api_keys:
-  url: /settings/apiKeys
-  param: { module: ahgSettings, action: apiKeys }
+# API Keys route moved to main plugin routing.yml as ahg_settings_api_keys
+# URL: /admin/ahg-settings/api-keys

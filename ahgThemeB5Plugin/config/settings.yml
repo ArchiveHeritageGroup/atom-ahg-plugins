@@ -1,12 +1,37 @@
 all:
   .settings:
     enabled_modules:
-      - spectrumReports
-      - threeDReports
       - ahgSettings
+      - api
+      - export
+      - identifierApi
       - informationobject
       - label
+      - landingPageBuilder
+      - reports
+      - spectrumReports
+      - threeDReports
+      - tiffpdfmerge
+      - accession
+      - actor
+      - admin
+      - browse
+      - clipboard
+      - default
+      - digitalobject
+      - function
+      - jobs
+      - menu
+      - object
+      - physicalobject
+      - repository
+      - right
+      - rightsholder
+      - search
+      - staticpage
+      - taxonomy
+      - term
+      - user
 
-# Vendor module settings
 vendor:
   enabled_modules: [vendor]

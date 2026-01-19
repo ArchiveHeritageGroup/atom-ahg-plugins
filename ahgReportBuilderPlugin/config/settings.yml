@@ -1,0 +1,6 @@
+# ahgReportBuilderPlugin Settings
+all:
+  .settings:
+    # Enable the reportBuilder module
+    enabled_modules:
+      - reportBuilder
