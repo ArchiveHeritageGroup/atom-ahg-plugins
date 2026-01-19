@@ -431,6 +431,7 @@ class WorkflowEngine
         $this->register(new LoanOutWorkflow());
         $this->register(new LoanInWorkflow());
         $this->register(new ObjectEntryWorkflow());
+        $this->register(new ExhibitionWorkflow());
     }
 
     /**

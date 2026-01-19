@@ -147,11 +147,16 @@
                     </h2>
                     <small class="text-muted">Objects with identification warnings</small>
                 </div>
-                <?php if (!empty($identificationsWithWarnings)): ?>
+                <?php
+                  $warningsArray = $identificationsWithWarnings instanceof sfOutputEscaperArrayDecorator
+                      ? $identificationsWithWarnings->getRawValue()
+                      : (array) $identificationsWithWarnings;
+                ?>
+                <?php if (!empty($warningsArray)): ?>
                     <hr>
                     <small class="text-muted">Recent warnings:</small>
                     <ul class="list-unstyled small mt-2">
-                        <?php foreach (array_slice($identificationsWithWarnings, 0, 3) as $item): ?>
+                        <?php foreach (array_slice($warningsArray, 0, 3) as $item): ?>
                             <li class="text-truncate" title="<?php echo htmlspecialchars($item->warning) ?>">
                                 <i class="fas fa-exclamation-circle text-warning"></i>
                                 <?php echo htmlspecialchars($item->object_name) ?>

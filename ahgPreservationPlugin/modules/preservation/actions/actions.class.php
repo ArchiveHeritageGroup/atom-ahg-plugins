@@ -74,8 +74,9 @@ class preservationActions extends sfActions
                 $join->on('io.id', '=', 'io_i18n.id')
                      ->where('io_i18n.culture', '=', 'en');
             })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('do.id', $id)
-            ->select('do.*', 'io_i18n.title as object_title', 'io.slug')
+            ->select('do.*', 'io_i18n.title as object_title', 'slug.slug')
             ->first();
 
         if (!$this->digitalObject) {
