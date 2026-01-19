@@ -111,7 +111,7 @@ foreach ($reports as $report) {
         <div class="card-header d-flex justify-content-between align-items-center bg-light">
             <span>
                 <i class="bi <?php echo $categoryIcons[$category] ?? 'bi-folder'; ?> me-2"></i>
-                <strong><?php echo htmlspecialchars($category); ?></strong>
+                <strong><?php echo $category; ?></strong>
             </span>
             <span class="badge bg-secondary"><?php echo count($categoryReports); ?></span>
         </div>
@@ -135,10 +135,10 @@ foreach ($reports as $report) {
                         </td>
                         <td>
                             <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'preview', 'id' => $report->id]); ?>" class="fw-bold text-decoration-none">
-                                <?php echo htmlspecialchars($report->name); ?>
+                                <?php echo $report->name; ?>
                             </a>
                             <?php if ($report->description): ?>
-                            <br><small class="text-muted"><?php echo htmlspecialchars(substr($report->description, 0, 80)); ?><?php echo strlen($report->description) > 80 ? '...' : ''; ?></small>
+                            <br><small class="text-muted"><?php echo substr($report->description, 0, 80); ?><?php echo strlen($report->description) > 80 ? '...' : ''; ?></small>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -163,14 +163,14 @@ foreach ($reports as $report) {
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'preview', 'id' => $report->id]); ?>" class="btn btn-outline-primary" title="<?php echo __('Preview'); ?>">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="bi bi-eye me-1"></i><?php echo __('View'); ?>
                                 </a>
                                 <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'edit', 'id' => $report->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Edit'); ?>">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil me-1"></i><?php echo __('Edit'); ?>
                                 </a>
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="<?php echo __('Export'); ?>">
-                                        <i class="bi bi-download"></i>
+                                        <i class="bi bi-download me-1"></i><?php echo __('Export'); ?>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'csv']); ?>"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
@@ -178,14 +178,8 @@ foreach ($reports as $report) {
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'pdf']); ?>"><i class="bi bi-filetype-pdf me-2"></i>PDF</a></li>
                                     </ul>
                                 </div>
-                                <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'schedule', 'id' => $report->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Schedule'); ?>">
-                                    <i class="bi bi-clock"></i>
-                                </a>
-                                <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'cloneReport', 'id' => $report->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Clone'); ?>">
-                                    <i class="bi bi-copy"></i>
-                                </a>
                                 <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'delete', 'id' => $report->id, 'confirm' => 1]); ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure you want to delete this report?'); ?>');">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash me-1"></i><?php echo __('Delete'); ?>
                                 </a>
                             </div>
                         </td>
