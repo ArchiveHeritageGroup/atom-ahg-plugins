@@ -40,6 +40,16 @@ ahg_settings_plugins:
   url: /admin/ahg-settings/plugins
   param: { module: ahgSettings, action: plugins }
 
+# Central Dashboard (primary URL)
+admin_dashboard:
+  url: /admin/dashboard
+  param: { module: reports, action: index }
+
+# Legacy URL redirect
+reports_index:
+  url: /reports
+  param: { module: reports, action: index }
+
 # Centralized Report System
 report_view:
   url: /reports/view/:code

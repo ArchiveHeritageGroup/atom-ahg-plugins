@@ -1,7 +1,7 @@
 <?php use_helper('Text'); ?>
 
 <div class="mb-3">
-    <a href="/reports" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Reports'); ?></a>
+    <a href="/admin/dashboard" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?></a>
 </div>
 
 <h1 class="h3 mb-4"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy Management (POPIA/PAIA/GDPR)'); ?></h1>

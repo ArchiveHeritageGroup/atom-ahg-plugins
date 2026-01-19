@@ -5,7 +5,7 @@
     <h4><?php echo __('GRAP 103 Compliance'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Dashboard'); ?></a></li>
-        <li><a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><i class="fas fa-chart-bar me-2"></i><?php echo __('Reports'); ?></a></li>
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Central Dashboard'); ?></a></li>
     </ul>
 </div>
 <?php end_slot(); ?>

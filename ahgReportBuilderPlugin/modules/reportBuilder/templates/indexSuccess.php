@@ -57,11 +57,8 @@
         <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'create']); ?>" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i><?php echo __('Create New Report'); ?>
         </a>
-        <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'archive']); ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-archive me-1"></i><?php echo __('View Archive'); ?>
-        </a>
-        <a href="/index.php/reports" class="btn btn-outline-secondary">
-            <i class="bi bi-bar-chart-line me-1"></i><?php echo __('Reports Dashboard'); ?>
+        <a href="/admin/dashboard" class="btn btn-outline-secondary">
+            <i class="bi bi-speedometer2 me-1"></i><?php echo __('Central Dashboard'); ?>
         </a>
     </div>
     <div>

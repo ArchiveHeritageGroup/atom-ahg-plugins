@@ -31,8 +31,8 @@
                 <!-- Dashboards Column -->
                 <div class="col-md-4">
                     <h6 class="dropdown-header"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboards'); ?></h6>
-                    <a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>">
-                        <i class="fas fa-desktop me-2"></i><?php echo __('System Overview'); ?>
+                    <a class="dropdown-item" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-2"></i><?php echo __('Central Dashboard'); ?>
                     </a>
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>">
                         <i class="fas fa-layer-group me-2"></i><?php echo __('Collections Management'); ?>

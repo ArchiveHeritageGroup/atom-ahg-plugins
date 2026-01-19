@@ -34,6 +34,8 @@ $hasAudit = isPluginActive('ahgAuditTrailPlugin');
 $hasVendor = isPluginActive('ahgVendorPlugin');
 $has3D = isPluginActive('ar3DPlugin');
 $hasOais = isPluginActive('arOaisPlugin');
+$hasPreservation = isPluginActive('ahgPreservationPlugin');
+$hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
 ?>
 
 <?php slot('sidebar'); ?>
@@ -42,6 +44,9 @@ $hasOais = isPluginActive('arOaisPlugin');
     <ul class="list-unstyled">
         <li><a href="/admin/report-builder"><i class="fas fa-tools me-2"></i><?php echo __('Report Builder'); ?></a></li>
         <li><a href="<?php echo url_for('export/index'); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
+        <?php if ($hasPreservation): ?>
+        <li><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-shield-alt me-2"></i><?php echo __('Preservation'); ?></a></li>
+        <?php endif; ?>
     </ul>
 
     <?php if ($hasVendor): ?>
@@ -76,7 +81,7 @@ $hasOais = isPluginActive('arOaisPlugin');
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
-<h1><i class="fas fa-chart-line"></i> <?php echo __('Reports Dashboard'); ?></h1>
+<h1><i class="fas fa-tachometer-alt"></i> <?php echo __('Central Dashboard'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
@@ -392,6 +397,74 @@ $hasOais = isPluginActive('arOaisPlugin');
                     </li>
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'serviceTypes']); ?>"><i class="fas fa-tools me-2 text-muted"></i><?php echo __('Service Types'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($hasPreservation): ?>
+    <!-- Digital Preservation Row -->
+    <div class="row mb-4">
+        <!-- Digital Preservation -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #17a2b8 !important;">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Digital Preservation'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Preservation Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']); ?>"><i class="fas fa-check-double me-2 text-muted"></i><?php echo __('Fixity Verification'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'events']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('PREMIS Events'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Preservation Reports'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Format Registry -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i><?php echo __('Format Registry'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Formats'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']) . '?risk=high'; ?>"><i class="fas fa-exclamation-triangle me-2 text-muted"></i><?php echo __('At-Risk Formats'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'policies']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Preservation Policies'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Checksums & Fixity -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #28a745 !important;">
+                    <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i><?php echo __('Checksums & Integrity'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=missing'; ?>"><i class="fas fa-exclamation-circle me-2 text-muted"></i><?php echo __('Missing Checksums'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=stale'; ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Stale Verification'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']) . '?status=failed'; ?>"><i class="fas fa-times-circle me-2 text-muted"></i><?php echo __('Failed Checks'); ?></a>
                     </li>
                 </ul>
             </div>

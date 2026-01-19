@@ -1,6 +1,6 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>">Reports</a></li>
+        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
         <li class="breadcrumb-item active">Gallery Management</li>
     </ol>
 </nav>

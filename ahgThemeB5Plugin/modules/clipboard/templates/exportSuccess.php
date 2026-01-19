@@ -2,7 +2,7 @@
 
 <?php slot('before-content'); ?>
   <div class="mb-3">
-    <a href="<?php echo url_for('reports/index'); ?>" class="btn btn-outline-secondary">
+    <a href="/admin/dashboard" class="btn btn-outline-secondary">
       <i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Dashboard'); ?>
     </a>
   </div>
@@ -92,7 +92,7 @@
 
     <ul class="actions mb-3 nav gap-2">
       <li><input class="btn atom-btn-outline-success" type="submit" id="exportSubmit" value="<?php echo __('Export'); ?>"></li>
-      <li><a href="<?php echo url_for('reports/index'); ?>" class="btn atom-btn-outline-light"><?php echo __('Cancel'); ?></a></li>
+      <li><a href="/admin/dashboard" class="btn atom-btn-outline-light"><?php echo __('Cancel'); ?></a></li>
     </ul>
 
   </form>

@@ -13,7 +13,7 @@
         <li><a href="<?php echo url_for(['module' => 'spectrumReports', 'action' => 'valuations']); ?>"><i class="fas fa-dollar-sign me-2"></i><?php echo __('Valuations'); ?></a></li>
     </ul>
     <hr>
-    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Reports'); ?></a>
+    <a href="/admin/dashboard" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Dashboard'); ?></a>
 </div>
 <?php end_slot(); ?>
 
