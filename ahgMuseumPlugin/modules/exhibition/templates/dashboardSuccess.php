@@ -166,6 +166,12 @@
         <a href="<?php echo url_for(['module' => 'museum', 'action' => 'index']); ?>" class="list-group-item list-group-item-action">
           <i class="fas fa-archive me-2 text-secondary"></i> Object Registry
         </a>
+        <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'museum']); ?>" class="list-group-item list-group-item-action">
+          <i class="fas fa-exchange-alt me-2 text-warning"></i> Manage Loans
+        </a>
+        <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'museum']); ?>" class="list-group-item list-group-item-action">
+          <i class="fas fa-arrow-right-from-bracket me-2 text-info"></i> New Loan Out
+        </a>
       </div>
     </div>
 

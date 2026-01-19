@@ -19,6 +19,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'authority';
         $enabledModules[] = 'api';
         $enabledModules[] = 'exhibition';
+        $enabledModules[] = 'loan';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
     }
 
@@ -128,6 +129,65 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             '/exhibition/:id/storyline/:storyline_id/add-stop',
             ['module' => 'exhibition', 'action' => 'addStop'],
             ['id' => '\d+', 'storyline_id' => '\d+']
+        ));
+
+        // === LOAN MANAGEMENT ===
+        $routing->prependRoute('loan_index', new sfRoute(
+            '/loan',
+            ['module' => 'loan', 'action' => 'index']
+        ));
+        $routing->prependRoute('loan_add', new sfRoute(
+            '/loan/add',
+            ['module' => 'loan', 'action' => 'add']
+        ));
+        $routing->prependRoute('loan_show', new sfRoute(
+            '/loan/:id',
+            ['module' => 'loan', 'action' => 'show'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_edit', new sfRoute(
+            '/loan/:id/edit',
+            ['module' => 'loan', 'action' => 'edit'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_add_object', new sfRoute(
+            '/loan/:id/add-object',
+            ['module' => 'loan', 'action' => 'addObject'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_remove_object', new sfRoute(
+            '/loan/:id/remove-object',
+            ['module' => 'loan', 'action' => 'removeObject'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_transition', new sfRoute(
+            '/loan/:id/transition',
+            ['module' => 'loan', 'action' => 'transition'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_extend', new sfRoute(
+            '/loan/:id/extend',
+            ['module' => 'loan', 'action' => 'extend'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_return', new sfRoute(
+            '/loan/:id/return',
+            ['module' => 'loan', 'action' => 'return'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_agreement', new sfRoute(
+            '/loan/:id/agreement',
+            ['module' => 'loan', 'action' => 'agreement'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_upload_document', new sfRoute(
+            '/loan/:id/upload-document',
+            ['module' => 'loan', 'action' => 'uploadDocument'],
+            ['id' => '\d+']
+        ));
+        $routing->prependRoute('loan_search_objects', new sfRoute(
+            '/loan/search-objects',
+            ['module' => 'loan', 'action' => 'searchObjects']
         ));
     }
 }

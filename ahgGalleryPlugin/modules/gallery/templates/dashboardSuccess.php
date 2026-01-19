@@ -26,8 +26,8 @@
             <div class="list-group list-group-flush">
                 <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'exhibitions']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-images me-2"></i>Exhibitions</a>
                 <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'createExhibition']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-plus me-2"></i>New Exhibition</a>
-                <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'loans']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-exchange-alt me-2"></i>Loans</a>
-                <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'createLoan']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-plus me-2"></i>New Loan</a>
+                <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'gallery']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-exchange-alt me-2"></i>Loans</a>
+                <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'gallery']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-plus me-2"></i>New Loan</a>
                 <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'venues']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-building me-2"></i>Venues & Spaces</a>
                 <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'valuations']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-dollar-sign me-2"></i>Valuations</a>
                 <a href="<?php echo url_for(['module' => 'gallery', 'action' => 'artists']); ?>" class="list-group-item list-group-item-action"><i class="fas fa-user-circle me-2"></i>Artists</a>

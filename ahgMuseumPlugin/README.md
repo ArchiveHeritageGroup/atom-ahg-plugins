@@ -1,58 +1,243 @@
-# ahgMuseumPlugin - Provenance Module Installation
+# ahgMuseumPlugin
 
-## Quick Fix for 404 Error
+Museum and GLAM (Galleries, Libraries, Archives, Museums) extension for AtoM, providing specialized functionality for cultural heritage institutions.
 
-The error "Action ahgMuseumPlugin/provenance does not exist" means the action class and template are missing.
+## Modules
 
-## Installation Steps
+1. [Exhibition Management](#exhibition-management)
+2. [Provenance Tracking](#provenance-tracking)
+3. [Loan Management](#loan-management) *(coming soon)*
 
-### 1. Copy the module files
+---
 
-Copy the `modules/ahgMuseumPlugin` directory to your plugin:
+## Exhibition Management
 
-```bash
-# If ahgMuseumPlugin already exists
-cp -r modules/ahgMuseumPlugin/* /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/
+Comprehensive exhibition planning and management system for museums and galleries.
 
-# OR create new plugin directory structure
-mkdir -p /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/actions
-mkdir -p /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/templates
-cp modules/ahgMuseumPlugin/actions/actions.class.php /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/actions/
-cp modules/ahgMuseumPlugin/templates/*.php /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/templates/
+### Features
+
+- **Exhibition Lifecycle Management** - 9-stage workflow from concept to archived
+- **Object Management** - Link collection objects with drag & drop ordering
+- **Sections/Galleries** - Organize objects into themed sections
+- **Multiple Storylines** - Create different narrative paths for various audiences
+- **Event Scheduling** - Plan openings, tours, lectures, workshops
+- **Checklists** - Task management with templates, assignments, due dates
+- **Reporting** - Object lists, statistics, progress tracking
+
+### Database Tables
+
+| Table | Purpose |
+|-------|---------|
+| `exhibition` | Main exhibition records |
+| `exhibition_section` | Gallery/room sections within exhibitions |
+| `exhibition_object` | Objects assigned to exhibitions |
+| `exhibition_storyline` | Narrative paths through exhibitions |
+| `exhibition_storyline_stop` | Individual stops on a storyline |
+| `exhibition_event` | Scheduled events (openings, tours, etc.) |
+| `exhibition_checklist` | Task checklists for exhibition phases |
+| `exhibition_checklist_item` | Individual checklist tasks |
+| `exhibition_checklist_template` | Reusable checklist templates |
+| `exhibition_checklist_template_item` | Template task items |
+
+### Exhibition Statuses
+
+| Status | Color | Description |
+|--------|-------|-------------|
+| `concept` | Gray | Initial idea phase |
+| `planning` | Blue | Active planning |
+| `preparation` | Cyan | Content preparation |
+| `installation` | Orange | Physical setup |
+| `open` | Green | Currently open to public |
+| `closing` | Yellow | Closing phase |
+| `closed` | Red | Closed to public |
+| `archived` | Dark | Historical record |
+| `canceled` | Dark Red | Canceled exhibition |
+
+### Routes/URLs
+
+| URL Pattern | Action | Description |
+|-------------|--------|-------------|
+| `/exhibition` | index | List all exhibitions |
+| `/exhibition/:id` | show | Exhibition details |
+| `/exhibition/add` | add | Create new exhibition |
+| `/exhibition/edit/id/:id` | edit | Edit exhibition |
+| `/exhibition/:id/objects` | objects | Manage exhibition objects |
+| `/exhibition/:id/sections` | sections | Manage sections |
+| `/exhibition/:id/storylines` | storylines | List storylines |
+| `/exhibition/storyline/id/:id` | storyline | Storyline details |
+| `/exhibition/:id/events` | events | Manage events |
+| `/exhibition/:id/checklists` | checklists | Manage checklists |
+| `/exhibition/:id/object-list` | objectList | Object list report |
+
+### AJAX Endpoints
+
+| URL | Method | Purpose |
+|-----|--------|---------|
+| `/exhibition/searchObjects` | GET | Search collection objects |
+| `/exhibition/reorderObjects/id/:id` | POST | Save drag & drop order |
+| `/exhibition/transition/id/:id` | POST | Change exhibition status |
+| `/exhibition/completeItem/id/:id` | POST | Mark checklist item done |
+
+### Controller Actions
+
+Located in `modules/exhibition/actions/actions.class.php`:
+
+```
+executeIndex          - List exhibitions with filters
+executeShow           - Exhibition detail view
+executeAdd            - Create exhibition form
+executeEdit           - Edit exhibition form
+executeObjects        - Manage exhibition objects
+executeAddObject      - Add object to exhibition
+executeUpdateObject   - Update object placement
+executeRemoveObject   - Remove object from exhibition
+executeReorderObjects - Save drag & drop order (AJAX)
+executeSections       - Manage sections
+executeAddSection     - Add section
+executeUpdateSection  - Update section
+executeDeleteSection  - Delete section
+executeStorylines     - List storylines
+executeStoryline      - Storyline detail with stops
+executeAddStoryline   - Add storyline
+executeUpdateStoryline - Update storyline
+executeDeleteStoryline - Delete storyline
+executeAddStop        - Add storyline stop
+executeUpdateStop     - Update stop
+executeDeleteStop     - Delete stop
+executeEvents         - Manage events
+executeAddEvent       - Add event
+executeUpdateEvent    - Update event
+executeDeleteEvent    - Delete event
+executeChecklists     - Manage checklists
+executeCreateChecklist - Create from template
+executeAddChecklistItem - Add checklist item
+executeCompleteItem   - Mark item complete
+executeObjectList     - Generate object list report
+executeSearchObjects  - AJAX object search
+executeTransition     - Change exhibition status
 ```
 
-### 2. Add routing
+### Service Class
 
-Add these routes to `/usr/share/nginx/archive/plugins/ahgMuseumPlugin/config/routing.yml`:
+Located in `lib/Services/Exhibition/ExhibitionService.php`:
 
-```yaml
-ahgMuseumPlugin_provenance:
-  url: /:slug/ahgMuseumPlugin/provenance
-  class: QubitInformationObjectRoute
-  param: { module: ahgMuseumPlugin, action: provenance }
-  options: { model: QubitInformationObject }
+**Exhibition Methods:**
+- `search(filters, limit, offset)` - Search exhibitions
+- `get(id, includeDetails)` - Get exhibition by ID
+- `getBySlug(slug)` - Get exhibition by slug
+- `create(data, userId)` - Create exhibition
+- `update(id, data, userId)` - Update exhibition
+- `transitionStatus(id, newStatus, userId, reason)` - Change status
+- `getStatistics()` - Overall statistics
+- `getTypes()` / `getStatuses()` - Get enum values
 
-ahgMuseumPlugin_index:
-  url: /:slug/ahgMuseumPlugin
-  class: QubitInformationObjectRoute
-  param: { module: ahgMuseumPlugin, action: index }
-  options: { model: QubitInformationObject }
+**Object Methods:**
+- `getObjects(exhibitionId, sectionId)` - Get exhibition objects
+- `addObject(exhibitionId, objectId, data)` - Add object
+- `updateObject(id, data)` - Update object placement
+- `removeObject(id)` - Remove object
+- `reorderObjects(order)` - Save new order
+- `checkObjectAvailability(objectId, exhibitionId)` - Check conflicts
+
+**Section Methods:**
+- `getSections(exhibitionId)` - Get sections
+- `addSection(exhibitionId, data)` - Add section
+- `updateSection(id, data)` - Update section
+- `deleteSection(id)` - Delete section
+
+**Storyline Methods:**
+- `getStorylines(exhibitionId)` - Get storylines
+- `getStoryline(id)` - Get storyline with stops
+- `addStoryline(exhibitionId, data)` - Add storyline
+- `updateStoryline(id, data)` - Update storyline
+- `deleteStoryline(id)` - Delete storyline
+- `addStorylineStop(storylineId, data)` - Add stop
+- `updateStorylineStop(id, data)` - Update stop
+- `deleteStorylineStop(id)` - Delete stop
+
+**Event Methods:**
+- `getEvents(exhibitionId)` - Get events
+- `addEvent(exhibitionId, data)` - Add event
+- `updateEvent(id, data)` - Update event
+- `deleteEvent(id)` - Delete event
+
+**Checklist Methods:**
+- `getChecklists(exhibitionId)` - Get checklists with items
+- `getChecklistTemplates()` - Get available templates
+- `createChecklistFromTemplate(exhibitionId, templateId)` - Create from template
+- `addChecklistItem(checklistId, data)` - Add item
+- `completeChecklistItem(itemId, userId, notes)` - Mark complete
+
+### Templates
+
+Located in `modules/exhibition/templates/`:
+
+| Template | Purpose |
+|----------|---------|
+| `indexSuccess.php` | Exhibition list with filters |
+| `showSuccess.php` | Exhibition detail page |
+| `addSuccess.php` | Create exhibition form |
+| `editSuccess.php` | Edit exhibition form |
+| `objectsSuccess.php` | Object management with drag & drop |
+| `sectionsSuccess.php` | Section management |
+| `storylinesSuccess.php` | Storyline list |
+| `storylineSuccess.php` | Storyline detail with stops |
+| `eventsSuccess.php` | Event management |
+| `checklistsSuccess.php` | Checklist management |
+| `objectListSuccess.php` | Object list report |
+
+### Usage Example
+
+```php
+// Get exhibition service
+$service = new \AtomExtensions\Services\Exhibition\ExhibitionService();
+
+// Search exhibitions
+$results = $service->search(['status' => 'open'], 20, 0);
+
+// Get exhibition with all details
+$exhibition = $service->get(1, true);
+
+// Add object to exhibition
+$service->addObject(1, 553, [
+    'section_id' => 1,
+    'display_position' => 'Case A1',
+    'insurance_value' => 15000.00,
+    'label_text' => 'Archaeological artifact...'
+]);
+
+// Create checklist from template
+$checklistId = $service->createChecklistFromTemplate(1, 1);
 ```
 
-### 3. Clear cache
+---
 
-```bash
-cd /usr/share/nginx/archive
-php symfony cc
-```
+## Provenance Tracking
 
-### 4. Test
+Visual timeline of object ownership and custody history using D3.js.
 
-Navigate to: `https://wdb.theahg.co.za/index.php/av-demo/ahgMuseumPlugin/provenance`
+### Features
 
-## Optional: Create Provenance Database Table
+- Interactive timeline visualization
+- Color-coded event types
+- Verified/unverified status tracking
+- Multiple data sources (ISAD-G fields, events, custom table)
 
-For detailed custody history tracking, create the `museum_provenance` table:
+### Routes
+
+| URL Pattern | Action | Description |
+|-------------|--------|-------------|
+| `/:slug/ahgMuseumPlugin/provenance` | provenance | Provenance timeline |
+
+### Data Sources
+
+- ISAD(G) Archival History field
+- ISAD(G) Custodial History field
+- Immediate Source of Acquisition
+- Related Events (Creation, Accumulation, Collection)
+- Optional: `museum_provenance` table for detailed tracking
+
+### Optional Database Table
 
 ```sql
 CREATE TABLE museum_provenance (
@@ -74,59 +259,102 @@ CREATE TABLE museum_provenance (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-## Files Included
+---
+
+## Loan Management
+
+*Coming soon* - Incoming and outgoing loan management for GLAM institutions.
+
+### Planned Features
+
+- Loan requests and approvals workflow
+- Borrower/lender management
+- Insurance and indemnity tracking
+- Condition reporting integration
+- Shipping and courier management
+- Loan agreements and contracts
+- Due date monitoring and renewals
+- Integration with Exhibition module
+
+---
+
+## Installation
+
+### 1. Enable the plugin
+
+```bash
+php bin/atom extension:enable ahgMuseumPlugin
+```
+
+### 2. Run database migrations
+
+```bash
+mysql -u root archive < plugins/ahgMuseumPlugin/data/install.sql
+```
+
+### 3. Clear cache
+
+```bash
+php symfony cc
+```
+
+### 4. Access the modules
+
+- Exhibitions: `/index.php/exhibition`
+- Provenance: `/index.php/{object-slug}/ahgMuseumPlugin/provenance`
+
+---
+
+## File Structure
 
 ```
 ahgMuseumPlugin/
 ├── config/
-│   └── routing.yml           # Route definitions
+│   ├── ahgMuseumPluginConfiguration.class.php
+│   └── routing.yml
+├── data/
+│   └── install.sql
+├── lib/
+│   └── Services/
+│       └── Exhibition/
+│           └── ExhibitionService.php
 ├── modules/
-│   └── ahgMuseumPlugin/
+│   ├── ahgMuseumPlugin/
+│   │   ├── actions/
+│   │   │   └── actions.class.php
+│   │   └── templates/
+│   │       ├── indexSuccess.php
+│   │       └── provenanceSuccess.php
+│   └── exhibition/
 │       ├── actions/
-│       │   └── actions.class.php    # Controller with provenance action
+│       │   └── actions.class.php
 │       └── templates/
-│           ├── indexSuccess.php     # Index/overview template
-│           └── provenanceSuccess.php # D3.js timeline template
+│           ├── indexSuccess.php
+│           ├── showSuccess.php
+│           ├── addSuccess.php
+│           ├── editSuccess.php
+│           ├── objectsSuccess.php
+│           ├── sectionsSuccess.php
+│           ├── storylinesSuccess.php
+│           ├── storylineSuccess.php
+│           ├── eventsSuccess.php
+│           ├── checklistsSuccess.php
+│           └── objectListSuccess.php
 └── README.md
 ```
 
-## Features
+---
 
-### Provenance Timeline (D3.js)
-- Visual timeline of ownership/custody history
-- Interactive tooltips with details
-- Color-coded by event type
-- Supports verified/unverified status
+## Requirements
 
-### Data Sources
-- ISAD(G) Archival History field
-- ISAD(G) Custodial History field  
-- Immediate Source of Acquisition
-- Related Events (Creation, Accumulation, Collection)
-- Optional: museum_provenance table for detailed tracking
+- AtoM 2.10+
+- PHP 8.1+
+- MySQL 8.0+
+- atom-framework (Laravel Query Builder)
 
-## Troubleshooting
+---
 
-### Still getting 404?
+## License
 
-1. Check the routing is loaded:
-```bash
-php symfony app:routes | grep ahgMuseumPlugin
-```
-
-2. Check module exists:
-```bash
-ls -la /usr/share/nginx/archive/plugins/ahgMuseumPlugin/modules/ahgMuseumPlugin/
-```
-
-3. Check cache is cleared:
-```bash
-rm -rf /usr/share/nginx/archive/cache/*
-php symfony cc
-```
-
-4. Check permissions:
-```bash
-chown -R www-data:www-data /usr/share/nginx/archive/plugins/ahgMuseumPlugin/
-chmod -R 755 /usr/share/nginx/archive/plugins/ahgMuseumPlugin/
-```
+Copyright (c) 2024-2025 The Archive and Heritage Group (Pty) Ltd
+All rights reserved.

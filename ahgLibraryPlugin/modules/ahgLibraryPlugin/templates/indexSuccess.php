@@ -418,6 +418,10 @@ $rawResource = sfOutputEscaper::unescape($resource);
           <a href="<?php echo url_for(['module' => 'ahgCart', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-success" title="<?php echo __('Add to Cart'); ?>" data-bs-toggle="tooltip"><i class="fas fa-cart-plus"></i></a>
         <?php endif; ?>
       <?php endif; ?>
+      <?php if (in_array('ahgLoanPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $sf_user->isAuthenticated()): ?>
+        <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'library', 'object_id' => $resource->id]); ?>" class="btn btn-xs btn-outline-warning" title="<?php echo __('New Loan'); ?>" data-bs-toggle="tooltip"><i class="fas fa-hand-holding"></i></a>
+        <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'library', 'object_id' => $resource->id]); ?>" class="btn btn-xs btn-outline-info" title="<?php echo __('Manage Loans'); ?>" data-bs-toggle="tooltip"><i class="fas fa-exchange-alt"></i></a>
+      <?php endif; ?>
     </div>
     <!-- Actions (authenticated users only) -->
     <?php if ($sf_user->isAuthenticated()): ?>

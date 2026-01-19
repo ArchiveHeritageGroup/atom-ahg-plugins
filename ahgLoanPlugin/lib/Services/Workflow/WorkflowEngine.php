@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace arMuseumMetadataPlugin\Services\Workflow;
+namespace AhgLoan\Services\Workflow;
 
-use arMuseumMetadataPlugin\Contracts\WorkflowInterface;
+use AhgLoan\Contracts\WorkflowInterface;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -424,21 +424,19 @@ class WorkflowEngine
     }
 
     /**
-     * Register default Spectrum 5.0 workflows.
+     * Register default loan workflows.
      */
     private function registerDefaultWorkflows(): void
     {
         $dir = __DIR__;
+        $contractsDir = dirname($dir, 2) . '/Contracts';
+        require_once $contractsDir . '/WorkflowInterface.php';
         require_once $dir . '/AbstractWorkflow.php';
         require_once $dir . '/LoanOutWorkflow.php';
         require_once $dir . '/LoanInWorkflow.php';
-        require_once $dir . '/ObjectEntryWorkflow.php';
-        require_once $dir . '/ExhibitionWorkflow.php';
 
         $this->register(new LoanOutWorkflow());
         $this->register(new LoanInWorkflow());
-        $this->register(new ObjectEntryWorkflow());
-        $this->register(new ExhibitionWorkflow());
     }
 
     /**
