@@ -16,7 +16,7 @@ $glamTypes = sfOutputEscaper::unescape($glamTypes ?? []);
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'staticpage', 'action' => 'static', 'id' => 'homepage']); ?>"><?php echo __('Home'); ?></a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><?php echo __('Reports'); ?></a></li>
+            <li class="breadcrumb-item"><a href="/admin/dashboard"><?php echo __('Dashboard'); ?></a></li>
             <li class="breadcrumb-item active"><?php echo __($reportName); ?></li>
         </ol>
     </nav>

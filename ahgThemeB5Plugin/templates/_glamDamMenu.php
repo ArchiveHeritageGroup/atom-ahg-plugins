@@ -41,7 +41,7 @@ $isAdmin = $sf_user->isAdministrator();
     
     <!-- Reports -->
     <li><h6 class="dropdown-header"><?php echo __('Reports'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><i class="fas fa-chart-bar fa-fw me-2"></i><?php echo __('Reports Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt fa-fw me-2"></i><?php echo __('Central Dashboard'); ?></a></li>
     <?php endif; ?>
     
     <li><hr class="dropdown-divider"></li>

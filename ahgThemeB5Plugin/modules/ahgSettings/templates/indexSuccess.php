@@ -58,6 +58,24 @@ try {
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- Preservation & Backup Card -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm border-success">
+            <div class="card-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title"><?php echo __('Preservation & Backup'); ?></h5>
+                <p class="card-text text-muted small"><?php echo __('Configure backup replication targets, verify integrity, and manage preservation'); ?></p>
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4">
+                <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'preservation']); ?>" class="btn btn-success">
+                    <i class="fas fa-cog"></i> <?php echo __('Configure'); ?>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php if ($damEnabled): ?>

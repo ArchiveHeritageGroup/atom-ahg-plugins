@@ -68,6 +68,9 @@
 <!-- Quick Actions -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'identification']); ?>" class="btn btn-outline-info">
+            <i class="bi bi-fingerprint me-1"></i><?php echo __('Format ID'); ?>
+        </a>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']); ?>" class="btn btn-outline-primary">
             <i class="bi bi-list-check me-1"></i><?php echo __('Fixity Log'); ?>
         </a>
@@ -77,8 +80,22 @@
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']); ?>" class="btn btn-outline-primary">
             <i class="bi bi-file-code me-1"></i><?php echo __('Format Registry'); ?>
         </a>
-        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']); ?>" class="btn btn-outline-primary">
-            <i class="bi bi-graph-up me-1"></i><?php echo __('Reports'); ?>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'scheduler']); ?>" class="btn btn-outline-dark">
+            <i class="bi bi-clock-history me-1"></i><?php echo __('Scheduler'); ?>
+        </a>
+    </div>
+    <div>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-outline-primary">
+            <i class="bi bi-archive me-1"></i><?php echo __('OAIS Packages'); ?>
+        </a>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'virusScan']); ?>" class="btn btn-outline-danger">
+            <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Virus Scan'); ?>
+        </a>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'conversion']); ?>" class="btn btn-outline-success">
+            <i class="bi bi-arrow-repeat me-1"></i><?php echo __('Format Conversion'); ?>
+        </a>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'backup']); ?>" class="btn btn-outline-info">
+            <i class="bi bi-cloud-arrow-up me-1"></i><?php echo __('Backup'); ?>
         </a>
     </div>
 </div>

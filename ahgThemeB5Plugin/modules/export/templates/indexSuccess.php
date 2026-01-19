@@ -4,7 +4,7 @@ $exportFormats = sfOutputEscaper::unescape($exportFormats ?? []);
 
 <div class="container-fluid py-4">
     <div class="mb-3">
-        <a href="<?php echo url_for('reports/index'); ?>" class="btn btn-outline-secondary">
+        <a href="/admin/dashboard" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Dashboard'); ?>
             
             

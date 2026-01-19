@@ -118,21 +118,26 @@ CREATE TABLE IF NOT EXISTS preservation_format (
 -- =============================================
 -- DIGITAL OBJECT FORMAT IDENTIFICATION
 -- Links digital objects to identified formats
+-- Supports Siegfried/DROID PRONOM identification
 -- =============================================
 CREATE TABLE IF NOT EXISTS preservation_object_format (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     digital_object_id INT NOT NULL,
     format_id BIGINT UNSIGNED,
-    mime_type VARCHAR(100),
+    puid VARCHAR(50) COMMENT 'PRONOM Unique Identifier from Siegfried/DROID',
+    mime_type VARCHAR(255),
     format_name VARCHAR(255),
     format_version VARCHAR(50),
-    identification_tool VARCHAR(100) COMMENT 'e.g., DROID, file, finfo',
+    identification_tool VARCHAR(100) COMMENT 'e.g., siegfried, DROID, file, finfo',
     identification_date DATETIME NOT NULL,
     confidence ENUM('low', 'medium', 'high', 'certain') DEFAULT 'medium',
+    basis VARCHAR(500) COMMENT 'How identified: extension, signature, container, byte match',
+    warning TEXT COMMENT 'Identification warnings from tool',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_digital_object (digital_object_id),
     INDEX idx_format (format_id),
+    INDEX idx_puid (puid),
     INDEX idx_mime_type (mime_type),
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE,
@@ -223,3 +228,418 @@ INSERT IGNORE INTO preservation_policy (name, description, policy_type, is_activ
 ('Daily Fixity Check', 'Verify checksums for a sample of digital objects daily', 'fixity', 1, '0 2 * * *', '{"sample_percentage": 5, "algorithm": "sha256"}'),
 ('Weekly Full Fixity', 'Full fixity verification weekly', 'fixity', 0, '0 3 * * 0', '{"sample_percentage": 100, "algorithm": "sha256"}'),
 ('Format Risk Monitor', 'Monitor objects with at-risk formats', 'format', 1, '0 4 * * 1', '{"risk_levels": ["high", "critical"]}');
+
+-- =============================================
+-- VIRUS SCAN LOG
+-- Records virus scan results for digital objects
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_virus_scan (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    digital_object_id INT NOT NULL,
+    scan_engine VARCHAR(50) NOT NULL DEFAULT 'clamav',
+    engine_version VARCHAR(50),
+    signature_version VARCHAR(100),
+    status ENUM('clean', 'infected', 'error', 'skipped') NOT NULL,
+    threat_name VARCHAR(255) COMMENT 'Name of detected threat if infected',
+    file_path VARCHAR(1024),
+    file_size BIGINT UNSIGNED,
+    scanned_at DATETIME NOT NULL,
+    scanned_by VARCHAR(100) COMMENT 'user or system/cron',
+    duration_ms INT UNSIGNED,
+    error_message TEXT,
+    quarantined TINYINT(1) DEFAULT 0,
+    quarantine_path VARCHAR(1024),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_digital_object (digital_object_id),
+    INDEX idx_status (status),
+    INDEX idx_scanned_at (scanned_at),
+    INDEX idx_threat (threat_name),
+
+    FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- FORMAT CONVERSION LOG
+-- Records format migration/normalization jobs
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_format_conversion (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    digital_object_id INT NOT NULL,
+    source_format VARCHAR(100) NOT NULL,
+    source_mime_type VARCHAR(100),
+    target_format VARCHAR(100) NOT NULL,
+    target_mime_type VARCHAR(100),
+    conversion_tool VARCHAR(100) NOT NULL COMMENT 'imagemagick, ffmpeg, ghostscript, etc.',
+    tool_version VARCHAR(50),
+    status ENUM('pending', 'processing', 'completed', 'failed') NOT NULL DEFAULT 'pending',
+    source_path VARCHAR(1024),
+    source_size BIGINT UNSIGNED,
+    source_checksum VARCHAR(128),
+    output_path VARCHAR(1024),
+    output_size BIGINT UNSIGNED,
+    output_checksum VARCHAR(128),
+    conversion_options JSON COMMENT 'Tool-specific options used',
+    quality_score DECIMAL(5,2) COMMENT 'Quality assessment score if applicable',
+    started_at DATETIME,
+    completed_at DATETIME,
+    duration_ms INT UNSIGNED,
+    error_message TEXT,
+    created_by VARCHAR(100),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_digital_object (digital_object_id),
+    INDEX idx_status (status),
+    INDEX idx_source_format (source_format),
+    INDEX idx_target_format (target_format),
+    INDEX idx_created_at (created_at),
+
+    FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- BACKUP VERIFICATION LOG
+-- Records backup integrity verification results
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_backup_verification (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    backup_id BIGINT UNSIGNED COMMENT 'Reference to atom_backup if exists',
+    backup_type ENUM('database', 'files', 'full', 'incremental') NOT NULL,
+    backup_path VARCHAR(1024) NOT NULL,
+    backup_size BIGINT UNSIGNED,
+    original_checksum VARCHAR(128),
+    verified_checksum VARCHAR(128),
+    status ENUM('valid', 'invalid', 'missing', 'error', 'corrupted') NOT NULL,
+    verification_method VARCHAR(50) DEFAULT 'sha256',
+    files_checked INT UNSIGNED DEFAULT 0,
+    files_valid INT UNSIGNED DEFAULT 0,
+    files_invalid INT UNSIGNED DEFAULT 0,
+    files_missing INT UNSIGNED DEFAULT 0,
+    verified_at DATETIME NOT NULL,
+    verified_by VARCHAR(100),
+    duration_ms INT UNSIGNED,
+    error_message TEXT,
+    details JSON COMMENT 'Detailed verification results',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_backup_id (backup_id),
+    INDEX idx_status (status),
+    INDEX idx_verified_at (verified_at),
+    INDEX idx_backup_type (backup_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- REPLICATION TARGETS
+-- Defines remote backup/replication destinations
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_replication_target (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    target_type ENUM('local', 'sftp', 's3', 'azure', 'gcs', 'rsync') NOT NULL,
+    connection_config JSON NOT NULL COMMENT 'Encrypted connection details',
+    is_active TINYINT(1) DEFAULT 1,
+    sync_schedule VARCHAR(100) COMMENT 'Cron expression',
+    last_sync_at DATETIME,
+    last_sync_status ENUM('success', 'partial', 'failed') DEFAULT NULL,
+    last_sync_files INT UNSIGNED DEFAULT 0,
+    last_sync_bytes BIGINT UNSIGNED DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_active (is_active),
+    INDEX idx_type (target_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- REPLICATION LOG
+-- Records replication sync operations
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_replication_log (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    target_id BIGINT UNSIGNED NOT NULL,
+    operation ENUM('sync', 'verify', 'restore') NOT NULL,
+    status ENUM('started', 'completed', 'failed', 'partial') NOT NULL,
+    files_total INT UNSIGNED DEFAULT 0,
+    files_synced INT UNSIGNED DEFAULT 0,
+    files_failed INT UNSIGNED DEFAULT 0,
+    bytes_transferred BIGINT UNSIGNED DEFAULT 0,
+    started_at DATETIME NOT NULL,
+    completed_at DATETIME,
+    duration_ms INT UNSIGNED,
+    error_message TEXT,
+    details JSON,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_target (target_id),
+    INDEX idx_status (status),
+    INDEX idx_started_at (started_at),
+
+    FOREIGN KEY (target_id) REFERENCES preservation_replication_target(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- FORMAT CONVERSION PRESETS
+-- Predefined conversion configurations
+-- =============================================
+INSERT IGNORE INTO preservation_format (puid, mime_type, format_name, format_version, extension, risk_level, is_preservation_format, preservation_action, migration_target_id) VALUES
+-- Add more formats with migration targets
+('fmt/40', 'image/bmp', 'Windows Bitmap', '3.0', 'bmp', 'high', 0, 'migrate', NULL),
+('fmt/116', 'image/x-pict', 'Apple PICT', '', 'pct', 'critical', 0, 'migrate', NULL),
+('fmt/112', 'application/msword', 'Microsoft Word Document', '97-2003', 'doc', 'high', 0, 'migrate', NULL),
+('fmt/61', 'application/vnd.ms-excel', 'Microsoft Excel', '97-2003', 'xls', 'high', 0, 'migrate', NULL),
+('fmt/126', 'application/vnd.ms-powerpoint', 'Microsoft PowerPoint', '97-2003', 'ppt', 'high', 0, 'migrate', NULL),
+('fmt/5', 'audio/x-aiff', 'Audio Interchange File Format', '', 'aif', 'medium', 0, 'monitor', NULL),
+('fmt/527', 'video/quicktime', 'QuickTime Movie', '', 'mov', 'medium', 0, 'monitor', NULL),
+('fmt/585', 'video/x-msvideo', 'AVI Video', '', 'avi', 'high', 0, 'migrate', NULL),
+('fmt/596', 'video/x-ms-wmv', 'Windows Media Video', '', 'wmv', 'high', 0, 'migrate', NULL);
+
+-- Update migration targets (TIFF for images, PDF/A for documents)
+-- Using temporary variable approach to avoid MySQL self-reference error
+SET @tiff_id = (SELECT id FROM preservation_format WHERE mime_type = 'image/tiff' LIMIT 1);
+SET @pdfa_id = (SELECT id FROM preservation_format WHERE format_name = 'PDF/A-2b' LIMIT 1);
+UPDATE preservation_format SET migration_target_id = @tiff_id WHERE mime_type IN ('image/bmp', 'image/x-pict') AND migration_target_id IS NULL AND @tiff_id IS NOT NULL;
+UPDATE preservation_format SET migration_target_id = @pdfa_id WHERE mime_type IN ('application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint') AND migration_target_id IS NULL AND @pdfa_id IS NOT NULL;
+
+-- Add virus scan and backup verification policies
+INSERT IGNORE INTO preservation_policy (name, description, policy_type, is_active, schedule_cron, config) VALUES
+('Daily Virus Scan', 'Scan new uploads for viruses daily', 'fixity', 1, '0 1 * * *', '{"scan_new_only": true, "quarantine_infected": true}'),
+('Weekly Backup Verification', 'Verify backup integrity weekly', 'replication', 1, '0 5 * * 0', '{"verify_checksums": true, "sample_files": 100}');
+
+-- =============================================
+-- WORKFLOW SCHEDULES
+-- Configurable scheduled preservation tasks
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_workflow_schedule (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    workflow_type ENUM(
+        'format_identification',
+        'fixity_check',
+        'virus_scan',
+        'format_conversion',
+        'backup_verification',
+        'replication'
+    ) NOT NULL,
+    is_enabled TINYINT(1) DEFAULT 1,
+
+    -- Schedule configuration
+    schedule_type ENUM('cron', 'interval', 'manual') NOT NULL DEFAULT 'cron',
+    cron_expression VARCHAR(100) COMMENT 'Cron expression (e.g., 0 2 * * *)',
+    interval_hours INT UNSIGNED COMMENT 'Hours between runs for interval type',
+
+    -- Execution limits
+    batch_limit INT UNSIGNED DEFAULT 100 COMMENT 'Max objects per run',
+    timeout_minutes INT UNSIGNED DEFAULT 60 COMMENT 'Max runtime in minutes',
+
+    -- Options
+    options JSON COMMENT 'Workflow-specific options',
+
+    -- Tracking
+    last_run_at DATETIME,
+    last_run_status ENUM('success', 'partial', 'failed', 'timeout') DEFAULT NULL,
+    last_run_processed INT UNSIGNED DEFAULT 0,
+    last_run_duration_ms INT UNSIGNED,
+    next_run_at DATETIME,
+    total_runs INT UNSIGNED DEFAULT 0,
+    total_processed INT UNSIGNED DEFAULT 0,
+
+    -- Notifications
+    notify_on_failure TINYINT(1) DEFAULT 1,
+    notify_email VARCHAR(255),
+
+    -- Metadata
+    created_by VARCHAR(100),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_workflow_type (workflow_type),
+    INDEX idx_enabled (is_enabled),
+    INDEX idx_next_run (next_run_at),
+    INDEX idx_schedule_type (schedule_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- WORKFLOW RUN LOG
+-- Records each execution of a scheduled workflow
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_workflow_run (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    schedule_id BIGINT UNSIGNED NOT NULL,
+    workflow_type VARCHAR(50) NOT NULL,
+
+    -- Execution details
+    status ENUM('running', 'completed', 'failed', 'timeout', 'cancelled') NOT NULL DEFAULT 'running',
+    started_at DATETIME NOT NULL,
+    completed_at DATETIME,
+    duration_ms INT UNSIGNED,
+
+    -- Results
+    objects_processed INT UNSIGNED DEFAULT 0,
+    objects_succeeded INT UNSIGNED DEFAULT 0,
+    objects_failed INT UNSIGNED DEFAULT 0,
+    objects_skipped INT UNSIGNED DEFAULT 0,
+
+    -- Details
+    error_message TEXT,
+    summary JSON COMMENT 'Detailed run summary',
+
+    -- Execution context
+    triggered_by ENUM('scheduler', 'manual', 'api') DEFAULT 'scheduler',
+    triggered_by_user VARCHAR(100),
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_schedule (schedule_id),
+    INDEX idx_workflow_type (workflow_type),
+    INDEX idx_status (status),
+    INDEX idx_started_at (started_at),
+
+    FOREIGN KEY (schedule_id) REFERENCES preservation_workflow_schedule(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- DEFAULT WORKFLOW SCHEDULES
+-- =============================================
+INSERT IGNORE INTO preservation_workflow_schedule
+(name, description, workflow_type, is_enabled, schedule_type, cron_expression, batch_limit, options, created_by) VALUES
+('Daily Format Identification', 'Identify formats for new digital objects', 'format_identification', 1, 'cron', '0 1 * * *', 500, '{"unidentified_only": true, "update_registry": true}', 'system'),
+('Daily Fixity Check', 'Verify checksums for digital objects', 'fixity_check', 1, 'cron', '0 2 * * *', 500, '{"min_age_days": 7, "algorithm": "sha256"}', 'system'),
+('Daily Virus Scan', 'Scan digital objects for malware', 'virus_scan', 1, 'cron', '0 3 * * *', 200, '{"new_only": true, "quarantine": true}', 'system'),
+('Weekly Format Conversion', 'Convert at-risk formats to preservation formats', 'format_conversion', 0, 'cron', '0 4 * * 0', 50, '{"target_formats": {"image": "tiff", "document": "pdf"}}', 'system'),
+('Weekly Backup Verification', 'Verify backup file integrity', 'backup_verification', 1, 'cron', '0 6 * * 6', 100, '{"verify_checksums": true}', 'system'),
+('Daily Replication', 'Replicate files to backup targets', 'replication', 0, 'cron', '0 5 * * *', 500, '{"targets": "all", "verify_after_sync": true}', 'system');
+
+-- =============================================
+-- OAIS PACKAGES (SIP/AIP/DIP)
+-- Archival information packages per OAIS standard
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_package (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE COMMENT 'Unique package identifier',
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+
+    -- Package type per OAIS model
+    package_type ENUM('sip', 'aip', 'dip') NOT NULL,
+
+    -- Package status
+    status ENUM('draft', 'building', 'complete', 'validated', 'exported', 'error') NOT NULL DEFAULT 'draft',
+
+    -- Package format
+    package_format ENUM('bagit', 'zip', 'tar', 'directory') NOT NULL DEFAULT 'bagit',
+    bagit_version VARCHAR(10) DEFAULT '1.0',
+
+    -- Content information
+    object_count INT UNSIGNED DEFAULT 0,
+    total_size BIGINT UNSIGNED DEFAULT 0 COMMENT 'Total size in bytes',
+
+    -- Checksums
+    manifest_algorithm VARCHAR(20) DEFAULT 'sha256',
+    package_checksum VARCHAR(128) COMMENT 'Checksum of packaged file',
+
+    -- Paths
+    source_path VARCHAR(1024) COMMENT 'Path to package directory or file',
+    export_path VARCHAR(1024) COMMENT 'Path to exported package',
+
+    -- OAIS metadata
+    originator VARCHAR(255) COMMENT 'Producer/creator of content',
+    submission_agreement VARCHAR(255) COMMENT 'Reference to submission agreement',
+    retention_period VARCHAR(100) COMMENT 'Retention period if applicable',
+
+    -- Relationships
+    parent_package_id BIGINT UNSIGNED COMMENT 'Parent package (e.g., AIP from SIP)',
+    information_object_id INT COMMENT 'Root information object if applicable',
+
+    -- Timestamps
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(100),
+    built_at DATETIME,
+    validated_at DATETIME,
+    exported_at DATETIME,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    -- Extra metadata as JSON
+    metadata JSON COMMENT 'Additional package metadata',
+
+    INDEX idx_package_type (package_type),
+    INDEX idx_status (status),
+    INDEX idx_uuid (uuid),
+    INDEX idx_parent (parent_package_id),
+    INDEX idx_info_object (information_object_id),
+
+    FOREIGN KEY (parent_package_id) REFERENCES preservation_package(id) ON DELETE SET NULL,
+    FOREIGN KEY (information_object_id) REFERENCES information_object(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- PACKAGE CONTENTS
+-- Links packages to digital objects
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_package_object (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    package_id BIGINT UNSIGNED NOT NULL,
+    digital_object_id INT NOT NULL,
+
+    -- File information within package
+    relative_path VARCHAR(1024) NOT NULL COMMENT 'Path within package',
+    file_name VARCHAR(255) NOT NULL,
+    file_size BIGINT UNSIGNED,
+
+    -- Checksums
+    checksum_algorithm VARCHAR(20) DEFAULT 'sha256',
+    checksum_value VARCHAR(128),
+
+    -- Format information
+    mime_type VARCHAR(100),
+    puid VARCHAR(50) COMMENT 'PRONOM identifier',
+
+    -- Object role in package
+    object_role ENUM('payload', 'metadata', 'manifest', 'tagfile') DEFAULT 'payload',
+
+    -- Sequence for ordering
+    sequence INT UNSIGNED DEFAULT 0,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_package (package_id),
+    INDEX idx_digital_object (digital_object_id),
+    INDEX idx_role (object_role),
+
+    UNIQUE KEY uk_package_path (package_id, relative_path),
+    FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE,
+    FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- PACKAGE EVENTS
+-- Tracks package lifecycle events
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_package_event (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    package_id BIGINT UNSIGNED NOT NULL,
+
+    event_type ENUM(
+        'creation', 'modification', 'building', 'validation',
+        'export', 'import', 'transfer', 'deletion', 'error'
+    ) NOT NULL,
+
+    event_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    event_detail TEXT,
+    event_outcome ENUM('success', 'failure', 'warning') DEFAULT 'success',
+    event_outcome_detail TEXT,
+
+    -- Agent information
+    agent_type ENUM('user', 'system', 'software') DEFAULT 'system',
+    agent_value VARCHAR(255),
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_package (package_id),
+    INDEX idx_event_type (event_type),
+    INDEX idx_datetime (event_datetime),
+
+    FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

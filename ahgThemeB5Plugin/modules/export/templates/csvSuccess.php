@@ -4,6 +4,6 @@
   <?php echo __('CSV Export functionality coming soon.'); ?>
 </div>
 <p><?php echo __('This feature will allow you to export archival descriptions in CSV format.'); ?></p>
-<a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="btn btn-secondary">
-  <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Reports'); ?>
+<a href="/admin/dashboard" class="btn btn-secondary">
+  <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
 </a>
