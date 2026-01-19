@@ -203,7 +203,7 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasMuseum): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museumReports', 'action' => 'index']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Reports (CCO)"); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Dashboard"); ?></a></li>
                     <?php endif; ?>
                 </ul>
             </div>

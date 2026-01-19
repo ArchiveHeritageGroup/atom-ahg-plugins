@@ -1,4 +1,13 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped array to raw array for PHP array functions
+$eventsRaw = $events ?? [];
+if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
+    $events = $eventsRaw->getRawValue();
+} else {
+    $events = is_array($eventsRaw) ? $eventsRaw : [];
+}
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -13,7 +22,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Exhibition Events</h1>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addEventModal">
-        <i class="fa fa-plus"></i> Add Event
+        <i class="fas fa-plus"></i> Add Event
       </button>
     </div>
 
@@ -32,11 +41,11 @@
     <?php if (empty($events)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-calendar fa-3x text-muted mb-3"></i>
+          <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
           <h5>No events scheduled</h5>
           <p class="text-muted">Schedule events like openings, talks, workshops, and tours.</p>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
-            <i class="fa fa-plus"></i> Schedule First Event
+            <i class="fas fa-plus"></i> Schedule First Event
           </button>
         </div>
       </div>
@@ -74,7 +83,7 @@
                       <h5 class="mb-1"><?php echo htmlspecialchars($event['title']); ?></h5>
                       <p class="small text-muted mb-2">
                         <?php if (!empty($event['event_time'])): ?>
-                          <i class="fa fa-clock-o me-1"></i> <?php echo date('g:i A', strtotime($event['event_time'])); ?>
+                          <i class="fas fa-clock me-1"></i> <?php echo date('g:i A', strtotime($event['event_time'])); ?>
                         <?php endif; ?>
                         <?php if (!empty($event['event_type'])): ?>
                           <span class="badge bg-info ms-2 text-capitalize"><?php echo str_replace('_', ' ', $event['event_type']); ?></span>
@@ -101,11 +110,11 @@
                               data-registration="<?php echo !empty($event['registration_required']) ? '1' : '0'; ?>"
                               data-free="<?php echo !empty($event['is_free']) ? '1' : '0'; ?>"
                               data-price="<?php echo $event['ticket_price'] ?? ''; ?>">
-                        <i class="fa fa-edit"></i>
+                        <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
                               onclick="deleteEvent(<?php echo $event['id']; ?>, '<?php echo htmlspecialchars(addslashes($event['title'])); ?>')">
-                        <i class="fa fa-trash"></i>
+                        <i class="fas fa-trash"></i>
                       </button>
                     </div>
                   </div>
@@ -116,18 +125,18 @@
 
                   <div class="d-flex gap-3 small text-muted">
                     <?php if (!empty($event['location'])): ?>
-                      <span><i class="fa fa-map-marker me-1"></i> <?php echo htmlspecialchars($event['location']); ?></span>
+                      <span><i class="fas fa-map-marker me-1"></i> <?php echo htmlspecialchars($event['location']); ?></span>
                     <?php endif; ?>
                     <?php if (!empty($event['capacity'])): ?>
-                      <span><i class="fa fa-users me-1"></i> Capacity: <?php echo $event['capacity']; ?></span>
+                      <span><i class="fas fa-users me-1"></i> Capacity: <?php echo $event['capacity']; ?></span>
                     <?php endif; ?>
                     <?php if (!empty($event['registration_required'])): ?>
-                      <span class="text-warning"><i class="fa fa-ticket me-1"></i> Registration Required</span>
+                      <span class="text-warning"><i class="fas fa-ticket me-1"></i> Registration Required</span>
                     <?php endif; ?>
                     <?php if (!empty($event['is_free'])): ?>
-                      <span class="text-success"><i class="fa fa-gift me-1"></i> Free</span>
+                      <span class="text-success"><i class="fas fa-gift me-1"></i> Free</span>
                     <?php elseif (!empty($event['ticket_price'])): ?>
-                      <span><i class="fa fa-money me-1"></i> R<?php echo number_format($event['ticket_price'], 2); ?></span>
+                      <span><i class="fas fa-money-bill me-1"></i> R<?php echo number_format($event['ticket_price'], 2); ?></span>
                     <?php endif; ?>
                   </div>
                 </div>
@@ -153,7 +162,7 @@
         </p>
         <?php if (!empty($exhibition['opening_date'])): ?>
           <p class="small mb-0">
-            <i class="fa fa-calendar me-1"></i>
+            <i class="fas fa-calendar me-1"></i>
             <?php echo $exhibition['opening_date']; ?>
             <?php if (!empty($exhibition['closing_date'])): ?>
               - <?php echo $exhibition['closing_date']; ?>
@@ -223,7 +232,7 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Event Type</label>
-              <select name="event_type" class="form-select">
+              <select name="event_type" id="addEventType" class="form-select tom-select">
                 <option value="other">Other</option>
                 <option value="opening">Opening</option>
                 <option value="closing">Closing</option>
@@ -315,7 +324,7 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Event Type</label>
-              <select name="event_type" id="editEventType" class="form-select">
+              <select name="event_type" id="editEventType" class="form-select tom-select-edit">
                 <option value="other">Other</option>
                 <option value="opening">Opening</option>
                 <option value="closing">Closing</option>
@@ -433,4 +442,37 @@ function deleteEvent(id, title) {
     form.submit();
   }
 }
+</script>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize TOM Select for add modal
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+
+  // Initialize TOM Select for edit modal
+  var editEventTypeSelect = document.getElementById('editEventType');
+  var editEventTypeTom = null;
+  if (editEventTypeSelect) {
+    editEventTypeTom = new TomSelect(editEventTypeSelect, {
+      allowEmptyOption: true,
+      create: false
+    });
+  }
+
+  // Update edit modal TOM Select when modal opens
+  document.getElementById('editEventModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    if (editEventTypeTom) {
+      editEventTypeTom.setValue(button.dataset.type || 'other');
+    }
+  });
+});
 </script>

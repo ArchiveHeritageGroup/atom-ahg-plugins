@@ -1,6 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-shield-check text-success me-2"></i><?php echo __('Digital Preservation Dashboard'); ?></h1>
+<div class="d-flex justify-content-between align-items-center">
+  <h1><i class="bi bi-shield-check text-success me-2"></i><?php echo __('Digital Preservation Dashboard'); ?></h1>
+  <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i><?php echo __('Return to Central Dashboard'); ?>
+  </a>
+</div>
 <?php end_slot() ?>
 
 <?php slot('content') ?>

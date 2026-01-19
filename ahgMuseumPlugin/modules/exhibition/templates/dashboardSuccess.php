@@ -52,7 +52,7 @@
       <div class="card-body p-0">
         <?php if (empty($currentExhibitions)): ?>
           <div class="p-4 text-center text-muted">
-            <i class="fa fa-calendar-check fa-2x mb-2"></i>
+            <i class="fas fa-calendar-check fa-2x mb-2"></i>
             <p class="mb-0">No exhibitions currently open</p>
           </div>
         <?php else: ?>
@@ -65,10 +65,10 @@
                 </div>
                 <p class="mb-1 small text-muted">
                   <?php if (!empty($exhibition['venue_name'])): ?>
-                    <i class="fa fa-map-marker me-1"></i> <?php echo htmlspecialchars($exhibition['venue_name']); ?>
+                    <i class="fas fa-map-marker me-1"></i> <?php echo htmlspecialchars($exhibition['venue_name']); ?>
                   <?php endif; ?>
                   <?php if (!empty($exhibition['closing_date'])): ?>
-                    <span class="ms-2"><i class="fa fa-calendar me-1"></i> Closes: <?php echo $exhibition['closing_date']; ?></span>
+                    <span class="ms-2"><i class="fas fa-calendar me-1"></i> Closes: <?php echo $exhibition['closing_date']; ?></span>
                   <?php endif; ?>
                 </p>
                 <?php if (!empty($exhibition['closing_date'])): ?>
@@ -98,7 +98,7 @@
       <div class="card-body p-0">
         <?php if (empty($upcomingExhibitions)): ?>
           <div class="p-4 text-center text-muted">
-            <i class="fa fa-calendar fa-2x mb-2"></i>
+            <i class="fas fa-calendar fa-2x mb-2"></i>
             <p class="mb-0">No upcoming exhibitions scheduled</p>
           </div>
         <?php else: ?>
@@ -113,10 +113,10 @@
                 </div>
                 <p class="mb-1 small text-muted">
                   <?php if (!empty($exhibition['opening_date'])): ?>
-                    <i class="fa fa-calendar me-1"></i> Opens: <?php echo $exhibition['opening_date']; ?>
+                    <i class="fas fa-calendar me-1"></i> Opens: <?php echo $exhibition['opening_date']; ?>
                   <?php endif; ?>
                   <?php if (!empty($exhibition['venue_name'])): ?>
-                    <span class="ms-2"><i class="fa fa-map-marker me-1"></i> <?php echo htmlspecialchars($exhibition['venue_name']); ?></span>
+                    <span class="ms-2"><i class="fas fa-map-marker me-1"></i> <?php echo htmlspecialchars($exhibition['venue_name']); ?></span>
                   <?php endif; ?>
                 </p>
               </a>
@@ -158,13 +158,13 @@
       </div>
       <div class="list-group list-group-flush">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'add']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-plus me-2 text-success"></i> Create New Exhibition
+          <i class="fas fa-plus me-2 text-success"></i> Create New Exhibition
         </a>
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'index']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-list me-2 text-primary"></i> View All Exhibitions
+          <i class="fas fa-list me-2 text-primary"></i> View All Exhibitions
         </a>
         <a href="<?php echo url_for(['module' => 'museum', 'action' => 'index']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-archive me-2 text-secondary"></i> Object Registry
+          <i class="fas fa-archive me-2 text-secondary"></i> Object Registry
         </a>
       </div>
     </div>

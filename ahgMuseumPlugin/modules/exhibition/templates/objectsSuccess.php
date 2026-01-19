@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped arrays to raw arrays for PHP array functions
+$objectsRaw = $objects ?? [];
+$objects = ($objectsRaw instanceof sfOutputEscaperArrayDecorator) ? $objectsRaw->getRawValue() : (is_array($objectsRaw) ? $objectsRaw : []);
+$sectionsRaw = $sections ?? [];
+$sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsRaw->getRawValue() : (is_array($sectionsRaw) ? $sectionsRaw : []);
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -13,18 +20,18 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Exhibition Objects</h1>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addObjectModal">
-        <i class="fa fa-plus"></i> Add Object
+        <i class="fas fa-plus"></i> Add Object
       </button>
     </div>
 
     <?php if (empty($objects)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-archive fa-3x text-muted mb-3"></i>
+          <i class="fas fa-archive fa-3x text-muted mb-3"></i>
           <h5>No objects added yet</h5>
           <p class="text-muted">Add objects from the collection to this exhibition.</p>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addObjectModal">
-            <i class="fa fa-plus"></i> Add First Object
+            <i class="fas fa-plus"></i> Add First Object
           </button>
         </div>
       </div>
@@ -38,7 +45,7 @@
               <a href="?" class="btn btn-sm <?php echo empty($currentSection) ? 'btn-primary' : 'btn-outline-primary'; ?>">All</a>
               <?php foreach ($sections as $section): ?>
                 <a href="?section=<?php echo $section['id']; ?>" class="btn btn-sm <?php echo ($currentSection ?? '') == $section['id'] ? 'btn-primary' : 'btn-outline-secondary'; ?>">
-                  <?php echo htmlspecialchars($section['name']); ?>
+                  <?php echo htmlspecialchars($section['title']); ?>
                 </a>
               <?php endforeach; ?>
             </div>
@@ -63,32 +70,32 @@
               <?php foreach ($objects as $object): ?>
                 <tr data-id="<?php echo $object['id']; ?>">
                   <td class="text-center">
-                    <i class="fa fa-grip-vertical text-muted drag-handle" style="cursor: move;"></i>
+                    <i class="fas fa-grip-vertical text-muted drag-handle" style="cursor: move;"></i>
                   </td>
                   <td>
-                    <a href="<?php echo url_for(['module' => 'museum', 'action' => 'show', 'id' => $object['museum_object_id']]); ?>">
-                      <strong><?php echo htmlspecialchars($object['object_title'] ?? $object['object_number']); ?></strong>
+                    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $object['object_slug']]); ?>">
+                      <strong><?php echo htmlspecialchars($object['object_title'] ?? $object['identifier']); ?></strong>
                     </a>
-                    <?php if (!empty($object['object_number'])): ?>
-                      <br><small class="text-muted"><?php echo htmlspecialchars($object['object_number']); ?></small>
+                    <?php if (!empty($object['identifier'])): ?>
+                      <br><small class="text-muted"><?php echo htmlspecialchars($object['identifier']); ?></small>
                     <?php endif; ?>
                   </td>
                   <td>
-                    <?php if (!empty($object['section_name'])): ?>
-                      <?php echo htmlspecialchars($object['section_name']); ?>
+                    <?php if (!empty($object['section_title'])): ?>
+                      <?php echo htmlspecialchars($object['section_title']); ?>
                     <?php else: ?>
                       <span class="text-muted">-</span>
                     <?php endif; ?>
                   </td>
                   <td>
-                    <?php if (!empty($object['display_location'])): ?>
-                      <?php echo htmlspecialchars($object['display_location']); ?>
+                    <?php if (!empty($object['display_position'])): ?>
+                      <?php echo htmlspecialchars($object['display_position']); ?>
                     <?php else: ?>
                       <span class="text-muted">Not assigned</span>
                     <?php endif; ?>
                   </td>
                   <td>
-                    <span class="badge bg-secondary"><?php echo $object['display_order'] ?? '-'; ?></span>
+                    <span class="badge bg-secondary"><?php echo $object['sequence_order'] ?? '-'; ?></span>
                   </td>
                   <td class="text-end">
                     <div class="btn-group btn-group-sm">
@@ -96,16 +103,16 @@
                               data-bs-toggle="modal" data-bs-target="#editObjectModal"
                               data-id="<?php echo $object['id']; ?>"
                               data-section="<?php echo $object['section_id'] ?? ''; ?>"
-                              data-location="<?php echo htmlspecialchars($object['display_location'] ?? ''); ?>"
-                              data-notes="<?php echo htmlspecialchars($object['display_notes'] ?? ''); ?>"
-                              data-order="<?php echo $object['display_order'] ?? ''; ?>"
+                              data-location="<?php echo htmlspecialchars($object['display_position'] ?? ''); ?>"
+                              data-notes="<?php echo htmlspecialchars($object['installation_notes'] ?? ''); ?>"
+                              data-order="<?php echo $object['sequence_order'] ?? ''; ?>"
                               title="Edit">
-                        <i class="fa fa-edit"></i>
+                        <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
-                              onclick="removeObject(<?php echo $object['id']; ?>, '<?php echo htmlspecialchars(addslashes($object['object_title'] ?? $object['object_number'])); ?>')"
+                              onclick="removeObject(<?php echo $object['id']; ?>, '<?php echo htmlspecialchars(addslashes($object['object_title'] ?? $object['identifier'])); ?>')"
                               title="Remove">
-                        <i class="fa fa-times"></i>
+                        <i class="fas fa-times"></i>
                       </button>
                     </div>
                   </td>
@@ -135,7 +142,7 @@
         </p>
         <?php if (!empty($exhibition['opening_date'])): ?>
           <p class="small mb-1">
-            <i class="fa fa-calendar me-1"></i>
+            <i class="fas fa-calendar me-1"></i>
             <?php echo $exhibition['opening_date']; ?>
             <?php if (!empty($exhibition['closing_date'])): ?>
               - <?php echo $exhibition['closing_date']; ?>
@@ -153,7 +160,7 @@
         <ul class="list-group list-group-flush">
           <?php foreach ($sections as $section): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <?php echo htmlspecialchars($section['name']); ?>
+              <?php echo htmlspecialchars($section['title']); ?>
               <span class="badge bg-primary rounded-pill"><?php echo $section['object_count'] ?? 0; ?></span>
             </li>
           <?php endforeach; ?>
@@ -167,10 +174,10 @@
       </div>
       <div class="list-group list-group-flush">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id']]); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-file-text me-2"></i> Generate Object List
+          <i class="fas fa-file-text me-2"></i> Generate Object List
         </a>
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibition['id']]); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-th-large me-2"></i> Manage Sections
+          <i class="fas fa-th-large me-2"></i> Manage Sections
         </a>
       </div>
     </div>
@@ -198,10 +205,10 @@
           <?php if (!empty($sections)): ?>
             <div class="mb-3">
               <label class="form-label">Section</label>
-              <select name="section_id" class="form-select">
+              <select name="section_id" id="addSectionId" class="form-select tom-select">
                 <option value="">-- No section --</option>
                 <?php foreach ($sections as $section): ?>
-                  <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['name']); ?></option>
+                  <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['title']); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -240,10 +247,10 @@
           <?php if (!empty($sections)): ?>
             <div class="mb-3">
               <label class="form-label">Section</label>
-              <select name="section_id" id="editSectionId" class="form-select">
+              <select name="section_id" id="editSectionId" class="form-select tom-select-edit">
                 <option value="">-- No section --</option>
                 <?php foreach ($sections as $section): ?>
-                  <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['name']); ?></option>
+                  <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['title']); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -286,7 +293,7 @@ document.getElementById('objectSearch').addEventListener('input', function() {
   }
 
   searchTimeout = setTimeout(function() {
-    fetch('<?php echo url_for(['module' => 'exhibition', 'action' => 'searchObjects']); ?>?q=' + encodeURIComponent(query))
+    fetch('<?php echo url_for(['module' => 'exhibition', 'action' => 'searchObjects']); ?>?q=' + encodeURIComponent(query) + '&exhibition_id=<?php echo $exhibition['id']; ?>')
       .then(response => response.json())
       .then(data => {
         const results = document.getElementById('searchResults');
@@ -348,4 +355,84 @@ function removeObject(id, title) {
     form.submit();
   }
 }
+</script>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<!-- Sortable for drag and drop -->
+<script src="/plugins/ahgThemeB5Plugin/js/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize TOM Select for add modal
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+
+  // Initialize TOM Select for edit modal (needs special handling for setValue)
+  var editSectionSelect = document.getElementById('editSectionId');
+  var editSectionTom = null;
+  if (editSectionSelect) {
+    editSectionTom = new TomSelect(editSectionSelect, {
+      allowEmptyOption: true,
+      create: false
+    });
+  }
+
+  // Update edit modal TOM Select when modal opens
+  document.getElementById('editObjectModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    if (editSectionTom) {
+      editSectionTom.setValue(button.dataset.section || '');
+    }
+  });
+
+  // Initialize Sortable for drag and drop reordering
+  var objectList = document.getElementById('objectList');
+  if (objectList) {
+    new Sortable(objectList, {
+      handle: '.drag-handle',
+      animation: 150,
+      ghostClass: 'table-warning',
+      onEnd: function(evt) {
+        // Collect new order
+        var rows = objectList.querySelectorAll('tr[data-id]');
+        var order = [];
+        rows.forEach(function(row, index) {
+          order.push({
+            id: row.dataset.id,
+            sequence_order: index + 1
+          });
+          // Update badge display
+          var badge = row.querySelector('.badge.bg-secondary');
+          if (badge) {
+            badge.textContent = index + 1;
+          }
+        });
+
+        // Save new order via AJAX
+        fetch('<?php echo url_for(['module' => 'exhibition', 'action' => 'reorderObjects', 'id' => $exhibition['id']]); ?>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ order: order })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) {
+            alert('Error saving order: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error saving order');
+        });
+      }
+    });
+  }
+});
 </script>

@@ -1,4 +1,9 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped arrays to raw arrays for PHP array functions
+$sectionsRaw = $sections ?? [];
+$sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsRaw->getRawValue() : (is_array($sectionsRaw) ? $sectionsRaw : []);
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -13,18 +18,18 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Exhibition Sections</h1>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-        <i class="fa fa-plus"></i> Add Section
+        <i class="fas fa-plus"></i> Add Section
       </button>
     </div>
 
     <?php if (empty($sections)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-th-large fa-3x text-muted mb-3"></i>
+          <i class="fas fa-th-large fa-3x text-muted mb-3"></i>
           <h5>No sections created yet</h5>
           <p class="text-muted">Organize your exhibition by creating sections or galleries.</p>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-            <i class="fa fa-plus"></i> Create First Section
+            <i class="fas fa-plus"></i> Create First Section
           </button>
         </div>
       </div>
@@ -35,7 +40,7 @@
             <div class="card h-100">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                  <i class="fa fa-grip-vertical me-2 text-muted drag-handle" style="cursor: move;"></i>
+                  <i class="fas fa-grip-vertical me-2 text-muted drag-handle" style="cursor: move;"></i>
                   <?php echo htmlspecialchars($section['name']); ?>
                 </h6>
                 <span class="badge bg-primary"><?php echo $section['display_order'] ?? 0; ?></span>
@@ -47,20 +52,20 @@
 
                 <?php if (!empty($section['gallery_name'])): ?>
                   <p class="small mb-1">
-                    <i class="fa fa-map-marker me-1"></i>
+                    <i class="fas fa-map-marker me-1"></i>
                     <strong>Gallery:</strong> <?php echo htmlspecialchars($section['gallery_name']); ?>
                   </p>
                 <?php endif; ?>
 
                 <?php if (!empty($section['theme'])): ?>
                   <p class="small mb-1">
-                    <i class="fa fa-tag me-1"></i>
+                    <i class="fas fa-tag me-1"></i>
                     <strong>Theme:</strong> <?php echo htmlspecialchars($section['theme']); ?>
                   </p>
                 <?php endif; ?>
 
                 <p class="small mb-0">
-                  <i class="fa fa-archive me-1"></i>
+                  <i class="fas fa-archive me-1"></i>
                   <strong>Objects:</strong> <?php echo $section['object_count'] ?? 0; ?>
                 </p>
               </div>
@@ -68,7 +73,7 @@
                 <div class="btn-group btn-group-sm w-100">
                   <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibition['id'], 'section' => $section['id']]); ?>"
                      class="btn btn-outline-primary">
-                    <i class="fa fa-archive"></i> Objects
+                    <i class="fas fa-archive"></i> Objects
                   </a>
                   <button type="button" class="btn btn-outline-secondary"
                           data-bs-toggle="modal" data-bs-target="#editSectionModal"
@@ -78,11 +83,11 @@
                           data-gallery="<?php echo htmlspecialchars($section['gallery_name'] ?? ''); ?>"
                           data-theme="<?php echo htmlspecialchars($section['theme'] ?? ''); ?>"
                           data-order="<?php echo $section['display_order'] ?? 0; ?>">
-                    <i class="fa fa-edit"></i> Edit
+                    <i class="fas fa-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger"
                           onclick="deleteSection(<?php echo $section['id']; ?>, '<?php echo htmlspecialchars(addslashes($section['name'])); ?>')">
-                    <i class="fa fa-trash"></i>
+                    <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
@@ -138,11 +143,11 @@
         <h5 class="modal-title">Add Section</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="post" action="<?php echo url_for(['module' => 'exhibition', 'action' => 'addSection', 'id' => $exhibition['id']]); ?>">
+      <form method="post" action="<?php echo url_for(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibition['id']]); ?>">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Section Name <span class="text-danger">*</span></label>
-            <input type="text" name="name" class="form-control" required placeholder="e.g., Introduction, Main Gallery, African Art">
+            <label class="form-label">Section Title <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required placeholder="e.g., Introduction, Main Gallery, African Art">
           </div>
 
           <div class="mb-3">
@@ -153,7 +158,7 @@
           <?php if (!empty($galleries)): ?>
             <div class="mb-3">
               <label class="form-label">Gallery</label>
-              <select name="gallery_id" class="form-select">
+              <select name="gallery_id" id="addGalleryId" class="form-select tom-select">
                 <option value="">-- Select gallery --</option>
                 <?php foreach ($galleries as $gallery): ?>
                   <option value="<?php echo $gallery['id']; ?>"><?php echo htmlspecialchars($gallery['name']); ?></option>
@@ -260,4 +265,18 @@ function deleteSection(id, name) {
     form.submit();
   }
 }
+</script>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+});
 </script>

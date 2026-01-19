@@ -36,7 +36,7 @@
           </div>
           <div class="col-auto ms-auto">
             <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'add']); ?>" class="btn btn-success btn-sm">
-              <i class="fa fa-plus"></i> New Exhibition
+              <i class="fas fa-plus"></i> New Exhibition
             </a>
           </div>
         </form>
@@ -45,7 +45,7 @@
       <div class="card-body p-0">
         <?php if (empty($exhibitions)): ?>
           <div class="p-4 text-center text-muted">
-            <i class="fa fa-image fa-3x mb-3"></i>
+            <i class="fas fa-image fa-3x mb-3"></i>
             <p>No exhibitions found</p>
           </div>
         <?php else: ?>
@@ -84,10 +84,10 @@
                   <td class="text-end">
                     <div class="btn-group btn-group-sm">
                       <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'show', 'id' => $exhibition['id']]); ?>" class="btn btn-outline-primary" title="View">
-                        <i class="fa fa-eye"></i>
+                        <i class="fas fa-eye"></i>
                       </a>
                       <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'edit', 'id' => $exhibition['id']]); ?>" class="btn btn-outline-secondary" title="Edit">
-                        <i class="fa fa-edit"></i>
+                        <i class="fas fa-edit"></i>
                       </a>
                     </div>
                   </td>
@@ -178,10 +178,10 @@
       </div>
       <div class="list-group list-group-flush">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-dashboard me-2"></i> Exhibition Dashboard
+          <i class="fas fa-dashboard me-2"></i> Exhibition Dashboard
         </a>
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'add']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-plus me-2"></i> Create Exhibition
+          <i class="fas fa-plus me-2"></i> Create Exhibition
         </a>
       </div>
     </div>

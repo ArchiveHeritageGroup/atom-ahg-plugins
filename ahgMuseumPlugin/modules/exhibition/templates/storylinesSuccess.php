@@ -1,4 +1,9 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped arrays to raw arrays for PHP array functions
+$storylinesRaw = $storylines ?? [];
+$storylines = ($storylinesRaw instanceof sfOutputEscaperArrayDecorator) ? $storylinesRaw->getRawValue() : (is_array($storylinesRaw) ? $storylinesRaw : []);
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -13,18 +18,18 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Storylines &amp; Narratives</h1>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStorylineModal">
-        <i class="fa fa-plus"></i> Create Storyline
+        <i class="fas fa-plus"></i> Create Storyline
       </button>
     </div>
 
     <?php if (empty($storylines)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-book fa-3x text-muted mb-3"></i>
+          <i class="fas fa-book fa-3x text-muted mb-3"></i>
           <h5>No storylines created yet</h5>
           <p class="text-muted">Create narrative journeys through your exhibition with storylines.</p>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStorylineModal">
-            <i class="fa fa-plus"></i> Create First Storyline
+            <i class="fas fa-plus"></i> Create First Storyline
           </button>
         </div>
       </div>
@@ -41,7 +46,7 @@
             <div class="btn-group btn-group-sm">
               <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'storyline', 'id' => $exhibition['id'], 'storyline_id' => $storyline['id']]); ?>"
                  class="btn btn-outline-primary">
-                <i class="fa fa-eye"></i> View
+                <i class="fas fa-eye"></i> View
               </a>
               <button type="button" class="btn btn-outline-secondary"
                       data-bs-toggle="modal" data-bs-target="#editStorylineModal"
@@ -50,11 +55,11 @@
                       data-type="<?php echo $storyline['type'] ?? 'general'; ?>"
                       data-description="<?php echo htmlspecialchars($storyline['description'] ?? ''); ?>"
                       data-audience="<?php echo $storyline['target_audience'] ?? ''; ?>">
-                <i class="fa fa-edit"></i>
+                <i class="fas fa-edit"></i>
               </button>
               <button type="button" class="btn btn-outline-danger"
                       onclick="deleteStoryline(<?php echo $storyline['id']; ?>, '<?php echo htmlspecialchars(addslashes($storyline['title'])); ?>')">
-                <i class="fa fa-trash"></i>
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
@@ -66,14 +71,14 @@
             <div class="row">
               <div class="col-md-4">
                 <p class="small mb-1">
-                  <i class="fa fa-map-marker me-1"></i>
+                  <i class="fas fa-map-marker me-1"></i>
                   <strong><?php echo $storyline['stop_count'] ?? 0; ?></strong> stops
                 </p>
               </div>
               <?php if (!empty($storyline['target_audience'])): ?>
                 <div class="col-md-4">
                   <p class="small mb-1">
-                    <i class="fa fa-users me-1"></i>
+                    <i class="fas fa-users me-1"></i>
                     Audience: <strong class="text-capitalize"><?php echo str_replace('_', ' ', $storyline['target_audience']); ?></strong>
                   </p>
                 </div>
@@ -81,7 +86,7 @@
               <?php if (!empty($storyline['duration_minutes'])): ?>
                 <div class="col-md-4">
                   <p class="small mb-1">
-                    <i class="fa fa-clock-o me-1"></i>
+                    <i class="fas fa-clock me-1"></i>
                     Duration: <strong><?php echo $storyline['duration_minutes']; ?> min</strong>
                   </p>
                 </div>
@@ -179,7 +184,7 @@
 
           <div class="mb-3">
             <label class="form-label">Type</label>
-            <select name="type" class="form-select">
+            <select name="type" id="addStorylineType" class="form-select tom-select">
               <option value="general">General</option>
               <option value="guided_tour">Guided Tour</option>
               <option value="self_guided">Self-Guided</option>
@@ -197,7 +202,7 @@
 
           <div class="mb-3">
             <label class="form-label">Target Audience</label>
-            <select name="target_audience" class="form-select">
+            <select name="target_audience" id="addStorylineAudience" class="form-select tom-select">
               <option value="">-- All visitors --</option>
               <option value="general">General Public</option>
               <option value="families">Families with Children</option>
@@ -240,7 +245,7 @@
 
           <div class="mb-3">
             <label class="form-label">Type</label>
-            <select name="type" id="editType" class="form-select">
+            <select name="type" id="editType" class="form-select tom-select-edit-type">
               <option value="general">General</option>
               <option value="guided_tour">Guided Tour</option>
               <option value="self_guided">Self-Guided</option>
@@ -258,7 +263,7 @@
 
           <div class="mb-3">
             <label class="form-label">Target Audience</label>
-            <select name="target_audience" id="editAudience" class="form-select">
+            <select name="target_audience" id="editAudience" class="form-select tom-select-edit-audience">
               <option value="">-- All visitors --</option>
               <option value="general">General Public</option>
               <option value="families">Families with Children</option>
@@ -306,4 +311,50 @@ function deleteStoryline(id, title) {
     form.submit();
   }
 }
+</script>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize TOM Select for add modal
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+
+  // Initialize TOM Select for edit modal
+  var editTypeTom = null;
+  var editAudienceTom = null;
+
+  var editTypeSelect = document.getElementById('editType');
+  if (editTypeSelect) {
+    editTypeTom = new TomSelect(editTypeSelect, {
+      allowEmptyOption: true,
+      create: false
+    });
+  }
+
+  var editAudienceSelect = document.getElementById('editAudience');
+  if (editAudienceSelect) {
+    editAudienceTom = new TomSelect(editAudienceSelect, {
+      allowEmptyOption: true,
+      create: false
+    });
+  }
+
+  // Update edit modal TOM Select when modal opens
+  document.getElementById('editStorylineModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    if (editTypeTom) {
+      editTypeTom.setValue(button.dataset.type || 'general');
+    }
+    if (editAudienceTom) {
+      editAudienceTom.setValue(button.dataset.audience || '');
+    }
+  });
+});
 </script>

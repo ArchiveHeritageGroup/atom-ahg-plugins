@@ -1,4 +1,9 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped arrays to raw arrays for PHP array functions
+$checklistsRaw = $checklists ?? [];
+$checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $checklistsRaw->getRawValue() : (is_array($checklistsRaw) ? $checklistsRaw : []);
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -14,7 +19,7 @@
       <h1>Exhibition Checklists</h1>
       <div class="btn-group">
         <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
-          <i class="fa fa-plus"></i> Create Checklist
+          <i class="fas fa-plus"></i> Create Checklist
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <?php foreach ($templates as $template): ?>
@@ -38,7 +43,7 @@
     <?php if (empty($checklists)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-check-square-o fa-3x text-muted mb-3"></i>
+          <i class="fas fa-square-check fa-3x text-muted mb-3"></i>
           <h5>No checklists created yet</h5>
           <p class="text-muted">Create checklists to track tasks for planning, installation, and closing.</p>
         </div>
@@ -47,7 +52,7 @@
       <?php foreach ($checklists as $checklist): ?>
         <?php
           $total = count($checklist['items'] ?? []);
-          $completed = count(array_filter($checklist['items'] ?? [], fn($i) => !empty($i['completed_at'])));
+          $completed = count(array_filter($checklist['items'] ?? [], fn($i) => !empty($i['is_completed'])));
           $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
         ?>
         <div class="card mb-4">
@@ -76,22 +81,22 @@
             <?php if (!empty($checklist['items'])): ?>
               <ul class="list-group list-group-flush">
                 <?php foreach ($checklist['items'] as $item): ?>
-                  <li class="list-group-item <?php echo !empty($item['completed_at']) ? 'bg-light' : ''; ?>">
+                  <li class="list-group-item <?php echo !empty($item['is_completed']) ? 'bg-light' : ''; ?>">
                     <div class="d-flex align-items-start">
                       <div class="form-check me-3">
                         <input type="checkbox" class="form-check-input" style="transform: scale(1.3);"
-                               <?php echo !empty($item['completed_at']) ? 'checked disabled' : ''; ?>
+                               <?php echo !empty($item['is_completed']) ? 'checked disabled' : ''; ?>
                                onchange="completeItem(<?php echo $item['id']; ?>, this.checked)">
                       </div>
                       <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                           <div>
-                            <span class="<?php echo !empty($item['completed_at']) ? 'text-decoration-line-through text-muted' : ''; ?>">
-                              <?php echo htmlspecialchars($item['task_name']); ?>
+                            <span class="<?php echo !empty($item['is_completed']) ? 'text-decoration-line-through text-muted' : ''; ?>">
+                              <?php echo htmlspecialchars($item['name']); ?>
                             </span>
                             <?php if (!empty($item['assigned_to'])): ?>
                               <br><small class="text-muted">
-                                <i class="fa fa-user me-1"></i> <?php echo htmlspecialchars($item['assigned_to']); ?>
+                                <i class="fas fa-user me-1"></i> <?php echo htmlspecialchars($item['assigned_to']); ?>
                               </small>
                             <?php endif; ?>
                           </div>
@@ -100,16 +105,16 @@
                               <?php
                                 $dueDate = new DateTime($item['due_date']);
                                 $today = new DateTime();
-                                $isOverdue = $dueDate < $today && empty($item['completed_at']);
+                                $isOverdue = $dueDate < $today && empty($item['is_completed']);
                               ?>
                               <span class="badge <?php echo $isOverdue ? 'bg-danger' : 'bg-light text-dark'; ?>">
                                 Due: <?php echo $item['due_date']; ?>
                               </span>
                             <?php endif; ?>
-                            <?php if (!empty($item['completed_at'])): ?>
+                            <?php if (!empty($item['is_completed'])): ?>
                               <br><small class="text-success">
-                                <i class="fa fa-check me-1"></i>
-                                <?php echo date('M j, Y', strtotime($item['completed_at'])); ?>
+                                <i class="fas fa-check me-1"></i>
+                                <?php echo date('M j, Y', strtotime($item['is_completed'])); ?>
                               </small>
                             <?php endif; ?>
                           </div>
@@ -134,7 +139,7 @@
                     data-bs-toggle="modal" data-bs-target="#addItemModal"
                     data-checklist-id="<?php echo $checklist['id']; ?>"
                     data-checklist-name="<?php echo htmlspecialchars($checklist['name']); ?>">
-              <i class="fa fa-plus"></i> Add Item
+              <i class="fas fa-plus"></i> Add Item
             </button>
           </div>
         </div>
@@ -167,7 +172,7 @@
           $completedItems = 0;
           foreach ($checklists as $cl) {
             $totalItems += count($cl['items'] ?? []);
-            $completedItems += count(array_filter($cl['items'] ?? [], fn($i) => !empty($i['completed_at'])));
+            $completedItems += count(array_filter($cl['items'] ?? [], fn($i) => !empty($i['is_completed'])));
           }
           $overallProgress = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
         ?>
@@ -186,7 +191,7 @@
       $overdueItems = [];
       foreach ($checklists as $cl) {
         foreach ($cl['items'] ?? [] as $item) {
-          if (!empty($item['due_date']) && empty($item['completed_at'])) {
+          if (!empty($item['due_date']) && empty($item['is_completed'])) {
             $dueDate = new DateTime($item['due_date']);
             $today = new DateTime();
             if ($dueDate < $today) {
@@ -201,12 +206,12 @@
     <?php if (!empty($overdueItems)): ?>
       <div class="card mb-3 border-danger">
         <div class="card-header bg-danger text-white">
-          <h5 class="mb-0"><i class="fa fa-warning me-2"></i> Overdue Items</h5>
+          <h5 class="mb-0"><i class="fas fa-triangle-exclamation me-2"></i> Overdue Items</h5>
         </div>
         <ul class="list-group list-group-flush">
           <?php foreach (array_slice($overdueItems, 0, 5) as $item): ?>
             <li class="list-group-item">
-              <strong class="small"><?php echo htmlspecialchars($item['task_name']); ?></strong>
+              <strong class="small"><?php echo htmlspecialchars($item['name']); ?></strong>
               <br>
               <small class="text-danger">Due: <?php echo $item['due_date']; ?></small>
               <br>

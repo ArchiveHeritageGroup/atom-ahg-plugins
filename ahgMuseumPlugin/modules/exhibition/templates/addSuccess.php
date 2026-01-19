@@ -29,7 +29,7 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Exhibition Type</label>
-              <select name="exhibition_type" class="form-select">
+              <select name="exhibition_type" id="exhibitionType" class="form-select tom-select">
                 <?php foreach ($types as $key => $label): ?>
                   <option value="<?php echo $key; ?>" <?php echo ($data['exhibition_type'] ?? 'temporary') == $key ? 'selected' : ''; ?>>
                     <?php echo $label; ?>
@@ -86,7 +86,7 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
           <?php if (!empty($venues)): ?>
             <div class="mb-3">
               <label class="form-label">Venue</label>
-              <select name="venue_id" class="form-select">
+              <select name="venue_id" id="venueId" class="form-select tom-select">
                 <option value="">-- Select venue --</option>
                 <?php foreach ($venues as $venue): ?>
                   <option value="<?php echo $venue->id; ?>" <?php echo ($data['venue_id'] ?? '') == $venue->id ? 'selected' : ''; ?>>
@@ -132,7 +132,7 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label">Currency</label>
-              <select name="budget_currency" class="form-select">
+              <select name="budget_currency" id="budgetCurrency" class="form-select tom-select">
                 <option value="ZAR" <?php echo ($data['budget_currency'] ?? 'ZAR') == 'ZAR' ? 'selected' : ''; ?>>ZAR</option>
                 <option value="USD" <?php echo ($data['budget_currency'] ?? '') == 'USD' ? 'selected' : ''; ?>>USD</option>
                 <option value="EUR" <?php echo ($data['budget_currency'] ?? '') == 'EUR' ? 'selected' : ''; ?>>EUR</option>
@@ -219,3 +219,17 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
     </div>
   </div>
 </div>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+});
+</script>

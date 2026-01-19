@@ -1,4 +1,13 @@
 <?php use_helper('Date'); ?>
+<?php
+// Convert escaped array to raw array for PHP array functions
+$stopsRaw = $storyline['stops'] ?? [];
+if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
+    $stops = $stopsRaw->getRawValue();
+} else {
+    $stops = is_array($stopsRaw) ? $stopsRaw : [];
+}
+?>
 
 <div class="row">
   <div class="col-md-8">
@@ -22,7 +31,7 @@
         <?php endif; ?>
       </div>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStopModal">
-        <i class="fa fa-plus"></i> Add Stop
+        <i class="fas fa-plus"></i> Add Stop
       </button>
     </div>
 
@@ -37,11 +46,11 @@
     <?php if (empty($stops)): ?>
       <div class="card">
         <div class="card-body text-center py-5">
-          <i class="fa fa-map-signs fa-3x text-muted mb-3"></i>
+          <i class="fas fa-map-signs fa-3x text-muted mb-3"></i>
           <h5>No stops added yet</h5>
           <p class="text-muted">Add stops to create a narrative journey through the exhibition.</p>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStopModal">
-            <i class="fa fa-plus"></i> Add First Stop
+            <i class="fas fa-plus"></i> Add First Stop
           </button>
         </div>
       </div>
@@ -67,8 +76,8 @@
                       <h5 class="mb-1"><?php echo htmlspecialchars($stop['title']); ?></h5>
                       <?php if (!empty($stop['object_title'])): ?>
                         <p class="small text-muted mb-2">
-                          <i class="fa fa-archive me-1"></i>
-                          <a href="<?php echo url_for(['module' => 'museum', 'action' => 'show', 'id' => $stop['exhibition_object_id']]); ?>">
+                          <i class="fas fa-archive me-1"></i>
+                          <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $stop['object_slug']]); ?>">
                             <?php echo htmlspecialchars($stop['object_title']); ?>
                           </a>
                         </p>
@@ -83,11 +92,11 @@
                               data-duration="<?php echo $stop['duration_seconds'] ?? ''; ?>"
                               data-order="<?php echo $stop['stop_order']; ?>"
                               data-object="<?php echo $stop['exhibition_object_id'] ?? ''; ?>">
-                        <i class="fa fa-edit"></i>
+                        <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
                               onclick="deleteStop(<?php echo $stop['id']; ?>, '<?php echo htmlspecialchars(addslashes($stop['title'])); ?>')">
-                        <i class="fa fa-trash"></i>
+                        <i class="fas fa-trash"></i>
                       </button>
                     </div>
                   </div>
@@ -98,13 +107,13 @@
 
                   <div class="d-flex gap-3 small text-muted">
                     <?php if (!empty($stop['duration_seconds'])): ?>
-                      <span><i class="fa fa-clock-o me-1"></i> <?php echo floor($stop['duration_seconds'] / 60); ?>:<?php echo str_pad($stop['duration_seconds'] % 60, 2, '0', STR_PAD_LEFT); ?></span>
+                      <span><i class="fas fa-clock me-1"></i> <?php echo floor($stop['duration_seconds'] / 60); ?>:<?php echo str_pad($stop['duration_seconds'] % 60, 2, '0', STR_PAD_LEFT); ?></span>
                     <?php endif; ?>
                     <?php if (!empty($stop['audio_url'])): ?>
-                      <span><i class="fa fa-headphones me-1"></i> Audio</span>
+                      <span><i class="fas fa-headphones me-1"></i> Audio</span>
                     <?php endif; ?>
                     <?php if (!empty($stop['video_url'])): ?>
-                      <span><i class="fa fa-video-camera me-1"></i> Video</span>
+                      <span><i class="fas fa-video me-1"></i> Video</span>
                     <?php endif; ?>
                   </div>
                 </div>
@@ -155,11 +164,11 @@
       <div class="list-group list-group-flush">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibition['id']]); ?>"
            class="list-group-item list-group-item-action">
-          <i class="fa fa-arrow-left me-2"></i> Back to Storylines
+          <i class="fas fa-arrow-left me-2"></i> Back to Storylines
         </a>
         <a href="#" class="list-group-item list-group-item-action"
            onclick="window.print(); return false;">
-          <i class="fa fa-print me-2"></i> Print Script
+          <i class="fas fa-print me-2"></i> Print Script
         </a>
       </div>
     </div>
@@ -206,7 +215,7 @@
           <?php if (!empty($exhibitionObjects)): ?>
             <div class="mb-3">
               <label class="form-label">Link to Object</label>
-              <select name="exhibition_object_id" class="form-select">
+              <select name="exhibition_object_id" id="addStopObject" class="form-select tom-select">
                 <option value="">-- No object --</option>
                 <?php foreach ($exhibitionObjects as $obj): ?>
                   <option value="<?php echo $obj['id']; ?>">
@@ -274,7 +283,7 @@
           <?php if (!empty($exhibitionObjects)): ?>
             <div class="mb-3">
               <label class="form-label">Link to Object</label>
-              <select name="exhibition_object_id" id="editStopObject" class="form-select">
+              <select name="exhibition_object_id" id="editStopObject" class="form-select tom-select-edit">
                 <option value="">-- No object --</option>
                 <?php foreach ($exhibitionObjects as $obj): ?>
                   <option value="<?php echo $obj['id']; ?>">
@@ -341,6 +350,39 @@ function deleteStop(id, title) {
     form.submit();
   }
 }
+</script>
+
+<!-- TOM Select -->
+<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize TOM Select for add modal
+  document.querySelectorAll('.tom-select').forEach(function(el) {
+    new TomSelect(el, {
+      allowEmptyOption: true,
+      create: false
+    });
+  });
+
+  // Initialize TOM Select for edit modal
+  var editObjectSelect = document.getElementById('editStopObject');
+  var editObjectTom = null;
+  if (editObjectSelect) {
+    editObjectTom = new TomSelect(editObjectSelect, {
+      allowEmptyOption: true,
+      create: false
+    });
+  }
+
+  // Update edit modal TOM Select when modal opens
+  document.getElementById('editStopModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    if (editObjectTom) {
+      editObjectTom.setValue(button.dataset.object || '');
+    }
+  });
+});
 </script>
 
 <style>

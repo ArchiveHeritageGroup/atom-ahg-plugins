@@ -435,6 +435,52 @@ class ExhibitionService
         return true;
     }
 
+    /**
+     * Update a section.
+     */
+    public function updateSection(int $sectionId, array $data): bool
+    {
+        $updateData = [
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if (isset($data['title'])) {
+            $updateData['title'] = $data['title'];
+        }
+        if (isset($data['description'])) {
+            $updateData['description'] = $data['description'];
+        }
+        if (isset($data['gallery_name'])) {
+            $updateData['gallery_name'] = $data['gallery_name'];
+        }
+        if (isset($data['theme'])) {
+            $updateData['theme'] = $data['theme'];
+        }
+        if (isset($data['display_order'])) {
+            $updateData['sequence_order'] = (int) $data['display_order'];
+        }
+
+        return $this->db->table('exhibition_section')
+            ->where('id', $sectionId)
+            ->update($updateData) > 0;
+    }
+
+    /**
+     * Delete a section.
+     */
+    public function deleteSection(int $sectionId): bool
+    {
+        // First unassign objects from this section
+        $this->db->table('exhibition_object')
+            ->where('section_id', $sectionId)
+            ->update(['section_id' => null]);
+
+        // Then delete the section
+        return $this->db->table('exhibition_section')
+            ->where('id', $sectionId)
+            ->delete() > 0;
+    }
+
     // =========================================================================
     // Objects
     // =========================================================================
@@ -507,9 +553,8 @@ class ExhibitionService
                     ->where('ioi.culture', '=', 'en');
             })
             ->leftJoin('exhibition_section as es', 'es.id', '=', 'eo.section_id')
-            ->leftJoin('digital_object as do', function ($join) {
-                $join->on('do.information_object_id', '=', 'io.id');
-            })
+            ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
+            ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
             ->where('eo.exhibition_id', $exhibitionId);
 
         if ($sectionId !== null) {
@@ -519,10 +564,12 @@ class ExhibitionService
         return $query
             ->select(
                 'eo.*',
+                'slug.slug as object_slug',
                 'io.identifier',
                 'ioi.title as object_title',
                 'es.title as section_title',
-                'do.path as thumbnail_path'
+                'do.path as thumbnail_path',
+                'do.name as thumbnail_name'
             )
             ->orderBy('eo.section_id')
             ->orderBy('eo.sequence_order')
@@ -530,8 +577,9 @@ class ExhibitionService
             ->map(function ($row) {
                 $data = (array) $row;
                 $data['status_label'] = self::OBJECT_STATUSES[$data['status']] ?? $data['status'];
-                if ($data['thumbnail_path']) {
-                    $data['thumbnail_url'] = '/uploads/'.$data['thumbnail_path'];
+                if (!empty($data['thumbnail_path']) && !empty($data['thumbnail_name'])) {
+                    // Path already contains /uploads/, just append filename
+                    $data['thumbnail_url'] = rtrim($data['thumbnail_path'], '/').'/'.ltrim($data['thumbnail_name'], '/');
                 }
 
                 return $data;
@@ -596,6 +644,22 @@ class ExhibitionService
         return $this->db->table('exhibition_object')
             ->where('id', $exhibitionObjectId)
             ->delete() > 0;
+    }
+
+    /**
+     * Reorder exhibition objects.
+     *
+     * @param array $order Array of ['id' => objectId, 'sequence_order' => order]
+     */
+    public function reorderObjects(array $order): void
+    {
+        foreach ($order as $item) {
+            if (!empty($item['id']) && isset($item['sequence_order'])) {
+                $this->db->table('exhibition_object')
+                    ->where('id', (int) $item['id'])
+                    ->update(['sequence_order' => (int) $item['sequence_order']]);
+            }
+        }
     }
 
     /**
@@ -705,9 +769,58 @@ class ExhibitionService
     }
 
     /**
+     * Update storyline.
+     */
+    public function updateStoryline(int $storylineId, array $data): void
+    {
+        $update = [
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if (isset($data['title'])) {
+            $update['title'] = $data['title'];
+        }
+        if (isset($data['description'])) {
+            $update['description'] = $data['description'];
+        }
+        if (isset($data['narrative_type'])) {
+            $update['narrative_type'] = $data['narrative_type'];
+        }
+        if (isset($data['target_audience'])) {
+            $update['target_audience'] = $data['target_audience'];
+        }
+        if (isset($data['is_primary'])) {
+            $update['is_primary'] = $data['is_primary'];
+        }
+        if (isset($data['estimated_duration_minutes'])) {
+            $update['estimated_duration_minutes'] = $data['estimated_duration_minutes'];
+        }
+
+        $this->db->table('exhibition_storyline')
+            ->where('id', $storylineId)
+            ->update($update);
+    }
+
+    /**
+     * Delete storyline and its stops.
+     */
+    public function deleteStoryline(int $storylineId): void
+    {
+        // Delete stops first
+        $this->db->table('exhibition_storyline_stop')
+            ->where('storyline_id', $storylineId)
+            ->delete();
+
+        // Delete storyline
+        $this->db->table('exhibition_storyline')
+            ->where('id', $storylineId)
+            ->delete();
+    }
+
+    /**
      * Add stop to storyline.
      */
-    public function addStorylineStop(int $storylineId, int $exhibitionObjectId, array $data): int
+    public function addStorylineStop(int $storylineId, ?int $exhibitionObjectId, array $data): int
     {
         $sequence = $this->db->table('exhibition_storyline_stop')
             ->where('storyline_id', $storylineId)
@@ -733,6 +846,46 @@ class ExhibitionService
     }
 
     /**
+     * Update storyline stop.
+     */
+    public function updateStorylineStop(int $stopId, array $data): void
+    {
+        $update = [
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if (isset($data['title'])) {
+            $update['title'] = $data['title'];
+        }
+        if (isset($data['narrative_text'])) {
+            $update['narrative_text'] = $data['narrative_text'];
+        }
+        if (isset($data['sequence_order'])) {
+            $update['sequence_order'] = $data['sequence_order'];
+        }
+        if (isset($data['audio_duration_seconds'])) {
+            $update['audio_duration_seconds'] = $data['audio_duration_seconds'];
+        }
+        if (array_key_exists('exhibition_object_id', $data)) {
+            $update['exhibition_object_id'] = $data['exhibition_object_id'];
+        }
+
+        $this->db->table('exhibition_storyline_stop')
+            ->where('id', $stopId)
+            ->update($update);
+    }
+
+    /**
+     * Delete storyline stop.
+     */
+    public function deleteStorylineStop(int $stopId): void
+    {
+        $this->db->table('exhibition_storyline_stop')
+            ->where('id', $stopId)
+            ->delete();
+    }
+
+    /**
      * Get storyline with all stops.
      */
     public function getStorylineWithStops(int $storylineId): ?array
@@ -755,14 +908,18 @@ class ExhibitionService
                 $join->on('ioi.id', '=', 'io.id')
                     ->where('ioi.culture', '=', 'en');
             })
-            ->leftJoin('digital_object as do', 'do.information_object_id', '=', 'io.id')
+            ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
+            ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
             ->where('ss.storyline_id', $storylineId)
             ->orderBy('ss.sequence_order')
             ->select(
                 'ss.*',
+                'eo.information_object_id',
+                'slug.slug as object_slug',
                 'io.identifier',
                 'ioi.title as object_title',
-                'do.path as thumbnail_path'
+                'do.path as thumbnail_path',
+                'do.name as thumbnail_name'
             )
             ->get()
             ->map(function ($row) {
@@ -770,8 +927,9 @@ class ExhibitionService
                 if ($item['key_points']) {
                     $item['key_points'] = json_decode($item['key_points'], true);
                 }
-                if ($item['thumbnail_path']) {
-                    $item['thumbnail_url'] = '/uploads/'.$item['thumbnail_path'];
+                if (!empty($item['thumbnail_path']) && !empty($item['thumbnail_name'])) {
+                    // Path already contains /uploads/, just append filename
+                    $item['thumbnail_url'] = rtrim($item['thumbnail_path'], '/').'/'.ltrim($item['thumbnail_name'], '/');
                 }
 
                 return $item;
@@ -816,6 +974,40 @@ class ExhibitionService
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    /**
+     * Update event.
+     */
+    public function updateEvent(int $eventId, array $data): void
+    {
+        $update = [
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $fields = ['title', 'event_type', 'description', 'event_date', 'start_time',
+                   'end_time', 'location', 'max_attendees', 'requires_registration',
+                   'is_free', 'ticket_price', 'presenter_name'];
+
+        foreach ($fields as $field) {
+            if (array_key_exists($field, $data)) {
+                $update[$field] = $data[$field];
+            }
+        }
+
+        $this->db->table('exhibition_event')
+            ->where('id', $eventId)
+            ->update($update);
+    }
+
+    /**
+     * Delete event.
+     */
+    public function deleteEvent(int $eventId): void
+    {
+        $this->db->table('exhibition_event')
+            ->where('id', $eventId)
+            ->delete();
     }
 
     /**
@@ -931,6 +1123,26 @@ class ExhibitionService
                 'completed_by' => $userId,
                 'notes' => $notes,
             ]) > 0;
+    }
+
+    /**
+     * Add item to checklist.
+     */
+    public function addChecklistItem(int $checklistId, array $data): int
+    {
+        $sequence = $this->db->table('exhibition_checklist_item')
+            ->where('checklist_id', $checklistId)
+            ->max('sequence_order') ?? 0;
+
+        return $this->db->table('exhibition_checklist_item')->insertGetId([
+            'checklist_id' => $checklistId,
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'category' => $data['category'] ?? null,
+            'is_required' => $data['is_required'] ?? false,
+            'sequence_order' => $sequence + 1,
+            'is_completed' => false,
+        ]);
     }
 
     // =========================================================================
@@ -1071,10 +1283,16 @@ class ExhibitionService
             ->where('eo.exhibition_id', $exhibitionId)
             ->orderBy('es.sequence_order')
             ->orderBy('eo.sequence_order')
+            ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
             ->select(
+                'eo.id',
+                'eo.information_object_id',
+                'slug.slug as object_slug',
                 'io.identifier',
                 'ioi.title as object_title',
+                'es.id as section_id',
                 'es.title as section_title',
+                'es.gallery_name',
                 'eo.display_position',
                 'eo.status',
                 'eo.insurance_value',

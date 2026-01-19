@@ -220,16 +220,17 @@ class exhibitionActions extends sfActions
      */
     public function executeAddObject(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
         $service = $this->getExhibitionService();
-        $exhibitionId = (int) $request->getParameter('exhibition_id');
-        $objectId = (int) $request->getParameter('object_id');
+
+        // Get exhibition ID from route parameter 'id'
+        $exhibitionId = (int) $request->getParameter('id');
+        // Get object ID from form field 'museum_object_id'
+        $objectId = (int) $request->getParameter('museum_object_id');
 
         $data = [
             'section_id' => $request->getParameter('section_id') ?: null,
-            'display_position' => $request->getParameter('display_position'),
-            'label_text' => $request->getParameter('label_text'),
+            'display_position' => $request->getParameter('display_location'),
+            'label_text' => $request->getParameter('display_notes'),
             'insurance_value' => $request->getParameter('insurance_value') ?: null,
             'requires_loan' => $request->getParameter('requires_loan') ? true : false,
             'lender_institution' => $request->getParameter('lender_institution'),
@@ -237,74 +238,85 @@ class exhibitionActions extends sfActions
 
         try {
             $id = $service->addObject($exhibitionId, $objectId, $data);
-
-            return $this->renderText(json_encode([
-                'success' => true,
-                'id' => $id,
-                'message' => 'Object added to exhibition',
-            ]));
+            $this->getUser()->setFlash('notice', 'Object added to exhibition');
         } catch (\Exception $e) {
-            return $this->renderText(json_encode([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ]));
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibitionId]);
     }
 
     /**
-     * Update object in exhibition (AJAX).
+     * Update object in exhibition.
      */
     public function executeUpdateObject(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
         $service = $this->getExhibitionService();
-        $exhibitionObjectId = (int) $request->getParameter('id');
 
-        $data = [];
-        foreach (['section_id', 'display_position', 'sequence_order', 'label_text', 'insurance_value', 'installation_notes'] as $field) {
-            if ($request->hasParameter($field)) {
-                $data[$field] = $request->getParameter($field);
-            }
-        }
+        $exhibitionId = (int) $request->getParameter('id');
+        $exhibitionObjectId = (int) $request->getParameter('object_id');
 
-        // Handle status change separately
-        if ($request->hasParameter('status')) {
-            $userId = $this->getUser()->getAttribute('user_id', 1);
-            $service->updateObjectStatus(
-                $exhibitionObjectId,
-                $request->getParameter('status'),
-                $userId,
-                $request->getParameter('notes')
-            );
-        }
+        $data = [
+            'section_id' => $request->getParameter('section_id') ?: null,
+            'display_position' => $request->getParameter('display_location'),
+            'sequence_order' => $request->getParameter('display_order') ?: 0,
+            'installation_notes' => $request->getParameter('display_notes'),
+        ];
 
-        if (!empty($data)) {
+        try {
             $service->updateObject($exhibitionObjectId, $data);
+            $this->getUser()->setFlash('notice', 'Object updated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
 
-        return $this->renderText(json_encode([
-            'success' => true,
-            'message' => 'Object updated',
-        ]));
+        $this->redirect(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibitionId]);
     }
 
     /**
-     * Remove object from exhibition (AJAX).
+     * Remove object from exhibition.
      */
     public function executeRemoveObject(sfWebRequest $request)
     {
+        $service = $this->getExhibitionService();
+
+        $exhibitionId = (int) $request->getParameter('id');
+        $exhibitionObjectId = (int) $request->getParameter('object_id');
+
+        try {
+            $service->removeObject($exhibitionObjectId);
+            $this->getUser()->setFlash('notice', 'Object removed from exhibition');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Reorder objects via drag and drop (AJAX).
+     */
+    public function executeReorderObjects(sfWebRequest $request)
+    {
         $this->getResponse()->setContentType('application/json');
 
-        $service = $this->getExhibitionService();
-        $exhibitionObjectId = (int) $request->getParameter('id');
+        try {
+            $service = $this->getExhibitionService();
 
-        $service->removeObject($exhibitionObjectId);
+            // Get JSON body
+            $content = file_get_contents('php://input');
+            $data = json_decode($content, true);
 
-        return $this->renderText(json_encode([
-            'success' => true,
-            'message' => 'Object removed from exhibition',
-        ]));
+            if (empty($data['order']) || !is_array($data['order'])) {
+                return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid order data']));
+            }
+
+            $service->reorderObjects($data['order']);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
     }
 
     /**
@@ -346,6 +358,66 @@ class exhibitionActions extends sfActions
     }
 
     /**
+     * Update a section.
+     */
+    public function executeUpdateSection(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $sectionId = (int) $request->getParameter('section_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'title' => $request->getParameter('name') ?: $request->getParameter('title'),
+            'description' => $request->getParameter('description'),
+            'gallery_name' => $request->getParameter('gallery_name'),
+            'theme' => $request->getParameter('theme'),
+            'display_order' => $request->getParameter('display_order') ?: 0,
+        ];
+
+        try {
+            $service->updateSection($sectionId, $data);
+            $this->getUser()->setFlash('notice', 'Section updated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Delete a section.
+     */
+    public function executeDeleteSection(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $sectionId = (int) $request->getParameter('section_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        try {
+            $service->deleteSection($sectionId);
+            $this->getUser()->setFlash('notice', 'Section deleted');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibitionId]);
+    }
+
+    /**
      * Manage storylines.
      */
     public function executeStorylines(sfWebRequest $request)
@@ -382,6 +454,99 @@ class exhibitionActions extends sfActions
     }
 
     /**
+     * Add storyline to exhibition.
+     */
+    public function executeAddStoryline(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'title' => $request->getParameter('title'),
+            'description' => $request->getParameter('description'),
+            'narrative_type' => $request->getParameter('type') ?: 'general',
+            'target_audience' => $request->getParameter('target_audience') ?: 'all',
+            'estimated_duration_minutes' => $request->getParameter('duration_minutes') ?: null,
+        ];
+
+        try {
+            $userId = $this->getUser()->getAttribute('user_id', 1);
+            $service->createStoryline($exhibitionId, $data, $userId);
+            $this->getUser()->setFlash('notice', 'Storyline created');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Update storyline.
+     */
+    public function executeUpdateStoryline(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $storylineId = (int) $request->getParameter('storyline_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'title' => $request->getParameter('title'),
+            'description' => $request->getParameter('description'),
+            'narrative_type' => $request->getParameter('type') ?: 'general',
+            'target_audience' => $request->getParameter('target_audience') ?: 'all',
+        ];
+
+        try {
+            $service->updateStoryline($storylineId, $data);
+            $this->getUser()->setFlash('notice', 'Storyline updated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Delete storyline.
+     */
+    public function executeDeleteStoryline(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $storylineId = (int) $request->getParameter('storyline_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        try {
+            $service->deleteStoryline($storylineId);
+            $this->getUser()->setFlash('notice', 'Storyline deleted');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibitionId]);
+    }
+
+    /**
      * View/edit storyline with stops.
      */
     public function executeStoryline(sfWebRequest $request)
@@ -398,36 +563,86 @@ class exhibitionActions extends sfActions
     }
 
     /**
-     * Add stop to storyline (AJAX).
+     * Add stop to storyline.
      */
     public function executeAddStop(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
+        $this->forward404Unless($request->isMethod('post'));
 
         $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
         $storylineId = (int) $request->getParameter('storyline_id');
-        $exhibitionObjectId = (int) $request->getParameter('exhibition_object_id');
+        $exhibitionObjectId = $request->getParameter('exhibition_object_id') ?: null;
 
         $data = [
             'title' => $request->getParameter('title'),
-            'narrative_text' => $request->getParameter('narrative_text'),
-            'connection_to_next' => $request->getParameter('connection_to_next'),
-            'suggested_viewing_minutes' => $request->getParameter('viewing_minutes') ?: 2,
+            'narrative_text' => $request->getParameter('narrative_content'),
+            'sequence_order' => $request->getParameter('stop_order') ?: null,
+            'audio_duration_seconds' => $request->getParameter('duration_seconds') ?: null,
+            'audio_file_path' => $request->getParameter('audio_url'),
+            'video_url' => $request->getParameter('video_url'),
         ];
 
         try {
-            $id = $service->addStorylineStop($storylineId, $exhibitionObjectId, $data);
-
-            return $this->renderText(json_encode([
-                'success' => true,
-                'id' => $id,
-            ]));
+            $service->addStorylineStop($storylineId, $exhibitionObjectId, $data);
+            $this->getUser()->setFlash('notice', 'Stop added to storyline');
         } catch (\Exception $e) {
-            return $this->renderText(json_encode([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ]));
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storyline', 'id' => $exhibitionId, 'storyline_id' => $storylineId]);
+    }
+
+    /**
+     * Update stop in storyline.
+     */
+    public function executeUpdateStop(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $storylineId = (int) $request->getParameter('storyline_id');
+        $stopId = (int) $request->getParameter('stop_id');
+
+        $data = [
+            'title' => $request->getParameter('title'),
+            'narrative_text' => $request->getParameter('narrative_content'),
+            'sequence_order' => $request->getParameter('stop_order') ?: null,
+            'audio_duration_seconds' => $request->getParameter('duration_seconds') ?: null,
+            'exhibition_object_id' => $request->getParameter('exhibition_object_id') ?: null,
+        ];
+
+        try {
+            $service->updateStorylineStop($stopId, $data);
+            $this->getUser()->setFlash('notice', 'Stop updated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storyline', 'id' => $exhibitionId, 'storyline_id' => $storylineId]);
+    }
+
+    /**
+     * Delete stop from storyline.
+     */
+    public function executeDeleteStop(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $storylineId = (int) $request->getParameter('storyline_id');
+        $stopId = (int) $request->getParameter('stop_id');
+
+        try {
+            $service->deleteStorylineStop($stopId);
+            $this->getUser()->setFlash('notice', 'Stop deleted');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'storyline', 'id' => $exhibitionId, 'storyline_id' => $storylineId]);
     }
 
     /**
@@ -471,6 +686,114 @@ class exhibitionActions extends sfActions
     }
 
     /**
+     * Add event to exhibition.
+     */
+    public function executeAddEvent(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'title' => $request->getParameter('title'),
+            'event_type' => $request->getParameter('event_type'),
+            'description' => $request->getParameter('description'),
+            'event_date' => $request->getParameter('event_date'),
+            'start_time' => $request->getParameter('start_time'),
+            'end_time' => $request->getParameter('end_time'),
+            'location' => $request->getParameter('location'),
+            'max_attendees' => $request->getParameter('max_attendees') ?: null,
+            'requires_registration' => $request->getParameter('requires_registration') ? true : false,
+            'is_free' => $request->getParameter('is_free') ? true : false,
+            'ticket_price' => $request->getParameter('ticket_price') ?: null,
+            'presenter_name' => $request->getParameter('presenter_name'),
+        ];
+
+        try {
+            $userId = $this->getUser()->getAttribute('user_id', 1);
+            $service->createEvent($exhibitionId, $data, $userId);
+            $this->getUser()->setFlash('notice', 'Event created');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Update event.
+     */
+    public function executeUpdateEvent(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $eventId = (int) $request->getParameter('event_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'title' => $request->getParameter('title'),
+            'event_type' => $request->getParameter('event_type'),
+            'description' => $request->getParameter('description'),
+            'event_date' => $request->getParameter('event_date'),
+            'start_time' => $request->getParameter('start_time'),
+            'end_time' => $request->getParameter('end_time'),
+            'location' => $request->getParameter('location'),
+            'max_attendees' => $request->getParameter('max_attendees') ?: null,
+            'requires_registration' => $request->getParameter('requires_registration') ? true : false,
+            'is_free' => $request->getParameter('is_free') ? true : false,
+            'ticket_price' => $request->getParameter('ticket_price') ?: null,
+            'presenter_name' => $request->getParameter('presenter_name'),
+        ];
+
+        try {
+            $service->updateEvent($eventId, $data);
+            $this->getUser()->setFlash('notice', 'Event updated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Delete event.
+     */
+    public function executeDeleteEvent(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $eventId = (int) $request->getParameter('event_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        try {
+            $service->deleteEvent($eventId);
+            $this->getUser()->setFlash('notice', 'Event deleted');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibitionId]);
+    }
+
+    /**
      * Exhibition checklists.
      */
     public function executeChecklists(sfWebRequest $request)
@@ -504,22 +827,80 @@ class exhibitionActions extends sfActions
     }
 
     /**
+     * Create checklist from template.
+     */
+    public function executeCreateChecklist(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $templateId = (int) $request->getParameter('template_id');
+        $assignedTo = $request->getParameter('assigned_to') ?: null;
+
+        try {
+            $service->createChecklistFromTemplate($exhibitionId, $templateId, $assignedTo);
+            $this->getUser()->setFlash('notice', 'Checklist created');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'checklists', 'id' => $exhibitionId]);
+    }
+
+    /**
+     * Add item to checklist.
+     */
+    public function executeAddChecklistItem(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod('post'));
+
+        $service = $this->getExhibitionService();
+        $exhibitionId = (int) $request->getParameter('id');
+        $checklistId = (int) $request->getParameter('checklist_id');
+
+        $exhibition = $service->get($exhibitionId);
+        if (!$exhibition) {
+            $this->forward404('Exhibition not found');
+        }
+
+        $data = [
+            'name' => $request->getParameter('task_name'),
+            'description' => $request->getParameter('notes'),
+        ];
+
+        try {
+            $service->addChecklistItem($checklistId, $data);
+            $this->getUser()->setFlash('notice', 'Item added to checklist');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
+        }
+
+        $this->redirect(['module' => 'exhibition', 'action' => 'checklists', 'id' => $exhibitionId]);
+    }
+
+    /**
      * Complete checklist item (AJAX).
      */
     public function executeCompleteItem(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
         $service = $this->getExhibitionService();
-        $itemId = (int) $request->getParameter('id');
+
+        // Exhibition ID is in URL, item ID is in POST data
+        $exhibitionId = (int) $request->getParameter('id');
+        $itemId = (int) $request->getParameter('item_id');
         $userId = $this->getUser()->getAttribute('user_id', 1);
         $notes = $request->getParameter('notes');
 
         $service->completeChecklistItem($itemId, $userId, $notes);
 
-        return $this->renderText(json_encode([
-            'success' => true,
-        ]));
+        $this->redirect(['module' => 'exhibition', 'action' => 'checklists', 'id' => $exhibitionId]);
     }
 
     /**
@@ -535,6 +916,7 @@ class exhibitionActions extends sfActions
         }
 
         $this->objects = $service->generateObjectList($this->exhibition['id']);
+        $this->sections = $service->getSections($this->exhibition['id']);
 
         // Export format
         $format = $request->getParameter('format');
@@ -593,27 +975,27 @@ class exhibitionActions extends sfActions
                 $join->on('ioi.id', '=', 'io.id')
                     ->where('ioi.culture', '=', 'en');
             })
-            ->leftJoin('digital_object as do', 'do.information_object_id', '=', 'io.id')
+            ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
             ->where('io.id', '!=', 1) // Exclude root
-            ->whereNotIn('io.id', $existingIds)
+            ->whereNotIn('io.id', $existingIds ?: [0])
             ->where(function ($q) use ($query) {
                 $q->where('io.identifier', 'LIKE', "%{$query}%")
                     ->orWhere('ioi.title', 'LIKE', "%{$query}%");
             })
-            ->select('io.id', 'io.identifier', 'ioi.title', 'do.path as thumbnail')
+            ->select('io.id', 'io.identifier as object_number', 'ioi.title', 'do.path as thumbnail')
             ->limit(20)
             ->get()
             ->map(function ($row) {
                 return [
                     'id' => $row->id,
-                    'identifier' => $row->identifier,
+                    'object_number' => $row->object_number,
                     'title' => $row->title,
                     'thumbnail' => $row->thumbnail ? '/uploads/'.$row->thumbnail : null,
                 ];
             })
             ->all();
 
-        return $this->renderText(json_encode($objects));
+        return $this->renderText(json_encode(['objects' => $objects]));
     }
 
     /**

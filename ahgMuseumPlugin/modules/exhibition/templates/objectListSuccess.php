@@ -1,4 +1,9 @@
 <?php use_helper('Date'); ?>
+<?php
+// Extract raw arrays from Symfony decorator
+$objectsArray = $objects instanceof sfOutputEscaperArrayDecorator ? $objects->getRawValue() : (array) ($objects ?? []);
+$sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections->getRawValue() : (array) ($sections ?? []);
+?>
 
 <div class="row">
   <div class="col-12">
@@ -18,11 +23,11 @@
       <div class="d-print-none">
         <div class="btn-group">
           <button type="button" class="btn btn-outline-primary" onclick="window.print()">
-            <i class="fa fa-print"></i> Print
+            <i class="fas fa-print"></i> Print
           </button>
-          <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectListExport', 'id' => $exhibition['id'], 'format' => 'csv']); ?>"
+          <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id'], 'format' => 'csv']); ?>"
              class="btn btn-outline-secondary">
-            <i class="fa fa-download"></i> Export CSV
+            <i class="fas fa-download"></i> Export CSV
           </a>
         </div>
       </div>
@@ -42,7 +47,7 @@
     <div class="col-4 text-end">
       <p class="mb-1"><strong>Object Checklist</strong></p>
       <p class="mb-1">Generated: <?php echo date('d M Y'); ?></p>
-      <p class="mb-0">Objects: <?php echo count($objects); ?></p>
+      <p class="mb-0">Objects: <?php echo count($objectsArray); ?></p>
     </div>
   </div>
   <hr>
@@ -53,7 +58,7 @@
   <div class="col-md-3">
     <div class="card bg-light">
       <div class="card-body text-center">
-        <h3 class="mb-0"><?php echo count($objects); ?></h3>
+        <h3 class="mb-0"><?php echo count($objectsArray); ?></h3>
         <small class="text-muted">Total Objects</small>
       </div>
     </div>
@@ -61,7 +66,7 @@
   <div class="col-md-3">
     <div class="card bg-light">
       <div class="card-body text-center">
-        <h3 class="mb-0"><?php echo count($sections); ?></h3>
+        <h3 class="mb-0"><?php echo count($sectionsArray); ?></h3>
         <small class="text-muted">Sections</small>
       </div>
     </div>
@@ -71,7 +76,7 @@
       <div class="card-body text-center">
         <?php
           $totalValue = 0;
-          foreach ($objects as $obj) {
+          foreach ($objectsArray as $obj) {
             $totalValue += floatval($obj['insurance_value'] ?? 0);
           }
         ?>
@@ -83,22 +88,22 @@
   <div class="col-md-3">
     <div class="card bg-light">
       <div class="card-body text-center">
-        <h3 class="mb-0"><?php echo count(array_filter($objects, fn($o) => !empty($o['is_loan']))); ?></h3>
+        <h3 class="mb-0"><?php echo count(array_filter($objectsArray, fn($o) => !empty($o['is_loan']))); ?></h3>
         <small class="text-muted">Loan Objects</small>
       </div>
     </div>
   </div>
 </div>
 
-<?php if (empty($objects)): ?>
+<?php if (empty($objectsArray)): ?>
   <div class="card">
     <div class="card-body text-center py-5">
-      <i class="fa fa-archive fa-3x text-muted mb-3"></i>
+      <i class="fas fa-archive fa-3x text-muted mb-3"></i>
       <h5>No objects in this exhibition</h5>
       <p class="text-muted">Add objects to generate the object list.</p>
       <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibition['id']]); ?>"
          class="btn btn-primary d-print-none">
-        <i class="fa fa-plus"></i> Add Objects
+        <i class="fas fa-plus"></i> Add Objects
       </a>
     </div>
   </div>
@@ -106,10 +111,10 @@
   <!-- Group by section -->
   <?php
     $groupedObjects = ['_unassigned' => []];
-    foreach ($sections as $section) {
+    foreach ($sectionsArray as $section) {
       $groupedObjects[$section['id']] = ['section' => $section, 'objects' => []];
     }
-    foreach ($objects as $obj) {
+    foreach ($objectsArray as $obj) {
       if (!empty($obj['section_id']) && isset($groupedObjects[$obj['section_id']])) {
         $groupedObjects[$obj['section_id']]['objects'][] = $obj;
       } else {
@@ -157,9 +162,9 @@
                       <?php endif; ?>
                     </td>
                     <td class="d-print-none">
-                      <a href="<?php echo url_for(['module' => 'museum', 'action' => 'show', 'id' => $obj['museum_object_id']]); ?>"
+                      <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $obj['object_slug']]); ?>"
                          class="btn btn-sm btn-outline-primary">
-                        <i class="fa fa-eye"></i>
+                        <i class="fas fa-eye"></i>
                       </a>
                     </td>
                   </tr>
@@ -215,9 +220,9 @@
                       <?php endif; ?>
                     </td>
                     <td class="d-print-none">
-                      <a href="<?php echo url_for(['module' => 'museum', 'action' => 'show', 'id' => $obj['museum_object_id']]); ?>"
+                      <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $obj['object_slug']]); ?>"
                          class="btn btn-sm btn-outline-primary">
-                        <i class="fa fa-eye"></i>
+                        <i class="fas fa-eye"></i>
                       </a>
                     </td>
                   </tr>
@@ -250,7 +255,7 @@
         </div>
         <div class="col-md-4 text-end">
           <h4 class="mb-0">R<?php echo number_format($totalValue, 2); ?></h4>
-          <small class="text-muted"><?php echo count($objects); ?> objects</small>
+          <small class="text-muted"><?php echo count($objectsArray); ?> objects</small>
         </div>
       </div>
     </div>

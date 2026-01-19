@@ -2,6 +2,14 @@
 
 <div class="row">
   <div class="col-md-8">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'index']); ?>">Exhibitions</a></li>
+        <li class="breadcrumb-item active"><?php echo htmlspecialchars($exhibition['title']); ?></li>
+      </ol>
+    </nav>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-start mb-4">
       <div>
@@ -12,30 +20,30 @@
       </div>
       <div class="btn-group">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'edit', 'id' => $exhibition['id']]); ?>" class="btn btn-outline-primary">
-          <i class="fa fa-edit"></i> Edit
+          <i class="fas fa-edit"></i> Edit
         </a>
         <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
           <span class="visually-hidden">More</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-cube me-2"></i> Manage Objects
+            <i class="fas fa-cube me-2"></i> Manage Objects
           </a></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-th-large me-2"></i> Manage Sections
+            <i class="fas fa-th-large me-2"></i> Manage Sections
           </a></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-book me-2"></i> Storylines
+            <i class="fas fa-book me-2"></i> Storylines
           </a></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-calendar me-2"></i> Events
+            <i class="fas fa-calendar me-2"></i> Events
           </a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'checklists', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-check-square me-2"></i> Checklists
+            <i class="fas fa-check-square me-2"></i> Checklists
           </a></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id']]); ?>">
-            <i class="fa fa-list me-2"></i> Object List Report
+            <i class="fas fa-list me-2"></i> Object List Report
           </a></li>
         </ul>
       </div>
@@ -91,7 +99,7 @@
     <!-- Dates -->
     <div class="card mb-4">
       <div class="card-header">
-        <h5 class="mb-0"><i class="fa fa-calendar me-2"></i>Dates</h5>
+        <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Dates</h5>
       </div>
       <div class="card-body">
         <div class="row">
@@ -125,7 +133,7 @@
     <?php if (!empty($exhibition['description']) || !empty($exhibition['theme'])): ?>
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>About</h5>
+          <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>About</h5>
         </div>
         <div class="card-body">
           <?php if (!empty($exhibition['theme'])): ?>
@@ -139,22 +147,30 @@
     <?php endif; ?>
 
     <!-- Objects -->
-    <?php if (!empty($exhibition['objects'])): ?>
+    <?php
+      // Handle Symfony output escaper for exhibition and objects
+      $exhibitionRaw = ($exhibition instanceof sfOutputEscaperArrayDecorator) ? $exhibition->getRawValue() : $exhibition;
+      $objectsRaw = $exhibitionRaw['objects'] ?? [];
+      $objectsArray = ($objectsRaw instanceof sfOutputEscaperArrayDecorator) ? $objectsRaw->getRawValue() : (is_array($objectsRaw) ? $objectsRaw : []);
+    ?>
+    <?php if (!empty($objectsArray)): ?>
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fa fa-cube me-2"></i>Objects (<?php echo count($exhibition['objects']); ?>)</h5>
+          <h5 class="mb-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Objects (<?php echo count($objectsArray); ?>)</h5>
           <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibition['id']]); ?>" class="btn btn-sm btn-outline-primary">
             Manage Objects
           </a>
         </div>
         <div class="list-group list-group-flush">
-          <?php foreach (array_slice($exhibition['objects'], 0, 5) as $obj): ?>
+          <?php foreach (array_slice($objectsArray, 0, 5) as $obj): ?>
             <div class="list-group-item d-flex align-items-center">
               <?php if (!empty($obj['thumbnail_url'])): ?>
-                <img src="<?php echo $obj['thumbnail_url']; ?>" alt="" class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                <img src="<?php echo htmlspecialchars($obj['thumbnail_url']); ?>" alt="" class="me-3 rounded" style="width: 50px; height: 50px; object-fit: cover;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="me-3 bg-secondary text-white align-items-center justify-content-center rounded" style="width: 50px; height: 50px; font-size: 1.2rem; display: none;">📦</div>
               <?php else: ?>
-                <div class="me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                  <i class="fa fa-image text-muted"></i>
+                <div class="me-3 bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                  📦
                 </div>
               <?php endif; ?>
               <div class="flex-grow-1">
@@ -164,10 +180,10 @@
               <span class="badge bg-secondary"><?php echo $obj['status_label']; ?></span>
             </div>
           <?php endforeach; ?>
-          <?php if (count($exhibition['objects']) > 5): ?>
+          <?php if (count($objectsArray) > 5): ?>
             <div class="list-group-item text-center">
               <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objects', 'id' => $exhibition['id']]); ?>">
-                View all <?php echo count($exhibition['objects']); ?> objects
+                View all <?php echo count($objectsArray); ?> objects
               </a>
             </div>
           <?php endif; ?>
@@ -179,7 +195,7 @@
     <?php if (!empty($exhibition['sections'])): ?>
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fa fa-th-large me-2"></i>Sections (<?php echo count($exhibition['sections']); ?>)</h5>
+          <h5 class="mb-0"><i class="fas fa-th-large me-2"></i>Sections (<?php echo count($exhibition['sections']); ?>)</h5>
           <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'sections', 'id' => $exhibition['id']]); ?>" class="btn btn-sm btn-outline-primary">
             Manage
           </a>
@@ -204,7 +220,7 @@
     <?php if (!empty($exhibition['storylines'])): ?>
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fa fa-book me-2"></i>Storylines</h5>
+          <h5 class="mb-0"><i class="fas fa-book me-2"></i>Storylines</h5>
           <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'storylines', 'id' => $exhibition['id']]); ?>" class="btn btn-sm btn-outline-primary">
             Manage
           </a>
@@ -215,7 +231,7 @@
               <div class="d-flex justify-content-between">
                 <strong>
                   <?php if ($storyline['is_primary']): ?>
-                    <i class="fa fa-star text-warning me-1"></i>
+                    <i class="fas fa-star text-warning me-1"></i>
                   <?php endif; ?>
                   <?php echo $storyline['title']; ?>
                 </strong>
@@ -324,16 +340,19 @@
     </div>
 
     <!-- Upcoming Events -->
-    <?php if (!empty($exhibition['events'])): ?>
-      <?php $upcomingEvents = array_filter($exhibition['events'], fn($e) => $e['event_date'] >= date('Y-m-d')); ?>
-      <?php if (!empty($upcomingEvents)): ?>
-        <div class="card mb-4">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Upcoming Events</h5>
-            <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibition['id']]); ?>" class="btn btn-sm btn-link">All</a>
-          </div>
-          <div class="list-group list-group-flush">
-            <?php foreach (array_slice($upcomingEvents, 0, 3) as $event): ?>
+    <?php
+      $eventsRaw = $exhibitionRaw['events'] ?? [];
+      $eventsArray = ($eventsRaw instanceof sfOutputEscaperArrayDecorator) ? $eventsRaw->getRawValue() : (is_array($eventsRaw) ? $eventsRaw : []);
+      $upcomingEvents = array_filter($eventsArray, fn($e) => ($e['event_date'] ?? '') >= date('Y-m-d'));
+    ?>
+    <?php if (!empty($upcomingEvents)): ?>
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Upcoming Events</h5>
+          <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'events', 'id' => $exhibition['id']]); ?>" class="btn btn-sm btn-link">All</a>
+        </div>
+        <div class="list-group list-group-flush">
+          <?php foreach (array_slice($upcomingEvents, 0, 3) as $event): ?>
               <div class="list-group-item">
                 <div class="d-flex justify-content-between">
                   <strong><?php echo $event['title']; ?></strong>
@@ -350,7 +369,6 @@
           </div>
         </div>
       <?php endif; ?>
-    <?php endif; ?>
 
     <!-- Quick Links -->
     <div class="card">
@@ -359,13 +377,13 @@
       </div>
       <div class="list-group list-group-flush">
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id']]); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-list me-2"></i> Object List
+          <i class="fas fa-list me-2"></i> Object List
         </a>
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id'], 'format' => 'csv']); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-download me-2"></i> Export Objects (CSV)
+          <i class="fas fa-download me-2"></i> Export Objects (CSV)
         </a>
         <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'checklists', 'id' => $exhibition['id']]); ?>" class="list-group-item list-group-item-action">
-          <i class="fa fa-check-square me-2"></i> Checklists
+          <i class="fas fa-check-square me-2"></i> Checklists
         </a>
       </div>
     </div>
