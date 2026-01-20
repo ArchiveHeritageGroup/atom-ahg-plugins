@@ -69,7 +69,7 @@
                                 <code><?php echo esc_entities($entity->entity_value); ?></code>
                             </td>
                             <td>
-                                <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'id' => $entity->object_id]); ?>" target="_blank">
+                                <a href="/index.php/<?php echo $entity->object_slug; ?>" target="_blank">
                                     <?php echo esc_entities(substr($entity->object_title ?? 'Untitled', 0, 50)); ?>
                                     <?php if (strlen($entity->object_title ?? '') > 50): ?>...<?php endif; ?>
                                 </a>

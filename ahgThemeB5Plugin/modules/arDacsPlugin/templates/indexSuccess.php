@@ -1,4 +1,16 @@
 <?php decorate_with('layout_3col'); ?>
+<?php
+// Load PII masking helper if privacy plugin is enabled
+if (in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+    require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/helper/PiiHelper.php';
+}
+function pii_filter($objectId, $content) {
+    if (function_exists('pii_mask')) {
+        return pii_mask($objectId, $content);
+    }
+    return $content;
+}
+?>
 
 <?php slot('sidebar'); ?>
   <?php include_component('informationobject', 'contextMenu'); ?>
@@ -125,7 +137,13 @@
     ); ?>
   <?php } ?>
 
-  <?php echo render_show(__('Scope and content'), render_value($resource->getScopeAndContent(['cultureFallback' => true]))); ?>
+  <?php echo render_show(__('Scope and content'), render_value(pii_filter($resource->id, $resource->getScopeAndContent(['cultureFallback' => true])))); ?>
+  <?php if (function_exists('pii_has_redacted') && pii_has_redacted($resource->id)): ?>
+  <div class="alert alert-warning py-1 px-2 mt-2">
+    <i class="fas fa-shield-alt me-1"></i>
+    <small><?php echo __('This record contains redacted PII'); ?></small>
+  </div>
+  <?php endif; ?>
 
   <?php echo render_show(__('System of arrangement'), render_value($resource->getArrangement(['cultureFallback' => true]))); ?>
 

@@ -832,6 +832,140 @@ document.addEventListener('DOMContentLoaded', function() {
 
   semanticToggle.addEventListener('change', updateExpansionPreview);
 
+  // Store cached expansions for form submission
+  var cachedExpansions = {};
+
+  // Override updateExpansionPreview to cache results
+  var originalUpdateExpansionPreview = updateExpansionPreview;
+  updateExpansionPreview = function() {
+    var query = queryInput.value.trim();
+    var semanticEnabled = semanticToggle.checked;
+
+    if (!query || !semanticEnabled) {
+      expansionPreview.style.display = 'none';
+      return;
+    }
+
+    expansionPreview.style.display = 'block';
+    expansionLoading.style.display = 'block';
+    expansionContent.innerHTML = '';
+
+    fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        expansionLoading.style.display = 'none';
+        if (data.success && Object.keys(data.expansions).length > 0) {
+          // Cache the expansions
+          cachedExpansions[query] = data.expansions;
+
+          var html = '';
+          for (var term in data.expansions) {
+            html += '<div class="mb-2"><strong>' + escapeHtml(term) + '</strong> <i class="fas fa-arrow-right text-muted mx-1"></i> ';
+            html += data.expansions[term].map(function(s) {
+              return '<span class="badge bg-secondary me-1">' + escapeHtml(s) + '</span>';
+            }).join('');
+            html += '</div>';
+          }
+          expansionContent.innerHTML = html;
+        } else {
+          cachedExpansions[query] = null;
+          expansionContent.innerHTML = '<span class="text-muted"><?php echo __('No expansions found for this query.'); ?></span>';
+        }
+      })
+      .catch(function(error) {
+        expansionLoading.style.display = 'none';
+        expansionContent.innerHTML = '<span class="text-danger"><?php echo __('Error loading expansions'); ?></span>';
+      });
+  };
+
+  // Helper function to get result count for a query
+  function getResultCount(searchQuery, useSemantic) {
+    var url = '<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse']); ?>?query=' + encodeURIComponent(searchQuery) + '&limit=1';
+    if (useSemantic) {
+      url += '&semantic=1';
+    }
+    return fetch(url)
+      .then(function(response) { return response.text(); })
+      .then(function(html) {
+        // Extract result count from the page
+        var match = html.match(/Showing\s+(\d+)\s+results/i);
+        return match ? parseInt(match[1]) : 0;
+      })
+      .catch(function() { return -1; });
+  }
+
+  // Form submission handler - expand query before submitting
+  var searchForm = document.getElementById('semantic-search-form');
+  searchForm.addEventListener('submit', function(e) {
+    var query = queryInput.value.trim();
+    var semanticEnabled = semanticToggle.checked;
+
+    if (!semanticEnabled || !query) {
+      return; // Let form submit normally
+    }
+
+    e.preventDefault();
+
+    // Build expanded query
+    var expandedQuery = query;
+    var expansions = cachedExpansions[query];
+
+    // If not cached, fetch first
+    var fetchPromise = expansions !== undefined
+      ? Promise.resolve({ expansions: expansions })
+      : fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            cachedExpansions[query] = data.success ? data.expansions : null;
+            return { expansions: cachedExpansions[query] };
+          });
+
+    fetchPromise.then(function(result) {
+      var expandedTerms = [];
+      if (result.expansions) {
+        for (var term in result.expansions) {
+          expandedTerms = expandedTerms.concat(result.expansions[term]);
+        }
+        if (expandedTerms.length > 0) {
+          expandedQuery = query + ' ' + expandedTerms.join(' ');
+        }
+      }
+
+      // Now get result counts for both queries
+      // Original: without semantic, Semantic: with semantic=1 (server handles OR logic)
+      Promise.all([
+        getResultCount(query, false),
+        getResultCount(query, true)
+      ]).then(function(counts) {
+        var originalCount = counts[0];
+        var expandedCount = counts[1];
+
+        // Build debug info
+        var debugInfo = '=== SEMANTIC SEARCH DEBUG ===\n\n';
+        debugInfo += 'Query: "' + query + '"\n';
+        debugInfo += 'Results (normal search): ' + originalCount + '\n';
+        debugInfo += 'Results (semantic search): ' + expandedCount + '\n\n';
+
+        if (expandedTerms.length > 0) {
+          debugInfo += 'Thesaurus expansions (OR logic on server):\n';
+          for (var term in result.expansions) {
+            debugInfo += '  ' + term + ' → ' + result.expansions[term].join(', ') + '\n';
+          }
+          debugInfo += '\nImprovement: +' + (expandedCount - originalCount) + ' results\n';
+        } else {
+          debugInfo += 'No thesaurus expansions found.\n';
+        }
+
+        // Show debug popup
+        alert(debugInfo);
+
+        // Submit form normally - server handles OR logic for semantic search
+        // Don't modify the query - server will expand it with proper OR logic
+        searchForm.submit();
+      });
+    });
+  });
+
   var modal = document.getElementById('semanticSearchModal');
   modal.addEventListener('shown.bs.modal', function() {
     queryInput.focus();

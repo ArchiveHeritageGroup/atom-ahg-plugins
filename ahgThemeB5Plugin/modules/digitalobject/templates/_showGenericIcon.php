@@ -8,6 +8,19 @@ $isStreamableAudio = false;
 $mimeType = $resource->mimeType ?? '';
 $mediaTypeId = $resource->mediaTypeId ?? null;
 
+// Check for PII redaction (for PDFs)
+$hasPiiRedaction = false;
+$piiDownloadUrl = null;
+$isPdf = (stripos($mimeType, 'pdf') !== false);
+if ($isPdf && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+    require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/helper/PiiHelper.php';
+    $objectId = $resource->object->id ?? ($resource->objectId ?? null);
+    if ($objectId && function_exists('pii_has_redacted') && pii_has_redacted($objectId)) {
+        $hasPiiRedaction = true;
+        $piiDownloadUrl = url_for(['module' => 'privacyAdmin', 'action' => 'downloadPdf', 'id' => $objectId]);
+    }
+}
+
 // Check if streamable using numeric IDs
 if ($mediaTypeId == 137 && ahg_needs_streaming($resource)) {
     $isStreamableVideo = true;
@@ -61,13 +74,23 @@ if ($mediaTypeId == 137 && ahg_needs_streaming($resource)) {
   <div class="digitalObject">
     <div class="digitalObjectRep">
       <?php if (isset($link) && $canReadMaster) { ?>
-        <?php echo link_to(image_tag($representation->getFullPath(), ['alt' => __($resource->getDigitalObjectAltText() ?: 'Open original %1%', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]), 'class' => 'img-thumbnail']), $link, ['target' => '_blank']); ?>
+        <?php if ($hasPiiRedaction && $piiDownloadUrl): ?>
+          <!-- PDF with PII redaction -->
+          <?php echo link_to(image_tag($representation->getFullPath(), ['alt' => __('Open redacted %1%', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]), 'class' => 'img-thumbnail']), $piiDownloadUrl, ['target' => '_blank']); ?>
+        <?php else: ?>
+          <?php echo link_to(image_tag($representation->getFullPath(), ['alt' => __($resource->getDigitalObjectAltText() ?: 'Open original %1%', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]), 'class' => 'img-thumbnail']), $link, ['target' => '_blank']); ?>
+        <?php endif; ?>
       <?php } else { ?>
         <?php echo image_tag($representation->getFullPath(), ['alt' => __($resource->getDigitalObjectAltText() ?: 'Original %1% not accessible', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]), 'class' => 'img-thumbnail']); ?>
       <?php } ?>
     </div>
     <div class="digitalObjectDesc">
       <?php echo wrap_text($resource->name, 18); ?>
+      <?php if ($hasPiiRedaction): ?>
+        <div class="mt-1">
+          <span class="badge bg-warning text-dark"><i class="fas fa-shield-alt me-1"></i><?php echo __('PII Redacted'); ?></span>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 <?php endif; ?>

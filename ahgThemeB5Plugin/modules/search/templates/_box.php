@@ -108,3 +108,50 @@
     </button>
   </div>
 </form>
+
+<script>
+(function() {
+  var searchBox = document.getElementById('search-box');
+  var queryInput = document.getElementById('search-box-input');
+  var semanticToggle = document.getElementById('semantic-search-toggle');
+
+  if (!searchBox || !queryInput || !semanticToggle) return;
+
+  searchBox.addEventListener('submit', function(e) {
+    var query = queryInput.value.trim();
+    var semanticEnabled = semanticToggle.checked;
+
+    if (!semanticEnabled || !query) return;
+
+    // Prevent immediate submission
+    e.preventDefault();
+
+    // Fetch expansions and then submit
+    fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (data.success && Object.keys(data.expansions).length > 0) {
+          // Build expanded query
+          var expandedTerms = [];
+          for (var term in data.expansions) {
+            expandedTerms = expandedTerms.concat(data.expansions[term]);
+          }
+
+          if (expandedTerms.length > 0) {
+            queryInput.value = query + ' ' + expandedTerms.join(' ');
+          }
+        }
+
+        // Disable semantic param since we already expanded
+        semanticToggle.disabled = true;
+
+        // Submit the form
+        searchBox.submit();
+      })
+      .catch(function(error) {
+        // On error, submit with original query
+        searchBox.submit();
+      });
+  });
+})();
+</script>

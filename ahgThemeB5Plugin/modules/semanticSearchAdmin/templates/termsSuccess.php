@@ -44,6 +44,15 @@
 
     <!-- Terms Table -->
     <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>
+                <?php echo __('Showing %1% - %2% of %3% terms', [
+                    '%1%' => number_format(($currentPage - 1) * $perPage + 1),
+                    '%2%' => number_format(min($currentPage * $perPage, $totalCount)),
+                    '%3%' => number_format($totalCount)
+                ]); ?>
+            </span>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -98,5 +107,73 @@
                 </table>
             </div>
         </div>
+        <?php if ($totalPages > 1): ?>
+        <div class="card-footer">
+            <nav aria-label="Term pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    <?php
+                    // Build base URL with current filters
+                    $baseParams = ['module' => 'semanticSearchAdmin', 'action' => 'terms'];
+                    if ($sf_request->getParameter('source')) {
+                        $baseParams['source'] = $sf_request->getParameter('source');
+                    }
+                    if ($sf_request->getParameter('q')) {
+                        $baseParams['q'] = $sf_request->getParameter('q');
+                    }
+                    ?>
+
+                    <!-- Previous button -->
+                    <li class="page-item <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo url_for(array_merge($baseParams, ['page' => $currentPage - 1])); ?>">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    <?php
+                    // Show page numbers with ellipsis
+                    $showPages = [];
+                    $showPages[] = 1;
+
+                    if ($currentPage > 3) {
+                        $showPages[] = '...';
+                    }
+
+                    for ($i = max(2, $currentPage - 1); $i <= min($totalPages - 1, $currentPage + 1); $i++) {
+                        if (!in_array($i, $showPages)) {
+                            $showPages[] = $i;
+                        }
+                    }
+
+                    if ($currentPage < $totalPages - 2) {
+                        $showPages[] = '...';
+                    }
+
+                    if ($totalPages > 1) {
+                        $showPages[] = $totalPages;
+                    }
+
+                    foreach ($showPages as $p):
+                        if ($p === '...'):
+                    ?>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php else: ?>
+                        <li class="page-item <?php echo $p == $currentPage ? 'active' : ''; ?>">
+                            <a class="page-link" href="<?php echo url_for(array_merge($baseParams, ['page' => $p])); ?>"><?php echo $p; ?></a>
+                        </li>
+                    <?php
+                        endif;
+                    endforeach;
+                    ?>
+
+                    <!-- Next button -->
+                    <li class="page-item <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo url_for(array_merge($baseParams, ['page' => $currentPage + 1])); ?>">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <?php endif; ?>
     </div>
 </div>

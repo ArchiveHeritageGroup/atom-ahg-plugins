@@ -9,10 +9,21 @@ class privacyAdminActions extends sfActions
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
-        
-        // Check admin permission
+
+        // Actions that editors can access (and public for downloadPdf)
+        $editorAllowedActions = ['piiScanAjax', 'piiScan', 'piiReview', 'piiEntityAction', 'piiScanObject', 'piiScanRun', 'downloadPdf'];
+
+        // downloadPdf can be accessed by anyone (it handles its own permission check)
+        if ($this->getActionName() === 'downloadPdf') {
+            return;
+        }
+        $currentAction = $this->getActionName();
+
+        // Check admin permission (editors can access PII-related actions)
         if (!$this->context->user->hasCredential('administrator')) {
-            $this->forward('admin', 'secure');
+            if (!in_array($currentAction, $editorAllowedActions) || !$this->context->user->hasCredential('editor')) {
+                $this->forward('admin', 'secure');
+            }
         }
     }
 
@@ -986,15 +997,20 @@ class privacyAdminActions extends sfActions
         // Get pending PII entities for review
         $this->entities = DB::table('ahg_ner_entity as e')
             ->join('ahg_ner_extraction as ex', 'ex.id', '=', 'e.extraction_id')
+            ->join('information_object as io', 'io.id', '=', 'e.object_id')
             ->join('information_object_i18n as i18n', function($j) {
                 $j->on('i18n.id', '=', 'e.object_id')->where('i18n.culture', '=', 'en');
+            })
+            ->join('slug', function($j) {
+                $j->on('slug.object_id', '=', 'io.id');
             })
             ->where('ex.backend_used', 'pii_detector')
             ->whereIn('e.status', ['pending', 'flagged'])
             ->select([
                 'e.id', 'e.object_id', 'e.entity_type', 'e.entity_value',
                 'e.confidence', 'e.status', 'e.created_at',
-                'i18n.title as object_title'
+                'i18n.title as object_title',
+                'slug.slug as object_slug'
             ])
             ->orderByDesc('e.status') // flagged first
             ->orderByDesc('e.created_at')
@@ -1017,6 +1033,10 @@ class privacyAdminActions extends sfActions
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiReview']);
         }
 
+        // Get the object ID before updating
+        $entity = DB::table('ahg_ner_entity')->where('id', $entityId)->first();
+        $objectId = $entity ? $entity->object_id : null;
+
         DB::table('ahg_ner_entity')
             ->where('id', $entityId)
             ->update([
@@ -1024,6 +1044,17 @@ class privacyAdminActions extends sfActions
                 'reviewed_by' => $this->getUserId(),
                 'reviewed_at' => date('Y-m-d H:i:s'),
             ]);
+
+        // Clear PDF redaction cache for this object when status changes
+        if ($objectId) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+            $pdfService->clearCache($objectId);
+
+            // Also clear the PII masking cache
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            \ahgPrivacyPlugin\Service\PiiMaskingService::clearCache($objectId);
+        }
 
         $this->getUser()->setFlash('success', 'Entity marked as ' . $action);
 
@@ -1086,5 +1117,119 @@ class privacyAdminActions extends sfActions
                 'error' => $e->getMessage()
             ]));
         }
+    }
+
+    /**
+     * Serve a redacted PDF document
+     * Route: /privacyAdmin/downloadPdf?id=<object_id>
+     */
+    public function executeDownloadPdf(sfWebRequest $request)
+    {
+        $objectId = (int)$request->getParameter('id');
+
+        if (!$objectId) {
+            $this->forward404('Object ID required');
+        }
+
+        // Load the redaction service
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+        $service = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+
+        // Get the digital object path
+        $digitalObject = DB::table('digital_object')
+            ->where('object_id', $objectId)
+            ->first();
+
+        if (!$digitalObject) {
+            $this->forward404('No digital object found');
+        }
+
+        // Build the file path (matches QubitDigitalObject::getAbsolutePath())
+        // Path format: sf_web_dir + path + name
+        $originalPath = sfConfig::get('sf_web_dir') . $digitalObject->path . $digitalObject->name;
+
+        // Check if it's a PDF
+        $mimeType = $digitalObject->mime_type ?? mime_content_type($originalPath);
+        if (stripos($mimeType, 'pdf') === false) {
+            // Not a PDF, redirect to normal download
+            $this->redirect($this->context->getRouting()->generate(null, [
+                'module' => 'digitalobject',
+                'action' => 'view',
+                'slug' => $request->getParameter('slug')
+            ]));
+        }
+
+        // Check if user can bypass redaction (admin)
+        if (\ahgPrivacyPlugin\Service\PdfRedactionService::canBypassRedaction()) {
+            // Serve original file
+            $this->servePdf($originalPath, $digitalObject->name ?? 'document.pdf');
+            return sfView::NONE;
+        }
+
+        // Get redacted version
+        $result = $service->getRedactedPdf($objectId, $originalPath);
+
+        if (!$result['success']) {
+            // Log error and serve original (fallback)
+            error_log('PDF redaction failed for object ' . $objectId . ': ' . ($result['error'] ?? 'Unknown error'));
+            $this->servePdf($originalPath, $digitalObject->name ?? 'document.pdf');
+            return sfView::NONE;
+        }
+
+        // Serve the redacted PDF
+        $filename = pathinfo($digitalObject->name ?? 'document.pdf', PATHINFO_FILENAME);
+        $this->servePdf($result['path'], $filename . '_redacted.pdf');
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Helper to serve a PDF file
+     */
+    protected function servePdf(string $path, string $filename): void
+    {
+        if (!file_exists($path)) {
+            $this->forward404('File not found');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setHttpHeader('Content-Type', 'application/pdf');
+        $response->setHttpHeader('Content-Disposition', 'inline; filename="' . $filename . '"');
+        $response->setHttpHeader('Content-Length', filesize($path));
+        $response->setHttpHeader('Cache-Control', 'private, max-age=0');
+
+        $response->sendHttpHeaders();
+        readfile($path);
+    }
+
+    /**
+     * Clear redacted PDF cache for an object (call when PII status changes)
+     */
+    public function executeClearPdfCache(sfWebRequest $request)
+    {
+        if (!$this->context->user->hasCredential('administrator')) {
+            $this->forward('admin', 'secure');
+        }
+
+        $objectId = (int)$request->getParameter('id');
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+        $service = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+
+        if ($objectId) {
+            $service->clearCache($objectId);
+            $message = 'Cache cleared for object ' . $objectId;
+        } else {
+            $service->clearAllCache();
+            $message = 'All PDF redaction cache cleared';
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->renderText(json_encode(['success' => true, 'message' => $message]));
+        }
+
+        $this->getUser()->setFlash('success', $message);
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
     }
 }

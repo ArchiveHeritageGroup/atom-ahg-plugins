@@ -67,8 +67,11 @@ class ahgDisplayActions extends sfActions
         $this->semanticEnabled = $request->getParameter("semantic") == "1";
 
         // Expand query with synonyms if semantic search is enabled
+        // Store as array for OR-based search
         if ($this->queryFilter && $this->semanticEnabled) {
-            $this->queryFilter = $this->expandQueryWithSynonyms($this->queryFilter);
+            $this->queryFilterTerms = $this->expandQueryWithSynonyms($this->queryFilter);
+        } else {
+            $this->queryFilterTerms = null;
         }
 
         $this->titleFilter = $request->getParameter("title");
@@ -455,207 +458,18 @@ class ahgDisplayActions extends sfActions
         }
 
         if ($this->repoFilter) {
-
-        // Text search filters
-        if ($this->queryFilter) {
-            $q = "%".$this->queryFilter."%";
-            $query->where(function($qb) use ($q) {
-                $qb->whereExists(function($sub) use ($q) {
-                    $sub->select(DB::raw(1))
-                        ->from("information_object_i18n as ioi")
-                        ->whereRaw("ioi.id = io.id")
-                        ->where(function($w) use ($q) {
-                            $w->where("ioi.title", "like", $q)
-                              ->orWhere("ioi.scope_and_content", "like", $q);
-                        });
-                })->orWhere("io.identifier", "like", $q);
-            });
-        }
-
-        if ($this->titleFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("information_object_i18n as ioi")
-                    ->whereRaw("ioi.id = io.id")
-                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
-            });
-        }
-
-        if ($this->identifierFilter) {
-            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
-        }
-
-        if ($this->scopeAndContentFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("information_object_i18n as ioi")
-                    ->whereRaw("ioi.id = io.id")
-                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
-            });
-        }
-
-        if ($this->creatorSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("event as e")
-                    ->join("actor_i18n as ai", function($j) {
-                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
-                    })
-                    ->whereRaw("e.object_id = io.id")
-                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
-            });
-        }
-
-        if ($this->subjectSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 35)
-                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
-            });
-        }
-
-        if ($this->placeSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 42)
-                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
-            });
-        }
-
-        if ($this->genreSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 78)
-                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
-            });
-        }
             $query->where('io.repository_id', $this->repoFilter);
+        }
 
-        // Text search filters
+        // Text search filters - use OR logic for semantic search
         if ($this->queryFilter) {
-            $q = "%".$this->queryFilter."%";
-            $query->where(function($qb) use ($q) {
-                $qb->whereExists(function($sub) use ($q) {
-                    $sub->select(DB::raw(1))
-                        ->from("information_object_i18n as ioi")
-                        ->whereRaw("ioi.id = io.id")
-                        ->where(function($w) use ($q) {
-                            $w->where("ioi.title", "like", $q)
-                              ->orWhere("ioi.scope_and_content", "like", $q);
-                        });
-                })->orWhere("io.identifier", "like", $q);
-            });
-        }
-
-        if ($this->titleFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("information_object_i18n as ioi")
-                    ->whereRaw("ioi.id = io.id")
-                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
-            });
-        }
-
-        if ($this->identifierFilter) {
-            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
-        }
-
-        if ($this->scopeAndContentFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("information_object_i18n as ioi")
-                    ->whereRaw("ioi.id = io.id")
-                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
-            });
-        }
-
-        if ($this->creatorSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("event as e")
-                    ->join("actor_i18n as ai", function($j) {
-                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
-                    })
-                    ->whereRaw("e.object_id = io.id")
-                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
-            });
-        }
-
-        if ($this->subjectSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 35)
-                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
-            });
-        }
-
-        if ($this->placeSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 42)
-                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
-            });
-        }
-
-        if ($this->genreSearchFilter) {
-            $query->whereExists(function($sub) {
-                $sub->select(DB::raw(1))
-                    ->from("object_term_relation as otr")
-                    ->join("term as t", "otr.term_id", "=", "t.id")
-                    ->join("term_i18n as ti", function($j) {
-                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
-                    })
-                    ->whereRaw("otr.object_id = io.id")
-                    ->where("t.taxonomy_id", 78)
-                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
-            });
-        }
-        }
-
-        // Text search filters
-        if ($this->queryFilter) {
-            $q = "%".$this->queryFilter."%";
-            $query->where(function($qb) use ($q) {
-                $qb->whereExists(function($sub) use ($q) {
-                    $sub->select(DB::raw(1))
-                        ->from("information_object_i18n as ioi")
-                        ->whereRaw("ioi.id = io.id")
-                        ->where(function($w) use ($q) {
-                            $w->where("ioi.title", "like", $q)
-                              ->orWhere("ioi.scope_and_content", "like", $q);
-                        });
-                })->orWhere("io.identifier", "like", $q);
-            });
+            if ($this->queryFilterTerms) {
+                // Semantic search: search for ANY of the expanded terms (OR logic)
+                $this->applyTextSearchFilter($query, $this->queryFilterTerms);
+            } else {
+                // Normal search: single term
+                $this->applyTextSearchFilter($query, $this->queryFilter);
+            }
         }
 
         if ($this->titleFilter) {
@@ -1044,9 +858,9 @@ class ahgDisplayActions extends sfActions
      * Expand query with synonyms from thesaurus
      *
      * @param string $query Original search query
-     * @return string Expanded query with OR'd synonyms
+     * @return array Array of all terms to search (original + synonyms)
      */
-    protected function expandQueryWithSynonyms(string $query): string
+    protected function expandQueryWithSynonyms(string $query): array
     {
         try {
             require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/ThesaurusService.php';
@@ -1054,23 +868,64 @@ class ahgDisplayActions extends sfActions
 
             $expansions = $thesaurus->expandQuery($query);
 
-            if (empty($expansions)) {
-                return $query;
-            }
+            // Start with original query terms
+            $allTerms = preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY);
 
-            // Build expanded query: original terms + synonyms joined with OR
-            $allTerms = [$query];
+            // Add all synonyms
             foreach ($expansions as $term => $synonyms) {
                 foreach ($synonyms as $synonym) {
                     $allTerms[] = $synonym;
                 }
             }
 
-            // Return unique terms joined - will be used in LIKE searches
-            return implode(' ', array_unique($allTerms));
+            // Return unique terms
+            return array_unique($allTerms);
         } catch (\Exception $e) {
-            // If thesaurus fails, return original query
-            return $query;
+            // If thesaurus fails, return original terms
+            return preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY);
+        }
+    }
+
+    /**
+     * Apply text search filter with proper OR logic for semantic search
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param array|string $searchTerms Search terms (array for semantic, string for normal)
+     */
+    protected function applyTextSearchFilter($query, $searchTerms): void
+    {
+        if (is_array($searchTerms)) {
+            // Semantic search: OR between all terms
+            $query->where(function($qb) use ($searchTerms) {
+                foreach ($searchTerms as $term) {
+                    $q = "%" . $term . "%";
+                    $qb->orWhere(function($inner) use ($q) {
+                        $inner->whereExists(function($sub) use ($q) {
+                            $sub->select(DB::raw(1))
+                                ->from("information_object_i18n as ioi")
+                                ->whereRaw("ioi.id = io.id")
+                                ->where(function($w) use ($q) {
+                                    $w->where("ioi.title", "like", $q)
+                                      ->orWhere("ioi.scope_and_content", "like", $q);
+                                });
+                        })->orWhere("io.identifier", "like", $q);
+                    });
+                }
+            });
+        } else {
+            // Normal search: single term
+            $q = "%" . $searchTerms . "%";
+            $query->where(function($qb) use ($q) {
+                $qb->whereExists(function($sub) use ($q) {
+                    $sub->select(DB::raw(1))
+                        ->from("information_object_i18n as ioi")
+                        ->whereRaw("ioi.id = io.id")
+                        ->where(function($w) use ($q) {
+                            $w->where("ioi.title", "like", $q)
+                              ->orWhere("ioi.scope_and_content", "like", $q);
+                        });
+                })->orWhere("io.identifier", "like", $q);
+            });
         }
     }
 }

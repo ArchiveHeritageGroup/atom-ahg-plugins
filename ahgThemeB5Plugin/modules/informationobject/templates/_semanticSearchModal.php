@@ -110,7 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
   var expansionPreview = document.getElementById('expansion-preview');
   var expansionContent = document.getElementById('expansion-content');
   var expansionLoading = document.getElementById('expansion-loading');
+  var searchForm = document.getElementById('semantic-search-form');
   var debounceTimer = null;
+  var cachedExpansions = {};
 
   function updateExpansionPreview() {
     var query = queryInput.value.trim();
@@ -130,6 +132,9 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function(data) {
         expansionLoading.style.display = 'none';
         if (data.success && Object.keys(data.expansions).length > 0) {
+          // Cache the expansions for form submission
+          cachedExpansions[query] = data.expansions;
+
           var html = '';
           for (var term in data.expansions) {
             html += '<div class="mb-2"><strong>' + escapeHtml(term) + '</strong> <i class="fas fa-arrow-right text-muted mx-1"></i> ';
@@ -140,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           expansionContent.innerHTML = html;
         } else {
+          cachedExpansions[query] = null;
           expansionContent.innerHTML = '<span class="text-muted"><?php echo __('No expansions found for this query.'); ?></span>';
         }
       })
@@ -163,6 +169,90 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Toggle change handler
   semanticToggle.addEventListener('change', updateExpansionPreview);
+
+  // Form submission handler - expand query before submitting
+  searchForm.addEventListener('submit', function(e) {
+    var query = queryInput.value.trim();
+    var semanticEnabled = semanticToggle.checked;
+
+    // DEBUG: Show what we're working with
+    var debugInfo = 'SEMANTIC SEARCH DEBUG:\n';
+    debugInfo += 'Query: "' + query + '"\n';
+    debugInfo += 'Semantic enabled: ' + semanticEnabled + '\n';
+    debugInfo += 'Cached expansions: ' + JSON.stringify(cachedExpansions, null, 2) + '\n';
+
+    if (semanticEnabled && query) {
+      // If not cached yet, fetch synchronously (blocking)
+      if (!cachedExpansions[query]) {
+        e.preventDefault();
+        debugInfo += 'Fetching expansions (not cached)...\n';
+
+        fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            debugInfo += 'Response: ' + JSON.stringify(data, null, 2) + '\n';
+
+            if (data.success && Object.keys(data.expansions).length > 0) {
+              var expandedTerms = [];
+              for (var term in data.expansions) {
+                expandedTerms = expandedTerms.concat(data.expansions[term]);
+              }
+
+              if (expandedTerms.length > 0) {
+                var originalQuery = query;
+                var expandedQuery = query + ' ' + expandedTerms.join(' ');
+                queryInput.value = expandedQuery;
+
+                debugInfo += 'Original query: "' + originalQuery + '"\n';
+                debugInfo += 'Expanded query: "' + expandedQuery + '"\n';
+              }
+            } else {
+              debugInfo += 'No expansions found.\n';
+            }
+
+            // Show debug popup
+            alert(debugInfo);
+
+            // Disable semantic param and submit
+            var semanticInput = searchForm.querySelector('input[name="semantic"]');
+            if (semanticInput) {
+              semanticInput.disabled = true;
+            }
+            searchForm.submit();
+          })
+          .catch(function(error) {
+            debugInfo += 'Error: ' + error.message + '\n';
+            alert(debugInfo);
+            searchForm.submit();
+          });
+        return;
+      }
+
+      // Use cached expansions
+      debugInfo += 'Using cached expansions\n';
+      var expandedTerms = [];
+      for (var term in cachedExpansions[query]) {
+        expandedTerms = expandedTerms.concat(cachedExpansions[query][term]);
+      }
+
+      if (expandedTerms.length > 0) {
+        var originalQuery = query;
+        var expandedQuery = query + ' ' + expandedTerms.join(' ');
+        queryInput.value = expandedQuery;
+
+        debugInfo += 'Original query: "' + originalQuery + '"\n';
+        debugInfo += 'Expanded query: "' + expandedQuery + '"\n';
+
+        var semanticInput = searchForm.querySelector('input[name="semantic"]');
+        if (semanticInput) {
+          semanticInput.disabled = true;
+        }
+      }
+    }
+
+    // Show debug popup
+    alert(debugInfo);
+  });
 
   // Initial preview on modal open
   var modal = document.getElementById('semanticSearchModal');

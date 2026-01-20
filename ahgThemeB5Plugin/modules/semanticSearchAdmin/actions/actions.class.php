@@ -88,6 +88,8 @@ class semanticSearchAdminActions extends sfActions
     {
         $source = $request->getParameter('source');
         $search = $request->getParameter('q');
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $perPage = 50;
 
         $query = DB::table('ahg_thesaurus_term')
             ->select('ahg_thesaurus_term.*')
@@ -101,7 +103,16 @@ class semanticSearchAdminActions extends sfActions
             $query->where('term', 'LIKE', "%{$search}%");
         }
 
-        $this->terms = $query->orderBy('term')->limit(100)->get();
+        // Get total count for pagination
+        $this->totalCount = $query->count();
+        $this->currentPage = $page;
+        $this->perPage = $perPage;
+        $this->totalPages = max(1, ceil($this->totalCount / $perPage));
+
+        // Get paginated results
+        $offset = ($page - 1) * $perPage;
+        $this->terms = $query->orderBy('term')->offset($offset)->limit($perPage)->get();
+
         $this->sources = DB::table('ahg_thesaurus_term')
             ->selectRaw('source, COUNT(*) as count')
             ->groupBy('source')

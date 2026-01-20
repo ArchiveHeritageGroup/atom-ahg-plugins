@@ -102,6 +102,11 @@ class ahgSettingsMenuComponent extends sfComponent
                 'action' => 'security',
             ],
             [
+                'label' => $i18n->__('API Keys'),
+                'action' => 'apiKeys',
+                'hide' => !$this->context->getConfiguration()->isPluginEnabled('ahgAPIPlugin'),
+            ],
+            [
                 'label' => $i18n->__('Site information'),
                 'action' => 'siteInformation',
             ],
