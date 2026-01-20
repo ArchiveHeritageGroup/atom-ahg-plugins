@@ -57,6 +57,11 @@ class ahgSettingsAction extends sfAction
             'icon' => 'fa-tasks',
             'description' => 'Job queue and scheduling settings',
         ],
+        'semantic_search' => [
+            'label' => 'Semantic Search',
+            'icon' => 'fa-brain',
+            'description' => 'Thesaurus, synonyms, and query expansion settings',
+        ],
     ];
 
     /**
@@ -271,6 +276,20 @@ class ahgSettingsAction extends sfAction
                 'jobs_cleanup_days' => 30,
                 'jobs_notify_on_failure' => true,
                 'jobs_notify_email' => '',
+            ],
+            'semantic_search' => [
+                'semantic_search_enabled' => true,
+                'semantic_expansion_limit' => 5,
+                'semantic_min_weight' => 0.6,
+                'semantic_show_expansion' => true,
+                'semantic_log_searches' => true,
+                'semantic_wordnet_enabled' => true,
+                'semantic_wikidata_enabled' => false,
+                'semantic_local_synonyms' => true,
+                'semantic_ollama_enabled' => false,
+                'semantic_ollama_endpoint' => 'http://localhost:11434',
+                'semantic_ollama_model' => 'nomic-embed-text',
+                'semantic_es_synonyms_path' => '/etc/elasticsearch/synonyms/ahg_synonyms.txt',
             ],
         ];
 

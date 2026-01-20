@@ -282,6 +282,14 @@
             <input type="text" name="iptc_headline" class="form-control">
             <small class="text-muted"><?php echo __('Brief synopsis or summary'); ?></small>
           </div>
+          <div class="mb-3 field-video field-audio" style="display:none;">
+            <label class="form-label"><?php echo __('Running Time'); ?> <small class="text-muted">(<?php echo __('Minutes'); ?>)</small></label>
+            <div class="input-group" style="max-width: 200px;">
+              <input type="number" class="form-control" name="iptc_duration_minutes" min="1">
+              <span class="input-group-text"><?php echo __('min'); ?></span>
+            </div>
+            <small class="text-muted"><?php echo __('Round to nearest minute'); ?></small>
+          </div>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Caption / Description'); ?></label>
             <textarea name="iptc_caption" class="form-control" rows="3"></textarea>
@@ -336,12 +344,23 @@
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label"><?php echo __('Country'); ?></label>
+              <label class="form-label"><?php echo __('Country (Filming Location)'); ?></label>
               <input type="text" name="iptc_country" class="form-control">
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label"><?php echo __('Country Code'); ?></label>
               <input type="text" name="iptc_country_code" class="form-control" maxlength="3" placeholder="ISO 3166-1 alpha-3">
+            </div>
+          </div>
+          <div class="row field-video field-audio" style="display:none;">
+            <div class="col-md-6 mb-3">
+              <label class="form-label"><?php echo __('Production Country'); ?></label>
+              <input type="text" name="iptc_production_country" class="form-control" placeholder="e.g., Netherlands, South Africa">
+              <small class="text-muted"><?php echo __('Country where film/video was produced (may differ from filming location)'); ?></small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label"><?php echo __('Production Country Code'); ?></label>
+              <input type="text" name="iptc_production_country_code" class="form-control" maxlength="3" placeholder="e.g., NLD, ZAF">
             </div>
           </div>
         </div>

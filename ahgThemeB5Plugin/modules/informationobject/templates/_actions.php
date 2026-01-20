@@ -174,7 +174,21 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 <ul class="actions mb-3 nav gap-2">
 
   <?php if (io_check_acl($resource, 'update') || io_check_acl($resource, 'translate')) { ?>
-    <li><a href="<?php echo io_url($resource, 'informationobject', 'edit'); ?>" class="btn atom-btn-outline-light"><?php echo __('Edit'); ?></a></li>
+    <?php
+      // Use sector-specific edit page
+      $editModule = 'informationobject';
+      $currentModule = sfContext::getInstance()->getModuleName();
+      if ($currentModule === 'ahgDAMPlugin') {
+          $editModule = 'ahgDAMPlugin';
+      } elseif ($currentModule === 'ahgMuseumPlugin') {
+          $editModule = 'ahgMuseumPlugin';
+      } elseif ($currentModule === 'ahgLibraryPlugin') {
+          $editModule = 'ahgLibraryPlugin';
+      } elseif ($currentModule === 'ahgGalleryPlugin') {
+          $editModule = 'ahgGalleryPlugin';
+      }
+    ?>
+    <li><a href="<?php echo io_url($resource, $editModule, 'edit'); ?>" class="btn atom-btn-outline-light"><?php echo __('Edit'); ?></a></li>
   <?php } ?>
 
   <?php if (io_check_acl($resource, 'delete')) { ?>

@@ -37,7 +37,7 @@ if ($sf_request->hasParameter('displayMode')) {
 
   <div class="multiline-header d-flex align-items-center mb-3">
     <i class="fas fa-3x fa-file-alt me-3" aria-hidden="true"></i>
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column flex-grow-1">
       <h1 class="mb-0" aria-describedby="heading-label">
         <?php if (isset($pager) && $pager->getNbResults()) { ?>
           <?php echo __('Showing %1% results', ['%1%' => $pager->getNbResults()]); ?>
@@ -49,6 +49,12 @@ if ($sf_request->hasParameter('displayMode')) {
         <?php echo sfConfig::get('app_ui_label_informationobject'); ?>
       </span>
     </div>
+    <!-- Semantic Search Button -->
+    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#semanticSearchModal">
+      <i class="fas fa-brain me-1"></i>
+      <span class="d-none d-md-inline"><?php echo __('Semantic Search'); ?></span>
+      <span class="d-md-none"><?php echo __('Search'); ?></span>
+    </button>
   </div>
 <?php end_slot(); ?>
 
@@ -402,3 +408,6 @@ if ($sf_request->hasParameter('displayMode')) {
     <?php echo get_partial('default/pager', ['pager' => $pager]); ?>
   <?php end_slot(); ?>
 <?php } ?>
+
+<?php // Include Semantic Search Modal ?>
+<?php include_partial('informationobject/semanticSearchModal'); ?>

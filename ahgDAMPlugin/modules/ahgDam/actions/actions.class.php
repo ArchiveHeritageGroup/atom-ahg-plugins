@@ -160,6 +160,7 @@ class ahgDamActions extends sfActions
                 'creator_address' => $request->getParameter('iptc_creator_address'),
                 // Content
                 'headline' => $request->getParameter('iptc_headline'),
+                'duration_minutes' => $request->getParameter('iptc_duration_minutes') ?: null,
                 'caption' => $request->getParameter('iptc_caption'),
                 'keywords' => $request->getParameter('iptc_keywords'),
                 'iptc_subject_code' => $request->getParameter('iptc_subject_code'),
@@ -172,6 +173,8 @@ class ahgDamActions extends sfActions
                 'country' => $request->getParameter('iptc_country'),
                 'country_code' => $request->getParameter('iptc_country_code'),
                 'sublocation' => $request->getParameter('iptc_sublocation'),
+                'production_country' => $request->getParameter('iptc_production_country'),
+                'production_country_code' => $request->getParameter('iptc_production_country_code'),
                 // Copyright
                 'credit_line' => $request->getParameter('iptc_credit_line'),
                 'source' => $request->getParameter('iptc_source'),
@@ -254,7 +257,53 @@ class ahgDamActions extends sfActions
             ->whereNull('parent_id')
             ->first();
 
+        // Load AtoM administration data (repositories are actors, so name is in actor_i18n)
+        $this->repositories = DB::table('repository')
+            ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->whereNotNull('actor_i18n.authorized_form_of_name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->get();
+
+        $this->levels = DB::table('term')
+            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID)
+            ->select('term.id', 'term_i18n.name')
+            ->orderBy('term.lft')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        $this->publicationStatuses = DB::table('term')
+            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', QubitTaxonomy::PUBLICATION_STATUS_ID)
+            ->select('term.id', 'term_i18n.name')
+            ->orderBy('term_i18n.name')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        // Get current publication status
+        $this->currentPublicationStatus = DB::table('status')
+            ->where('object_id', $this->resource->id)
+            ->where('type_id', QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+            ->value('status_id') ?: QubitTerm::PUBLICATION_STATUS_DRAFT_ID;
+
+        $this->displayStandards = [
+            'isad' => 'ISAD(G)',
+            'rad' => 'RAD',
+            'dacs' => 'DACS',
+            'dc' => 'Dublin Core',
+            'mods' => 'MODS',
+        ];
+
+        // Load existing versions, holdings, and links for the form
+        $this->versions = DB::table('dam_version_links')->where('object_id', $this->resource->id)->get();
+        $this->holdings = DB::table('dam_format_holdings')->where('object_id', $this->resource->id)->get();
+        $this->links = DB::table('dam_external_links')->where('object_id', $this->resource->id)->get();
+
         if ($request->isMethod('post')) {
+            // Save AtoM core fields
+            $this->saveAtomCoreFields($request, $this->resource->id);
+
             $data = [
                 // Creator
                 'creator' => $request->getParameter('creator'),
@@ -267,14 +316,15 @@ class ahgDamActions extends sfActions
                 'creator_phone' => $request->getParameter('creator_phone'),
                 'creator_email' => $request->getParameter('creator_email'),
                 'creator_website' => $request->getParameter('creator_website'),
-                
+
                 // Content
                 'headline' => $request->getParameter('headline'),
+                'duration_minutes' => $request->getParameter('duration_minutes') ?: null,
                 'caption' => $request->getParameter('caption'),
                 'keywords' => $request->getParameter('keywords'),
                 'iptc_subject_code' => $request->getParameter('iptc_subject_code'),
                 'intellectual_genre' => $request->getParameter('intellectual_genre'),
-                
+
                 // Location
                 'date_created' => $request->getParameter('date_created') ?: null,
                 'city' => $request->getParameter('city'),
@@ -282,36 +332,38 @@ class ahgDamActions extends sfActions
                 'country' => $request->getParameter('country'),
                 'country_code' => $request->getParameter('country_code'),
                 'sublocation' => $request->getParameter('sublocation'),
-                
+                'production_country' => $request->getParameter('production_country'),
+                'production_country_code' => $request->getParameter('production_country_code'),
+
                 // Status
                 'title' => $request->getParameter('iptc_title'),
                 'job_id' => $request->getParameter('job_id'),
                 'instructions' => $request->getParameter('instructions'),
                 'credit_line' => $request->getParameter('credit_line'),
                 'source' => $request->getParameter('source'),
-                
+
                 // Copyright
                 'copyright_notice' => $request->getParameter('copyright_notice'),
                 'rights_usage_terms' => $request->getParameter('rights_usage_terms'),
-                
+
                 // Licensing
                 'license_type' => $request->getParameter('license_type') ?: null,
                 'license_url' => $request->getParameter('license_url'),
                 'license_expiry' => $request->getParameter('license_expiry') ?: null,
-                
+
                 // Releases
                 'model_release_status' => $request->getParameter('model_release_status') ?: 'none',
                 'model_release_id' => $request->getParameter('model_release_id'),
                 'property_release_status' => $request->getParameter('property_release_status') ?: 'none',
                 'property_release_id' => $request->getParameter('property_release_id'),
-                
+
                 // Artwork
                 'artwork_title' => $request->getParameter('artwork_title'),
                 'artwork_creator' => $request->getParameter('artwork_creator'),
                 'artwork_date' => $request->getParameter('artwork_date'),
                 'artwork_source' => $request->getParameter('artwork_source'),
                 'artwork_copyright' => $request->getParameter('artwork_copyright'),
-                
+
                 // People
                 'persons_shown' => $request->getParameter('persons_shown'),
 
@@ -331,7 +383,7 @@ class ahgDamActions extends sfActions
 
                 // Contributors JSON
                 'contributors_json' => $this->buildContributorsJson($request),
-                
+
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
@@ -339,8 +391,17 @@ class ahgDamActions extends sfActions
                 ->where('object_id', $this->resource->id)
                 ->update($data);
 
+            // Save alternative versions
+            $this->saveVersionLinks($request, $this->resource->id);
+
+            // Save format holdings
+            $this->saveFormatHoldings($request, $this->resource->id);
+
+            // Save external links
+            $this->saveExternalLinks($request, $this->resource->id);
+
             $this->getUser()->setFlash('success', 'IPTC metadata saved successfully');
-            
+
             if ($request->getParameter('save_and_continue')) {
                 $this->redirect(['module' => 'dam', 'action' => 'editIptc', 'slug' => $slug]);
             } else {
@@ -567,11 +628,11 @@ class ahgDamActions extends sfActions
     {
         $roles = $request->getParameter('credit_role', []);
         $names = $request->getParameter('credit_name', []);
-        
+
         if (!is_array($roles) || !is_array($names)) {
             return null;
         }
-        
+
         $contributors = [];
         foreach ($roles as $i => $role) {
             $name = $names[$i] ?? '';
@@ -582,7 +643,243 @@ class ahgDamActions extends sfActions
                 ];
             }
         }
-        
+
         return !empty($contributors) ? json_encode($contributors) : null;
+    }
+
+    /**
+     * Save alternative version links
+     */
+    protected function saveVersionLinks(sfWebRequest $request, int $objectId)
+    {
+        $ids = $request->getParameter('version_id', []);
+        $titles = $request->getParameter('version_title', []);
+        $types = $request->getParameter('version_type', []);
+        $languages = $request->getParameter('version_language', []);
+        $years = $request->getParameter('version_year', []);
+        $notes = $request->getParameter('version_notes', []);
+
+        if (!is_array($titles)) {
+            return;
+        }
+
+        // Get existing IDs
+        $existingIds = DB::table('dam_version_links')
+            ->where('object_id', $objectId)
+            ->pluck('id')
+            ->toArray();
+
+        $submittedIds = [];
+        foreach ($titles as $i => $title) {
+            if (empty(trim($title))) {
+                continue;
+            }
+
+            $data = [
+                'object_id' => $objectId,
+                'title' => trim($title),
+                'version_type' => $types[$i] ?? 'language',
+                'language_name' => $languages[$i] ?? null,
+                'year' => $years[$i] ?? null,
+                'notes' => $notes[$i] ?? null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            $id = $ids[$i] ?? null;
+            if (!empty($id)) {
+                // Update existing
+                DB::table('dam_version_links')->where('id', $id)->update($data);
+                $submittedIds[] = (int) $id;
+            } else {
+                // Insert new
+                $data['created_at'] = date('Y-m-d H:i:s');
+                DB::table('dam_version_links')->insert($data);
+            }
+        }
+
+        // Delete removed rows
+        $toDelete = array_diff($existingIds, $submittedIds);
+        if (!empty($toDelete)) {
+            DB::table('dam_version_links')->whereIn('id', $toDelete)->delete();
+        }
+    }
+
+    /**
+     * Save format holdings
+     */
+    protected function saveFormatHoldings(sfWebRequest $request, int $objectId)
+    {
+        $ids = $request->getParameter('holding_id', []);
+        $formats = $request->getParameter('holding_format', []);
+        $institutions = $request->getParameter('holding_institution', []);
+        $accessStatuses = $request->getParameter('holding_access', []);
+        $urls = $request->getParameter('holding_url', []);
+        $notes = $request->getParameter('holding_notes', []);
+
+        if (!is_array($formats)) {
+            return;
+        }
+
+        // Get existing IDs
+        $existingIds = DB::table('dam_format_holdings')
+            ->where('object_id', $objectId)
+            ->pluck('id')
+            ->toArray();
+
+        $submittedIds = [];
+        foreach ($formats as $i => $format) {
+            $institution = $institutions[$i] ?? '';
+            if (empty($format) || empty(trim($institution))) {
+                continue;
+            }
+
+            $data = [
+                'object_id' => $objectId,
+                'format_type' => $format,
+                'holding_institution' => trim($institution),
+                'access_status' => $accessStatuses[$i] ?? 'unknown',
+                'access_url' => $urls[$i] ?? null,
+                'notes' => $notes[$i] ?? null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            $id = $ids[$i] ?? null;
+            if (!empty($id)) {
+                // Update existing
+                DB::table('dam_format_holdings')->where('id', $id)->update($data);
+                $submittedIds[] = (int) $id;
+            } else {
+                // Insert new
+                $data['created_at'] = date('Y-m-d H:i:s');
+                DB::table('dam_format_holdings')->insert($data);
+            }
+        }
+
+        // Delete removed rows
+        $toDelete = array_diff($existingIds, $submittedIds);
+        if (!empty($toDelete)) {
+            DB::table('dam_format_holdings')->whereIn('id', $toDelete)->delete();
+        }
+    }
+
+    /**
+     * Save AtoM core fields (identifier, title, repository, level, publication status)
+     */
+    protected function saveAtomCoreFields(sfWebRequest $request, int $objectId)
+    {
+        // Update information_object
+        $ioData = [];
+
+        $identifier = $request->getParameter('atom_identifier');
+        if ($identifier !== null) {
+            $ioData['identifier'] = $identifier;
+        }
+
+        $repositoryId = $request->getParameter('atom_repository_id');
+        if ($repositoryId !== null) {
+            $ioData['repository_id'] = $repositoryId ?: null;
+        }
+
+        $levelId = $request->getParameter('atom_level_of_description_id');
+        if ($levelId !== null) {
+            $ioData['level_of_description_id'] = $levelId ?: null;
+        }
+
+        $displayStandardId = $request->getParameter('atom_display_standard_id');
+        if ($displayStandardId !== null) {
+            $ioData['display_standard_id'] = $displayStandardId ?: null;
+        }
+
+        if (!empty($ioData)) {
+            $ioData['updated_at'] = date('Y-m-d H:i:s');
+            DB::table('information_object')->where('id', $objectId)->update($ioData);
+        }
+
+        // Update i18n (title)
+        $title = $request->getParameter('atom_title');
+        if ($title !== null && $title !== '') {
+            DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->update(['title' => $title]);
+        }
+
+        // Update publication status
+        $pubStatusId = $request->getParameter('atom_publication_status_id');
+        if ($pubStatusId) {
+            $exists = DB::table('status')
+                ->where('object_id', $objectId)
+                ->where('type_id', QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+                ->exists();
+
+            if ($exists) {
+                DB::table('status')
+                    ->where('object_id', $objectId)
+                    ->where('type_id', QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+                    ->update(['status_id' => $pubStatusId]);
+            } else {
+                DB::table('status')->insert([
+                    'object_id' => $objectId,
+                    'type_id' => QubitTerm::STATUS_TYPE_PUBLICATION_ID,
+                    'status_id' => $pubStatusId,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Save external links
+     */
+    protected function saveExternalLinks(sfWebRequest $request, int $objectId)
+    {
+        $ids = $request->getParameter('link_id', []);
+        $types = $request->getParameter('link_type', []);
+        $urls = $request->getParameter('link_url', []);
+        $titles = $request->getParameter('link_title', []);
+        $persons = $request->getParameter('link_person', []);
+        $roles = $request->getParameter('link_role', []);
+
+        if (!is_array($urls)) {
+            return;
+        }
+
+        // Get existing IDs
+        $existingIds = DB::table('dam_external_links')
+            ->where('object_id', $objectId)
+            ->pluck('id')
+            ->toArray();
+
+        $submittedIds = [];
+        foreach ($urls as $i => $url) {
+            if (empty(trim($url))) {
+                continue;
+            }
+
+            $data = [
+                'object_id' => $objectId,
+                'link_type' => $types[$i] ?? 'Other',
+                'url' => trim($url),
+                'title' => $titles[$i] ?? null,
+                'person_name' => $persons[$i] ?? null,
+                'person_role' => $roles[$i] ?? null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            $id = $ids[$i] ?? null;
+            if (!empty($id)) {
+                // Update existing
+                DB::table('dam_external_links')->where('id', $id)->update($data);
+                $submittedIds[] = (int) $id;
+            } else {
+                // Insert new
+                $data['created_at'] = date('Y-m-d H:i:s');
+                DB::table('dam_external_links')->insert($data);
+            }
+        }
+
+        // Delete removed rows
+        $toDelete = array_diff($existingIds, $submittedIds);
+        if (!empty($toDelete)) {
+            DB::table('dam_external_links')->whereIn('id', $toDelete)->delete();
+        }
     }
 }

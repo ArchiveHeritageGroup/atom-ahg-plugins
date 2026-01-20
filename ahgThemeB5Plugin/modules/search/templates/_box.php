@@ -69,6 +69,25 @@
       ]); ?>">
         <?php echo __('Advanced search'); ?>
       </a>
+      <div class="dropdown-divider"></div>
+      <div class="px-3 py-2">
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="semantic-search-toggle"
+            name="semantic"
+            value="1"
+            <?php echo ($sf_request->getParameter('semantic') == '1') ? 'checked' : ''; ?>>
+          <label class="form-check-label" for="semantic-search-toggle">
+            <i class="fas fa-brain me-1" aria-hidden="true"></i>
+            <?php echo __('Semantic search'); ?>
+          </label>
+        </div>
+        <small class="text-muted d-block mt-1">
+          <?php echo __('Expand search with synonyms'); ?>
+        </small>
+      </div>
     </div>
     <input
       id="search-box-input"

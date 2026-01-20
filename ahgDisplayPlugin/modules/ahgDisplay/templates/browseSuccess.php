@@ -163,13 +163,47 @@ function getItemUrl($obj) {
 <?php slot('title'); ?>
   <div class="multiline-header d-flex align-items-center mb-3">
     <i class="fas fa-folder-open fa-2x text-muted me-3"></i>
-    <div>
+    <div class="flex-grow-1">
       <h1 class="mb-0 text-success"><?php echo __('Showing %1% results', ['%1%' => $total]); ?></h1>
       <span class="small text-muted">
         <?php if ($parent): ?><?php echo __('in'); ?> <?php echo esc_entities($parent->title ?: '[Untitled]') ?><?php else: ?><?php echo __('GLAM Browser'); ?><?php endif ?>
       </span>
     </div>
+    <!-- Semantic Search Button -->
+    <button type="button" class="btn btn-primary ms-3" id="openSemanticSearchBtn" onclick="openSemanticModal();">
+      <i class="fas fa-brain me-1"></i>
+      <span class="d-none d-md-inline"><?php echo __('Semantic Search'); ?></span>
+      <span class="d-md-none"><?php echo __('Search'); ?></span>
+    </button>
   </div>
+  <script>
+  function openSemanticModal() {
+    var modal = document.getElementById('semanticSearchModal');
+    var backdrop = document.getElementById('semanticSearchBackdrop');
+    if (!modal || !backdrop) { console.error('Modal not found'); return; }
+    modal.style.display = 'block';
+    backdrop.style.display = 'block';
+    setTimeout(function() {
+      modal.classList.add('show');
+      backdrop.classList.add('show');
+    }, 10);
+    document.body.classList.add('modal-open');
+    var input = document.getElementById('semantic-query-input');
+    if (input) input.focus();
+  }
+  function closeSemanticModal() {
+    var modal = document.getElementById('semanticSearchModal');
+    var backdrop = document.getElementById('semanticSearchBackdrop');
+    if (!modal || !backdrop) return;
+    modal.classList.remove('show');
+    backdrop.classList.remove('show');
+    setTimeout(function() {
+      modal.style.display = 'none';
+      backdrop.style.display = 'none';
+    }, 150);
+    document.body.classList.remove('modal-open');
+  }
+  </script>
 <?php end_slot(); ?>
 
 <?php slot('sidebar'); ?>
@@ -650,4 +684,161 @@ function getItemUrl($obj) {
       </ul>
     </nav>
   <?php endif ?>
+
+  <!-- Semantic Search Modal -->
+  <div class="modal-backdrop fade" id="semanticSearchBackdrop" style="display:none;"></div>
+<div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true" style="display:none;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="semanticSearchModalLabel">
+          <i class="fas fa-brain me-2"></i><?php echo __('Semantic Search'); ?>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" onclick="closeSemanticModal();" aria-label="<?php echo __('Close'); ?>"></button>
+      </div>
+      <form id="semantic-search-form" action="<?php echo url_for(['module' => 'ahgDisplay', 'action' => 'browse']); ?>" method="get">
+        <div class="modal-body">
+          <!-- Search Input -->
+          <div class="mb-4">
+            <label for="semantic-query-input" class="form-label fw-bold">
+              <?php echo __('Search Query'); ?>
+            </label>
+            <div class="input-group input-group-lg">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="semantic-query-input"
+                name="query"
+                value="<?php echo htmlspecialchars($sf_request->getParameter('query', '')); ?>"
+                placeholder="<?php echo __('Enter search terms...'); ?>"
+                autofocus>
+            </div>
+          </div>
+
+          <!-- Semantic Search Toggle -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="modal-semantic-toggle"
+                  name="semantic"
+                  value="1"
+                  <?php echo $sf_request->getParameter('semantic') == '1' ? 'checked' : ''; ?>>
+                <label class="form-check-label fw-bold" for="modal-semantic-toggle">
+                  <i class="fas fa-brain me-1 text-primary"></i>
+                  <?php echo __('Enable Semantic Search'); ?>
+                </label>
+              </div>
+              <p class="text-muted small mt-2 mb-0">
+                <?php echo __('When enabled, your search will be expanded with synonyms and related terms. For example, searching for "archive" will also find "repository", "depot", "record office", etc.'); ?>
+              </p>
+            </div>
+          </div>
+
+          <!-- Query Expansion Preview -->
+          <div id="expansion-preview" class="card bg-light" style="display: none;">
+            <div class="card-header">
+              <i class="fas fa-expand-arrows-alt me-1"></i>
+              <?php echo __('Query Expansion Preview'); ?>
+            </div>
+            <div class="card-body">
+              <div id="expansion-loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin me-1"></i>
+                <?php echo __('Loading expansions...'); ?>
+              </div>
+              <div id="expansion-content"></div>
+            </div>
+          </div>
+
+          <!-- Hidden fields to preserve current filters -->
+          <?php if ($typeFilter): ?><input type="hidden" name="type" value="<?php echo htmlspecialchars($typeFilter); ?>"><?php endif; ?>
+          <?php if ($repoFilter): ?><input type="hidden" name="repo" value="<?php echo htmlspecialchars($repoFilter); ?>"><?php endif; ?>
+          <?php if ($levelFilter): ?><input type="hidden" name="level" value="<?php echo htmlspecialchars($levelFilter); ?>"><?php endif; ?>
+          <input type="hidden" name="view" value="<?php echo htmlspecialchars($viewMode); ?>">
+          <input type="hidden" name="limit" value="<?php echo (int)$limit; ?>">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSemanticModal();">
+            <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i><?php echo __('Search'); ?>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var queryInput = document.getElementById('semantic-query-input');
+  var semanticToggle = document.getElementById('modal-semantic-toggle');
+  var expansionPreview = document.getElementById('expansion-preview');
+  var expansionContent = document.getElementById('expansion-content');
+  var expansionLoading = document.getElementById('expansion-loading');
+  var debounceTimer = null;
+
+  function updateExpansionPreview() {
+    var query = queryInput.value.trim();
+    var semanticEnabled = semanticToggle.checked;
+
+    if (!query || !semanticEnabled) {
+      expansionPreview.style.display = 'none';
+      return;
+    }
+
+    expansionPreview.style.display = 'block';
+    expansionLoading.style.display = 'block';
+    expansionContent.innerHTML = '';
+
+    fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        expansionLoading.style.display = 'none';
+        if (data.success && Object.keys(data.expansions).length > 0) {
+          var html = '';
+          for (var term in data.expansions) {
+            html += '<div class="mb-2"><strong>' + escapeHtml(term) + '</strong> <i class="fas fa-arrow-right text-muted mx-1"></i> ';
+            html += data.expansions[term].map(function(s) {
+              return '<span class="badge bg-secondary me-1">' + escapeHtml(s) + '</span>';
+            }).join('');
+            html += '</div>';
+          }
+          expansionContent.innerHTML = html;
+        } else {
+          expansionContent.innerHTML = '<span class="text-muted"><?php echo __('No expansions found for this query.'); ?></span>';
+        }
+      })
+      .catch(function(error) {
+        expansionLoading.style.display = 'none';
+        expansionContent.innerHTML = '<span class="text-danger"><?php echo __('Error loading expansions'); ?></span>';
+      });
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  queryInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(updateExpansionPreview, 500);
+  });
+
+  semanticToggle.addEventListener('change', updateExpansionPreview);
+
+  var modal = document.getElementById('semanticSearchModal');
+  modal.addEventListener('shown.bs.modal', function() {
+    queryInput.focus();
+    if (queryInput.value) {
+      updateExpansionPreview();
+    }
+  });
+});
+</script>
 <?php end_slot(); ?>

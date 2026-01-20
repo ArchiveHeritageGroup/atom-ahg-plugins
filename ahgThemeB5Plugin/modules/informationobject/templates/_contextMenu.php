@@ -186,6 +186,108 @@ if ('Notification' in window && Notification.permission === 'default') { Notific
 </script>
 <?php endif; ?>
 
+<!-- PII Detection Section -->
+<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<section class="sidebar-widget">
+  <h4><?php echo __('Privacy & PII'); ?></h4>
+  <ul>
+    <li>
+      <a href="#" id="piiScanBtn" onclick="scanForPii(<?php echo $resource->id ?>); return false;">
+        <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Scan for PII'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiReview']); ?>">
+        <i class="bi bi-clipboard-check me-1"></i><?php echo __('PII Review Queue'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScan']); ?>">
+        <i class="bi bi-graph-up me-1"></i><?php echo __('PII Dashboard'); ?>
+      </a>
+    </li>
+  </ul>
+</section>
+
+<!-- PII Results Modal -->
+<div class="modal fade" id="piiModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title"><i class="bi bi-shield-exclamation me-2"></i>PII Detection Results</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="piiModalBody"></div>
+      <div class="modal-footer">
+        <span id="piiRiskScore" class="me-auto"></span>
+        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiReview']); ?>" class="btn btn-warning" id="piiReviewBtn" style="display:none;">Review PII</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function scanForPii(objectId) {
+  var modal = new bootstrap.Modal(document.getElementById('piiModal'));
+  modal.show();
+  document.getElementById('piiModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-warning"></div><p class="mt-2">Scanning for PII...</p></div>';
+  document.getElementById('piiReviewBtn').style.display = 'none';
+  document.getElementById('piiRiskScore').textContent = '';
+
+  fetch('/index.php/privacyAdmin/piiScanAjax?id=' + objectId, { method: 'GET' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        document.getElementById('piiModalBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Scan failed') + '</div>';
+        return;
+      }
+      var html = '';
+      var cfg = {
+        PERSON: {icon:'bi-person-fill',color:'info',label:'People'},
+        ORG: {icon:'bi-building',color:'secondary',label:'Organizations'},
+        GPE: {icon:'bi-geo-alt-fill',color:'secondary',label:'Places'},
+        DATE: {icon:'bi-calendar',color:'secondary',label:'Dates'},
+        SA_ID: {icon:'bi-credit-card-fill',color:'danger',label:'SA ID Numbers'},
+        NG_NIN: {icon:'bi-credit-card-fill',color:'danger',label:'Nigerian NIN'},
+        PASSPORT: {icon:'bi-passport',color:'danger',label:'Passport Numbers'},
+        EMAIL: {icon:'bi-envelope-fill',color:'warning',label:'Email Addresses'},
+        PHONE_SA: {icon:'bi-telephone-fill',color:'warning',label:'Phone Numbers (SA)'},
+        PHONE_INTL: {icon:'bi-telephone-fill',color:'warning',label:'Phone Numbers (Intl)'},
+        BANK_ACCOUNT: {icon:'bi-bank',color:'danger',label:'Bank Accounts'},
+        TAX_NUMBER: {icon:'bi-file-earmark-text',color:'danger',label:'Tax Numbers'},
+        CREDIT_CARD: {icon:'bi-credit-card',color:'danger',label:'Credit Cards'}
+      };
+      var total = 0;
+      for (var type in data.entities) {
+        var items = data.entities[type];
+        if (items && items.length) {
+          total += items.length;
+          var c = cfg[type] || {icon:'bi-tag',color:'secondary',label:type};
+          html += '<div class="mb-3"><h6 class="text-'+c.color+'"><i class="'+c.icon+' me-1"></i>'+c.label+' <span class="badge bg-'+c.color+'">'+items.length+'</span></h6><div class="d-flex flex-wrap gap-2">';
+          for (var i=0; i<items.length; i++) {
+            var riskBadge = items[i].risk === 'high' || items[i].risk === 'critical' ? 'bg-danger' : (items[i].risk === 'medium' ? 'bg-warning text-dark' : 'bg-secondary');
+            html += '<span class="badge '+riskBadge+' fs-6 fw-normal" title="Confidence: '+items[i].confidence+'%">'+items[i].value+'</span>';
+          }
+          html += '</div></div>';
+        }
+      }
+      if (total === 0) { html = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>No PII detected in this record</div>'; }
+      else {
+        document.getElementById('piiReviewBtn').style.display = 'inline-block';
+        if (data.high_risk > 0) {
+          html = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i><strong>' + data.high_risk + ' high-risk PII entities detected!</strong></div>' + html;
+        }
+      }
+      document.getElementById('piiModalBody').innerHTML = html;
+      document.getElementById('piiRiskScore').innerHTML = '<span class="badge '+(data.risk_score > 50 ? 'bg-danger' : (data.risk_score > 20 ? 'bg-warning text-dark' : 'bg-success'))+'">Risk Score: '+data.risk_score+'/100</span> | Found ' + total + ' entities';
+    })
+    .catch(function(err) {
+      document.getElementById('piiModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
+    });
+}
+</script>
+<?php endif; ?>
+
 <?php if (isPluginActive('ahgExtendedRightsPlugin')): ?>
 <?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_extendedRightsContextMenu.php')) { include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); } ?>
 <?php endif; ?>

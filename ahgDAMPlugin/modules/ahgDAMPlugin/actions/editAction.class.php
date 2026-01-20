@@ -61,6 +61,11 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 $this->saveItemLocation();
                 $this->updateDisplayObjectConfig();
 
+                // Save film metadata (versions, holdings, links)
+                $this->saveVersionLinks();
+                $this->saveFormatHoldings();
+                $this->saveExternalLinks();
+
                 $this->resource->updateXmlExports();
                 $this->redirect([$this->resource, 'module' => 'informationobject']);
             }
@@ -72,8 +77,27 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
             $this->iptc = \Illuminate\Database\Capsule\Manager::table('dam_iptc_metadata')
                 ->where('object_id', $this->resource->id)
                 ->first();
+
+            // Load film metadata: versions, holdings, links
+            $this->versionLinks = \Illuminate\Database\Capsule\Manager::table('dam_version_links')
+                ->where('object_id', $this->resource->id)
+                ->orderBy('id')
+                ->get();
+
+            $this->formatHoldings = \Illuminate\Database\Capsule\Manager::table('dam_format_holdings')
+                ->where('object_id', $this->resource->id)
+                ->orderBy('id')
+                ->get();
+
+            $this->externalLinks = \Illuminate\Database\Capsule\Manager::table('dam_external_links')
+                ->where('object_id', $this->resource->id)
+                ->orderBy('id')
+                ->get();
         } else {
             $this->iptc = (object)[];
+            $this->versionLinks = collect([]);
+            $this->formatHoldings = collect([]);
+            $this->externalLinks = collect([]);
         }
         QubitDescription::addAssets($this->response);
     }
@@ -193,6 +217,9 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 'creator_city' => $request->getParameter('iptc_creator_city'),
                 'creator_address' => $request->getParameter('iptc_creator_address'),
                 'headline' => $request->getParameter('iptc_headline'),
+                'duration_minutes' => $request->getParameter('duration_minutes') ?: null,
+                'production_country' => $request->getParameter('production_country'),
+                'production_country_code' => $request->getParameter('production_country_code'),
                 'caption' => $request->getParameter('iptc_caption'),
                 'keywords' => $request->getParameter('iptc_keywords'),
                 'iptc_subject_code' => $request->getParameter('iptc_subject_code'),
@@ -343,7 +370,7 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
     {
         $roles = $request->getParameter('credit_role', []);
         $names = $request->getParameter('credit_name', []);
-        
+
         $contributors = [];
         foreach ($roles as $index => $role) {
             if (!empty($role) && !empty($names[$index])) {
@@ -353,7 +380,229 @@ class ahgDAMPluginEditAction extends sfIsadPluginEditAction
                 ];
             }
         }
-        
+
         return !empty($contributors) ? json_encode($contributors) : null;
+    }
+
+    /**
+     * Save alternative version links
+     */
+    protected function saveVersionLinks()
+    {
+        if (!$this->resource->id) return;
+
+        $request = $this->getRequest();
+        $objectId = $this->resource->id;
+
+        try {
+            $ids = $request->getParameter('version_id', []);
+            $titles = $request->getParameter('version_title', []);
+            $types = $request->getParameter('version_type', []);
+            $languages = $request->getParameter('version_language', []);
+            $languageCodes = $request->getParameter('version_language_code', []);
+            $years = $request->getParameter('version_year', []);
+            $notes = $request->getParameter('version_notes', []);
+
+            // Get existing IDs to track which to delete
+            $existingIds = \Illuminate\Database\Capsule\Manager::table('dam_version_links')
+                ->where('object_id', $objectId)
+                ->pluck('id')
+                ->toArray();
+            $processedIds = [];
+
+            foreach ($titles as $index => $title) {
+                if (empty(trim($title))) continue;
+
+                $data = [
+                    'object_id' => $objectId,
+                    'title' => trim($title),
+                    'version_type' => $types[$index] ?? 'language',
+                    'language_name' => $languages[$index] ?? null,
+                    'language_code' => $languageCodes[$index] ?? null,
+                    'year' => $years[$index] ?? null,
+                    'notes' => $notes[$index] ?? null,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $id = $ids[$index] ?? null;
+                if (!empty($id) && in_array($id, $existingIds)) {
+                    // Update existing
+                    \Illuminate\Database\Capsule\Manager::table('dam_version_links')
+                        ->where('id', $id)
+                        ->update($data);
+                    $processedIds[] = (int)$id;
+                } else {
+                    // Insert new
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                    $newId = \Illuminate\Database\Capsule\Manager::table('dam_version_links')->insertGetId($data);
+                    $processedIds[] = $newId;
+                }
+            }
+
+            // Delete removed entries
+            $toDelete = array_diff($existingIds, $processedIds);
+            if (!empty($toDelete)) {
+                \Illuminate\Database\Capsule\Manager::table('dam_version_links')
+                    ->whereIn('id', $toDelete)
+                    ->delete();
+            }
+        } catch (\Exception $e) {
+            error_log("DAM saveVersionLinks Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save format holdings at institutions
+     */
+    protected function saveFormatHoldings()
+    {
+        if (!$this->resource->id) return;
+
+        $request = $this->getRequest();
+        $objectId = $this->resource->id;
+
+        try {
+            $ids = $request->getParameter('holding_id', []);
+            $formats = $request->getParameter('holding_format', []);
+            $formatDetails = $request->getParameter('holding_format_details', []);
+            $institutions = $request->getParameter('holding_institution', []);
+            $locations = $request->getParameter('holding_location', []);
+            $accessions = $request->getParameter('holding_accession', []);
+            $conditions = $request->getParameter('holding_condition', []);
+            $accessStatuses = $request->getParameter('holding_access', []);
+            $urls = $request->getParameter('holding_url', []);
+            $accessNotes = $request->getParameter('holding_access_notes', []);
+            $verified = $request->getParameter('holding_verified', []);
+            $primaries = $request->getParameter('holding_primary', []);
+            $notes = $request->getParameter('holding_notes', []);
+
+            // Get existing IDs to track which to delete
+            $existingIds = \Illuminate\Database\Capsule\Manager::table('dam_format_holdings')
+                ->where('object_id', $objectId)
+                ->pluck('id')
+                ->toArray();
+            $processedIds = [];
+
+            foreach ($formats as $index => $format) {
+                $institution = $institutions[$index] ?? '';
+                if (empty(trim($institution))) continue;
+
+                $id = $ids[$index] ?? null;
+                $isPrimary = in_array($id, $primaries ?: []) ? 1 : 0;
+
+                $data = [
+                    'object_id' => $objectId,
+                    'format_type' => $format ?? 'Other',
+                    'format_details' => $formatDetails[$index] ?? null,
+                    'holding_institution' => trim($institution),
+                    'holding_location' => $locations[$index] ?? null,
+                    'accession_number' => $accessions[$index] ?? null,
+                    'condition_status' => $conditions[$index] ?? 'unknown',
+                    'access_status' => $accessStatuses[$index] ?? 'unknown',
+                    'access_url' => $urls[$index] ?? null,
+                    'access_notes' => $accessNotes[$index] ?? null,
+                    'verified_date' => !empty($verified[$index]) ? $verified[$index] : null,
+                    'is_primary' => $isPrimary,
+                    'notes' => $notes[$index] ?? null,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                if (!empty($id) && in_array($id, $existingIds)) {
+                    // Update existing
+                    \Illuminate\Database\Capsule\Manager::table('dam_format_holdings')
+                        ->where('id', $id)
+                        ->update($data);
+                    $processedIds[] = (int)$id;
+                } else {
+                    // Insert new
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                    $newId = \Illuminate\Database\Capsule\Manager::table('dam_format_holdings')->insertGetId($data);
+                    $processedIds[] = $newId;
+                }
+            }
+
+            // Delete removed entries
+            $toDelete = array_diff($existingIds, $processedIds);
+            if (!empty($toDelete)) {
+                \Illuminate\Database\Capsule\Manager::table('dam_format_holdings')
+                    ->whereIn('id', $toDelete)
+                    ->delete();
+            }
+        } catch (\Exception $e) {
+            error_log("DAM saveFormatHoldings Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save external reference links (ESAT, IMDb, etc.)
+     */
+    protected function saveExternalLinks()
+    {
+        if (!$this->resource->id) return;
+
+        $request = $this->getRequest();
+        $objectId = $this->resource->id;
+
+        try {
+            $ids = $request->getParameter('link_id', []);
+            $types = $request->getParameter('link_type', []);
+            $urls = $request->getParameter('link_url', []);
+            $titles = $request->getParameter('link_title', []);
+            $descriptions = $request->getParameter('link_description', []);
+            $persons = $request->getParameter('link_person', []);
+            $roles = $request->getParameter('link_role', []);
+            $verified = $request->getParameter('link_verified', []);
+            $primaries = $request->getParameter('link_primary', []);
+
+            // Get existing IDs to track which to delete
+            $existingIds = \Illuminate\Database\Capsule\Manager::table('dam_external_links')
+                ->where('object_id', $objectId)
+                ->pluck('id')
+                ->toArray();
+            $processedIds = [];
+
+            foreach ($urls as $index => $url) {
+                if (empty(trim($url))) continue;
+
+                $id = $ids[$index] ?? null;
+                $isPrimary = in_array($id, $primaries ?: []) ? 1 : 0;
+
+                $data = [
+                    'object_id' => $objectId,
+                    'link_type' => $types[$index] ?? 'Other',
+                    'url' => trim($url),
+                    'title' => $titles[$index] ?? null,
+                    'description' => $descriptions[$index] ?? null,
+                    'person_name' => $persons[$index] ?? null,
+                    'person_role' => $roles[$index] ?? null,
+                    'verified_date' => !empty($verified[$index]) ? $verified[$index] : null,
+                    'is_primary' => $isPrimary,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                if (!empty($id) && in_array($id, $existingIds)) {
+                    // Update existing
+                    \Illuminate\Database\Capsule\Manager::table('dam_external_links')
+                        ->where('id', $id)
+                        ->update($data);
+                    $processedIds[] = (int)$id;
+                } else {
+                    // Insert new
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                    $newId = \Illuminate\Database\Capsule\Manager::table('dam_external_links')->insertGetId($data);
+                    $processedIds[] = $newId;
+                }
+            }
+
+            // Delete removed entries
+            $toDelete = array_diff($existingIds, $processedIds);
+            if (!empty($toDelete)) {
+                \Illuminate\Database\Capsule\Manager::table('dam_external_links')
+                    ->whereIn('id', $toDelete)
+                    ->delete();
+            }
+        } catch (\Exception $e) {
+            error_log("DAM saveExternalLinks Error: " . $e->getMessage());
+        }
     }
 }

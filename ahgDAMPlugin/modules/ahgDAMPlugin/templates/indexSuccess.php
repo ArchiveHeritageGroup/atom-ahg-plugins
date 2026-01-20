@@ -109,8 +109,8 @@
       <?php endif; ?>
     <?php endif; ?>
     <?php if (in_array('ahgLoanPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $sf_user->isAuthenticated()): ?>
-      <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'dam', 'object_id' => $rawResource->id]); ?>" class="btn btn-xs btn-outline-warning" title="<?php echo __('New License'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-contract"></i></a>
-      <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'dam', 'object_id' => $rawResource->id]); ?>" class="btn btn-xs btn-outline-info" title="<?php echo __('Manage Licenses'); ?>" data-bs-toggle="tooltip"><i class="fas fa-exchange-alt"></i></a>
+      <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'dam', 'object_id' => $rawResource->id]); ?>" class="btn btn-xs btn-outline-warning" title="<?php echo __('New Loan'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-contract"></i></a>
+      <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'dam', 'object_id' => $rawResource->id]); ?>" class="btn btn-xs btn-outline-info" title="<?php echo __('Manage Loans'); ?>" data-bs-toggle="tooltip"><i class="fas fa-exchange-alt"></i></a>
     <?php endif; ?>
   </div>
 
@@ -153,13 +153,14 @@
   <?php endif; ?>
 
   <!-- IPTC Content Description -->
-  <?php if ($iptc && (!empty($iptc->headline) || !empty($iptc->caption) || !empty($iptc->keywords))): ?>
+  <?php if ($iptc && (!empty($iptc->headline) || !empty($iptc->caption) || !empty($iptc->keywords) || !empty($iptc->duration_minutes))): ?>
   <section class="card mb-3">
     <div class="card-header bg-success text-white">
       <h4 class="mb-0"><i class="fas fa-align-left"></i> <?php echo __('IPTC - Content Description'); ?></h4>
     </div>
     <div class="card-body">
       <?php if (!empty($iptc->headline)) echo render_show(__('Headline'), $iptc->headline); ?>
+      <?php if (!empty($iptc->duration_minutes)) echo render_show(__('Running Time'), $iptc->duration_minutes . ' ' . __('minutes')); ?>
       <?php if (!empty($iptc->caption)) echo render_show(__('Caption / Description'), nl2br(esc_entities($iptc->caption))); ?>
       <?php if (!empty($iptc->keywords)) echo render_show(__('Keywords'), $iptc->keywords); ?>
       <?php if (!empty($iptc->iptc_subject_code)) echo render_show(__('IPTC Subject Code'), $iptc->iptc_subject_code); ?>
@@ -170,7 +171,7 @@
   <?php endif; ?>
 
   <!-- IPTC Location -->
-  <?php if ($iptc && (!empty($iptc->city) || !empty($iptc->country) || !empty($iptc->date_created))): ?>
+  <?php if ($iptc && (!empty($iptc->city) || !empty($iptc->country) || !empty($iptc->date_created) || !empty($iptc->production_country))): ?>
   <section class="card mb-3">
     <div class="card-header bg-info text-white">
       <h4 class="mb-0"><i class="fas fa-map-marker-alt"></i> <?php echo __('IPTC - Location'); ?></h4>
@@ -180,8 +181,9 @@
       <?php if (!empty($iptc->sublocation)) echo render_show(__('Sublocation'), $iptc->sublocation); ?>
       <?php if (!empty($iptc->city)) echo render_show(__('City'), $iptc->city); ?>
       <?php if (!empty($iptc->state_province)) echo render_show(__('State / Province'), $iptc->state_province); ?>
-      <?php if (!empty($iptc->country)) echo render_show(__('Country'), $iptc->country . (!empty($iptc->country_code) ? ' (' . $iptc->country_code . ')' : '')); ?>
-      
+      <?php if (!empty($iptc->country)) echo render_show(__('Country (Filming)'), $iptc->country . (!empty($iptc->country_code) ? ' (' . $iptc->country_code . ')' : '')); ?>
+      <?php if (!empty($iptc->production_country)) echo render_show(__('Country (Production)'), $iptc->production_country . (!empty($iptc->production_country_code) ? ' (' . $iptc->production_country_code . ')' : '')); ?>
+
       <?php if (!empty($iptc->gps_latitude) && !empty($iptc->gps_longitude)): ?>
         <div class="field">
           <h3><?php echo __('GPS Coordinates'); ?></h3>
@@ -368,6 +370,150 @@
           <?php echo render_show(__('Bit Depth'), $iptc->bit_depth); ?>
         </div>
         <?php endif; ?>
+      </div>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- Alternative Versions -->
+  <?php
+  $versions = DB::table('dam_version_links')->where('object_id', $resource->id)->get();
+  ?>
+  <?php if (count($versions) > 0): ?>
+  <section class="card mb-3">
+    <div class="card-header" style="background-color: #17a2b8; color: white;">
+      <h4 class="mb-0"><i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?></h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-sm table-striped mb-0">
+        <thead>
+          <tr>
+            <th><?php echo __('Title'); ?></th>
+            <th><?php echo __('Type'); ?></th>
+            <th><?php echo __('Language'); ?></th>
+            <th><?php echo __('Year'); ?></th>
+            <th><?php echo __('Notes'); ?></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($versions as $v): ?>
+          <tr>
+            <td><?php echo esc_entities($v->title); ?></td>
+            <td><?php echo ucfirst(str_replace('_', ' ', $v->version_type)); ?></td>
+            <td><?php echo esc_entities($v->language_name); ?></td>
+            <td><?php echo esc_entities($v->year); ?></td>
+            <td><?php echo esc_entities($v->notes); ?></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- Format Holdings -->
+  <?php
+  $holdings = DB::table('dam_format_holdings')->where('object_id', $resource->id)->get();
+  ?>
+  <?php if (count($holdings) > 0): ?>
+  <section class="card mb-3">
+    <div class="card-header" style="background-color: #6c757d; color: white;">
+      <h4 class="mb-0"><i class="fas fa-film"></i> <?php echo __('Format Holdings & Access'); ?></h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-sm table-striped mb-0">
+        <thead>
+          <tr>
+            <th><?php echo __('Format'); ?></th>
+            <th><?php echo __('Institution'); ?></th>
+            <th><?php echo __('Access'); ?></th>
+            <th><?php echo __('Link'); ?></th>
+            <th><?php echo __('Notes'); ?></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          $accessLabels = [
+            'available' => __('Available'),
+            'restricted' => __('Restricted'),
+            'preservation_only' => __('Preservation Only'),
+            'digitized_available' => __('Digitized Available'),
+            'on_request' => __('On Request'),
+            'staff_only' => __('Staff Only'),
+            'unknown' => __('Unknown'),
+          ];
+          ?>
+          <?php foreach ($holdings as $h): ?>
+          <tr>
+            <td><?php echo str_replace('_', ' ', $h->format_type); ?></td>
+            <td><?php echo esc_entities($h->holding_institution); ?></td>
+            <td>
+              <?php
+              $badge = 'secondary';
+              if ($h->access_status == 'available' || $h->access_status == 'digitized_available') $badge = 'success';
+              elseif ($h->access_status == 'restricted' || $h->access_status == 'staff_only') $badge = 'warning';
+              elseif ($h->access_status == 'preservation_only') $badge = 'danger';
+              ?>
+              <span class="badge bg-<?php echo $badge; ?>"><?php echo $accessLabels[$h->access_status] ?? $h->access_status; ?></span>
+            </td>
+            <td>
+              <?php if (!empty($h->access_url)): ?>
+              <a href="<?php echo esc_entities($h->access_url); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-external-link-alt"></i> <?php echo __('View'); ?>
+              </a>
+              <?php endif; ?>
+            </td>
+            <td><?php echo esc_entities($h->notes); ?></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- External Links -->
+  <?php
+  $links = DB::table('dam_external_links')->where('object_id', $resource->id)->get();
+  ?>
+  <?php if (count($links) > 0): ?>
+  <section class="card mb-3">
+    <div class="card-header" style="background-color: #28a745; color: white;">
+      <h4 class="mb-0"><i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?></h4>
+    </div>
+    <div class="card-body">
+      <div class="list-group list-group-flush">
+        <?php
+        $linkIcons = [
+          'ESAT' => 'fa-book',
+          'IMDb' => 'fa-film',
+          'NFVSA' => 'fa-archive',
+          'Wikipedia' => 'fa-wikipedia-w fab',
+          'Wikidata' => 'fa-database',
+          'VIAF' => 'fa-id-card',
+          'YouTube' => 'fa-youtube fab',
+          'Vimeo' => 'fa-vimeo fab',
+          'Archive_org' => 'fa-archive',
+          'BFI' => 'fa-film',
+          'AFI' => 'fa-film',
+          'Academic' => 'fa-graduation-cap',
+          'Press' => 'fa-newspaper',
+          'Review' => 'fa-star',
+          'Other' => 'fa-link',
+        ];
+        ?>
+        <?php foreach ($links as $link): ?>
+        <a href="<?php echo esc_entities($link->url); ?>" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div>
+            <i class="<?php echo $linkIcons[$link->link_type] ?? 'fas fa-link'; ?> me-2"></i>
+            <strong><?php echo esc_entities($link->title ?: $link->link_type); ?></strong>
+            <?php if (!empty($link->person_name)): ?>
+              <span class="text-muted ms-2">(<?php echo esc_entities($link->person_name); ?><?php if (!empty($link->person_role)) echo ' - ' . esc_entities($link->person_role); ?>)</span>
+            <?php endif; ?>
+          </div>
+          <span class="badge bg-secondary"><?php echo str_replace('_', '.', $link->link_type); ?></span>
+        </a>
+        <?php endforeach; ?>
       </div>
     </div>
   </section>

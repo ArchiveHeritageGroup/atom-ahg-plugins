@@ -283,13 +283,24 @@ HTML;
      */
     private function convertFormat(string $htmlContent, string $format, array $variables): string
     {
-        if (self::FORMAT_PDF === $format && class_exists('Dompdf\Dompdf')) {
-            $dompdf = new \Dompdf\Dompdf();
-            $dompdf->loadHtml($htmlContent);
-            $dompdf->setPaper('A4', 'portrait');
-            $dompdf->render();
+        if (self::FORMAT_PDF === $format) {
+            // Ensure composer autoloader is loaded for Dompdf
+            $autoloader = \sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
+            if (file_exists($autoloader)) {
+                require_once $autoloader;
+            }
 
-            return $dompdf->output();
+            if (class_exists('Dompdf\Dompdf')) {
+                $dompdf = new \Dompdf\Dompdf([
+                    'isRemoteEnabled' => true,
+                    'defaultFont' => 'serif',
+                ]);
+                $dompdf->loadHtml($htmlContent);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+
+                return $dompdf->output();
+            }
         }
 
         return $htmlContent;

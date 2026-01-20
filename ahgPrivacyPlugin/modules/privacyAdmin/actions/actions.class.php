@@ -891,4 +891,200 @@ class privacyAdminActions extends sfActions
         $this->getUser()->setFlash('success', 'All notifications marked as read');
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'notifications']);
     }
+
+    // =====================
+    // PII Detection
+    // =====================
+
+    protected function getPiiService(): \ahgPrivacyPlugin\Service\PiiDetectionService
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiDetectionService.php';
+        return new \ahgPrivacyPlugin\Service\PiiDetectionService();
+    }
+
+    public function executePiiScan(sfWebRequest $request)
+    {
+        $piiService = $this->getPiiService();
+        $this->stats = $piiService->getStatistics();
+        $this->repositories = DB::table('repository')
+            ->join('actor_i18n', function($j) {
+                $j->on('actor_i18n.id', '=', 'repository.id')
+                  ->where('actor_i18n.culture', '=', 'en');
+            })
+            ->select(['repository.id', 'actor_i18n.authorized_form_of_name as name'])
+            ->orderBy('name')
+            ->get();
+
+        // Get recent high-risk objects
+        $this->highRiskObjects = DB::table('ahg_ner_extraction as e')
+            ->join('information_object_i18n as i18n', function($j) {
+                $j->on('i18n.id', '=', 'e.object_id')->where('i18n.culture', '=', 'en');
+            })
+            ->where('e.backend_used', 'pii_detector')
+            ->where('e.entity_count', '>', 0)
+            ->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('ahg_ner_entity')
+                  ->whereColumn('ahg_ner_entity.extraction_id', 'e.id')
+                  ->where('ahg_ner_entity.status', 'flagged');
+            })
+            ->select(['e.object_id', 'i18n.title', 'e.entity_count', 'e.extracted_at'])
+            ->orderByDesc('e.extracted_at')
+            ->limit(20)
+            ->get();
+    }
+
+    public function executePiiScanRun(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
+        }
+
+        $piiService = $this->getPiiService();
+        $filters = [];
+
+        if ($request->getParameter('repository_id')) {
+            $filters['repository_id'] = (int)$request->getParameter('repository_id');
+        }
+
+        $limit = (int)$request->getParameter('limit', 50);
+        $results = $piiService->batchScan($filters, $limit);
+
+        $this->getUser()->setFlash('success', sprintf(
+            'Scanned %d objects. Found PII in %d objects (%d high-risk).',
+            $results['scanned'],
+            $results['with_pii'],
+            $results['high_risk']
+        ));
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
+    }
+
+    public function executePiiScanObject(sfWebRequest $request)
+    {
+        $objectId = (int)$request->getParameter('id');
+        if (!$objectId) {
+            $this->forward404();
+        }
+
+        $piiService = $this->getPiiService();
+        $this->scanResult = $piiService->scanObject($objectId);
+        $this->object = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', 'en')
+            ->first();
+
+        if ($request->isMethod('post') && $request->getParameter('save')) {
+            $piiService->saveScanResults($objectId, $this->scanResult, $this->getUserId());
+            $this->getUser()->setFlash('success', 'PII scan results saved');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScanObject', 'id' => $objectId]);
+        }
+    }
+
+    public function executePiiReview(sfWebRequest $request)
+    {
+        // Get pending PII entities for review
+        $this->entities = DB::table('ahg_ner_entity as e')
+            ->join('ahg_ner_extraction as ex', 'ex.id', '=', 'e.extraction_id')
+            ->join('information_object_i18n as i18n', function($j) {
+                $j->on('i18n.id', '=', 'e.object_id')->where('i18n.culture', '=', 'en');
+            })
+            ->where('ex.backend_used', 'pii_detector')
+            ->whereIn('e.status', ['pending', 'flagged'])
+            ->select([
+                'e.id', 'e.object_id', 'e.entity_type', 'e.entity_value',
+                'e.confidence', 'e.status', 'e.created_at',
+                'i18n.title as object_title'
+            ])
+            ->orderByDesc('e.status') // flagged first
+            ->orderByDesc('e.created_at')
+            ->limit(100)
+            ->get();
+    }
+
+    public function executePiiEntityAction(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $entityId = (int)$request->getParameter('entity_id');
+        $action = $request->getParameter('entity_action');
+
+        $validActions = ['approved', 'rejected', 'redacted'];
+        if (!in_array($action, $validActions)) {
+            $this->getUser()->setFlash('error', 'Invalid action');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiReview']);
+        }
+
+        DB::table('ahg_ner_entity')
+            ->where('id', $entityId)
+            ->update([
+                'status' => $action,
+                'reviewed_by' => $this->getUserId(),
+                'reviewed_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->getUser()->setFlash('success', 'Entity marked as ' . $action);
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->renderText(json_encode(['success' => true]));
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiReview']);
+    }
+
+    /**
+     * AJAX endpoint for single-object PII scan (called from information object page)
+     */
+    public function executePiiScanAjax(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = (int)$request->getParameter('id');
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $piiService = $this->getPiiService();
+            $result = $piiService->scanObject($objectId);
+
+            // Save results if entities found
+            if ($result['summary']['total'] > 0) {
+                $piiService->saveScanResults($objectId, $result, $this->getUserId());
+            }
+
+            // Format entities by type for display
+            $entitiesByType = [];
+            foreach ($result['entities'] as $entity) {
+                $type = $entity['type'];
+                if (!isset($entitiesByType[$type])) {
+                    $entitiesByType[$type] = [];
+                }
+                $entitiesByType[$type][] = [
+                    'value' => $entity['value'],
+                    'risk' => $entity['risk_level'],
+                    'confidence' => round($entity['confidence'] * 100),
+                ];
+            }
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'entity_count' => $result['summary']['total'],
+                'high_risk' => $result['summary']['high_risk'],
+                'risk_score' => $result['risk_score'],
+                'entities' => $entitiesByType,
+                'summary' => $result['summary'],
+            ]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
 }

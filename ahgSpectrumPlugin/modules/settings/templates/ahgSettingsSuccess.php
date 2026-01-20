@@ -602,7 +602,215 @@ slot('title', $title);
                                     </div>
                                 </fieldset>
                             <?php break; ?>
-                            
+
+                            <?php case 'semantic_search': ?>
+                                <!-- Semantic Search Settings -->
+                                <fieldset class="mb-4">
+                                    <legend><?php echo __('Search Configuration'); ?></legend>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Enable Semantic Search'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_search_enabled" name="settings[semantic_search_enabled]" value="true" <?php echo ($settings['semantic_search_enabled'] ?? true) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_search_enabled"><?php echo __('Expand searches with synonyms and related terms'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="semantic_expansion_limit"><?php echo __('Expansion Limit'); ?></label>
+                                        <div class="col-sm-9">
+                                            <input type="number" class="form-control" id="semantic_expansion_limit" name="settings[semantic_expansion_limit]" value="<?php echo $settings['semantic_expansion_limit'] ?? 5; ?>" min="1" max="20">
+                                            <small class="form-text text-muted"><?php echo __('Maximum number of synonyms to add per search term'); ?></small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="semantic_min_weight"><?php echo __('Minimum Weight'); ?></label>
+                                        <div class="col-sm-9">
+                                            <input type="number" class="form-control" id="semantic_min_weight" name="settings[semantic_min_weight]" value="<?php echo $settings['semantic_min_weight'] ?? 0.6; ?>" min="0" max="1" step="0.1">
+                                            <small class="form-text text-muted"><?php echo __('Only include synonyms with weight above this threshold (0.0-1.0)'); ?></small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Show Expansion Info'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_show_expansion" name="settings[semantic_show_expansion]" value="true" <?php echo ($settings['semantic_show_expansion'] ?? true) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_show_expansion"><?php echo __('Display expanded terms to users on search results'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Log Searches'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_log_searches" name="settings[semantic_log_searches]" value="true" <?php echo ($settings['semantic_log_searches'] ?? true) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_log_searches"><?php echo __('Log search queries for analytics'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="mb-4">
+                                    <legend><?php echo __('Data Sources'); ?></legend>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Local Synonyms'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_local_synonyms" name="settings[semantic_local_synonyms]" value="true" <?php echo ($settings['semantic_local_synonyms'] ?? true) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_local_synonyms"><?php echo __('Use local JSON synonym files (archival, library, museum, SA heritage)'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('WordNet (Datamuse)'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_wordnet_enabled" name="settings[semantic_wordnet_enabled]" value="true" <?php echo ($settings['semantic_wordnet_enabled'] ?? true) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_wordnet_enabled"><?php echo __('Enable WordNet synonyms via Datamuse API'); ?></label>
+                                            </div>
+                                            <small class="form-text text-muted"><?php echo __('Free API, rate limited to 100ms between requests'); ?></small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Wikidata'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_wikidata_enabled" name="settings[semantic_wikidata_enabled]" value="true" <?php echo ($settings['semantic_wikidata_enabled'] ?? false) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_wikidata_enabled"><?php echo __('Enable Wikidata SPARQL for heritage terminology'); ?></label>
+                                            </div>
+                                            <small class="form-text text-muted"><?php echo __('Free API, rate limited to 500ms between requests'); ?></small>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="mb-4">
+                                    <legend><?php echo __('Vector Embeddings (Optional)'); ?></legend>
+
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        <?php echo __('Vector embeddings require Ollama running locally. This enables semantic similarity search.'); ?>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label"><?php echo __('Enable Embeddings'); ?></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="semantic_ollama_enabled" name="settings[semantic_ollama_enabled]" value="true" <?php echo ($settings['semantic_ollama_enabled'] ?? false) ? 'checked' : ''; ?>>
+                                                <label class="custom-control-label" for="semantic_ollama_enabled"><?php echo __('Use Ollama for vector embeddings'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="semantic_ollama_endpoint"><?php echo __('Ollama Endpoint'); ?></label>
+                                        <div class="col-sm-9">
+                                            <input type="url" class="form-control" id="semantic_ollama_endpoint" name="settings[semantic_ollama_endpoint]" value="<?php echo htmlspecialchars($settings['semantic_ollama_endpoint'] ?? 'http://localhost:11434'); ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="semantic_ollama_model"><?php echo __('Embedding Model'); ?></label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" id="semantic_ollama_model" name="settings[semantic_ollama_model]">
+                                                <option value="nomic-embed-text" <?php echo ($settings['semantic_ollama_model'] ?? 'nomic-embed-text') === 'nomic-embed-text' ? 'selected' : ''; ?>>nomic-embed-text (Recommended)</option>
+                                                <option value="mxbai-embed-large" <?php echo ($settings['semantic_ollama_model'] ?? '') === 'mxbai-embed-large' ? 'selected' : ''; ?>>mxbai-embed-large</option>
+                                                <option value="all-minilm" <?php echo ($settings['semantic_ollama_model'] ?? '') === 'all-minilm' ? 'selected' : ''; ?>>all-minilm (Faster)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="mb-4">
+                                    <legend><?php echo __('Elasticsearch Integration'); ?></legend>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="semantic_es_synonyms_path"><?php echo __('Synonyms File Path'); ?></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control font-monospace" id="semantic_es_synonyms_path" name="settings[semantic_es_synonyms_path]" value="<?php echo htmlspecialchars($settings['semantic_es_synonyms_path'] ?? '/etc/elasticsearch/synonyms/ahg_synonyms.txt'); ?>">
+                                            <small class="form-text text-muted"><?php echo __('Path to export synonyms for Elasticsearch synonym filter'); ?></small>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Thesaurus Statistics -->
+                                <fieldset class="mb-4">
+                                    <legend><?php echo __('Thesaurus Status'); ?></legend>
+                                    <?php
+                                    // Load thesaurus stats
+                                    try {
+                                        $termCount = DB::table('ahg_thesaurus_term')->where('is_active', true)->count();
+                                        $synonymCount = DB::table('ahg_thesaurus_synonym')->where('is_active', true)->count();
+                                        $bySource = DB::table('ahg_thesaurus_term')
+                                            ->where('is_active', true)
+                                            ->selectRaw('source, COUNT(*) as count')
+                                            ->groupBy('source')
+                                            ->pluck('count', 'source')
+                                            ->toArray();
+                                    } catch (Exception $e) {
+                                        $termCount = 0;
+                                        $synonymCount = 0;
+                                        $bySource = [];
+                                    }
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h3 class="text-primary"><?php echo number_format($termCount); ?></h3>
+                                                    <p class="mb-0 text-muted"><?php echo __('Terms'); ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h3 class="text-success"><?php echo number_format($synonymCount); ?></h3>
+                                                    <p class="mb-0 text-muted"><?php echo __('Synonyms'); ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h3 class="text-info"><?php echo count($bySource); ?></h3>
+                                                    <p class="mb-0 text-muted"><?php echo __('Sources'); ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <?php if (!empty($bySource)): ?>
+                                    <div class="mt-3">
+                                        <strong><?php echo __('Terms by Source:'); ?></strong>
+                                        <ul class="list-inline mb-0 mt-2">
+                                            <?php foreach ($bySource as $source => $count): ?>
+                                                <li class="list-inline-item">
+                                                    <span class="badge badge-secondary"><?php echo ucfirst($source); ?>: <?php echo $count; ?></span>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <hr>
+                                    <p class="mb-2"><strong><?php echo __('CLI Commands:'); ?></strong></p>
+                                    <div class="font-monospace small bg-light p-2 rounded">
+                                        <code>php bin/atom thesaurus:stats</code> - <?php echo __('View statistics'); ?><br>
+                                        <code>php bin/atom thesaurus:import-local</code> - <?php echo __('Import local synonyms'); ?><br>
+                                        <code>php bin/atom thesaurus:sync-wordnet --archival</code> - <?php echo __('Sync from WordNet'); ?><br>
+                                        <code>php bin/atom thesaurus:export-es</code> - <?php echo __('Export to Elasticsearch'); ?>
+                                    </div>
+                                </fieldset>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
                         
                         <!-- Submit Button -->

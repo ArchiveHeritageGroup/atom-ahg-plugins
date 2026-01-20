@@ -120,23 +120,34 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label"><?php echo __('Production Company'); ?></label>
-            <input type="text" class="form-control" name="production_company" value="<?php echo esc_entities($iptc->production_company ?? ''); ?>" placeholder="<?php echo __('e.g., VPRO, SABC'); ?>">
+          <div class="col-md-3 mb-3">
+            <label class="form-label"><?php echo __('Running Time'); ?></label>
+            <div class="input-group">
+              <input type="number" class="form-control" name="duration_minutes" min="1" value="<?php echo esc_entities($iptc->duration_minutes ?? ''); ?>">
+              <span class="input-group-text"><?php echo __('min'); ?></span>
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-md-5 mb-3">
+            <label class="form-label"><?php echo __('Production Company'); ?></label>
+            <input type="text" class="form-control" name="production_company" value="<?php echo esc_entities($iptc->production_company ?? ''); ?>" placeholder="<?php echo __('e.g., African Film Productions'); ?>">
+          </div>
+          <div class="col-md-4 mb-3">
             <label class="form-label"><?php echo __('Distributor / Broadcaster'); ?></label>
             <input type="text" class="form-control" name="distributor" value="<?php echo esc_entities($iptc->distributor ?? ''); ?>">
           </div>
         </div>
         <div class="row">
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
             <label class="form-label"><?php echo __('Broadcast / Release Date'); ?></label>
-            <input type="text" class="form-control" name="broadcast_date" value="<?php echo esc_entities($iptc->broadcast_date ?? ''); ?>" placeholder="<?php echo __('e.g., 2006'); ?>">
+            <input type="text" class="form-control" name="broadcast_date" value="<?php echo esc_entities($iptc->broadcast_date ?? ''); ?>" placeholder="<?php echo __('e.g., 1954'); ?>">
           </div>
-          <div class="col-md-4 mb-3">
-            <label class="form-label"><?php echo __('Series Title'); ?></label>
-            <input type="text" class="form-control" name="series_title" value="<?php echo esc_entities($iptc->series_title ?? ''); ?>">
+          <div class="col-md-3 mb-3">
+            <label class="form-label"><?php echo __('Production Country'); ?></label>
+            <input type="text" class="form-control" name="production_country" value="<?php echo esc_entities($iptc->production_country ?? ''); ?>" placeholder="<?php echo __('e.g., South Africa'); ?>">
+          </div>
+          <div class="col-md-2 mb-3">
+            <label class="form-label"><?php echo __('Country Code'); ?></label>
+            <input type="text" class="form-control" name="production_country_code" maxlength="3" value="<?php echo esc_entities($iptc->production_country_code ?? ''); ?>" placeholder="<?php echo __('ZAF'); ?>">
           </div>
           <div class="col-md-2 mb-3">
             <label class="form-label"><?php echo __('Season'); ?></label>
@@ -147,9 +158,15 @@
             <input type="number" class="form-control" name="episode_number" value="<?php echo esc_entities($iptc->episode_number ?? ''); ?>">
           </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label"><?php echo __('Awards / Recognition'); ?></label>
-          <textarea class="form-control" name="awards" rows="2" placeholder="<?php echo __('e.g., Nominated for Golden Calf Award 2006'); ?>"><?php echo esc_entities($iptc->awards ?? ''); ?></textarea>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Series Title'); ?></label>
+            <input type="text" class="form-control" name="series_title" value="<?php echo esc_entities($iptc->series_title ?? ''); ?>">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label"><?php echo __('Awards / Recognition'); ?></label>
+            <input type="text" class="form-control" name="awards" value="<?php echo esc_entities($iptc->awards ?? ''); ?>" placeholder="<?php echo __('e.g., Nominated for Golden Calf Award'); ?>">
+          </div>
         </div>
       </div>
     </div>
@@ -614,6 +631,281 @@
       </div>
     </div>
 
+    <!-- Alternative Versions (Film/Video) -->
+    <div class="card mb-3">
+      <div class="card-header" style="background-color: #17a2b8; color: white;">
+        <i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small"><?php echo __('Other language versions, formats, or edits of this work'); ?></p>
+        <div id="versions-container">
+          <?php foreach ($versionLinks as $v): ?>
+          <div class="version-row border rounded p-2 mb-2 bg-light">
+            <input type="hidden" name="version_id[]" value="<?php echo $v->id; ?>">
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <label class="form-label small"><?php echo __('Title'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="version_title[]" value="<?php echo esc_entities($v->title); ?>" placeholder="<?php echo __('e.g., Kuddes van die veld'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Type'); ?></label>
+                <select class="form-select form-select-sm" name="version_type[]">
+                  <option value="language" <?php echo $v->version_type == 'language' ? 'selected' : ''; ?>><?php echo __('Language'); ?></option>
+                  <option value="format" <?php echo $v->version_type == 'format' ? 'selected' : ''; ?>><?php echo __('Format'); ?></option>
+                  <option value="restoration" <?php echo $v->version_type == 'restoration' ? 'selected' : ''; ?>><?php echo __('Restoration'); ?></option>
+                  <option value="directors_cut" <?php echo $v->version_type == 'directors_cut' ? 'selected' : ''; ?>><?php echo __("Director's Cut"); ?></option>
+                  <option value="censored" <?php echo $v->version_type == 'censored' ? 'selected' : ''; ?>><?php echo __('Censored'); ?></option>
+                  <option value="other" <?php echo $v->version_type == 'other' ? 'selected' : ''; ?>><?php echo __('Other'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Language'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="version_language[]" value="<?php echo esc_entities($v->language_name); ?>" placeholder="<?php echo __('Afrikaans'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('ISO Code'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="version_language_code[]" value="<?php echo esc_entities($v->language_code); ?>" maxlength="3" placeholder="<?php echo __('afr'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Year'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="version_year[]" value="<?php echo esc_entities($v->year); ?>" placeholder="<?php echo __('1954'); ?>">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-11">
+                <label class="form-label small"><?php echo __('Notes'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="version_notes[]" value="<?php echo esc_entities($v->notes); ?>" placeholder="<?php echo __('Additional information about this version'); ?>">
+              </div>
+              <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-version w-100"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="addVersionBtn">
+          <i class="fas fa-plus"></i> <?php echo __('Add Version'); ?>
+        </button>
+      </div>
+    </div>
+
+    <!-- Format Holdings (Film/Video) -->
+    <div class="card mb-3">
+      <div class="card-header" style="background-color: #6c757d; color: white;">
+        <i class="fas fa-archive"></i> <?php echo __('Format Holdings & Access'); ?>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small"><?php echo __('Physical formats held at institutions'); ?></p>
+        <div id="holdings-container">
+          <?php foreach ($formatHoldings as $h): ?>
+          <div class="holding-row border rounded p-2 mb-2 bg-light">
+            <input type="hidden" name="holding_id[]" value="<?php echo $h->id; ?>">
+            <div class="row mb-2">
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Format'); ?></label>
+                <select class="form-select form-select-sm" name="holding_format[]">
+                  <optgroup label="<?php echo __('Film'); ?>">
+                    <option value="35mm" <?php echo $h->format_type == '35mm' ? 'selected' : ''; ?>>35mm</option>
+                    <option value="16mm" <?php echo $h->format_type == '16mm' ? 'selected' : ''; ?>>16mm</option>
+                    <option value="8mm" <?php echo $h->format_type == '8mm' ? 'selected' : ''; ?>>8mm</option>
+                    <option value="Super8" <?php echo $h->format_type == 'Super8' ? 'selected' : ''; ?>>Super 8</option>
+                    <option value="Nitrate" <?php echo $h->format_type == 'Nitrate' ? 'selected' : ''; ?>><?php echo __('Nitrate'); ?></option>
+                    <option value="Safety" <?php echo $h->format_type == 'Safety' ? 'selected' : ''; ?>><?php echo __('Safety'); ?></option>
+                    <option value="Polyester" <?php echo $h->format_type == 'Polyester' ? 'selected' : ''; ?>><?php echo __('Polyester'); ?></option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Video'); ?>">
+                    <option value="VHS" <?php echo $h->format_type == 'VHS' ? 'selected' : ''; ?>>VHS</option>
+                    <option value="Betacam" <?php echo $h->format_type == 'Betacam' ? 'selected' : ''; ?>>Betacam</option>
+                    <option value="U-matic" <?php echo $h->format_type == 'U-matic' ? 'selected' : ''; ?>>U-matic</option>
+                    <option value="DV" <?php echo $h->format_type == 'DV' ? 'selected' : ''; ?>>DV</option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Digital'); ?>">
+                    <option value="DVD" <?php echo $h->format_type == 'DVD' ? 'selected' : ''; ?>>DVD</option>
+                    <option value="Blu-ray" <?php echo $h->format_type == 'Blu-ray' ? 'selected' : ''; ?>>Blu-ray</option>
+                    <option value="LaserDisc" <?php echo $h->format_type == 'LaserDisc' ? 'selected' : ''; ?>>LaserDisc</option>
+                    <option value="Digital_File" <?php echo $h->format_type == 'Digital_File' ? 'selected' : ''; ?>><?php echo __('Digital File'); ?></option>
+                    <option value="DCP" <?php echo $h->format_type == 'DCP' ? 'selected' : ''; ?>>DCP</option>
+                    <option value="ProRes" <?php echo $h->format_type == 'ProRes' ? 'selected' : ''; ?>>ProRes</option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Audio'); ?>">
+                    <option value="Audio_Reel" <?php echo $h->format_type == 'Audio_Reel' ? 'selected' : ''; ?>><?php echo __('Audio Reel'); ?></option>
+                    <option value="Audio_Cassette" <?php echo $h->format_type == 'Audio_Cassette' ? 'selected' : ''; ?>><?php echo __('Audio Cassette'); ?></option>
+                    <option value="Vinyl" <?php echo $h->format_type == 'Vinyl' ? 'selected' : ''; ?>><?php echo __('Vinyl'); ?></option>
+                    <option value="CD" <?php echo $h->format_type == 'CD' ? 'selected' : ''; ?>>CD</option>
+                  </optgroup>
+                  <option value="Other" <?php echo $h->format_type == 'Other' ? 'selected' : ''; ?>><?php echo __('Other'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Format Details'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_format_details[]" value="<?php echo esc_entities($h->format_details); ?>" placeholder="<?php echo __('Color, sound, ratio'); ?>">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small"><?php echo __('Institution'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_institution[]" value="<?php echo esc_entities($h->holding_institution); ?>" placeholder="<?php echo __('e.g., NFVSA, WCPLS'); ?>">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small"><?php echo __('Location'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_location[]" value="<?php echo esc_entities($h->holding_location); ?>" placeholder="<?php echo __('Department/vault'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Accession #'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_accession[]" value="<?php echo esc_entities($h->accession_number); ?>" placeholder="<?php echo __('Ref number'); ?>">
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Condition'); ?></label>
+                <select class="form-select form-select-sm" name="holding_condition[]">
+                  <option value="unknown" <?php echo $h->condition_status == 'unknown' ? 'selected' : ''; ?>><?php echo __('Unknown'); ?></option>
+                  <option value="excellent" <?php echo $h->condition_status == 'excellent' ? 'selected' : ''; ?>><?php echo __('Excellent'); ?></option>
+                  <option value="good" <?php echo $h->condition_status == 'good' ? 'selected' : ''; ?>><?php echo __('Good'); ?></option>
+                  <option value="fair" <?php echo $h->condition_status == 'fair' ? 'selected' : ''; ?>><?php echo __('Fair'); ?></option>
+                  <option value="poor" <?php echo $h->condition_status == 'poor' ? 'selected' : ''; ?>><?php echo __('Poor'); ?></option>
+                  <option value="deteriorating" <?php echo $h->condition_status == 'deteriorating' ? 'selected' : ''; ?>><?php echo __('Deteriorating'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Access'); ?></label>
+                <select class="form-select form-select-sm" name="holding_access[]">
+                  <option value="unknown" <?php echo $h->access_status == 'unknown' ? 'selected' : ''; ?>><?php echo __('Unknown'); ?></option>
+                  <option value="available" <?php echo $h->access_status == 'available' ? 'selected' : ''; ?>><?php echo __('Available'); ?></option>
+                  <option value="restricted" <?php echo $h->access_status == 'restricted' ? 'selected' : ''; ?>><?php echo __('Restricted'); ?></option>
+                  <option value="preservation_only" <?php echo $h->access_status == 'preservation_only' ? 'selected' : ''; ?>><?php echo __('Preservation Only'); ?></option>
+                  <option value="digitized_available" <?php echo $h->access_status == 'digitized_available' ? 'selected' : ''; ?>><?php echo __('Digitized'); ?></option>
+                  <option value="on_request" <?php echo $h->access_status == 'on_request' ? 'selected' : ''; ?>><?php echo __('On Request'); ?></option>
+                  <option value="staff_only" <?php echo $h->access_status == 'staff_only' ? 'selected' : ''; ?>><?php echo __('Staff Only'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small"><?php echo __('Access URL'); ?></label>
+                <input type="url" class="form-control form-control-sm" name="holding_url[]" value="<?php echo esc_entities($h->access_url); ?>" placeholder="<?php echo __('Streaming/download URL'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Verified Date'); ?></label>
+                <input type="date" class="form-control form-control-sm" name="holding_verified[]" value="<?php echo esc_entities($h->verified_date); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Primary'); ?></label>
+                <div class="form-check mt-1">
+                  <input type="checkbox" class="form-check-input" name="holding_primary[]" value="<?php echo $h->id; ?>" <?php echo $h->is_primary ? 'checked' : ''; ?>>
+                  <label class="form-check-label small"><?php echo __('Primary copy'); ?></label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label small"><?php echo __('Access Notes'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_access_notes[]" value="<?php echo esc_entities($h->access_notes); ?>" placeholder="<?php echo __('How to request, viewing conditions'); ?>">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label small"><?php echo __('Notes'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="holding_notes[]" value="<?php echo esc_entities($h->notes); ?>" placeholder="<?php echo __('Additional notes'); ?>">
+              </div>
+              <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-holding w-100"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="addHoldingBtn">
+          <i class="fas fa-plus"></i> <?php echo __('Add Holding'); ?>
+        </button>
+      </div>
+    </div>
+
+    <!-- External Links (ESAT, IMDb, etc.) -->
+    <div class="card mb-3">
+      <div class="card-header" style="background-color: #28a745; color: white;">
+        <i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small"><?php echo __('Links to ESAT, IMDb, Wikipedia, and other databases'); ?></p>
+        <div id="links-container">
+          <?php foreach ($externalLinks as $l): ?>
+          <div class="link-row border rounded p-2 mb-2 bg-light">
+            <input type="hidden" name="link_id[]" value="<?php echo $l->id; ?>">
+            <div class="row mb-2">
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Type'); ?></label>
+                <select class="form-select form-select-sm" name="link_type[]">
+                  <optgroup label="<?php echo __('South African'); ?>">
+                    <option value="ESAT" <?php echo $l->link_type == 'ESAT' ? 'selected' : ''; ?>>ESAT</option>
+                    <option value="SAFILM" <?php echo $l->link_type == 'SAFILM' ? 'selected' : ''; ?>>SA Film</option>
+                    <option value="NFVSA" <?php echo $l->link_type == 'NFVSA' ? 'selected' : ''; ?>>NFVSA</option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Film Databases'); ?>">
+                    <option value="IMDb" <?php echo $l->link_type == 'IMDb' ? 'selected' : ''; ?>>IMDb</option>
+                    <option value="BFI" <?php echo $l->link_type == 'BFI' ? 'selected' : ''; ?>>BFI</option>
+                    <option value="AFI" <?php echo $l->link_type == 'AFI' ? 'selected' : ''; ?>>AFI</option>
+                    <option value="Letterboxd" <?php echo $l->link_type == 'Letterboxd' ? 'selected' : ''; ?>>Letterboxd</option>
+                    <option value="MUBI" <?php echo $l->link_type == 'MUBI' ? 'selected' : ''; ?>>MUBI</option>
+                    <option value="Filmography" <?php echo $l->link_type == 'Filmography' ? 'selected' : ''; ?>><?php echo __('Filmography'); ?></option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Knowledge Bases'); ?>">
+                    <option value="Wikipedia" <?php echo $l->link_type == 'Wikipedia' ? 'selected' : ''; ?>>Wikipedia</option>
+                    <option value="Wikidata" <?php echo $l->link_type == 'Wikidata' ? 'selected' : ''; ?>>Wikidata</option>
+                    <option value="VIAF" <?php echo $l->link_type == 'VIAF' ? 'selected' : ''; ?>>VIAF</option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Media Platforms'); ?>">
+                    <option value="YouTube" <?php echo $l->link_type == 'YouTube' ? 'selected' : ''; ?>>YouTube</option>
+                    <option value="Vimeo" <?php echo $l->link_type == 'Vimeo' ? 'selected' : ''; ?>>Vimeo</option>
+                    <option value="Archive_org" <?php echo $l->link_type == 'Archive_org' ? 'selected' : ''; ?>>Archive.org</option>
+                  </optgroup>
+                  <optgroup label="<?php echo __('Other'); ?>">
+                    <option value="Review" <?php echo $l->link_type == 'Review' ? 'selected' : ''; ?>><?php echo __('Review'); ?></option>
+                    <option value="Academic" <?php echo $l->link_type == 'Academic' ? 'selected' : ''; ?>><?php echo __('Academic'); ?></option>
+                    <option value="Press" <?php echo $l->link_type == 'Press' ? 'selected' : ''; ?>><?php echo __('Press'); ?></option>
+                    <option value="Other" <?php echo $l->link_type == 'Other' ? 'selected' : ''; ?>><?php echo __('Other'); ?></option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small"><?php echo __('URL'); ?></label>
+                <input type="url" class="form-control form-control-sm" name="link_url[]" value="<?php echo esc_entities($l->url); ?>" placeholder="<?php echo __('https://...'); ?>">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small"><?php echo __('Title'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="link_title[]" value="<?php echo esc_entities($l->title); ?>" placeholder="<?php echo __('Link display text'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Verified'); ?></label>
+                <input type="date" class="form-control form-control-sm" name="link_verified[]" value="<?php echo esc_entities($l->verified_date); ?>">
+              </div>
+              <div class="col-md-1">
+                <label class="form-label small"><?php echo __('Primary'); ?></label>
+                <div class="form-check mt-1">
+                  <input type="checkbox" class="form-check-input" name="link_primary[]" value="<?php echo $l->id; ?>" <?php echo $l->is_primary ? 'checked' : ''; ?>>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Person'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="link_person[]" value="<?php echo esc_entities($l->person_name); ?>" placeholder="<?php echo __('e.g., Donald Swanson'); ?>">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small"><?php echo __('Role'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="link_role[]" value="<?php echo esc_entities($l->person_role); ?>" placeholder="<?php echo __('Director, Actor'); ?>">
+              </div>
+              <div class="col-md-7">
+                <label class="form-label small"><?php echo __('Description'); ?></label>
+                <input type="text" class="form-control form-control-sm" name="link_description[]" value="<?php echo esc_entities($l->description); ?>" placeholder="<?php echo __('What this link provides'); ?>">
+              </div>
+              <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-link w-100"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="addLinkBtn">
+          <i class="fas fa-plus"></i> <?php echo __('Add Link'); ?>
+        </button>
+      </div>
+    </div>
+
     <!-- Admin Area -->
     <div class="card mb-3">
       <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#adminSection" style="cursor:pointer;">
@@ -736,6 +1028,263 @@ document.addEventListener('DOMContentLoaded', function() {
         row.remove();
       }
     }
+    // Remove version/holding/link rows
+    if (e.target.closest('.btn-remove-version')) {
+      e.target.closest('.version-row').remove();
+    }
+    if (e.target.closest('.btn-remove-holding')) {
+      e.target.closest('.holding-row').remove();
+    }
+    if (e.target.closest('.btn-remove-link')) {
+      e.target.closest('.link-row').remove();
+    }
+  });
+
+  // Add Version
+  document.getElementById('addVersionBtn')?.addEventListener('click', function() {
+    const container = document.getElementById('versions-container');
+    const row = document.createElement('div');
+    row.className = 'version-row border rounded p-2 mb-2 bg-light';
+    row.innerHTML = `
+      <input type="hidden" name="version_id[]" value="">
+      <div class="row mb-2">
+        <div class="col-md-4">
+          <label class="form-label small"><?php echo __('Title'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="version_title[]" placeholder="<?php echo __('e.g., Kuddes van die veld'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Type'); ?></label>
+          <select class="form-select form-select-sm" name="version_type[]">
+            <option value="language"><?php echo __('Language'); ?></option>
+            <option value="format"><?php echo __('Format'); ?></option>
+            <option value="restoration"><?php echo __('Restoration'); ?></option>
+            <option value="directors_cut"><?php echo __("Director's Cut"); ?></option>
+            <option value="censored"><?php echo __('Censored'); ?></option>
+            <option value="other"><?php echo __('Other'); ?></option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Language'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="version_language[]" placeholder="<?php echo __('Afrikaans'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('ISO Code'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="version_language_code[]" maxlength="3" placeholder="<?php echo __('afr'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Year'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="version_year[]" placeholder="<?php echo __('1954'); ?>">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-11">
+          <label class="form-label small"><?php echo __('Notes'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="version_notes[]" placeholder="<?php echo __('Additional information'); ?>">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-sm btn-outline-danger btn-remove-version w-100"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  // Add Holding
+  document.getElementById('addHoldingBtn')?.addEventListener('click', function() {
+    const container = document.getElementById('holdings-container');
+    const row = document.createElement('div');
+    row.className = 'holding-row border rounded p-2 mb-2 bg-light';
+    row.innerHTML = `
+      <input type="hidden" name="holding_id[]" value="">
+      <div class="row mb-2">
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Format'); ?></label>
+          <select class="form-select form-select-sm" name="holding_format[]">
+            <optgroup label="<?php echo __('Film'); ?>">
+              <option value="35mm">35mm</option>
+              <option value="16mm">16mm</option>
+              <option value="8mm">8mm</option>
+              <option value="Super8">Super 8</option>
+              <option value="Nitrate"><?php echo __('Nitrate'); ?></option>
+              <option value="Safety"><?php echo __('Safety'); ?></option>
+              <option value="Polyester"><?php echo __('Polyester'); ?></option>
+            </optgroup>
+            <optgroup label="<?php echo __('Video'); ?>">
+              <option value="VHS">VHS</option>
+              <option value="Betacam">Betacam</option>
+              <option value="U-matic">U-matic</option>
+              <option value="DV">DV</option>
+            </optgroup>
+            <optgroup label="<?php echo __('Digital'); ?>">
+              <option value="DVD">DVD</option>
+              <option value="Blu-ray">Blu-ray</option>
+              <option value="Digital_File"><?php echo __('Digital File'); ?></option>
+              <option value="DCP">DCP</option>
+              <option value="ProRes">ProRes</option>
+            </optgroup>
+            <optgroup label="<?php echo __('Audio'); ?>">
+              <option value="Audio_Reel"><?php echo __('Audio Reel'); ?></option>
+              <option value="Audio_Cassette"><?php echo __('Audio Cassette'); ?></option>
+              <option value="Vinyl"><?php echo __('Vinyl'); ?></option>
+              <option value="CD">CD</option>
+            </optgroup>
+            <option value="Other"><?php echo __('Other'); ?></option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Format Details'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_format_details[]" placeholder="<?php echo __('Color, sound'); ?>">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small"><?php echo __('Institution'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_institution[]" placeholder="<?php echo __('e.g., NFVSA'); ?>">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small"><?php echo __('Location'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_location[]" placeholder="<?php echo __('Department/vault'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Accession #'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_accession[]" placeholder="<?php echo __('Ref number'); ?>">
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Condition'); ?></label>
+          <select class="form-select form-select-sm" name="holding_condition[]">
+            <option value="unknown"><?php echo __('Unknown'); ?></option>
+            <option value="excellent"><?php echo __('Excellent'); ?></option>
+            <option value="good"><?php echo __('Good'); ?></option>
+            <option value="fair"><?php echo __('Fair'); ?></option>
+            <option value="poor"><?php echo __('Poor'); ?></option>
+            <option value="deteriorating"><?php echo __('Deteriorating'); ?></option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Access'); ?></label>
+          <select class="form-select form-select-sm" name="holding_access[]">
+            <option value="unknown"><?php echo __('Unknown'); ?></option>
+            <option value="available"><?php echo __('Available'); ?></option>
+            <option value="restricted"><?php echo __('Restricted'); ?></option>
+            <option value="preservation_only"><?php echo __('Preservation Only'); ?></option>
+            <option value="digitized_available"><?php echo __('Digitized'); ?></option>
+            <option value="on_request"><?php echo __('On Request'); ?></option>
+            <option value="staff_only"><?php echo __('Staff Only'); ?></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small"><?php echo __('Access URL'); ?></label>
+          <input type="url" class="form-control form-control-sm" name="holding_url[]" placeholder="<?php echo __('Streaming URL'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Verified Date'); ?></label>
+          <input type="date" class="form-control form-control-sm" name="holding_verified[]">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Primary'); ?></label>
+          <div class="form-check mt-1">
+            <input type="checkbox" class="form-check-input" name="holding_primary[]" value="new">
+            <label class="form-check-label small"><?php echo __('Primary copy'); ?></label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label small"><?php echo __('Access Notes'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_access_notes[]" placeholder="<?php echo __('How to request'); ?>">
+        </div>
+        <div class="col-md-5">
+          <label class="form-label small"><?php echo __('Notes'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="holding_notes[]" placeholder="<?php echo __('Additional notes'); ?>">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-sm btn-outline-danger btn-remove-holding w-100"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  // Add Link
+  document.getElementById('addLinkBtn')?.addEventListener('click', function() {
+    const container = document.getElementById('links-container');
+    const row = document.createElement('div');
+    row.className = 'link-row border rounded p-2 mb-2 bg-light';
+    row.innerHTML = `
+      <input type="hidden" name="link_id[]" value="">
+      <div class="row mb-2">
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Type'); ?></label>
+          <select class="form-select form-select-sm" name="link_type[]">
+            <optgroup label="<?php echo __('South African'); ?>">
+              <option value="ESAT">ESAT</option>
+              <option value="SAFILM">SA Film</option>
+              <option value="NFVSA">NFVSA</option>
+            </optgroup>
+            <optgroup label="<?php echo __('Film Databases'); ?>">
+              <option value="IMDb">IMDb</option>
+              <option value="BFI">BFI</option>
+              <option value="AFI">AFI</option>
+              <option value="Letterboxd">Letterboxd</option>
+              <option value="MUBI">MUBI</option>
+              <option value="Filmography"><?php echo __('Filmography'); ?></option>
+            </optgroup>
+            <optgroup label="<?php echo __('Knowledge Bases'); ?>">
+              <option value="Wikipedia">Wikipedia</option>
+              <option value="Wikidata">Wikidata</option>
+              <option value="VIAF">VIAF</option>
+            </optgroup>
+            <optgroup label="<?php echo __('Media Platforms'); ?>">
+              <option value="YouTube">YouTube</option>
+              <option value="Vimeo">Vimeo</option>
+              <option value="Archive_org">Archive.org</option>
+            </optgroup>
+            <optgroup label="<?php echo __('Other'); ?>">
+              <option value="Review"><?php echo __('Review'); ?></option>
+              <option value="Academic"><?php echo __('Academic'); ?></option>
+              <option value="Press"><?php echo __('Press'); ?></option>
+              <option value="Other"><?php echo __('Other'); ?></option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small"><?php echo __('URL'); ?></label>
+          <input type="url" class="form-control form-control-sm" name="link_url[]" placeholder="<?php echo __('https://...'); ?>">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small"><?php echo __('Title'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="link_title[]" placeholder="<?php echo __('Link text'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Verified'); ?></label>
+          <input type="date" class="form-control form-control-sm" name="link_verified[]">
+        </div>
+        <div class="col-md-1">
+          <label class="form-label small"><?php echo __('Primary'); ?></label>
+          <div class="form-check mt-1">
+            <input type="checkbox" class="form-check-input" name="link_primary[]" value="new">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Person'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="link_person[]" placeholder="<?php echo __('Name'); ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small"><?php echo __('Role'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="link_role[]" placeholder="<?php echo __('Director'); ?>">
+        </div>
+        <div class="col-md-7">
+          <label class="form-label small"><?php echo __('Description'); ?></label>
+          <input type="text" class="form-control form-control-sm" name="link_description[]" placeholder="<?php echo __('What this link provides'); ?>">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-sm btn-outline-danger btn-remove-link w-100"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
   });
 });
 </script>

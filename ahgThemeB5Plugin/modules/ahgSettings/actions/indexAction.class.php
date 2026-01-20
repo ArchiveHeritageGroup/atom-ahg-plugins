@@ -214,6 +214,14 @@ class AhgSettingsIndexAction extends sfAction
             ];
         }
 
+        // Semantic Search - always available (core feature)
+        $this->sections['semantic_search'] = [
+            'label' => 'Semantic Search',
+            'icon' => 'fa-brain',
+            'description' => 'Thesaurus, synonyms, query expansion and search enhancement settings',
+            'url' => 'semanticSearchAdmin'
+        ];
+
         // E-Commerce / Cart Plugin
         $hasCart = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->getPlugins());
         if ($hasCart) {

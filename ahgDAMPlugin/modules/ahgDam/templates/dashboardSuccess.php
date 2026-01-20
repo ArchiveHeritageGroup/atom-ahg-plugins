@@ -43,10 +43,10 @@
 
   <div class="list-group mb-3">
     <a href="<?php echo url_for(['module' => 'loan', 'action' => 'index', 'sector' => 'dam']); ?>" class="list-group-item list-group-item-action">
-      <i class="fas fa-file-contract text-warning me-2"></i><?php echo __('Manage Licenses'); ?>
+      <i class="fas fa-file-contract text-warning me-2"></i><?php echo __('Manage Loans'); ?>
     </a>
     <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'out', 'sector' => 'dam']); ?>" class="list-group-item list-group-item-action">
-      <i class="fas fa-plus text-success me-2"></i><?php echo __('New License Out'); ?>
+      <i class="fas fa-plus text-success me-2"></i><?php echo __('New Loan Out'); ?>
     </a>
   </div>
 <?php end_slot(); ?>

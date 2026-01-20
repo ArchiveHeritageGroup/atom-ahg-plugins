@@ -183,7 +183,7 @@
               <tr class="table-light">
                 <td colspan="2"><strong>Total Insurance Value</strong></td>
                 <td colspan="3">
-                  <strong>R <?php echo number_format(array_sum(array_column($loan['objects'], 'insurance_value')), 2); ?></strong>
+                  <strong>R <?php echo number_format(array_sum(array_column(sfOutputEscaper::unescape($loan['objects']), 'insurance_value')), 2); ?></strong>
                 </td>
               </tr>
             </tfoot>

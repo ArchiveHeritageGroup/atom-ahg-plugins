@@ -64,6 +64,13 @@ class ahgDisplayActions extends sfActions
         $this->mediaFilter = $request->getParameter('media');
         // Text search filters
         $this->queryFilter = $request->getParameter("query");
+        $this->semanticEnabled = $request->getParameter("semantic") == "1";
+
+        // Expand query with synonyms if semantic search is enabled
+        if ($this->queryFilter && $this->semanticEnabled) {
+            $this->queryFilter = $this->expandQueryWithSynonyms($this->queryFilter);
+        }
+
         $this->titleFilter = $request->getParameter("title");
         $this->identifierFilter = $request->getParameter("identifier");
         $this->referenceCodeFilter = $request->getParameter("referenceCode");
@@ -843,9 +850,9 @@ class ahgDisplayActions extends sfActions
         $sortColumn = match($sort) {
             'identifier' => 'io.identifier',
             'refcode' => 'io.identifier',
-            'date' => 'io.updated_at',
-            'startdate' => 'io.start_date',
-            'enddate' => 'io.end_date',
+            'date' => 'io.id',  // Use ID as proxy for date (newer records have higher IDs)
+            'startdate' => 'io.id',
+            'enddate' => 'io.id',
             default => 'i18n.title'
         };
         $query->orderBy($sortColumn, $sortDir === 'desc' ? 'desc' : 'asc');
@@ -1031,5 +1038,39 @@ class ahgDisplayActions extends sfActions
             ->orderBy('df.field_group')->orderBy('df.sort_order')
             ->get()->toArray();
         $this->fieldGroups = ['identity', 'description', 'context', 'access', 'technical', 'admin'];
+    }
+
+    /**
+     * Expand query with synonyms from thesaurus
+     *
+     * @param string $query Original search query
+     * @return string Expanded query with OR'd synonyms
+     */
+    protected function expandQueryWithSynonyms(string $query): string
+    {
+        try {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/ThesaurusService.php';
+            $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
+
+            $expansions = $thesaurus->expandQuery($query);
+
+            if (empty($expansions)) {
+                return $query;
+            }
+
+            // Build expanded query: original terms + synonyms joined with OR
+            $allTerms = [$query];
+            foreach ($expansions as $term => $synonyms) {
+                foreach ($synonyms as $synonym) {
+                    $allTerms[] = $synonym;
+                }
+            }
+
+            // Return unique terms joined - will be used in LIKE searches
+            return implode(' ', array_unique($allTerms));
+        } catch (\Exception $e) {
+            // If thesaurus fails, return original query
+            return $query;
+        }
     }
 }
