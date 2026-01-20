@@ -1,0 +1,1961 @@
+openapi: 3.0.3
+info:
+  title: AtoM AHG Framework REST API
+  description: |
+    REST API v2 for AtoM AHG Framework - a comprehensive archival management platform
+    for GLAM and DAM institutions (Galleries, Libraries, Archives, Museums, Digital Asset Management).
+
+    ## Authentication
+
+    The API supports two authentication methods:
+    - **API Key**: Pass via `X-API-Key` header
+    - **Bearer Token**: Pass via `Authorization: Bearer <token>` header
+
+    ## Rate Limiting
+
+    API keys have configurable rate limits (default: 1000 requests/hour).
+    When exceeded, you'll receive a 429 response with `Retry-After` header.
+
+    ## Pagination
+
+    List endpoints use `limit` and `skip` parameters:
+    - `limit`: Maximum items per page (1-100, default: 10)
+    - `skip`: Number of items to skip (offset)
+
+    Response includes: `total`, `limit`, `skip`, `results`
+  version: 2.0.0
+  contact:
+    name: The Archive and Heritage Group
+    email: johan@theahg.co.za
+    url: https://www.theahg.co.za
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://psis.theahg.co.za/api/v2
+    description: Development Server
+  - url: https://atom.theahg.co.za/api/v2
+    description: Test Server
+
+tags:
+  - name: Descriptions
+    description: Archival descriptions (information objects)
+  - name: Authorities
+    description: Authority records (actors - people, organizations, families)
+  - name: Repositories
+    description: Repository/institution records
+  - name: Taxonomies
+    description: Controlled vocabularies and terms
+  - name: Search
+    description: Full-text search
+  - name: Batch
+    description: Batch operations (up to 100 per request)
+  - name: Conditions
+    description: Condition assessments (SPECTRUM standard)
+  - name: Assets
+    description: Heritage assets (GRAP 103/IPSAS 45)
+  - name: Valuations
+    description: Asset valuation history
+  - name: Privacy
+    description: Privacy/compliance (GDPR, POPIA, CCPA)
+  - name: Upload
+    description: File uploads
+  - name: Sync
+    description: Mobile/offline synchronization
+  - name: API Keys
+    description: API key management
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /:
+    get:
+      summary: API Information
+      description: Get API version and status information
+      operationId: getApiInfo
+      tags: [Descriptions]
+      responses:
+        '200':
+          description: API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+
+  /descriptions:
+    get:
+      summary: List Descriptions
+      description: Get a paginated list of archival descriptions
+      operationId: listDescriptions
+      tags: [Descriptions]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: repository
+          in: query
+          description: Filter by repository slug
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Filter by level of description
+          schema:
+            type: string
+        - name: sector
+          in: query
+          description: Filter by sector
+          schema:
+            type: string
+            enum: [archive, library, museum, dam]
+        - name: sort
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            default: updated
+        - name: sort_direction
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Paginated list of descriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescriptionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      summary: Create Description
+      description: Create a new archival description
+      operationId: createDescription
+      tags: [Descriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DescriptionCreate'
+      responses:
+        '201':
+          description: Created description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescriptionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /descriptions/{slug}:
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        description: Description slug identifier
+        schema:
+          type: string
+    get:
+      summary: Get Description
+      description: Get a description by slug
+      operationId: getDescription
+      tags: [Descriptions]
+      parameters:
+        - name: full
+          in: query
+          description: Include full details (dates, digital objects, etc.)
+          schema:
+            type: string
+            enum: ['0', '1']
+            default: '1'
+      responses:
+        '200':
+          description: Description details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescriptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update Description
+      description: Update a description
+      operationId: updateDescription
+      tags: [Descriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DescriptionUpdate'
+      responses:
+        '200':
+          description: Updated description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescriptionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Partial Update Description
+      description: Partially update a description
+      operationId: patchDescription
+      tags: [Descriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DescriptionUpdate'
+      responses:
+        '200':
+          description: Updated description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DescriptionResponse'
+    delete:
+      summary: Delete Description
+      description: Delete a description
+      operationId: deleteDescription
+      tags: [Descriptions]
+      responses:
+        '200':
+          description: Deletion confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /descriptions/{slug}/conditions:
+    get:
+      summary: Get Description Conditions
+      description: Get condition assessments for a description
+      operationId: getDescriptionConditions
+      tags: [Descriptions, Conditions]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of conditions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionListResponse'
+
+  /descriptions/{slug}/asset:
+    get:
+      summary: Get Description Asset
+      description: Get the heritage asset for a description
+      operationId: getDescriptionAsset
+      tags: [Descriptions, Assets]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetResponse'
+
+  /descriptions/{slug}/upload:
+    post:
+      summary: Upload to Description
+      description: Upload a file to a description
+      operationId: uploadToDescription
+      tags: [Descriptions, Upload]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+
+  /authorities:
+    get:
+      summary: List Authorities
+      description: Get a paginated list of authority records
+      operationId: listAuthorities
+      tags: [Authorities]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: entity_type
+          in: query
+          description: Filter by entity type
+          schema:
+            type: string
+            enum: [person, corporate_body, family]
+      responses:
+        '200':
+          description: Paginated list of authorities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorityListResponse'
+
+  /authorities/{slug}:
+    get:
+      summary: Get Authority
+      description: Get an authority record by slug
+      operationId: getAuthority
+      tags: [Authorities]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authority details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorityResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /repositories:
+    get:
+      summary: List Repositories
+      description: Get a paginated list of repositories
+      operationId: listRepositories
+      tags: [Repositories]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: Paginated list of repositories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryListResponse'
+
+  /taxonomies:
+    get:
+      summary: List Taxonomies
+      description: Get all taxonomies
+      operationId: listTaxonomies
+      tags: [Taxonomies]
+      responses:
+        '200':
+          description: List of taxonomies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxonomyListResponse'
+
+  /taxonomies/{id}/terms:
+    get:
+      summary: Get Taxonomy Terms
+      description: Get terms for a taxonomy
+      operationId: getTaxonomyTerms
+      tags: [Taxonomies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of terms
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermListResponse'
+
+  /search:
+    get:
+      summary: Search
+      description: Search across the archive
+      operationId: search
+      tags: [Search]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Entity type filter
+          schema:
+            type: string
+        - name: repository
+          in: query
+          description: Repository filter
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Level of description filter
+          schema:
+            type: string
+        - name: sector
+          in: query
+          description: Sector filter
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+    post:
+      summary: Search (POST)
+      description: Search with complex query parameters
+      operationId: searchPost
+      tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /batch:
+    post:
+      summary: Batch Operations
+      description: Execute multiple API operations in a single request (up to 100)
+      operationId: batchOperations
+      tags: [Batch]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequest'
+      responses:
+        '200':
+          description: Batch results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+
+  /conditions:
+    get:
+      summary: List Conditions
+      description: Get a paginated list of condition assessments
+      operationId: listConditions
+      tags: [Conditions]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: object_id
+          in: query
+          schema:
+            type: integer
+        - name: object_slug
+          in: query
+          schema:
+            type: string
+        - name: overall_condition
+          in: query
+          schema:
+            type: string
+        - name: checked_by
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of conditions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionListResponse'
+    post:
+      summary: Create Condition
+      description: Create a new condition assessment
+      operationId: createCondition
+      tags: [Conditions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConditionCreate'
+      responses:
+        '201':
+          description: Created condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionResponse'
+
+  /conditions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Condition
+      operationId: getCondition
+      tags: [Conditions]
+      responses:
+        '200':
+          description: Condition details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionResponse'
+    put:
+      summary: Update Condition
+      operationId: updateCondition
+      tags: [Conditions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConditionUpdate'
+      responses:
+        '200':
+          description: Updated condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionResponse'
+    delete:
+      summary: Delete Condition
+      operationId: deleteCondition
+      tags: [Conditions]
+      responses:
+        '200':
+          description: Deletion confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /conditions/{id}/photos:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Condition Photos
+      operationId: getConditionPhotos
+      tags: [Conditions]
+      responses:
+        '200':
+          description: List of photos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoListResponse'
+    post:
+      summary: Upload Condition Photo
+      operationId: uploadConditionPhoto
+      tags: [Conditions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadRequest'
+      responses:
+        '200':
+          description: Uploaded photo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResponse'
+
+  /conditions/{id}/photos/{photoId}:
+    delete:
+      summary: Delete Condition Photo
+      operationId: deleteConditionPhoto
+      tags: [Conditions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deletion confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /assets:
+    get:
+      summary: List Assets
+      operationId: listAssets
+      tags: [Assets]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: asset_class_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated list of assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetListResponse'
+    post:
+      summary: Create Asset
+      operationId: createAsset
+      tags: [Assets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCreate'
+      responses:
+        '201':
+          description: Created asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetResponse'
+
+  /assets/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Asset
+      operationId: getAsset
+      tags: [Assets]
+      responses:
+        '200':
+          description: Asset details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetResponse'
+    put:
+      summary: Update Asset
+      operationId: updateAsset
+      tags: [Assets]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetUpdate'
+      responses:
+        '200':
+          description: Updated asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetResponse'
+
+  /assets/{id}/valuations:
+    get:
+      summary: Get Asset Valuations
+      operationId: getAssetValuations
+      tags: [Assets, Valuations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Valuation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValuationListResponse'
+
+  /valuations:
+    get:
+      summary: List Valuations
+      operationId: listValuations
+      tags: [Valuations]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: asset_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated list of valuations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValuationListResponse'
+    post:
+      summary: Create Valuation
+      operationId: createValuation
+      tags: [Valuations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValuationCreate'
+      responses:
+        '201':
+          description: Created valuation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValuationResponse'
+
+  /privacy/dsars:
+    get:
+      summary: List DSARs
+      operationId: listDsars
+      tags: [Privacy]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: request_type
+          in: query
+          schema:
+            type: string
+        - name: jurisdiction
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of DSARs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarListResponse'
+    post:
+      summary: Create DSAR
+      operationId: createDsar
+      tags: [Privacy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarCreate'
+      responses:
+        '201':
+          description: Created DSAR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarResponse'
+
+  /privacy/dsars/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get DSAR
+      operationId: getDsar
+      tags: [Privacy]
+      responses:
+        '200':
+          description: DSAR details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarResponse'
+    put:
+      summary: Update DSAR
+      operationId: updateDsar
+      tags: [Privacy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarUpdate'
+      responses:
+        '200':
+          description: Updated DSAR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarResponse'
+
+  /privacy/breaches:
+    get:
+      summary: List Breaches
+      operationId: listBreaches
+      tags: [Privacy]
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/skip'
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of breaches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachListResponse'
+    post:
+      summary: Create Breach
+      operationId: createBreach
+      tags: [Privacy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BreachCreate'
+      responses:
+        '201':
+          description: Created breach
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachResponse'
+
+  /upload:
+    post:
+      summary: Upload File
+      operationId: uploadFile
+      tags: [Upload]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+
+  /sync/changes:
+    get:
+      summary: Get Changes
+      operationId: getSyncChanges
+      tags: [Sync]
+      parameters:
+        - name: since
+          in: query
+          description: ISO timestamp to get changes since
+          schema:
+            type: string
+            format: date-time
+        - name: entity_type
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+      responses:
+        '200':
+          description: Changes since timestamp
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncChangesResponse'
+
+  /sync/batch:
+    post:
+      summary: Push Sync Batch
+      operationId: pushSyncBatch
+      tags: [Sync]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncBatchRequest'
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncBatchResponse'
+
+  /keys:
+    get:
+      summary: List API Keys
+      operationId: listApiKeys
+      tags: [API Keys]
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+    post:
+      summary: Create API Key
+      operationId: createApiKey
+      tags: [API Keys]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreate'
+      responses:
+        '201':
+          description: Created API key (raw key shown only once)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyCreatedResponse'
+
+  /keys/{id}:
+    delete:
+      summary: Delete API Key
+      operationId: deleteApiKey
+      tags: [API Keys]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deletion confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Maximum number of results (1-100)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    skip:
+      name: skip
+      in: query
+      description: Number of results to skip (offset)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  responses:
+    Unauthorized:
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          description: Seconds until rate limit resets
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # Common schemas
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+      required: [success, data]
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        message:
+          type: string
+      required: [success, error, message]
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            deleted:
+              type: boolean
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        skip:
+          type: integer
+      required: [total, limit, skip]
+
+    ApiInfo:
+      type: object
+      properties:
+        version:
+          type: string
+        name:
+          type: string
+
+    # Description schemas
+    DescriptionSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        level_of_description:
+          type: string
+        sector:
+          type: string
+        repository_id:
+          type: integer
+        parent_id:
+          type: integer
+
+    DescriptionDetail:
+      allOf:
+        - $ref: '#/components/schemas/DescriptionSummary'
+        - type: object
+          properties:
+            identifier:
+              type: string
+            scope_and_content:
+              type: string
+            extent_and_medium:
+              type: string
+            dates:
+              type: array
+              items:
+                $ref: '#/components/schemas/DateEvent'
+            digital_objects:
+              type: array
+              items:
+                $ref: '#/components/schemas/DigitalObject'
+            subjects:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccessPoint'
+            hierarchy:
+              type: array
+              items:
+                $ref: '#/components/schemas/HierarchyItem'
+            children_count:
+              type: integer
+
+    DescriptionCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        identifier:
+          type: string
+        level_of_description_id:
+          type: integer
+        repository_id:
+          type: integer
+        parent_id:
+          type: integer
+        scope_and_content:
+          type: string
+      required: [title]
+
+    DescriptionUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        identifier:
+          type: string
+        scope_and_content:
+          type: string
+
+    DescriptionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/DescriptionSummary'
+
+    DescriptionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/DescriptionDetail'
+
+    DateEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+        date_display:
+          type: string
+        start_date:
+          type: string
+        end_date:
+          type: string
+
+    DigitalObject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        mime_type:
+          type: string
+        thumbnail_url:
+          type: string
+        master_url:
+          type: string
+
+    AccessPoint:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    HierarchyItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+
+    # Authority schemas
+    AuthoritySummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        authorized_form_of_name:
+          type: string
+        entity_type:
+          type: string
+
+    AuthorityListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AuthoritySummary'
+
+    AuthorityResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AuthoritySummary'
+
+    # Repository schemas
+    RepositorySummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        identifier:
+          type: string
+
+    RepositoryListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/RepositorySummary'
+
+    # Taxonomy schemas
+    TaxonomySummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        usage:
+          type: string
+
+    TaxonomyTerm:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        parent_id:
+          type: integer
+
+    TaxonomyListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaxonomySummary'
+
+    TermListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaxonomyTerm'
+
+    # Search schemas
+    SearchRequest:
+      type: object
+      properties:
+        q:
+          type: string
+        type:
+          type: string
+        repository:
+          type: string
+        limit:
+          type: integer
+        skip:
+          type: integer
+      required: [q]
+
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+
+    SearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/SearchResult'
+
+    # Batch schemas
+    BatchOperation:
+      type: object
+      properties:
+        method:
+          type: string
+          enum: [GET, POST, PUT, PATCH, DELETE]
+        path:
+          type: string
+        body:
+          type: object
+      required: [method, path]
+
+    BatchResult:
+      type: object
+      properties:
+        status:
+          type: integer
+        body:
+          type: object
+
+    BatchRequest:
+      type: object
+      properties:
+        operations:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/BatchOperation'
+      required: [operations]
+
+    BatchResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BatchResult'
+
+    # Condition schemas
+    ConditionSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        object_id:
+          type: integer
+        object_slug:
+          type: string
+        condition_reference:
+          type: string
+        check_date:
+          type: string
+        checked_by:
+          type: string
+        overall_condition:
+          type: string
+
+    ConditionCreate:
+      type: object
+      properties:
+        object_id:
+          type: integer
+        checked_by:
+          type: string
+        check_date:
+          type: string
+        overall_condition:
+          type: string
+        condition_note:
+          type: string
+      required: [object_id, checked_by]
+
+    ConditionUpdate:
+      type: object
+      properties:
+        check_date:
+          type: string
+        overall_condition:
+          type: string
+        condition_note:
+          type: string
+
+    ConditionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ConditionSummary'
+
+    ConditionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ConditionSummary'
+
+    PhotoUploadRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+        file_data:
+          type: string
+          description: Base64 encoded file data
+        photo_type:
+          type: string
+        caption:
+          type: string
+      required: [filename, file_data]
+
+    PhotoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        filename:
+          type: string
+        file_path:
+          type: string
+        thumbnail_url:
+          type: string
+
+    PhotoListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PhotoResponse'
+
+    # Asset schemas
+    AssetSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        object_id:
+          type: integer
+        asset_number:
+          type: string
+        acquisition_date:
+          type: string
+        current_value:
+          type: number
+
+    AssetCreate:
+      type: object
+      properties:
+        object_id:
+          type: integer
+        acquisition_date:
+          type: string
+        acquisition_cost:
+          type: number
+        currency_code:
+          type: string
+      required: [object_id]
+
+    AssetUpdate:
+      type: object
+      properties:
+        acquisition_date:
+          type: string
+        current_value:
+          type: number
+
+    AssetListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AssetSummary'
+
+    AssetResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AssetSummary'
+
+    # Valuation schemas
+    Valuation:
+      type: object
+      properties:
+        id:
+          type: integer
+        asset_id:
+          type: integer
+        valuation_date:
+          type: string
+        valuation_amount:
+          type: number
+        valuation_method:
+          type: string
+        valuer_name:
+          type: string
+
+    ValuationCreate:
+      type: object
+      properties:
+        asset_id:
+          type: integer
+        valuation_amount:
+          type: number
+        valuation_date:
+          type: string
+        valuation_method:
+          type: string
+      required: [asset_id, valuation_amount]
+
+    ValuationListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Valuation'
+
+    ValuationResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Valuation'
+
+    # Privacy schemas
+    DsarSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference_number:
+          type: string
+        request_type:
+          type: string
+        status:
+          type: string
+        requestor_name:
+          type: string
+        received_date:
+          type: string
+        due_date:
+          type: string
+
+    DsarCreate:
+      type: object
+      properties:
+        requester_name:
+          type: string
+        requester_email:
+          type: string
+        request_type:
+          type: string
+        subject_matter:
+          type: string
+      required: [requester_name]
+
+    DsarUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        notes:
+          type: string
+
+    DsarListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/DsarSummary'
+
+    DsarResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/DsarSummary'
+
+    BreachSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference_number:
+          type: string
+        breach_date:
+          type: string
+        severity:
+          type: string
+        status:
+          type: string
+
+    BreachCreate:
+      type: object
+      properties:
+        breach_date:
+          type: string
+        severity:
+          type: string
+        description:
+          type: string
+
+    BreachListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PaginationMeta'
+                - type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/BreachSummary'
+
+    BreachResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BreachSummary'
+
+    # Upload schemas
+    UploadRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+        mime_type:
+          type: string
+        file_data:
+          type: string
+          description: Base64 encoded file data
+      required: [filename, file_data]
+
+    UploadResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                filename:
+                  type: string
+                file_path:
+                  type: string
+                mime_type:
+                  type: string
+                file_size:
+                  type: integer
+
+    # Sync schemas
+    SyncChange:
+      type: object
+      properties:
+        entity_type:
+          type: string
+        entity_id:
+          type: integer
+        action:
+          type: string
+          enum: [create, update, delete]
+        changed_at:
+          type: string
+        data:
+          type: object
+
+    SyncChangesResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                changes:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SyncChange'
+                sync_token:
+                  type: string
+                has_more:
+                  type: boolean
+
+    SyncBatchRequest:
+      type: object
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncChange'
+        device_id:
+          type: string
+      required: [changes]
+
+    SyncBatchResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                processed:
+                  type: integer
+                errors:
+                  type: array
+                  items:
+                    type: object
+                conflicts:
+                  type: array
+                  items:
+                    type: object
+
+    # API Key schemas
+    ApiKeyInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        api_key_prefix:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        rate_limit:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+        last_used_at:
+          type: string
+
+    ApiKeyCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        rate_limit:
+          type: integer
+      required: [name]
+
+    ApiKeyListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApiKeyInfo'
+
+    ApiKeyCreatedResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                api_key:
+                  type: string
+                  description: Raw API key (shown only once)
+                name:
+                  type: string
+                scopes:
+                  type: array
+                  items:
+                    type: string

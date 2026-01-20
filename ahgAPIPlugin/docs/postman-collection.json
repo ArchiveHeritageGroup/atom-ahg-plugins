@@ -1,0 +1,895 @@
+{
+  "info": {
+    "name": "AtoM AHG Framework API v2",
+    "description": "REST API v2 for AtoM AHG Framework - a comprehensive archival management platform for GLAM and DAM institutions.\n\n## Authentication\n\nSet the `api_key` variable in your environment or collection variables.\n\n## Base URL\n\nSet `base_url` to your AtoM instance (e.g., https://your-atom-instance.com)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "ahg-atom-api"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://psis.theahg.co.za",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "your-api-key-here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Descriptions",
+      "description": "Archival descriptions (information objects)",
+      "item": [
+        {
+          "name": "List Descriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions?limit=10&skip=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "skip", "value": "0"},
+                {"key": "repository", "value": "", "disabled": true},
+                {"key": "level", "value": "", "disabled": true},
+                {"key": "sector", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Description",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug?full=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug"],
+              "query": [
+                {"key": "full", "value": "1"}
+              ],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Description",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Collection\",\n  \"identifier\": \"COL001\",\n  \"level_of_description_id\": 220,\n  \"repository_id\": 1,\n  \"scope_and_content\": \"Description of the collection\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Description",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"scope_and_content\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Description",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Description Conditions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug/conditions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug", "conditions"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Description Asset",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug/asset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug", "asset"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload to Description",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"document.pdf\",\n  \"mime_type\": \"application/pdf\",\n  \"file_data\": \"BASE64_ENCODED_DATA_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/descriptions/:slug/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "descriptions", ":slug", "upload"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authorities",
+      "description": "Authority records (actors)",
+      "item": [
+        {
+          "name": "List Authorities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/authorities?limit=10&skip=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "authorities"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "skip", "value": "0"},
+                {"key": "entity_type", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Authority",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/authorities/:slug",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "authorities", ":slug"],
+              "variable": [
+                {"key": "slug", "value": "example-slug"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Repositories",
+      "description": "Repository records",
+      "item": [
+        {
+          "name": "List Repositories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/repositories?limit=10&skip=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "repositories"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "skip", "value": "0"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Taxonomies",
+      "description": "Controlled vocabularies",
+      "item": [
+        {
+          "name": "List Taxonomies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/taxonomies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "taxonomies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Taxonomy Terms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/taxonomies/:id/terms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "taxonomies", ":id", "terms"],
+              "variable": [
+                {"key": "id", "value": "34", "description": "34 = Levels of Description"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "description": "Full-text search",
+      "item": [
+        {
+          "name": "Search (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/search?q=archive&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "search"],
+              "query": [
+                {"key": "q", "value": "archive"},
+                {"key": "limit", "value": "10"},
+                {"key": "type", "value": "", "disabled": true},
+                {"key": "repository", "value": "", "disabled": true},
+                {"key": "sector", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"q\": \"heritage\",\n  \"type\": \"informationobject\",\n  \"sector\": \"museum\",\n  \"limit\": 20\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/search",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "search"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batch",
+      "description": "Batch operations",
+      "item": [
+        {
+          "name": "Execute Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operations\": [\n    {\"method\": \"GET\", \"path\": \"/descriptions/item-1\"},\n    {\"method\": \"GET\", \"path\": \"/descriptions/item-2\"},\n    {\"method\": \"POST\", \"path\": \"/descriptions\", \"body\": {\"title\": \"New Item\"}}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/batch",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "batch"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conditions",
+      "description": "Condition assessments (SPECTRUM)",
+      "item": [
+        {
+          "name": "List Conditions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "object_id", "value": "", "disabled": true},
+                {"key": "overall_condition", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Condition",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Condition",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object_id\": 123,\n  \"checked_by\": \"John Smith\",\n  \"check_date\": \"2024-01-20\",\n  \"overall_condition\": \"good\",\n  \"condition_note\": \"Minor wear on edges\",\n  \"treatment_priority\": \"low\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Condition",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"overall_condition\": \"fair\",\n  \"condition_note\": \"Updated assessment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Condition",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Condition Photos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:id/photos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":id", "photos"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Condition Photo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"damage-detail.jpg\",\n  \"file_data\": \"BASE64_ENCODED_IMAGE_DATA\",\n  \"photo_type\": \"damage\",\n  \"caption\": \"Detail of edge damage\",\n  \"location_on_object\": \"Upper right corner\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:id/photos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":id", "photos"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Condition Photo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/conditions/:conditionId/photos/:photoId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "conditions", ":conditionId", "photos", ":photoId"],
+              "variable": [
+                {"key": "conditionId", "value": "1"},
+                {"key": "photoId", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "description": "Heritage assets (GRAP 103/IPSAS 45)",
+      "item": [
+        {
+          "name": "List Assets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/assets?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "assets"],
+              "query": [
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Asset",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/assets/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "assets", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Asset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object_id\": 123,\n  \"acquisition_date\": \"2024-01-15\",\n  \"acquisition_cost\": 50000.00,\n  \"acquisition_method\": \"purchase\",\n  \"currency_code\": \"ZAR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/assets",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "assets"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Asset",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_value\": 75000.00,\n  \"is_insured\": true,\n  \"insurance_value\": 80000.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/assets/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "assets", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Asset Valuations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/assets/:id/valuations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "assets", ":id", "valuations"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Valuations",
+      "description": "Asset valuation history",
+      "item": [
+        {
+          "name": "List Valuations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/valuations?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "valuations"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "asset_id", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Valuation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset_id\": 1,\n  \"valuation_amount\": 75000.00,\n  \"valuation_date\": \"2024-01-20\",\n  \"valuation_method\": \"market_comparison\",\n  \"valuer_name\": \"Jane Doe\",\n  \"valuer_organization\": \"Heritage Valuers Inc.\",\n  \"currency_code\": \"ZAR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/valuations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "valuations"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Privacy",
+      "description": "Privacy/compliance (GDPR, POPIA)",
+      "item": [
+        {
+          "name": "List DSARs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/dsars?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "dsars"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "status", "value": "", "disabled": true},
+                {"key": "request_type", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get DSAR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/dsars/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "dsars", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create DSAR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requester_name\": \"John Smith\",\n  \"requester_email\": \"john@example.com\",\n  \"request_type\": \"access\",\n  \"subject_matter\": \"Request for personal records\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/dsars",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "dsars"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update DSAR",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"notes\": \"Processing request\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/dsars/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "dsars", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Breaches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/breaches?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "breaches"],
+              "query": [
+                {"key": "limit", "value": "10"},
+                {"key": "status", "value": "", "disabled": true},
+                {"key": "severity", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Breach",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"breach_date\": \"2024-01-20\",\n  \"severity\": \"high\",\n  \"breach_type\": \"unauthorized_access\",\n  \"description\": \"Unauthorized access to records detected\",\n  \"affected_count\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/privacy/breaches",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "privacy", "breaches"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "description": "File uploads",
+      "item": [
+        {
+          "name": "Upload File (Base64)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"document.pdf\",\n  \"mime_type\": \"application/pdf\",\n  \"file_data\": \"BASE64_ENCODED_DATA_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "upload"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sync",
+      "description": "Mobile/offline synchronization",
+      "item": [
+        {
+          "name": "Get Changes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/sync/changes?limit=100",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "sync", "changes"],
+              "query": [
+                {"key": "limit", "value": "100"},
+                {"key": "since", "value": "", "disabled": true},
+                {"key": "entity_type", "value": "", "disabled": true}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Push Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": [\n    {\n      \"entity_type\": \"condition\",\n      \"entity_id\": 1,\n      \"action\": \"update\",\n      \"changed_at\": \"2024-01-20T12:00:00Z\",\n      \"data\": {\n        \"overall_condition\": \"good\"\n      }\n    }\n  ],\n  \"device_id\": \"mobile-device-123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/sync/batch",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "sync", "batch"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API Keys",
+      "description": "API key management",
+      "item": [
+        {
+          "name": "List API Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/keys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "keys"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mobile App Key\",\n  \"scopes\": [\"read\", \"write\"],\n  \"rate_limit\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v2/keys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "keys"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete API Key",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/keys/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "keys", ":id"],
+              "variable": [
+                {"key": "id", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
