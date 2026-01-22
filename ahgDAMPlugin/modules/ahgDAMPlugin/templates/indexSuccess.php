@@ -39,14 +39,21 @@
       <div class="card-body text-center">
         <?php
           $mimeType = $digitalObject->mimeType ?? '';
+          $mediaTypeId = $digitalObject->mediaTypeId ?? null;
           $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
           $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
           $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
           $refPath = $refObj ? $refObj->getFullPath() : null;
           $masterPath = $digitalObject->getFullPath();
           $displayPath = $refPath ?: $thumbPath ?: $masterPath;
+
+          $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
+          $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
         ?>
-        <?php if (strpos($mimeType, 'image') !== false && $displayPath): ?>
+        <?php if ($isVideo || $isAudio): ?>
+          <!-- Video/Audio player with transcription support -->
+          <?php include_partial('digitalobject/showVideo', ['resource' => $digitalObject]); ?>
+        <?php elseif (strpos($mimeType, 'image') !== false && $displayPath): ?>
           <a href="<?php echo $masterPath; ?>" target="_blank">
             <img src="<?php echo $displayPath; ?>" alt="<?php echo esc_entities($resource->title ?? $resource->slug); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
           </a>
