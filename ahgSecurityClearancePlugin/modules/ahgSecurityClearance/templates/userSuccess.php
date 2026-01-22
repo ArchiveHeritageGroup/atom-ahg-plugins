@@ -55,7 +55,7 @@
                 </div>
               <?php endif; ?>
 
-              <form method="post" action="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'user', 'slug' => $user->slug]); ?>">
+              <form method="post" action="<?php echo url_for('@security_clearance_user?slug=' . $user->slug); ?>">
 
                 <div class="mb-4">
                   <label for="classification_id" class="form-label fw-bold">
@@ -169,7 +169,7 @@
 <div class="modal fade" id="revokeModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" action="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'user', 'slug' => $user->slug]); ?>">
+      <form method="post" action="<?php echo url_for('@security_clearance_user?slug=' . $user->slug); ?>">
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i><?php echo __('Revoke Clearance'); ?></h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

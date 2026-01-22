@@ -148,7 +148,7 @@ class ahgSecurityClearanceUserAction extends sfAction
                     DB::table('user_security_clearance')->insert($data);
                 }
 
-                $this->redirect(['module' => 'ahgSecurityClearance', 'action' => 'user', 'slug' => $this->user->slug, 'success' => 'updated']);
+                $this->redirect('@security_clearance_user?slug=' . $this->user->slug . '&success=updated');
             }
         } elseif ('revoke' === $actionType) {
             $reason = $request->getParameter('revoke_reason');
@@ -172,7 +172,7 @@ class ahgSecurityClearanceUserAction extends sfAction
                     ->delete();
             }
 
-            $this->redirect(['module' => 'ahgSecurityClearance', 'action' => 'user', 'slug' => $this->user->slug, 'success' => 'revoked']);
+            $this->redirect('@security_clearance_user?slug=' . $this->user->slug . '&success=revoked');
         }
     }
 }

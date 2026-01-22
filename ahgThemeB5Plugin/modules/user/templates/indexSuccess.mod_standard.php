@@ -8,23 +8,30 @@ $clearanceName = 'None';
 $clearanceColor = 'secondary';
 
 try {
-    if (class_exists('AtomExtensions\Services\SecurityClearanceService')) {
-        $clearanceLevel = SecurityClearanceService::getUserClearance($resource->id);
+    if (class_exists('SecurityClearanceService')) {
         $clearanceInfo = SecurityClearanceService::getUserClearance($resource->id);
-        
+
         if ($clearanceInfo) {
             $userClearance = $clearanceInfo;
-            $clearanceName = $clearanceInfo->classificationName ?? 'Unknown';
-            
-            // Color coding based on level
-            if ($clearanceLevel >= 4) {
-                $clearanceColor = 'danger';
-            } elseif ($clearanceLevel >= 2) {
-                $clearanceColor = 'warning';
-            } elseif ($clearanceLevel >= 1) {
-                $clearanceColor = 'info';
+            $clearanceLevel = $clearanceInfo->level ?? 0;
+            $clearanceName = $clearanceInfo->classificationName ?? $clearanceInfo->name ?? 'Unknown';
+
+            // Use classification color if available, otherwise derive from level
+            if (isset($clearanceInfo->classificationColor) && $clearanceInfo->classificationColor) {
+                $clearanceColor = $clearanceInfo->classificationColor;
+            } elseif (isset($clearanceInfo->color) && $clearanceInfo->color) {
+                $clearanceColor = $clearanceInfo->color;
             } else {
-                $clearanceColor = 'success';
+                // Color coding based on level
+                if ($clearanceLevel >= 4) {
+                    $clearanceColor = 'danger';
+                } elseif ($clearanceLevel >= 2) {
+                    $clearanceColor = 'warning';
+                } elseif ($clearanceLevel >= 1) {
+                    $clearanceColor = 'info';
+                } else {
+                    $clearanceColor = 'success';
+                }
             }
         }
     }

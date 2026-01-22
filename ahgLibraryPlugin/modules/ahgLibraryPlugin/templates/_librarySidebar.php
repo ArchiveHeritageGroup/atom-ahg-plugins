@@ -5,61 +5,74 @@
 
 <!-- Library Hierarchy Navigation -->
 <?php if ($resource): ?>
+<?php
+  $children = $resource->getChildren();
+  $totalChildren = count($children);
+  $hasMany = $totalChildren > 10;
+?>
 <section class="sidebar-widget">
-  <h4><?php echo __('Holdings'); ?></h4>
-  <ul class="list-group">
-    <?php if ($resource->parent && $resource->parent->id != QubitInformationObject::ROOT_ID): ?>
-    <li class="list-group-item">
-      <i class="fas fa-level-up-alt me-2"></i>
-      <?php echo link_to($resource->parent->getTitle(['cultureFallback' => true]) ?: '[Untitled]', ['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $resource->parent->slug]); ?>
-    </li>
+  <h4>
+    <?php echo __('Holdings'); ?>
+    <?php if ($totalChildren > 0): ?>
+      <span class="badge bg-secondary float-end"><?php echo $totalChildren; ?></span>
     <?php endif; ?>
-    <li class="list-group-item active">
-      <i class="fas fa-book me-2"></i>
-      <?php echo $resource->getTitle(['cultureFallback' => true]); ?>
-    </li>
-    <?php
-      $children = $resource->getChildren();
-      $totalChildren = count($children);
-      $initialLimit = 10;
-      $count = 0;
-      foreach ($children as $child):
-        $count++;
-        $isHidden = $count > $initialLimit;
-    ?>
-    <li class="list-group-item ps-4<?php echo $isHidden ? ' holdings-extra d-none' : ''; ?>">
-      <i class="fas fa-file me-2"></i>
-      <?php echo link_to($child->getTitle(['cultureFallback' => true]) ?: '[Untitled]', ['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $child->slug]); ?>
-    </li>
-    <?php endforeach; ?>
-    <?php if ($totalChildren > $initialLimit): ?>
-    <li class="list-group-item text-center holdings-toggle-container">
-      <a href="#" class="holdings-show-more text-decoration-none" onclick="toggleHoldings(this); return false;">
-        <i class="fas fa-chevron-down me-1"></i>
-        <?php echo __('Show %1% more', ['%1%' => $totalChildren - $initialLimit]); ?>
-      </a>
-      <a href="#" class="holdings-show-less text-decoration-none d-none" onclick="toggleHoldings(this); return false;">
-        <i class="fas fa-chevron-up me-1"></i>
-        <?php echo __('Show less'); ?>
-      </a>
-    </li>
-    <script>
-    function toggleHoldings(el) {
-      var container = el.closest('.sidebar-widget');
-      var extras = container.querySelectorAll('.holdings-extra');
-      var showMore = container.querySelector('.holdings-show-more');
-      var showLess = container.querySelector('.holdings-show-less');
+  </h4>
 
-      extras.forEach(function(item) {
-        item.classList.toggle('d-none');
-      });
-      showMore.classList.toggle('d-none');
-      showLess.classList.toggle('d-none');
-    }
-    </script>
-    <?php endif; ?>
-  </ul>
+  <!-- Parent link (outside scrollable area) -->
+  <?php if ($resource->parent && $resource->parent->id != QubitInformationObject::ROOT_ID): ?>
+  <div class="list-group mb-2">
+    <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $resource->parent->slug]); ?>" class="list-group-item list-group-item-action">
+      <i class="fas fa-level-up-alt me-2"></i>
+      <?php echo $resource->parent->getTitle(['cultureFallback' => true]) ?: '[Untitled]'; ?>
+    </a>
+  </div>
+  <?php endif; ?>
+
+  <!-- Current item header -->
+  <div class="list-group-item active mb-2">
+    <i class="fas fa-book me-2"></i>
+    <?php echo $resource->getTitle(['cultureFallback' => true]); ?>
+  </div>
+
+  <!-- Scrollable children list -->
+  <?php if ($totalChildren > 0): ?>
+  <div class="holdings-scroll-container<?php echo $hasMany ? ' has-scroll' : ''; ?>" style="<?php echo $hasMany ? 'max-height: 300px; overflow-y: auto;' : ''; ?>">
+    <ul class="list-group list-group-flush">
+      <?php foreach ($children as $child): ?>
+      <li class="list-group-item list-group-item-action ps-4 py-2">
+        <i class="fas fa-file me-2 text-muted"></i>
+        <?php echo link_to($child->getTitle(['cultureFallback' => true]) ?: '[Untitled]', ['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $child->slug]); ?>
+      </li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+  <?php if ($hasMany): ?>
+  <div class="text-center text-muted small mt-2">
+    <i class="fas fa-arrows-alt-v me-1"></i><?php echo __('Scroll to see all %1% items', ['%1%' => $totalChildren]); ?>
+  </div>
+  <?php endif; ?>
+  <?php endif; ?>
 </section>
+<style>
+.holdings-scroll-container.has-scroll {
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+.holdings-scroll-container.has-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.holdings-scroll-container.has-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.holdings-scroll-container.has-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+.holdings-scroll-container.has-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+</style>
 <?php endif; ?>
 
 <?php echo get_component('menu', 'staticPagesMenu'); ?>

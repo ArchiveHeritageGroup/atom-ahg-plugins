@@ -85,17 +85,19 @@ class SecurityClearanceService
         return DB::table('user_security_clearance as usc')
             ->join('security_classification as sc', 'usc.classification_id', '=', 'sc.id')
             ->where('usc.user_id', $userId)
-            ->where('usc.active', 1)
             ->where(function ($query) {
-                $query->whereNull('usc.expiry_date')
-                    ->orWhere('usc.expiry_date', '>=', date('Y-m-d'));
+                // Check clearance hasn't expired
+                $query->whereNull('usc.expires_at')
+                    ->orWhere('usc.expires_at', '>=', date('Y-m-d H:i:s'));
             })
             ->select([
                 'usc.*',
                 'sc.code',
                 'sc.name',
+                'sc.name as classificationName',  // Alias for template compatibility
                 'sc.level',
                 'sc.color',
+                'sc.color as classificationColor',  // Alias for template compatibility
                 'sc.icon',
                 'sc.requires_2fa',
                 'sc.watermark_required',

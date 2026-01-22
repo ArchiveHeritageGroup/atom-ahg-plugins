@@ -45,5 +45,12 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
             ['module' => 'ahgSecurityClearance', 'action' => 'revokeAccess'],
             ['id' => '\d+']
         ));
+
+        // User clearance management (slug-based)
+        $routing->prependRoute('security_clearance_user', new sfRoute(
+            '/security/clearance/user/:slug',
+            ['module' => 'ahgSecurityClearance', 'action' => 'user'],
+            ['slug' => '[a-zA-Z0-9_-]+']
+        ));
     }
 }
