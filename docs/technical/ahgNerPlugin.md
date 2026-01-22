@@ -642,6 +642,89 @@ php symfony cc
 
 ---
 
+## 9. PII Detection Integration
+
+The NER plugin provides the foundation for PII (Personally Identifiable Information) detection in `ahgPrivacyPlugin`.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    NER + PII Integration                                 │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────┐          ┌───────────────────┐
+│   ahgNerPlugin    │          │  ahgPrivacyPlugin │
+├───────────────────┤          ├───────────────────┤
+│                   │          │                   │
+│  Entity Types:    │◄────────►│ PiiDetectionService│
+│  • PERSON         │  shared  │                   │
+│  • ORG            │  tables  │  Additional PII:  │
+│  • GPE            │          │  • SA_ID          │
+│  • DATE           │          │  • NG_NIN         │
+│                   │          │  • EMAIL          │
+│  Tables:          │          │  • PHONE_SA       │
+│  ahg_ner_extraction│         │  • BANK_ACCOUNT   │
+│  ahg_ner_entity   │          │  • CREDIT_CARD    │
+│                   │          │  • TAX_NUMBER     │
+└───────────────────┘          └───────────────────┘
+```
+
+### Shared Tables
+
+The PII Detection system uses the same database tables as NER:
+
+| Table | Usage |
+|-------|-------|
+| `ahg_ner_extraction` | Stores scan records (backend_used = 'pii_detector') |
+| `ahg_ner_entity` | Stores detected PII entities with risk flags |
+
+### Entity Type Mapping
+
+| NER Entity | PII Risk | Description |
+|------------|----------|-------------|
+| PERSON | Medium | Names extracted by spaCy |
+| ORG | Low | Organizations via spaCy |
+| GPE | Low | Places via spaCy |
+| DATE | Low | Dates via spaCy |
+| SA_ID | High | SA ID numbers (regex + Luhn) |
+| NG_NIN | High | Nigerian NIN (regex) |
+| PASSPORT | High | Passport numbers (regex) |
+| EMAIL | Medium | Email addresses (regex) |
+| PHONE_SA | Medium | SA phone numbers (regex) |
+| CREDIT_CARD | Critical | Credit cards (regex + Luhn) |
+
+### CLI Commands
+
+```bash
+# Standard NER extraction
+php symfony ner:extract --object=123
+
+# PII-focused scan (includes NER + regex patterns)
+php symfony privacy:scan-pii --id=123
+
+# Batch PII scan
+php symfony privacy:scan-pii --limit=100
+
+# PII statistics
+php symfony privacy:scan-pii --stats
+```
+
+### Distinguishing NER vs PII Scans
+
+```sql
+-- NER extractions only
+SELECT * FROM ahg_ner_extraction WHERE backend_used = 'local';
+
+-- PII scans only
+SELECT * FROM ahg_ner_extraction WHERE backend_used = 'pii_detector';
+
+-- All extractions
+SELECT * FROM ahg_ner_extraction;
+```
+
+---
+
 ## Appendix: Useful Queries
 ```sql
 -- Check processing status

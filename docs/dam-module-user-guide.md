@@ -416,6 +416,120 @@ Control who can view and download:
 
 ---
 
+## Film & Video Metadata (New)
+
+The DAM module includes specialized fields for film and video heritage materials.
+
+### Production Details
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PRODUCTION DETAILS                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Running Time:      [21         ] minutes                   │
+│  Production Country:[South Africa        ]                  │
+│  Country Code:      [ZAF] (ISO 3166-1 alpha-3)             │
+│                                                             │
+│  Production Company:[African Film Productions]              │
+│  Distributor:       [                        ]              │
+│  Series Title:      [                        ]              │
+│  Season/Episode:    [   ] / [   ]                          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Alternative Versions
+Track different language versions, restorations, and edits:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ALTERNATIVE VERSIONS                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Title              Type       Language    Code   Year      │
+│  ─────────────────────────────────────────────────────────  │
+│  Kuddes van die veld Language   Afrikaans   afr    1954     │
+│  Flocks of the veld  Language   English     eng    1954     │
+│                                                             │
+│  Types: Language, Format, Restoration, Director's Cut,      │
+│         Censored, Other                                     │
+│                                                             │
+│  [+ Add Version]                                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Format Holdings & Access
+Document where physical copies are held:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FORMAT HOLDINGS                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Format    Institution  Location    Condition  Access       │
+│  ─────────────────────────────────────────────────────────  │
+│  16mm      WCPLS        Film Vault  Good       On Request   │
+│  35mm      NFVSA        Archive     Fair       Restricted   │
+│  Digital   AHG          Cloud       Excellent  Available    │
+│                                                             │
+│  Format Types:                                              │
+│  • Film: 35mm, 16mm, 8mm, Super8, Nitrate, Safety          │
+│  • Video: VHS, Betacam, U-matic, DV                        │
+│  • Digital: DVD, Blu-ray, Digital File, DCP, ProRes        │
+│  • Audio: Audio Reel, Audio Cassette, Vinyl, CD            │
+│                                                             │
+│  Condition: Excellent, Good, Fair, Poor, Deteriorating     │
+│  Access: Available, Restricted, Preservation Only,         │
+│          Digitized, On Request, Staff Only                 │
+│                                                             │
+│  [+ Add Holding]                                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### External References
+Link to film databases and resources:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EXTERNAL REFERENCES                                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Type       URL                        Person      Role     │
+│  ─────────────────────────────────────────────────────────  │
+│  ESAT       esat.sun.ac.za/...         D. Swanson  Director │
+│  IMDb       imdb.com/title/...                              │
+│  Wikipedia  en.wikipedia.org/...                            │
+│                                                             │
+│  Link Types:                                                │
+│  • South African: ESAT, SA Film, NFVSA                     │
+│  • Film Databases: IMDb, BFI, AFI, Letterboxd, MUBI       │
+│  • Knowledge Bases: Wikipedia, Wikidata, VIAF             │
+│  • Media Platforms: YouTube, Vimeo, Archive.org           │
+│  • Other: Review, Academic, Press                          │
+│                                                             │
+│  [+ Add Link]                                               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Loan Management
+
+The DAM module integrates with the Loan plugin for managing loans:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  LOAN ACTIONS                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📋 New Loan       Create a new loan for this asset         │
+│  📊 Manage Loans   View and manage existing loans           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Need Help?
 
 Contact your system administrator or digital archivist if you need assistance.
@@ -423,3 +537,4 @@ Contact your system administrator or digital archivist if you need assistance.
 ---
 
 *Part of the AtoM AHG Framework*
+*Last Updated: 2026-01-20*

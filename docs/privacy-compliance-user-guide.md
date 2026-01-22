@@ -628,7 +628,446 @@ Manage data protection compliance for POPIA, GDPR, PIPEDA, CCPA, and other priva
 
 ---
 
-## Part 8: Compliance Dashboard
+## Part 8: PII Detection
+
+### What is PII?
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   PII = Personally Identifiable Information                 │
+│                                                             │
+│   Information that can identify an individual:              │
+│   • Names                                                   │
+│   • ID numbers (SA ID, passport, etc.)                      │
+│   • Email addresses                                         │
+│   • Phone numbers                                           │
+│   • Bank account numbers                                    │
+│   • Tax numbers                                             │
+│                                                             │
+│   The system automatically scans your records for PII       │
+│   to help you comply with privacy regulations.              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### PII Types Detected
+```
+┌─────────────────────────────────────────────────────────────┐
+│  TYPE             │  RISK    │  EXAMPLE                     │
+├───────────────────┼──────────┼──────────────────────────────┤
+│  SA ID Number     │  HIGH    │  8501015800083               │
+│  Nigerian NIN     │  HIGH    │  12345678901                 │
+│  Passport Number  │  HIGH    │  A12345678                   │
+│  Bank Account     │  HIGH    │  1234567890                  │
+│  Credit Card      │  CRITICAL│  4111-1111-1111-1111         │
+│  Tax Number       │  HIGH    │  0123456789                  │
+│  Email Address    │  MEDIUM  │  john@example.com            │
+│  Phone Number     │  MEDIUM  │  +27 82 123 4567             │
+│  Person Name      │  MEDIUM  │  John Smith (via AI)         │
+│  Organisation     │  LOW     │  ACME Corp (via AI)          │
+│  Place            │  LOW     │  Johannesburg (via AI)       │
+└───────────────────┴──────────┴──────────────────────────────┘
+```
+
+---
+
+### How to Access PII Scanner
+```
+  Main Menu
+      │
+      ▼
+   Admin
+      │
+      ▼
+   Privacy Compliance
+      │
+      ├──▶ PII Scanner         (scan and detect PII)
+      │       │
+      │       ├──▶ Dashboard   (statistics overview)
+      │       ├──▶ Run Scan    (batch scan records)
+      │       └──▶ Review      (approve/reject findings)
+      │
+      └──▶ ...other options...
+```
+
+**Or from any record:**
+```
+  View any archival description
+      │
+      ▼
+   Sidebar (right side)
+      │
+      ▼
+   "Privacy & PII" section
+      │
+      ├──▶ Scan for PII        (scan this record)
+      ├──▶ PII Review Queue    (see all pending)
+      └──▶ PII Dashboard       (statistics)
+```
+
+---
+
+### Scan Individual Record
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PII DETECTION RESULTS                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ⚠️ 3 high-risk PII entities detected!                      │
+│                                                             │
+│  ─────────────────────────────────────────────────────────  │
+│                                                             │
+│  🔴 SA ID Numbers (1)                                       │
+│     ┌──────────────────────────────┐                        │
+│     │ 8501****083                  │                        │
+│     └──────────────────────────────┘                        │
+│                                                             │
+│  🟡 Email Addresses (1)                                     │
+│     ┌──────────────────────────────┐                        │
+│     │ jo***@example.com            │                        │
+│     └──────────────────────────────┘                        │
+│                                                             │
+│  🔵 People (via AI) (2)                                     │
+│     ┌──────────────────────────────┐                        │
+│     │ John Smith    Mary Jones     │                        │
+│     └──────────────────────────────┘                        │
+│                                                             │
+│  ─────────────────────────────────────────────────────────  │
+│                                                             │
+│  Risk Score: 45/100                      [ Review PII ]     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### PII Scanner Dashboard
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PII DETECTION SCANNER                                       │
+├──────────────────┬──────────────────┬───────────────────────┤
+│                  │                  │                       │
+│  OBJECTS SCANNED │  WITH PII        │   HIGH-RISK           │
+│                  │                  │                       │
+│      1,245       │      156         │       23              │
+│    records       │    records       │    records 🔴         │
+│                  │                  │                       │
+└──────────────────┴──────────────────┴───────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ RUN PII SCAN                                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Repository      [ All repositories           ▼]            │
+│                                                             │
+│  Batch Size      [ 50 objects                 ▼]            │
+│                  ┌───────────────────────────────┐          │
+│                  │ 25 objects                    │          │
+│                  │ 50 objects              ←     │          │
+│                  │ 100 objects                   │          │
+│                  │ 250 objects                   │          │
+│                  └───────────────────────────────┘          │
+│                                                             │
+│                              [ ▶ Start Scan ]               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ HIGH-RISK OBJECTS                                    🔴     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Object              │ PII Count │ Scanned    │ Actions     │
+│  ────────────────────┼───────────┼────────────┼─────────────│
+│  Personnel File 1954 │    12     │ 2026-01-20 │ [View]      │
+│  Medical Records Box │     8     │ 2026-01-20 │ [View]      │
+│  Application Forms   │     6     │ 2026-01-19 │ [View]      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Review PII Entities
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PII REVIEW QUEUE                              Pending: 47   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Status │ Type    │ Value          │ Object     │ Actions   │
+│  ───────┼─────────┼────────────────┼────────────┼───────────│
+│  🔴 Flag│ SA_ID   │ 8501****083    │ File #123  │ [✓][✎][✗] │
+│  🟡 Pend│ EMAIL   │ jo***@mail.com │ Letter #45 │ [✓][✎][✗] │
+│  🟡 Pend│ PERSON  │ John Smith     │ Report #67 │ [✓][✎][✗] │
+│  🟣 ISAD│ PLACE   │ Johannesburg   │ Report #67 │ [✓][✎][✗] │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ REVIEW ACTIONS                                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ✓ APPROVE   - Not sensitive PII, can remain visible        │
+│                                                             │
+│  ✎ REDACT    - Is PII, should be masked/restricted          │
+│               (For PDFs: black boxes applied to text)       │
+│                                                             │
+│  ✗ REJECT    - False positive, not actually PII             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Entity Sources (Badge Colors)
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PII ENTITY SOURCES                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔵 NER (Blue)     - AI-extracted from text/images via NER  │
+│                      Types: PERSON, ORG, GPE, DATE          │
+│                                                             │
+│  🔴 Regex (Red)    - Pattern-matched PII identifiers        │
+│                      Types: SA_ID, EMAIL, PHONE, BANK_ACCT  │
+│                                                             │
+│  🟣 ISAD (Purple)  - From ISAD(G) access points             │
+│                      Types: Subject, Place, Name, Date      │
+│                                                             │
+│  Note: ISAD access points are metadata fields you entered.  │
+│  They may contain names, places, or dates that need to be   │
+│  redacted from public-facing documents.                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Using the Command Line
+```
+┌─────────────────────────────────────────────────────────────┐
+│ CLI COMMANDS FOR PII SCANNING                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  # Show statistics                                          │
+│  php symfony privacy:scan-pii --stats                       │
+│                                                             │
+│  # Scan a specific record                                   │
+│  php symfony privacy:scan-pii --id=123                      │
+│                                                             │
+│  # Batch scan 50 records                                    │
+│  php symfony privacy:scan-pii --limit=50                    │
+│                                                             │
+│  # Scan specific repository only                            │
+│  php symfony privacy:scan-pii --repository=5                │
+│                                                             │
+│  # Re-scan already scanned records                          │
+│  php symfony privacy:scan-pii --rescan                      │
+│                                                             │
+│  # Show detailed output                                     │
+│  php symfony privacy:scan-pii --verbose                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Risk Score Explained
+```
+┌─────────────────────────────────────────────────────────────┐
+│ RISK SCORE CALCULATION                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Score Range     │  Classification  │  Action Required      │
+│  ────────────────┼──────────────────┼───────────────────────│
+│    0 - 20        │  🟢 Low Risk     │  Monitor              │
+│   21 - 50        │  🟡 Medium Risk  │  Review recommended   │
+│   51 - 100       │  🔴 High Risk    │  Immediate review     │
+│                                                             │
+│  ─────────────────────────────────────────────────────────  │
+│                                                             │
+│  How the score is calculated:                               │
+│                                                             │
+│  • Critical PII (credit cards)     × 30 points each         │
+│  • High-risk PII (ID numbers)      × 20 points each         │
+│  • Medium-risk (email, phone)      × 5 points each          │
+│  • Low-risk (names, places)        × 1 point each           │
+│                                                             │
+│  Maximum score: 100                                         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Part 8b: PDF Redaction
+
+### What is PDF Redaction?
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   PDF REDACTION = Permanently removing sensitive            │
+│                   information from PDF documents            │
+│                                                             │
+│   When you mark a PII entity for redaction:                 │
+│   • The system searches the PDF for that text               │
+│   • Applies black boxes over matching text                  │
+│   • Creates a new "redacted" version of the PDF             │
+│   • Public users see only the redacted version              │
+│                                                             │
+│   Original PDFs are PRESERVED - only copies are redacted.   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### PDF Redaction Workflow
+```
+                    Record has PDF
+                          │
+                          ▼
+              ┌────────────────────────┐
+              │   Scan for PII         │
+              │   (Admin → Privacy →   │
+              │    PII Scanner)        │
+              └───────────┬────────────┘
+                          │
+                          ▼
+              ┌────────────────────────┐
+              │   Review detected      │
+              │   entities             │
+              └───────────┬────────────┘
+                          │
+         ┌────────────────┼────────────────┐
+         │                │                │
+    ✓ Approve        ✎ Redact         ✗ Reject
+         │                │                │
+         ▼                ▼                ▼
+    Not PII,         Mark for        False positive,
+    keep visible     redaction       remove from list
+                          │
+                          ▼
+              ┌────────────────────────┐
+              │   System generates     │
+              │   redacted PDF         │
+              │   (black boxes over    │
+              │   sensitive text)      │
+              └───────────┬────────────┘
+                          │
+                          ▼
+              ┌────────────────────────┐
+              │   Public users see     │
+              │   redacted version     │
+              │                        │
+              │   Staff see original   │
+              │   (if permissions)     │
+              └────────────────────────┘
+```
+
+---
+
+### What Gets Redacted
+```
+┌─────────────────────────────────────────────────────────────┐
+│ SOURCES OF REDACTION TERMS                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. NER-Extracted Entities                                  │
+│     Names, organizations, places extracted from OCR text    │
+│                                                             │
+│  2. Regex-Detected PII                                      │
+│     ID numbers, emails, phone numbers found in metadata     │
+│                                                             │
+│  3. ISAD Access Points                                      │
+│     • Subjects: Topic terms linked to the record            │
+│     • Places: Geographic locations                          │
+│     • Names: People/organizations from events               │
+│     • Dates: Date ranges from events                        │
+│                                                             │
+│  Only entities marked with status "Redact" are applied.     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### View Redacted PDF
+```
+┌─────────────────────────────────────────────────────────────┐
+│ HOW PUBLIC USERS SEE REDACTED PDFs                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  When viewing a record with redacted PII:                   │
+│                                                             │
+│  1. The PDF viewer shows "PII Redacted" badge               │
+│  2. Sensitive text appears as black boxes: ████████         │
+│  3. The underlying text is permanently removed              │
+│  4. Copy/paste won't reveal original text                   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │  📄 Document Viewer        [PII Redacted]       │        │
+│  ├─────────────────────────────────────────────────┤        │
+│  │                                                 │        │
+│  │  Employee Name: █████████████████               │        │
+│  │  ID Number: ██████████████                      │        │
+│  │  Department: Human Resources                    │        │
+│  │  Date: 15 March 1985                            │        │
+│  │                                                 │        │
+│  └─────────────────────────────────────────────────┘        │
+│                                                             │
+│  Note: Original file remains available to staff with        │
+│  appropriate permissions.                                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Tips for Effective Redaction
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ✓ DO                          │  ✗ DON'T                  │
+├────────────────────────────────┼────────────────────────────┤
+│  Review all entities carefully │  Blindly redact everything │
+│  Check ISAD access points      │  Ignore purple badges      │
+│  Verify PDF has text layer     │  Assume scanned PDFs work  │
+│  Test redacted output          │  Skip verification         │
+│  Document your decisions       │  Leave audit trail gaps    │
+│  Re-scan after metadata edits  │  Assume one scan is enough │
+└────────────────────────────────┴────────────────────────────┘
+```
+
+---
+
+### PDF Requirements for Redaction
+```
+┌─────────────────────────────────────────────────────────────┐
+│ PDF REQUIREMENTS                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  For redaction to work, PDFs must have:                     │
+│                                                             │
+│  ✓ Text layer (not just scanned images)                     │
+│  ✓ Searchable text (can be OCR'd or native)                 │
+│                                                             │
+│  If your PDF is a scan without OCR:                         │
+│  1. The system cannot locate text to redact                 │
+│  2. Consider running OCR first (e.g., using Tesseract)      │
+│  3. Re-upload the OCR'd version                             │
+│                                                             │
+│  How to check if PDF has text:                              │
+│  • Open PDF in viewer                                       │
+│  • Try to select/highlight text                             │
+│  • If you can select it, redaction will work                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Part 9: Compliance Dashboard
 
 ### Overview Screen
 ```
@@ -684,6 +1123,9 @@ Manage data protection compliance for POPIA, GDPR, PIPEDA, CCPA, and other priva
 │  Record consent            │  Admin → Privacy → Consent     │
 │  Manage officers           │  Admin → Privacy → Officers    │
 │  Generate report           │  Admin → Privacy → Reports     │
+│  Scan for PII              │  Admin → Privacy → PII Scanner │
+│  Scan single record        │  Record page → Scan for PII    │
+│  Review PII findings       │  Admin → Privacy → PII Review  │
 └────────────────────────────┴────────────────────────────────┘
 ```
 

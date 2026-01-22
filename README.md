@@ -7,7 +7,7 @@
 [![AtoM Version](https://img.shields.io/badge/AtoM-2.8.x--2.10.x-blue.svg)](https://www.accesstomemory.org/)
 [![PHP Version](https://img.shields.io/badge/PHP-8.3-purple.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
-[![Extensions](https://img.shields.io/badge/Extensions-19+-orange.svg)](#-available-extensions)
+[![Extensions](https://img.shields.io/badge/Extensions-36-orange.svg)](#-available-extensions)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952b3.svg)](https://getbootstrap.com/)
 [![Laravel](https://img.shields.io/badge/Laravel-Query%20Builder-red.svg)](https://laravel.com/)
 
@@ -203,15 +203,30 @@
 │  ├── Base Repository/Service Classes                            │
 │  └── Helper Utilities                                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  LAYER 2: atom-ahg-plugins                                      │
+│  LAYER 2: atom-ahg-plugins (36 plugins)                         │
 │  ├── ahgThemeB5Plugin (Required - Locked)                       │
 │  ├── ahgSecurityClearancePlugin (Required - Locked)             │
-│  └── [Optional Plugins...]                                      │
+│  └── [34 Optional Plugins...]                                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  LAYER 3: Provenance AI (Optional - API)                        │
-│  └── AI-powered entity extraction for archivists                │
+│  LAYER 3: SDKs & AI Services (Optional)                         │
+│  ├── atom-ahg-python - Python SDK for AtoM API                  │
+│  ├── atom-client-js - TypeScript SDK for AtoM API               │
+│  └── Provenance AI - Entity extraction service                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+### Repository Structure
+
+| Repository | Purpose | Type |
+|------------|---------|------|
+| [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework) | Core Laravel foundation, CLI, services | Required |
+| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | All 36 AHG plugins | Plugin Collection |
+| [atom-ahg-python](https://github.com/ArchiveHeritageGroup/atom-ahg-python) | Python SDK for API integration | SDK |
+| [atom-client-js](https://github.com/ArchiveHeritageGroup/atom-client-js) | TypeScript/JavaScript SDK | SDK |
+| [atom-extensions-catalog](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog) | Documentation & plugin registry | Catalog |
+
+> **Note:** This catalog repository contains documentation and the plugin registry manifest (`catalog.json`).
+> All code lives in the respective repositories above.
 
 ---
 
@@ -334,10 +349,21 @@ For a fresh Ubuntu server:
 
 | Extension | Description |
 |-----------|-------------|
-| **ahgNerPlugin** | Named Entity Recognition |
+| **ahgNerPlugin** | Named Entity Recognition (Python/spaCy) |
+| **ahgSemanticSearchPlugin** | Semantic search, thesaurus, WordNet/Wikidata sync, embeddings |
+| **ahgMetadataExtractionPlugin** | EXIF/IPTC/XMP metadata extraction |
 | **ahg3DModelPlugin** | 3D model viewer & thumbnails |
 | **IiifViewerFramework** | IIIF deep zoom image viewer |
 | **ahgRicExplorerPlugin** | Records in Contexts graph viewer |
+
+### API & Integration
+
+| Extension | Description |
+|-----------|-------------|
+| **ahgAPIPlugin** | Extended REST API endpoints |
+| **ahgMigrationPlugin** | Data migration tools |
+| **ahgReportBuilderPlugin** | Custom report generation |
+| **ahgLoanPlugin** | Object loan management |
 
 ---
 
@@ -410,7 +436,9 @@ AI-powered entity extraction for archivists:
 | Document | Description |
 |----------|-------------|
 | **[INSTALLATION.md](INSTALLATION.md)** | Complete installation guide (7 methods) |
+| **[catalog.json](catalog.json)** | Plugin registry manifest (machine-readable) |
 | [docs/](docs/) | User guides for each plugin |
+| [docs/technical/](docs/technical/) | Technical documentation |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 
 ---

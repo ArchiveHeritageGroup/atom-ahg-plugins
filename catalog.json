@@ -1,0 +1,247 @@
+{
+  "$schema": "https://theahg.co.za/schemas/atom-catalog-v1.json",
+  "name": "AtoM Extensions Catalog",
+  "description": "Official catalog of AtoM extensions by The Archive and Heritage Group",
+  "version": "2.0.0",
+  "organization": "The Archive and Heritage Group (Pty) Ltd",
+  "homepage": "https://theahg.co.za",
+  "repositories": {
+    "atom-framework": {
+      "description": "Core Laravel-based framework for AtoM extensions",
+      "url": "https://github.com/ArchiveHeritageGroup/atom-framework",
+      "branch": "main",
+      "required": true,
+      "local_path": "/usr/share/nginx/archive/atom-framework"
+    },
+    "atom-ahg-plugins": {
+      "description": "Official AHG plugins for AtoM",
+      "url": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
+      "branch": "main",
+      "local_path": "/usr/share/nginx/archive/atom-ahg-plugins"
+    },
+    "atom-ahg-python": {
+      "description": "Python SDK for AtoM API",
+      "url": "https://github.com/ArchiveHeritageGroup/atom-ahg-python",
+      "branch": "main",
+      "local_path": "/usr/share/nginx/archive/atom-ahg-python"
+    },
+    "atom-client-js": {
+      "description": "TypeScript/JavaScript SDK for AtoM API",
+      "url": "https://github.com/ArchiveHeritageGroup/atom-client-js",
+      "branch": "main",
+      "local_path": "/usr/share/nginx/archive/atom-client-js"
+    }
+  },
+  "plugins": {
+    "core": [
+      {
+        "name": "ahgThemeB5Plugin",
+        "description": "Bootstrap 5 theme for AtoM",
+        "category": "theme",
+        "required": true,
+        "locked": true
+      },
+      {
+        "name": "ahgSecurityClearancePlugin",
+        "description": "Security classification and clearance management",
+        "category": "security",
+        "required": true,
+        "locked": true
+      }
+    ],
+    "official": [
+      {
+        "name": "ahgDisplayPlugin",
+        "description": "GLAM browser and display modes",
+        "category": "display"
+      },
+      {
+        "name": "ahgLibraryPlugin",
+        "description": "Library sector support with ISBN lookup",
+        "category": "sector"
+      },
+      {
+        "name": "ahgMuseumPlugin",
+        "description": "Museum sector support with Getty integration",
+        "category": "sector"
+      },
+      {
+        "name": "ahgGalleryPlugin",
+        "description": "Gallery sector support",
+        "category": "sector"
+      },
+      {
+        "name": "ahgDAMPlugin",
+        "description": "Digital Asset Management sector support",
+        "category": "sector"
+      },
+      {
+        "name": "ahgBackupPlugin",
+        "description": "Database and file backup with scheduling",
+        "category": "maintenance"
+      },
+      {
+        "name": "ahgAuditTrailPlugin",
+        "description": "Comprehensive audit logging",
+        "category": "compliance"
+      },
+      {
+        "name": "ahgPrivacyPlugin",
+        "description": "POPIA/GDPR privacy compliance and PII detection",
+        "category": "compliance"
+      },
+      {
+        "name": "ahgResearchPlugin",
+        "description": "Research portal with reading room booking",
+        "category": "research"
+      },
+      {
+        "name": "ahgAccessRequestPlugin",
+        "description": "Researcher access request management",
+        "category": "rights"
+      },
+      {
+        "name": "ahgExtendedRightsPlugin",
+        "description": "Extended rights management",
+        "category": "rights"
+      },
+      {
+        "name": "ahgRightsPlugin",
+        "description": "Core rights management",
+        "category": "rights"
+      },
+      {
+        "name": "ahgDonorAgreementPlugin",
+        "description": "Donor agreement management with contracts",
+        "category": "rights"
+      },
+      {
+        "name": "ahgLoanPlugin",
+        "description": "Loan management for GLAM institutions",
+        "category": "loans"
+      },
+      {
+        "name": "ahgSpectrumPlugin",
+        "description": "Spectrum 5.0 museum procedures",
+        "category": "sector"
+      },
+      {
+        "name": "ahgConditionPlugin",
+        "description": "Object condition reporting with annotations",
+        "category": "preservation"
+      },
+      {
+        "name": "ahgPreservationPlugin",
+        "description": "Digital preservation with fixity verification",
+        "category": "preservation"
+      },
+      {
+        "name": "ahgMetadataExtractionPlugin",
+        "description": "Universal metadata extraction with ExifTool",
+        "category": "preservation"
+      },
+      {
+        "name": "ahgNerPlugin",
+        "description": "Named Entity Recognition with spaCy",
+        "category": "ai"
+      },
+      {
+        "name": "ahgSemanticSearchPlugin",
+        "description": "Semantic search with thesaurus and embeddings",
+        "category": "search"
+      },
+      {
+        "name": "ahgReportBuilderPlugin",
+        "description": "Custom report builder with drag-drop designer",
+        "category": "reporting"
+      },
+      {
+        "name": "ahgAPIPlugin",
+        "description": "Enhanced REST API v2 with webhooks",
+        "category": "integration"
+      },
+      {
+        "name": "ahgMigrationPlugin",
+        "description": "Universal data migration tool",
+        "category": "migration"
+      },
+      {
+        "name": "ahgDataMigrationPlugin",
+        "description": "Data migration utilities",
+        "category": "migration"
+      },
+      {
+        "name": "ahgRicExplorerPlugin",
+        "description": "Records in Contexts (RiC) visualization",
+        "category": "standards"
+      },
+      {
+        "name": "ahgHeritageAccountingPlugin",
+        "description": "Heritage asset accounting (GRAP 103/IPSAS)",
+        "category": "accounting"
+      },
+      {
+        "name": "ahgProvenancePlugin",
+        "description": "Provenance tracking and visualization",
+        "category": "provenance"
+      },
+      {
+        "name": "ahgIiifCollectionPlugin",
+        "description": "IIIF manifest and collection management",
+        "category": "integration"
+      },
+      {
+        "name": "ahg3DModelPlugin",
+        "description": "3D model viewer with Blender integration",
+        "category": "display"
+      },
+      {
+        "name": "ahgCartPlugin",
+        "description": "Shopping cart for orders and requests",
+        "category": "user-engagement"
+      },
+      {
+        "name": "ahgFavoritesPlugin",
+        "description": "User favorites and bookmarks",
+        "category": "user-engagement"
+      },
+      {
+        "name": "ahgFeedbackPlugin",
+        "description": "User feedback collection",
+        "category": "user-engagement"
+      },
+      {
+        "name": "ahgRequestToPublishPlugin",
+        "description": "Publication request workflow",
+        "category": "user-engagement"
+      },
+      {
+        "name": "ahgVendorPlugin",
+        "description": "Third-party vendor management",
+        "category": "integration"
+      }
+    ]
+  },
+  "categories": {
+    "theme": "Visual themes and styling",
+    "security": "Security and access control",
+    "display": "Content display and viewing",
+    "sector": "GLAM sector-specific features",
+    "maintenance": "System maintenance utilities",
+    "compliance": "Regulatory compliance (POPIA, GDPR, etc.)",
+    "research": "Research and reading room services",
+    "rights": "Rights and access management",
+    "loans": "Object loan management",
+    "preservation": "Digital preservation",
+    "ai": "AI and machine learning features",
+    "search": "Search enhancements",
+    "reporting": "Reports and analytics",
+    "integration": "Third-party integrations and APIs",
+    "migration": "Data migration tools",
+    "standards": "Archival standards (RiC, EAD, etc.)",
+    "accounting": "Heritage asset accounting",
+    "provenance": "Provenance tracking",
+    "user-engagement": "User engagement features"
+  },
+  "updated_at": "2026-01-22T10:34:00Z"
+}
