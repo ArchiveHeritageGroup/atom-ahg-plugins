@@ -16,7 +16,16 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
           $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
           $is3D = in_array($ext, ['obj', 'glb', 'gltf', 'fbx', 'stl', 'ply', 'dae']);
         ?>
-        <?php if ($isImage): ?>
+        <?php
+          $mimeType = $digitalObject->mime_type ?? '';
+          $mediaTypeId = $digitalObject->media_type_id ?? null;
+          $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
+          $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
+        ?>
+        <?php if ($isVideo || $isAudio): ?>
+          <!-- Video/Audio player with transcription support -->
+          <?php include_partial('digitalobject/showVideo', ['resource' => $qubitResource->digitalObjectsRelatedByobjectId[0]]); ?>
+        <?php elseif ($isImage): ?>
           <img src="<?php echo esc_entities($fullPath); ?>" alt="" class="img-fluid" style="max-height: 300px;">
         <?php elseif ($is3D): ?>
           <!-- 3D Preview with model-viewer -->
