@@ -1,0 +1,41 @@
+# =============================================================================
+# Semantic Search Admin Routes
+# =============================================================================
+
+semantic_search_admin_index:
+  url: /admin/semantic-search
+  param: { module: semanticSearchAdmin, action: index }
+
+semantic_search_admin_config:
+  url: /admin/semantic-search/config
+  param: { module: semanticSearchAdmin, action: config }
+
+semantic_search_admin_terms:
+  url: /admin/semantic-search/terms
+  param: { module: semanticSearchAdmin, action: terms }
+
+semantic_search_admin_term_view:
+  url: /admin/semantic-search/term/:id
+  param: { module: semanticSearchAdmin, action: termView }
+  requirements: { id: \d+ }
+
+semantic_search_admin_term_add:
+  url: /admin/semantic-search/term/add
+  param: { module: semanticSearchAdmin, action: termAdd }
+
+semantic_search_admin_sync_logs:
+  url: /admin/semantic-search/sync-logs
+  param: { module: semanticSearchAdmin, action: syncLogs }
+
+semantic_search_admin_search_logs:
+  url: /admin/semantic-search/search-logs
+  param: { module: semanticSearchAdmin, action: searchLogs }
+
+# AJAX endpoints
+semantic_search_admin_run_sync:
+  url: /semanticSearchAdmin/runSync
+  param: { module: semanticSearchAdmin, action: runSync }
+
+semantic_search_admin_test_expand:
+  url: /semanticSearchAdmin/testExpand
+  param: { module: semanticSearchAdmin, action: testExpand }

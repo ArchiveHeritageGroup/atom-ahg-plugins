@@ -863,7 +863,7 @@ class ahgDisplayActions extends sfActions
     protected function expandQueryWithSynonyms(string $query): array
     {
         try {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/ThesaurusService.php';
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
             $expansions = $thesaurus->expandQuery($query);

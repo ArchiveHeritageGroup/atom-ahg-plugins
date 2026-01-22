@@ -1,4 +1,27 @@
 # =============================================================================
+# Media Streaming Routes (must be before other routes)
+# =============================================================================
+
+media_stream:
+  url: /media/stream/:id
+  param: { module: media, action: stream }
+  requirements: { id: \d+ }
+
+media_download:
+  url: /media/download/:id
+  param: { module: media, action: download }
+  requirements: { id: \d+ }
+
+media_snippets_list:
+  url: /media/snippets/:id
+  param: { module: media, action: snippets }
+  requirements: { id: \d+ }
+
+media_snippets_save:
+  url: /media/snippets
+  param: { module: media, action: saveSnippet }
+
+# =============================================================================
 # AHG Settings Dashboard Routes
 # =============================================================================
 

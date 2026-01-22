@@ -290,4 +290,110 @@ class mediaActions extends sfActions
             fclose($handle);
         }
     }
+
+    /**
+     * Get snippets for a digital object (AJAX)
+     *
+     * @param sfWebRequest $request
+     */
+    public function executeSnippets(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id');
+
+        if (!$id) {
+            echo json_encode(['error' => 'Digital object ID required']);
+            return sfView::NONE;
+        }
+
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare('SELECT * FROM media_snippets WHERE digital_object_id = ? ORDER BY start_time');
+            $stmt->execute([$id]);
+            $snippets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode(['snippets' => $snippets]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Save a media snippet (AJAX POST)
+     *
+     * @param sfWebRequest $request
+     */
+    public function executeSaveSnippet(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            echo json_encode(['error' => 'POST method required']);
+            return sfView::NONE;
+        }
+
+        // Get JSON body
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            echo json_encode(['error' => 'Invalid JSON data']);
+            return sfView::NONE;
+        }
+
+        $digitalObjectId = (int) ($data['digital_object_id'] ?? 0);
+        $title = trim($data['title'] ?? '');
+        $startTime = (float) ($data['start_time'] ?? 0);
+        $endTime = (float) ($data['end_time'] ?? 0);
+        $notes = trim($data['notes'] ?? '');
+
+        if (!$digitalObjectId || !$title || $startTime < 0 || $endTime <= $startTime) {
+            echo json_encode(['error' => 'Invalid snippet data']);
+            return sfView::NONE;
+        }
+
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare('INSERT INTO media_snippets (digital_object_id, title, start_time, end_time, notes) VALUES (?, ?, ?, ?, ?)');
+            $stmt->execute([$digitalObjectId, $title, $startTime, $endTime, $notes]);
+            $id = $conn->lastInsertId();
+
+            echo json_encode(['success' => true, 'id' => $id]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Delete a media snippet (AJAX DELETE)
+     *
+     * @param sfWebRequest $request
+     */
+    public function executeDeleteSnippet(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id');
+
+        if (!$id) {
+            echo json_encode(['error' => 'Snippet ID required']);
+            return sfView::NONE;
+        }
+
+        try {
+            $conn = Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM media_snippets WHERE id = ?');
+            $stmt->execute([$id]);
+
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
 }
