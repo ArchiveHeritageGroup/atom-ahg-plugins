@@ -932,37 +932,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       // Now get result counts for both queries
-      // Original: without semantic, Semantic: with semantic=1 (server handles OR logic)
-      Promise.all([
-        getResultCount(query, false),
-        getResultCount(query, true)
-      ]).then(function(counts) {
-        var originalCount = counts[0];
-        var expandedCount = counts[1];
-
-        // Build debug info
-        var debugInfo = '=== SEMANTIC SEARCH DEBUG ===\n\n';
-        debugInfo += 'Query: "' + query + '"\n';
-        debugInfo += 'Results (normal search): ' + originalCount + '\n';
-        debugInfo += 'Results (semantic search): ' + expandedCount + '\n\n';
-
-        if (expandedTerms.length > 0) {
-          debugInfo += 'Thesaurus expansions (OR logic on server):\n';
-          for (var term in result.expansions) {
-            debugInfo += '  ' + term + ' → ' + result.expansions[term].join(', ') + '\n';
-          }
-          debugInfo += '\nImprovement: +' + (expandedCount - originalCount) + ' results\n';
-        } else {
-          debugInfo += 'No thesaurus expansions found.\n';
-        }
-
-        // Show debug popup
-        alert(debugInfo);
-
-        // Submit form normally - server handles OR logic for semantic search
-        // Don't modify the query - server will expand it with proper OR logic
-        searchForm.submit();
-      });
+      // Submit form - server handles OR logic for semantic search
+      searchForm.submit();
     });
   });
 

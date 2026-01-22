@@ -175,23 +175,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var query = queryInput.value.trim();
     var semanticEnabled = semanticToggle.checked;
 
-    // DEBUG: Show what we're working with
-    var debugInfo = 'SEMANTIC SEARCH DEBUG:\n';
-    debugInfo += 'Query: "' + query + '"\n';
-    debugInfo += 'Semantic enabled: ' + semanticEnabled + '\n';
-    debugInfo += 'Cached expansions: ' + JSON.stringify(cachedExpansions, null, 2) + '\n';
-
     if (semanticEnabled && query) {
       // If not cached yet, fetch synchronously (blocking)
       if (!cachedExpansions[query]) {
         e.preventDefault();
-        debugInfo += 'Fetching expansions (not cached)...\n';
 
         fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
           .then(function(response) { return response.json(); })
           .then(function(data) {
-            debugInfo += 'Response: ' + JSON.stringify(data, null, 2) + '\n';
-
             if (data.success && Object.keys(data.expansions).length > 0) {
               var expandedTerms = [];
               for (var term in data.expansions) {
@@ -199,19 +190,9 @@ document.addEventListener('DOMContentLoaded', function() {
               }
 
               if (expandedTerms.length > 0) {
-                var originalQuery = query;
-                var expandedQuery = query + ' ' + expandedTerms.join(' ');
-                queryInput.value = expandedQuery;
-
-                debugInfo += 'Original query: "' + originalQuery + '"\n';
-                debugInfo += 'Expanded query: "' + expandedQuery + '"\n';
+                queryInput.value = query + ' ' + expandedTerms.join(' ');
               }
-            } else {
-              debugInfo += 'No expansions found.\n';
             }
-
-            // Show debug popup
-            alert(debugInfo);
 
             // Disable semantic param and submit
             var semanticInput = searchForm.querySelector('input[name="semantic"]');
@@ -221,27 +202,20 @@ document.addEventListener('DOMContentLoaded', function() {
             searchForm.submit();
           })
           .catch(function(error) {
-            debugInfo += 'Error: ' + error.message + '\n';
-            alert(debugInfo);
+            console.error('Semantic search error:', error);
             searchForm.submit();
           });
         return;
       }
 
       // Use cached expansions
-      debugInfo += 'Using cached expansions\n';
       var expandedTerms = [];
       for (var term in cachedExpansions[query]) {
         expandedTerms = expandedTerms.concat(cachedExpansions[query][term]);
       }
 
       if (expandedTerms.length > 0) {
-        var originalQuery = query;
-        var expandedQuery = query + ' ' + expandedTerms.join(' ');
-        queryInput.value = expandedQuery;
-
-        debugInfo += 'Original query: "' + originalQuery + '"\n';
-        debugInfo += 'Expanded query: "' + expandedQuery + '"\n';
+        queryInput.value = query + ' ' + expandedTerms.join(' ');
 
         var semanticInput = searchForm.querySelector('input[name="semantic"]');
         if (semanticInput) {
@@ -249,9 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
-
-    // Show debug popup
-    alert(debugInfo);
   });
 
   // Initial preview on modal open
