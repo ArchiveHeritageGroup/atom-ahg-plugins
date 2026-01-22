@@ -359,7 +359,13 @@ class SemanticSearchCron
         try {
             $service = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
             $result = $service->exportToElasticsearch();
-            $this->output("  Exported {$result['count']} synonym groups to {$result['path']}");
+
+            // Handle both array and string return types
+            if (is_array($result)) {
+                $this->output("  Exported {$result['count']} synonym groups to {$result['path']}");
+            } else {
+                $this->output("  Exported synonyms to {$result}");
+            }
         } catch (Exception $e) {
             $this->output("  ERROR: " . $e->getMessage());
         }
