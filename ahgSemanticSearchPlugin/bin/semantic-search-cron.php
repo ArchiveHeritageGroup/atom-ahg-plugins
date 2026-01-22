@@ -117,11 +117,21 @@ function initDatabase(string $atomRoot): void
         'password' => '',
     ];
 
-    // Try to load from AtoM config
+    // Load from AtoM config.php
     if (file_exists($configFile)) {
         $config = include $configFile;
-        if (isset($config['database'])) {
-            $dbConfig = array_merge($dbConfig, $config['database']);
+        // Database credentials are at root level in config.php
+        if (isset($config['db_host'])) {
+            $dbConfig['host'] = $config['db_host'];
+        }
+        if (isset($config['db_name'])) {
+            $dbConfig['database'] = $config['db_name'];
+        }
+        if (isset($config['db_user'])) {
+            $dbConfig['username'] = $config['db_user'];
+        }
+        if (isset($config['db_pass'])) {
+            $dbConfig['password'] = $config['db_pass'];
         }
     }
 
