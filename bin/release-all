@@ -1,0 +1,317 @@
+#!/bin/bash
+#===============================================================================
+# AtoM AHG - Batch Release Script
+#===============================================================================
+# Manages releases across all AtoM AHG repositories
+#
+# Usage:
+#   ./bin/release-all push              # Push all repos to GitHub
+#   ./bin/release-all status            # Show status of all repos
+#   ./bin/release-all release TYPE MSG  # Release all repos (patch/minor/major)
+#
+# Repositories managed:
+#   - atom-framework        (Core Laravel foundation)
+#   - atom-ahg-plugins      (36 AHG plugins)
+#   - atom-extensions-catalog (Documentation & registry)
+#   - atom-ahg-python       (Python SDK)
+#   - atom-client-js        (TypeScript SDK)
+#===============================================================================
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="/usr/share/nginx/archive"
+
+# Repository definitions: name|path|github_repo|has_version
+REPOS=(
+    "atom-framework|${BASE_DIR}/atom-framework|ArchiveHeritageGroup/atom-framework|yes"
+    "atom-ahg-plugins|${BASE_DIR}/atom-ahg-plugins|ArchiveHeritageGroup/atom-ahg-plugins|yes"
+    "atom-extensions-catalog|${BASE_DIR}/atom-extensions-catalog|ArchiveHeritageGroup/atom-extensions-catalog|yes"
+    "atom-ahg-python|${BASE_DIR}/atom-ahg-python|ArchiveHeritageGroup/atom-ahg-python|yes"
+    "atom-client-js|${BASE_DIR}/atom-client-js|ArchiveHeritageGroup/atom-client-js|yes"
+)
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+#===============================================================================
+# Helper Functions
+#===============================================================================
+
+print_header() {
+    echo ""
+    echo -e "${CYAN}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  $1${NC}"
+    echo -e "${CYAN}════════════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+print_repo_header() {
+    echo -e "${BLUE}┌──────────────────────────────────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│ $1${NC}"
+    echo -e "${BLUE}└──────────────────────────────────────────────────────────────────┘${NC}"
+}
+
+get_version() {
+    local path="$1"
+    if [ -f "${path}/version.json" ]; then
+        php -r "\$j=json_decode(file_get_contents('${path}/version.json'),true); echo \$j['version'] ?? '0.0.0';" 2>/dev/null || echo "0.0.0"
+    elif [ -f "${path}/pyproject.toml" ]; then
+        grep -m1 'version' "${path}/pyproject.toml" | cut -d'"' -f2 2>/dev/null || echo "0.0.0"
+    elif [ -f "${path}/package.json" ]; then
+        php -r "\$j=json_decode(file_get_contents('${path}/package.json'),true); echo \$j['version'] ?? '0.0.0';" 2>/dev/null || echo "0.0.0"
+    else
+        echo "0.0.0"
+    fi
+}
+
+bump_version() {
+    local current="$1"
+    local type="$2"
+
+    IFS='.' read -r major minor patch <<< "$current"
+
+    case $type in
+        major) major=$((major + 1)); minor=0; patch=0 ;;
+        minor) minor=$((minor + 1)); patch=0 ;;
+        patch) patch=$((patch + 1)) ;;
+    esac
+
+    echo "${major}.${minor}.${patch}"
+}
+
+update_version_file() {
+    local path="$1"
+    local new_version="$2"
+    local date=$(date +%Y-%m-%d)
+
+    if [ -f "${path}/version.json" ]; then
+        php -r "
+            \$j = json_decode(file_get_contents('${path}/version.json'), true);
+            \$j['version'] = '${new_version}';
+            \$j['release_date'] = '${date}';
+            \$j['updated'] = '${date}';
+            file_put_contents('${path}/version.json', json_encode(\$j, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . \"\n\");
+        "
+    fi
+
+    if [ -f "${path}/pyproject.toml" ]; then
+        sed -i "s/^version = \".*\"/version = \"${new_version}\"/" "${path}/pyproject.toml"
+    fi
+
+    if [ -f "${path}/package.json" ]; then
+        php -r "
+            \$j = json_decode(file_get_contents('${path}/package.json'), true);
+            \$j['version'] = '${new_version}';
+            file_put_contents('${path}/package.json', json_encode(\$j, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . \"\n\");
+        "
+    fi
+}
+
+ensure_remote() {
+    local path="$1"
+    local github_repo="$2"
+
+    cd "$path"
+
+    if ! git remote get-url origin &>/dev/null; then
+        echo -e "  ${YELLOW}Adding remote origin...${NC}"
+        git remote add origin "git@github.com:${github_repo}.git"
+    fi
+}
+
+#===============================================================================
+# Commands
+#===============================================================================
+
+cmd_status() {
+    print_header "Repository Status"
+
+    printf "%-25s %-10s %-15s %-20s\n" "REPOSITORY" "VERSION" "BRANCH" "STATUS"
+    printf "%-25s %-10s %-15s %-20s\n" "─────────────────────────" "──────────" "───────────────" "────────────────────"
+
+    for repo_def in "${REPOS[@]}"; do
+        IFS='|' read -r name path github has_version <<< "$repo_def"
+
+        if [ -d "$path" ]; then
+            cd "$path"
+            version=$(get_version "$path")
+            branch=$(git branch --show-current 2>/dev/null || echo "N/A")
+
+            # Check status
+            if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+                status="${YELLOW}modified${NC}"
+            elif git log origin/${branch}..HEAD 2>/dev/null | grep -q .; then
+                status="${CYAN}ahead${NC}"
+            else
+                status="${GREEN}clean${NC}"
+            fi
+
+            printf "%-25s %-10s %-15s " "$name" "v$version" "$branch"
+            echo -e "$status"
+        else
+            printf "%-25s %-10s %-15s " "$name" "N/A" "N/A"
+            echo -e "${RED}not found${NC}"
+        fi
+    done
+    echo ""
+}
+
+cmd_push() {
+    print_header "Push All Repositories to GitHub"
+
+    local success=0
+    local failed=0
+
+    for repo_def in "${REPOS[@]}"; do
+        IFS='|' read -r name path github has_version <<< "$repo_def"
+
+        if [ ! -d "$path" ]; then
+            echo -e "${YELLOW}Skipping $name (not found)${NC}"
+            continue
+        fi
+
+        print_repo_header "$name"
+        cd "$path"
+
+        # Ensure remote exists
+        ensure_remote "$path" "$github"
+
+        # Check if there's anything to push
+        branch=$(git branch --show-current 2>/dev/null || echo "main")
+
+        # Check for uncommitted changes
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+            echo -e "  ${YELLOW}Uncommitted changes detected${NC}"
+            git status --short
+            echo ""
+        fi
+
+        # Push
+        echo -e "  Pushing to origin/${branch}..."
+        if git push -u origin "$branch" 2>&1; then
+            echo -e "  ${GREEN}✓ Pushed successfully${NC}"
+            ((success++))
+        else
+            echo -e "  ${RED}✗ Push failed${NC}"
+            ((failed++))
+        fi
+
+        # Push tags
+        if git tag -l | grep -q .; then
+            echo -e "  Pushing tags..."
+            git push origin --tags 2>&1 || true
+        fi
+
+        echo ""
+    done
+
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "  Pushed: ${GREEN}${success}${NC}  Failed: ${RED}${failed}${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+}
+
+cmd_release() {
+    local type="${1:-patch}"
+    local msg="${2:-Release update}"
+    local date=$(date +%Y-%m-%d)
+
+    print_header "Release All Repositories (${type})"
+    echo -e "Message: ${msg}"
+    echo ""
+
+    for repo_def in "${REPOS[@]}"; do
+        IFS='|' read -r name path github has_version <<< "$repo_def"
+
+        if [ ! -d "$path" ]; then
+            echo -e "${YELLOW}Skipping $name (not found)${NC}"
+            continue
+        fi
+
+        print_repo_header "$name"
+        cd "$path"
+
+        # Ensure remote
+        ensure_remote "$path" "$github"
+
+        # Get and bump version
+        current=$(get_version "$path")
+        new_version=$(bump_version "$current" "$type")
+        tag="v${new_version}"
+
+        echo -e "  Version: ${YELLOW}v${current}${NC} → ${GREEN}${tag}${NC}"
+
+        # Update version files
+        if [ "$has_version" = "yes" ]; then
+            update_version_file "$path" "$new_version"
+        fi
+
+        # Git operations
+        git add -A
+
+        if git diff --cached --quiet; then
+            echo -e "  ${YELLOW}No changes to commit${NC}"
+        else
+            git commit -m "${tag}: ${msg}"
+            echo -e "  ${GREEN}✓ Committed${NC}"
+        fi
+
+        # Create tag
+        if git tag -l | grep -q "^${tag}$"; then
+            echo -e "  ${YELLOW}Tag ${tag} already exists${NC}"
+        else
+            git tag -a "${tag}" -m "${msg}"
+            echo -e "  ${GREEN}✓ Tagged ${tag}${NC}"
+        fi
+
+        # Push
+        branch=$(git branch --show-current 2>/dev/null || echo "main")
+        git push -u origin "$branch" 2>&1 || echo -e "  ${YELLOW}Push to origin failed (may need to create repo)${NC}"
+        git push origin "${tag}" 2>&1 || true
+
+        echo ""
+    done
+
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "  ${GREEN}All repositories released!${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+}
+
+cmd_help() {
+    echo "AtoM AHG - Batch Release Script"
+    echo ""
+    echo "Usage:"
+    echo "  $0 status              Show status of all repositories"
+    echo "  $0 push                Push all repositories to GitHub"
+    echo "  $0 release TYPE MSG    Release all repos (TYPE: patch|minor|major)"
+    echo ""
+    echo "Managed Repositories:"
+    for repo_def in "${REPOS[@]}"; do
+        IFS='|' read -r name path github has_version <<< "$repo_def"
+        echo "  - $name ($github)"
+    done
+    echo ""
+}
+
+#===============================================================================
+# Main
+#===============================================================================
+
+case "${1:-help}" in
+    status)
+        cmd_status
+        ;;
+    push)
+        cmd_push
+        ;;
+    release)
+        cmd_release "${2:-patch}" "${3:-Release update}"
+        ;;
+    *)
+        cmd_help
+        ;;
+esac
