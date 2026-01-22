@@ -1,17 +1,21 @@
 {
     "name": "Backup & Restore",
     "machine_name": "ahgBackupPlugin",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Database and file backup with scheduling, restore, upload and retention management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
+    "category": "maintenance",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
     "dependencies": [],
-    "theme_support": ["arDominionB5Plugin", "arAHGThemeB5Plugin"],
+    "theme_support": [
+        "arDominionB5Plugin",
+        "arAHGThemeB5Plugin"
+    ],
     "tables": [],
     "provides": {
         "admin_section": {

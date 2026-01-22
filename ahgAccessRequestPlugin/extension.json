@@ -1,10 +1,11 @@
 {
     "name": "Access Request",
     "machine_name": "ahgAccessRequestPlugin",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "description": "Researcher access request management for restricted materials",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
+    "category": "rights",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

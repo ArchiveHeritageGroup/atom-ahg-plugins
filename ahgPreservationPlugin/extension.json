@@ -1,6 +1,7 @@
 {
-    "name": "ahgPreservationPlugin",
-    "version": "1.0.4",
+    "name": "Digital Preservation",
+    "machine_name": "ahgPreservationPlugin",
+    "version": "1.0.5",
     "description": "Digital preservation: checksums, fixity verification, PREMIS events, format registry",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0",
@@ -14,13 +15,18 @@
         "OAIS",
         "format registry"
     ],
-    "dependencies": {
-        "atom": ">=2.8.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [],
     "settings": {
         "default_algorithm": "sha256",
         "auto_checksum_on_upload": true,
         "fixity_check_interval_days": 7
-    }
+    },
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ]
 }

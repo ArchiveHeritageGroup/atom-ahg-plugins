@@ -1,0 +1,47 @@
+{
+    "name": "Loan Management",
+    "machine_name": "ahgLoanPlugin",
+    "version": "1.0.1",
+    "description": "Shared loan management for GLAM institutions - Museums, Galleries, Archives, Libraries, and Digital Assets. Based on Spectrum 5.0 and international GLAM standards.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "loans",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "tables": [
+        "ahg_loan",
+        "ahg_loan_object",
+        "ahg_loan_document",
+        "ahg_loan_extension",
+        "ahg_loan_status_history",
+        "ahg_loan_facility_report",
+        "ahg_loan_facility_image",
+        "ahg_loan_condition_report",
+        "ahg_loan_condition_image",
+        "ahg_loan_courier",
+        "ahg_loan_shipment",
+        "ahg_loan_shipment_event",
+        "ahg_loan_notification_template",
+        "ahg_loan_notification_log",
+        "ahg_loan_cost"
+    ],
+    "features": [
+        "Inbound and outbound loans",
+        "Multi-sector support (Museum, Gallery, Archive, Library, DAM)",
+        "Facility reports for venue assessment",
+        "Condition reports with images",
+        "Courier and shipment tracking",
+        "Loan extensions and status history",
+        "Automated notifications",
+        "Cost tracking",
+        "Insurance management"
+    ],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ]
+}

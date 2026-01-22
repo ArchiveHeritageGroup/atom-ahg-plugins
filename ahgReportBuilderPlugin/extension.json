@@ -1,0 +1,35 @@
+{
+    "name": "Report Builder",
+    "machine_name": "ahgReportBuilderPlugin",
+    "version": "1.0.1",
+    "description": "Custom report builder with drag-drop designer, charts, scheduling, and multi-format export (PDF, XLSX, CSV)",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "reporting",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "tables": [
+        "custom_report",
+        "report_schedule",
+        "report_archive",
+        "dashboard_widget"
+    ],
+    "features": [
+        "Custom report templates",
+        "Drag-drop report designer",
+        "Multiple data sources",
+        "Chart support (bar, line, pie)",
+        "Scheduled report generation",
+        "Report archive management",
+        "Dashboard widgets",
+        "Export to PDF, XLSX, CSV"
+    ],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ]
+}
