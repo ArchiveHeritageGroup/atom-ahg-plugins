@@ -18,22 +18,45 @@
       <i class="fas fa-book me-2"></i>
       <?php echo $resource->getTitle(['cultureFallback' => true]); ?>
     </li>
-    <?php 
+    <?php
       $children = $resource->getChildren();
+      $totalChildren = count($children);
+      $initialLimit = 10;
       $count = 0;
       foreach ($children as $child):
-        if ($count++ >= 10) break;
+        $count++;
+        $isHidden = $count > $initialLimit;
     ?>
-    <li class="list-group-item ps-4">
+    <li class="list-group-item ps-4<?php echo $isHidden ? ' holdings-extra d-none' : ''; ?>">
       <i class="fas fa-file me-2"></i>
       <?php echo link_to($child->getTitle(['cultureFallback' => true]) ?: '[Untitled]', ['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $child->slug]); ?>
     </li>
     <?php endforeach; ?>
-    <?php if (count($children) > 10): ?>
-    <li class="list-group-item text-muted">
-      <i class="fas fa-ellipsis-h me-2"></i>
-      <?php echo __('%1% more...', ['%1%' => count($children) - 10]); ?>
+    <?php if ($totalChildren > $initialLimit): ?>
+    <li class="list-group-item text-center holdings-toggle-container">
+      <a href="#" class="holdings-show-more text-decoration-none" onclick="toggleHoldings(this); return false;">
+        <i class="fas fa-chevron-down me-1"></i>
+        <?php echo __('Show %1% more', ['%1%' => $totalChildren - $initialLimit]); ?>
+      </a>
+      <a href="#" class="holdings-show-less text-decoration-none d-none" onclick="toggleHoldings(this); return false;">
+        <i class="fas fa-chevron-up me-1"></i>
+        <?php echo __('Show less'); ?>
+      </a>
     </li>
+    <script>
+    function toggleHoldings(el) {
+      var container = el.closest('.sidebar-widget');
+      var extras = container.querySelectorAll('.holdings-extra');
+      var showMore = container.querySelector('.holdings-show-more');
+      var showLess = container.querySelector('.holdings-show-less');
+
+      extras.forEach(function(item) {
+        item.classList.toggle('d-none');
+      });
+      showMore.classList.toggle('d-none');
+      showLess.classList.toggle('d-none');
+    }
+    </script>
     <?php endif; ?>
   </ul>
 </section>
