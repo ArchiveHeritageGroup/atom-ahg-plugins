@@ -1,0 +1,42 @@
+{
+    "name": "Metadata Extraction",
+    "machine_name": "ahgMetadataExtractionPlugin",
+    "version": "1.0.0",
+    "description": "Universal metadata extraction from digital objects using ExifTool, with automatic field mapping and preservation metadata support",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "preservation",
+    "keywords": [
+        "metadata",
+        "EXIF",
+        "extraction",
+        "ExifTool",
+        "preservation",
+        "technical metadata"
+    ],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "system_requirements": {
+        "exiftool": "ExifTool must be installed on the system"
+    },
+    "tables": [
+        "extracted_metadata",
+        "metadata_extraction_log"
+    ],
+    "features": [
+        "Automatic metadata extraction from uploaded files",
+        "ExifTool integration for comprehensive format support",
+        "Technical metadata preservation",
+        "Field mapping to AtoM descriptive fields",
+        "Batch extraction support",
+        "Extraction logging and audit trail"
+    ],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ]
+}

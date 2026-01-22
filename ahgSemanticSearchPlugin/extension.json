@@ -1,0 +1,85 @@
+{
+    "name": "Semantic Search",
+    "machine_name": "ahgSemanticSearchPlugin",
+    "version": "1.0.0",
+    "description": "Semantic search and thesaurus management with WordNet/Datamuse API sync, Wikidata SPARQL integration, and vector embeddings via Ollama",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "search",
+    "keywords": [
+        "semantic search",
+        "thesaurus",
+        "synonyms",
+        "WordNet",
+        "Wikidata",
+        "embeddings",
+        "NLP"
+    ],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [],
+    "optional_dependencies": {
+        "ollama": "For vector embedding generation",
+        "elasticsearch": "For synonym export and semantic search"
+    },
+    "tables": [
+        "semantic_synonym",
+        "semantic_embedding",
+        "ahg_semantic_search_settings",
+        "semantic_query_log"
+    ],
+    "features": [
+        "Thesaurus management with domain-specific synonyms",
+        "WordNet sync via Datamuse API",
+        "Wikidata SPARQL integration",
+        "Local JSON synonym import",
+        "Elasticsearch synonym export",
+        "Query expansion for enhanced search",
+        "Vector embeddings via Ollama",
+        "Scheduled sync via cron jobs"
+    ],
+    "cron": {
+        "install": "sudo cp config/cron.d/ahg-semantic-search /etc/cron.d/",
+        "jobs": [
+            {
+                "name": "weekly-full-sync",
+                "schedule": "0 2 * * 0",
+                "command": "php bin/semantic-search-cron.php all",
+                "description": "Weekly full sync from WordNet and Wikidata"
+            },
+            {
+                "name": "daily-embeddings",
+                "schedule": "0 3 * * *",
+                "command": "php bin/semantic-search-cron.php update-embeddings",
+                "description": "Daily vector embedding updates"
+            },
+            {
+                "name": "daily-es-export",
+                "schedule": "0 4 * * *",
+                "command": "php bin/semantic-search-cron.php export-es",
+                "description": "Daily Elasticsearch synonym export"
+            },
+            {
+                "name": "monthly-cleanup",
+                "schedule": "0 1 1 * *",
+                "command": "php bin/semantic-search-cron.php cleanup",
+                "description": "Monthly cleanup of stale entries"
+            }
+        ]
+    },
+    "cli_commands": [
+        {
+            "name": "semantic-search-cron.php",
+            "description": "Cron job handler for scheduled tasks",
+            "usage": "php bin/semantic-search-cron.php [task] [options]",
+            "tasks": ["all", "sync-wordnet", "sync-wikidata", "update-embeddings", "export-es", "cleanup"]
+        }
+    ],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ]
+}
