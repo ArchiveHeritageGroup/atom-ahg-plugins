@@ -766,4 +766,44 @@ class WordNetSyncService
     {
         return $this->syncTerms($terms, $domain);
     }
+
+    /**
+     * Sync terms for a specific domain by name
+     *
+     * @param string $domain Domain name: archival, library, museum, general
+     * @param int $limit Maximum terms to process (0 = all)
+     * @return array Sync statistics with 'added', 'updated', 'skipped' keys
+     */
+    public function syncDomain(string $domain, int $limit = 0): array
+    {
+        $terms = match ($domain) {
+            'archival' => self::ARCHIVAL_TERMS,
+            'library' => self::LIBRARY_TERMS,
+            'museum' => self::MUSEUM_TERMS,
+            'south_african', 'za' => self::SOUTH_AFRICAN_TERMS,
+            'historical' => self::HISTORICAL_TERMS,
+            default => self::GENERAL_TERMS,
+        };
+
+        // Apply limit if specified
+        if ($limit > 0 && $limit < count($terms)) {
+            $terms = array_slice($terms, 0, $limit);
+        }
+
+        $domainConstant = match ($domain) {
+            'archival' => ThesaurusService::DOMAIN_ARCHIVAL,
+            'library' => ThesaurusService::DOMAIN_LIBRARY,
+            'museum' => ThesaurusService::DOMAIN_MUSEUM,
+            default => ThesaurusService::DOMAIN_GENERAL,
+        };
+
+        $result = $this->syncTerms($terms, $domainConstant);
+
+        // Return in format expected by cron script
+        return [
+            'added' => $result['terms_added'] ?? 0,
+            'updated' => $result['terms_updated'] ?? 0,
+            'skipped' => ($result['terms_processed'] ?? 0) - ($result['terms_added'] ?? 0) - ($result['terms_updated'] ?? 0),
+        ];
+    }
 }

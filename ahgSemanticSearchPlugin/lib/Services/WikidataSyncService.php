@@ -88,6 +88,23 @@ class WikidataSyncService
     // ========================================================================
 
     /**
+     * Sync archival terms from Wikidata (alias for syncHeritageTerms)
+     *
+     * @param int $limit Maximum terms to process (0 = all)
+     * @return array Sync statistics with 'added' and 'updated' keys
+     */
+    public function syncArchivalTerms(int $limit = 0): array
+    {
+        $result = $this->syncHeritageTerms();
+
+        // Return in format expected by cron script
+        return [
+            'added' => $result['terms_added'] ?? 0,
+            'updated' => $result['terms_processed'] - ($result['terms_added'] ?? 0),
+        ];
+    }
+
+    /**
      * Sync heritage-related terms from Wikidata
      */
     public function syncHeritageTerms(): array
