@@ -34,10 +34,10 @@
 
 declare(strict_types=1);
 
-// Determine AtoM root
+// Determine paths - detect plugin root from script location
+$pluginRoot = dirname(__DIR__); // Parent of bin/ directory
 $atomRoot = getenv('ATOM_ROOT') ?: '/usr/share/nginx/archive';
 $frameworkRoot = $atomRoot . '/atom-framework';
-$pluginRoot = $atomRoot . '/plugins/ahgSemanticSearchPlugin';
 
 // Bootstrap
 require_once $frameworkRoot . '/vendor/autoload.php';
