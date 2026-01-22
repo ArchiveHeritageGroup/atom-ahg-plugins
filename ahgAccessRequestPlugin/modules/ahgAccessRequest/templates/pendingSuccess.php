@@ -115,7 +115,7 @@
                         <br><small class="text-muted"><?php echo date('H:i', strtotime($req->created_at)); ?></small>
                       </td>
                       <td>
-                        <a href="<?php echo url_for('@security_request_view?id=' . $req->id); ?>" class="btn btn-sm btn-primary">
+                        <a href="<?php echo url_for('@access_request_view?id=' . $req->id); ?>" class="btn btn-sm btn-primary">
                           <i class="fas fa-eye me-1"></i> Review
                         </a>
                       </td>

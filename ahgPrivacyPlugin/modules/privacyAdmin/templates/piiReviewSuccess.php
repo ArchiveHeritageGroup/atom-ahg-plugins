@@ -60,10 +60,23 @@
                                     'BANK_ACCOUNT' => 'bg-danger',
                                     'ORG' => 'bg-secondary',
                                     'GPE' => 'bg-secondary',
+                                    // ISAD Access Point types
+                                    'ISAD_SUBJECT' => 'bg-purple text-white',
+                                    'ISAD_PLACE' => 'bg-teal text-white',
+                                    'ISAD_NAME' => 'bg-indigo text-white',
+                                    'ISAD_DATE' => 'bg-cyan text-dark',
                                 ];
                                 $badge = $typeBadges[$entity->entity_type] ?? 'bg-primary';
+                                $isIsad = strpos($entity->entity_type, 'ISAD_') === 0;
+                                $displayType = $isIsad ? str_replace('ISAD_', '', $entity->entity_type) : $entity->entity_type;
                                 ?>
-                                <span class="badge <?php echo $badge; ?>"><?php echo $entity->entity_type; ?></span>
+                                <span class="badge <?php echo $badge; ?>" style="<?php echo $isIsad ? 'background-color: #6f42c1 !important;' : ''; ?>">
+                                    <?php if ($isIsad): ?><i class="fas fa-tag me-1"></i><?php endif; ?>
+                                    <?php echo $displayType; ?>
+                                </span>
+                                <?php if ($isIsad): ?>
+                                <br><small class="text-muted">ISAD Access Point</small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <code><?php echo esc_entities($entity->entity_value); ?></code>
@@ -82,20 +95,26 @@
                                 <span class="<?php echo $confClass; ?>"><?php echo $conf; ?>%</span>
                             </td>
                             <td>
-                                <form action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiEntityAction']); ?>" method="post" class="d-inline">
-                                    <input type="hidden" name="entity_id" value="<?php echo $entity->id; ?>">
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="submit" name="entity_action" value="approved" class="btn btn-outline-success" title="Approve - Not PII">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button type="submit" name="entity_action" value="redacted" class="btn btn-outline-warning" title="Redact - Is PII">
-                                            <i class="fas fa-eraser"></i>
-                                        </button>
-                                        <button type="submit" name="entity_action" value="rejected" class="btn btn-outline-danger" title="Reject - False Positive">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </form>
+                                <div class="d-flex gap-1">
+                                    <form action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiEntityAction']); ?>" method="post" class="d-inline">
+                                        <input type="hidden" name="entity_id" value="<?php echo $entity->id; ?>">
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="submit" name="entity_action" value="approved" class="btn btn-outline-success" title="Approve - Not PII">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="submit" name="entity_action" value="redacted" class="btn btn-outline-warning" title="Redact - Is PII">
+                                                <i class="fas fa-eraser"></i>
+                                            </button>
+                                            <button type="submit" name="entity_action" value="rejected" class="btn btn-outline-danger" title="Reject - False Positive">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $entity->object_id]); ?>"
+                                       class="btn btn-sm btn-outline-dark" title="Visual Redaction Editor">
+                                        <i class="fas fa-mask"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -116,11 +135,37 @@
                 </div>
                 <div class="col-md-4">
                     <span class="badge bg-warning text-dark me-2"><i class="fas fa-eraser"></i></span>
-                    <strong>Redact</strong> - Is PII, should be masked/restricted
+                    <strong>Redact</strong> - Is PII, should be masked/restricted in metadata and PDFs
                 </div>
                 <div class="col-md-4">
                     <span class="badge bg-danger me-2"><i class="fas fa-times"></i></span>
                     <strong>Reject</strong> - False positive, not actually PII
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entity Sources Legend -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <h6><i class="fas fa-tags me-2"></i>Entity Sources</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>Extracted Entities (NER/Regex)</strong></p>
+                    <span class="badge bg-info me-1">PERSON</span>
+                    <span class="badge bg-secondary me-1">ORG</span>
+                    <span class="badge bg-secondary me-1">GPE</span>
+                    <span class="badge bg-danger me-1">SA_ID</span>
+                    <span class="badge bg-warning text-dark me-1">EMAIL</span>
+                    <small class="d-block text-muted mt-1">Extracted from metadata text fields and PDF content</small>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>ISAD Access Points</strong></p>
+                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>SUBJECT</span>
+                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>PLACE</span>
+                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>NAME</span>
+                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>DATE</span>
+                    <small class="d-block text-muted mt-1">From Subject, Place, Name, and Date access point fields</small>
                 </div>
             </div>
         </div>

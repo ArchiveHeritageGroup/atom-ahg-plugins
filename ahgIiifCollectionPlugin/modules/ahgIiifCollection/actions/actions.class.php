@@ -10,7 +10,7 @@ class ahgIiifCollectionActions extends sfActions
     protected function initService()
     {
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
-        $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
+        $this->collectionService = new \AtomFramework\Services\IiifCollectionService();
         
         // Initialize database
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {

@@ -23,14 +23,28 @@ $resourceSlug = $resource->slug ?? null;
         </a>
         
         <!-- TIFF to PDF Merge -->
-        <button type="button" 
-                class="btn btn-outline-secondary btn-sm" 
-                data-bs-toggle="modal" 
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                data-bs-toggle="modal"
                 data-bs-target="#tiffPdfMergeModal"
                 title="Upload multiple TIFF/image files and merge into a single PDF/A document">
             <i class="fas fa-layer-group me-1"></i>
             Merge to PDF
         </button>
+
+        <?php
+        // Visual Redaction Editor - only show if a digital object exists
+        $hasDigitalObject = QubitDigitalObject::getByInformationObjectId($resourceId) !== null;
+        if ($hasDigitalObject && $sf_user->hasCredential(['editor', 'administrator'], false)):
+        ?>
+        <!-- Visual Redaction Editor -->
+        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resourceId]); ?>"
+           class="btn btn-outline-dark btn-sm"
+           title="Visual Redaction Editor - Draw redactions on PDF/Image to mask sensitive content">
+            <i class="fas fa-mask me-1"></i>
+            Redact
+        </a>
+        <?php endif; ?>
     </div>
 </div>
 

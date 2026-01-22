@@ -6,17 +6,25 @@ class privacyAdminActions extends sfActions
     public function preExecute()
     {
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+
+        // downloadPdf can be accessed by anyone (public access for viewing redacted PDFs)
+        if ($this->getActionName() === 'downloadPdf') {
+            return;
+        }
+
+        // All other actions require authentication
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        // Actions that editors can access (and public for downloadPdf)
-        $editorAllowedActions = ['piiScanAjax', 'piiScan', 'piiReview', 'piiEntityAction', 'piiScanObject', 'piiScanRun', 'downloadPdf'];
-
-        // downloadPdf can be accessed by anyone (it handles its own permission check)
-        if ($this->getActionName() === 'downloadPdf') {
-            return;
-        }
+        // Actions that editors can access
+        $editorAllowedActions = [
+            'piiScanAjax', 'piiScan', 'piiReview', 'piiEntityAction', 'piiScanObject', 'piiScanRun',
+            'addManualRedaction', 'getRedactedTerms', 'removeManualRedaction',
+            // Visual redaction actions
+            'visualRedactionEditor', 'getVisualRedactions', 'saveVisualRedaction', 'deleteVisualRedaction',
+            'getNerEntitiesForPage', 'applyVisualRedactions', 'getDocumentInfo', 'downloadRedactedFile'
+        ];
         $currentAction = $this->getActionName();
 
         // Check admin permission (editors can access PII-related actions)
@@ -1231,5 +1239,643 @@ class privacyAdminActions extends sfActions
 
         $this->getUser()->setFlash('success', $message);
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
+    }
+
+    /**
+     * AJAX endpoint for adding manual redaction from PDF text selection
+     * POST /privacyAdmin/addManualRedaction
+     *
+     * Parameters:
+     *   - object_id: int - The information object ID
+     *   - text: string - The selected text to redact
+     *   - redact_all: bool - Whether to redact all instances (default true)
+     */
+    public function executeAddManualRedaction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'POST method required'
+            ]));
+        }
+
+        $objectId = (int)$request->getParameter('object_id');
+        $text = trim($request->getParameter('text', ''));
+        $redactAll = $request->getParameter('redact_all', true);
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        if (empty($text)) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Text selection required'
+            ]));
+        }
+
+        // Limit text length to prevent abuse
+        if (strlen($text) > 500) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Selected text too long (max 500 characters)'
+            ]));
+        }
+
+        try {
+            // Check if this exact text is already marked for this object
+            $existing = DB::table('ahg_ner_entity')
+                ->where('object_id', $objectId)
+                ->where('entity_text', $text)
+                ->first();
+
+            if ($existing) {
+                // Update existing entry to redacted status
+                DB::table('ahg_ner_entity')
+                    ->where('id', $existing->id)
+                    ->update([
+                        'status' => 'redacted',
+                        'reviewed_by' => $this->getUserId(),
+                        'reviewed_at' => date('Y-m-d H:i:s'),
+                    ]);
+                $entityId = $existing->id;
+            } else {
+                // Insert new entity
+                $entityId = DB::table('ahg_ner_entity')->insertGetId([
+                    'object_id' => $objectId,
+                    'entity_text' => $text,
+                    'entity_type' => 'MANUAL',
+                    'confidence' => 1.0,
+                    'source' => 'user_selection',
+                    'status' => 'redacted',
+                    'reviewed_by' => $this->getUserId(),
+                    'reviewed_at' => date('Y-m-d H:i:s'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // Clear the PDF redaction cache so it regenerates
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+            $pdfService->clearCache($objectId);
+
+            // Also clear PII masking cache
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            \ahgPrivacyPlugin\Service\PiiMaskingService::clearCache($objectId);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'message' => 'Text marked for redaction',
+                'entity_id' => $entityId,
+                'text' => $text,
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Failed to save redaction: ' . $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * AJAX endpoint to get current redacted terms for an object
+     * GET /privacyAdmin/getRedactedTerms?id=<object_id>
+     */
+    public function executeGetRedactedTerms(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = (int)$request->getParameter('id');
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $terms = DB::table('ahg_ner_entity')
+                ->where('object_id', $objectId)
+                ->where('status', 'redacted')
+                ->select('id', 'entity_text', 'entity_type', 'source')
+                ->get();
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'terms' => $terms,
+                'count' => count($terms),
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * AJAX endpoint to remove a manual redaction
+     * POST /privacyAdmin/removeManualRedaction
+     */
+    public function executeRemoveManualRedaction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'POST method required'
+            ]));
+        }
+
+        $entityId = (int)$request->getParameter('entity_id');
+
+        if (!$entityId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Entity ID required'
+            ]));
+        }
+
+        try {
+            // Get the object ID before deleting
+            $entity = DB::table('ahg_ner_entity')->where('id', $entityId)->first();
+
+            if (!$entity) {
+                return $this->renderText(json_encode([
+                    'success' => false,
+                    'error' => 'Entity not found'
+                ]));
+            }
+
+            $objectId = $entity->object_id;
+
+            // Only allow removing MANUAL entries, change others to 'approved'
+            if ($entity->source === 'user_selection' || $entity->entity_type === 'MANUAL') {
+                DB::table('ahg_ner_entity')->where('id', $entityId)->delete();
+            } else {
+                DB::table('ahg_ner_entity')
+                    ->where('id', $entityId)
+                    ->update([
+                        'status' => 'approved',
+                        'reviewed_by' => $this->getUserId(),
+                        'reviewed_at' => date('Y-m-d H:i:s'),
+                    ]);
+            }
+
+            // Clear the PDF redaction cache
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+            $pdfService->clearCache($objectId);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'message' => 'Redaction removed',
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    // =====================
+    // Visual Redaction Editor
+    // =====================
+
+    protected function getVisualRedactionService(): \ahgPrivacyPlugin\Service\VisualRedactionService
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/VisualRedactionService.php';
+        return new \ahgPrivacyPlugin\Service\VisualRedactionService();
+    }
+
+    /**
+     * Visual Redaction Editor page
+     * GET /privacyAdmin/visualRedactionEditor?id=<object_id>
+     */
+    public function executeVisualRedactionEditor(sfWebRequest $request)
+    {
+        $objectId = (int)$request->getParameter('id');
+        if (!$objectId) {
+            $this->forward404('Object ID required');
+        }
+
+        // Get object info using QubitInformationObject for proper access
+        $this->object = QubitInformationObject::getById($objectId);
+        if (!$this->object) {
+            // Fallback to database query
+            $this->object = DB::table('information_object_i18n as i')
+                ->leftJoin('slug', 'slug.object_id', '=', 'i.id')
+                ->leftJoin('information_object as io', 'io.id', '=', 'i.id')
+                ->where('i.id', $objectId)
+                ->where('i.culture', 'en')
+                ->select(['i.id', 'i.title', 'slug.slug', 'io.identifier as referenceCode'])
+                ->first();
+        }
+
+        if (!$this->object) {
+            $this->forward404('Object not found');
+        }
+
+        // Get document info
+        $service = $this->getVisualRedactionService();
+        $this->docInfo = $service->getDocumentInfo($objectId);
+
+        if ($this->docInfo) {
+            // Add URL for the document
+            $digitalObject = DB::table('digital_object')
+                ->where('object_id', $objectId)
+                ->first();
+            if ($digitalObject) {
+                $this->docInfo['url'] = $digitalObject->path . $digitalObject->name;
+            }
+        }
+
+        // Get existing redaction regions
+        $this->regions = $service->getRegionsForObject($objectId);
+    }
+
+    /**
+     * Get visual redaction regions for an object
+     * GET /privacyAdmin/getVisualRedactions?id=<object_id>&page=<page_number>
+     */
+    public function executeGetVisualRedactions(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = (int)$request->getParameter('id');
+        $page = $request->getParameter('page');
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $regions = $service->getRegionsForObject($objectId, $page ? (int)$page : null);
+
+            // Parse coordinates JSON for each region
+            $regionsArray = $regions->map(function ($region) {
+                $region->coordinates = json_decode($region->coordinates, true);
+                return $region;
+            })->toArray();
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'regions' => $regionsArray,
+                'count' => count($regionsArray)
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Save visual redaction regions
+     * POST /privacyAdmin/saveVisualRedaction
+     */
+    public function executeSaveVisualRedaction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'POST method required'
+            ]));
+        }
+
+        // Get JSON body
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+
+        if (!$data) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Invalid JSON data'
+            ]));
+        }
+
+        $objectId = (int)($data['object_id'] ?? 0);
+        $page = (int)($data['page'] ?? 1);
+        $regions = $data['regions'] ?? [];
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $savedIds = $service->batchSaveRegions($objectId, $page, $regions, $this->getUserId());
+
+            // Get updated regions
+            $updatedRegions = $service->getRegionsForObject($objectId, $page);
+            $regionsArray = $updatedRegions->map(function ($region) {
+                $region->coordinates = json_decode($region->coordinates, true);
+                return $region;
+            })->toArray();
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'message' => 'Regions saved',
+                'saved_count' => count($savedIds),
+                'regions' => $regionsArray
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Delete a visual redaction region
+     * POST /privacyAdmin/deleteVisualRedaction
+     */
+    public function executeDeleteVisualRedaction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'POST method required'
+            ]));
+        }
+
+        $regionId = (int)$request->getParameter('region_id');
+
+        if (!$regionId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Region ID required'
+            ]));
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $result = $service->deleteRegion($regionId);
+
+            return $this->renderText(json_encode([
+                'success' => $result,
+                'message' => $result ? 'Region deleted' : 'Region not found'
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Get NER entities for a specific page
+     * GET /privacyAdmin/getNerEntitiesForPage?id=<object_id>&page=<page_number>
+     */
+    public function executeGetNerEntitiesForPage(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = (int)$request->getParameter('id');
+        $page = (int)($request->getParameter('page') ?? 1);
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $entities = $service->getNerEntitiesForPage($objectId, $page);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'entities' => $entities->toArray(),
+                'count' => $entities->count()
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Apply visual redactions - marks regions as 'applied' and clears cache
+     * so the viewer automatically shows redacted content (like PII Review workflow)
+     * POST /privacyAdmin/applyVisualRedactions
+     */
+    public function executeApplyVisualRedactions(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'POST method required'
+            ]));
+        }
+
+        // Get JSON body
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+
+        $objectId = (int)($data['object_id'] ?? $request->getParameter('id'));
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $userId = $this->getUserId();
+            $now = date('Y-m-d H:i:s');
+
+            // Get pending/approved regions
+            $regions = DB::table('privacy_visual_redaction')
+                ->where('object_id', $objectId)
+                ->whereIn('status', ['pending', 'approved'])
+                ->get();
+
+            if ($regions->isEmpty()) {
+                return $this->renderText(json_encode([
+                    'success' => true,
+                    'message' => 'No regions to apply',
+                    'region_count' => 0
+                ]));
+            }
+
+            // Mark all pending/approved regions as 'applied'
+            $updated = DB::table('privacy_visual_redaction')
+                ->where('object_id', $objectId)
+                ->whereIn('status', ['pending', 'approved'])
+                ->update([
+                    'status' => 'applied',
+                    'applied_at' => $now,
+                    'reviewed_by' => $userId,
+                    'reviewed_at' => $now,
+                    'updated_at' => $now
+                ]);
+
+            // Clear the PdfRedactionService cache so viewer regenerates redacted output
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
+            $pdfService->clearCache($objectId);
+
+            // Also clear VisualRedactionService cache if it exists
+            $visualService = $this->getVisualRedactionService();
+            $visualService->clearCache($objectId);
+
+            // Get the slug for view URL
+            $slug = DB::table('slug')->where('object_id', $objectId)->value('slug');
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'message' => "Applied {$updated} visual redaction(s). View the record to see redacted content.",
+                'region_count' => $updated,
+                'view_url' => $slug ? url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $slug]) : null
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Get document info (page count, dimensions, type)
+     * GET /privacyAdmin/getDocumentInfo?id=<object_id>
+     */
+    public function executeGetDocumentInfo(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = (int)$request->getParameter('id');
+
+        if (!$objectId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Object ID required'
+            ]));
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $docInfo = $service->getDocumentInfo($objectId);
+
+            if (!$docInfo) {
+                return $this->renderText(json_encode([
+                    'success' => false,
+                    'error' => 'No digital object found'
+                ]));
+            }
+
+            // Add URL for the document
+            $digitalObject = DB::table('digital_object')
+                ->where('object_id', $objectId)
+                ->first();
+
+            if ($digitalObject) {
+                $docInfo['url'] = $digitalObject->path . $digitalObject->name;
+            }
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'document' => $docInfo
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+        }
+    }
+
+    /**
+     * Download redacted file
+     * GET /privacyAdmin/downloadRedactedFile?id=<object_id>
+     */
+    public function executeDownloadRedactedFile(sfWebRequest $request)
+    {
+        $objectId = (int)$request->getParameter('id');
+
+        if (!$objectId) {
+            $this->forward404('Object ID required');
+        }
+
+        try {
+            $service = $this->getVisualRedactionService();
+            $cachedPath = $service->getCachedRedaction($objectId);
+
+            if (!$cachedPath || !file_exists($cachedPath)) {
+                // Try to generate
+                $result = $service->applyRedactions($objectId, $this->getUserId());
+                if (!$result['success'] || !isset($result['redacted_path'])) {
+                    $this->forward404('Redacted file not available');
+                }
+                $cachedPath = $result['redacted_path'];
+            }
+
+            // Get original filename
+            $digitalObject = DB::table('digital_object')
+                ->where('object_id', $objectId)
+                ->first();
+
+            $filename = $digitalObject->name ?? 'redacted_document';
+            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+            $baseName = pathinfo($filename, PATHINFO_FILENAME);
+            $downloadName = $baseName . '_redacted.' . $ext;
+
+            // Determine mime type
+            $mimeType = $digitalObject->mime_type ?? mime_content_type($cachedPath);
+
+            // Serve the file
+            $response = $this->getResponse();
+            $response->clearHttpHeaders();
+            $response->setHttpHeader('Content-Type', $mimeType);
+            $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $downloadName . '"');
+            $response->setHttpHeader('Content-Length', filesize($cachedPath));
+            $response->setHttpHeader('Cache-Control', 'private, max-age=0');
+
+            $response->sendHttpHeaders();
+            readfile($cachedPath);
+
+            return sfView::NONE;
+
+        } catch (\Exception $e) {
+            $this->forward404('Error: ' . $e->getMessage());
+        }
     }
 }

@@ -70,6 +70,11 @@ class PiiDetectionService
         'DATE' => 'personal',
         'ORG' => 'personal',
         'GPE' => 'personal',
+        // ISAD Access Point types
+        'ISAD_SUBJECT' => 'personal',
+        'ISAD_PLACE' => 'personal',
+        'ISAD_NAME' => 'personal',
+        'ISAD_DATE' => 'personal',
     ];
 
     /**
@@ -89,7 +94,18 @@ class PiiDetectionService
         'DATE' => 'low',
         'ORG' => 'low',
         'GPE' => 'low',
+        // ISAD Access Point types
+        'ISAD_SUBJECT' => 'low',
+        'ISAD_PLACE' => 'low',
+        'ISAD_NAME' => 'medium',
+        'ISAD_DATE' => 'low',
     ];
+
+    /**
+     * AtoM taxonomy IDs for access points
+     */
+    private const TAXONOMY_SUBJECTS = 35;
+    private const TAXONOMY_PLACES = 42;
 
     /**
      * Scan text for PII using regex patterns
@@ -283,6 +299,20 @@ class PiiDetectionService
             }
         }
 
+        // Include ISAD access points (Subject, Places, Names, Dates)
+        $isadEntities = $this->convertAccessPointsToEntities($objectId);
+        if (!empty($isadEntities)) {
+            $results['fields_scanned'][] = 'isad_access_points';
+            foreach ($isadEntities as $entity) {
+                $results['entities'][] = $entity;
+                $results['summary']['total']++;
+                $riskKey = $entity['risk_level'] . '_risk';
+                if (isset($results['summary'][$riskKey])) {
+                    $results['summary'][$riskKey]++;
+                }
+            }
+        }
+
         // Calculate risk score (0-100)
         $results['risk_score'] = $this->calculateRiskScore($results['summary']);
 
@@ -327,6 +357,153 @@ class PiiDetectionService
             error_log('PII PDF scan error: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get ISAD access points for an information object
+     *
+     * Returns subjects, places, names, and dates from ISAD access point fields
+     *
+     * @param int $objectId
+     * @return array
+     */
+    public function getIsadAccessPoints(int $objectId): array
+    {
+        $accessPoints = [
+            'subjects' => [],
+            'places' => [],
+            'names' => [],
+            'dates' => [],
+        ];
+
+        // Get subject access points (taxonomy 35)
+        $subjects = DB::table('object_term_relation as otr')
+            ->join('term as t', 't.id', '=', 'otr.term_id')
+            ->join('term_i18n as ti', function ($j) {
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('otr.object_id', $objectId)
+            ->where('t.taxonomy_id', self::TAXONOMY_SUBJECTS)
+            ->pluck('ti.name')
+            ->toArray();
+        $accessPoints['subjects'] = array_unique(array_filter($subjects));
+
+        // Get place access points (taxonomy 42)
+        $places = DB::table('object_term_relation as otr')
+            ->join('term as t', 't.id', '=', 'otr.term_id')
+            ->join('term_i18n as ti', function ($j) {
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('otr.object_id', $objectId)
+            ->where('t.taxonomy_id', self::TAXONOMY_PLACES)
+            ->pluck('ti.name')
+            ->toArray();
+        $accessPoints['places'] = array_unique(array_filter($places));
+
+        // Get name access points (via events - creators, subjects of, etc.)
+        $names = DB::table('event as ev')
+            ->join('actor as a', 'a.id', '=', 'ev.actor_id')
+            ->join('actor_i18n as ai', function ($j) {
+                $j->on('ai.id', '=', 'a.id')->where('ai.culture', '=', 'en');
+            })
+            ->where('ev.object_id', $objectId)
+            ->whereNotNull('ev.actor_id')
+            ->pluck('ai.authorized_form_of_name')
+            ->toArray();
+        $accessPoints['names'] = array_unique(array_filter($names));
+
+        // Get date access points (from events)
+        $dates = DB::table('event')
+            ->where('object_id', $objectId)
+            ->whereNotNull('start_date')
+            ->select(['start_date', 'end_date'])
+            ->get();
+
+        foreach ($dates as $date) {
+            if ($date->start_date) {
+                $accessPoints['dates'][] = $date->start_date;
+            }
+            if ($date->end_date && $date->end_date !== $date->start_date) {
+                $accessPoints['dates'][] = $date->end_date;
+            }
+        }
+        $accessPoints['dates'] = array_unique(array_filter($accessPoints['dates']));
+
+        return $accessPoints;
+    }
+
+    /**
+     * Convert ISAD access points to PII entity format
+     *
+     * @param int $objectId
+     * @return array
+     */
+    public function convertAccessPointsToEntities(int $objectId): array
+    {
+        $accessPoints = $this->getIsadAccessPoints($objectId);
+        $entities = [];
+
+        // Convert subjects
+        foreach ($accessPoints['subjects'] as $subject) {
+            $entities[] = [
+                'type' => 'ISAD_SUBJECT',
+                'value' => $subject,
+                'raw_value' => $subject,
+                'position' => 0,
+                'risk_level' => self::$riskLevels['ISAD_SUBJECT'],
+                'category' => 'personal',
+                'confidence' => 1.0, // Access points are definitive
+                'source' => 'isad_access_point',
+                'field' => 'subject_access_points',
+            ];
+        }
+
+        // Convert places
+        foreach ($accessPoints['places'] as $place) {
+            $entities[] = [
+                'type' => 'ISAD_PLACE',
+                'value' => $place,
+                'raw_value' => $place,
+                'position' => 0,
+                'risk_level' => self::$riskLevels['ISAD_PLACE'],
+                'category' => 'personal',
+                'confidence' => 1.0,
+                'source' => 'isad_access_point',
+                'field' => 'place_access_points',
+            ];
+        }
+
+        // Convert names
+        foreach ($accessPoints['names'] as $name) {
+            $entities[] = [
+                'type' => 'ISAD_NAME',
+                'value' => $name,
+                'raw_value' => $name,
+                'position' => 0,
+                'risk_level' => self::$riskLevels['ISAD_NAME'],
+                'category' => 'personal',
+                'confidence' => 1.0,
+                'source' => 'isad_access_point',
+                'field' => 'name_access_points',
+            ];
+        }
+
+        // Convert dates
+        foreach ($accessPoints['dates'] as $date) {
+            $entities[] = [
+                'type' => 'ISAD_DATE',
+                'value' => $date,
+                'raw_value' => $date,
+                'position' => 0,
+                'risk_level' => self::$riskLevels['ISAD_DATE'],
+                'category' => 'personal',
+                'confidence' => 1.0,
+                'source' => 'isad_access_point',
+                'field' => 'date_access_points',
+            ];
+        }
+
+        return $entities;
     }
 
     /**

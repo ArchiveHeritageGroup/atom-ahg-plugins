@@ -146,7 +146,7 @@
           <div class="card-footer">
             <div class="row">
               <div class="col-md-6 mb-3 mb-md-0">
-                <form method="post" action="<?php echo url_for('@security_request_approve?id=' . $accessRequest->id); ?>">
+                <form method="post" action="<?php echo url_for('@access_request_approve?id=' . $accessRequest->id); ?>">
                   <div class="input-group">
                     <input type="text" name="notes" class="form-control" placeholder="Approval notes (optional)">
                     <input type="date" name="expires_at" class="form-control" title="Expiration date">
@@ -157,7 +157,7 @@
                 </form>
               </div>
               <div class="col-md-6">
-                <form method="post" action="<?php echo url_for('@security_request_deny?id=' . $accessRequest->id); ?>">
+                <form method="post" action="<?php echo url_for('@access_request_deny?id=' . $accessRequest->id); ?>">
                   <div class="input-group">
                     <input type="text" name="notes" class="form-control" placeholder="Denial reason (required)" required>
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Deny this request?');">

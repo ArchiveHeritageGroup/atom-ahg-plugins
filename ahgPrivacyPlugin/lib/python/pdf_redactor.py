@@ -171,6 +171,147 @@ class PdfRedactor:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
 
+    def hex_to_rgb(self, hex_color: str) -> tuple:
+        """Convert hex color to RGB tuple (0-1 range for PyMuPDF)"""
+        hex_color = hex_color.lstrip('#')
+        if len(hex_color) != 6:
+            return (0, 0, 0)  # Default to black
+        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        return (r / 255, g / 255, b / 255)
+
+    def redact_pdf_regions(
+        self,
+        input_path: str,
+        output_path: str,
+        regions: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Redact specified regions (coordinate-based) from a PDF document.
+
+        Args:
+            input_path: Path to the input PDF
+            output_path: Path for the redacted output PDF
+            regions: List of region dictionaries with:
+                - page: Page number (1-indexed)
+                - x, y, width, height: Coordinates (normalized 0-1 or absolute)
+                - normalized: Whether coordinates are normalized (default True)
+                - color: Hex color for the redaction box (default #000000)
+
+        Returns:
+            Dictionary with redaction statistics
+        """
+        if not os.path.exists(input_path):
+            return {
+                'success': False,
+                'error': f'Input PDF not found: {input_path}'
+            }
+
+        if not regions:
+            # No regions to redact, just copy the file
+            shutil.copy(input_path, output_path)
+            return {'success': True, 'redactions': 0, 'message': 'No regions to redact'}
+
+        # Reset stats
+        stats = {
+            'pages_processed': set(),
+            'regions_applied': 0,
+            'regions_by_page': {}
+        }
+
+        try:
+            # Open the PDF
+            doc = fitz.open(input_path)
+            total_pages = len(doc)
+
+            # Group regions by page
+            regions_by_page = {}
+            for region in regions:
+                page_num = region.get('page', 1)
+                if page_num < 1 or page_num > total_pages:
+                    continue
+                if page_num not in regions_by_page:
+                    regions_by_page[page_num] = []
+                regions_by_page[page_num].append(region)
+
+            # Process each page with regions
+            for page_num, page_regions in regions_by_page.items():
+                page = doc[page_num - 1]  # 0-indexed
+                page_width = page.rect.width
+                page_height = page.rect.height
+                page_redactions = 0
+
+                for region in page_regions:
+                    try:
+                        # Get coordinates
+                        x = float(region.get('x', 0))
+                        y = float(region.get('y', 0))
+                        w = float(region.get('width', 0))
+                        h = float(region.get('height', 0))
+                        color = region.get('color', '#000000')
+                        normalized = region.get('normalized', True)
+
+                        # Convert normalized coordinates to absolute
+                        if normalized:
+                            x = x * page_width
+                            y = y * page_height
+                            w = w * page_width
+                            h = h * page_height
+
+                        # Create rectangle
+                        rect = fitz.Rect(x, y, x + w, y + h)
+
+                        # Validate rectangle
+                        if rect.is_empty or rect.is_infinite:
+                            continue
+
+                        # Clip to page bounds
+                        rect = rect & page.rect
+
+                        # Parse color
+                        fill_color = self.hex_to_rgb(color)
+
+                        # Add redaction annotation
+                        page.add_redact_annot(
+                            rect,
+                            text="",
+                            fill=fill_color,
+                            text_color=(1, 1, 1)
+                        )
+                        page_redactions += 1
+
+                    except Exception as e:
+                        print(f"Warning: Failed to apply region: {e}", file=sys.stderr)
+                        continue
+
+                # Apply all redactions for this page
+                if page_redactions > 0:
+                    page.apply_redactions()
+                    stats['pages_processed'].add(page_num)
+                    stats['regions_applied'] += page_redactions
+                    stats['regions_by_page'][page_num] = page_redactions
+
+            # Save the redacted PDF
+            doc.save(output_path, garbage=4, deflate=True)
+            doc.close()
+
+            return {
+                'success': True,
+                'input': input_path,
+                'output': output_path,
+                'total_pages': total_pages,
+                'pages_processed': len(stats['pages_processed']),
+                'regions_requested': len(regions),
+                'regions_applied': stats['regions_applied'],
+                'regions_by_page': stats['regions_by_page']
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'input': input_path
+            }
+
 
 def redact_pdf(
     input_path: str,
@@ -180,7 +321,7 @@ def redact_pdf(
     case_sensitive: bool = False
 ) -> Dict[str, Any]:
     """
-    Convenience function to redact a PDF.
+    Convenience function to redact a PDF by text terms.
 
     Args:
         input_path: Path to input PDF
@@ -196,35 +337,66 @@ def redact_pdf(
     return redactor.redact_pdf(input_path, output_path, terms, replacement_text)
 
 
+def redact_pdf_regions(
+    input_path: str,
+    output_path: str,
+    regions: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Convenience function to redact a PDF by coordinate regions.
+
+    Args:
+        input_path: Path to input PDF
+        output_path: Path for output PDF
+        regions: List of region dictionaries with coordinates
+
+    Returns:
+        Dictionary with redaction results
+    """
+    redactor = PdfRedactor()
+    return redactor.redact_pdf_regions(input_path, output_path, regions)
+
+
 def main():
     """CLI entry point"""
     if len(sys.argv) < 4:
         print(json.dumps({
             'success': False,
-            'error': 'Usage: pdf_redactor.py <input_pdf> <output_pdf> <terms_json>'
+            'error': 'Usage: pdf_redactor.py <input_pdf> <output_pdf> <terms_or_regions_json> [--regions]'
         }))
         sys.exit(1)
 
     input_pdf = sys.argv[1]
     output_pdf = sys.argv[2]
 
+    # Check for --regions flag
+    use_regions = '--regions' in sys.argv
+
     try:
-        terms = json.loads(sys.argv[3])
-        if not isinstance(terms, list):
-            terms = [terms]
+        data = json.loads(sys.argv[3])
+        if not isinstance(data, list):
+            data = [data]
     except json.JSONDecodeError as e:
         print(json.dumps({
             'success': False,
-            'error': f'Invalid JSON for terms: {e}'
+            'error': f'Invalid JSON: {e}'
         }))
         sys.exit(1)
 
-    # Optional replacement text
-    replacement_text = sys.argv[4] if len(sys.argv) > 4 else "[REDACTED]"
+    if use_regions:
+        # Region-based redaction
+        result = redact_pdf_regions(input_pdf, output_pdf, data)
+    else:
+        # Text-based redaction (legacy)
+        replacement_text = "[REDACTED]"
+        # Find replacement text if provided (not --regions)
+        for i, arg in enumerate(sys.argv):
+            if arg not in ('--regions',) and i > 3:
+                replacement_text = arg
+                break
+        result = redact_pdf(input_pdf, output_pdf, data, replacement_text)
 
-    result = redact_pdf(input_pdf, output_pdf, terms, replacement_text)
     print(json.dumps(result))
-
     sys.exit(0 if result['success'] else 1)
 
 

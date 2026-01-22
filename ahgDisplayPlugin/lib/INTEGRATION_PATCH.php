@@ -1,12 +1,12 @@
 <?php
 /**
  * INTEGRATION PATCH for DisplayService.php
- * 
- * This file shows the modifications needed to integrate rights into the
- * centralized display system.
- * 
+ *
+ * This file shows the modifications needed to integrate rights and
+ * privacy (visual redaction) into the centralized display system.
+ *
  * FILE: /plugins/ahgDisplayPlugin/lib/Services/DisplayService.php
- * 
+ *
  * =====================================================================
  * STEP 1: Add this at the top of the file (after use statements)
  * =====================================================================
@@ -14,6 +14,7 @@
 
 // Add after: use Illuminate\Database\Capsule\Manager as DB;
 // require_once __DIR__ . '/../DisplayRightsExtension.php';
+// require_once __DIR__ . '/../DisplayPrivacyExtension.php';
 
 /**
  * =====================================================================
@@ -71,12 +72,20 @@ public function prepareForDisplay(int $objectId, ?string $profileCode = null, st
     // Get actions from profile
     $actions = json_decode($profile->available_actions ?? '[]', true);
 
-    // === NEW: GET RIGHTS DATA ===
+    // === GET RIGHTS DATA ===
     $rightsData = [];
     if (class_exists('DisplayRightsExtension')) {
         $rightsData = DisplayRightsExtension::getRightsData($objectId, $userId, $canEdit);
         // Add rights action if appropriate
         $actions = DisplayRightsExtension::addRightsAction($actions, $objectId, $canEdit);
+    }
+
+    // === GET PRIVACY/REDACTION DATA ===
+    $privacyData = [];
+    if (class_exists('DisplayPrivacyExtension')) {
+        $privacyData = DisplayPrivacyExtension::getPrivacyData($objectId, $canEdit);
+        // Add visual_redaction action for editors with digital objects
+        $actions = DisplayPrivacyExtension::addRedactionAction($actions, $objectId, $canEdit);
     }
 
     // Build display data
@@ -92,7 +101,8 @@ public function prepareForDisplay(int $objectId, ?string $profileCode = null, st
         'actions' => $actions,
         'available_profiles' => $this->getAvailableProfiles($objectId),
         'css_class' => $profile->css_class,
-        'rights' => $rightsData, // === NEW ===
+        'rights' => $rightsData,
+        'privacy' => $privacyData, // Visual redaction data
     ];
 
     // Add children for hierarchy view

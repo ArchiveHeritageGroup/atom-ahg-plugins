@@ -1,7 +1,7 @@
 {
     "name": "Display Plugin",
     "machine_name": "ahgDisplayPlugin",
-    "version": "1.2.13",
+    "version": "1.2.14",
     "description": "GLAM browser and display modes for archival content",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

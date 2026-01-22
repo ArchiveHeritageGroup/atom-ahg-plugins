@@ -35,9 +35,13 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        // Cart Browse
+        // Cart Browse - override both /cart and /cart/browse
         $routing->prependRoute('ahg_cart_browse', new sfRoute(
             '/cart',
+            ['module' => 'ahgCart', 'action' => 'browse']
+        ));
+        $routing->prependRoute('ahg_cart_browse_legacy', new sfRoute(
+            '/cart/browse',
             ['module' => 'ahgCart', 'action' => 'browse']
         ));
 
