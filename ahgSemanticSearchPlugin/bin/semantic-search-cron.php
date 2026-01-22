@@ -117,21 +117,25 @@ function initDatabase(string $atomRoot): void
         'password' => '',
     ];
 
-    // Load from AtoM config.php
+    // Load from AtoM config.php (Propel format)
     if (file_exists($configFile)) {
         $config = include $configFile;
-        // Database credentials are at root level in config.php
-        if (isset($config['db_host'])) {
-            $dbConfig['host'] = $config['db_host'];
-        }
-        if (isset($config['db_name'])) {
-            $dbConfig['database'] = $config['db_name'];
-        }
-        if (isset($config['db_user'])) {
-            $dbConfig['username'] = $config['db_user'];
-        }
-        if (isset($config['db_pass'])) {
-            $dbConfig['password'] = $config['db_pass'];
+
+        if (isset($config['all']['propel']['param'])) {
+            $param = $config['all']['propel']['param'];
+
+            // Parse DSN for host and database
+            $dsn = $param['dsn'] ?? '';
+            if (preg_match('/host=([^;]+)/', $dsn, $hostMatches)) {
+                $dbConfig['host'] = $hostMatches[1];
+            }
+            if (preg_match('/dbname=([^;]+)/', $dsn, $dbMatches)) {
+                $dbConfig['database'] = $dbMatches[1];
+            }
+
+            // Get username and password
+            $dbConfig['username'] = $param['username'] ?? 'root';
+            $dbConfig['password'] = $param['password'] ?? '';
         }
     }
 
