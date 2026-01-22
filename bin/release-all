@@ -120,7 +120,14 @@ ensure_remote() {
 
     if ! git remote get-url origin &>/dev/null; then
         echo -e "  ${YELLOW}Adding remote origin...${NC}"
-        git remote add origin "git@github.com:${github_repo}.git"
+        git remote add origin "https://github.com/${github_repo}.git"
+    else
+        # Ensure HTTPS URL (GH CLI uses HTTPS by default)
+        local current_url=$(git remote get-url origin)
+        if [[ "$current_url" == git@* ]]; then
+            echo -e "  ${YELLOW}Switching to HTTPS...${NC}"
+            git remote set-url origin "https://github.com/${github_repo}.git"
+        fi
     fi
 }
 
