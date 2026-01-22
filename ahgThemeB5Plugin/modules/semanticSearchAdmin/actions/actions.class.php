@@ -231,8 +231,8 @@ class semanticSearchAdminActions extends sfActions
         $result = ['success' => false, 'message' => 'Unknown sync type'];
 
         try {
-            // Load services
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/ThesaurusService.php';
+            // Load services from plugin
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
 
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
@@ -246,7 +246,7 @@ class semanticSearchAdminActions extends sfActions
                     break;
 
                 case 'wordnet':
-                    require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/WordNetSyncService.php';
+                    require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/WordNetSyncService.php';
                     $wordnet = new \AtomFramework\Services\SemanticSearch\WordNetSyncService();
                     // Sync all domains for comprehensive vocabulary coverage
                     $allStats = $wordnet->syncAllDomains();
@@ -291,7 +291,7 @@ class semanticSearchAdminActions extends sfActions
         $result = ['success' => false, 'expansions' => []];
 
         try {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/SemanticSearch/ThesaurusService.php';
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
             $expansionResult = $thesaurus->expandQuery($query);

@@ -122,7 +122,7 @@ INSERT INTO ahg_semantic_search_settings (setting_key, setting_value, setting_ty
 ('ollama_endpoint', 'http://localhost:11434', 'string'),
 ('expansion_limit', '5', 'integer'),
 ('min_similarity_weight', '0.6', 'float'),
-('elasticsearch_synonyms_path', '/etc/elasticsearch/synonyms/ahg_synonyms.txt', 'string'),
+('elasticsearch_synonyms_path', '/usr/share/nginx/archive/atom-framework/data/synonyms/ahg_synonyms.txt', 'string'),
 ('sync_interval_days', '7', 'integer'),
 ('last_cron_sync', '0', 'integer')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;

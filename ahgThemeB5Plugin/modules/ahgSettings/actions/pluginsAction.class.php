@@ -99,8 +99,11 @@ class AhgSettingsPluginsAction extends sfAction
             $this->redirect(['module' => 'ahgSettings', 'action' => 'plugins']);
 
         } catch (Exception $e) {
-            error_log("Plugin Manager: Error: " . $e->getMessage());
-            $this->getUser()->setFlash('error', "Error: " . $e->getMessage());
+            $errorMsg = $e->getMessage();
+            error_log("Plugin Manager: Error: " . $errorMsg);
+            if (!empty($errorMsg)) {
+                $this->getUser()->setFlash('error', "Error: " . $errorMsg);
+            }
         }
     }
 

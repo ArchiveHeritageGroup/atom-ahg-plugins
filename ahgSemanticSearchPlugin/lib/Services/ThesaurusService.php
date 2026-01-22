@@ -50,10 +50,14 @@ class ThesaurusService
             ? \sfConfig::get('sf_root_dir', '/usr/share/nginx/atom') . '/atom-framework'
             : '/usr/share/nginx/archive/atom-framework';
 
+        // Load ES synonyms path from DB settings or use default
+        $esSynonymsPath = $this->getSettingFromDb('elasticsearch_synonyms_path')
+            ?? $frameworkRoot . '/data/synonyms/ahg_synonyms.txt';
+
         $this->config = array_merge([
             'log_path' => $logDir . '/thesaurus.log',
             'synonyms_dir' => $frameworkRoot . '/data/synonyms',
-            'es_synonyms_path' => '/etc/elasticsearch/synonyms/ahg_synonyms.txt',
+            'es_synonyms_path' => $esSynonymsPath,
             'default_language' => 'en',
             'expansion_limit' => 5,
             'min_weight' => 0.6,
@@ -88,6 +92,21 @@ class ThesaurusService
     // ========================================================================
     // Settings Management
     // ========================================================================
+
+    /**
+     * Get a single setting from DB (used during construction)
+     */
+    private function getSettingFromDb(string $key): ?string
+    {
+        try {
+            $setting = DB::table('ahg_semantic_search_settings')
+                ->where('setting_key', $key)
+                ->first();
+            return $setting ? $setting->setting_value : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 
     /**
      * Load settings from database
