@@ -37,7 +37,7 @@ declare(strict_types=1);
 // Determine AtoM root
 $atomRoot = getenv('ATOM_ROOT') ?: '/usr/share/nginx/archive';
 $frameworkRoot = $atomRoot . '/atom-framework';
-$pluginRoot = $atomRoot . '/atom-ahg-plugins/ahgSemanticSearchPlugin';
+$pluginRoot = $atomRoot . '/plugins/ahgSemanticSearchPlugin';
 
 // Bootstrap
 require_once $frameworkRoot . '/vendor/autoload.php';

@@ -43,30 +43,30 @@
         "Scheduled sync via cron jobs"
     ],
     "cron": {
-        "install": "sudo cp config/cron.d/ahg-semantic-search /etc/cron.d/",
+        "install": "sudo cp /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/config/cron.d/ahg-semantic-search /etc/cron.d/",
         "jobs": [
             {
                 "name": "weekly-full-sync",
                 "schedule": "0 2 * * 0",
-                "command": "php bin/semantic-search-cron.php all",
+                "command": "php /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php all",
                 "description": "Weekly full sync from WordNet and Wikidata"
             },
             {
                 "name": "daily-embeddings",
                 "schedule": "0 3 * * *",
-                "command": "php bin/semantic-search-cron.php update-embeddings",
+                "command": "php /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php update-embeddings",
                 "description": "Daily vector embedding updates"
             },
             {
                 "name": "daily-es-export",
                 "schedule": "0 4 * * *",
-                "command": "php bin/semantic-search-cron.php export-es",
+                "command": "php /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php export-es",
                 "description": "Daily Elasticsearch synonym export"
             },
             {
                 "name": "monthly-cleanup",
                 "schedule": "0 1 1 * *",
-                "command": "php bin/semantic-search-cron.php cleanup",
+                "command": "php /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php cleanup",
                 "description": "Monthly cleanup of stale entries"
             }
         ]

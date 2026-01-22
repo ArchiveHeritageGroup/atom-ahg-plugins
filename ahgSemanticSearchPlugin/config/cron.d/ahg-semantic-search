@@ -1,5 +1,5 @@
 # AHG Semantic Search Plugin - Cron Jobs
-# Install: sudo cp /usr/share/nginx/archive/atom-ahg-plugins/ahgSemanticSearchPlugin/config/cron.d/ahg-semantic-search /etc/cron.d/
+# Install: sudo cp /usr/share/nginx/archive/plugins/ahgSemanticSearchPlugin/config/cron.d/ahg-semantic-search /etc/cron.d/
 # Or add to crontab: crontab -e
 
 SHELL=/bin/bash
@@ -12,16 +12,16 @@ ATOM_ROOT=/usr/share/nginx/archive
 
 # Weekly full sync (Sunday 2:00 AM)
 # Syncs thesaurus from WordNet and Wikidata, updates embeddings
-0 2 * * 0 www-data php $ATOM_ROOT/atom-ahg-plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php all --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
+0 2 * * 0 www-data php $ATOM_ROOT/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php all --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
 
 # Daily embedding updates (3:00 AM)
 # Updates vector embeddings for new terms
-0 3 * * * www-data php $ATOM_ROOT/atom-ahg-plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php update-embeddings --limit=500 --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
+0 3 * * * www-data php $ATOM_ROOT/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php update-embeddings --limit=500 --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
 
 # Daily Elasticsearch export (4:00 AM)
 # Exports synonyms to Elasticsearch format
-0 4 * * * www-data php $ATOM_ROOT/atom-ahg-plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php export-es --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
+0 4 * * * www-data php $ATOM_ROOT/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php export-es --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
 
 # Monthly cleanup (1st of month, 1:00 AM)
 # Removes stale entries older than 90 days
-0 1 1 * * www-data php $ATOM_ROOT/atom-ahg-plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php cleanup --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
+0 1 1 * * www-data php $ATOM_ROOT/plugins/ahgSemanticSearchPlugin/bin/semantic-search-cron.php cleanup --quiet >> /var/log/atom/semantic-search-cron.log 2>&1
