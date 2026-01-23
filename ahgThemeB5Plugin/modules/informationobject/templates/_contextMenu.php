@@ -75,8 +75,8 @@ if (isset($resource)) {
 }
 ?>
 
-<!-- NER Extract Section -->
-<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgNerPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<!-- AI Tools Section (NER, Summarize, Translate) -->
+<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Named Entity Recognition'); ?></h4>
   <ul>
@@ -344,6 +344,18 @@ if ($hasDigitalObject):
       </a>
     </li>
     <?php endif; ?>
+    <?php if (in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+    <li>
+      <a href="#" onclick="generateSummary(<?php echo $resource->id; ?>); return false;">
+        <i class="bi bi-file-text me-1"></i><?php echo __('Summarize'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="#" onclick="showTranslateModal(<?php echo $resource->id; ?>); return false;">
+        <i class="bi bi-translate me-1"></i><?php echo __('Translate'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
   </ul>
 </section>
 
@@ -419,7 +431,114 @@ function extractMetadataAndRefresh(doId) {
 }
 
 function extractExifMetadata(doId) { showTechnicalData(doId); }
+
+function showTranslateModal(objectId) {
+  var modal = new bootstrap.Modal(document.getElementById('translateModal'));
+  modal.show();
+  document.getElementById('translateObjectId').value = objectId;
+  document.getElementById('translateResult').style.display = 'none';
+  document.getElementById('translateForm').style.display = 'block';
+}
+
+function executeTranslation() {
+  var objectId = document.getElementById('translateObjectId').value;
+  var targetLang = document.getElementById('translateTargetLang').value;
+  var fields = [];
+  document.querySelectorAll('input[name="translateFields"]:checked').forEach(function(cb) { fields.push(cb.value); });
+
+  if (fields.length === 0) { alert('Please select at least one field to translate'); return; }
+
+  document.getElementById('translateForm').style.display = 'none';
+  document.getElementById('translateResult').style.display = 'block';
+  document.getElementById('translateResultBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Translating to ' + document.getElementById('translateTargetLang').selectedOptions[0].text + '...</p></div>';
+
+  fetch('/index.php/ai/translate/' + objectId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target_culture: targetLang, fields: fields })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        document.getElementById('translateResultBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Translation failed') + '</div>';
+        return;
+      }
+      var html = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>Translation completed!</div>';
+      if (data.translations) {
+        html += '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Field</th><th>Original</th><th>Translated</th></tr></thead><tbody>';
+        for (var field in data.translations) {
+          var t = data.translations[field];
+          html += '<tr><td><strong>' + field + '</strong></td><td>' + (t.original || '').substring(0, 100) + (t.original && t.original.length > 100 ? '...' : '') + '</td><td>' + (t.translated || '').substring(0, 100) + (t.translated && t.translated.length > 100 ? '...' : '') + '</td></tr>';
+        }
+        html += '</tbody></table></div>';
+      }
+      html += '<div class="mt-3"><button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Page</button></div>';
+      document.getElementById('translateResultBody').innerHTML = html;
+    })
+    .catch(function(err) {
+      document.getElementById('translateResultBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
+    });
+}
 </script>
+
+<!-- Translate Modal -->
+<div class="modal fade" id="translateModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="bi bi-translate me-2"></i><?php echo __('Translate Record'); ?></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="translateObjectId" value="">
+        <div id="translateForm">
+          <div class="mb-3">
+            <label class="form-label"><?php echo __('Target Language'); ?></label>
+            <select id="translateTargetLang" class="form-select">
+              <option value="af">Afrikaans</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="es">Spanish</option>
+              <option value="pt">Portuguese</option>
+              <option value="nl">Dutch</option>
+              <option value="it">Italian</option>
+              <option value="zu">Zulu</option>
+              <option value="xh">Xhosa</option>
+              <option value="st">Sotho</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label"><?php echo __('Fields to Translate'); ?></label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="translateFields" value="title" id="translateTitle" checked>
+              <label class="form-check-label" for="translateTitle"><?php echo __('Title'); ?></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="translateFields" value="scope_and_content" id="translateScope" checked>
+              <label class="form-check-label" for="translateScope"><?php echo __('Scope and Content'); ?></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="translateFields" value="archival_history" id="translateHistory">
+              <label class="form-check-label" for="translateHistory"><?php echo __('Archival History'); ?></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="translateFields" value="arrangement" id="translateArrangement">
+              <label class="form-check-label" for="translateArrangement"><?php echo __('Arrangement'); ?></label>
+            </div>
+          </div>
+          <p class="text-muted small"><i class="bi bi-info-circle me-1"></i><?php echo __('Translation uses Argos Translate (offline). Language packs must be installed.'); ?></p>
+        </div>
+        <div id="translateResult" style="display:none;">
+          <div id="translateResultBody"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
+        <button type="button" class="btn btn-primary" onclick="executeTranslation()" id="translateBtn"><?php echo __('Translate'); ?></button>
+      </div>
+    </div>
+  </div>
+</div>
 <?php endif; ?>
 <?php endif; ?>
 

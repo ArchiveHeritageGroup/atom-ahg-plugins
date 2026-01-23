@@ -1,40 +1,61 @@
-# NER Plugin Routes
+# AI Plugin Routes (NER, Translate, Summarize)
+
+# NER Routes
+ahg_ai_ner_extract:
+  url: /ai/ner/extract/:id
+  param: { module: ahgAI, action: extract }
+
+ahg_ai_ner_review:
+  url: /ai/ner/review
+  param: { module: ahgAI, action: review }
+
+ahg_ai_ner_entities:
+  url: /ai/ner/entities/:id
+  param: { module: ahgAI, action: getEntities }
+
+ahg_ai_ner_update:
+  url: /ai/ner/entity/update
+  param: { module: ahgAI, action: updateEntity }
+
+ahg_ai_ner_create_actor:
+  url: /ai/ner/create/actor
+  param: { module: ahgAI, action: createActor }
+
+ahg_ai_ner_create_place:
+  url: /ai/ner/create/place
+  param: { module: ahgAI, action: createPlace }
+
+ahg_ai_ner_create_subject:
+  url: /ai/ner/create/subject
+  param: { module: ahgAI, action: createSubject }
+
+ahg_ai_ner_health:
+  url: /ai/ner/health
+  param: { module: ahgAI, action: health }
+
+ahg_ai_ner_bulk_save:
+  url: /ai/ner/bulk-save
+  param: { module: ahgAI, action: bulkSave }
+
+# Summarize Route
+ahg_ai_summarize:
+  url: /ai/summarize/:id
+  param: { module: ahgAI, action: summarize }
+
+# Translate Route
+ahg_ai_translate:
+  url: /ai/translate/:id
+  param: { module: ahgAI, action: translate }
+
+# Legacy NER routes (backward compatibility)
 ahg_ner_extract:
   url: /ner/extract/:id
-  param: { module: ahgNer, action: extract }
+  param: { module: ahgAI, action: extract }
 
 ahg_ner_review:
   url: /ner/review
-  param: { module: ahgNer, action: review }
-
-ahg_ner_entities:
-  url: /ner/entities/:id
-  param: { module: ahgNer, action: getEntities }
-
-ahg_ner_update:
-  url: /ner/entity/update
-  param: { module: ahgNer, action: updateEntity }
-
-ahg_ner_create_actor:
-  url: /ner/create/actor
-  param: { module: ahgNer, action: createActor }
-
-ahg_ner_create_place:
-  url: /ner/create/place
-  param: { module: ahgNer, action: createPlace }
-
-ahg_ner_create_subject:
-  url: /ner/create/subject
-  param: { module: ahgNer, action: createSubject }
-
-ahg_ner_health:
-  url: /ner/health
-  param: { module: ahgNer, action: health }
-
-ahg_ner_bulk_save:
-  url: /ner/bulk-save
-  param: { module: ahgNer, action: bulkSave }
+  param: { module: ahgAI, action: review }
 
 ahg_ner_summarize:
   url: /ner/summarize/:id
-  param: { module: ahgNer, action: summarize }
+  param: { module: ahgAI, action: summarize }

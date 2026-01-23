@@ -2,8 +2,159 @@
 
 require_once dirname(__FILE__).'/../../../lib/service/NerService.php';
 
-class ahgNerActions extends sfActions
+class ahgAIActions extends sfActions
 {
+    /**
+     * Translate record fields to target language using Argos Translate
+     */
+    public function executeTranslate(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $object = QubitInformationObject::getById($objectId);
+
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        // Get request data
+        $data = json_decode($request->getContent(), true);
+        $targetCulture = $data['target_culture'] ?? $request->getParameter('target_culture', 'af');
+        $fields = $data['fields'] ?? $request->getParameter('fields', ['title', 'scope_and_content']);
+
+        if (is_string($fields)) {
+            $fields = explode(',', $fields);
+        }
+
+        // Get source culture (default to English)
+        $sourceCulture = 'en';
+
+        // Get Python path and script
+        $pythonPath = $this->getPythonPath();
+        $script = sfConfig::get('sf_root_dir') . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+
+        if (!file_exists($script)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Translation script not found']));
+        }
+
+        // Get source text for each field
+        $source = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', $sourceCulture)
+            ->first();
+
+        if (!$source) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No source text found']));
+        }
+
+        $translations = [];
+        $fieldMap = [
+            'title' => 'title',
+            'scope_and_content' => 'scope_and_content',
+            'archival_history' => 'archival_history',
+            'arrangement' => 'arrangement',
+        ];
+
+        foreach ($fields as $field) {
+            $field = trim($field);
+            $dbField = $fieldMap[$field] ?? $field;
+            $sourceText = $source->$dbField ?? null;
+
+            if (empty($sourceText)) {
+                continue;
+            }
+
+            // Call Python translation
+            $cmd = sprintf(
+                '%s %s translate %s --from=%s --to=%s 2>&1',
+                escapeshellarg($pythonPath),
+                escapeshellarg($script),
+                escapeshellarg($sourceText),
+                escapeshellarg($sourceCulture),
+                escapeshellarg($targetCulture)
+            );
+
+            exec($cmd, $output, $code);
+            $result = json_decode(implode('', $output), true);
+            $output = [];
+
+            if (isset($result['translation'])) {
+                $translations[$field] = [
+                    'original' => $sourceText,
+                    'translated' => $result['translation']
+                ];
+            }
+        }
+
+        if (empty($translations)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No fields were translated']));
+        }
+
+        // Save translations to target culture
+        $exists = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', $targetCulture)
+            ->exists();
+
+        $updateData = [];
+        foreach ($translations as $field => $data) {
+            $dbField = $fieldMap[$field] ?? $field;
+            $updateData[$dbField] = $data['translated'];
+        }
+
+        if ($exists) {
+            Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', $targetCulture)
+                ->update($updateData);
+        } else {
+            $newRecord = (array)$source;
+            $newRecord['culture'] = $targetCulture;
+            foreach ($updateData as $field => $value) {
+                $newRecord[$field] = $value;
+            }
+            unset($newRecord['id']);
+            $newRecord['id'] = $objectId;
+            Illuminate\Database\Capsule\Manager::table('information_object_i18n')->insert($newRecord);
+        }
+
+        // Log translation
+        try {
+            Illuminate\Database\Capsule\Manager::table('ahg_translation_log')->insert([
+                'object_id' => $objectId,
+                'field_name' => implode(',', array_keys($translations)),
+                'source_culture' => $sourceCulture,
+                'target_culture' => $targetCulture,
+                'source_text' => substr(json_encode($translations), 0, 1000),
+                'translated_text' => substr(json_encode(array_map(function($t) { return $t['translated']; }, $translations)), 0, 1000),
+                'translation_engine' => 'argos',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (Exception $e) {
+            // Log table might not exist yet
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'translations' => $translations,
+            'target_culture' => $targetCulture
+        ]));
+    }
+
+    private function getPythonPath()
+    {
+        $paths = ['/usr/bin/python3', '/usr/local/bin/python3', 'python3'];
+        foreach ($paths as $path) {
+            exec("which $path 2>/dev/null", $output, $code);
+            if ($code === 0) {
+                return trim($output[0] ?? $path);
+            }
+            $output = [];
+        }
+        return 'python3';
+    }
+
     public function executeExtract(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
