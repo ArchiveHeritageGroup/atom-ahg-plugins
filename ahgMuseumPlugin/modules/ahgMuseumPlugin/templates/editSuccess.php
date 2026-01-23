@@ -53,8 +53,8 @@
 
 </div>
 <!-- Tom Select CSS (JS loaded in after-content slot) -->
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener("DOMContentLoaded", function() {
   // Creator dropdown

@@ -5,12 +5,15 @@
     "description": "Library cataloging with MARC-inspired fields, ISBN lookup, and bibliographic management",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
-    "category": "ahg",
+    "category": "sector",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "data/install.sql",
     "tables": [
         "library_item",
@@ -20,9 +23,5 @@
         "atom_isbn_lookup_audit",
         "atom_isbn_provider",
         "library_settings"
-    ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "arAHGThemeB5Plugin"
     ]
 }

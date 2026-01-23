@@ -488,6 +488,8 @@ $rawResource = sfOutputEscaper::unescape($resource);
     </section>
     <?php endif; ?>
 
+    <!-- Privacy & PII -->
+    <?php include_partial('informationobject/privacyPiiSection', ['resource' => $rawResource, 'sf_user' => $sf_user]); ?>
 
     <!-- Barcode / ISBN -->
     <?php

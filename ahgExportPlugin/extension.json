@@ -1,0 +1,27 @@
+{
+    "name": "AHG Export",
+    "machine_name": "ahgExportPlugin",
+    "version": "1.0.0",
+    "description": "Archival export functionality for CSV, EAD, and other formats",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": []
+    },
+    "display_actions": [],
+    "display_panels": [],
+    "display_badges": [],
+    "tables": [],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "export",
+    "load_order": 30
+}

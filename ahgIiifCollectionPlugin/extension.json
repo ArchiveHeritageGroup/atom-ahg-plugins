@@ -10,16 +10,14 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahg3DModelPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "iiif_annotation",
         "iiif_annotation_body",

@@ -10,16 +10,15 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahgDonorAgreementPlugin",
             "ahgRightsPlugin"
         ]
     },
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "provenance_record",
         "provenance_record_i18n",

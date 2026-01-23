@@ -11,7 +11,7 @@ class ahgLibraryPluginIsbnProviderEditAction extends sfAction
             $this->forward('admin', 'secure');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $db = \Illuminate\Database\Capsule\Manager::class;
 
         $this->provider = null;

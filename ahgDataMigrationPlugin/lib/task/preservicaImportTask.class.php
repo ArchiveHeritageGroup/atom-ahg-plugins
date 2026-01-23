@@ -75,7 +75,7 @@ EOF;
         $this->logSection('preservica', "Format: {$format}");
 
         // Load framework
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         // Build options array
         $importOptions = [

@@ -1,0 +1,45 @@
+{
+    "name": "AHG Core Plugin",
+    "machine_name": "ahgCorePlugin",
+    "version": "1.0.0",
+    "description": "Core utilities and shared services for AHG plugins. Provides centralized database access, configuration, taxonomy resolution, file storage, and cross-plugin contracts.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "core",
+    "is_core": true,
+    "is_locked": true,
+    "load_order": 1,
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "provides": {
+        "services": [
+            "AhgCore\\Core\\AhgDb",
+            "AhgCore\\Core\\AhgConfig",
+            "AhgCore\\Core\\AhgTaxonomy",
+            "AhgCore\\Core\\AhgStorage"
+        ],
+        "contracts": [
+            "AhgCore\\Contracts\\AuditServiceInterface",
+            "AhgCore\\Contracts\\DisplayActionProviderInterface",
+            "AhgCore\\Contracts\\PluginServiceInterface",
+            "AhgCore\\Contracts\\MetadataExtractorInterface"
+        ]
+    },
+    "assets": {
+        "js": [
+            "web/js/vendor/chart.min.js",
+            "web/js/vendor/tom-select.complete.min.js",
+            "web/js/vendor/select2.min.js",
+            "web/js/vendor/model-viewer.min.js",
+            "web/js/vendor/Sortable.min.js"
+        ],
+        "css": [
+            "web/css/select2.min.css",
+            "web/css/select2-bootstrap-5-theme.min.css",
+            "web/css/tom-select.bootstrap5.min.css"
+        ]
+    }
+}

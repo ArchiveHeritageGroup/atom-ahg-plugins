@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Model Viewer</title>
-    <script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>
+    <script type="module" src="/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js"></script>
     <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; }

@@ -89,6 +89,15 @@ function cco_get_digital_objects($resourceId): array
 {
     return DB::table('digital_object')
         ->where('object_id', $resourceId)
+        ->select([
+            'id',
+            'name',
+            'path',
+            'mime_type as mimeType',
+            'byte_size as byteSize',
+            'object_id',
+            'media_type_id as mediaTypeId',
+        ])
         ->get()
         ->toArray();
 }

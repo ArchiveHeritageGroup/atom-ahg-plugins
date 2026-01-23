@@ -1,0 +1,30 @@
+{
+    "name": "Landing Page Builder",
+    "machine_name": "ahgLandingPagePlugin",
+    "version": "1.0.0",
+    "description": "Visual landing page builder with drag-and-drop blocks",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": []
+    },
+    "display_actions": [],
+    "display_panels": [],
+    "display_badges": [],
+    "tables": [
+        "landing_page",
+        "landing_page_block"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "admin",
+    "load_order": 35
+}

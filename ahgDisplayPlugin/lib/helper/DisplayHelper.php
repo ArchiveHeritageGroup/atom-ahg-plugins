@@ -3,6 +3,8 @@
  * Display helper functions for templates
  */
 
+use AhgDisplay\Services\DisplayService;
+
 function get_display_service(): DisplayService
 {
     static $service;

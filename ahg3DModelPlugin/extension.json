@@ -11,6 +11,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "data/install.sql",
     "tables": [
         "object_3d_model",
@@ -23,8 +26,4 @@
         "iiif_3d_manifest",
         "object_3d_audit_log"
     ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ]
 }

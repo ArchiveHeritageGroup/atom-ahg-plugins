@@ -308,9 +308,6 @@ class ahgAuditTrailListener
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
 
-            error_log("AUDIT: Logged {$action} on {$entityType} by {$username}" . 
-                ($changedFields ? " (changed: " . implode(', ', array_keys($changedFields)) . ")" : ""));
-
         } catch (\Exception $e) {
             error_log('AUDIT ERROR: ' . $e->getMessage());
         }

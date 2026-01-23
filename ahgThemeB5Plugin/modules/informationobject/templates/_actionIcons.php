@@ -58,18 +58,6 @@ $hasChildren = DB::table('information_object')->where('parent_id', $resourceId)-
   <?php // Finding Aid - use component for full functionality ?>
   <?php echo get_component('informationobject', 'findingAid', ['resource' => $resource]); ?>
 
-  <?php // Visual Redaction Editor - for editors/admins with digital objects ?>
-  <?php if ($hasDigitalObject && $sf_user->hasCredential(['editor', 'administrator'], false) && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-  <h4 class="h5 mb-2"><?php echo __('Privacy'); ?></h4>
-  <ul class="list-unstyled">
-    <li>
-      <a class="atom-icon-link" href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resourceId]); ?>">
-        <i class="fas fa-fw fa-mask me-1" aria-hidden="true"></i><?php echo __('Visual Redaction Editor'); ?>
-      </a>
-    </li>
-  </ul>
-  <?php endif; ?>
-
   <?php // Calculate Dates - inline instead of component ?>
   <?php if ($sf_user->isAdministrator() && $hasChildren && $slug) { ?>
   <h4 class="h5 mb-2"><?php echo __('Calculate dates'); ?></h4>

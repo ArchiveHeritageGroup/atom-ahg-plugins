@@ -10,9 +10,8 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
-    "theme_support": [
-        "ahgThemeB5Plugin"
+    "dependencies": [
+        "ahgCorePlugin"
     ],
     "tables": [],
     "shared_tables": [

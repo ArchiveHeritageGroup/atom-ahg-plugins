@@ -1,17 +1,11 @@
 all:
   .settings:
     enabled_modules:
-      - ahgSettings
       - api
-      - export
       - identifierApi
       - informationobject
-      - label
-      - landingPageBuilder
-      - reports
       - spectrumReports
       - threeDReports
-      - tiffpdfmerge
       - accession
       - actor
       - admin

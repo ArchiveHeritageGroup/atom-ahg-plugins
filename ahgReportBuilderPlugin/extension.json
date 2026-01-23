@@ -12,7 +12,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "custom_report",
         "report_schedule",
@@ -29,7 +31,4 @@
         "Dashboard widgets",
         "Export to PDF, XLSX, CSV"
     ],
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ]
 }

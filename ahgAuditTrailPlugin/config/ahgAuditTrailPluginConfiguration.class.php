@@ -1,20 +1,72 @@
 <?php
+
+/**
+ * ahgAuditTrailPlugin Configuration
+ *
+ * Comprehensive audit trail logging for AtoM.
+ * Provides AhgAuditService for centralized audit logging.
+ */
 class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Comprehensive audit trail logging for AtoM';
-    public static $version = '1.0.0';
+    public static $version = '1.1.0';
 
     public function initialize(): void
     {
+        // Register autoloader for plugin namespaces
+        $this->registerAutoloader();
+
         // Enable the module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ahgAuditTrail';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
+        // Register AhgAuditService with AhgCore
+        $this->registerAuditService();
+
         // Hook into response event for audit logging (fires after action completes)
         $this->dispatcher->connect('response.filter_content', [$this, 'onResponseFilterContent']);
     }
 
+    /**
+     * Register PSR-4 autoloader for plugin classes
+     */
+    protected function registerAutoloader(): void
+    {
+        spl_autoload_register(function ($class) {
+            // Handle AhgAuditTrail namespace
+            if (strpos($class, 'AhgAuditTrail\\') === 0) {
+                $relativePath = str_replace('AhgAuditTrail\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Register the audit service with AhgCore
+     */
+    protected function registerAuditService(): void
+    {
+        try {
+            // Load AhgCore if available
+            if (class_exists('AhgCore\\AhgCore', true)) {
+                \AhgAuditTrail\Services\AhgAuditService::register();
+            }
+        } catch (\Exception $e) {
+            // AhgCore not available, continue without registration
+        }
+    }
+
+    /**
+     * Response filter content hook
+     */
     public function onResponseFilterContent(sfEvent $event, $content)
     {
         // Log authentication events
@@ -24,17 +76,24 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
         return $content;
     }
 
+    /**
+     * Log action using AhgAuditService
+     */
     protected function logAction(): void
     {
         try {
-            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (!file_exists($frameworkPath)) {
-                return;
-            }
-            require_once $frameworkPath;
-
             if (!sfContext::hasInstance()) {
                 return;
+            }
+
+            // Use AhgCore's database if available
+            if (!class_exists('AhgCore\\Core\\AhgDb')) {
+                // Fallback to direct bootstrap
+                $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+                if (!file_exists($frameworkPath)) {
+                    return;
+                }
+                require_once $frameworkPath;
             }
 
             $context = sfContext::getInstance();
@@ -46,7 +105,7 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             // Only log write operations and specific actions
             $auditableActions = ['create', 'edit', 'update', 'delete', 'copy', 'import', 'export', 'publish', 'unpublish'];
             $isWriteOperation = $request->isMethod('POST') || $request->isMethod('PUT') || $request->isMethod('DELETE');
-            
+
             if (!$isWriteOperation && !in_array($action, $auditableActions)) {
                 return;
             }
@@ -56,56 +115,76 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
                 'informationobject', 'actor', 'repository', 'term', 'taxonomy',
                 'accession', 'deaccession', 'donor', 'rightsholder', 'function',
                 'physicalobject', 'digitalobject', 'user', 'aclGroup', 'staticpage',
-                'ahgMuseumPlugin', 'sfLibraryPlugin', 'sfGalleryPlugin',
+                'ahgMuseumPlugin', 'ahgLibraryPlugin', 'ahgGalleryPlugin',
+                'ahg3DModelPlugin', 'ahgDAMPlugin',
             ];
-            
+
             if (!in_array($module, $auditableModules)) {
                 return;
             }
 
-            // Check if audit is enabled
-            $enabled = \Illuminate\Database\Capsule\Manager::table('ahg_audit_settings')
-                ->where('setting_key', 'audit_enabled')
-                ->value('setting_value');
+            // Use AhgAuditService if available
+            if (class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
+                $userId = null;
+                $username = 'anonymous';
+                if ($user->isAuthenticated()) {
+                    $userId = $user->getAttribute('user_id');
+                    $username = $user->getAttribute('username') ?? $user->getUsername();
+                }
 
-            if ($enabled !== '1') {
-                return;
+                // Determine action type
+                $actionType = $action;
+                if ($request->isMethod('POST') && in_array($action, ['index', 'edit'])) {
+                    $actionType = $request->getParameter('id') ? 'update' : 'create';
+                }
+
+                \AhgAuditTrail\Services\AhgAuditService::logAction(
+                    $actionType,
+                    $this->resolveEntityType($module),
+                    $this->resolveEntityId($request),
+                    [
+                        'user_id' => $userId,
+                        'username' => $username,
+                        'module' => $module,
+                        'action_name' => $action,
+                        'slug' => $request->getParameter('slug'),
+                    ]
+                );
             }
-
-            $userId = null;
-            $username = 'anonymous';
-            if ($user->isAuthenticated()) {
-                $userId = $user->getAttribute('user_id');
-                $username = $user->getAttribute('username') ?? $user->getUsername();
-            }
-
-            // Determine action type
-            $actionType = $action;
-            if ($request->isMethod('POST') && in_array($action, ['index', 'edit'])) {
-                $actionType = $request->getParameter('id') ? 'update' : 'create';
-            }
-
-            \Illuminate\Database\Capsule\Manager::table('ahg_audit_log')->insert([
-                'uuid' => sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)),
-                'user_id' => $userId,
-                'username' => $username,
-                'action' => $actionType,
-                'entity_type' => $this->resolveEntityType($module),
-                'module' => $module,
-                'action_name' => $action,
-                'request_method' => $request->getMethod(),
-                'request_uri' => substr($request->getUri(), 0, 2000),
-                'ip_address' => $request->getRemoteAddress(),
-                'user_agent' => substr($request->getHttpHeader('User-Agent') ?? '', 0, 500),
-                'status' => 'success',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
         } catch (\Exception $e) {
-            // Silently fail - don't break the app
             error_log('Audit log error: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Resolve entity ID from request
+     */
+    protected function resolveEntityId($request): ?int
+    {
+        $id = $request->getParameter('id');
+        if ($id && is_numeric($id)) {
+            return (int)$id;
+        }
+
+        $slug = $request->getParameter('slug');
+        if ($slug) {
+            try {
+                $db = class_exists('AhgCore\\Core\\AhgDb')
+                    ? \AhgCore\Core\AhgDb::class
+                    : \Illuminate\Database\Capsule\Manager::class;
+                $objectId = $db::table('slug')->where('slug', $slug)->value('object_id');
+                return $objectId ? (int)$objectId : null;
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve entity type from module name
+     */
     protected function resolveEntityType($module): string
     {
         $map = [
@@ -124,51 +203,49 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             'function' => 'QubitFunction',
             'physicalobject' => 'QubitPhysicalObject',
             'staticpage' => 'QubitStaticPage',
-            'ahgMuseumPlugin' => 'QubitMuseumObject',
-            'sfLibraryPlugin' => 'QubitLibraryObject',
-            'sfGalleryPlugin' => 'QubitGalleryObject',
+            'ahgMuseumPlugin' => 'MuseumObject',
+            'ahgLibraryPlugin' => 'LibraryItem',
+            'ahgGalleryPlugin' => 'GalleryWork',
+            'ahg3DModelPlugin' => 'Model3D',
+            'ahgDAMPlugin' => 'DigitalAsset',
         ];
         return $map[$module] ?? $module;
     }
 
+    /**
+     * Log authentication events
+     */
     protected function logAuthentication(): void
     {
         try {
             if (!sfContext::hasInstance()) {
                 return;
             }
-            
+
             $context = sfContext::getInstance();
             $user = $context->getUser();
             $request = $context->getRequest();
             $module = $context->getModuleName();
             $action = $context->getActionName();
-            
+
             // Only check user module login/logout
             if ($module !== 'user' || !in_array($action, ['login', 'logout'])) {
                 return;
             }
-            
-            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (!file_exists($frameworkPath)) {
+
+            // Use AhgAuditService if available
+            if (!class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
                 return;
             }
-            require_once $frameworkPath;
-            
-            // Check if auth audit is enabled
-            $auditAuth = \Illuminate\Database\Capsule\Manager::table('ahg_audit_settings')
-                ->where('setting_key', 'audit_authentication')
-                ->value('setting_value');
-            if ($auditAuth !== '1') {
-                return;
-            }
-            
+
+            $service = \AhgAuditTrail\Services\AhgAuditService::getInstance();
+
             $eventType = null;
             $userId = null;
             $username = null;
             $status = 'success';
             $failureReason = null;
-            
+
             // Login success - user is now authenticated after POST
             if ($action === 'login' && $request->isMethod('POST') && $user->isAuthenticated()) {
                 $eventType = 'login';
@@ -182,34 +259,22 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
                 $status = 'failure';
                 $failureReason = 'Invalid credentials';
             }
-            // Logout - response is sent after signOut()
+            // Logout
             elseif ($action === 'logout') {
                 $eventType = 'logout';
-                // User is already signed out, get from session or request
                 $userId = $request->getAttribute('_pre_logout_user_id');
                 $username = $request->getAttribute('_pre_logout_username') ?? 'unknown';
             }
-            
+
             if ($eventType) {
-                \Illuminate\Database\Capsule\Manager::table('ahg_audit_authentication')->insert([
-                    'uuid' => sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)),
-                    'event_type' => $eventType,
-                    'user_id' => $userId,
-                    'username' => $username,
-                    'ip_address' => $request->getRemoteAddress(),
-                    'user_agent' => substr($request->getHttpHeader('User-Agent') ?? '', 0, 500),
-                    'session_id' => session_id() ?: null,
+                $service->logAuth($eventType, $userId, $username, [
                     'status' => $status,
                     'failure_reason' => $failureReason,
-                    'failed_attempts' => 0,
-                    'metadata' => json_encode(['action' => $action, 'module' => $module]),
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'metadata' => ['action' => $action, 'module' => $module],
                 ]);
-                error_log("AUTH LOGGED: {$eventType} for {$username}");
             }
         } catch (\Exception $e) {
             error_log('Auth audit error: ' . $e->getMessage());
         }
     }
-
 }

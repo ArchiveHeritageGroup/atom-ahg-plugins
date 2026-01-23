@@ -10,14 +10,12 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": []
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "ric_orphan_tracking",
         "ric_queue_status",

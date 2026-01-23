@@ -1,8 +1,8 @@
 {
     "name": "Audit Trail",
     "machine_name": "ahgAuditTrailPlugin",
-    "version": "1.2.10",
-    "description": "Comprehensive audit trail logging for AtoM with POPIA/NARSSA compliance",
+    "version": "1.3.0",
+    "description": "Comprehensive audit trail logging for AtoM with POPIA/NARSSA compliance. Provides AhgAuditService for centralized audit logging.",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "ahg",
@@ -11,6 +11,17 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "provides": {
+        "services": [
+            "AhgAuditTrail\\Services\\AhgAuditService"
+        ],
+        "implements": [
+            "AhgCore\\Contracts\\AuditServiceInterface"
+        ]
+    },
     "install_sql": "data/install.sql",
     "tables": [
         "ahg_audit_log",
@@ -18,9 +29,5 @@
         "ahg_audit_access",
         "ahg_audit_settings",
         "ahg_audit_retention_policy"
-    ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "arAHGThemeB5Plugin"
     ]
 }

@@ -35,7 +35,7 @@
       <td>
         <?php 
           $params = json_decode($search->search_params, true) ?: [];
-          $runUrl = url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params);
+          $runUrl = url_for('@glam_browse') . '?' . http_build_query($params);
         ?>
         <a href="<?php echo $runUrl; ?>" class="btn btn-primary btn-sm">
           <i class="fa fa-play"></i> <?php echo __('Run'); ?>
@@ -53,7 +53,7 @@
 <?php endif; ?>
 
 <div class="mt-3">
-  <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']); ?>" class="btn btn-secondary">
+  <a href="<?php echo url_for('@glam_browse'); ?>" class="btn btn-secondary">
     <i class="fa fa-search me-1"></i><?php echo __('Browse Records'); ?>
   </a>
 </div>

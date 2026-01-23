@@ -114,7 +114,6 @@ class extendedRightsComponents extends sfComponents
             ->get();
 
         // Get Embargo
-        error_log("EMBARGO_CHECK: objectId=" . $objectId);
         $this->embargo = Capsule::table('rights_embargo')
             ->where('object_id', '=', $objectId)
             ->where('status', '=', 'active')

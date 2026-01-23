@@ -576,49 +576,36 @@ class ResearchService
     protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
     {
         try {
-            $userId = null;
-            $username = null;
-            if (class_exists('sfContext') && \sfContext::hasInstance()) {
-                $user = \sfContext::getInstance()->getUser();
-                if ($user && $user->isAuthenticated()) {
-                    $userId = $user->getAttribute('user_id');
-                    if ($userId) {
-                        $userRecord = DB::table('user')->where('id', $userId)->first();
-                        $username = $userRecord->username ?? null;
+            $auditServicePath = \sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            if (file_exists($auditServicePath)) {
+                require_once $auditServicePath;
+            }
+
+            if (class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
+                $changedFields = [];
+                foreach ($newValues as $key => $val) {
+                    if (($oldValues[$key] ?? null) !== $val) {
+                        $changedFields[] = $key;
                     }
                 }
+                if ($action === 'delete') {
+                    $changedFields = array_keys($oldValues);
+                }
+
+                \AhgAuditTrail\Services\AhgAuditService::logAction(
+                    $action,
+                    $entityType,
+                    $entityId,
+                    [
+                        'title' => $title,
+                        'module' => 'ahgResearchPlugin',
+                        'action_name' => $action,
+                        'old_values' => $oldValues,
+                        'new_values' => $newValues,
+                        'changed_fields' => $changedFields,
+                    ]
+                );
             }
-
-            $changedFields = [];
-            foreach ($newValues as $key => $val) {
-                if (($oldValues[$key] ?? null) !== $val) $changedFields[] = $key;
-            }
-            if ($action === 'delete') $changedFields = array_keys($oldValues);
-
-            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
-                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), 
-                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, 
-                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-
-            DB::table('ahg_audit_log')->insert([
-                'uuid' => $uuid,
-                'user_id' => $userId,
-                'username' => $username,
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
-                'session_id' => session_id() ?: null,
-                'action' => $action,
-                'entity_type' => $entityType,
-                'entity_id' => $entityId,
-                'entity_title' => $title,
-                'module' => 'ahgResearchPlugin',
-                'action_name' => $action,
-                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
-                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
-                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
-                'status' => 'success',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
         } catch (\Exception $e) {
             error_log("ResearchService AUDIT ERROR: " . $e->getMessage());
         }

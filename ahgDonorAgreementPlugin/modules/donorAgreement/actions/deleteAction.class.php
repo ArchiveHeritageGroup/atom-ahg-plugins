@@ -13,7 +13,7 @@ class donorAgreementDeleteAction extends sfAction
             $this->forward404('Agreement ID required');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $service = new \AtomFramework\Services\DonorAgreement\DonorAgreementService();
 

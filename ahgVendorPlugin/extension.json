@@ -11,6 +11,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "data/install.sql",
     "tables": [
         "ahg_vendors",
@@ -23,8 +26,4 @@
         "ahg_vendor_transaction_history",
         "ahg_vendor_transaction_attachments"
     ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ]
 }

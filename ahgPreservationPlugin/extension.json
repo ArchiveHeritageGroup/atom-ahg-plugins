@@ -20,13 +20,12 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "settings": {
         "default_algorithm": "sha256",
         "auto_checksum_on_upload": true,
         "fixity_check_interval_days": 7
     },
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ]
 }

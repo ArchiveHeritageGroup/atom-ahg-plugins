@@ -10,16 +10,14 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahgSecurityClearancePlugin"
         ]
     },
-    "theme_support": [
-        "ahgThemeB5Plugin",
-        "arDominionB5Plugin"
-    ],
     "tables": [
         "privacy_config",
         "privacy_officer",

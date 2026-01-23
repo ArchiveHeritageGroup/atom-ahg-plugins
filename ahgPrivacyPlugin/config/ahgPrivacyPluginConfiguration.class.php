@@ -38,7 +38,7 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- Fabric.js -->
-    <script src="/plugins/ahgThemeB5Plugin/js/fabric.min.js"></script>
+    <script src="/plugins/ahgCorePlugin/js/vendor/fabric.min.js"></script>
 HTML;
             $content = str_replace('</head>', $css . "\n</head>", $content);
 

@@ -11,6 +11,7 @@
         "php": ">=8.1"
     },
     "dependencies": [
+        "ahgCorePlugin",
         "ahgSpectrumPlugin"
     ],
     "dependents": [],
@@ -20,10 +21,6 @@
             "ahgGrapPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "museum_metadata"
     ],

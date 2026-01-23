@@ -10,16 +10,36 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahgExtendedRightsPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
+    "display_actions": [
+        {
+            "id": "rights_action",
+            "label": "Rights",
+            "icon": "bi-shield-lock",
+            "template": "ahgRightsPlugin/templates/display/_rights.php",
+            "contexts": ["informationobject", "actor"],
+            "permission": "read",
+            "weight": 30
+        }
     ],
+    "display_panels": [
+        {
+            "id": "rights_panel",
+            "label": "Rights & Restrictions",
+            "template": "ahgRightsPlugin/templates/display/_rights_section.php",
+            "contexts": ["informationobject"],
+            "position": "sidebar",
+            "weight": 50
+        }
+    ],
+    "display_badges": [],
     "tables": [
         "rights",
         "rights_i18n",

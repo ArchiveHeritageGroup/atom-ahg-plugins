@@ -14,7 +14,7 @@ $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" 
 ?>
 
 <!-- Include model-viewer component -->
-<script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>
+<script type="module" src="/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js"></script>
 
 <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">

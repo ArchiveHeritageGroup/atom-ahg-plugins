@@ -2,7 +2,7 @@
   id="search-box"
   class="d-flex flex-grow-1 my-2"
   role="search"
-  action="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']); ?>">
+  action="<?php echo url_for('@glam_browse'); ?>">
   <h2 class="visually-hidden"><?php echo __('Search'); ?></h2>
   <input type="hidden" name="topLod" value="0">
   <input type="hidden" name="sort" value="relevance">
@@ -61,12 +61,7 @@
         </div>
         <div class="dropdown-divider"></div>
       <?php } ?>
-      <a class="dropdown-item" href="<?php echo url_for([
-          'module' => 'informationobject',
-          'action' => 'browse',
-          'showAdvanced' => true,
-          'topLod' => false,
-      ]); ?>">
+      <a class="dropdown-item" href="<?php echo url_for('@glam_browse') . '?showAdvanced=true&topLevel=0'; ?>">
         <?php echo __('Advanced search'); ?>
       </a>
       <div class="dropdown-divider"></div>

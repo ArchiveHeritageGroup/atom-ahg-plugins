@@ -259,10 +259,17 @@
       window.saveSnippet = function(id) {
         var title = document.getElementById('snippetTitle-' + id).value.trim();
         var notes = document.getElementById('snippetNotes-' + id).value.trim();
-        
+        var saveBtn = document.querySelector('#snippetCreatorModal-' + id + ' .btn-primary');
+
         if (!title) { alert('Please enter a title'); return; }
         if (snippetData.startTime >= snippetData.endTime) { alert('End time must be after start time'); return; }
-        
+
+        // Prevent double-click
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+        }
+
         fetch('/media/snippets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -281,9 +288,13 @@
             location.reload();
           } else {
             alert('Failed: ' + (data.error || 'Unknown error'));
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save Snippet'; }
           }
         })
-        .catch(function(err) { alert('Error: ' + err.message); });
+        .catch(function(err) {
+          alert('Error: ' + err.message);
+          if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save Snippet'; }
+        });
       };
       
       window.playSnippet = function(startTime, endTime) {
@@ -298,9 +309,20 @@
       
       window.deleteSnippet = function(snippetId, doId) {
         if (!confirm('Delete this snippet?')) return;
-        fetch('/media/snippets/' + snippetId, { method: 'DELETE' })
+        fetch('/media/snippets/' + snippetId + '?_=' + Date.now(), {
+          method: 'DELETE',
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        })
           .then(function(r) { return r.json(); })
-          .then(function(data) { if (data.success) location.reload(); });
+          .then(function(data) {
+            if (data.success) {
+              location.reload(true);
+            } else {
+              alert('Delete failed: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(function(err) { alert('Error: ' + err.message); });
       };
       
       window.seekToTime = function(time) {

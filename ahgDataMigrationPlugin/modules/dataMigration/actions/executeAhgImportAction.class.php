@@ -89,7 +89,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         if (file_exists($pluginPath . '/lib/Services/PreservicaImportService.php')) {
             require_once $pluginPath . '/lib/Services/PreservicaImportService.php';
         }
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         // Get import options

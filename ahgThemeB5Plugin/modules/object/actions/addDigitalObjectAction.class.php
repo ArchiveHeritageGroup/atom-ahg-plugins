@@ -314,7 +314,7 @@ class ObjectAddDigitalObjectAction extends sfAction
     {
         error_log("=== APPLY METADATA LARAVEL START ===");
         try {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            \AhgCore\Core\AhgDb::init();
             
             if (!($this->resource instanceof QubitInformationObject)) {
                 return;

@@ -11,7 +11,7 @@ class provenanceComponents extends sfComponents
      */
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 

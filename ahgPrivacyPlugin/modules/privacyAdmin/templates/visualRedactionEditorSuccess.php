@@ -217,15 +217,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
                         </ul>
                     </div>
                     <div class="col-md-4">
-                        <h6><i class="fas fa-keyboard text-primary me-2"></i>Keyboard Shortcuts</h6>
-                        <ul class="small mb-0">
-                            <li><kbd>V</kbd> - Select/Pan mode</li>
-                            <li><kbd>R</kbd> - Rectangle draw mode</li>
-                            <li><kbd>Delete</kbd> - Remove selected region</li>
-                            <li><kbd>Ctrl+S</kbd> - Save redactions</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4">
                         <h6><i class="fas fa-check-double text-success me-2"></i>Applying Redactions</h6>
                         <ul class="small mb-0">
                             <li>Save your redaction regions</li>
@@ -262,7 +253,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 <script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js"></script>
 <?php endif; ?>
 
-<script src="/plugins/ahgThemeB5Plugin/js/fabric.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/fabric.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

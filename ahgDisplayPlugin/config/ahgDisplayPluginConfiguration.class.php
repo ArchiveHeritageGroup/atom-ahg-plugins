@@ -1,4 +1,5 @@
 <?php
+
 class ahgDisplayPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Context-aware display system for archives, museums, galleries, libraries and DAM';
@@ -6,6 +7,12 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Register autoloader for AhgDisplay namespace
+        $this->registerAutoloader();
+
+        // Initialize the display action registry
+        $this->initializeRegistry();
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
         $this->dispatcher->connect('template.filter_parameters', [$this, 'onTemplateFilterParameters']);
         $this->dispatcher->connect('QubitInformationObject.save', [$this, 'onInformationObjectSave']);
@@ -18,38 +25,63 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
     }
 
     /**
-     * Check if ahgThemeB5Plugin is the active theme
+     * Register PSR-4 autoloader for plugin classes
      */
-    private function isAhgThemeActive(): bool
+    protected function registerAutoloader()
     {
-        try {
-            $sql = "SELECT si.value FROM setting s
-                    JOIN setting_i18n si ON s.id = si.id
-                    WHERE s.name = 'plugins' AND s.scope IS NULL LIMIT 1";
-            $value = QubitPdo::fetchColumn($sql);
-            if ($value) {
-                $plugins = unserialize($value);
-                if (is_array($plugins) && in_array('ahgThemeB5Plugin', $plugins)) {
+        spl_autoload_register(function ($class) {
+            if (strpos($class, 'AhgDisplay\\') === 0) {
+                $relativePath = str_replace('AhgDisplay\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
                     return true;
                 }
             }
+            return false;
+        });
+    }
+
+    /**
+     * Initialize the display action registry
+     */
+    protected function initializeRegistry()
+    {
+        try {
+            require_once __DIR__ . '/../lib/Registry/DisplayActionRegistry.php';
+            \AhgDisplay\Registry\DisplayActionRegistry::init();
         } catch (Exception $e) {
-            // Ignore errors during routing
+            error_log('ahgDisplayPlugin: Failed to initialize registry: ' . $e->getMessage());
         }
-        return false;
     }
 
     public function loadRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
 
-        // Only the conditional route - all other routes are in routing.yml
-        if ($this->isAhgThemeActive()) {
-            $routing->prependRoute('informationobject_browse_redirect', new sfRoute(
-                '/informationobject/browse',
-                ['module' => 'ahgDisplay', 'action' => 'browse']
-            ));
+        // Load routes from routing.yml
+        $routingFile = __DIR__ . '/routing.yml';
+        if (file_exists($routingFile)) {
+            $routes = sfYaml::load($routingFile);
+            if (is_array($routes)) {
+                foreach ($routes as $name => $config) {
+                    if (isset($config['url']) && isset($config['param'])) {
+                        $routing->prependRoute($name, new sfRoute(
+                            $config['url'],
+                            $config['param']
+                        ));
+                    }
+                }
+            }
         }
+
+        // Core display routes - no theme dependency (fallback)
+        $routing->prependRoute('display_browse', new sfRoute(
+            '/display/browse',
+            ['module' => 'ahgDisplay', 'action' => 'browse']
+        ));
     }
 
     public function onTemplateFilterParameters(sfEvent $event, $parameters)

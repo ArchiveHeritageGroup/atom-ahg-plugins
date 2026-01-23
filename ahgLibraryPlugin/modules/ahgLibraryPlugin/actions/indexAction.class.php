@@ -2,67 +2,71 @@
 /**
  * Library item view action.
  */
+
+// Load AhgAccessGate for embargo checks
+require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Access/AhgAccessGate.php';
+
 class ahgLibraryPluginIndexAction extends sfAction
 {
     public function execute($request)
     {
-        // Embargo access filter
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
-        // Load framework
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/bootstrap.php';
-        
+        // Initialize database
+        \AhgCore\Core\AhgDb::init();
+
         $slug = $request->getParameter('slug');
-        
+
         if (empty($slug)) {
             $this->forward404('No slug provided');
         }
-        
+
         // Load the information object by slug
         $this->resource = QubitInformationObject::getBySlug($slug);
-        
+
         if (!$this->resource) {
             // Try to find by ID if slug looks like a number
             if (is_numeric($slug)) {
                 $this->resource = QubitInformationObject::getById((int)$slug);
             }
         }
-        
+
         if (!$this->resource) {
             $this->forward404('Library item not found: ' . $slug);
         }
-        
+
         // Check read permission
         if (!QubitAcl::check($this->resource, 'read')) {
             QubitAcl::forwardToSecureAction();
         }
-        
+
         // Check embargo access
-        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+        if (!\AhgCore\Access\AhgAccessGate::canView($this->resource->id, $this)) {
             return sfView::NONE;
         }
-        
+
         // Load library extended data
         $this->loadLibraryData($this->resource->id);
-        
+
         // Load digital object if exists
         $this->digitalObject = $this->resource->getDigitalObject();
     }
-    
+
     /**
      * Load library extended data including creators and subjects.
      */
     protected function loadLibraryData(int $informationObjectId): void
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        $repoPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        if (file_exists($repoPath)) {
+            require_once $repoPath;
+        }
         $repo = new \AtomFramework\Repositories\LibraryItemRepository();
-        
+
         // Load library_item data
         $this->libraryData = $repo->getLibraryData($informationObjectId) ?? [];
-        
+
         // Get library item ID
         $libraryItemId = $repo->getLibraryItemId($informationObjectId);
-        
+
         if ($libraryItemId) {
             // Load creators
             $this->libraryData['creators'] = $repo->getCreators($libraryItemId);
@@ -72,9 +76,12 @@ class ahgLibraryPluginIndexAction extends sfAction
             $this->libraryData['creators'] = [];
             $this->libraryData['subjects'] = [];
         }
-        
+
         // Load item physical location
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        $locRepoPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        if (file_exists($locRepoPath)) {
+            require_once $locRepoPath;
+        }
         $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
         $this->itemLocation = $locRepo->getLocationWithContainer($informationObjectId) ?? [];
     }

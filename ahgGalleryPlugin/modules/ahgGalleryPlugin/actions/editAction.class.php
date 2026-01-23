@@ -582,59 +582,42 @@ class ahgGalleryPluginEditAction extends sfAction
     }
 
     /**
-     * Log audit trail entry
+     * Log audit trail entry via AhgAuditService
      */
     protected function logAudit(string $action, int $resourceId, array $oldValues, array $newValues): void
     {
         try {
-            $user = $this->getUser();
-            $userId = $user->getAttribute('user_id');
-            $username = null;
-
-            if ($userId) {
-                $userRecord = DB::table('user')->where('id', $userId)->first();
-                $username = $userRecord->username ?? null;
+            $auditServicePath = sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            if (file_exists($auditServicePath)) {
+                require_once $auditServicePath;
             }
 
-            $changedFields = [];
-            foreach ($newValues as $key => $newVal) {
-                $oldVal = $oldValues[$key] ?? null;
-                if ($newVal !== $oldVal) {
-                    $changedFields[] = $key;
+            if (class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
+                $changedFields = [];
+                foreach ($newValues as $key => $val) {
+                    if (($oldValues[$key] ?? null) !== $val) {
+                        $changedFields[] = $key;
+                    }
                 }
+                if ($action === 'delete') {
+                    $changedFields = array_keys($oldValues);
+                }
+
+                \AhgAuditTrail\Services\AhgAuditService::logAction(
+                    $action,
+                    'GalleryWork',
+                    $resourceId,
+                    [
+                        'title' => $newValues['title'] ?? $oldValues['title'] ?? null,
+                        'slug' => $this->resource->slug ?? null,
+                        'module' => 'ahgGalleryPlugin',
+                        'action_name' => 'edit',
+                        'old_values' => $oldValues,
+                        'new_values' => $newValues,
+                        'changed_fields' => $changedFields,
+                    ]
+                );
             }
-
-            $uuid = sprintf(
-                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                mt_rand(0, 0xffff),
-                mt_rand(0, 0x0fff) | 0x4000,
-                mt_rand(0, 0x3fff) | 0x8000,
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-            );
-
-            DB::table('ahg_audit_log')->insert([
-                'uuid' => $uuid,
-                'user_id' => $userId,
-                'username' => $username,
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-                'session_id' => session_id() ?: null,
-                'action' => $action,
-                'entity_type' => 'GalleryWork',
-                'entity_id' => $resourceId,
-                'entity_slug' => $this->resource->slug ?? null,
-                'entity_title' => $newValues['title'] ?? null,
-                'module' => 'ahgGalleryPlugin',
-                'action_name' => 'edit',
-                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
-                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
-                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
-                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
-                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
-                'status' => 'success',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
         } catch (\Exception $e) {
             error_log("Gallery AUDIT ERROR: " . $e->getMessage());
         }

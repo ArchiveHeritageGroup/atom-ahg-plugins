@@ -11,7 +11,7 @@ class provenanceActions extends sfActions
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -27,7 +27,7 @@ class provenanceActions extends sfActions
      */
     public function executeView(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -53,7 +53,7 @@ class provenanceActions extends sfActions
      */
     public function executeTimeline(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -80,7 +80,7 @@ class provenanceActions extends sfActions
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -273,7 +273,7 @@ class provenanceActions extends sfActions
     }
     protected function processDocuments(sfWebRequest $request, int $recordId, ?int $userId)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         
         $docTypes = $request->getParameter('doc_type', []);
         $docTitles = $request->getParameter('doc_title', []);
@@ -335,7 +335,7 @@ class provenanceActions extends sfActions
     public function executeDeleteDocument(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         
         $docId = $request->getParameter('id');
         
@@ -361,7 +361,7 @@ class provenanceActions extends sfActions
     {
         $this->getResponse()->setContentType('application/json');
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -384,7 +384,7 @@ class provenanceActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
@@ -428,7 +428,7 @@ class provenanceActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 
         $eventId = $request->getParameter('event_id');
@@ -447,7 +447,7 @@ class provenanceActions extends sfActions
      */
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
 

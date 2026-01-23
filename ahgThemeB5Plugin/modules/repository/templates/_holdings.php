@@ -1,4 +1,4 @@
-<form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_holdings'); ?>" action="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']); ?>">
+<form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_holdings'); ?>" action="<?php echo url_for('@glam_browse'); ?>">
   <input type="hidden" name="repos" value="<?php echo $resource->id; ?>">
   <div class="input-group">
     <input type="text" class="form-control" name="query" aria-label="<?php echo __('Search'); ?>" placeholder="<?php echo __('Search'); ?>">

@@ -79,7 +79,7 @@ class searchEnhancementActions extends sfActions
             ]);
         
         $params = json_decode($search->search_params, true) ?: [];
-        $url = url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params);
+        $url = url_for('@glam_browse') . '?' . http_build_query($params);
         
         $this->redirect($url);
     }
@@ -94,7 +94,7 @@ class searchEnhancementActions extends sfActions
         }
         
         $params = json_decode($template->search_params, true) ?: [];
-        $url = url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params);
+        $url = url_for('@glam_browse') . '?' . http_build_query($params);
         
         $this->redirect($url);
     }

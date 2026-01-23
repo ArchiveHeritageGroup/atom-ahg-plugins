@@ -66,7 +66,7 @@ EOF;
     {
         parent::execute($arguments, $options);
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         // Install schema
         if ($options['install-schema']) {

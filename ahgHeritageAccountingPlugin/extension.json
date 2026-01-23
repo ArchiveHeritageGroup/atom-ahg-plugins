@@ -11,7 +11,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "modules": [
             "ahgGrapModule",
@@ -34,8 +36,4 @@
         "heritage_transaction_log",
         "heritage_regional_data"
     ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ]
 }

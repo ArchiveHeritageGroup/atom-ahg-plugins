@@ -221,8 +221,8 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
 </div>
 
 <!-- TOM Select -->
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.tom-select').forEach(function(el) {

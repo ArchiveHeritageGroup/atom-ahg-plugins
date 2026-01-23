@@ -50,10 +50,10 @@ if (!$resourceId) return;
   <div id="ric-fullscreen-graph" style="width:100%; height:100%;"></div>
 </div>
 
-<script src="/plugins/ahgThemeB5Plugin/js/cytoscape.min.js"></script>
-<script src="/plugins/ahgThemeB5Plugin/js/three.min.js"></script>
-<script src="/plugins/ahgThemeB5Plugin/js/three-spritetext.min.js"></script>
-<script src="/plugins/ahgThemeB5Plugin/js/3d-force-graph.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/cytoscape.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/three.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/three-spritetext.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/3d-force-graph.min.js"></script>
 
 <script>
 (function() {

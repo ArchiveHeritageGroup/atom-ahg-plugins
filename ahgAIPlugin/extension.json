@@ -1,0 +1,36 @@
+{
+    "name": "AI Tools",
+    "machine_name": "ahgAIPlugin",
+    "version": "2.0.0",
+    "description": "AI-powered tools for archival management: Named Entity Recognition (NER), Translation, Summarization, and Spellcheck",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ai",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "ahg_ai_settings",
+        "ahg_ai_usage",
+        "ahg_ner_extraction",
+        "ahg_ner_entity",
+        "ahg_ner_entity_link",
+        "ahg_translation_queue",
+        "ahg_translation_log"
+    ],
+    "features": {
+        "ner": "Named Entity Recognition - extract persons, organizations, places, dates",
+        "translate": "Machine translation using Argos Translate (offline)",
+        "summarize": "AI-powered text summarization",
+        "spellcheck": "Spelling and grammar checking"
+    },
+    "python": {
+        "module": "atom_ahg.resources.translation",
+        "requirements": ["argostranslate>=1.9.0"]
+    }
+}

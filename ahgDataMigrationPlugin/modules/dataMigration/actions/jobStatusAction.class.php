@@ -11,7 +11,7 @@ class dataMigrationJobStatusAction extends sfAction
             $this->forward('admin', 'secure');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $id = (int)$request->getParameter('id');

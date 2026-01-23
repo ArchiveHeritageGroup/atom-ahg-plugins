@@ -13,16 +13,27 @@
             "gd"
         ]
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahgMuseumPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
+    "display_actions": [
+        {
+            "id": "condition_report_action",
+            "label": "Condition Report",
+            "icon": "bi-clipboard-check",
+            "template": "ahgConditionPlugin/templates/display/_condition_report.php",
+            "contexts": ["informationobject"],
+            "permission": "update",
+            "weight": 40
+        }
     ],
+    "display_panels": [],
+    "display_badges": [],
     "tables": [
         "condition_check",
         "condition_check_i18n",

@@ -1,0 +1,29 @@
+{
+    "name": "TIFF PDF Merge",
+    "machine_name": "ahgTiffPdfMergePlugin",
+    "version": "1.0.0",
+    "description": "TIFF and PDF merge job management for digital preservation",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": []
+    },
+    "display_actions": [],
+    "display_panels": [],
+    "display_badges": [],
+    "tables": [
+        "tiff_pdf_merge_job"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "preservation",
+    "load_order": 45
+}

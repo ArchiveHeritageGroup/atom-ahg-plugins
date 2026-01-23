@@ -11,6 +11,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "data/install.sql",
     "tables": [
         "security_classification",
@@ -43,8 +46,4 @@
         "object_rights_holder",
         "object_rights_statement"
     ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "arAHGThemeB5Plugin"
-    ]
 }

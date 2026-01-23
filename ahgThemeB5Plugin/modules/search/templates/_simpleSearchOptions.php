@@ -7,7 +7,7 @@
  */
 
 // Load search service
-require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+\AhgCore\Core\AhgDb::init();
 $searchService = new \App\Services\AdvancedSearchService();
 
 $user = sfContext::getInstance()->getUser();
@@ -32,7 +32,7 @@ $popular = $searchService->getPopularSearches(5);
   </div>
   
   <!-- Advanced Search -->
-  <a class="dropdown-item" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'showAdvanced' => 'true']); ?>">
+  <a class="dropdown-item" href="<?php echo url_for('@glam_browse') . '?showAdvanced=true'; ?>">
     <i class="fa fa-sliders-h me-2"></i><?php echo __('Advanced search'); ?>
   </a>
   
@@ -83,7 +83,7 @@ $popular = $searchService->getPopularSearches(5);
   <?php foreach ($history as $item): ?>
   <?php 
     $params = json_decode($item->search_params, true) ?: [];
-    $searchUrl = url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params);
+    $searchUrl = url_for('@glam_browse') . '?' . http_build_query($params);
   ?>
   <a class="dropdown-item" href="<?php echo $searchUrl; ?>">
     <i class="fa fa-search me-2 text-muted"></i>
@@ -105,7 +105,7 @@ $popular = $searchService->getPopularSearches(5);
   <?php foreach (array_slice($popular, 0, 3) as $p): ?>
   <?php 
     $params = json_decode($p->search_params, true) ?: [];
-    $searchUrl = url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params);
+    $searchUrl = url_for('@glam_browse') . '?' . http_build_query($params);
   ?>
   <a class="dropdown-item" href="<?php echo $searchUrl; ?>">
     <i class="fa fa-trending-up me-2 text-warning"></i>

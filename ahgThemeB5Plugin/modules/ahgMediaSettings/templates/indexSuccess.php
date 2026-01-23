@@ -1,6 +1,6 @@
 <?php use_helper('Text') ?>
-<?php use_stylesheet("/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css") ?>
-<?php use_javascript("/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js") ?>
+<?php use_stylesheet("/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css") ?>
+<?php use_javascript("/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js") ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="mb-0"><?php echo __('Media Processing Settings') ?></h1>

@@ -6,10 +6,8 @@ class embargoActions extends sfActions
 {
     protected function initDb()
     {
-        // Initialize Laravel DB if not already
-        if (!DB::connection()->getPdo()) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        }
+        // Initialize Laravel DB via AhgDb (idempotent)
+        \AhgCore\Core\AhgDb::init();
     }
 
     

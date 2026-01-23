@@ -70,7 +70,7 @@ EOF;
         sfContext::createInstance($this->configuration);
 
         // Load framework
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
 

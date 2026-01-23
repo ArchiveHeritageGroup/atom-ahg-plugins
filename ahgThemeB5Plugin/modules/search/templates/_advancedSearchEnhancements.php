@@ -42,7 +42,7 @@ try {
     <span class="text-muted small me-2"><i class="fa fa-bolt me-1"></i><?php echo __('Quick Searches'); ?></span>
     <?php foreach ($templates as $template): ?>
     <?php $params = json_decode($template->search_params, true) ?: []; ?>
-    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>"
+    <a href="<?php echo url_for('@glam_browse') . '?' . http_build_query($params); ?>"
        class="btn btn-sm btn-outline-<?php echo esc_entities($template->color ?: 'secondary'); ?> py-0 px-2">
       <i class="fa <?php echo esc_entities($template->icon ?: 'fa-search'); ?> me-1"></i>
       <?php echo esc_entities($template->name); ?>
@@ -61,7 +61,7 @@ try {
       <ul class="dropdown-menu">
         <?php foreach ($savedSearches as $saved): ?>
         <?php $params = json_decode($saved->search_params, true) ?: []; ?>
-        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?' . http_build_query($params); ?>">
+        <li><a class="dropdown-item" href="<?php echo url_for('@glam_browse') . '?' . http_build_query($params); ?>">
           <i class="fa fa-search me-2 text-muted"></i><?php echo esc_entities($saved->name); ?>
         </a></li>
         <?php endforeach; ?>

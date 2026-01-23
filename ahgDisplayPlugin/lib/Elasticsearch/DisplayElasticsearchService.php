@@ -1,12 +1,12 @@
 <?php
 /**
-require_once __DIR__ . "/QubitTermCompat.php";
  * Elasticsearch 7 Search Service for ahgDisplayPlugin
- * 
+ *
  * Handles indexing and searching with display-specific fields
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AhgDisplay\Services\DisplayService;
 
 class DisplayElasticsearchService
 {
@@ -14,17 +14,17 @@ class DisplayElasticsearchService
     protected $index;
     protected $displayService;
     protected $culture;
-    
+
     // ES 7 no longer uses types - just index
     const INDEX_NAME = 'atom';
-    
+
     public function __construct(?string $culture = null)
     {
         $this->culture = $culture ?? sfContext::getInstance()->getUser()->getCulture() ?? 'en';
         $this->index = sfConfig::get('app_elasticsearch_index', self::INDEX_NAME);
-        
+
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
-        $this->displayService = new DisplayService($this->culture);
+        $this->displayService = new DisplayService();
     }
     
     /**

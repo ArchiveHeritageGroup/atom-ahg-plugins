@@ -24,7 +24,7 @@ class ahgPrivacyActions extends sfActions
     public function executeDsarRequest(sfWebRequest $request)
     {
         // Bootstrap and require service
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes();
 
@@ -92,7 +92,7 @@ class ahgPrivacyActions extends sfActions
      */
     public function executeComplaint(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
 
         $this->complaintTypes = [
@@ -137,7 +137,7 @@ class ahgPrivacyActions extends sfActions
      */
     public function executeComplaintConfirmation(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
             ->where('id', $request->getParameter('id'))

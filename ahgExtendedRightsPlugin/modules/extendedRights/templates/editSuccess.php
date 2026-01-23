@@ -1,5 +1,5 @@
 <!-- Tom Select CSS -->
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 
 <h1>Edit Rights: <?php echo htmlspecialchars($resource->title ?? 'Untitled'); ?></h1>
 <nav aria-label="breadcrumb" class="mb-4">
@@ -113,7 +113,7 @@
 </form>
 
 <!-- Tom Select JS -->
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     new TomSelect('#rights_holder_id', {

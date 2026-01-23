@@ -11,7 +11,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "cart",
         "ahg_ecommerce_settings",

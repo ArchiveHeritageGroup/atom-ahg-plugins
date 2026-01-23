@@ -12,7 +12,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "ahg_loan",
         "ahg_loan_object",
@@ -41,7 +43,4 @@
         "Cost tracking",
         "Insurance management"
     ],
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ]
 }

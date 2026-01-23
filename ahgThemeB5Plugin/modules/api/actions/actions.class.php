@@ -13,7 +13,7 @@ class apiActions extends sfActions
             return $this->renderText(json_encode(['results' => [], 'error' => 'Query too short']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {
@@ -64,7 +64,7 @@ class apiActions extends sfActions
             return $this->renderText(json_encode([]));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {

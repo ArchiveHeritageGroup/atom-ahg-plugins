@@ -29,7 +29,10 @@ function has_3d_models($objectId)
  * Render digital object viewer
  * Uses IiifViewerHelper for comprehensive viewer support
  * Includes video/audio with transcription support
+ *
+ * Note: Only defined if not already defined by DigitalObjectViewerHelper
  */
+if (!function_exists('render_digital_object_viewer')):
 function render_digital_object_viewer($resource, $digitalObject = null, array $options = [])
 {
     // Get the digital object if not provided
@@ -63,3 +66,4 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
     // Fallback - simple rendering
     return '<div class="alert alert-warning">Viewer not available</div>';
 }
+endif;

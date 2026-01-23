@@ -11,8 +11,7 @@
         "php": ">=8.1"
     },
     "dependencies": [
-        "ahgRightsPlugin",
-        "ahgExtendedRightsPlugin"
+        "ahgCorePlugin"
     ],
     "optional": {
         "extensions": [
@@ -20,10 +19,6 @@
             "ahgGrapPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "gallery_artist",
         "gallery_artist_bibliography",

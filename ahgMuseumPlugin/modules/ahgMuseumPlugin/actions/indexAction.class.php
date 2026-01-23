@@ -11,8 +11,8 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-// Embargo access filter
-require_once sfConfig::get('sf_plugins_dir') . '/ahgExtendedRightsPlugin/lib/EmbargoAccessFilter.php';
+// Load AhgAccessGate for embargo checks
+require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Access/AhgAccessGate.php';
 
 class ahgMuseumPluginIndexAction extends sfAction
 {
@@ -32,7 +32,7 @@ class ahgMuseumPluginIndexAction extends sfAction
         }
         
         // Check embargo access - blocks full embargo for public users
-        if (!EmbargoAccessFilter::checkAccess($this->resource->id, $this)) {
+        if (!\AhgCore\Access\AhgAccessGate::canView($this->resource->id, $this)) {
             return sfView::NONE;
         }
 
@@ -57,7 +57,7 @@ class ahgMuseumPluginIndexAction extends sfAction
         // Load CCO/Museum specific data
         $this->loadMuseumData();
         // Load item physical location
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
         $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
         $this->itemLocation = $locRepo->getLocationWithContainer($this->resource->id) ?? [];

@@ -10,7 +10,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "dependents": [
         "ahgMuseumPlugin"
     ],
@@ -20,10 +22,6 @@
             "ahgGrapPlugin"
         ]
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "spectrum_acquisition",
         "spectrum_approval",

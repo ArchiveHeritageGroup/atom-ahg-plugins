@@ -8,7 +8,7 @@ class donorAgreementRemindersAction extends sfAction
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $this->reminders = \Illuminate\Database\Capsule\Manager::table('donor_agreement_reminder as r')
             ->join('donor_agreement as da', 'r.donor_agreement_id', '=', 'da.id')

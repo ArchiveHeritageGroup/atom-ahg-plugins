@@ -443,9 +443,9 @@
 </style>
 
 <!-- Select2 for autocomplete -->
-<link href="/plugins/ahgThemeB5Plugin/css/select2.min.css" rel="stylesheet" />
-<link href="/plugins/ahgThemeB5Plugin/css/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-<script src="/plugins/ahgThemeB5Plugin/js/select2.min.js"></script>
+<link href="/plugins/ahgCorePlugin/css/vendor/select2.min.css" rel="stylesheet" />
+<link href="/plugins/ahgCorePlugin/css/vendor/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<script src="/plugins/ahgCorePlugin/js/vendor/select2.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener("DOMContentLoaded", function() {
   $(".select2-actor").select2({
@@ -644,8 +644,8 @@ document.addEventListener("DOMContentLoaded", function() {
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
   'use strict';

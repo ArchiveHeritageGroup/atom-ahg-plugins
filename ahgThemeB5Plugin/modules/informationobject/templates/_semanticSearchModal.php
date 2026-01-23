@@ -21,7 +21,7 @@ $semanticEnabled = $sf_request->getParameter('semantic') == '1';
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
       </div>
-      <form id="semantic-search-form" action="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']); ?>" method="get">
+      <form id="semantic-search-form" action="<?php echo url_for('@glam_browse'); ?>" method="get">
         <div class="modal-body">
           <!-- Search Input -->
           <div class="mb-4">

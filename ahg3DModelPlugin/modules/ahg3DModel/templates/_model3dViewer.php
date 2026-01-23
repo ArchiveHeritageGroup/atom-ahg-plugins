@@ -76,7 +76,7 @@ $modelCount = count($models);
 if (!customElements.get('model-viewer')) {
     var script = document.createElement('script');
     script.type = 'module';
-    script.src = '/plugins/ahgThemeB5Plugin/js/model-viewer.min.js';
+    script.src = '/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js';
     document.head.appendChild(script);
 }
 </script>

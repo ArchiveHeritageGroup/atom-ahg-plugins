@@ -2,7 +2,7 @@
   <div class="card-body">
     <?php include_component('repository', 'logo', ['resource' => $resource]); ?>
 
-    <form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?>" action="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']); ?>">
+    <form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?>" action="<?php echo url_for('@glam_browse'); ?>">
       <input type="hidden" name="repos" value="<?php echo $resource->id; ?>">
       <label for="institution-search-query" class="h5 mb-2 form-label"><?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?></label>
       <div class="input-group">

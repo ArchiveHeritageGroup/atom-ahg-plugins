@@ -8,7 +8,7 @@ class donorAgreementBrowseAction extends sfAction
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $this->filters = [
             'status' => $request->getParameter('status'),

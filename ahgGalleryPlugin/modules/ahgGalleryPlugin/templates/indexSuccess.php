@@ -32,7 +32,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
           <div class="position-relative">
             <?php if (in_array($ext, ['glb', 'gltf'])): ?>
               <!-- Model Viewer for GLB/GLTF -->
-              <script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>
+              <script type="module" src="/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js"></script>
               <model-viewer 
                 id="sidebar-model-viewer"
                 src="<?php echo esc_entities($fullPath); ?>" 
@@ -232,6 +232,9 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>"><i class="fas fa-th me-2"></i><?php echo __('GLAM browser'); ?></a></li>
     </ul>
   </div>
+
+  <!-- Privacy & PII -->
+  <?php include_partial('informationobject/privacyPiiSection', ['resource' => $resource, 'sf_user' => $sf_user]); ?>
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
@@ -690,7 +693,7 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
   <!-- 3D Viewer Container -->
   <div id="fullscreen-3d-container" class="w-100 h-100">
     <?php if (in_array($ext3D, ['glb', 'gltf'])): ?>
-      <script type="module" src="/plugins/ahgThemeB5Plugin/js/model-viewer.min.js"></script>
+      <script type="module" src="/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js"></script>
       <model-viewer 
         id="fullscreen-model-viewer"
         src="<?php echo esc_entities($fullPath3D); ?>" 

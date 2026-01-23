@@ -5,12 +5,15 @@
     "description": "Digital Asset Management with IPTC metadata, watermarks, derivatives, and Creative Commons licensing",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
-    "category": "ahg",
+    "category": "sector",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "data/install.sql",
     "tables": [
         "dam_iptc_metadata",
@@ -24,9 +27,5 @@
         "rights_derivative_rule",
         "rights_derivative_log",
         "security_watermark_log"
-    ],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
     ]
 }

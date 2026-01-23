@@ -11,14 +11,22 @@
         "php": ">=8.1"
     },
     "dependencies": [
+        "ahgCorePlugin",
         "ahgRightsPlugin"
     ],
     "optional": {
         "extensions": []
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "ahgThemeB5Plugin"
+    "display_actions": [],
+    "display_panels": [],
+    "display_badges": [
+        {
+            "id": "embargo_badge",
+            "check_method": "ahgExtendedRightsPlugin\\Services\\EmbargoService::isObjectEmbargoed",
+            "template": "ahgExtendedRightsPlugin/templates/display/_embargoBadge.php",
+            "contexts": ["informationobject"],
+            "weight": 10
+        }
     ],
     "tables": [
         "extended_rights",

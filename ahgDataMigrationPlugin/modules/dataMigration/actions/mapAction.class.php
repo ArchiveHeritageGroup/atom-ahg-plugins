@@ -61,7 +61,7 @@ class dataMigrationMapAction extends sfAction
         }
 
         // Get saved mappings
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $savedMappings = \Illuminate\Database\Capsule\Manager::table('atom_data_mapping')
             ->orderBy('name')
             ->get()->toArray();

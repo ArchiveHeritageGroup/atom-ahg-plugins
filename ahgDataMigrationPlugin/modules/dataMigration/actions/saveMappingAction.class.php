@@ -14,7 +14,7 @@ class dataMigrationSaveMappingAction extends sfAction
             return $this->renderText(json_encode(['success' => false, 'error' => 'POST required']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $name = trim($request->getParameter('mapping_name', ''));
         $category = trim($request->getParameter('category', 'Custom'));

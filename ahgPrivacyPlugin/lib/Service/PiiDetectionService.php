@@ -102,10 +102,20 @@ class PiiDetectionService
     ];
 
     /**
-     * AtoM taxonomy IDs for access points
+     * Get taxonomy ID for subjects (uses AhgTaxonomy for dynamic lookup)
      */
-    private const TAXONOMY_SUBJECTS = 35;
-    private const TAXONOMY_PLACES = 42;
+    private static function getSubjectsTaxonomyId(): int
+    {
+        return \AhgCore\Taxonomy\AhgTaxonomy::getId('subjects') ?? 35;
+    }
+
+    /**
+     * Get taxonomy ID for places (uses AhgTaxonomy for dynamic lookup)
+     */
+    private static function getPlacesTaxonomyId(): int
+    {
+        return \AhgCore\Taxonomy\AhgTaxonomy::getId('places') ?? 42;
+    }
 
     /**
      * Scan text for PII using regex patterns
@@ -383,7 +393,7 @@ class PiiDetectionService
                 $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
             })
             ->where('otr.object_id', $objectId)
-            ->where('t.taxonomy_id', self::TAXONOMY_SUBJECTS)
+            ->where('t.taxonomy_id', self::getSubjectsTaxonomyId())
             ->pluck('ti.name')
             ->toArray();
         $accessPoints['subjects'] = array_unique(array_filter($subjects));
@@ -395,7 +405,7 @@ class PiiDetectionService
                 $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
             })
             ->where('otr.object_id', $objectId)
-            ->where('t.taxonomy_id', self::TAXONOMY_PLACES)
+            ->where('t.taxonomy_id', self::getPlacesTaxonomyId())
             ->pluck('ti.name')
             ->toArray();
         $accessPoints['places'] = array_unique(array_filter($places));

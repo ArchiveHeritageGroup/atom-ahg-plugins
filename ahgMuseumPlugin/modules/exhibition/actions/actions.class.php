@@ -1003,7 +1003,7 @@ class exhibitionActions extends sfActions
      */
     protected function getExhibitionService()
     {
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin/lib/Services/Exhibition/ExhibitionService.php';
 
         return new \arMuseumMetadataPlugin\Services\Exhibition\ExhibitionService(

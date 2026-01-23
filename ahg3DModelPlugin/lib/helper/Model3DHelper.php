@@ -30,7 +30,7 @@ function has_3d_model($resource): bool
     }
     
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $db = \Illuminate\Database\Capsule\Manager::class;
         
         $cache[$objectId] = $db::table('object_3d_model')
@@ -55,7 +55,7 @@ function get_3d_models($resource): array
     $objectId = is_object($resource) ? $resource->id : (int)$resource;
     
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $service = new \AtomFramework\Services\Model3DService();
         return $service->getModelsForObject($objectId);
     } catch (\Exception $e) {
@@ -74,7 +74,7 @@ function get_primary_3d_model($resource): ?object
     $objectId = is_object($resource) ? $resource->id : (int)$resource;
     
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $service = new \AtomFramework\Services\Model3DService();
         return $service->getPrimaryModel($objectId);
     } catch (\Exception $e) {
@@ -94,7 +94,7 @@ function render_3d_model($resource, array $options = []): string
     $objectId = is_object($resource) ? $resource->id : (int)$resource;
     
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $service = new \AtomFramework\Services\Model3DService();
         
         $model = $service->getPrimaryModel($objectId);
@@ -126,7 +126,7 @@ function render_3d_model($resource, array $options = []): string
 function render_3d_model_viewer(int $modelId, array $options = []): string
 {
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $service = new \AtomFramework\Services\Model3DService();
         
         $viewerType = $options['viewer_type'] ?? $service->getSetting('default_viewer', 'model-viewer');
@@ -155,7 +155,7 @@ function render_3d_model_gallery($resource, array $options = []): string
     $objectId = is_object($resource) ? $resource->id : (int)$resource;
     
     try {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         $service = new \AtomFramework\Services\Model3DService();
         
         $models = $service->getModelsForObject($objectId);

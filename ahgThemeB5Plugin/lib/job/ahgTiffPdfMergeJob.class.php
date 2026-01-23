@@ -6,7 +6,7 @@
  */
 
 // Ensure Laravel DB is available
-require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+\AhgCore\Core\AhgDb::init();
 
 use Illuminate\Database\Capsule\Manager as DB;
 

@@ -5,7 +5,7 @@
  */
 $isEdit = isset($agreement) && $agreement && isset($agreement->id);
 ?>
-<link href="/plugins/ahgThemeB5Plugin/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 
 <div class="container-fluid py-4">
   <div class="row mb-4">
@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<script src="/plugins/ahgThemeB5Plugin/js/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var donorSelect = document.getElementById('donor-select');

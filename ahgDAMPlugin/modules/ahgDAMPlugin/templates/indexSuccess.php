@@ -565,6 +565,9 @@
     <?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
   <?php endif; ?>
 
+  <!-- Privacy & PII -->
+  <?php include_partial('informationobject/privacyPiiSection', ['resource' => $resource]); ?>
+
   <!-- Provenance & Chain of Custody -->
   <?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
   <section class="card mb-3">

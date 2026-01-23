@@ -90,7 +90,7 @@ class UserPasswordResetAction extends sfAction
     protected function getEmailSetting(string $key, $default = null)
     {
         // Bootstrap Laravel DB
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         
         $setting = DB::table('email_setting')
             ->where('setting_key', $key)

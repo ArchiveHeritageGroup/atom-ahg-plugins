@@ -2,11 +2,11 @@
 <!-- D3.js for visualizations -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <!-- AHG Media Player Scripts -->
-<script src="/plugins/ahgThemeB5Plugin/js/atom-media-player.js"></script>
-<script src="/plugins/ahgThemeB5Plugin/js/media-controls.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/atom-media-player.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/media-controls.js"></script>
 <?php // Plugin protection script for admin pages ?>
 <?php if ($sf_user->isAuthenticated() && (strpos($_SERVER['REQUEST_URI'] ?? '', 'ahg-settings/plugins') !== false || strpos($_SERVER['REQUEST_URI'] ?? '', 'sfPluginAdminPlugin') !== false)): ?>
-<script src="/plugins/ahgThemeB5Plugin/js/plugin-protection.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/plugin-protection.js"></script>
 <?php endif; ?>
 </body>
 </html>
@@ -35,4 +35,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<script src="/plugins/ahgThemeB5Plugin/js/levelSectorFilter.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/levelSectorFilter.js"></script>

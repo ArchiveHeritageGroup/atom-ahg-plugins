@@ -186,7 +186,7 @@ if ('Notification' in window && Notification.permission === 'default') { Notific
 </script>
 <?php endif; ?>
 
-<!-- PII Detection Section -->
+<!-- Privacy & PII Section -->
 <?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Privacy & PII'); ?></h4>
@@ -202,8 +202,13 @@ if ('Notification' in window && Notification.permission === 'default') { Notific
       </a>
     </li>
     <li>
+      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>">
+        <i class="bi bi-eraser-fill me-1"></i><?php echo __('Visual Redaction Editor'); ?>
+      </a>
+    </li>
+    <li>
       <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScan']); ?>">
-        <i class="bi bi-graph-up me-1"></i><?php echo __('PII Dashboard'); ?>
+        <i class="bi bi-speedometer2 me-1"></i><?php echo __('PII Dashboard'); ?>
       </a>
     </li>
   </ul>
@@ -286,6 +291,136 @@ function scanForPii(objectId) {
     });
 }
 </script>
+<?php endif; ?>
+
+<!-- Digital Object Tools Section -->
+<?php if (isset($resource) && $sf_user->isAuthenticated()): ?>
+<?php
+if (!isset($hasDigitalObject)) {
+    $hasDigitalObject = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists();
+}
+if ($hasDigitalObject):
+    // Get digital object details
+    $doInfo = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->first();
+    $digitalObjectId = $doInfo->id ?? null;
+    $mimeType = $doInfo->mime_type ?? '';
+    $isVideo = strpos($mimeType, 'video') !== false;
+    $isAudio = strpos($mimeType, 'audio') !== false;
+    $isImage = strpos($mimeType, 'image') !== false;
+
+    // Check for existing transcription
+    $hasTranscription = false;
+    if ($digitalObjectId && ($isVideo || $isAudio)) {
+        try {
+            $hasTranscription = \Illuminate\Database\Capsule\Manager::table('media_transcription')->where('digital_object_id', $digitalObjectId)->exists();
+        } catch (Exception $e) {}
+    }
+?>
+<section class="sidebar-widget">
+  <h4><?php echo __('Digital Object Tools'); ?></h4>
+  <ul>
+    <?php if ($isVideo || $isAudio): ?>
+    <li>
+      <?php if ($hasTranscription): ?>
+      <a href="#" onclick="document.querySelector('[data-bs-target*=transcript-panel]')?.click(); return false;">
+        <i class="bi bi-card-text me-1"></i><?php echo __('View Transcript'); ?>
+      </a>
+      <?php else: ?>
+      <a href="#" onclick="triggerTranscription(<?php echo $digitalObjectId; ?>); return false;" id="transcribe-link">
+        <i class="bi bi-mic me-1"></i><?php echo __('Transcribe (Whisper)'); ?>
+      </a>
+      <?php endif; ?>
+    </li>
+    <?php endif; ?>
+    <li>
+      <a href="#" onclick="showTechnicalData(<?php echo $digitalObjectId; ?>); return false;">
+        <i class="bi bi-info-circle me-1"></i><?php echo __('Technical Data'); ?>
+      </a>
+    </li>
+    <?php if ($isImage): ?>
+    <li>
+      <a href="#" onclick="extractExifMetadata(<?php echo $digitalObjectId; ?>); return false;">
+        <i class="bi bi-camera me-1"></i><?php echo __('Extract EXIF/XMP'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
+  </ul>
+</section>
+
+<!-- Technical Data Modal -->
+<div class="modal fade" id="technicalDataModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i><?php echo __('Technical Data'); ?></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="technicalDataBody">
+        <div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Loading...</p></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function triggerTranscription(doId) {
+  var btn = document.getElementById('transcribe-btn-' + doId);
+  if (btn) { btn.click(); return; }
+  var link = document.getElementById('transcribe-link');
+  if (link) { link.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Transcribing...'; link.style.pointerEvents = 'none'; }
+  fetch('/media/transcribe/' + doId, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) location.reload();
+      else { alert('Transcription failed: ' + (data.error || 'Unknown')); if (link) { link.innerHTML = '<i class="bi bi-mic me-1"></i>Transcribe (Whisper)'; link.style.pointerEvents = 'auto'; } }
+    })
+    .catch(function(err) { alert('Error: ' + err.message); if (link) { link.innerHTML = '<i class="bi bi-mic me-1"></i>Transcribe (Whisper)'; link.style.pointerEvents = 'auto'; } });
+}
+
+function showTechnicalData(doId) {
+  var modal = new bootstrap.Modal(document.getElementById('technicalDataModal'));
+  modal.show();
+  document.getElementById('technicalDataBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Loading...</p></div>';
+  fetch('/media/metadata/' + doId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-warning">' + data.error + '</div><button class="btn btn-primary" onclick="extractMetadataAndRefresh(' + doId + ')"><i class="bi bi-cogs me-1"></i>Extract Metadata</button>'; return; }
+      var html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>';
+      if (data.filename) html += '<tr><td><strong>Filename</strong></td><td>' + data.filename + '</td></tr>';
+      if (data.mime_type) html += '<tr><td><strong>MIME Type</strong></td><td>' + data.mime_type + '</td></tr>';
+      if (data.byte_size) html += '<tr><td><strong>File Size</strong></td><td>' + formatBytes(data.byte_size) + '</td></tr>';
+      if (data.duration) html += '<tr><td><strong>Duration</strong></td><td>' + formatDuration(data.duration) + '</td></tr>';
+      if (data.width && data.height) html += '<tr><td><strong>Dimensions</strong></td><td>' + data.width + ' x ' + data.height + ' px</td></tr>';
+      if (data.codec) html += '<tr><td><strong>Codec</strong></td><td>' + data.codec + '</td></tr>';
+      if (data.bitrate) html += '<tr><td><strong>Bitrate</strong></td><td>' + Math.round(data.bitrate / 1000) + ' kbps</td></tr>';
+      if (data.sample_rate) html += '<tr><td><strong>Sample Rate</strong></td><td>' + data.sample_rate + ' Hz</td></tr>';
+      if (data.channels) html += '<tr><td><strong>Channels</strong></td><td>' + data.channels + '</td></tr>';
+      if (data.exif) { for (var k in data.exif) html += '<tr><td><strong>' + k + '</strong></td><td>' + data.exif[k] + '</td></tr>'; }
+      if (data.metadata) { for (var k in data.metadata) html += '<tr><td><strong>' + k + '</strong></td><td>' + data.metadata[k] + '</td></tr>'; }
+      html += '</tbody></table></div>';
+      if (!data.filename && !data.mime_type && !data.exif && !data.metadata) html = '<div class="alert alert-info">No technical metadata. Click "Extract Metadata" to generate it.</div><button class="btn btn-primary" onclick="extractMetadataAndRefresh(' + doId + ')"><i class="bi bi-cogs me-1"></i>Extract Metadata</button>';
+      document.getElementById('technicalDataBody').innerHTML = html;
+    })
+    .catch(function(err) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>'; });
+}
+
+function formatBytes(b) { if (!b) return '0 B'; var k = 1024, s = ['B','KB','MB','GB'], i = Math.floor(Math.log(b)/Math.log(k)); return parseFloat((b/Math.pow(k,i)).toFixed(2)) + ' ' + s[i]; }
+function formatDuration(sec) { if (!sec) return '0:00'; var h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60); return h > 0 ? h + ':' + (m<10?'0':'') + m + ':' + (s<10?'0':'') + s : m + ':' + (s<10?'0':'') + s; }
+
+function extractMetadataAndRefresh(doId) {
+  document.getElementById('technicalDataBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting metadata...</p></div>';
+  fetch('/media/extract/' + doId, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) { if (data.success) showTechnicalData(doId); else document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Extraction failed: ' + (data.error || 'Unknown') + '</div>'; })
+    .catch(function(err) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>'; });
+}
+
+function extractExifMetadata(doId) { showTechnicalData(doId); }
+</script>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php if (isPluginActive('ahgExtendedRightsPlugin')): ?>

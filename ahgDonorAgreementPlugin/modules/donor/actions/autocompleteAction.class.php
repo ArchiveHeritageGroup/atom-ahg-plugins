@@ -16,7 +16,7 @@ class donorAutocompleteAction extends sfAction
             return $this->renderText(json_encode([]));
         }
         
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         
         $results = \Illuminate\Database\Capsule\Manager::table('donor')
             ->join('actor', 'donor.id', '=', 'actor.id')

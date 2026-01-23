@@ -583,7 +583,7 @@ class ccoEditAction extends InformationObjectEditAction
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+            \AhgCore\Core\AhgDb::init();
             require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
             require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/WatermarkSettingsService.php';
             require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/DerivativeWatermarkService.php';

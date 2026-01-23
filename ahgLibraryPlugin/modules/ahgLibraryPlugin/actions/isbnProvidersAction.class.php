@@ -12,7 +12,7 @@ class ahgLibraryPluginIsbnProvidersAction extends sfAction
             $this->forward('admin', 'secure');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
 
         $this->providers = \Illuminate\Database\Capsule\Manager::table('atom_isbn_provider')
             ->orderBy('priority')

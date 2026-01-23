@@ -169,7 +169,7 @@ $resourceSlug = $resource->slug ?? null;
 .tpm-sortable-ghost { opacity: 0.4; background-color: #e7f1ff; }
 </style>
 
-<script src="/plugins/ahgThemeB5Plugin/js/sortable.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/sortable.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
     'use strict';

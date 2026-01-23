@@ -16,21 +16,31 @@ class ahg3DModelActions extends sfActions
 
     public function preExecute()
     {
-        // Load the Laravel bootstrap
-        $bootstrapPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        if (file_exists($bootstrapPath)) {
-            require_once $bootstrapPath;
+        // Use AhgCore for database access
+        $corePluginPath = sfConfig::get('sf_root_dir') . '/plugins/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($corePluginPath)) {
+            require_once $corePluginPath;
         }
-        
+
+        // Fallback to bootstrap if AhgCore not available
+        if (!class_exists('AhgCore\\Core\\AhgDb')) {
+            $bootstrapPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($bootstrapPath)) {
+                require_once $bootstrapPath;
+            }
+        }
+
         // Manually load the service file if not autoloaded
         $servicePath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/Model3DService.php';
         if (file_exists($servicePath)) {
             require_once $servicePath;
         }
-        
-        // Initialize database manager
-        $this->db = \Illuminate\Database\Capsule\Manager::class;
-        
+
+        // Initialize database manager - use AhgDb if available
+        $this->db = class_exists('AhgCore\\Core\\AhgDb')
+            ? \AhgCore\Core\AhgDb::class
+            : \Illuminate\Database\Capsule\Manager::class;
+
         // Initialize service
         if (class_exists('\AtomFramework\Services\Model3DService')) {
             $this->model3DService = new \AtomFramework\Services\Model3DService();
@@ -437,10 +447,10 @@ class ahg3DModelActions extends sfActions
 
         // Log action
         $this->logAction($modelId, 'update');
-        
-        // Capture new values and log to central audit trail
+
+        // Capture new values and log to central audit trail via AhgAuditService
         $newValues = $this->captureModelValues($modelId);
-        $this->logAuditTrail('update', $modelId, $oldValues, $newValues);
+        $this->logToAuditService('update', $modelId, $oldValues, $newValues);
 
         $this->getUser()->setFlash('notice', 'Model settings updated');
         $this->redirect(['module' => 'ahg3DModel', 'action' => 'edit', 'id' => $modelId]);
@@ -898,16 +908,23 @@ class ahg3DModelActions extends sfActions
     }
 
     /**
-     * Log to central audit trail with old/new values
+     * Log to central audit trail via AhgAuditService
      */
-    private function logAuditTrail(string $action, int $modelId, array $oldValues, array $newValues): void
+    private function logToAuditService(string $action, int $modelId, array $oldValues, array $newValues): void
     {
         try {
+            // Load AhgAuditService if available
+            $auditServicePath = sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            if (file_exists($auditServicePath)) {
+                require_once $auditServicePath;
+            }
+
+            if (!class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
+                return;
+            }
+
             $db = $this->db;
             $model = $db::table('object_3d_model')->where('id', $modelId)->first();
-            
-            $userId = $this->context->user->getUserId();
-            $username = $this->context->user->getUsername();
 
             $changedFields = [];
             foreach ($newValues as $key => $newVal) {
@@ -917,37 +934,19 @@ class ahg3DModelActions extends sfActions
                 }
             }
 
-            $uuid = sprintf(
-                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                mt_rand(0, 0xffff),
-                mt_rand(0, 0x0fff) | 0x4000,
-                mt_rand(0, 0x3fff) | 0x8000,
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            \AhgAuditTrail\Services\AhgAuditService::logAction(
+                $action,
+                'Object3D',
+                $model->object_id ?? $modelId,
+                [
+                    'title' => $newValues['title'] ?? null,
+                    'module' => 'ahg3DModelPlugin',
+                    'action_name' => 'edit',
+                    'old_values' => $oldValues,
+                    'new_values' => $newValues,
+                    'changed_fields' => $changedFields,
+                ]
             );
-
-            $db::table('ahg_audit_log')->insert([
-                'uuid' => $uuid,
-                'user_id' => $userId,
-                'username' => $username,
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-                'session_id' => session_id() ?: null,
-                'action' => $action,
-                'entity_type' => 'Object3D',
-                'entity_id' => $model->object_id ?? $modelId,
-                'entity_slug' => null,
-                'entity_title' => $newValues['title'] ?? null,
-                'module' => 'ahg3DModelPlugin',
-                'action_name' => 'edit',
-                'request_method' => $_SERVER['REQUEST_METHOD'] ?? null,
-                'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
-                'old_values' => !empty($oldValues) ? json_encode($oldValues) : null,
-                'new_values' => !empty($newValues) ? json_encode($newValues) : null,
-                'changed_fields' => !empty($changedFields) ? json_encode($changedFields) : null,
-                'status' => 'success',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
         } catch (\Exception $e) {
             error_log("3D AUDIT ERROR: " . $e->getMessage());
         }

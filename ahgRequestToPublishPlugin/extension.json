@@ -10,7 +10,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "category": "user-engagement",
     "tables": [
         "request_to_publish"

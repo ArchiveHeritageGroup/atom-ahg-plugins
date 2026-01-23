@@ -12,15 +12,12 @@
         "php": ">=8.1"
     },
     "dependencies": [
+        "ahgCorePlugin",
         "ahgAccessRequestPlugin"
     ],
     "optional": {
         "extensions": []
     },
-    "theme_support": [
-        "arDominionB5Plugin",
-        "arAHGThemeB5Plugin"
-    ],
     "tables": [
         "research_researcher",
         "research_booking",

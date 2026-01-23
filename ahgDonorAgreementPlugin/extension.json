@@ -11,15 +11,14 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional": {
         "extensions": [
             "ahgExtendedRightsPlugin"
         ]
     },
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ],
     "tables": [
         "agreement_type",
         "donor_agreement",

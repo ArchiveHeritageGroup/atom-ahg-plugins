@@ -1,3 +1,3 @@
 
 <!-- Display Mode Styles -->
-<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/display-modes.css">
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/css/vendor/display-modes.css">

@@ -14,7 +14,7 @@ class physicalobjectActions extends sfActions
     public function executeIndex($request)
     {
         // Load framework for extended data
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Get resource from route
@@ -31,7 +31,7 @@ class physicalobjectActions extends sfActions
     public function executeEdit($request)
     {
         // Load framework
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Set up resource

@@ -242,7 +242,7 @@
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
-<script src="/plugins/ahgThemeB5Plugin/js/chart.min.js"></script>
+<script src="/plugins/ahgCorePlugin/js/vendor/chart.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const syncTrendData = <?php echo json_encode($syncTrend); ?>;
 const operationsData = <?php echo json_encode($operationsByType); ?>;

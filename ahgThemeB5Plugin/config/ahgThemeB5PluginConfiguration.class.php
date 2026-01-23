@@ -64,17 +64,11 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
     private function enableThemeModules(): void
     {
         $themeModules = [
-            'ahgSettings',
             'api',
-            'export',
             'identifierApi',
             'informationobject',
-            'label',
-            'landingPageBuilder',
-            'reports',
             'spectrumReports',
             'threeDReports',
-            'tiffpdfmerge',
         ];
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
@@ -155,109 +149,12 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
      */
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
-        // Label generation route
-        $routing->prependRoute('label_index', new sfRoute('/label/:slug', [
-            'module' => 'label',
-            'action' => 'index'
-        ]));
-        // Reports routes
-        $routing->prependRoute('reports_index', new sfRoute('/reports', [
-            'module' => 'reports',
-            'action' => 'index'
-        ]));
-
-        $routing->prependRoute('reports_descriptions', new sfRoute('/reports/descriptions', [
-            'module' => 'reports',
-            'action' => 'descriptions'
-        ]));
-
-        $routing->prependRoute('reports_authorities', new sfRoute('/reports/authorities', [
-            'module' => 'reports',
-            'action' => 'archival'
-        ]));
-
-        $routing->prependRoute('reports_repositories', new sfRoute('/reports/repositories', [
-            'module' => 'reports',
-            'action' => 'repositories'
-        ]));
-
-        $routing->prependRoute('reports_accessions', new sfRoute('/reports/accessions', [
-            'module' => 'reports',
-            'action' => 'accessions'
-        ]));
-
-        $routing->prependRoute('reports_storage', new sfRoute('/reports/storage', [
-            'module' => 'reports',
-            'action' => 'storage'
-        ]));
-
-        $routing->prependRoute('reports_recent', new sfRoute('/reports/recent', [
-            'module' => 'reports',
-            'action' => 'recent'
-        ]));
-
-        $routing->prependRoute('reports_activity', new sfRoute('/reports/activity', [
-            'module' => 'reports',
-            'action' => 'activity'
-        ]));
-
-        // Export routes
-        $routing->prependRoute('export_archival', new sfRoute('/export/archival', [
-            'module' => 'export',
-            'action' => 'archival'
-        ]));
-
-        $routing->prependRoute('export_csv', new sfRoute('/export/csv', [
-            'module' => 'export',
-            'action' => 'archival'
-        ]));
-
-        $routing->prependRoute('export_ead', new sfRoute('/export/ead', [
-            'module' => 'export',
-            'action' => 'archival'
-        ]));
-
-        $routing->prependRoute('export_grap', new sfRoute('/export/grap', [
-            'module' => 'export',
-            'action' => 'archival'
-        ]));
-
-        $routing->prependRoute('export_authorities', new sfRoute('/export/authorities', [
-            'module' => 'export',
-            'action' => 'archival'
-        ]));
-
-        // AHG Settings routes - module is ahgSettings, NOT settings
-        $routing->prependRoute('ahg_settings_dashboard', new sfRoute('/settings/ahgSettings', [
-            'module' => 'ahgSettings',
-            'action' => 'index'
-        ]));
-
-        $routing->prependRoute('ahg_settings_section', new sfRoute('/settings/ahgSettings/section', [
-            'module' => 'ahgSettings',
-            'action' => 'section'
-        ]));		
-        // Admin AHG Settings routes (used by templates)
-        $routing->prependRoute('admin_ahg_settings', new sfRoute('/admin/ahg-settings', [
-            'module' => 'ahgSettings',
-            'action' => 'index'
-        ]));
-        $routing->prependRoute('admin_ahg_settings_section', new sfRoute('/admin/ahg-settings/section', [
-            'module' => 'ahgSettings',
-            'action' => 'section'
-        ]));
-        $routing->prependRoute('admin_ahg_settings_plugins', new sfRoute('/admin/ahg-settings/plugins', [
-            'module' => 'ahgSettings',
-            'action' => 'plugins'
-        ]));
-        $routing->prependRoute('admin_ahg_settings_ai_services', new sfRoute('/admin/ahg-settings/ai-services', [
-            'module' => 'ahgSettings',
-            'action' => 'aiServices'
-        ]));
-        $routing->prependRoute('admin_ahg_settings_email', new sfRoute('/admin/ahg-settings/email', [
-            'module' => 'ahgSettings',
-            'action' => 'email'
-        ]));
+        // Routes moved to dedicated plugins:
+        // - ahgSettingsPlugin: ahgSettings routes
+        // - ahgReportsPlugin: reports routes
+        // - ahgExportPlugin: export routes
+        // - ahgLabelPlugin: label routes
+        // - ahgLandingPagePlugin: landing page routes
+        // - ahgTiffPdfMergePlugin: tiffpdfmerge routes
     }
 }

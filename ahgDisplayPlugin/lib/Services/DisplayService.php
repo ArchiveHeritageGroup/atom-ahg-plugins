@@ -3,35 +3,77 @@
  * DisplayService - Main service for GLAM display functionality
  */
 
-use Illuminate\Database\Capsule\Manager as DB;
+namespace AhgDisplay\Services;
+
+use AhgCore\Core\AhgDb;
 
 require_once __DIR__ . '/DisplayTypeDetector.php';
+require_once __DIR__ . '/DisplayRegistry.php';
 
 class DisplayService
 {
+    private static ?self $instance = null;
+    private ?DisplayRegistry $registry = null;
+
+    /**
+     * Get singleton instance
+     */
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Get the display registry
+     */
+    public function getRegistry(): DisplayRegistry
+    {
+        if ($this->registry === null) {
+            $this->registry = DisplayRegistry::getInstance();
+        }
+        return $this->registry;
+    }
+
     /**
      * Get object data with auto-detected GLAM type and appropriate profile
      */
     public function getObjectDisplay(int $objectId): array
     {
         // Auto-detect type
-        $type = DisplayTypeDetector::detect($objectId);
-        $profile = DisplayTypeDetector::getProfile($objectId);
+        $type = \DisplayTypeDetector::detect($objectId);
+        $profile = \DisplayTypeDetector::getProfile($objectId);
 
         // Get object data
         $object = $this->getObjectData($objectId);
+
+        // Get extensions from registry
+        $extensions = [];
+        if ($object) {
+            $extensions = [
+                'actions' => $this->getRegistry()->getActions($object),
+                'panels' => $this->getRegistry()->getPanels($object),
+                'badges' => $this->getRegistry()->getBadges($object),
+            ];
+        }
 
         return [
             'object' => $object,
             'type' => $type,
             'profile' => $profile,
             'fields' => $this->getFieldsForProfile($profile),
+            'extensions' => $extensions,
         ];
     }
 
+    /**
+     * Get object data
+     */
     public function getObjectData(int $objectId): ?object
     {
-        return DB::table('information_object as io')
+        return AhgDb::table('information_object as io')
             ->leftJoin('information_object_i18n as i18n', function ($j) {
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
@@ -46,6 +88,9 @@ class DisplayService
             ->first();
     }
 
+    /**
+     * Get fields for a profile
+     */
     public function getFieldsForProfile(?object $profile): array
     {
         if (!$profile) {
@@ -63,7 +108,7 @@ class DisplayService
             return [];
         }
 
-        return DB::table('display_field as df')
+        return AhgDb::table('display_field as df')
             ->leftJoin('display_field_i18n as dfi', function ($j) {
                 $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', 'en');
             })
@@ -74,9 +119,12 @@ class DisplayService
             ->toArray();
     }
 
+    /**
+     * Get levels
+     */
     public function getLevels(?string $domain = null): array
     {
-        $query = DB::table('display_level as dl')
+        $query = AhgDb::table('display_level as dl')
             ->leftJoin('display_level_i18n as dli', function ($j) {
                 $j->on('dl.id', '=', 'dli.id')->where('dli.culture', '=', 'en');
             })
@@ -90,9 +138,12 @@ class DisplayService
         return $query->get()->toArray();
     }
 
+    /**
+     * Get collection types
+     */
     public function getCollectionTypes(): array
     {
-        return DB::table('display_collection_type as dct')
+        return AhgDb::table('display_collection_type as dct')
             ->leftJoin('display_collection_type_i18n as dcti', function ($j) {
                 $j->on('dct.id', '=', 'dcti.id')->where('dcti.culture', '=', 'en');
             })
@@ -102,17 +153,23 @@ class DisplayService
             ->toArray();
     }
 
+    /**
+     * Set object type
+     */
     public function setObjectType(int $objectId, string $type): void
     {
-        DB::table('display_object_config')->updateOrInsert(
+        AhgDb::table('display_object_config')->updateOrInsert(
             ['object_id' => $objectId],
-            ['object_type' => $type, 'updated_at' => now()]
+            ['object_type' => $type, 'updated_at' => date('Y-m-d H:i:s')]
         );
     }
 
+    /**
+     * Set object type recursively for children
+     */
     public function setObjectTypeRecursive(int $parentId, string $type): int
     {
-        $children = DB::table('information_object')
+        $children = AhgDb::table('information_object')
             ->where('parent_id', $parentId)
             ->pluck('id')
             ->toArray();
@@ -127,11 +184,54 @@ class DisplayService
         return $count;
     }
 
+    /**
+     * Assign profile to object
+     */
     public function assignProfile(int $objectId, int $profileId, string $context = 'default', bool $primary = false): void
     {
-        DB::table('display_object_profile')->updateOrInsert(
+        AhgDb::table('display_object_profile')->updateOrInsert(
             ['object_id' => $objectId, 'profile_id' => $profileId, 'context' => $context],
             ['is_primary' => $primary ? 1 : 0]
         );
+    }
+
+    /**
+     * Get actions for an entity
+     */
+    public function getActionsForEntity(object $entity, array $context = []): array
+    {
+        return $this->getRegistry()->getActions($entity, $context);
+    }
+
+    /**
+     * Get panels for an entity
+     */
+    public function getPanelsForEntity(object $entity, array $context = []): array
+    {
+        return $this->getRegistry()->getPanels($entity, $context);
+    }
+
+    /**
+     * Get badges for an entity
+     */
+    public function getBadgesForEntity(object $entity, array $context = []): array
+    {
+        return $this->getRegistry()->getBadges($entity, $context);
+    }
+
+    /**
+     * Render actions HTML
+     */
+    public function renderActions(object $entity, array $context = []): string
+    {
+        return $this->getRegistry()->renderActions($entity, $context);
+    }
+
+    /**
+     * Render badges HTML
+     */
+    public function renderBadges(object $entity, array $context = []): string
+    {
+        return $this->getRegistry()->renderBadges($entity, $context);
     }
 }

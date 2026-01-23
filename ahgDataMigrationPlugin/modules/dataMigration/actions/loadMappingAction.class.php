@@ -10,7 +10,7 @@ class dataMigrationLoadMappingAction extends sfAction
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
         
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        \AhgCore\Core\AhgDb::init();
         
         $id = (int)$request->getParameter('id');
         

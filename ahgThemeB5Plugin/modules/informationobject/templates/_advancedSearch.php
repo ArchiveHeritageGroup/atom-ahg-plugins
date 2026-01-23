@@ -7,7 +7,7 @@
     </h2>
     <div id="collapse-adv-search" class="accordion-collapse collapse<?php echo $showAdvanced ? ' show' : ''; ?>" aria-labelledby="heading-adv-search">
       <div class="accordion-body">
-        <?php echo $form->renderFormTag(url_for(['module' => 'informationobject', 'action' => 'browse']), ['name' => 'advanced-search-form', 'method' => 'get']); ?>
+        <?php echo $form->renderFormTag(url_for('@glam_browse'), ['name' => 'advanced-search-form', 'method' => 'get']); ?>
 
           <?php foreach ($hiddenFields as $name => $value) { ?>
             <input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>

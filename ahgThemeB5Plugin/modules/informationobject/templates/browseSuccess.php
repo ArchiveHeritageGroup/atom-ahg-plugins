@@ -1,5 +1,5 @@
 <?php
-use_stylesheet("/plugins/ahgThemeB5Plugin/css/display-modes.css");
+use_stylesheet("/plugins/ahgCorePlugin/css/vendor/display-modes.css");
 // Display mode - gallery/timeline use full width (1col), others use 2col
 $currentDisplayMode = $sf_request->getParameter('displayMode', 'list');
 $fullwidthModes = ['gallery', 'timeline'];

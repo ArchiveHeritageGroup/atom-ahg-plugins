@@ -12,10 +12,7 @@
         "php": ">=8.1"
     },
     "dependencies": [
-        "ahgThemeB5Plugin"
-    ],
-    "theme_support": [
-        "ahgThemeB5Plugin"
+        "ahgCorePlugin"
     ],
     "tables": [
         "atom_migration_job",

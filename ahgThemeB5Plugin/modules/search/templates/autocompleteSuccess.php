@@ -26,8 +26,7 @@
     <li>
       <?php echo link_to(
           __('all matching descriptions'),
-          ['module' => 'informationobject', 'action' => 'browse', 'topLod' => '0']
-              + $sf_data->getRaw('allMatchingIoParams'),
+          url_for('@glam_browse') . '?' . http_build_query(['topLevel' => '0'] + $sf_data->getRaw('allMatchingIoParams')),
           ['class' => 'dropdown-item text-wrap text-muted fst-italic']
       ); ?>
     </li>

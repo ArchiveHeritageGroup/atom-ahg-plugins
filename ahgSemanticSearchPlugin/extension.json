@@ -21,7 +21,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "optional_dependencies": {
         "ollama": "For vector embedding generation",
         "elasticsearch": "For synonym export and semantic search"
@@ -79,7 +81,4 @@
             "tasks": ["all", "sync-wordnet", "sync-wikidata", "update-embeddings", "export-es", "cleanup"]
         }
     ],
-    "theme_support": [
-        "ahgThemeB5Plugin"
-    ]
 }

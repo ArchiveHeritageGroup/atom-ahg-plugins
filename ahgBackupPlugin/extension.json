@@ -11,10 +11,8 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": [],
-    "theme_support": [
-        "arDominionB5Plugin",
-        "arAHGThemeB5Plugin"
+    "dependencies": [
+        "ahgCorePlugin"
     ],
     "tables": [],
     "provides": {
