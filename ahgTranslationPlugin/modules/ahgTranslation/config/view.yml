@@ -1,0 +1,11 @@
+default:
+  has_layout: true
+
+translateSuccess:
+  has_layout: false
+
+applySuccess:
+  has_layout: false
+
+healthSuccess:
+  has_layout: false

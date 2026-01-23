@@ -350,6 +350,8 @@ if ($hasDigitalObject):
         <i class="bi bi-file-text me-1"></i><?php echo __('Summarize'); ?>
       </a>
     </li>
+    <?php endif; ?>
+    <?php if (in_array('ahgTranslationPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
     <li>
       <a href="#" onclick="showTranslateModal(<?php echo $resource->id; ?>); return false;">
         <i class="bi bi-translate me-1"></i><?php echo __('Translate'); ?>
@@ -442,6 +444,7 @@ function showTranslateModal(objectId) {
 
 function executeTranslation() {
   var objectId = document.getElementById('translateObjectId').value;
+  var sourceLang = document.getElementById('translateSourceLang').value;
   var targetLang = document.getElementById('translateTargetLang').value;
   var fields = [];
   document.querySelectorAll('input[name="translateFields"]:checked').forEach(function(cb) { fields.push(cb.value); });
@@ -452,32 +455,58 @@ function executeTranslation() {
   document.getElementById('translateResult').style.display = 'block';
   document.getElementById('translateResultBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Translating to ' + document.getElementById('translateTargetLang').selectedOptions[0].text + '...</p></div>';
 
-  fetch('/index.php/ai/translate/' + objectId, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ target_culture: targetLang, fields: fields })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data.success) {
-        document.getElementById('translateResultBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Translation failed') + '</div>';
-        return;
-      }
-      var html = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>Translation completed!</div>';
-      if (data.translations) {
-        html += '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Field</th><th>Original</th><th>Translated</th></tr></thead><tbody>';
-        for (var field in data.translations) {
-          var t = data.translations[field];
-          html += '<tr><td><strong>' + field + '</strong></td><td>' + (t.original || '').substring(0, 100) + (t.original && t.original.length > 100 ? '...' : '') + '</td><td>' + (t.translated || '').substring(0, 100) + (t.translated && t.translated.length > 100 ? '...' : '') + '</td></tr>';
-        }
-        html += '</tbody></table></div>';
-      }
-      html += '<div class="mt-3"><button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Page</button></div>';
-      document.getElementById('translateResultBody').innerHTML = html;
+  // Translate each field sequentially using LibreTranslate API
+  var results = {};
+  var errors = [];
+  var pending = fields.length;
+
+  function finishTranslation() {
+    if (Object.keys(results).length === 0 && errors.length > 0) {
+      document.getElementById('translateResultBody').innerHTML = '<div class="alert alert-danger">' + errors.join('<br>') + '</div>';
+      return;
+    }
+    var html = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>Translation completed!</div>';
+    html += '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Field</th><th>Translation</th><th>Status</th></tr></thead><tbody>';
+    for (var field in results) {
+      var t = results[field];
+      html += '<tr><td><strong>' + field + '</strong></td><td>' + (t.translation || '').substring(0, 150) + (t.translation && t.translation.length > 150 ? '...' : '') + '</td><td>' + (t.apply_ok ? '<span class="badge bg-success">Saved</span>' : '<span class="badge bg-warning">Draft</span>') + '</td></tr>';
+    }
+    html += '</tbody></table></div>';
+    if (errors.length > 0) {
+      html += '<div class="alert alert-warning mt-2"><strong>Some errors:</strong><br>' + errors.join('<br>') + '</div>';
+    }
+    html += '<div class="mt-3"><button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Page</button></div>';
+    document.getElementById('translateResultBody').innerHTML = html;
+  }
+
+  fields.forEach(function(field) {
+    var formData = new FormData();
+    formData.append('field', field);
+    formData.append('source', sourceLang);
+    formData.append('target', targetLang);
+    formData.append('apply', '1');
+    formData.append('overwrite', '1');
+
+    fetch('/index.php/translation/translate/' + objectId, {
+      method: 'POST',
+      body: formData
     })
-    .catch(function(err) {
-      document.getElementById('translateResultBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
-    });
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          results[field] = data;
+        } else {
+          errors.push(field + ': ' + (data.error || 'Failed'));
+        }
+        pending--;
+        if (pending === 0) finishTranslation();
+      })
+      .catch(function(err) {
+        errors.push(field + ': ' + err.message);
+        pending--;
+        if (pending === 0) finishTranslation();
+      });
+  });
 }
 </script>
 
@@ -492,20 +521,35 @@ function executeTranslation() {
       <div class="modal-body">
         <input type="hidden" id="translateObjectId" value="">
         <div id="translateForm">
-          <div class="mb-3">
-            <label class="form-label"><?php echo __('Target Language'); ?></label>
-            <select id="translateTargetLang" class="form-select">
-              <option value="af">Afrikaans</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-              <option value="es">Spanish</option>
-              <option value="pt">Portuguese</option>
-              <option value="nl">Dutch</option>
-              <option value="it">Italian</option>
-              <option value="zu">Zulu</option>
-              <option value="xh">Xhosa</option>
-              <option value="st">Sotho</option>
-            </select>
+          <div class="row mb-3">
+            <div class="col-6">
+              <label class="form-label"><?php echo __('Source Language'); ?></label>
+              <select id="translateSourceLang" class="form-select">
+                <option value="en" selected>English</option>
+                <option value="af">Afrikaans</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="es">Spanish</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+                <option value="zu">Zulu</option>
+                <option value="xh">Xhosa</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label"><?php echo __('Target Language'); ?></label>
+              <select id="translateTargetLang" class="form-select">
+                <option value="af">Afrikaans</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="es">Spanish</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+                <option value="zu">Zulu</option>
+                <option value="xh">Xhosa</option>
+              </select>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Fields to Translate'); ?></label>
@@ -526,7 +570,7 @@ function executeTranslation() {
               <label class="form-check-label" for="translateArrangement"><?php echo __('Arrangement'); ?></label>
             </div>
           </div>
-          <p class="text-muted small"><i class="bi bi-info-circle me-1"></i><?php echo __('Translation uses Argos Translate (offline). Language packs must be installed.'); ?></p>
+          <p class="text-muted small"><i class="bi bi-info-circle me-1"></i><?php echo __('Translation uses LibreTranslate (local server). Supports Afrikaans and SA languages.'); ?></p>
         </div>
         <div id="translateResult" style="display:none;">
           <div id="translateResultBody"></div>

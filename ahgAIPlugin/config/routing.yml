@@ -1,4 +1,4 @@
-# AI Plugin Routes (NER, Translate, Summarize)
+# AI Plugin Routes (NER, Summarize)
 
 # NER Routes
 ahg_ai_ner_extract:
@@ -41,11 +41,6 @@ ahg_ai_ner_bulk_save:
 ahg_ai_summarize:
   url: /ai/summarize/:id
   param: { module: ahgAI, action: summarize }
-
-# Translate Route
-ahg_ai_translate:
-  url: /ai/translate/:id
-  param: { module: ahgAI, action: translate }
 
 # Legacy NER routes (backward compatibility)
 ahg_ner_extract:

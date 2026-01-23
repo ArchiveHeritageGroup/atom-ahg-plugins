@@ -130,9 +130,9 @@ class AhgSettingsIndexAction extends sfAction
         }
 
 
-        // AI Services - show when ahgNerPlugin is enabled
-        $hasNer = in_array('ahgNerPlugin', sfProjectConfiguration::getActive()->getPlugins());
-        if ($hasNer) {
+        // AI Services - show when ahgAIPlugin is enabled
+        $hasAI = in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasAI) {
             $this->sections['ai'] = [
                 'label' => 'AI Services',
                 'icon' => 'fa-brain',

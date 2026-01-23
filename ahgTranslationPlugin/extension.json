@@ -1,0 +1,22 @@
+{
+  "name": "Translation",
+  "machine_name": "ahgTranslationPlugin",
+  "version": "1.0.0",
+  "description": "On-prem translation integration for AtoM via local MT endpoint (supports Afrikaans/Dutch and SA languages -> English depending on MT service).",
+  "author": "The Archive and Heritage Group",
+  "license": "GPL-3.0",
+  "category": "ai",
+  "requires": {
+    "atom": ">=2.8",
+    "php": ">=8.1"
+  },
+  "dependencies": [],
+  "tables": [
+    "ahg_translation_settings",
+    "ahg_translation_draft",
+    "ahg_translation_log"
+  ],
+  "features": {
+    "translate": "Translate descriptive fields using a local MT endpoint; create drafts and apply into information_object_i18n"
+  }
+}

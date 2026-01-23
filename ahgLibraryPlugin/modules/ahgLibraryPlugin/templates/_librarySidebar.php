@@ -99,7 +99,7 @@ if (!function_exists('isLibraryPluginActive')) {
 $hasCondition = isLibraryPluginActive('ahgConditionPlugin');
 $hasSpectrum = isLibraryPluginActive('ahgSpectrumPlugin');
 $hasResearch = isLibraryPluginActive('ahgResearchPlugin');
-$hasNer = isLibraryPluginActive('ahgNerPlugin');
+$hasNer = isLibraryPluginActive('ahgAIPlugin');
 $hasExtendedRights = isLibraryPluginActive('ahgExtendedRightsPlugin');
 
 if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):

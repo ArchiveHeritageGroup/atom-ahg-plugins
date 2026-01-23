@@ -14,7 +14,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  * - Financial data (bank accounts, tax numbers)
  *
  * Integrates with:
- * - ahgNerPlugin (entity extraction)
+ * - ahgAIPlugin (entity extraction, translation, summarization)
  * - ahgPrivacyPlugin (data inventory)
  *
  * @author Johan Pieterse - The Archive and Heritage Group
