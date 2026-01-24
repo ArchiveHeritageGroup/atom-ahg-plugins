@@ -21,75 +21,8 @@ media_snippets_save:
   url: /media/snippets
   param: { module: media, action: saveSnippet }
 
-# =============================================================================
-# 3D Object Reports Routes
-# =============================================================================
-threeD_reports_index:
-  url: /threeDReports
-  param: { module: threeDReports, action: index }
-
-threeD_reports_models:
-  url: /threeDReports/models
-  param: { module: threeDReports, action: models }
-
-threeD_reports_hotspots:
-  url: /threeDReports/hotspots
-  param: { module: threeDReports, action: hotspots }
-
-threeD_reports_thumbnails:
-  url: /threeDReports/thumbnails
-  param: { module: threeDReports, action: thumbnails }
-
-threeD_reports_digitalObjects:
-  url: /threeDReports/digitalObjects
-  param: { module: threeDReports, action: digitalObjects }
-
-threeD_reports_settings:
-  url: /threeDReports/settings
-  param: { module: threeDReports, action: settings }
-
-threeD_reports_createConfig:
-  url: /threeDReports/createConfig
-  param: { module: threeDReports, action: createConfig }
-
-threeD_reports_bulkCreateConfig:
-  url: /threeDReports/bulkCreateConfig
-  param: { module: threeDReports, action: bulkCreateConfig }
-
-# =============================================================================
-# Spectrum Reports Routes
-# =============================================================================
-spectrum_reports_index:
-  url: /spectrumReports
-  param: { module: spectrumReports, action: index }
-
-spectrum_reports_loans:
-  url: /spectrumReports/loans
-  param: { module: spectrumReports, action: loans }
-
-spectrum_reports_conditions:
-  url: /spectrumReports/conditions
-  param: { module: spectrumReports, action: conditions }
-
-spectrum_reports_valuations:
-  url: /spectrumReports/valuations
-  param: { module: spectrumReports, action: valuations }
-
-spectrum_reports_movements:
-  url: /spectrumReports/movements
-  param: { module: spectrumReports, action: movements }
-
-spectrum_reports_acquisitions:
-  url: /spectrumReports/acquisitions
-  param: { module: spectrumReports, action: acquisitions }
-
-spectrum_reports_conservation:
-  url: /spectrumReports/conservation
-  param: { module: spectrumReports, action: conservation }
-
-spectrum_reports_objectEntry:
-  url: /spectrumReports/objectEntry
-  param: { module: spectrumReports, action: objectEntry }
+# Note: 3D Reports routes moved to ahgIiifPlugin
+# Note: Spectrum Reports routes moved to ahgSpectrumPlugin
 
 # =============================================================================
 # API Routes

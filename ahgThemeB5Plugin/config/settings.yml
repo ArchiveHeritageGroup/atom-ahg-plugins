@@ -4,8 +4,6 @@ all:
       - api
       - identifierApi
       - informationobject
-      - spectrumReports
-      - threeDReports
       - accession
       - actor
       - admin

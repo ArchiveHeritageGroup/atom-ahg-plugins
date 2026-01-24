@@ -41,6 +41,7 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'ahgIiif';
         $enabledModules[] = 'ahgIiifCollection';
         $enabledModules[] = 'ahgIiifAuth';
+        $enabledModules[] = 'threeDReports';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         // Add routes
@@ -227,6 +228,50 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('iiif_auth_unprotect', new sfRoute(
             '/admin/iiif-auth/unprotect',
             ['module' => 'ahgIiifAuth', 'action' => 'unprotect']
+        ));
+
+        // ===================
+        // 3D REPORTS ROUTES
+        // ===================
+
+        $routing->prependRoute('threeD_reports_index', new sfRoute(
+            '/threeDReports',
+            ['module' => 'threeDReports', 'action' => 'index']
+        ));
+
+        $routing->prependRoute('threeD_reports_models', new sfRoute(
+            '/threeDReports/models',
+            ['module' => 'threeDReports', 'action' => 'models']
+        ));
+
+        $routing->prependRoute('threeD_reports_hotspots', new sfRoute(
+            '/threeDReports/hotspots',
+            ['module' => 'threeDReports', 'action' => 'hotspots']
+        ));
+
+        $routing->prependRoute('threeD_reports_thumbnails', new sfRoute(
+            '/threeDReports/thumbnails',
+            ['module' => 'threeDReports', 'action' => 'thumbnails']
+        ));
+
+        $routing->prependRoute('threeD_reports_digitalObjects', new sfRoute(
+            '/threeDReports/digitalObjects',
+            ['module' => 'threeDReports', 'action' => 'digitalObjects']
+        ));
+
+        $routing->prependRoute('threeD_reports_settings', new sfRoute(
+            '/threeDReports/settings',
+            ['module' => 'threeDReports', 'action' => 'settings']
+        ));
+
+        $routing->prependRoute('threeD_reports_createConfig', new sfRoute(
+            '/threeDReports/createConfig',
+            ['module' => 'threeDReports', 'action' => 'createConfig']
+        ));
+
+        $routing->prependRoute('threeD_reports_bulkCreateConfig', new sfRoute(
+            '/threeDReports/bulkCreateConfig',
+            ['module' => 'threeDReports', 'action' => 'bulkCreateConfig']
         ));
     }
 }

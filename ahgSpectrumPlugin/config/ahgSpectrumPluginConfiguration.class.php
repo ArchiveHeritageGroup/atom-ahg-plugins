@@ -13,6 +13,7 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'spectrum';
+        $enabledModules[] = 'spectrumReports';
         $enabledModules[] = 'api';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
     }
@@ -160,15 +161,45 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
             ['module' => 'api', 'action' => 'spectrumStatistics']
         ));
 
-        // Reports routes
+        // Reports routes - spectrumReports module
         $routing->prependRoute('spectrum_reports_index', new sfRoute(
-            '/spectrumReports/index',
-            ['module' => 'settings', 'action' => 'spectrumReports']
+            '/spectrumReports',
+            ['module' => 'spectrumReports', 'action' => 'index']
+        ));
+
+        $routing->prependRoute('spectrum_reports_loans', new sfRoute(
+            '/spectrumReports/loans',
+            ['module' => 'spectrumReports', 'action' => 'loans']
         ));
 
         $routing->prependRoute('spectrum_reports_conditions', new sfRoute(
             '/spectrumReports/conditions',
-            ['module' => 'settings', 'action' => 'conditionReports']
+            ['module' => 'spectrumReports', 'action' => 'conditions']
+        ));
+
+        $routing->prependRoute('spectrum_reports_valuations', new sfRoute(
+            '/spectrumReports/valuations',
+            ['module' => 'spectrumReports', 'action' => 'valuations']
+        ));
+
+        $routing->prependRoute('spectrum_reports_movements', new sfRoute(
+            '/spectrumReports/movements',
+            ['module' => 'spectrumReports', 'action' => 'movements']
+        ));
+
+        $routing->prependRoute('spectrum_reports_acquisitions', new sfRoute(
+            '/spectrumReports/acquisitions',
+            ['module' => 'spectrumReports', 'action' => 'acquisitions']
+        ));
+
+        $routing->prependRoute('spectrum_reports_conservation', new sfRoute(
+            '/spectrumReports/conservation',
+            ['module' => 'spectrumReports', 'action' => 'conservation']
+        ));
+
+        $routing->prependRoute('spectrum_reports_object_entry', new sfRoute(
+            '/spectrumReports/objectEntry',
+            ['module' => 'spectrumReports', 'action' => 'objectEntry']
         ));
     }
 }

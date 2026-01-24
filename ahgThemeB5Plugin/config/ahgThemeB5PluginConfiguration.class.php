@@ -67,8 +67,6 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
             'api',
             'identifierApi',
             'informationobject',
-            'spectrumReports',
-            'threeDReports',
         ];
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
