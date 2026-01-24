@@ -10,10 +10,11 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
     {
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
-        $enabledModules = sfConfig::get('sf_enabled_modules');
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ahgLibraryPlugin';
         $enabledModules[] = 'isbn';
         $enabledModules[] = 'libraryReports';
+        $enabledModules[] = 'informationobject'; // For ISBN lookup action
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
     
@@ -93,6 +94,28 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('library_cover_proxy', new sfRoute(
             '/library/cover/:isbn',
             ['module' => 'ahgLibraryPlugin', 'action' => 'coverProxy']
+        ));
+
+        // ISBN lookup for information objects (moved from theme routing_isbn.yml)
+        $routing->prependRoute('informationobject_isbn_lookup', new sfRoute(
+            '/informationobject/isbnLookup',
+            ['module' => 'informationobject', 'action' => 'isbnLookup']
+        ));
+
+        // ISBN test routes
+        $routing->prependRoute('isbn_test', new sfRoute(
+            '/isbn/test',
+            ['module' => 'isbn', 'action' => 'test']
+        ));
+
+        $routing->prependRoute('isbn_api_test', new sfRoute(
+            '/isbn/apiTest',
+            ['module' => 'isbn', 'action' => 'apiTest']
+        ));
+
+        $routing->prependRoute('isbn_stats', new sfRoute(
+            '/admin/isbn/stats',
+            ['module' => 'isbn', 'action' => 'stats']
         ));
     }
 }

@@ -1,40 +1,17 @@
 # =============================================================================
-# Media Streaming Routes (must be before other routes)
+# AHG Theme B5 Plugin Routing
 # =============================================================================
-
-media_stream:
-  url: /media/stream/:id
-  param: { module: media, action: stream }
-  requirements: { id: \d+ }
-
-media_download:
-  url: /media/download/:id
-  param: { module: media, action: download }
-  requirements: { id: \d+ }
-
-media_snippets_list:
-  url: /media/snippets/:id
-  param: { module: media, action: snippets }
-  requirements: { id: \d+ }
-
-media_snippets_save:
-  url: /media/snippets
-  param: { module: media, action: saveSnippet }
-
-# Note: 3D Reports routes moved to ahgIiifPlugin
-# Note: Spectrum Reports routes moved to ahgSpectrumPlugin
-
+# Routes have been moved to their respective plugins for plugin autonomy:
+#
+# Media routes (media_stream, media_download, etc.) → ahgIiifPlugin
+# API routes (api_search_io, api_autocomplete_glam) → ahgAPIPlugin
+# ISBN routes → ahgLibraryPlugin
+# TIFF/PDF Merge routes → ahgTiffPdfMergePlugin
+# Landing Page routes → ahgLandingPagePlugin
+# 3D Reports routes → ahgIiifPlugin
+# Spectrum Reports routes → ahgSpectrumPlugin
+# Search Enhancement routes → ahgSemanticSearchPlugin
+# Request to Publish routes → ahgRequestToPublishPlugin
+#
+# This file is kept for any theme-specific routes only.
 # =============================================================================
-# API Routes
-# =============================================================================
-api_search_io:
-  url: /api/search/io
-  param: { module: api, action: searchInformationObjects }
-
-api_autocomplete_glam:
-  url: /api/autocomplete/glam
-  param: { module: api, action: autocompleteGlam }
-
-api_plugin_protection:
-  url: /api/plugin-protection
-  param: { module: api, action: pluginProtection }

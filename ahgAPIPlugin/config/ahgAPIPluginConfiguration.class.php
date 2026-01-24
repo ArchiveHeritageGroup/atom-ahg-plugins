@@ -93,6 +93,22 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $this->addRoute('GET', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysBrowse']);
         $this->addRoute('POST', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysCreate']);
         $this->addRoute('DELETE', '/api/v2/keys/:id', ['module' => 'apiv2', 'action' => 'keysDelete', 'params' => ['id' => '\d+']]);
+
+        // Legacy API routes (moved from theme routing.yml)
+        $this->routing->prependRoute('api_search_io', new sfRoute(
+            '/api/search/io',
+            ['module' => 'api', 'action' => 'searchInformationObjects']
+        ));
+
+        $this->routing->prependRoute('api_autocomplete_glam', new sfRoute(
+            '/api/autocomplete/glam',
+            ['module' => 'api', 'action' => 'autocompleteGlam']
+        ));
+
+        $this->routing->prependRoute('api_plugin_protection', new sfRoute(
+            '/api/plugin-protection',
+            ['module' => 'api', 'action' => 'pluginProtection']
+        ));
     }
 
     protected function addRoute($method, $pattern, array $options = [])

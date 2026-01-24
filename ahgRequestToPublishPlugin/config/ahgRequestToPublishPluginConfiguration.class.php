@@ -17,6 +17,7 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'requestToPublish';
         $enabledModules[] = 'requesttopublish';
+        $enabledModules[] = 'informationobject'; // For editRequestToPublish action
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);

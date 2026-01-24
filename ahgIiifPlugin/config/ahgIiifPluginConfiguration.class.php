@@ -275,5 +275,32 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
             '/threeDReports/bulkCreateConfig',
             ['module' => 'threeDReports', 'action' => 'bulkCreateConfig']
         ));
+
+        // ===================
+        // MEDIA STREAMING ROUTES (moved from theme routing.yml)
+        // ===================
+
+        $routing->prependRoute('media_stream', new sfRoute(
+            '/media/stream/:id',
+            ['module' => 'media', 'action' => 'stream'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_download', new sfRoute(
+            '/media/download/:id',
+            ['module' => 'media', 'action' => 'download'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_snippets_list', new sfRoute(
+            '/media/snippets/:id',
+            ['module' => 'media', 'action' => 'snippets'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_snippets_save', new sfRoute(
+            '/media/snippets',
+            ['module' => 'media', 'action' => 'saveSnippet']
+        ));
     }
 }
