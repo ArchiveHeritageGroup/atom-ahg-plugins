@@ -1,0 +1,27 @@
+{
+    "name": "ahgExhibitionPlugin",
+    "version": "1.0.0",
+    "description": "Exhibition management for GLAM/DAM sectors - standalone plugin for managing exhibitions, objects, storylines, and events",
+    "author": "The Archive and Heritage Group",
+    "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
+    "category": "glam",
+    "requires": {
+        "atom": ">=2.6.0"
+    },
+    "features": [
+        "Exhibition lifecycle management",
+        "Object selection and placement",
+        "Storylines and narratives",
+        "Venue and space management",
+        "Installation tracking",
+        "Event scheduling",
+        "Checklists and tasks"
+    ],
+    "sectors": [
+        "archive",
+        "museum",
+        "gallery",
+        "library",
+        "dam"
+    ]
+}

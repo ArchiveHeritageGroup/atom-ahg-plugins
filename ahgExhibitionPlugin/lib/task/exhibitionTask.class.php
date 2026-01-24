@@ -10,7 +10,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class museumExhibitionTask extends arBaseTask
+class exhibitionTask extends arBaseTask
 {
     protected function configure()
     {

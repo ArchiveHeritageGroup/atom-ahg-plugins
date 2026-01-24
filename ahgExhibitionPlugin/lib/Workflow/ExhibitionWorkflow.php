@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace arMuseumMetadataPlugin\Services\Workflow;
+namespace ahgExhibitionPlugin\Workflow;
 
 use arMuseumMetadataPlugin\Contracts\WorkflowInterface;
 

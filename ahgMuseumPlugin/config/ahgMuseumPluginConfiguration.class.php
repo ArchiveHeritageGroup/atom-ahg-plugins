@@ -18,7 +18,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'cidoc';
         $enabledModules[] = 'authority';
         $enabledModules[] = 'api';
-        $enabledModules[] = 'exhibition';
+        // Note: Exhibition module moved to standalone ahgExhibitionPlugin
         // Note: Loan module moved to standalone ahgLoanPlugin
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
     }
@@ -62,75 +62,7 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
             ['module' => 'ahgMuseumPlugin', 'action' => 'gettyAutocomplete']
         ));
 
-        // === EXHIBITION MANAGEMENT ===
-        $routing->prependRoute('exhibition_index', new sfRoute(
-            '/exhibition',
-            ['module' => 'exhibition', 'action' => 'index']
-        ));
-        $routing->prependRoute('exhibition_dashboard', new sfRoute(
-            '/exhibition/dashboard',
-            ['module' => 'exhibition', 'action' => 'dashboard']
-        ));
-        $routing->prependRoute('exhibition_add', new sfRoute(
-            '/exhibition/add',
-            ['module' => 'exhibition', 'action' => 'add']
-        ));
-        $routing->prependRoute('exhibition_show', new sfRoute(
-            '/exhibition/:id',
-            ['module' => 'exhibition', 'action' => 'show'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_edit', new sfRoute(
-            '/exhibition/:id/edit',
-            ['module' => 'exhibition', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_objects', new sfRoute(
-            '/exhibition/:id/objects',
-            ['module' => 'exhibition', 'action' => 'objects'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_sections', new sfRoute(
-            '/exhibition/:id/sections',
-            ['module' => 'exhibition', 'action' => 'sections'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_storylines', new sfRoute(
-            '/exhibition/:id/storylines',
-            ['module' => 'exhibition', 'action' => 'storylines'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_events', new sfRoute(
-            '/exhibition/:id/events',
-            ['module' => 'exhibition', 'action' => 'events'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_checklists', new sfRoute(
-            '/exhibition/:id/checklists',
-            ['module' => 'exhibition', 'action' => 'checklists'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_object_list', new sfRoute(
-            '/exhibition/:id/object-list',
-            ['module' => 'exhibition', 'action' => 'objectList'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_storyline', new sfRoute(
-            '/exhibition/:id/storyline/:storyline_id',
-            ['module' => 'exhibition', 'action' => 'storyline'],
-            ['id' => '\d+', 'storyline_id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_add_storyline', new sfRoute(
-            '/exhibition/:id/add-storyline',
-            ['module' => 'exhibition', 'action' => 'addStoryline'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('exhibition_add_stop', new sfRoute(
-            '/exhibition/:id/storyline/:storyline_id/add-stop',
-            ['module' => 'exhibition', 'action' => 'addStop'],
-            ['id' => '\d+', 'storyline_id' => '\d+']
-        ));
-
+        // Note: Exhibition routes moved to standalone ahgExhibitionPlugin
         // Note: Loan routes moved to standalone ahgLoanPlugin
     }
 }

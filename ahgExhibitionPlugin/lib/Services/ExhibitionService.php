@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace arMuseumMetadataPlugin\Services\Exhibition;
+namespace ahgExhibitionPlugin\Services;
 
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;

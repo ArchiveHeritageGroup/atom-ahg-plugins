@@ -1004,9 +1004,9 @@ class exhibitionActions extends sfActions
     protected function getExhibitionService()
     {
         \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin/lib/Services/Exhibition/ExhibitionService.php';
+        require_once sfConfig::get('sf_plugins_dir').'/ahgExhibitionPlugin/lib/Services/ExhibitionService.php';
 
-        return new \arMuseumMetadataPlugin\Services\Exhibition\ExhibitionService(
+        return new \ahgExhibitionPlugin\Services\ExhibitionService(
             \Illuminate\Database\Capsule\Manager::connection()
         );
     }
