@@ -47,6 +47,39 @@ class AhgTranslationRepository
         );
     }
 
+    /**
+     * Get max field length for translation output.
+     * VARCHAR fields have specific limits, TEXT fields use 65535.
+     */
+    public static function fieldMaxLength(string $column): int
+    {
+        $lengths = array(
+            'title' => 1024,
+            'alternate_title' => 1024,
+            'edition' => 255,
+            // TEXT fields - use 65535 (max for TEXT type)
+            'extent_and_medium' => 65535,
+            'archival_history' => 65535,
+            'acquisition' => 65535,
+            'scope_and_content' => 65535,
+            'appraisal' => 65535,
+            'accruals' => 65535,
+            'arrangement' => 65535,
+            'access_conditions' => 65535,
+            'reproduction_conditions' => 65535,
+            'physical_characteristics' => 65535,
+            'finding_aids' => 65535,
+            'location_of_originals' => 65535,
+            'location_of_copies' => 65535,
+            'related_units_of_description' => 65535,
+            'institution_responsible_identifier' => 1024,
+            'rules' => 65535,
+            'sources' => 65535,
+            'revision_history' => 65535,
+        );
+        return $lengths[$column] ?? 65535;
+    }
+
     public function getSetting(string $key, $default = null)
     {
         $row = AhgTranslationDb::fetchOne(

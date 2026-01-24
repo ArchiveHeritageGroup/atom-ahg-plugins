@@ -1,11 +1,15 @@
 {
     "name": "ahgMultiTenantPlugin",
+    "machine_name": "ahgMultiTenantPlugin",
     "version": "1.0.1",
     "description": "Repository-based multi-tenancy with user hierarchy (Admin > Super User > User)",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",
     "license": "proprietary",
     "category": "security",
+    "requires": {
+        "atom": ">=2.6.0"
+    },
     "dependencies": [
         "ahgCorePlugin"
     ],

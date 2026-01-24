@@ -42,9 +42,9 @@ class libraryEditAction extends sfAction
             $slugRow = $db->table('slug')->where('object_id', $savedId)->first();
 
             if ($slugRow && $slugRow->slug) {
-                $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $slugRow->slug]);
+                $this->redirect(['module' => 'library', 'action' => 'index', 'slug' => $slugRow->slug]);
             } else {
-                $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'browse']);
+                $this->redirect(['module' => 'library', 'action' => 'browse']);
             }
         }
 
@@ -409,7 +409,7 @@ class libraryEditAction extends sfAction
                     [
                         'title' => $newValues['title'] ?? $oldValues['title'] ?? null,
                         'slug' => $this->resource->slug ?? null,
-                        'module' => 'ahgLibraryPlugin',
+                        'module' => 'library',
                         'action_name' => 'edit',
                         'old_values' => $oldValues,
                         'new_values' => $newValues,

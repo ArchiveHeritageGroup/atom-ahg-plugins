@@ -19,7 +19,7 @@ $hasTiffPdfMerge = class_exists('ahgTiffPdfMergePluginConfiguration');
 
         <!-- TIFF to PDF Merge Button (from ahgTiffPdfMergePlugin) -->
         <?php if ($hasTiffPdfMerge): ?>
-        <?php include_partial('ahgTiffPdfMergePlugin/tiffPdfMergeButton', [
+        <?php include_partial('tiffpdfmerge/tiffPdfMergeButton', [
             'informationObjectId' => $resource->id,
             'buttonClass' => 'btn btn-outline-secondary btn-sm'
         ]); ?>
@@ -31,11 +31,11 @@ $hasTiffPdfMerge = class_exists('ahgTiffPdfMergePluginConfiguration');
 
 <!-- Include modal (once per page) -->
 <?php if ($hasTiffPdfMerge): ?>
-<?php include_partial('ahgTiffPdfMergePlugin/tiffPdfMergeModal', [
+<?php include_partial('tiffpdfmerge/tiffPdfMergeModal', [
     'informationObjectId' => $resource->id
 ]); ?>
 
 <!-- Load required scripts -->
 <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
-<script src="<?php echo public_path('plugins/ahgTiffPdfMergePlugin/web/js/tiff-pdf-merge.js'); ?>"></script>
+<script src="<?php echo public_path('plugins/tiffpdfmerge/web/js/tiff-pdf-merge.js'); ?>"></script>
 <?php endif; ?>

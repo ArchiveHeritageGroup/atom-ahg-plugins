@@ -22,7 +22,18 @@
         </tr>
       </thead>
       <tbody>
+        <?php
+        // Plugins managed by AHG Settings Plugin Manager - hide from base AtoM plugin admin
+        $ahgManagedPlugins = [
+            'ahgUiOverridesPlugin',
+            'ahgTiffPdfMergePlugin',
+            'ahgExportPlugin',
+            'ahgLandingPagePlugin',
+            'ahgLabelPlugin',
+        ];
+        ?>
         <?php foreach ($sf_data->getRaw('plugins') as $name => $plugin) { ?>
+          <?php if (in_array($name, $ahgManagedPlugins)) continue; ?>
           <tr>
             <td>
               <?php if (file_exists($plugin->getRootDir().'/images/image.png')) { ?>

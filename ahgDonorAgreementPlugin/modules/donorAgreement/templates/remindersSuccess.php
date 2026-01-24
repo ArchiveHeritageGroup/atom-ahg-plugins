@@ -9,7 +9,7 @@
         <span class="badge bg-warning text-dark ms-2"><?php echo count($reminders) ?></span>
       </h1>
     </div>
-    <a href="<?php echo url_for(['module' => 'ahgDonor', 'action' => 'dashboard']) ?>" class="btn btn-outline-primary">
+    <a href="<?php echo url_for(['module' => 'donor', 'action' => 'dashboard']) ?>" class="btn btn-outline-primary">
       <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to Dashboard') ?>
     </a>
   </div>

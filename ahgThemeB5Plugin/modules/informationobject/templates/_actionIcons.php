@@ -1,5 +1,5 @@
 <?php
-require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/helper/AhgLaravelHelper.php';
+require_once sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
 use Illuminate\Database\Capsule\Manager as DB;
 
 $slug = $resource->slug ?? null;

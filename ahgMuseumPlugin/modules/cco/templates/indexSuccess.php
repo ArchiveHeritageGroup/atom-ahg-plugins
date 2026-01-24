@@ -5,6 +5,7 @@
  * @package    ahgMuseumPlugin
  * @subpackage templates
  */
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -304,7 +305,7 @@ $ancestors = cco_get_ancestors($resource);
 
 <?php slot('title'); ?>
   <?php echo get_component('informationobject', 'descriptionHeader', ['resource' => $resource, 'title' => cco_get_title($resource)]); ?>
-<?php include_partial('ahgSecurityClearance/securityBadge', ['resource' => $resource]); ?>  
+<?php include_partial('securityClearance/securityBadge', ['resource' => $resource]); ?>  
   <?php if (ROOT_INFORMATION_OBJECT_ID != $resource->parent_id) { ?>
     <?php echo include_partial('default/breadcrumb', ['resource' => $resource, 'objects' => $ancestors]); ?>
   <?php } ?>

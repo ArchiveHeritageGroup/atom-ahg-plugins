@@ -45,7 +45,7 @@ class libraryRenameAction extends DefaultEditAction
 
                 // BUG FIX #60: Redirect to Library module
                 $this->redirect(
-                    ['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $this->resource->slug]
+                    ['module' => 'library', 'action' => 'index', 'slug' => $this->resource->slug]
                 );
             }
         }

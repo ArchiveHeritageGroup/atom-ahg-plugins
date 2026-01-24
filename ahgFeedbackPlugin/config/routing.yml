@@ -2,30 +2,30 @@
 
 ahg_feedback_browse:
   url: /feedback
-  param: { module: ahgFeedback, action: browse }
+  param: { module: feedback, action: browse }
 
 ahg_feedback_general:
   url: /feedback/general
-  param: { module: ahgFeedback, action: general }
+  param: { module: feedback, action: general }
 
 ahg_feedback_submit:
   url: /informationobject/:slug/feedback
-  param: { module: ahgFeedback, action: submit }
+  param: { module: feedback, action: submit }
 
 ahg_feedback_edit:
   url: /feedback/:id/edit
-  param: { module: ahgFeedback, action: edit }
+  param: { module: feedback, action: edit }
   requirements:
     id: \d+
 
 ahg_feedback_delete:
   url: /feedback/:id/delete
-  param: { module: ahgFeedback, action: delete }
+  param: { module: feedback, action: delete }
   requirements:
     id: \d+
 
 ahg_feedback_view:
   url: /feedback/:id
-  param: { module: ahgFeedback, action: view }
+  param: { module: feedback, action: view }
   requirements:
     id: \d+

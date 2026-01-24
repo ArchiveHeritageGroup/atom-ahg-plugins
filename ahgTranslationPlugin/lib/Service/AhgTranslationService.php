@@ -20,16 +20,23 @@ class AhgTranslationService
         $this->repo->setSetting($key, $value);
     }
 
-    public function translateText(string $text, string $sourceCulture, string $targetCulture = 'en'): array
+    public function translateText(string $text, string $sourceCulture, string $targetCulture = 'en', ?int $maxLength = null): array
     {
-        $endpoint = $this->getSetting('mt.endpoint', 'http://127.0.0.1:5100/translate');
-        $timeout = (int)$this->getSetting('mt.timeout_seconds', '30');
+        // Use NLLB-200 API (ahg-ai service)
+        $endpoint = $this->getSetting('mt.endpoint', 'http://192.168.0.112:5004/ai/v1/translate');
+        $apiKey = $this->getSetting('mt.api_key', 'ahg_ai_demo_internal_2026');
+        $timeout = (int)$this->getSetting('mt.timeout_seconds', '60');
 
-        $payload = json_encode(array(
+        // NLLB-200 API format with max_length for field
+        $payloadData = array(
+            'text'   => $text,
             'source' => $sourceCulture,
             'target' => $targetCulture,
-            'text'   => $text,
-        ));
+        );
+        if ($maxLength !== null) {
+            $payloadData['max_length'] = $maxLength;
+        }
+        $payload = json_encode($payloadData);
 
         $t0 = microtime(true);
 
@@ -37,7 +44,10 @@ class AhgTranslationService
         curl_setopt_array($ch, array(
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'X-API-Key: ' . $apiKey,
+            ),
             CURLOPT_POSTFIELDS => $payload,
             CURLOPT_TIMEOUT => $timeout,
         ));
@@ -73,7 +83,8 @@ class AhgTranslationService
             );
         }
 
-        $translation = $data['translatedText'] ?? $data['translation'] ?? null;
+        // NLLB-200 returns 'translated' field
+        $translation = $data['translated'] ?? $data['translatedText'] ?? $data['translation'] ?? null;
 
         if ($status < 200 || $status >= 300 || !is_string($translation)) {
             return array(
@@ -93,6 +104,7 @@ class AhgTranslationService
             'error' => null,
             'elapsed_ms' => $elapsedMs,
             'endpoint' => $endpoint,
+            'model' => $data['model'] ?? 'nllb-200',
         );
     }
 

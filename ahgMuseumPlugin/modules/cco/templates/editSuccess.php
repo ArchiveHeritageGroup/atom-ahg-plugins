@@ -487,7 +487,7 @@ function cco_edit_form_url($resource): string
 
     <?php // ===== SECURITY CLASSIFICATION ===== ?>
     <div class="accordion mb-3">
-      <?php include_partial('ahgSecurityClearance/securityFieldset', ['resource' => $resource]); ?>
+      <?php include_partial('securityClearance/securityFieldset', ['resource' => $resource]); ?>
     </div>
     <?php // ===== END SECURITY CLASSIFICATION ===== ?>
         <?php echo get_partial('informationobject/adminInfo', ['form' => $form, 'resource' => $resource]); ?>

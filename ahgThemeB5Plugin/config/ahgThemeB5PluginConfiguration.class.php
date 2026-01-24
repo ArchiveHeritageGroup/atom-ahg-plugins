@@ -153,12 +153,26 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
      */
     public function loadRoutes(sfEvent $event)
     {
-        // Routes moved to dedicated plugins:
-        // - ahgSettingsPlugin: ahgSettings routes
-        // - ahgReportsPlugin: reports routes
-        // - ahgExportPlugin: export routes
-        // - ahgLabelPlugin: label routes
-        // - ahgLandingPagePlugin: landing page routes
-        // - ahgTiffPdfMergePlugin: tiffpdfmerge routes
+        $routing = $event->getSubject();
+
+        // Override slug routes to use AhgMetadataRoute for GLAM/DAM support
+        // These must be prepended to take precedence over base AtoM routes
+        $routing->prependRoute('ahg_slug', new AhgMetadataRoute(
+            '/:slug',
+            ['action' => 'index'],
+            ['slug' => '[^/;]+']
+        ));
+
+        $routing->prependRoute('ahg_edit', new AhgMetadataRoute(
+            '/:slug/edit',
+            ['action' => 'edit'],
+            ['slug' => '[^/;]+']
+        ));
+
+        $routing->prependRoute('ahg_slug_template', new AhgMetadataRoute(
+            '/:slug;:template',
+            ['action' => 'index'],
+            ['slug' => '[^/;]+', 'template' => '[^/;]+']
+        ));
     }
 }

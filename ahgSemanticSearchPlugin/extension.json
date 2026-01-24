@@ -80,5 +80,5 @@
             "usage": "php bin/semantic-search-cron.php [task] [options]",
             "tasks": ["all", "sync-wordnet", "sync-wikidata", "update-embeddings", "export-es", "cleanup"]
         }
-    ],
+    ]
 }

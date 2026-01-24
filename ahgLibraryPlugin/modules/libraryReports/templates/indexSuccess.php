@@ -11,7 +11,7 @@
         <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'callNumbers']); ?>"><i class="fas fa-sort-alpha-down me-2"></i><?php echo __('Call Numbers'); ?></a></li>
     </ul>
     <hr>
-    <a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'browse']); ?>" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+    <a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
 </div>
 <?php end_slot(); ?>
 

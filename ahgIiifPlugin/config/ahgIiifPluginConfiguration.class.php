@@ -302,5 +302,44 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
             '/media/snippets',
             ['module' => 'media', 'action' => 'saveSnippet']
         ));
+
+        // ===================
+        // MEDIA SETTINGS ROUTES
+        // ===================
+
+        $routing->prependRoute('media_settings_index', new sfRoute(
+            '/mediaSettings/index',
+            ['module' => 'mediaSettings', 'action' => 'index']
+        ));
+
+        $routing->prependRoute('media_settings_save', new sfRoute(
+            '/mediaSettings/save',
+            ['module' => 'mediaSettings', 'action' => 'save']
+        ));
+
+        $routing->prependRoute('media_settings_test', new sfRoute(
+            '/mediaSettings/test',
+            ['module' => 'mediaSettings', 'action' => 'test']
+        ));
+
+        $routing->prependRoute('media_settings_queue', new sfRoute(
+            '/mediaSettings/queue',
+            ['module' => 'mediaSettings', 'action' => 'queue']
+        ));
+
+        $routing->prependRoute('media_settings_process_queue', new sfRoute(
+            '/mediaSettings/processQueue',
+            ['module' => 'mediaSettings', 'action' => 'processQueue']
+        ));
+
+        $routing->prependRoute('media_settings_clear_queue', new sfRoute(
+            '/mediaSettings/clearQueue',
+            ['module' => 'mediaSettings', 'action' => 'clearQueue']
+        ));
+
+        $routing->prependRoute('media_settings_autocomplete', new sfRoute(
+            '/mediaSettings/autocomplete',
+            ['module' => 'mediaSettings', 'action' => 'autocomplete']
+        ));
     }
 }

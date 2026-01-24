@@ -353,7 +353,7 @@ if ($hasDigitalObject):
     <?php endif; ?>
     <?php if (in_array('ahgTranslationPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
     <li>
-      <?php include_partial('ahgTranslation/translateModal', ['objectId' => $resource->id]); ?>
+      <?php include_partial('translation/translateModal', ['objectId' => $resource->id]); ?>
     </li>
     <?php endif; ?>
   </ul>

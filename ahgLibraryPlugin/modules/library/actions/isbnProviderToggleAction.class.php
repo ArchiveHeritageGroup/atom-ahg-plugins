@@ -21,6 +21,6 @@ class libraryIsbnProviderToggleAction extends sfAction
             $this->getUser()->setFlash('notice', 'Provider ' . ($provider->enabled ? 'disabled' : 'enabled') . ' successfully.');
         }
 
-        $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviders']);
+        $this->redirect(['module' => 'library', 'action' => 'isbnProviders']);
     }
 }

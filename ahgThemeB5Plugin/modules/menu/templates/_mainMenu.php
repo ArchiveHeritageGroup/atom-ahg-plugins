@@ -77,16 +77,16 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
             <li><h6 class="dropdown-header"><?php echo __('Sector Items'); ?></h6></li>
           <?php endif; ?>
           <?php if ($hasMuseum): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgMuseumPlugin', 'action' => 'add']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum object'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'museum', 'action' => 'add']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum object'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasGallery): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgGalleryPlugin', 'action' => 'add']); ?>"><i class="fas fa-images fa-fw me-2"></i><?php echo __('Gallery item'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'gallery', 'action' => 'add']); ?>"><i class="fas fa-images fa-fw me-2"></i><?php echo __('Gallery item'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasLibrary): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'add']); ?>"><i class="fas fa-book fa-fw me-2"></i><?php echo __('Library item'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'library', 'action' => 'add']); ?>"><i class="fas fa-book fa-fw me-2"></i><?php echo __('Library item'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasDam): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDam', 'action' => 'create']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'dam', 'action' => 'create']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Photo/DAM asset'); ?></a></li>
           <?php endif; ?>
         <?php endif; ?>
 

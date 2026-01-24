@@ -27,5 +27,5 @@
         "default_algorithm": "sha256",
         "auto_checksum_on_upload": true,
         "fixity_check_interval_days": 7
-    },
+    }
 }

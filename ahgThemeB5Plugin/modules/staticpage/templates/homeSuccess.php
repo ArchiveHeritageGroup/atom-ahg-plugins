@@ -30,7 +30,7 @@
 
 <?php // Featured collection carousel - provided by ahgIiifPlugin ?>
 <?php if (class_exists('ahgIiifPluginConfiguration')): ?>
-  <?php include_partial('ahgIiif/featuredCollection') ?>
+  <?php include_partial('iiif/featuredCollection') ?>
 <?php endif ?>
 
 <div class="page p-3">

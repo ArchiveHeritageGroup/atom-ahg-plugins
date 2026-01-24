@@ -55,4 +55,4 @@ ric_ajax_update_orphan:
 # RiC Explorer AJAX endpoint
 ric_explorer_get_data:
   url: /ric/getData
-  param: { module: ahgRicExplorer, action: getData }
+  param: { module: ricExplorer, action: getData }

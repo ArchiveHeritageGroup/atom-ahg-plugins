@@ -1,6 +1,67 @@
-# ============================================================================
-# ahgAccessRequestPlugin - Routing
-# NOTE: All routes defined in ahgAccessRequestPluginConfiguration.class.php
-# This file kept empty to avoid duplicates
-# Routes use prependRoute() for proper priority ordering
-# ============================================================================
+# ahgAccessRequestPlugin routes
+
+accessRequest_index:
+  url: /accessRequest
+  param: { module: accessRequest, action: pending }
+
+# Route for /security/request without ID - redirect to pending requests
+security_request_index:
+  url: /security/request
+  param: { module: accessRequest, action: pending }
+
+access_request_new:
+  url: /security/request-access
+  param: { module: accessRequest, action: new }
+
+access_request_create:
+  url: /security/request-access/create
+  param: { module: accessRequest, action: create }
+
+access_request_object:
+  url: /security/request-object
+  param: { module: accessRequest, action: requestObject }
+
+access_request_object_create:
+  url: /security/request-object/create
+  param: { module: accessRequest, action: createObjectRequest }
+
+access_request_my:
+  url: /security/my-requests
+  param: { module: accessRequest, action: myRequests }
+
+access_request_cancel:
+  url: /security/request/:id/cancel
+  param: { module: accessRequest, action: cancel }
+  requirements: { id: \d+ }
+
+access_request_pending:
+  url: /security/access-requests
+  param: { module: accessRequest, action: pending }
+
+access_request_view:
+  url: /security/request/:id
+  param: { module: accessRequest, action: view }
+  requirements: { id: \d+ }
+
+access_request_approve:
+  url: /security/request/:id/approve
+  param: { module: accessRequest, action: approve }
+  requirements: { id: \d+ }
+
+access_request_deny:
+  url: /security/request/:id/deny
+  param: { module: accessRequest, action: deny }
+  requirements: { id: \d+ }
+
+access_request_review:
+  url: /security/request/:id/review
+  param: { module: accessRequest, action: view }
+  requirements: { id: \d+ }
+
+access_request_approvers:
+  url: /security/approvers
+  param: { module: accessRequest, action: approvers }
+
+access_request_requests:
+  url: /security/requests
+  param: { module: accessRequest, action: pending }

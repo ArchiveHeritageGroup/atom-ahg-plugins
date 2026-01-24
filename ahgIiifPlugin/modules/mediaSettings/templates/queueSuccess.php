@@ -127,6 +127,6 @@
     <p class="text-muted"><?php echo __('To automatically process the queue, add this cron job:') ?></p>
     <pre class="bg-light p-3 rounded"><code>*/5 * * * * php <?php echo sfConfig::get('sf_root_dir') ?>/symfony ahgMediaSettings:processQueue --limit=10</code></pre>
     <p class="text-muted mb-0"><?php echo __('Or call the endpoint periodically:') ?></p>
-    <pre class="bg-light p-3 rounded mb-0"><code>curl -X POST <?php echo sfConfig::get('app_siteBaseUrl') ?>/index.php/ahgMediaSettings/processQueue?limit=10</code></pre>
+    <pre class="bg-light p-3 rounded mb-0"><code>curl -X POST <?php echo sfConfig::get('app_siteBaseUrl') ?>/index.php/mediaSettings/processQueue?limit=10</code></pre>
   </div>
 </div>

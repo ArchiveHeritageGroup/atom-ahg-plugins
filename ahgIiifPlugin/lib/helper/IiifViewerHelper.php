@@ -157,55 +157,73 @@ function render_iiif_viewer($resource, $options = [])
     $hasVideo = stripos($mimeType, 'video') !== false;
     $has3D = has_3d_models($resource);
     $hasAV = $hasAudio || $hasVideo;
-    
+
+    // Override default viewer based on content type
+    // Note: viewer names must match JavaScript IiifViewerManager expectations
+    if ($hasPdf) {
+        $opts['viewer'] = 'pdfjs';
+    } elseif ($hasAV) {
+        $opts['viewer'] = 'av';
+    } elseif ($has3D) {
+        $opts['viewer'] = 'model-viewer';
+    }
+
     // Generate unique viewer ID
     $viewerId = 'iiif-viewer-' . $objectId . '-' . substr(md5(uniqid()), 0, 8);
     
     // Build HTML
     $html = '';
-    
-    // Include CSS (once per page)
-    $html .= get_iiif_viewer_css($pluginPath);
-    
-    // Container
-    $html .= '<div class="iiif-viewer-container" id="container-' . $viewerId . '">';
-    
-    // Viewer toggle buttons
-    $html .= ahg_iiif_render_viewer_toggle($viewerId, $opts['viewer'], $has3D, $hasPdf, $hasAV);
-    
-    // Controls bar
-    $html .= ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $opts);
-    
-    // Main viewer area
-    $html .= '<div class="viewer-area" id="viewer-area-' . $viewerId . '">';
-    
-    // OpenSeadragon viewer
-    $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . $viewerHeight . ';background:#1a1a1a;border-radius:8px;"></div>';
-    
-    // Mirador wrapper (hidden by default)
-    $html .= '<div id="mirador-wrapper-' . $viewerId . '" class="mirador-wrapper" style="display:none;position:relative;">';
-    $html .= '<button id="close-mirador-' . $viewerId . '" class="btn btn-sm btn-light" style="position:absolute;top:10px;right:10px;z-index:1000;">';
-    $html .= '<i class="fas fa-times"></i> Close</button>';
-    $html .= '<div id="mirador-' . $viewerId . '" style="width:100%;height:700px;"></div>';
-    $html .= '</div>';
-    
-    // PDF viewer (if applicable)
+
+    // For PDF content - use simple embedded viewer without IIIF complexity
     if ($hasPdf) {
         $pdfUrl = get_digital_object_url($primaryDo);
-        $html .= ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $viewerHeight);
+        $html .= '<div class="pdf-viewer-container">';
+        $html .= ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $viewerHeight, true);
+        $html .= '</div>';
+        return $html;
     }
-    
-    // 3D viewer (if applicable)
+
+    // For images - use full IIIF viewer
+    $html .= get_iiif_viewer_css($pluginPath);
+    $html .= '<div class="iiif-viewer-container" id="container-' . $viewerId . '">';
+
+    // Determine if we have actual images (not just PDF/AV/3D)
+    $hasImages = !$hasPdf && !$hasAV && !$has3D;
+
+    // Viewer toggle buttons (only for images)
+    $html .= ahg_iiif_render_viewer_toggle($viewerId, $opts['viewer'], $has3D, $hasPdf, $hasAV, $hasImages);
+
+    // Controls bar (only for image content)
+    if ($hasImages) {
+        $html .= ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $opts);
+    }
+
+    // Main viewer area
+    $html .= '<div class="viewer-area" id="viewer-area-' . $viewerId . '">';
+
+    // OpenSeadragon viewer (only for images)
+    if ($hasImages) {
+        $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . $viewerHeight . ';background:#1a1a1a;border-radius:8px;"></div>';
+
+        // Mirador wrapper (hidden by default)
+        $html .= '<div id="mirador-wrapper-' . $viewerId . '" class="mirador-wrapper" style="display:none;position:relative;">';
+        $html .= '<button id="close-mirador-' . $viewerId . '" class="btn btn-sm btn-light" style="position:absolute;top:10px;right:10px;z-index:1000;">';
+        $html .= '<i class="fas fa-times"></i> Close</button>';
+        $html .= '<div id="mirador-' . $viewerId . '" style="width:100%;height:700px;"></div>';
+        $html .= '</div>';
+    }
+
+    // 3D viewer (if applicable) - show by default for 3D content
     if ($has3D) {
         $model = get_primary_3d_model($resource);
         if ($model) {
-            $html .= ahg_iiif_render_3d_viewer_html($viewerId, $model, $viewerHeight, $baseUrl);
+            $html .= ahg_iiif_render_3d_viewer_html($viewerId, $model, $viewerHeight, $baseUrl, true);
         }
     }
-    
-    // Audio/Video viewer (if applicable)
+
+    // Audio/Video viewer (if applicable) - show by default for AV content
     if ($hasAV) {
-        $html .= ahg_iiif_render_av_viewer_html($viewerId, $primaryDo, $viewerHeight, $baseUrl);
+        $html .= ahg_iiif_render_av_viewer_html($viewerId, $primaryDo, $viewerHeight, $baseUrl, true);
     }
     
     $html .= '</div>'; // viewer-area
@@ -218,10 +236,12 @@ function render_iiif_viewer($resource, $options = [])
     $html .= '</div>'; // container
     
     // JavaScript initialization
+    $pdfUrl = $hasPdf ? get_digital_object_url($primaryDo) : null;
     $html .= ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $opts, [
         'has3D' => $has3D,
         'hasPdf' => $hasPdf,
         'hasAV' => $hasAV,
+        'pdfUrl' => $pdfUrl,
         'baseUrl' => $baseUrl,
         'cantaloupeUrl' => $cantaloupeUrl,
         'pluginPath' => $pluginPath,
@@ -232,29 +252,46 @@ function render_iiif_viewer($resource, $options = [])
 
 /**
  * Check if resource has 3D models
+ *
+ * Uses ahg3DModelPlugin's has_3d_model() if available (authoritative),
+ * otherwise falls back to checking digital object file extensions.
  */
+if (!function_exists('has_3d_models')):
 function has_3d_models($resource)
 {
+    // Use ahg3DModelPlugin's function if available (checks object_3d_model table)
+    if (function_exists('has_3d_model')) {
+        return has_3d_model($resource);
+    }
+    // Fallback: check digital object extensions
     return get_primary_3d_model($resource) !== null;
 }
+endif;
 
 /**
- * Get primary 3D model for resource (from standard digital objects)
+ * Get primary 3D model for resource
+ *
+ * Uses ahg3DModelPlugin's get_primary_3d_model() if available (from object_3d_model table),
+ * otherwise falls back to detecting 3D files from standard digital objects.
+ *
+ * Note: ahg3DModelPlugin defines get_primary_3d_model() in Model3DHelper.php.
+ * This fallback only activates when that plugin is not installed.
  */
+if (!function_exists('get_primary_3d_model')):
 function get_primary_3d_model($resource)
 {
     $extensions = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
-    
+
     try {
         $digitalObjects = get_digital_objects($resource);
-        
+
         foreach ($digitalObjects as $do) {
             $name = is_object($do) ? $do->name : ($do['name'] ?? '');
             $path = is_object($do) ? $do->path : ($do['path'] ?? '');
             $id = is_object($do) ? $do->id : ($do['id'] ?? 0);
             $objectId = is_object($do) ? $do->object_id : ($do['object_id'] ?? $resource->id);
             $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            
+
             if (in_array($ext, $extensions)) {
                 // Return as object with expected properties
                 return (object)[
@@ -277,15 +314,21 @@ function get_primary_3d_model($resource)
         return null;
     }
 }
+endif;
 
 /**
  * Get digital object URL
  */
 function get_digital_object_url($digitalObject)
 {
-    $path = trim($digitalObject->path ?? '', '/');
+    $path = $digitalObject->path ?? '';
     $name = $digitalObject->name ?? '';
-    return '/uploads/' . $path . '/' . $name;
+
+    // Path already includes /uploads/ prefix from database
+    $fullPath = rtrim($path, '/') . '/' . $name;
+
+    // Ensure single leading slash
+    return '/' . ltrim($fullPath, '/');
 }
 
 /**
@@ -299,37 +342,34 @@ function build_iiif_identifier($path, $name)
 
 /**
  * Render viewer toggle buttons
+ * Only shows relevant buttons based on content type
  */
-function ahg_iiif_render_viewer_toggle($viewerId, $defaultViewer, $has3D, $hasPdf, $hasAV)
+function ahg_iiif_render_viewer_toggle($viewerId, $defaultViewer, $has3D, $hasPdf, $hasAV, $hasImages = true)
 {
+    // For PDF/AV/3D only content, don't show toggle - just show the appropriate viewer
+    if (($hasPdf || $hasAV || $has3D) && !$hasImages) {
+        return '';
+    }
+
     $html = '<div class="viewer-toggle btn-group btn-group-sm mb-2" role="group">';
 
-    // OpenSeadragon button (always shown)
-    $activeOsd = ($defaultViewer === 'openseadragon') ? ' active' : '';
-    $html .= '<button type="button" class="btn btn-outline-primary' . $activeOsd . '" id="btn-osd-' . $viewerId . '" title="Image Viewer">';
-    $html .= '<i class="fas fa-image"></i></button>';
+    // Only show image viewer buttons if there are actual images
+    if ($hasImages && !$hasPdf && !$hasAV) {
+        // OpenSeadragon button
+        $activeOsd = ($defaultViewer === 'openseadragon') ? ' active' : '';
+        $html .= '<button type="button" class="btn btn-outline-primary' . $activeOsd . '" id="btn-osd-' . $viewerId . '" title="Image Viewer">';
+        $html .= '<i class="fas fa-image"></i></button>';
 
-    // Mirador button (always shown)
-    $activeMirador = ($defaultViewer === 'mirador') ? ' active' : '';
-    $html .= '<button type="button" class="btn btn-outline-primary' . $activeMirador . '" id="btn-mirador-' . $viewerId . '" title="Mirador Viewer">';
-    $html .= '<i class="fas fa-columns"></i></button>';
-
-    // PDF button (if has PDF)
-    if ($hasPdf) {
-        $html .= '<button type="button" class="btn btn-outline-primary" id="btn-pdf-' . $viewerId . '" title="PDF Viewer">';
-        $html .= '<i class="fas fa-file-pdf"></i></button>';
+        // Mirador button
+        $activeMirador = ($defaultViewer === 'mirador') ? ' active' : '';
+        $html .= '<button type="button" class="btn btn-outline-primary' . $activeMirador . '" id="btn-mirador-' . $viewerId . '" title="Mirador Viewer">';
+        $html .= '<i class="fas fa-columns"></i></button>';
     }
 
     // 3D button (if has 3D models)
     if ($has3D) {
         $html .= '<button type="button" class="btn btn-outline-primary" id="btn-3d-' . $viewerId . '" title="3D Model Viewer">';
         $html .= '<i class="fas fa-cube"></i></button>';
-    }
-
-    // AV button (if has audio/video)
-    if ($hasAV) {
-        $html .= '<button type="button" class="btn btn-outline-primary" id="btn-av-' . $viewerId . '" title="Media Player">';
-        $html .= '<i class="fas fa-play-circle"></i></button>';
     }
 
     $html .= '</div>';
@@ -412,31 +452,39 @@ function ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $op
 
 /**
  * Render PDF viewer HTML
+ * Uses browser's native PDF viewer via iframe for best compatibility
  */
-function ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $height)
+function ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $height, $showByDefault = false)
 {
-    $html = '<div id="pdf-wrapper-' . $viewerId . '" class="pdf-wrapper" style="display:none;">';
-    $html .= '<div class="pdf-toolbar mb-2">';
+    $displayStyle = $showByDefault ? '' : 'display:none;';
+
+    $html = '<div id="pdf-wrapper-' . $viewerId . '" class="pdf-wrapper" style="' . $displayStyle . '">';
+
+    // Toolbar with download and fullscreen
+    $html .= '<div class="pdf-toolbar mb-2 d-flex justify-content-between align-items-center">';
+    $html .= '<span class="badge bg-danger"><i class="fas fa-file-pdf me-1"></i>PDF Document</span>';
     $html .= '<div class="btn-group btn-group-sm">';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-prev-' . $viewerId . '"><i class="fas fa-chevron-left"></i></button>';
-    $html .= '<span class="btn btn-outline-secondary disabled" id="pdf-page-' . $viewerId . '">1 / 1</span>';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-next-' . $viewerId . '"><i class="fas fa-chevron-right"></i></button>';
+    $html .= '<a href="' . htmlspecialchars($pdfUrl) . '" target="_blank" class="btn btn-outline-secondary" title="Open in new tab">';
+    $html .= '<i class="fas fa-external-link-alt"></i></a>';
+    $html .= '<a href="' . htmlspecialchars($pdfUrl) . '" download class="btn btn-outline-secondary" title="Download PDF">';
+    $html .= '<i class="fas fa-download"></i></a>';
+    $html .= '</div></div>';
+
+    // Embedded PDF viewer using iframe (uses browser's native PDF viewer)
+    $html .= '<iframe id="pdf-frame-' . $viewerId . '" ';
+    $html .= 'src="' . htmlspecialchars($pdfUrl) . '" ';
+    $html .= 'style="width:100%;height:' . $height . ';border:none;border-radius:8px;background:#525659;" ';
+    $html .= 'title="PDF Viewer"></iframe>';
+
     $html .= '</div>';
-    $html .= '<div class="btn-group btn-group-sm ms-2">';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-zoom-out-' . $viewerId . '"><i class="fas fa-search-minus"></i></button>';
-    $html .= '<button type="button" class="btn btn-outline-secondary" id="pdf-zoom-in-' . $viewerId . '"><i class="fas fa-search-plus"></i></button>';
-    $html .= '</div></div>';
-    $html .= '<div id="pdf-container-' . $viewerId . '" style="width:100%;height:' . $height . ';overflow:auto;background:#525659;border-radius:8px;" data-pdf-url="' . htmlspecialchars($pdfUrl) . '">';
-    $html .= '<canvas id="pdf-canvas-' . $viewerId . '"></canvas>';
-    $html .= '</div></div>';
-    
+
     return $html;
 }
 
 /**
  * Render 3D viewer HTML (uses standard digital object uploads)
  */
-function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl)
+function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl, $showByDefault = false)
 {
     // Use standard digital object path
     $modelUrl = $baseUrl . '/uploads/' . trim($model->path ?? '', '/') . '/' . $model->filename;
@@ -445,8 +493,9 @@ function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl)
     $cameraOrbit = $model->camera_orbit ?? '0deg 75deg 105%';
     $bgColor = $model->background_color ?? '#f5f5f5';
     $poster = !empty($model->poster_image) ? 'poster="' . $baseUrl . $model->poster_image . '"' : '';
-    
-    $html = '<div id="model-wrapper-' . $viewerId . '" class="model-wrapper" style="display:none;">';
+
+    $displayStyle = $showByDefault ? '' : 'display:none;';
+    $html = '<div id="model-wrapper-' . $viewerId . '" class="model-wrapper" style="' . $displayStyle . '">';
     $html .= '<model-viewer id="model-' . $viewerId . '" ';
     $html .= 'src="' . $modelUrl . '" ';
     $html .= $poster . ' ';
@@ -465,13 +514,14 @@ function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl)
 /**
  * Render audio/video viewer HTML
  */
-function ahg_iiif_render_av_viewer_html($viewerId, $digitalObject, $height, $baseUrl)
+function ahg_iiif_render_av_viewer_html($viewerId, $digitalObject, $height, $baseUrl, $showByDefault = false)
 {
     $mediaUrl = get_digital_object_url($digitalObject);
     $mimeType = $digitalObject->mimeType ?? 'video/mp4';
     $isAudio = stripos($mimeType, 'audio') !== false;
-    
-    $html = '<div id="av-wrapper-' . $viewerId . '" class="av-wrapper" style="display:none;">';
+
+    $displayStyle = $showByDefault ? '' : 'display:none;';
+    $html = '<div id="av-wrapper-' . $viewerId . '" class="av-wrapper" style="' . $displayStyle . '">';
     
     if ($isAudio) {
         $html .= '<audio id="audio-' . $viewerId . '" controls style="width:100%;">';
@@ -519,6 +569,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
         'has3D' => $config['has3D'],
         'hasPdf' => $config['hasPdf'],
         'hasAV' => $config['hasAV'],
+        'pdfUrl' => $config['pdfUrl'] ?? null,
         'enableAnnotations' => $opts['enable_annotations'],
     ]);
     

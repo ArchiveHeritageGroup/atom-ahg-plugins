@@ -50,9 +50,15 @@ export class IiifViewerManager {
     }
 
     async init() {
-        // Store preference
+        // Content-specific viewers should not be overridden by localStorage
+        const contentViewers = ['pdfjs', 'av', 'model-viewer'];
+        const isContentSpecific = contentViewers.includes(this.options.defaultViewer);
+
+        // Use content-specific viewer if set, otherwise check localStorage
         const savedViewer = localStorage.getItem('iiif_viewer_pref');
-        this.currentViewer = savedViewer || this.options.defaultViewer;
+        this.currentViewer = isContentSpecific
+            ? this.options.defaultViewer
+            : (savedViewer || this.options.defaultViewer);
 
         // Bind events
         this.bindEvents();

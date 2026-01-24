@@ -3,54 +3,54 @@
 # NER Routes
 ahg_ai_ner_extract:
   url: /ai/ner/extract/:id
-  param: { module: ahgAI, action: extract }
+  param: { module: ai, action: extract }
 
 ahg_ai_ner_review:
   url: /ai/ner/review
-  param: { module: ahgAI, action: review }
+  param: { module: ai, action: review }
 
 ahg_ai_ner_entities:
   url: /ai/ner/entities/:id
-  param: { module: ahgAI, action: getEntities }
+  param: { module: ai, action: getEntities }
 
 ahg_ai_ner_update:
   url: /ai/ner/entity/update
-  param: { module: ahgAI, action: updateEntity }
+  param: { module: ai, action: updateEntity }
 
 ahg_ai_ner_create_actor:
   url: /ai/ner/create/actor
-  param: { module: ahgAI, action: createActor }
+  param: { module: ai, action: createActor }
 
 ahg_ai_ner_create_place:
   url: /ai/ner/create/place
-  param: { module: ahgAI, action: createPlace }
+  param: { module: ai, action: createPlace }
 
 ahg_ai_ner_create_subject:
   url: /ai/ner/create/subject
-  param: { module: ahgAI, action: createSubject }
+  param: { module: ai, action: createSubject }
 
 ahg_ai_ner_health:
   url: /ai/ner/health
-  param: { module: ahgAI, action: health }
+  param: { module: ai, action: health }
 
 ahg_ai_ner_bulk_save:
   url: /ai/ner/bulk-save
-  param: { module: ahgAI, action: bulkSave }
+  param: { module: ai, action: bulkSave }
 
 # Summarize Route
 ahg_ai_summarize:
   url: /ai/summarize/:id
-  param: { module: ahgAI, action: summarize }
+  param: { module: ai, action: summarize }
 
 # Legacy NER routes (backward compatibility)
 ahg_ner_extract:
   url: /ner/extract/:id
-  param: { module: ahgAI, action: extract }
+  param: { module: ai, action: extract }
 
 ahg_ner_review:
   url: /ner/review
-  param: { module: ahgAI, action: review }
+  param: { module: ai, action: review }
 
 ahg_ner_summarize:
   url: /ner/summarize/:id
-  param: { module: ahgAI, action: summarize }
+  param: { module: ai, action: summarize }

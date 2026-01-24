@@ -1,4 +1,54 @@
-# ============================================================================
-# ahgSecurityClearancePlugin - Routing
-# NOTE: All routes defined in ahgSecurityClearancePluginConfiguration.class.php
-# ============================================================================
+# ahgSecurityClearancePlugin routes
+
+security_compliance:
+  url: /admin/security/compliance
+  param: { module: securityClearance, action: securityCompliance }
+
+security_clearances:
+  url: /security/clearances
+  param: { module: securityClearance, action: index }
+
+security_clearance_view:
+  url: /security/clearance/:id
+  param: { module: securityClearance, action: view }
+  requirements: { id: \d+ }
+
+security_clearance_grant:
+  url: /security/clearance/grant
+  param: { module: securityClearance, action: grant }
+
+security_clearance_revoke:
+  url: /security/clearance/:id/revoke
+  param: { module: securityClearance, action: revoke }
+  requirements: { id: \d+ }
+
+security_clearance_bulk_grant:
+  url: /security/clearance/bulk-grant
+  param: { module: securityClearance, action: bulkGrant }
+
+security_access_revoke:
+  url: /security/access/:id/revoke
+  param: { module: securityClearance, action: revokeAccess }
+  requirements: { id: \d+ }
+
+security_clearance_user:
+  url: /security/clearance/user/:slug
+  param: { module: securityClearance, action: user }
+  requirements: { slug: '[a-zA-Z0-9_-]+' }
+
+security_dashboard:
+  url: /security/dashboard
+  param: { module: securityClearance, action: dashboard }
+
+security_report:
+  url: /security/report
+  param: { module: securityClearance, action: report }
+
+security_compartments:
+  url: /security/compartments
+  param: { module: securityClearance, action: compartments }
+
+# Access request form submission (POST)
+security_request_submit:
+  url: /security/request/submit
+  param: { module: accessRequest, action: createObjectRequest }

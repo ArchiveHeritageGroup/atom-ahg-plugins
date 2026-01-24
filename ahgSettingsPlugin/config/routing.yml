@@ -1,0 +1,156 @@
+# ahgSettingsPlugin routes
+# Routes /ahgSettings/* URLs to the ahgSettings module
+
+# Settings index - base AtoM doesn't have settings/index, so route to ahgSettings
+settings_index:
+  url: /settings
+  param: { module: ahgSettings, action: index }
+
+# Admin routes (aliased URLs)
+admin_ahg_settings:
+  url: /admin/ahg-settings
+  param: { module: ahgSettings, action: index }
+
+admin_ahg_settings_section:
+  url: /admin/ahg-settings/section
+  param: { module: ahgSettings, action: section }
+
+admin_ahg_settings_plugins:
+  url: /admin/ahg-settings/plugins
+  param: { module: ahgSettings, action: plugins }
+
+admin_ahg_settings_ai_services:
+  url: /admin/ahg-settings/ai-services
+  param: { module: ahgSettings, action: aiServices }
+
+admin_ahg_settings_email:
+  url: /admin/ahg-settings/email
+  param: { module: ahgSettings, action: email }
+
+admin_ahg_settings_api_keys:
+  url: /admin/ahg-settings/api-keys
+  param: { module: ahgSettings, action: apiKeys }
+
+ahg_settings_index:
+  url: /ahgSettings/index
+  param: { module: ahgSettings, action: index }
+
+ahg_settings_section:
+  url: /ahgSettings/section
+  param: { module: ahgSettings, action: section }
+
+ahg_settings_export:
+  url: /ahgSettings/export
+  param: { module: ahgSettings, action: export }
+
+ahg_settings_import:
+  url: /ahgSettings/import
+  param: { module: ahgSettings, action: import }
+
+ahg_settings_reset:
+  url: /ahgSettings/reset
+  param: { module: ahgSettings, action: reset }
+
+ahg_settings_email:
+  url: /ahgSettings/email
+  param: { module: ahgSettings, action: email }
+
+ahg_settings_email_test:
+  url: /ahgSettings/emailTest
+  param: { module: ahgSettings, action: emailTest }
+
+ahg_settings_fuseki_test:
+  url: /ahgSettings/fusekiTest
+  param: { module: ahgSettings, action: fusekiTest }
+
+ahg_settings_plugins:
+  url: /ahgSettings/plugins
+  param: { module: ahgSettings, action: plugins }
+
+ahg_settings_save_tiff_pdf:
+  url: /ahgSettings/saveTiffPdfSettings
+  param: { module: ahgSettings, action: saveTiffPdfSettings }
+
+ahg_settings_dam_tools:
+  url: /ahgSettings/damTools
+  param: { module: ahgSettings, action: damTools }
+
+ahg_settings_preservation:
+  url: /ahgSettings/preservation
+  param: { module: ahgSettings, action: preservation }
+
+ahg_settings_levels:
+  url: /ahgSettings/levels
+  param: { module: ahgSettings, action: levels }
+
+ahg_settings_ai_services:
+  url: /ahgSettings/aiServices
+  param: { module: ahgSettings, action: aiServices }
+
+ahg_settings_api_keys:
+  url: /ahgSettings/apiKeys
+  param: { module: ahgSettings, action: apiKeys }
+
+ahg_settings_global:
+  url: /ahgSettings/global
+  param: { module: ahgSettings, action: global }
+
+ahg_settings_language:
+  url: /ahgSettings/language
+  param: { module: ahgSettings, action: language }
+
+ahg_settings_site_info:
+  url: /ahgSettings/siteInformation
+  param: { module: ahgSettings, action: siteInformation }
+
+ahg_settings_page_elements:
+  url: /ahgSettings/pageElements
+  param: { module: ahgSettings, action: pageElements }
+
+ahg_settings_permissions:
+  url: /ahgSettings/permissions
+  param: { module: ahgSettings, action: permissions }
+
+ahg_settings_security:
+  url: /ahgSettings/security
+  param: { module: ahgSettings, action: security }
+
+ahg_settings_treeview:
+  url: /ahgSettings/treeview
+  param: { module: ahgSettings, action: treeview }
+
+ahg_settings_uploads:
+  url: /ahgSettings/uploads
+  param: { module: ahgSettings, action: uploads }
+
+ahg_settings_visible_elements:
+  url: /ahgSettings/visibleElements
+  param: { module: ahgSettings, action: visibleElements }
+
+ahg_settings_template:
+  url: /ahgSettings/template
+  param: { module: ahgSettings, action: template }
+
+ahg_settings_finding_aid:
+  url: /ahgSettings/findingAid
+  param: { module: ahgSettings, action: findingAid }
+
+ahg_settings_oai:
+  url: /ahgSettings/oai
+  param: { module: ahgSettings, action: oai }
+
+ahg_settings_identifier:
+  url: /ahgSettings/identifier
+  param: { module: ahgSettings, action: identifier }
+
+ahg_settings_diacritics:
+  url: /ahgSettings/diacritics
+  param: { module: ahgSettings, action: diacritics }
+
+ahg_settings_csv_validator:
+  url: /ahgSettings/csvValidator
+  param: { module: ahgSettings, action: csvValidator }
+
+ahg_settings_clipboard:
+  url: /ahgSettings/clipboard
+  param: { module: ahgSettings, action: clipboard }

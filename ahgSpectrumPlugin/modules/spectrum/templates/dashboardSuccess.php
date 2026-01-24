@@ -183,7 +183,7 @@
                             <tr>
                                 <td><small><?php echo date('Y-m-d H:i', strtotime($activity->created_at)); ?></small></td>
                                 <td>
-                                    <a href="<?php echo url_for(['module' => 'ahgMuseumPlugin', 'action' => 'index', 'slug' => $activity->slug]); ?>">
+                                    <a href="<?php echo url_for(['module' => 'museum', 'action' => 'index', 'slug' => $activity->slug]); ?>">
                                         <?php echo esc_entities($activity->object_title ?? $activity->slug); ?>
                                     </a>
                                 </td>

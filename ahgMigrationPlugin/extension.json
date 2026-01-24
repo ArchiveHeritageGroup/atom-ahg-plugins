@@ -1,8 +1,10 @@
 {
-    "name": "Data Migration Tool",
+    "name": "Field Mapping Designer",
     "machine_name": "ahgMigrationPlugin",
     "version": "1.0.3",
-    "description": "Universal data migration and field mapping tool with sector-based destination mapping. Import from Vernon CMS, ArchivesSpace, DB/TextWorks and export to Archives, Museum, Library, Gallery, or DAM sectors.",
+    "description": "[DEPRECATED - Use ahgDataMigrationPlugin instead] Field mapping designer for Vernon CMS, ArchivesSpace, DB/TextWorks imports.",
+    "deprecated": true,
+    "replacement": "ahgDataMigrationPlugin",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "migration",

@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__)."/../../../lib/MuseumConstants.php";
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
 /**
  * Museum Plugin Index Template
  */

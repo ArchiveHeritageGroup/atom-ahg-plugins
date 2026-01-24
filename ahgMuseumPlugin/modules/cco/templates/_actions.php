@@ -238,10 +238,10 @@ function cco_get_repository($resource): ?object
             </a>
                     
             <hr class="dropdown-divider">
-            <a class="dropdown-item" href="<?php echo cco_url($resource, 'ahgSpectrumPlugin', 'index'); ?>">
+            <a class="dropdown-item" href="<?php echo cco_url($resource, 'spectrum', 'index'); ?>">
                 <?php echo __('View Spectrum data'); ?>
             </a>
-            <a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSpectrumPlugin', 'action' => 'barcode', 'slug' => $resource->slug, 'type' => 'label']); ?>">
+            <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'barcode', 'slug' => $resource->slug, 'type' => 'label']); ?>">
                 <?php echo __('Generate label'); ?>
             </a>
           <?php 
@@ -255,7 +255,7 @@ function cco_get_repository($resource): ?object
                    class="dropdown-item"><?php echo __('Generate Loan Agreement'); ?></a>
           <?php } ?>
             <!-- Workflow Status -->
-            <a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSpectrumPlugin', 'action' => 'workflow', 'procedure_type' => 'acquisition', 'record_id' => $resource->id]); ?>">
+            <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'procedure_type' => 'acquisition', 'record_id' => $resource->id]); ?>">
                 <?php echo __('Workflow Status'); ?>
             </a>
             

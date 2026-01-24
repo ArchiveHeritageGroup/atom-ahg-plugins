@@ -98,7 +98,10 @@ class translationActions extends sfActions
             return $this->renderText(json_encode(array('ok' => false, 'error' => 'No source text for this field/language')));
         }
 
-        $result = $this->svc->translateText($sourceText, $source, $target);
+        // Get max length for target field (field_length - 1)
+        $maxLength = AhgTranslationRepository::fieldMaxLength($targetColumn);
+
+        $result = $this->svc->translateText($sourceText, $source, $target, $maxLength);
         $this->svc->logAttempt($id, $fieldKey, $source, $target, $result);
 
         if (empty($result['ok'])) {

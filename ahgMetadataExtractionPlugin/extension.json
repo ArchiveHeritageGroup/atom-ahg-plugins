@@ -37,5 +37,5 @@
         "Field mapping to AtoM descriptive fields",
         "Batch extraction support",
         "Extraction logging and audit trail"
-    ],
+    ]
 }

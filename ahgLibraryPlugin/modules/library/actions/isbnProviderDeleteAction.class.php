@@ -24,6 +24,6 @@ class libraryIsbnProviderDeleteAction extends sfAction
             $this->getUser()->setFlash('error', 'Cannot delete core providers.');
         }
 
-        $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviders']);
+        $this->redirect(['module' => 'library', 'action' => 'isbnProviders']);
     }
 }

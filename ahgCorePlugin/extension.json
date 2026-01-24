@@ -37,9 +37,9 @@
             "web/js/vendor/Sortable.min.js"
         ],
         "css": [
-            "web/css/select2.min.css",
-            "web/css/select2-bootstrap-5-theme.min.css",
-            "web/css/tom-select.bootstrap5.min.css"
+            "web/css/vendor/select2.min.css",
+            "web/css/vendor/select2-bootstrap-5-theme.min.css",
+            "web/css/vendor/tom-select.bootstrap5.min.css"
         ]
     }
 }

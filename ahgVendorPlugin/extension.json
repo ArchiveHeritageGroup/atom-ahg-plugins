@@ -25,5 +25,5 @@
         "ahg_vendor_transaction_items",
         "ahg_vendor_transaction_history",
         "ahg_vendor_transaction_attachments"
-    ],
+    ]
 }

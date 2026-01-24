@@ -2,36 +2,36 @@
 
 ahg_data_migration:
   url: /admin/data-migration
-  param: { module: ahgDataMigration, action: index }
+  param: { module: dataMigration, action: index }
 
 ahg_data_migration_import:
   url: /admin/data-migration/import
-  param: { module: ahgDataMigration, action: import }
+  param: { module: dataMigration, action: import }
 
 ahg_data_migration_export:
   url: /admin/data-migration/export
-  param: { module: ahgDataMigration, action: export }
+  param: { module: dataMigration, action: export }
 
 ahg_preservica_import:
   url: /admin/data-migration/preservica/import
-  param: { module: ahgDataMigration, action: preservicaImport }
+  param: { module: dataMigration, action: preservicaImport }
 
 ahg_preservica_export:
   url: /admin/data-migration/preservica/export
-  param: { module: ahgDataMigration, action: preservicaExport }
+  param: { module: dataMigration, action: preservicaExport }
 
 ahg_preservica_export_record:
   url: /admin/data-migration/preservica/export/:id
-  param: { module: ahgDataMigration, action: preservicaExport }
+  param: { module: dataMigration, action: preservicaExport }
   requirements: { id: \d+ }
 
 ahg_data_migration_download:
   url: /admin/data-migration/download
-  param: { module: ahgDataMigration, action: download }
+  param: { module: dataMigration, action: download }
 
 ahg_data_migration_mapping:
   url: /admin/data-migration/mapping
-  param: { module: ahgDataMigration, action: getMapping }
+  param: { module: dataMigration, action: getMapping }
 
 ahg_data_migration_preview:
   url: /admin/data-migration/preview

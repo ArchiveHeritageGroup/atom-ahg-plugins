@@ -80,7 +80,7 @@
 </div>
 
 <div class="d-flex justify-content-between">
-  <a href="<?php echo url_for('ahgLibraryPlugin/isbnProviders') ?>" class="btn btn-secondary">
+  <a href="<?php echo url_for('library/isbnProviders') ?>" class="btn btn-secondary">
     <i class="fas fa-arrow-left me-1"></i><?php echo __('Cancel'); ?>
   </a>
   <button type="submit" class="btn btn-primary">

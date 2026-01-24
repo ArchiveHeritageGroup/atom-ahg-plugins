@@ -51,7 +51,7 @@ class libraryIsbnProviderEditAction extends sfAction
                 $this->getUser()->setFlash('notice', 'Provider added successfully.');
             }
 
-            $this->redirect(['module' => 'ahgLibraryPlugin', 'action' => 'isbnProviders']);
+            $this->redirect(['module' => 'library', 'action' => 'isbnProviders']);
         }
     }
 }

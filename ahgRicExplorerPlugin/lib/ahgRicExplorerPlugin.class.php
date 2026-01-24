@@ -66,8 +66,8 @@ class ahgRicExplorerPlugin
             $response = sfContext::getInstance()->getResponse();
             
             // Include panel component
-            $response->addSlot('ricExplorerPanel', 
-                get_component('ahgRicExplorer', 'ricPanel', [
+            $response->addSlot('ricExplorerPanel',
+                get_component('ricExplorer', 'ricPanel', [
                     'resource' => $event['resource']
                 ])
             );

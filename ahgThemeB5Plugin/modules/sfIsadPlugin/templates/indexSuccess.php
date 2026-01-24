@@ -1,6 +1,8 @@
 <?php decorate_with('layout_3col'); ?>
 <?php echo "<!-- DEBUG: This is ISAD module -->\n"; ?>
 <?php
+// Load viewer helper from ahgUiOverridesPlugin
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
 // Load PII masking helper if privacy plugin is enabled
 if (in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
     require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/helper/PiiHelper.php';
@@ -21,7 +23,7 @@ function pii_filter($objectId, $content) {
 
   <?php echo get_component('informationobject', 'descriptionHeader', ['resource' => $resource, 'title' => (string) $isad]); ?>
   <?php if (in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-  <?php include_partial('ahgSecurityClearance/securityBadge', ['resource' => $resource]); ?>
+  <?php include_partial('securityClearance/securityBadge', ['resource' => $resource]); ?>
   <?php endif; ?>
   <?php if (function_exists('pii_has_redacted') && pii_has_redacted($resource->id)): ?>
   <div class="alert alert-warning py-1 px-2 mb-2 d-inline-block">
@@ -484,7 +486,7 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 </section> <!-- /section#provenanceArea -->
 <?php endif ?>
 
-<?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ahgRicExplorer', 'ricPanel', ['resource' => $resource]); } ?>
+<?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ricExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 
 <?php slot('after-content'); ?>
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?> 

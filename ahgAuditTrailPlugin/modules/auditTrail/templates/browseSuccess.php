@@ -137,6 +137,6 @@
 </ul></nav>
 <?php endif; ?>
 
-<?php include_partial('ahgAuditTrailPlugin/compareModal') ?>
+<?php include_partial('auditTrail/compareModal') ?>
 
 <?php end_slot() ?>

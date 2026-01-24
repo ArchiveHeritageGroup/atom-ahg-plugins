@@ -14,7 +14,7 @@ class iiifAuthActions extends sfActions
 {
     protected function getAuthService(): IiifAuthService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/service/IiifAuthService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAuthService.php';
         return new IiifAuthService();
     }
 

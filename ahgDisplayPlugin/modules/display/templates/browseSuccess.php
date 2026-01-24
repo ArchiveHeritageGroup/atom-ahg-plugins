@@ -151,9 +151,9 @@ function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
 function getItemUrl($obj) {
     switch ($obj->object_type) {
         case 'library':
-            return url_for(['module' => 'ahgLibraryPlugin', 'action' => 'index', 'slug' => $obj->slug]);
+            return url_for(['module' => 'library', 'action' => 'index', 'slug' => $obj->slug]);
         case 'museum':
-            return url_for(['module' => 'ahgMuseumPlugin', 'action' => 'index', 'slug' => $obj->slug]);
+            return url_for(['module' => 'museum', 'action' => 'index', 'slug' => $obj->slug]);
         default:
             return url_for('@slug?slug=' . $obj->slug);
     }
@@ -475,8 +475,8 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
-  <?php include_partial("ahgDisplaySearch/glamAdvancedSearchEnhancements"); ?>
-  <?php include_partial("ahgDisplaySearch/glamAdvancedSearch"); ?>
+  <?php include_partial("displaySearch/glamAdvancedSearchEnhancements"); ?>
+  <?php include_partial("displaySearch/glamAdvancedSearch"); ?>
   <!-- Toolbar -->
   <div class="d-flex flex-wrap gap-2 mb-3">
     <a href="<?php echo url_for(array_merge(['module' => 'display', 'action' => 'print'], array_filter($fp))) ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-print"></i> <?php echo __('Print'); ?></a>

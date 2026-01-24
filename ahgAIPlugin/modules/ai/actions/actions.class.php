@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__).'/../../../lib/service/NerService.php';
+require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
 
 class aiActions extends sfActions
 {
@@ -1028,5 +1028,160 @@ class aiActions extends sfActions
             error_log("Error saving scope and content: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Translate record fields using NLLB-200
+     */
+    public function executeTranslate(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid JSON data']));
+        }
+
+        $sourceLang = $data['source'] ?? 'en';
+        $targetLang = $data['target'] ?? 'af';
+        $fields = $data['fields'] ?? ['title' => true, 'scope_content' => true];
+
+        $object = QubitInformationObject::getById($objectId);
+
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        $startTime = microtime(true);
+
+        // Get field values
+        $translations = [];
+        $errors = [];
+
+        // Translate title
+        if (!empty($fields['title']) && !empty($object->title)) {
+            $result = $this->callTranslationApi($object->title, $sourceLang, $targetLang);
+            if ($result['success']) {
+                $translations['title'] = [
+                    'original' => $object->title,
+                    'translated' => $result['translated']
+                ];
+            } else {
+                $errors[] = 'Title: ' . ($result['error'] ?? 'Translation failed');
+            }
+        }
+
+        // Translate scope and content
+        if (!empty($fields['scope_content']) && !empty($object->scopeAndContent)) {
+            $result = $this->callTranslationApi($object->scopeAndContent, $sourceLang, $targetLang);
+            if ($result['success']) {
+                $translations['scope_content'] = [
+                    'original' => $object->scopeAndContent,
+                    'translated' => $result['translated']
+                ];
+            } else {
+                $errors[] = 'Scope & Content: ' . ($result['error'] ?? 'Translation failed');
+            }
+        }
+
+        $processingTime = round((microtime(true) - $startTime) * 1000);
+
+        if (empty($translations) && !empty($errors)) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => implode('; ', $errors)
+            ]));
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'translations' => $translations,
+            'source_lang' => $sourceLang,
+            'target_lang' => $targetLang,
+            'processing_time_ms' => $processingTime,
+            'errors' => $errors
+        ]));
+    }
+
+    /**
+     * Get available languages
+     */
+    public function executeTranslateLanguages(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
+        $url = $apiUrl . '/ai/v1/translate/languages';
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Could not fetch languages'
+            ]));
+        }
+
+        return $this->renderText($response);
+    }
+
+    /**
+     * Call the translation API
+     */
+    private function callTranslationApi($text, $sourceLang, $targetLang)
+    {
+        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
+        $apiKey = sfConfig::get('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+
+        $url = $apiUrl . '/ai/v1/translate';
+
+        $payload = json_encode([
+            'text' => $text,
+            'source' => $sourceLang,
+            'target' => $targetLang
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-API-Key: ' . $apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['success' => false, 'error' => 'Connection error: ' . $error];
+        }
+
+        if ($httpCode !== 200) {
+            $data = json_decode($response, true);
+            return ['success' => false, 'error' => $data['error'] ?? "HTTP $httpCode"];
+        }
+
+        $data = json_decode($response, true);
+
+        if (!$data || !isset($data['success']) || !$data['success']) {
+            return ['success' => false, 'error' => $data['error'] ?? 'Unknown error'];
+        }
+
+        return [
+            'success' => true,
+            'translated' => $data['translated'] ?? ''
+        ];
     }
 }

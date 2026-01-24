@@ -1,6 +1,0 @@
-# ============================================================================
-# ahgIiifCollectionPlugin - Routing
-# NOTE: All routes defined in ahgIiifCollectionPluginConfiguration.class.php
-# This file kept empty to avoid duplicates
-# Routes use prependRoute() for proper priority ordering
-# ============================================================================

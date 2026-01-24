@@ -51,10 +51,10 @@ class InformationObjectRenameAction extends DefaultEditAction
                 
                 $module = 'informationobject';
                 switch ($displayStandardId) {
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('library'): $module = 'ahgLibraryPlugin'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('museum'):  $module = 'sfMuseumPlugin'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'): $module = 'ahgGalleryPlugin'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('dam'): $module = 'ahgDamPlugin'; break;
+                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('library'): $module = 'library'; break;
+                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('museum'):  $module = 'museum'; break;
+                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'): $module = 'gallery'; break;
+                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('dam'): $module = 'dam'; break;
                 }
 
                 $this->redirect([$this->resource, 'module' => $module]);

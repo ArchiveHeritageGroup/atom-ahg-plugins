@@ -452,7 +452,7 @@ class galleryEditAction extends sfAction
         $newValues = $this->captureCurrentValues($resourceId);
         $this->logAudit($isNew ? 'create' : 'update', $resourceId, $oldValues, $newValues);
 
-        $this->redirect(['module' => 'ahgGalleryPlugin', 'action' => 'index', 'slug' => $this->resource->slug ?? $this->resourceSlug]);
+        $this->redirect(['module' => 'gallery', 'action' => 'index', 'slug' => $this->resource->slug ?? $this->resourceSlug]);
     }
 
     protected function saveCreator($resourceId, $actorId)

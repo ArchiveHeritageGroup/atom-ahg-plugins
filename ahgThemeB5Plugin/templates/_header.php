@@ -83,7 +83,7 @@
           <?php echo get_component('menu', 'quickLinksMenu'); ?>
           
           <!-- AHG Admin Menu -->
-          <?php include_partial('global/ahgAdminMenu'); ?>
+          <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_ahgAdminMenu.php'); ?>
           
         </ul>
         <?php echo get_component('menu', 'userMenu'); ?>
