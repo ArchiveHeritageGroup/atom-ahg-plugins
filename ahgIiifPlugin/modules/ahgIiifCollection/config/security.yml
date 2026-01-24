@@ -1,0 +1,11 @@
+all:
+  is_secure: false
+
+index:
+  is_secure: false
+
+view:
+  is_secure: false
+
+autocomplete:
+  is_secure: false

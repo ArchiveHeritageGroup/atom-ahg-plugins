@@ -643,3 +643,231 @@ CREATE TABLE IF NOT EXISTS preservation_package_event (
 
     FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- MIGRATION PATHWAY DEFINITIONS
+-- Defines format migration routes with tools and quality impact
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_migration_pathway (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    source_puid VARCHAR(50) NOT NULL COMMENT 'PRONOM identifier of source format',
+    target_puid VARCHAR(50) NOT NULL COMMENT 'PRONOM identifier of target format',
+    migration_tool VARCHAR(100) NOT NULL COMMENT 'Tool to perform migration (imagemagick, ffmpeg, etc.)',
+    migration_command TEXT COMMENT 'Command template with placeholders {input} {output}',
+    quality_impact ENUM('lossless', 'minimal', 'moderate', 'significant') DEFAULT 'minimal',
+    fidelity_score DECIMAL(5,2) COMMENT 'Quality fidelity score 0-100',
+    is_recommended TINYINT(1) DEFAULT 0 COMMENT 'Recommended pathway for this source format',
+    is_automated TINYINT(1) DEFAULT 1 COMMENT 'Can be run automatically without review',
+    priority INT DEFAULT 100 COMMENT 'Priority order when multiple pathways exist',
+    notes TEXT COMMENT 'Additional notes about this pathway',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_source (source_puid),
+    INDEX idx_target (target_puid),
+    INDEX idx_recommended (is_recommended),
+    INDEX idx_tool (migration_tool),
+    UNIQUE KEY uk_source_target_tool (source_puid, target_puid, migration_tool)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- FORMAT OBSOLESCENCE TRACKING
+-- Tracks obsolescence risk for formats in use
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_format_obsolescence (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    format_id BIGINT UNSIGNED NOT NULL COMMENT 'Reference to preservation_format',
+    puid VARCHAR(50) NOT NULL COMMENT 'PRONOM identifier',
+    current_risk_level ENUM('low', 'medium', 'high', 'critical') NOT NULL,
+    migration_urgency ENUM('none', 'low', 'medium', 'high', 'critical') DEFAULT 'none',
+    affected_object_count INT UNSIGNED DEFAULT 0,
+    storage_size_bytes BIGINT UNSIGNED DEFAULT 0 COMMENT 'Total storage for affected objects',
+    recommended_action TEXT,
+    recommended_pathway_id BIGINT UNSIGNED COMMENT 'Suggested migration pathway',
+    last_assessed_at DATETIME,
+    next_assessment_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_format (format_id),
+    INDEX idx_puid (puid),
+    INDEX idx_risk (current_risk_level),
+    INDEX idx_urgency (migration_urgency),
+
+    FOREIGN KEY (format_id) REFERENCES preservation_format(id) ON DELETE CASCADE,
+    FOREIGN KEY (recommended_pathway_id) REFERENCES preservation_migration_pathway(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- MIGRATION PLANNING
+-- Plans for batch format migration operations
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_migration_plan (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    source_puid VARCHAR(50) NOT NULL,
+    target_puid VARCHAR(50) NOT NULL,
+    pathway_id BIGINT UNSIGNED COMMENT 'Selected migration pathway',
+    status ENUM('draft', 'approved', 'in_progress', 'completed', 'cancelled', 'failed') DEFAULT 'draft',
+
+    -- Scope
+    scope_type ENUM('all', 'repository', 'collection', 'custom') DEFAULT 'all',
+    scope_criteria JSON COMMENT 'Criteria for object selection',
+
+    -- Progress tracking
+    total_objects INT UNSIGNED DEFAULT 0,
+    objects_queued INT UNSIGNED DEFAULT 0,
+    objects_processed INT UNSIGNED DEFAULT 0,
+    objects_succeeded INT UNSIGNED DEFAULT 0,
+    objects_failed INT UNSIGNED DEFAULT 0,
+    objects_skipped INT UNSIGNED DEFAULT 0,
+
+    -- Storage impact
+    original_size_bytes BIGINT UNSIGNED DEFAULT 0,
+    converted_size_bytes BIGINT UNSIGNED DEFAULT 0,
+
+    -- Workflow
+    created_by INT COMMENT 'User who created the plan',
+    approved_by INT COMMENT 'User who approved the plan',
+    approved_at DATETIME,
+    started_at DATETIME,
+    completed_at DATETIME,
+
+    -- Options
+    keep_originals TINYINT(1) DEFAULT 1 COMMENT 'Keep original files after migration',
+    create_preservation_copies TINYINT(1) DEFAULT 1 COMMENT 'Store as preservation copies',
+    run_fixity_after TINYINT(1) DEFAULT 1 COMMENT 'Run fixity check after conversion',
+
+    -- Scheduling
+    scheduled_start DATETIME COMMENT 'When to start if scheduled',
+    max_concurrent INT UNSIGNED DEFAULT 5 COMMENT 'Max concurrent conversions',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_status (status),
+    INDEX idx_source (source_puid),
+    INDEX idx_target (target_puid),
+    INDEX idx_pathway (pathway_id),
+    INDEX idx_created_by (created_by),
+
+    FOREIGN KEY (pathway_id) REFERENCES preservation_migration_pathway(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- MIGRATION PLAN OBJECTS
+-- Links migration plans to specific digital objects
+-- =============================================
+CREATE TABLE IF NOT EXISTS preservation_migration_plan_object (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    plan_id BIGINT UNSIGNED NOT NULL,
+    digital_object_id INT NOT NULL,
+    status ENUM('pending', 'queued', 'processing', 'completed', 'failed', 'skipped') DEFAULT 'pending',
+
+    -- Source info
+    source_path VARCHAR(1024),
+    source_size BIGINT UNSIGNED,
+    source_checksum VARCHAR(128),
+
+    -- Result info
+    output_path VARCHAR(1024),
+    output_size BIGINT UNSIGNED,
+    output_checksum VARCHAR(128),
+
+    -- Processing
+    queued_at DATETIME,
+    started_at DATETIME,
+    completed_at DATETIME,
+    duration_ms INT UNSIGNED,
+
+    -- Error handling
+    error_message TEXT,
+    retry_count INT UNSIGNED DEFAULT 0,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_plan (plan_id),
+    INDEX idx_object (digital_object_id),
+    INDEX idx_status (status),
+
+    UNIQUE KEY uk_plan_object (plan_id, digital_object_id),
+    FOREIGN KEY (plan_id) REFERENCES preservation_migration_plan(id) ON DELETE CASCADE,
+    FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- SEED DATA: Common Migration Pathways
+-- =============================================
+INSERT IGNORE INTO preservation_migration_pathway
+(source_puid, target_puid, migration_tool, migration_command, quality_impact, fidelity_score, is_recommended, is_automated, priority, notes) VALUES
+-- Image conversions to TIFF (preservation format)
+('fmt/44', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'lossless', 100.00, 1, 1, 10, 'JPEG to TIFF - standard preservation conversion'),
+('fmt/11', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'lossless', 100.00, 1, 1, 10, 'PNG to TIFF - lossless preservation conversion'),
+('fmt/41', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'lossless', 100.00, 1, 1, 10, 'GIF to TIFF - lossless conversion'),
+('fmt/40', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'lossless', 100.00, 1, 1, 10, 'BMP to TIFF - lossless conversion'),
+('fmt/116', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'minimal', 98.00, 1, 1, 10, 'PICT to TIFF - legacy format conversion'),
+('fmt/645', 'fmt/353', 'imagemagick', 'convert {input} -compress lzw {output}', 'lossless', 100.00, 1, 1, 10, 'WebP to TIFF'),
+
+-- Image conversions to JPEG 2000 (alternative preservation format)
+('fmt/44', 'fmt/392', 'imagemagick', 'convert {input} {output}', 'minimal', 99.00, 0, 1, 20, 'JPEG to JP2 - optional preservation format'),
+('fmt/353', 'fmt/392', 'imagemagick', 'convert {input} {output}', 'minimal', 99.00, 0, 1, 20, 'TIFF to JP2 - optional preservation format'),
+
+-- PDF conversions to PDF/A
+('fmt/17', 'fmt/354', 'ghostscript', 'gs -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sOutputFile={output} {input}', 'minimal', 99.00, 1, 1, 10, 'PDF 1.4 to PDF/A-1a'),
+('fmt/18', 'fmt/354', 'ghostscript', 'gs -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sOutputFile={output} {input}', 'minimal', 99.00, 1, 1, 10, 'PDF 1.5 to PDF/A-1a'),
+('fmt/19', 'fmt/354', 'ghostscript', 'gs -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sOutputFile={output} {input}', 'minimal', 99.00, 1, 1, 10, 'PDF 1.6 to PDF/A-1a'),
+('fmt/95', 'fmt/354', 'ghostscript', 'gs -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sOutputFile={output} {input}', 'minimal', 99.00, 1, 1, 10, 'PDF to PDF/A-1a'),
+
+-- PDF to PDF/A-2b (more compatible)
+('fmt/95', 'fmt/476', 'ghostscript', 'gs -dPDFA=2 -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -sOutputFile={output} {input}', 'minimal', 99.50, 0, 1, 15, 'PDF to PDF/A-2b - more compatible'),
+
+-- Office documents to PDF/A
+('fmt/412', 'fmt/354', 'libreoffice', 'libreoffice --headless --convert-to pdf --outdir {outdir} {input}', 'moderate', 90.00, 1, 0, 10, 'DOCX to PDF/A - requires manual review'),
+('fmt/112', 'fmt/354', 'libreoffice', 'libreoffice --headless --convert-to pdf --outdir {outdir} {input}', 'moderate', 85.00, 1, 0, 10, 'DOC to PDF/A - legacy format, requires review'),
+('fmt/214', 'fmt/354', 'libreoffice', 'libreoffice --headless --convert-to pdf --outdir {outdir} {input}', 'moderate', 88.00, 1, 0, 10, 'XLSX to PDF/A'),
+('fmt/61', 'fmt/354', 'libreoffice', 'libreoffice --headless --convert-to pdf --outdir {outdir} {input}', 'moderate', 82.00, 1, 0, 10, 'XLS to PDF/A - legacy format'),
+('fmt/126', 'fmt/354', 'libreoffice', 'libreoffice --headless --convert-to pdf --outdir {outdir} {input}', 'moderate', 80.00, 1, 0, 10, 'PPT to PDF/A - legacy format'),
+
+-- Audio conversions to FLAC (preservation)
+('fmt/134', 'fmt/527', 'ffmpeg', 'ffmpeg -i {input} -c:a flac {output}', 'moderate', 75.00, 0, 1, 20, 'MP3 to FLAC - lossy source, cannot restore quality'),
+('fmt/141', 'fmt/527', 'ffmpeg', 'ffmpeg -i {input} -c:a flac {output}', 'lossless', 100.00, 1, 1, 10, 'WAV to FLAC - lossless compression'),
+('fmt/5', 'fmt/527', 'ffmpeg', 'ffmpeg -i {input} -c:a flac {output}', 'lossless', 100.00, 1, 1, 10, 'AIFF to FLAC - lossless compression'),
+
+-- Audio conversions to WAV (preservation)
+('fmt/134', 'fmt/141', 'ffmpeg', 'ffmpeg -i {input} -c:a pcm_s16le {output}', 'moderate', 75.00, 0, 1, 20, 'MP3 to WAV - lossy source'),
+('fmt/527', 'fmt/141', 'ffmpeg', 'ffmpeg -i {input} -c:a pcm_s16le {output}', 'lossless', 100.00, 0, 1, 15, 'FLAC to WAV - lossless expansion'),
+
+-- Video conversions
+('fmt/585', 'fmt/199', 'ffmpeg', 'ffmpeg -i {input} -c:v libx264 -crf 18 -c:a aac {output}', 'minimal', 95.00, 1, 1, 10, 'AVI to MP4 - good quality H.264'),
+('fmt/596', 'fmt/199', 'ffmpeg', 'ffmpeg -i {input} -c:v libx264 -crf 18 -c:a aac {output}', 'minimal', 95.00, 1, 1, 10, 'WMV to MP4 - good quality H.264'),
+('fmt/527', 'fmt/199', 'ffmpeg', 'ffmpeg -i {input} -c:v libx264 -crf 18 -c:a aac {output}', 'minimal', 95.00, 0, 1, 15, 'MOV to MP4'),
+
+-- Video to FFV1 (archival lossless codec)
+('fmt/585', 'fmt/569', 'ffmpeg', 'ffmpeg -i {input} -c:v ffv1 -level 3 -c:a flac {output}', 'lossless', 100.00, 0, 0, 30, 'AVI to MKV/FFV1 - archival lossless, large files'),
+('fmt/199', 'fmt/569', 'ffmpeg', 'ffmpeg -i {input} -c:v ffv1 -level 3 -c:a flac {output}', 'lossless', 100.00, 0, 0, 30, 'MP4 to MKV/FFV1 - archival lossless');
+
+-- =============================================
+-- DEFAULT OBSOLESCENCE ASSESSMENTS
+-- Initialize obsolescence tracking for high-risk formats
+-- =============================================
+INSERT IGNORE INTO preservation_format_obsolescence
+(format_id, puid, current_risk_level, migration_urgency, recommended_action, last_assessed_at)
+SELECT
+    pf.id,
+    pf.puid,
+    pf.risk_level,
+    CASE
+        WHEN pf.risk_level = 'critical' THEN 'critical'
+        WHEN pf.risk_level = 'high' THEN 'high'
+        ELSE 'none'
+    END,
+    CASE
+        WHEN pf.risk_level = 'critical' THEN 'Immediate migration required - format no longer supported'
+        WHEN pf.risk_level = 'high' THEN 'Migration recommended within 12 months'
+        ELSE NULL
+    END,
+    NOW()
+FROM preservation_format pf
+WHERE pf.risk_level IN ('high', 'critical') AND pf.puid IS NOT NULL;
