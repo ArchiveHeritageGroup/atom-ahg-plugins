@@ -2,6 +2,20 @@
 
 Detailed technical reference for all AHG plugins including architecture diagrams, ERD schemas, and API documentation.
 
+**Version:** 2.1.17
+**Last Updated:** January 2026
+
+---
+
+## Architecture & System Design
+
+| Document | Description |
+|----------|-------------|
+| [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md) | Plugin types, module ownership, extension surface API |
+| [DATABASE_ERD.md](DATABASE_ERD.md) | Entity-relationship diagrams for all plugin tables |
+| [SYSTEM_FLOWS.md](SYSTEM_FLOWS.md) | Request processing, installation, audit, IIIF, NER flows |
+| [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) | Comprehensive technical reference |
+
 ---
 
 ## Plugin Documentation
