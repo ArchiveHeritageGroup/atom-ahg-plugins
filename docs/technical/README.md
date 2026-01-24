@@ -32,12 +32,24 @@ Detailed technical reference for all AHG plugins including architecture diagrams
 | [ahgDonorPlugin](ahgDonorPlugin.md) | Acquisitions | Donor and agreement management |
 | [ahgVendorPlugin](ahgVendorPlugin.md) | Administration | Vendor/supplier management |
 
+### Media & Viewing
+
+| Plugin | Category | Description |
+|--------|----------|-------------|
+| [ahgIiifPlugin](ahgIiifPlugin.md) | Media | IIIF manifests, viewers, auth, collections |
+
 ### Research & AI
 
 | Plugin | Category | Description |
 |--------|----------|-------------|
 | [ahgResearchPlugin](ahgResearchPlugin.md) | Public Services | Researcher portal, bookings |
 | [ahgNerPlugin](ahgNerPlugin.md) | AI/NLP | Named Entity Recognition |
+
+### Preservation
+
+| Plugin | Category | Description |
+|--------|----------|-------------|
+| [ahgPreservationPlugin](ahgPreservationPlugin.md) | Preservation | OAIS/PREMIS, format migration, fixity |
 
 ---
 

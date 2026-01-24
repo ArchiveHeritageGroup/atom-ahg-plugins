@@ -213,6 +213,113 @@ Some viewers allow side-by-side comparison:
 
 ---
 
+## Protected Content
+
+Some images may require authentication to view at full resolution.
+
+### Access Levels
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ACCESS TYPES                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔓 Public          - No login required                     │
+│  📋 Clickthrough    - Agree to terms of use                 │
+│  🔐 Login Required  - Must have an account                  │
+│  🚫 Restricted      - Special permission needed             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Clickthrough Access
+
+Some content requires you to agree to terms before viewing:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     ACCESS REQUIRED                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  This resource requires acknowledgment of terms.            │
+│                                                             │
+│  By clicking "I Agree" you acknowledge that:                │
+│  • This material is for personal research only              │
+│  • You will not redistribute without permission             │
+│  • Copyright may apply to this content                      │
+│                                                             │
+│                    [ I Agree ]                              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Login Required
+
+Protected content shows a login prompt:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   AUTHENTICATION REQUIRED                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  This content requires you to log in.                       │
+│                                                             │
+│  Please log in to your account to access                    │
+│  full resolution images.                                    │
+│                                                             │
+│                    [ Login ]                                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### What You'll See Without Access
+```
+Without authentication:
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│            ┌─────────────────────┐                          │
+│            │                     │                          │
+│            │   Low-resolution    │ ← Thumbnail only         │
+│            │     thumbnail       │                          │
+│            │                     │                          │
+│            └─────────────────────┘                          │
+│                                                             │
+│  🔐 Login to view full resolution                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+After authentication:
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │                                                       │ │
+│  │              Full resolution image                    │ │
+│  │                                                       │ │
+│  │              Deep zoom enabled                        │ │
+│  │                                                       │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  🔓 Full access granted                                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Authentication Flow
+```
+1. View protected image
+         │
+         ▼
+2. Click "Login" or "I Agree"
+         │
+         ▼
+3. Pop-up window opens
+         │
+         ▼
+4. Log in or accept terms ────► Window closes automatically
+         │
+         ▼
+5. Full image loads
+```
+
+---
+
 ## Troubleshooting
 ```
 Problem                          Solution

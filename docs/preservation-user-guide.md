@@ -931,6 +931,126 @@ Each package follows the BagIt specification:
 
 ---
 
+## Format Migration
+
+Plan and execute format conversions to ensure long-term accessibility.
+
+### Understanding Format Risk
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FORMAT RISK LEVELS                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔴 Critical   - Format obsolete, software unavailable      │
+│  🟠 High       - Format deprecated, limited support         │
+│  🟡 Medium     - Proprietary, future uncertain              │
+│  🟢 Low        - Open standard, well-supported              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Obsolescence Report
+
+View formats at risk in your repository:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  OBSOLESCENCE REPORT                                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Format              Risk     Count    Recommended Action   │
+│  ─────────────────────────────────────────────────────────  │
+│  WordPerfect 5.1     🔴       45       → PDF/A-3            │
+│  Lotus 1-2-3         🔴       23       → ODS / XLSX         │
+│  TIFF LZW            🟡       1,234    → TIFF uncompressed  │
+│  JPEG 2000           🟡       567      → Monitor            │
+│  PDF/A-3             🟢       8,901    → No action          │
+│                                                             │
+│  [Generate Migration Plan]                                  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Migration Pathways
+
+Pre-defined conversion routes:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MIGRATION PATHWAYS                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Source            Target            Quality    Automated   │
+│  ─────────────────────────────────────────────────────────  │
+│  WordPerfect   →   PDF/A-3          Lossless     ✓         │
+│  Word DOC      →   PDF/A-3          Lossless     ✓         │
+│  TIFF (any)    →   TIFF Uncomp.     Lossless     ✓         │
+│  JPEG          →   JPEG 2000        Lossless     ✓         │
+│  WAV           →   FLAC             Lossless     ✓         │
+│  AVI           →   FFV1/MKV         Lossless     ✓         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Creating a Migration Plan
+
+```
+Step 1: Review Obsolescence Report
+        ↓
+Step 2: Select formats to migrate
+        ↓
+Step 3: Choose target formats
+        ↓
+Step 4: Create migration plan
+        ↓
+Step 5: Get approval (if required)
+        ↓
+Step 6: Execute migration
+        ↓
+Step 7: Verify results
+```
+
+### Migration Plan Status
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MIGRATION PLAN: TIFF Migration 2026                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Status:     In Progress                                    │
+│  Created:    2026-01-15                                     │
+│  Approved:   2026-01-16                                     │
+│                                                             │
+│  Progress:   ████████████░░░░░░░░ 60%                       │
+│                                                             │
+│  Total:      1,234 items                                    │
+│  Completed:  740 items                                      │
+│  Failed:     3 items                                        │
+│  Pending:    491 items                                      │
+│                                                             │
+│  [Pause]  [Resume]  [View Details]                          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Migration Best Practices
+
+```
+┌────────────────────────────────┬────────────────────────────┐
+│  ✓ DO                          │  ✗ DON'T                   │
+├────────────────────────────────┼────────────────────────────┤
+│  Keep original files           │  Delete originals          │
+│  Verify checksums after        │  Skip verification         │
+│  Test with samples first       │  Migrate everything at once│
+│  Document decisions            │  Migrate without approval  │
+│  Schedule during low-usage     │  Run during peak hours     │
+│  Monitor progress              │  Leave unattended          │
+└────────────────────────────────┴────────────────────────────┘
+```
+
+---
+
 ## Troubleshooting
 
 ### Common Issues

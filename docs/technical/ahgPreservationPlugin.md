@@ -1293,6 +1293,339 @@ Recommended cron schedule:
 
 ---
 
+## Format Migration
+
+### Overview
+
+The format migration subsystem enables proactive digital preservation through:
+- **Migration Pathways**: Define recommended conversion routes between formats
+- **Migration Plans**: Batch migration planning with tracking
+- **Obsolescence Analysis**: Identify at-risk formats in the repository
+- **Automated Recommendations**: Suggest target formats based on risk levels
+
+### Migration Pathway Tables
+
+```
++-------------------------------------------------------------------------+
+|                    FORMAT MIGRATION DATABASE SCHEMA                      |
++-------------------------------------------------------------------------+
+
++---------------------------+           +---------------------------+
+|   preservation_format     |           | preservation_migration_   |
+|    (existing table)       |           |        pathway            |
++---------------------------+           +---------------------------+
+| PK id                     |<----------| PK id                     |
+|    puid                   |    FK     | FK source_format_id       |
+|    format_name            |           | FK target_format_id       |--------+
+|    risk_level             |    +------| FK preferred_tool_id      |        |
+|    ...                    |    |      |    pathway_type           |        |
++---------------------------+    |      |    confidence_level       |        |
+                                 |      |    complexity             |        |
++---------------------------+    |      |    data_loss_risk         |        |
+|  preservation_conversion_ |    |      |    quality_impact         |        |
+|         tool              |<---+      |    is_recommended         |        |
++---------------------------+           |    is_automated           |        |
+| PK id                     |           |    notes                  |        |
+|    tool_name              |           |    created_at             |        |
+|    tool_version           |           |    updated_at             |        |
+|    ...                    |           +---------------------------+        |
++---------------------------+                      |                         |
+                                                   | 1:N                     |
+                                                   v                         |
+                            +---------------------------+                    |
+                            | preservation_migration_   |                    |
+                            |      pathway_tool         |                    |
+                            +---------------------------+                    |
+                            | PK id                     |                    |
+                            | FK pathway_id             |                    |
+                            | FK tool_id                |                    |
+                            |    priority               |                    |
+                            |    conversion_options     |                    |
+                            +---------------------------+                    |
+                                                                             |
++---------------------------+           +---------------------------+        |
+| preservation_migration_   |           | preservation_migration_   |        |
+|         plan              |           |      plan_item            |        |
++---------------------------+           +---------------------------+        |
+| PK id                     |<----------| PK id                     |        |
+|    name                   |     FK    | FK plan_id                |        |
+|    description            |           | FK digital_object_id      |        |
+|    status                 |           | FK pathway_id             |--------+
+|    created_by             |           |    source_format          |
+|    approved_by            |           |    target_format          |
+|    approved_at            |           |    priority               |
+|    started_at             |           |    status                 |
+|    completed_at           |           |    started_at             |
+|    total_items            |           |    completed_at           |
+|    items_completed        |           |    conversion_log         |
+|    items_failed           |           |    error_message          |
+|    notes                  |           |    created_at             |
+|    created_at             |           +---------------------------+
+|    updated_at             |
++---------------------------+
+```
+
+### Migration Database Tables
+
+#### preservation_migration_pathway
+
+Defines conversion routes between format types.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGINT PK | Auto-increment primary key |
+| `source_format_id` | BIGINT FK | Reference to preservation_format |
+| `target_format_id` | BIGINT FK | Target format reference |
+| `preferred_tool_id` | BIGINT FK | Preferred conversion tool |
+| `pathway_type` | ENUM | normalization, migration, emulation |
+| `confidence_level` | ENUM | high, medium, low |
+| `complexity` | ENUM | simple, moderate, complex |
+| `data_loss_risk` | ENUM | none, minimal, moderate, significant |
+| `quality_impact` | ENUM | lossless, minimal_loss, noticeable_loss |
+| `is_recommended` | TINYINT(1) | Official recommendation |
+| `is_automated` | TINYINT(1) | Can be automated |
+| `notes` | TEXT | Additional guidance |
+
+#### preservation_migration_plan
+
+Batch migration execution plans.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGINT PK | Auto-increment primary key |
+| `name` | VARCHAR(255) | Plan name |
+| `description` | TEXT | Plan description |
+| `status` | ENUM | draft, approved, in_progress, completed, cancelled |
+| `created_by` | VARCHAR(100) | Creator |
+| `approved_by` | VARCHAR(100) | Approver |
+| `approved_at` | DATETIME | Approval timestamp |
+| `started_at` | DATETIME | Execution start |
+| `completed_at` | DATETIME | Execution completion |
+| `total_items` | INT UNSIGNED | Total items in plan |
+| `items_completed` | INT UNSIGNED | Successfully migrated |
+| `items_failed` | INT UNSIGNED | Failed migrations |
+
+#### preservation_migration_plan_item
+
+Individual items within a migration plan.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGINT PK | Auto-increment primary key |
+| `plan_id` | BIGINT FK | Reference to migration_plan |
+| `digital_object_id` | INT FK | Reference to digital_object |
+| `pathway_id` | BIGINT FK | Reference to migration_pathway |
+| `source_format` | VARCHAR(100) | Source PUID or MIME type |
+| `target_format` | VARCHAR(100) | Target format |
+| `priority` | INT | Processing priority |
+| `status` | ENUM | pending, processing, completed, failed, skipped |
+| `started_at` | DATETIME | Item processing start |
+| `completed_at` | DATETIME | Item processing end |
+| `conversion_log` | TEXT | Conversion output log |
+| `error_message` | TEXT | Error details if failed |
+
+### Migration Service API
+
+#### MigrationPathwayService
+
+```php
+/**
+ * Get available migration pathways for a source format.
+ *
+ * @param string $sourceFormat Source PUID or MIME type
+ * @return array Available pathways with recommendations
+ */
+public function getPathwaysForFormat(string $sourceFormat): array
+
+/**
+ * Get recommended target format for a source.
+ *
+ * @param string $sourceFormat Source PUID or MIME type
+ * @return array|null Best pathway with target format
+ */
+public function getRecommendedTarget(string $sourceFormat): ?array
+
+/**
+ * Get obsolescence report for repository.
+ *
+ * @param string $riskLevel Filter by risk (critical, high, medium, low)
+ * @return array Formats at risk with object counts
+ */
+public function getObsolescenceReport(?string $riskLevel = null): array
+
+/**
+ * Create a new migration pathway.
+ *
+ * @param array $data Pathway configuration
+ * @return int New pathway ID
+ */
+public function createPathway(array $data): int
+```
+
+#### MigrationPlanService
+
+```php
+/**
+ * Create a migration plan.
+ *
+ * @param string $name Plan name
+ * @param string $description Plan description
+ * @param string $createdBy Creator user
+ * @return int New plan ID
+ */
+public function createPlan(string $name, string $description, string $createdBy): int
+
+/**
+ * Add items to a migration plan.
+ *
+ * @param int $planId Plan ID
+ * @param array $items Array of [digital_object_id, pathway_id, priority]
+ * @return int Number of items added
+ */
+public function addPlanItems(int $planId, array $items): int
+
+/**
+ * Add items by format criteria.
+ *
+ * @param int $planId Plan ID
+ * @param string $sourceFormat Source format to match
+ * @param int $pathwayId Pathway to use
+ * @param int $limit Maximum items to add
+ * @return int Number of items added
+ */
+public function addItemsByFormat(int $planId, string $sourceFormat, int $pathwayId, int $limit = 1000): int
+
+/**
+ * Execute a migration plan.
+ *
+ * @param int $planId Plan ID
+ * @param int $limit Items per batch
+ * @return array Execution results
+ */
+public function executePlan(int $planId, int $limit = 100): array
+
+/**
+ * Get plan execution status.
+ *
+ * @param int $planId Plan ID
+ * @return array Status with progress metrics
+ */
+public function getPlanStatus(int $planId): array
+```
+
+### preservationMigrationTask
+
+CLI task for format migration operations.
+
+**Location:** `lib/task/preservationMigrationTask.class.php`
+
+**Namespace:** `preservation:migration`
+
+**Actions:**
+
+| Action | Description |
+|--------|-------------|
+| `pathways` | List available migration pathways |
+| `obsolescence` | Generate obsolescence report |
+| `recommend` | Get recommendations for a format |
+| `plan-list` | List migration plans |
+| `plan-create` | Create a new plan |
+| `plan-add` | Add items to a plan |
+| `plan-execute` | Execute a plan |
+| `plan-status` | Show plan status |
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--format=X` | - | Source format (PUID or MIME) |
+| `--risk=X` | - | Risk level filter |
+| `--plan-id=N` | - | Plan ID |
+| `--name=X` | - | Plan name |
+| `--pathway-id=N` | - | Pathway ID |
+| `--limit=N` | 100 | Items limit |
+
+**Usage:**
+
+```bash
+# List pathways for a format
+php symfony preservation:migration pathways --format=fmt/18
+
+# Generate obsolescence report
+php symfony preservation:migration obsolescence
+php symfony preservation:migration obsolescence --risk=critical
+
+# Get recommendations
+php symfony preservation:migration recommend --format=fmt/18
+
+# Create migration plan
+php symfony preservation:migration plan-create --name="TIFF Migration 2026"
+
+# Add items to plan
+php symfony preservation:migration plan-add --plan-id=1 --format=fmt/353 --pathway-id=5
+
+# Execute plan
+php symfony preservation:migration plan-execute --plan-id=1 --limit=50
+
+# Check status
+php symfony preservation:migration plan-status --plan-id=1
+```
+
+### Migration Process Flow
+
+```
++-------------------------------------------------------------------------+
+|                      FORMAT MIGRATION SEQUENCE                           |
++-------------------------------------------------------------------------+
+
+    +----------+     +----------------+     +----------------+
+    |  Admin   |     |MigrationPlanSvc|     |PathwaySvc      |
+    +----+-----+     +-------+--------+     +-------+--------+
+         |                   |                      |
+         | obsolescence      |                      |
+         | report            |                      |
+         |------------------>|                      |
+         |                   | getObsolescence      |
+         |                   | Report()             |
+         |                   |--------------------->|
+         |                   |<---------------------|
+         |   at-risk formats |                      |
+         |<------------------|                      |
+         |                   |                      |
+         | create plan       |                      |
+         |------------------>|                      |
+         |                   | createPlan()         |
+         |                   |                      |
+         |   plan_id         |                      |
+         |<------------------|                      |
+         |                   |                      |
+         | add items by      |                      |
+         | format            |                      |
+         |------------------>|                      |
+         |                   | addItemsByFormat()   |
+         |                   | getRecommendedTarget |
+         |                   |--------------------->|
+         |                   |<---------------------|
+         |                   |                      |
+         |                   | INSERT plan_items    |
+         |                   |                      |
+         |   items added     |                      |
+         |<------------------|                      |
+         |                   |                      |
+         | approve & execute |                      |
+         |------------------>|                      |
+         |                   | executePlan()        |
+         |                   |                      |
+         |                   | For each item:       |
+         |                   |   convertFormat()    |
+         |                   |   UPDATE status      |
+         |                   |                      |
+         |   results         |                      |
+         |<------------------|                      |
+```
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
@@ -1301,8 +1634,9 @@ Recommended cron schedule:
 | 1.1.0 | 2026-01 | Added virus scanning (ClamAV), format conversion (ImageMagick/FFmpeg/LibreOffice/Ghostscript), backup verification, replication targets, CLI tasks, settings UI |
 | 1.2.0 | 2026-01 | Added Siegfried/PRONOM format identification with PUID tracking, confidence levels, batch identification CLI task, identification UI dashboard, auto-population of format registry |
 | 1.3.0 | 2026-01 | Added Workflow Scheduler UI for configuring and monitoring automated preservation tasks, preservationSchedulerTask CLI task, schedule management service methods, run history tracking |
+| 1.4.0 | 2026-01 | Added Format Migration subsystem: migration pathways, migration plans, obsolescence reporting, MigrationPathwayService, MigrationPlanService, preservationMigrationTask CLI |
 
 ---
 
 *Technical Documentation - Last Updated: January 2026*
-*Plugin Version: 1.3.0*
+*Plugin Version: 1.4.0*
