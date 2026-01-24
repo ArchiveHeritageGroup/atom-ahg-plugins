@@ -11,6 +11,11 @@ class ahgTiffPdfMergePluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'tiffpdfmerge';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
+        // Register templates directory for include_partial() calls
+        $decoratorDirs = sfConfig::get('sf_decorator_dirs', []);
+        $decoratorDirs[] = $this->rootDir . '/templates';
+        sfConfig::set('sf_decorator_dirs', $decoratorDirs);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
     }
 
