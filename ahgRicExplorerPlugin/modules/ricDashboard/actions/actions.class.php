@@ -149,7 +149,7 @@ class ricDashboardActions extends sfActions
     public function executeConfig(sfWebRequest $request)
     {
         // Redirect to AHG Settings - Fuseki section (centralized config)
-        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']);
+        $this->redirect(['module' => 'settings', 'action' => 'section', 'section' => 'fuseki']);
     }
 
     // AJAX Endpoints

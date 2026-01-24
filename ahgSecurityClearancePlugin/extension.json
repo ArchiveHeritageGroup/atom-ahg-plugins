@@ -14,7 +14,7 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "security_classification",
         "user_security_clearance",

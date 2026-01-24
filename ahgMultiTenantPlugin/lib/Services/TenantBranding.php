@@ -234,7 +234,7 @@ class TenantBranding
         }
 
         // Create upload directory
-        $webDir = \sfConfig::get('sf_web_dir', '/usr/share/nginx/archive');
+        $webDir = \sfConfig::get('sf_web_dir', sfConfig::get('sf_root_dir'));
         $uploadDir = $webDir . self::LOGO_UPLOAD_DIR . '/' . $repositoryId;
 
         if (!is_dir($uploadDir)) {
@@ -305,7 +305,7 @@ class TenantBranding
 
         $logo = self::getLogo($repositoryId);
         if ($logo) {
-            $webDir = \sfConfig::get('sf_web_dir', '/usr/share/nginx/archive');
+            $webDir = \sfConfig::get('sf_web_dir', sfConfig::get('sf_root_dir'));
             $filePath = $webDir . $logo;
             if (file_exists($filePath)) {
                 unlink($filePath);

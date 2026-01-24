@@ -66,8 +66,8 @@ class ahgRicExplorerPluginConfiguration extends sfPluginConfiguration
         $actionName = sfContext::getInstance()->getActionName();
 
         if ($moduleName == 'informationobject' && $actionName == 'index') {
-            $ricCss = '<link rel="stylesheet" href="/plugins/ahgRicExplorerPlugin/css/ric-explorer.css">';
-            $ricJs = '<script src="/plugins/ahgRicExplorerPlugin/js/ric-explorer.js"></script>';
+            $ricCss = '<link rel="stylesheet" href="/plugins/ahgRicExplorerPlugin/web/css/ric-explorer.css">';
+            $ricJs = '<script src="/plugins/ahgRicExplorerPlugin/web/js/ric-explorer.js"></script>';
 
             $content = str_replace('</head>', $ricCss . "\n" . '</head>', $content);
             $content = str_replace('</body>', $ricJs . "\n" . '</body>', $content);

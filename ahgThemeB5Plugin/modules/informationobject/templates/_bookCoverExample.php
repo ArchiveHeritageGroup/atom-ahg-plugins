@@ -28,7 +28,7 @@ if (!$isbn): ?>
              class="img-fluid rounded shadow-sm"
              loading="lazy"
              style="max-height: 300px;"
-             onerror="this.onerror=null; this.src='/plugins/ahgThemeB5Plugin/images/no-cover.png';">
+             onerror="this.onerror=null; this.src='/plugins/ahgThemeB5Plugin/web/images/no-cover.png';">
     </a>
     
     <div class="mt-2">

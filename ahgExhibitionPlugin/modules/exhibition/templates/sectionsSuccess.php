@@ -268,8 +268,8 @@ function deleteSection(id, name) {
 </script>
 
 <!-- TOM Select -->
-<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.tom-select').forEach(function(el) {

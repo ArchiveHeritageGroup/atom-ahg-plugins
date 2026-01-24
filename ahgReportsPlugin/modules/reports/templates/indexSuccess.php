@@ -59,7 +59,7 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
 
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
     </ul>
 
     <h4 class="mt-4"><?php echo __('Compliance'); ?></h4>
@@ -194,10 +194,10 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgDonor', 'action' => 'dashboard']); ?>"><i class="fas fa-handshake me-2 text-muted"></i><?php echo __('Donor Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasGallery): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgGalleryPlugin', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'gallery', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasLibrary): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgLibraryPlugin', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasDam): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
@@ -243,11 +243,11 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
                     <li class="list-group-item">
                         <a href="/admin/security/compliance"><i class="fas fa-lock me-2 text-muted"></i><?php echo __('Security Dashboard'); ?></a>
                     </li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'report']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Clearance Report'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'report']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Clearance Report'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasAudit): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'index']); ?>"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('Audit Log'); ?></a></li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Audit Log'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('Audit Log'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Audit Log'); ?></a></li>
                     <?php endif; ?>
                 </ul>
             </div>
@@ -426,6 +426,9 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Preservation Reports'); ?></a>
                     </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'tiffpdfmerge', 'action' => 'browse']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('TIFF to PDF Merge Jobs'); ?></a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -471,12 +474,5 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
         </div>
     </div>
     <?php endif; ?>
-
-    <!-- TIFF to PDF Merge Jobs Section -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <?php include_partial('reports/tiffPdfMergeJobs'); ?>
-        </div>
-    </div>
 </div>
 <?php end_slot(); ?>

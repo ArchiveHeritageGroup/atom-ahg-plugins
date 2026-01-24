@@ -222,7 +222,7 @@ function render_3d_model_gallery($resource, array $options = []): string
 function get_3d_model_upload_url($resource): string
 {
     $objectId = is_object($resource) ? $resource->id : (int)$resource;
-    return url_for(['module' => 'ahg3DModel', 'action' => 'upload', 'object_id' => $objectId]);
+    return url_for(['module' => 'model3d', 'action' => 'upload', 'object_id' => $objectId]);
 }
 
 /**

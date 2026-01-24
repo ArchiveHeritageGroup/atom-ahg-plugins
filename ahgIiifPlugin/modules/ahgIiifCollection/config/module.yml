@@ -1,3 +1,0 @@
-all:
-  is_internal: false
-  enabled: true

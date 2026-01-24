@@ -1,0 +1,932 @@
+<?php
+use Illuminate\Database\Capsule\Manager as DB;
+use AhgDisplay\Services\DisplayService;
+
+class displayActions extends sfActions
+{
+    protected $service;
+
+    public function preExecute()
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+        $this->service = new DisplayService();
+    }
+
+    public function executeIndex(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+
+        $this->profiles = DB::table('display_profile as dp')
+            ->leftJoin('display_profile_i18n as dpi', function($j) {
+                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+            })
+            ->select('dp.*', 'dpi.name')
+            ->orderBy('dp.domain')->orderBy('dp.sort_order')
+            ->get()->toArray();
+
+        $this->levels = $this->service->getLevels();
+        $this->collectionTypes = $this->service->getCollectionTypes();
+
+        $this->stats = [
+            'total_objects' => DB::table('information_object')->where('id', '>', 1)->count(),
+            'configured_objects' => DB::table('display_object_config')->count(),
+            'by_type' => DB::table('display_object_config')
+                ->select('object_type', DB::raw('COUNT(*) as count'))
+                ->groupBy('object_type')
+                ->get()->toArray(),
+        ];
+    }
+
+    public function executeBrowse(sfWebRequest $request)
+    {
+        // Check if user is authenticated (can see drafts)
+        $this->isAuthenticated = sfContext::getInstance()->getUser()->isAuthenticated();
+        
+        // Get all filter parameters
+        $this->typeFilter = $request->getParameter('type');
+        $this->parentId = $request->getParameter('parent');
+        $this->topLevelOnly = $request->getParameter('topLevel', '1');
+        $this->page = max(1, (int) $request->getParameter('page', 1));
+        $this->limit = (int) $request->getParameter('limit', 10);
+        if ($this->limit < 10) $this->limit = 10;
+        if ($this->limit > 100) $this->limit = 100;
+        $this->sort = $request->getParameter('sort', 'date');
+        $this->sortDir = $request->getParameter('dir', 'desc');
+        $this->viewMode = $request->getParameter('view', 'card');
+        $this->hasDigital = $request->getParameter('hasDigital');
+        
+        // New facet filters
+        $this->creatorFilter = $request->getParameter('creator');
+        $this->subjectFilter = $request->getParameter('subject');
+        $this->placeFilter = $request->getParameter('place');
+        $this->genreFilter = $request->getParameter('genre');
+        $this->levelFilter = $request->getParameter('level');
+        $this->mediaFilter = $request->getParameter('media');
+        // Text search filters
+        $this->queryFilter = $request->getParameter("query");
+        $this->semanticEnabled = $request->getParameter("semantic") == "1";
+
+        // Expand query with synonyms if semantic search is enabled
+        // Store as array for OR-based search
+        if ($this->queryFilter && $this->semanticEnabled) {
+            $this->queryFilterTerms = $this->expandQueryWithSynonyms($this->queryFilter);
+        } else {
+            $this->queryFilterTerms = null;
+        }
+
+        $this->titleFilter = $request->getParameter("title");
+        $this->identifierFilter = $request->getParameter("identifier");
+        $this->referenceCodeFilter = $request->getParameter("referenceCode");
+        $this->scopeAndContentFilter = $request->getParameter("scopeAndContent");
+        $this->creatorSearchFilter = $request->getParameter("creatorSearch");
+        $this->subjectSearchFilter = $request->getParameter("subjectSearch");
+        $this->placeSearchFilter = $request->getParameter("placeSearch");
+        $this->genreSearchFilter = $request->getParameter("genreSearch");
+        $this->repoFilter = $request->getParameter('repo');
+
+        // GLAM Type facet - filter by published status for guests
+        $glamQuery = DB::table('display_object_config as doc')
+            ->join('information_object as io', 'doc.object_id', '=', 'io.id')
+            ->select('doc.object_type', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $glamQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->types = $glamQuery->groupBy('doc.object_type')->orderBy('count', 'desc')->get()->toArray();
+
+        // Level of description facet - filter by published status for guests
+        $levelQuery = DB::table('information_object as io')
+            ->join('term as t', 'io.level_of_description_id', '=', 't.id')
+            ->join('term_i18n as ti', function($j) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('io.id', '>', 1)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $levelQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->levels = $levelQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Repository facet - filter by published status for guests
+        $repoQuery = DB::table('information_object as io')
+            ->join('repository as r', 'io.repository_id', '=', 'r.id')
+            ->join('actor_i18n as ai', function($j) {
+                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->where('io.id', '>', 1)
+            ->select('r.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $repoQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->repositories = $repoQuery->groupBy('r.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Creator facet - filter by published status for guests
+        $creatorQuery = DB::table('event as e')
+            ->join('actor as a', 'e.actor_id', '=', 'a.id')
+            ->join('actor_i18n as ai', function($j) {
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->whereNotNull('e.actor_id')
+            ->select('a.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT e.object_id) as count'));
+        if (!$this->isAuthenticated) {
+            $creatorQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = e.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->creators = $creatorQuery->groupBy('a.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Subject facet (taxonomy_id = 35) - filter by published status for guests
+        $subjectQuery = DB::table('object_term_relation as otr')
+            ->join('term as t', 'otr.term_id', '=', 't.id')
+            ->join('term_i18n as ti', function($j) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('t.taxonomy_id', 35)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $subjectQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->subjects = $subjectQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Place facet (taxonomy_id = 42) - filter by published status for guests
+        $placeQuery = DB::table('object_term_relation as otr')
+            ->join('term as t', 'otr.term_id', '=', 't.id')
+            ->join('term_i18n as ti', function($j) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('t.taxonomy_id', 42)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $placeQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->places = $placeQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Genre facet (taxonomy_id = 78) - filter by published status for guests
+        $genreQuery = DB::table('object_term_relation as otr')
+            ->join('term as t', 'otr.term_id', '=', 't.id')
+            ->join('term_i18n as ti', function($j) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+            })
+            ->where('t.taxonomy_id', 78)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $genreQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = otr.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->genres = $genreQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Media type facet - filter by published status for guests
+        $mediaQuery = DB::table('digital_object as do')
+            ->whereNull('do.parent_id')
+            ->whereNotNull('do.mime_type')
+            ->select(DB::raw('SUBSTRING_INDEX(mime_type, "/", 1) as media_type'), DB::raw('COUNT(*) as count'));
+        if (!$this->isAuthenticated) {
+            $mediaQuery->whereExists(function($q) {
+                $q->select(DB::raw(1))->from('status')
+                  ->whereRaw('status.object_id = do.object_id')
+                  ->where('status.type_id', 158)->where('status.status_id', 160);
+            });
+        }
+        $this->mediaTypes = $mediaQuery->groupBy('media_type')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+
+        // Build count query
+        $countQuery = DB::table('information_object as io')
+            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->where('io.id', '>', 1);
+
+        // Apply all filters to count query
+        $this->applyFilters($countQuery);
+
+        $this->total = $countQuery->count();
+        $this->totalPages = (int) ceil($this->total / $this->limit);
+
+        // Build main query
+        $query = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->leftJoin('term_i18n as level', function ($j) {
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+            })
+            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->where('io.id', '>', 1)
+            ->select(
+                'io.id', 'io.identifier', 'io.parent_id',
+                'i18n.title', 'i18n.scope_and_content',
+                'level.name as level_name',
+                'doc.object_type', 'slug.slug'
+            );
+
+        // Apply all filters to main query
+        $this->applyFilters($query);
+
+        // Handle parent/breadcrumb
+        if ($this->parentId) {
+            $this->parent = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($j) {
+                    $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                })
+                ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+                ->where('io.id', $this->parentId)
+                ->select('io.id', 'io.parent_id', 'i18n.title', 'slug.slug')
+                ->first();
+            $this->breadcrumb = $this->buildBreadcrumb($this->parentId);
+        } else {
+            $this->parent = null;
+            $this->breadcrumb = [];
+        }
+
+        $this->digitalObjectCount = DB::table('information_object as io')
+            ->join('digital_object as do', function($j) {
+                $j->on('io.id', '=', 'do.object_id')->whereNull('do.parent_id');
+            })
+            ->where('io.id', '>', 1)
+            ->count();
+
+        // Sort
+        // Handle sorting
+        $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
+        switch ($this->sort) {
+            case 'identifier':
+            case 'refcode':
+                $query->orderBy('io.identifier', $sortDir);
+                break;
+            case 'date':
+                // Sort by object id as proxy for creation order
+                $query->orderBy('io.id', $sortDir);
+                break;
+            case 'startdate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            case 'enddate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            default:
+                $query->orderBy('i18n.title', $sortDir);
+        }
+
+        // Paginate
+        $this->objects = $query
+            ->offset(($this->page - 1) * $this->limit)
+            ->limit($this->limit)
+            ->get()
+            ->toArray();
+
+        // Enrich results
+        foreach ($this->objects as &$obj) {
+            $obj->child_count = DB::table('information_object')->where('parent_id', $obj->id)->count();
+            
+            if (!$obj->object_type) {
+                $obj->object_type = DisplayTypeDetector::detect($obj->id);
+            }
+            
+            $obj->thumbnail = null;
+            
+            $digitalObject = DB::table('digital_object')
+                ->where('object_id', $obj->id)
+                ->whereNull('parent_id')
+                ->select('id')
+                ->first();
+            
+            $obj->has_digital = !empty($digitalObject);
+            
+            if ($digitalObject) {
+                $thumb = DB::table('digital_object')
+                    ->where('parent_id', $digitalObject->id)
+                    ->where('usage_id', 142)
+                    ->select('path', 'name')
+                    ->first();
+                
+                if ($thumb && $thumb->path && $thumb->name) {
+                    $obj->thumbnail = rtrim($thumb->path, '/') . '/' . $thumb->name;
+                } else {
+                    $ref = DB::table('digital_object')
+                        ->where('parent_id', $digitalObject->id)
+                        ->where('usage_id', 141)
+                        ->select('path', 'name')
+                        ->first();
+                    
+                    if ($ref && $ref->path && $ref->name) {
+                        $obj->thumbnail = rtrim($ref->path, '/') . '/' . $ref->name;
+                    }
+				}
+            }
+
+            // Fallback to library_item cover_url for library items
+            if (!$obj->thumbnail) {
+                $libraryItem = DB::table('library_item')
+                    ->where('information_object_id', $obj->id)
+                    ->select('cover_url')
+                    ->first();
+                if ($libraryItem && $libraryItem->cover_url) {
+                    $obj->thumbnail = $libraryItem->cover_url;
+                    $obj->has_digital = true;
+                }
+            }
+        }
+        
+        // Build filter params for template
+        $this->filterParams = [
+            'type' => $this->typeFilter,
+            'parent' => $this->parentId,
+            'topLevel' => $this->topLevelOnly,
+            'creator' => $this->creatorFilter,
+            'subject' => $this->subjectFilter,
+            'place' => $this->placeFilter,
+            'genre' => $this->genreFilter,
+            'level' => $this->levelFilter,
+            'media' => $this->mediaFilter,
+            'repo' => $this->repoFilter,
+            'hasDigital' => $this->hasDigital,
+            'view' => $this->viewMode,
+            'limit' => $this->limit,
+            'sort' => $this->sort,
+            'dir' => $this->sortDir,
+        ];
+    }
+
+    protected function applyFilters($query)
+    {
+        // Filter by publication status - only show Published items (status_id = 160) for guests
+        // Authenticated users (editors/admins) can see all items
+        if (!sfContext::getInstance()->getUser()->isAuthenticated()) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)  // publication status type
+                  ->where('status.status_id', 160); // Published
+            });
+        }
+
+        if ($this->parentId) {
+            $query->where('io.parent_id', $this->parentId);
+        } elseif ($this->topLevelOnly === '1') {
+            $query->where('io.parent_id', 1);
+        }
+
+        if ($this->typeFilter) {
+            $query->where('doc.object_type', $this->typeFilter);
+        }
+
+        if ($this->hasDigital) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('digital_object')
+                  ->whereRaw('digital_object.object_id = io.id')
+                  ->whereNull('digital_object.parent_id');
+            });
+        }
+
+        if ($this->creatorFilter) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('event')
+                  ->whereRaw('event.object_id = io.id')
+                  ->where('event.actor_id', $this->creatorFilter);
+            });
+        }
+
+        if ($this->subjectFilter) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('object_term_relation')
+                  ->whereRaw('object_term_relation.object_id = io.id')
+                  ->where('object_term_relation.term_id', $this->subjectFilter);
+            });
+        }
+
+        if ($this->placeFilter) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('object_term_relation')
+                  ->whereRaw('object_term_relation.object_id = io.id')
+                  ->where('object_term_relation.term_id', $this->placeFilter);
+            });
+        }
+
+        if ($this->genreFilter) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('object_term_relation')
+                  ->whereRaw('object_term_relation.object_id = io.id')
+                  ->where('object_term_relation.term_id', $this->genreFilter);
+            });
+        }
+
+        if ($this->levelFilter) {
+            $query->where('io.level_of_description_id', $this->levelFilter);
+        }
+
+        if ($this->mediaFilter) {
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('digital_object')
+                  ->whereRaw('digital_object.object_id = io.id')
+                  ->whereNull('digital_object.parent_id')
+                  ->whereRaw("digital_object.mime_type LIKE ?", [$this->mediaFilter . '/%']);
+            });
+        }
+
+        if ($this->repoFilter) {
+            $query->where('io.repository_id', $this->repoFilter);
+        }
+
+        // Text search filters - use OR logic for semantic search
+        if ($this->queryFilter) {
+            if ($this->queryFilterTerms) {
+                // Semantic search: search for ANY of the expanded terms (OR logic)
+                $this->applyTextSearchFilter($query, $this->queryFilterTerms);
+            } else {
+                // Normal search: single term
+                $this->applyTextSearchFilter($query, $this->queryFilter);
+            }
+        }
+
+        if ($this->titleFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.title", "like", "%".$this->titleFilter."%");
+            });
+        }
+
+        if ($this->identifierFilter) {
+            $query->where("io.identifier", "like", "%".$this->identifierFilter."%");
+        }
+
+        if ($this->scopeAndContentFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.scope_and_content", "like", "%".$this->scopeAndContentFilter."%");
+            });
+        }
+
+        if ($this->creatorSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("event as e")
+                    ->join("actor_i18n as ai", function($j) {
+                        $j->on("e.actor_id", "=", "ai.id")->where("ai.culture", "=", "en");
+                    })
+                    ->whereRaw("e.object_id = io.id")
+                    ->where("ai.authorized_form_of_name", "like", "%".$this->creatorSearchFilter."%");
+            });
+        }
+
+        if ($this->subjectSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 35)
+                    ->where("ti.name", "like", "%".$this->subjectSearchFilter."%");
+            });
+        }
+
+        if ($this->placeSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 42)
+                    ->where("ti.name", "like", "%".$this->placeSearchFilter."%");
+            });
+        }
+
+        if ($this->genreSearchFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("object_term_relation as otr")
+                    ->join("term as t", "otr.term_id", "=", "t.id")
+                    ->join("term_i18n as ti", function($j) {
+                        $j->on("t.id", "=", "ti.id")->where("ti.culture", "=", "en");
+                    })
+                    ->whereRaw("otr.object_id = io.id")
+                    ->where("t.taxonomy_id", 78)
+                    ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
+        }
+    }
+
+    public function executePrint(sfWebRequest $request)
+    {
+        $this->typeFilter = $request->getParameter('type');
+        $this->parentId = $request->getParameter('parent');
+        $this->topLevelOnly = $request->getParameter('topLevel', '1');
+        $this->sort = $request->getParameter('sort', 'date');
+        $this->sortDir = $request->getParameter('dir', 'desc');
+
+        $query = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->leftJoin('term_i18n as level', function ($j) {
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+            })
+            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->where('io.id', '>', 1)
+            ->select('io.id', 'io.identifier', 'i18n.title', 'i18n.scope_and_content', 'level.name as level_name', 'doc.object_type');
+
+        if ($this->parentId) {
+            $query->where('io.parent_id', $this->parentId);
+            $this->parent = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($j) {
+                    $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                })
+                ->where('io.id', $this->parentId)
+                ->select('io.id', 'i18n.title')
+                ->first();
+        } elseif ($this->topLevelOnly === '1') {
+            $query->where('io.parent_id', 1);
+            $this->parent = null;
+        } else {
+            $this->parent = null;
+        }
+
+        if ($this->typeFilter) {
+            $query->where('doc.object_type', $this->typeFilter);
+        }
+
+        // Handle sorting
+        $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
+        switch ($this->sort) {
+            case 'identifier':
+            case 'refcode':
+                $query->orderBy('io.identifier', $sortDir);
+                break;
+            case 'date':
+                // Sort by object id as proxy for creation order
+                $query->orderBy('io.id', $sortDir);
+                break;
+            case 'startdate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            case 'enddate':
+                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
+                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                break;
+            default:
+                $query->orderBy('i18n.title', $sortDir);
+        }
+
+        $this->objects = $query->limit(500)->get()->toArray();
+        $this->total = count($this->objects);
+
+        $this->setLayout(false);
+    }
+
+    public function executeExportCsv(sfWebRequest $request)
+    {
+        $typeFilter = $request->getParameter('type');
+        $parentId = $request->getParameter('parent');
+        $topLevelOnly = $request->getParameter('topLevel', '1');
+        $sort = $request->getParameter('sort', 'date');
+        $sortDir = $request->getParameter('dir', 'desc');
+
+        $query = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->leftJoin('term_i18n as level', function ($j) {
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+            })
+            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->leftJoin('repository as r', 'io.repository_id', '=', 'r.id')
+            ->leftJoin('actor_i18n as repo_name', function($j) {
+                $j->on('r.id', '=', 'repo_name.id')->where('repo_name.culture', '=', 'en');
+            })
+            ->where('io.id', '>', 1)
+            ->select(
+                'io.id', 
+                'io.identifier', 
+                'i18n.title', 
+                'i18n.scope_and_content',
+                'i18n.extent_and_medium',
+                'level.name as level_name', 
+                'doc.object_type',
+                'repo_name.authorized_form_of_name as repository'
+            );
+
+        if ($parentId) {
+            $query->where('io.parent_id', $parentId);
+        } elseif ($topLevelOnly === '1') {
+            $query->where('io.parent_id', 1);
+        }
+
+        if ($typeFilter) {
+            $query->where('doc.object_type', $typeFilter);
+        }
+
+        $sortColumn = match($sort) {
+            'identifier' => 'io.identifier',
+            'refcode' => 'io.identifier',
+            'date' => 'io.id',  // Use ID as proxy for date (newer records have higher IDs)
+            'startdate' => 'io.id',
+            'enddate' => 'io.id',
+            default => 'i18n.title'
+        };
+        $query->orderBy($sortColumn, $sortDir === 'desc' ? 'desc' : 'asc');
+
+        $objects = $query->limit(5000)->get()->toArray();
+        $filename = 'glam_export_' . date('Y-m-d_His') . '.csv';
+
+        while (ob_get_level()) { ob_end_clean(); }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fputcsv($output, ['ID', 'Identifier', 'Title', 'Level', 'GLAM Type', 'Repository', 'Scope and Content', 'Extent']);
+        
+        foreach ($objects as $obj) {
+            fputcsv($output, [
+                $obj->id,
+                $obj->identifier,
+                $obj->title,
+                $obj->level_name,
+                $obj->object_type,
+                $obj->repository,
+                $obj->scope_and_content,
+                $obj->extent_and_medium
+            ]);
+        }
+        
+        fclose($output);
+        exit;
+    }
+
+    public function executeChangeType(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(403);
+            return sfView::NONE;
+        }
+
+        $objectId = (int) $request->getParameter('id');
+        $newType = $request->getParameter('type');
+        $recursive = $request->getParameter('recursive');
+
+        $validTypes = ['archive', 'museum', 'gallery', 'library', 'dam', 'universal'];
+        if (!in_array($newType, $validTypes)) {
+            $this->getUser()->setFlash('error', 'Invalid type');
+            $this->redirect($request->getReferer() ?: 'display/browse');
+        }
+
+        DB::table('display_object_config')->updateOrInsert(
+            ['object_id' => $objectId],
+            ['object_type' => $newType, 'updated_at' => date('Y-m-d H:i:s')]
+        );
+
+        $count = 1;
+        if ($recursive) {
+            $count += $this->applyTypeRecursive($objectId, $newType);
+        }
+
+        $this->getUser()->setFlash('success', "Type changed to '$newType' for $count object(s)");
+        $this->redirect($request->getReferer() ?: 'display/browse');
+    }
+
+    protected function applyTypeRecursive(int $parentId, string $type): int
+    {
+        $children = DB::table('information_object')->where('parent_id', $parentId)->pluck('id')->toArray();
+        $count = 0;
+        foreach ($children as $childId) {
+            DB::table('display_object_config')->updateOrInsert(
+                ['object_id' => $childId],
+                ['object_type' => $type, 'updated_at' => date('Y-m-d H:i:s')]
+            );
+            $count++;
+            $count += $this->applyTypeRecursive($childId, $type);
+        }
+        return $count;
+    }
+
+    protected function buildBreadcrumb(int $objectId): array
+    {
+        $breadcrumb = [];
+        $currentId = $objectId;
+        $maxDepth = 20;
+
+        while ($currentId > 1 && $maxDepth-- > 0) {
+            $item = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($j) {
+                    $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                })
+                ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+                ->where('io.id', $currentId)
+                ->select('io.id', 'io.parent_id', 'i18n.title', 'slug.slug')
+                ->first();
+            if (!$item) break;
+            array_unshift($breadcrumb, $item);
+            $currentId = $item->parent_id;
+        }
+        return $breadcrumb;
+    }
+
+    public function executeSetType(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $objectId = (int) $request->getParameter('object_id');
+        $type = $request->getParameter('type');
+        $recursive = $request->getParameter('recursive');
+        $this->service->setObjectType($objectId, $type);
+        if ($recursive) {
+            $count = $this->service->setObjectTypeRecursive($objectId, $type);
+            $this->getUser()->setFlash('success', 'Set type for ' . ($count + 1) . ' objects');
+        } else {
+            $this->getUser()->setFlash('success', 'Object type set');
+        }
+        $this->redirect($request->getReferer() ?: 'display/index');
+    }
+
+    public function executeAssignProfile(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $objectId = (int) $request->getParameter('object_id');
+        $profileId = (int) $request->getParameter('profile_id');
+        $context = $request->getParameter('context') ?: 'default';
+        $primary = $request->getParameter('primary') ? true : false;
+        $this->service->assignProfile($objectId, $profileId, $context, $primary);
+        $this->getUser()->setFlash('success', 'Profile assigned');
+        $this->redirect($request->getReferer() ?: 'display/index');
+    }
+
+    public function executeProfiles(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $this->profiles = DB::table('display_profile as dp')
+            ->leftJoin('display_profile_i18n as dpi', function($j) {
+                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+            })
+            ->select('dp.*', 'dpi.name', 'dpi.description')
+            ->orderBy('dp.domain')->orderBy('dp.sort_order')
+            ->get()->toArray();
+    }
+
+    public function executeLevels(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $domain = $request->getParameter('domain');
+        $this->levels = $domain ? $this->service->getLevels($domain) : $this->service->getLevels();
+        $this->currentDomain = $domain;
+        $this->domains = ['archive', 'museum', 'gallery', 'library', 'dam', 'universal'];
+    }
+
+    public function executeBulkSetType(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        if ($request->isMethod('post')) {
+            $parentId = (int) $request->getParameter('parent_id');
+            $type = $request->getParameter('type');
+            $this->service->setObjectType($parentId, $type);
+            $count = $this->service->setObjectTypeRecursive($parentId, $type);
+            $this->getUser()->setFlash('success', 'Updated ' . ($count + 1) . ' objects to type: ' . $type);
+            $this->redirect('display/index');
+        }
+        $this->collections = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function($j) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->where('io.parent_id', 1)
+            ->select('io.id', 'io.identifier', 'i18n.title')
+            ->orderBy('i18n.title')
+            ->get()->toArray();
+        $this->collectionTypes = $this->service->getCollectionTypes();
+    }
+
+    public function executeFields(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $this->fields = DB::table('display_field as df')
+            ->leftJoin('display_field_i18n as dfi', function($j) {
+                $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', 'en');
+            })
+            ->select('df.*', 'dfi.name', 'dfi.help_text')
+            ->orderBy('df.field_group')->orderBy('df.sort_order')
+            ->get()->toArray();
+        $this->fieldGroups = ['identity', 'description', 'context', 'access', 'technical', 'admin'];
+    }
+
+    /**
+     * Expand query with synonyms from thesaurus
+     *
+     * @param string $query Original search query
+     * @return array Array of all terms to search (original + synonyms)
+     */
+    protected function expandQueryWithSynonyms(string $query): array
+    {
+        try {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
+            $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
+
+            $expansions = $thesaurus->expandQuery($query);
+
+            // Start with original query terms
+            $allTerms = preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY);
+
+            // Add all synonyms
+            foreach ($expansions as $term => $synonyms) {
+                foreach ($synonyms as $synonym) {
+                    $allTerms[] = $synonym;
+                }
+            }
+
+            // Return unique terms
+            return array_unique($allTerms);
+        } catch (\Exception $e) {
+            // If thesaurus fails, return original terms
+            return preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY);
+        }
+    }
+
+    /**
+     * Apply text search filter with proper OR logic for semantic search
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param array|string $searchTerms Search terms (array for semantic, string for normal)
+     */
+    protected function applyTextSearchFilter($query, $searchTerms): void
+    {
+        if (is_array($searchTerms)) {
+            // Semantic search: OR between all terms
+            $query->where(function($qb) use ($searchTerms) {
+                foreach ($searchTerms as $term) {
+                    $q = "%" . $term . "%";
+                    $qb->orWhere(function($inner) use ($q) {
+                        $inner->whereExists(function($sub) use ($q) {
+                            $sub->select(DB::raw(1))
+                                ->from("information_object_i18n as ioi")
+                                ->whereRaw("ioi.id = io.id")
+                                ->where(function($w) use ($q) {
+                                    $w->where("ioi.title", "like", $q)
+                                      ->orWhere("ioi.scope_and_content", "like", $q);
+                                });
+                        })->orWhere("io.identifier", "like", $q);
+                    });
+                }
+            });
+        } else {
+            // Normal search: single term
+            $q = "%" . $searchTerms . "%";
+            $query->where(function($qb) use ($q) {
+                $qb->whereExists(function($sub) use ($q) {
+                    $sub->select(DB::raw(1))
+                        ->from("information_object_i18n as ioi")
+                        ->whereRaw("ioi.id = io.id")
+                        ->where(function($w) use ($q) {
+                            $w->where("ioi.title", "like", $q)
+                              ->orWhere("ioi.scope_and_content", "like", $q);
+                        });
+                })->orWhere("io.identifier", "like", $q);
+            });
+        }
+    }
+}

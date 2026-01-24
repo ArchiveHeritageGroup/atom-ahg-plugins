@@ -18,7 +18,7 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
 
         // Enable the module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'ahgAuditTrail';
+        $enabledModules[] = 'auditTrail';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         // Register AhgAuditService with AhgCore
@@ -115,8 +115,8 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
                 'informationobject', 'actor', 'repository', 'term', 'taxonomy',
                 'accession', 'deaccession', 'donor', 'rightsholder', 'function',
                 'physicalobject', 'digitalobject', 'user', 'aclGroup', 'staticpage',
-                'ahgMuseumPlugin', 'ahgLibraryPlugin', 'ahgGalleryPlugin',
-                'ahg3DModelPlugin', 'ahgDAMPlugin',
+                'museum', 'library', 'gallery',
+                'model3d', 'dam',
             ];
 
             if (!in_array($module, $auditableModules)) {
@@ -203,11 +203,11 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             'function' => 'QubitFunction',
             'physicalobject' => 'QubitPhysicalObject',
             'staticpage' => 'QubitStaticPage',
-            'ahgMuseumPlugin' => 'MuseumObject',
-            'ahgLibraryPlugin' => 'LibraryItem',
-            'ahgGalleryPlugin' => 'GalleryWork',
-            'ahg3DModelPlugin' => 'Model3D',
-            'ahgDAMPlugin' => 'DigitalAsset',
+            'museum' => 'MuseumObject',
+            'library' => 'LibraryItem',
+            'gallery' => 'GalleryWork',
+            'model3d' => 'Model3D',
+            'dam' => 'DigitalAsset',
         ];
         return $map[$module] ?? $module;
     }

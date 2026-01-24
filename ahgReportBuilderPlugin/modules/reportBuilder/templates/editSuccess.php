@@ -422,5 +422,5 @@ window.reportBuilder = {
 </script>
 
 <!-- Then load designer.js for other functionality -->
-<script src="/plugins/ahgReportBuilderPlugin/js/designer.js"></script>
+<script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js"></script>
 <?php end_slot() ?>

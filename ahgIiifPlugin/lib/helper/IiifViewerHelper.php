@@ -584,7 +584,7 @@ function render_3d_model_viewer($resource, $options = [])
     $html .= '</script>';
     
     // Model-viewer script
-    $html .= '<script type="module" src="/plugins/ahgCorePlugin/js/vendor/model-viewer.min.js"></script>';
+    $html .= '<script type="module" src="/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js"></script>';
     
     return $html;
 }

@@ -572,7 +572,7 @@ class PreservicaImportService
             $basePath . DIRECTORY_SEPARATOR . $filename,                    // Same directory as OPEX
             $basePath . '/content/' . $filename,                            // PAX content directory
             $this->options['digital_object_path'] . '/' . $filename,        // Custom path if specified
-            '/usr/share/nginx/archive/uploads/migration/' . $filename,     // Default upload location
+            '' . sfConfig::get('sf_upload_dir') . '/migration/' . $filename,     // Default upload location
         ];
         
         $filePath = null;
@@ -705,7 +705,7 @@ class PreservicaImportService
      */
     protected function copyToUploads(string $sourcePath, int $digitalObjectId): string
     {
-        $uploadsDir = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+        $uploadsDir = sfConfig::get('sf_upload_dir', '' . sfConfig::get('sf_upload_dir') . '');
 
         // Create directory structure (AtoM's standard r/XX pattern)
         $subdir = 'r/' . substr(md5($digitalObjectId), 0, 2);

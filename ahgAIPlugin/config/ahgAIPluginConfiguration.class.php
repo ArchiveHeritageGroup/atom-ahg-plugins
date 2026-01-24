@@ -18,51 +18,51 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         // NER routes
         $routing->prependRoute('ahg_ai_ner_extract', new sfRoute(
             '/ai/ner/extract/:id',
-            ['module' => 'ahgAI', 'action' => 'nerExtract']
+            ['module' => 'ai', 'action' => 'nerExtract']
         ));
 
         $routing->prependRoute('ahg_ai_ner_review', new sfRoute(
             '/ai/ner/review',
-            ['module' => 'ahgAI', 'action' => 'nerReview']
+            ['module' => 'ai', 'action' => 'nerReview']
         ));
 
         $routing->prependRoute('ahg_ai_ner_bulk_save', new sfRoute(
             '/ai/ner/bulk-save',
-            ['module' => 'ahgAI', 'action' => 'nerBulkSave']
+            ['module' => 'ai', 'action' => 'nerBulkSave']
         ));
 
         // Summarization routes
         $routing->prependRoute('ahg_ai_summarize', new sfRoute(
             '/ai/summarize/:id',
-            ['module' => 'ahgAI', 'action' => 'summarize']
+            ['module' => 'ai', 'action' => 'summarize']
         ));
 
         // Translation routes
         $routing->prependRoute('ahg_ai_translate', new sfRoute(
             '/ai/translate/:id',
-            ['module' => 'ahgAI', 'action' => 'translate']
+            ['module' => 'ai', 'action' => 'translate']
         ));
 
         $routing->prependRoute('ahg_ai_translate_batch', new sfRoute(
             '/ai/translate/batch',
-            ['module' => 'ahgAI', 'action' => 'translateBatch']
+            ['module' => 'ai', 'action' => 'translateBatch']
         ));
 
         // Spellcheck routes
         $routing->prependRoute('ahg_ai_spellcheck', new sfRoute(
             '/ai/spellcheck/:id',
-            ['module' => 'ahgAI', 'action' => 'spellcheck']
+            ['module' => 'ai', 'action' => 'spellcheck']
         ));
 
         // Settings & Health
         $routing->prependRoute('ahg_ai_settings', new sfRoute(
             '/ai/settings',
-            ['module' => 'ahgAI', 'action' => 'settings']
+            ['module' => 'ai', 'action' => 'settings']
         ));
 
         $routing->prependRoute('ahg_ai_health', new sfRoute(
             '/ai/health',
-            ['module' => 'ahgAI', 'action' => 'health']
+            ['module' => 'ai', 'action' => 'health']
         ));
     }
 

@@ -5,7 +5,7 @@
     </div>
     <div class="card-body">
         <div class="d-grid gap-2">
-            <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']); ?>" class="btn btn-outline-primary">
+            <a href="<?php echo url_for(['module' => 'settings', 'action' => 'section', 'section' => 'fuseki']); ?>" class="btn btn-outline-primary">
                 <i class="fa fa-cog"></i> <?php echo __('RIC/Fuseki Settings'); ?>
             </a>
             <a href="https://www.ica.org/standards/RiC/ontology" target="_blank" class="btn btn-outline-info">

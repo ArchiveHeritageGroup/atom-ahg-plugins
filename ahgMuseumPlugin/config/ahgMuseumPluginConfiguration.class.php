@@ -3,7 +3,7 @@
 class ahgMuseumPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'AHG Museum Plugin - CCO/Spectrum museum object cataloguing';
-    public static $version = '1.0.0';
+    public static $version = '1.1.0';
 
     public function initialize()
     {
@@ -11,13 +11,13 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
 
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'ahgMuseumPlugin';
+        $enabledModules[] = 'museum';
         $enabledModules[] = 'cco';
         $enabledModules[] = 'museumReports';
         $enabledModules[] = 'dashboard';
         $enabledModules[] = 'cidoc';
         $enabledModules[] = 'authority';
-        $enabledModules[] = 'api';
+        $enabledModules[] = 'museumApi';
         // Note: Exhibition module moved to standalone ahgExhibitionPlugin
         // Note: Loan module moved to standalone ahgLoanPlugin
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
@@ -36,30 +36,30 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         // === MUSEUM VIEW/BROWSE/CRUD ===
         $routing->prependRoute('museum_view', new AhgMetadataRoute(
             '/museum/:slug',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'index'],
+            ['module' => 'museum', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
         ));
         $routing->prependRoute('museum_browse', new sfRoute(
             '/museum/browse',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'browse']
+            ['module' => 'museum', 'action' => 'browse']
         ));
         $routing->prependRoute('museum_add', new sfRoute(
             '/museum/add',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'add']
+            ['module' => 'museum', 'action' => 'add']
         ));
         $routing->prependRoute('museum_edit', new sfRoute(
             '/museum/edit/:slug',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'edit'],
+            ['module' => 'museum', 'action' => 'edit'],
             ['slug' => '[a-zA-Z0-9_-]+']
         ));
         // === VOCABULARY/GETTY API ===
-        $routing->prependRoute('ahgMuseumPlugin_vocabulary', new sfRoute(
-            '/ahgMuseumPlugin/vocabulary',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'vocabulary']
+        $routing->prependRoute('museum_vocabulary', new sfRoute(
+            '/museum/vocabulary',
+            ['module' => 'museum', 'action' => 'vocabulary']
         ));
-        $routing->prependRoute('ahgMuseumPlugin_getty', new sfRoute(
-            '/ahgMuseumPlugin/getty',
-            ['module' => 'ahgMuseumPlugin', 'action' => 'gettyAutocomplete']
+        $routing->prependRoute('museum_getty', new sfRoute(
+            '/museum/getty',
+            ['module' => 'museum', 'action' => 'gettyAutocomplete']
         ));
 
         // Note: Exhibition routes moved to standalone ahgExhibitionPlugin

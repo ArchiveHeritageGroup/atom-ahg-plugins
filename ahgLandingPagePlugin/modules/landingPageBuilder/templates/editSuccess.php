@@ -273,6 +273,6 @@ window.LandingPageBuilder = {
 </script>
 
 <!-- Load Sortable.js and Landing Page Builder JS -->
-<script src="/plugins/ahgCorePlugin/js/vendor/vendor/Sortable.min.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/landing-page-builder.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/landing-page-builder-columns.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/vendor/Sortable.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/landing-page-builder.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/landing-page-builder-columns.js"></script>

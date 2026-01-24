@@ -8,8 +8,8 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
     {
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'donorAgreement';
-        $enabledModules[] = 'ahgDonor';
-        
+        $enabledModules[] = 'donor';
+
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'configureRouting']);
@@ -22,7 +22,7 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
         // Dashboard
         $routing->prependRoute('donor_dashboard', new sfRoute(
             '/donor/dashboard',
-            ['module' => 'donorDashboard', 'action' => 'index']
+            ['module' => 'donorAgreement', 'action' => 'dashboard']
         ));
 
         // Agreement CRUD

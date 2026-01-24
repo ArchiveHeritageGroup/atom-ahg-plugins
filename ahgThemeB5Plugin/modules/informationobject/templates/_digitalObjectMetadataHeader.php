@@ -36,6 +36,6 @@ $hasTiffPdfMerge = class_exists('ahgTiffPdfMergePluginConfiguration');
 ]); ?>
 
 <!-- Load required scripts -->
-<script src="/plugins/ahgCorePlugin/js/vendor/sortable.min.js"></script>
-<script src="<?php echo public_path('plugins/ahgTiffPdfMergePlugin/js/tiff-pdf-merge.js'); ?>"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
+<script src="<?php echo public_path('plugins/ahgTiffPdfMergePlugin/web/js/tiff-pdf-merge.js'); ?>"></script>
 <?php endif; ?>

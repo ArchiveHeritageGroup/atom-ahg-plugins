@@ -9,7 +9,7 @@ $this->addRoute(
     'user_security',
     new sfRoute(
         '/admin/users/:slug/security',
-        ['module' => 'ahgSecurityClearance', 'action' => 'user']
+        ['module' => 'securityClearance', 'action' => 'user']
     )
 );
 
@@ -18,7 +18,7 @@ $this->addRoute(
     'informationobject_security',
     new QubitResourceRoute(
         '/:slug/security',
-        ['module' => 'ahgSecurityClearance', 'action' => 'object'],
+        ['module' => 'securityClearance', 'action' => 'object'],
         ['model' => 'QubitInformationObject']
     )
 );
@@ -27,7 +27,7 @@ $this->addRoute(
     'informationobject_classify',
     new QubitResourceRoute(
         '/:slug/security/classify',
-        ['module' => 'ahgSecurityClearance', 'action' => 'classify'],
+        ['module' => 'securityClearance', 'action' => 'classify'],
         ['model' => 'QubitInformationObject']
     )
 );
@@ -36,7 +36,7 @@ $this->addRoute(
     'informationobject_declassify',
     new QubitResourceRoute(
         '/:slug/security/declassify',
-        ['module' => 'ahgSecurityClearance', 'action' => 'declassify'],
+        ['module' => 'securityClearance', 'action' => 'declassify'],
         ['model' => 'QubitInformationObject']
     )
 );
@@ -46,7 +46,7 @@ $this->addRoute(
     'security_dashboard',
     new sfRoute(
         '/admin/security',
-        ['module' => 'ahgSecurityClearance', 'action' => 'dashboard']
+        ['module' => 'securityClearance', 'action' => 'dashboard']
     )
 );
 
@@ -55,7 +55,7 @@ $this->addRoute(
     'security_clearances',
     new sfRoute(
         '/admin/security/clearances',
-        ['module' => 'ahgSecurityClearance', 'action' => 'clearances']
+        ['module' => 'securityClearance', 'action' => 'clearances']
     )
 );
 
@@ -63,7 +63,7 @@ $this->addRoute(
     'security_clearance_grant',
     new sfRoute(
         '/admin/security/clearances/grant',
-        ['module' => 'ahgSecurityClearance', 'action' => 'grant']
+        ['module' => 'securityClearance', 'action' => 'grant']
     )
 );
 
@@ -71,7 +71,7 @@ $this->addRoute(
     'security_clearance_edit',
     new sfRoute(
         '/admin/security/clearances/:userId/edit',
-        ['module' => 'ahgSecurityClearance', 'action' => 'editClearance'],
+        ['module' => 'securityClearance', 'action' => 'editClearance'],
         ['userId' => '\d+']
     )
 );
@@ -81,7 +81,7 @@ $this->addRoute(
     'security_objects',
     new sfRoute(
         '/admin/security/objects',
-        ['module' => 'ahgSecurityClearance', 'action' => 'objects']
+        ['module' => 'securityClearance', 'action' => 'objects']
     )
 );
 
@@ -90,6 +90,6 @@ $this->addRoute(
     'security_audit',
     new sfRoute(
         '/admin/security/audit',
-        ['module' => 'ahgSecurityClearance', 'action' => 'audit']
+        ['module' => 'securityClearance', 'action' => 'audit']
     )
 );

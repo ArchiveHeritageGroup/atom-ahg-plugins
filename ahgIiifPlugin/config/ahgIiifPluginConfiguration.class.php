@@ -38,12 +38,12 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
 
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'ahgIiif';
-        $enabledModules[] = 'ahgIiifCollection';
-        $enabledModules[] = 'ahgIiifAuth';
+        $enabledModules[] = 'iiif';
+        $enabledModules[] = 'iiifCollection';
+        $enabledModules[] = 'iiifAuth';
         $enabledModules[] = 'threeDReports';
         $enabledModules[] = 'media';
-        $enabledModules[] = 'ahgMediaSettings';
+        $enabledModules[] = 'mediaSettings';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         // Add routes
@@ -93,20 +93,20 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // IIIF Manifest by slug
         $routing->prependRoute('iiif_manifest', new sfRoute(
             '/iiif/manifest/:slug',
-            ['module' => 'ahgIiif', 'action' => 'manifest']
+            ['module' => 'iiif', 'action' => 'manifest']
         ));
 
         // IIIF Manifest by ID
         $routing->prependRoute('iiif_manifest_by_id', new sfRoute(
             '/iiif/manifest/id/:id',
-            ['module' => 'ahgIiif', 'action' => 'manifestById'],
+            ['module' => 'iiif', 'action' => 'manifestById'],
             ['id' => '\d+']
         ));
 
         // Viewer settings admin page
         $routing->prependRoute('iiif_settings', new sfRoute(
             '/admin/iiif-settings',
-            ['module' => 'ahgIiif', 'action' => 'settings']
+            ['module' => 'iiif', 'action' => 'settings']
         ));
 
         // ===================
@@ -116,68 +116,68 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // Autocomplete (most specific first)
         $routing->prependRoute('iiif_collection_autocomplete', new sfRoute(
             '/manifest-collections/autocomplete',
-            ['module' => 'ahgIiifCollection', 'action' => 'autocomplete']
+            ['module' => 'iiifCollection', 'action' => 'autocomplete']
         ));
 
         // Index/list
         $routing->prependRoute('iiif_collection_index', new sfRoute(
             '/manifest-collections',
-            ['module' => 'ahgIiifCollection', 'action' => 'index']
+            ['module' => 'iiifCollection', 'action' => 'index']
         ));
 
         // Create/new
         $routing->prependRoute('iiif_collection_new', new sfRoute(
             '/manifest-collection/new',
-            ['module' => 'ahgIiifCollection', 'action' => 'new']
+            ['module' => 'iiifCollection', 'action' => 'new']
         ));
 
         $routing->prependRoute('iiif_collection_create', new sfRoute(
             '/manifest-collection/create',
-            ['module' => 'ahgIiifCollection', 'action' => 'create']
+            ['module' => 'iiifCollection', 'action' => 'create']
         ));
 
         // Reorder
         $routing->prependRoute('iiif_collection_reorder', new sfRoute(
             '/manifest-collection/reorder',
-            ['module' => 'ahgIiifCollection', 'action' => 'reorder']
+            ['module' => 'iiifCollection', 'action' => 'reorder']
         ));
 
         // View/edit/update/delete
         $routing->prependRoute('iiif_collection_view', new sfRoute(
             '/manifest-collection/:id/view',
-            ['module' => 'ahgIiifCollection', 'action' => 'view']
+            ['module' => 'iiifCollection', 'action' => 'view']
         ));
 
         $routing->prependRoute('iiif_collection_edit', new sfRoute(
             '/manifest-collection/:id/edit',
-            ['module' => 'ahgIiifCollection', 'action' => 'edit']
+            ['module' => 'iiifCollection', 'action' => 'edit']
         ));
 
         $routing->prependRoute('iiif_collection_update', new sfRoute(
             '/manifest-collection/:id/update',
-            ['module' => 'ahgIiifCollection', 'action' => 'update']
+            ['module' => 'iiifCollection', 'action' => 'update']
         ));
 
         $routing->prependRoute('iiif_collection_delete', new sfRoute(
             '/manifest-collection/:id/delete',
-            ['module' => 'ahgIiifCollection', 'action' => 'delete']
+            ['module' => 'iiifCollection', 'action' => 'delete']
         ));
 
         // Items management
         $routing->prependRoute('iiif_collection_add_items', new sfRoute(
             '/manifest-collection/:id/items/add',
-            ['module' => 'ahgIiifCollection', 'action' => 'addItems']
+            ['module' => 'iiifCollection', 'action' => 'addItems']
         ));
 
         $routing->prependRoute('iiif_collection_remove_item', new sfRoute(
             '/manifest-collection/item/:item_id/remove',
-            ['module' => 'ahgIiifCollection', 'action' => 'removeItem']
+            ['module' => 'iiifCollection', 'action' => 'removeItem']
         ));
 
         // IIIF Collection JSON output (must be last - has wildcard slug)
         $routing->prependRoute('iiif_collection_manifest', new sfRoute(
             '/manifest-collection/:slug/manifest.json',
-            ['module' => 'ahgIiifCollection', 'action' => 'manifest']
+            ['module' => 'iiifCollection', 'action' => 'manifest']
         ));
 
         // ===================
@@ -187,49 +187,49 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // Auth admin
         $routing->prependRoute('iiif_auth_admin', new sfRoute(
             '/admin/iiif-auth',
-            ['module' => 'ahgIiifAuth', 'action' => 'index']
+            ['module' => 'iiifAuth', 'action' => 'index']
         ));
 
         // Login service
         $routing->prependRoute('iiif_auth_login', new sfRoute(
             '/iiif/auth/login/:service',
-            ['module' => 'ahgIiifAuth', 'action' => 'login']
+            ['module' => 'iiifAuth', 'action' => 'login']
         ));
 
         // Token service
         $routing->prependRoute('iiif_auth_token', new sfRoute(
             '/iiif/auth/token/:service',
-            ['module' => 'ahgIiifAuth', 'action' => 'token']
+            ['module' => 'iiifAuth', 'action' => 'token']
         ));
 
         // Logout service
         $routing->prependRoute('iiif_auth_logout', new sfRoute(
             '/iiif/auth/logout/:service',
-            ['module' => 'ahgIiifAuth', 'action' => 'logout']
+            ['module' => 'iiifAuth', 'action' => 'logout']
         ));
 
         // Confirm (clickthrough)
         $routing->prependRoute('iiif_auth_confirm', new sfRoute(
             '/iiif/auth/confirm/:service',
-            ['module' => 'ahgIiifAuth', 'action' => 'confirm']
+            ['module' => 'iiifAuth', 'action' => 'confirm']
         ));
 
         // Access check API
         $routing->prependRoute('iiif_auth_check', new sfRoute(
             '/iiif/auth/check/:id',
-            ['module' => 'ahgIiifAuth', 'action' => 'check'],
+            ['module' => 'iiifAuth', 'action' => 'check'],
             ['id' => '\d+']
         ));
 
         // Protect/unprotect (admin)
         $routing->prependRoute('iiif_auth_protect', new sfRoute(
             '/admin/iiif-auth/protect',
-            ['module' => 'ahgIiifAuth', 'action' => 'protect']
+            ['module' => 'iiifAuth', 'action' => 'protect']
         ));
 
         $routing->prependRoute('iiif_auth_unprotect', new sfRoute(
             '/admin/iiif-auth/unprotect',
-            ['module' => 'ahgIiifAuth', 'action' => 'unprotect']
+            ['module' => 'iiifAuth', 'action' => 'unprotect']
         ));
 
         // ===================

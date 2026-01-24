@@ -5,7 +5,7 @@
  * Include in browse templates:
  * <?php include_partial('search/searchEnhancementPanel', ['entityType' => 'informationobject']); ?>
  * 
- * Path: /usr/share/nginx/archive/plugins/ahgThemeB5Plugin/modules/search/templates/_searchEnhancementPanel.php
+ * Path: ' . sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/modules/search/templates/_searchEnhancementPanel.php
  */
 
 // Load service

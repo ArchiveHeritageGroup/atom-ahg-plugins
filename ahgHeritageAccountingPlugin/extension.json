@@ -22,7 +22,7 @@
             "ahgPsasModule"
         ]
     },
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "heritage_accounting_standard",
         "heritage_asset_class",

@@ -234,7 +234,7 @@ class TiffPdfMergeJob
 
         $slugValue = $slug ? $slug->slug : sprintf('%010d', $informationObjectId);
 
-        $uploadDir = '/usr/share/nginx/archive/uploads/r/' . $slugValue;
+        $uploadDir = '' . sfConfig::get('sf_upload_dir') . '/r/' . $slugValue;
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);

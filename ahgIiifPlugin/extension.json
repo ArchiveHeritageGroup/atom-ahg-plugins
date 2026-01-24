@@ -1,0 +1,24 @@
+{
+    "machine_name": "ahgIiifPlugin",
+    "name": "AHG IIIF Plugin",
+    "version": "1.0.0",
+    "description": "IIIF viewer integration with Mirador and OpenSeadragon support",
+    "author": "The Archive and Heritage Group",
+    "category": "viewer",
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional_dependencies": [
+        "ahg3DModelPlugin"
+    ],
+    "tables_created": [
+        "iiif_collection",
+        "iiif_collection_item"
+    ],
+    "provides": {
+        "modules": ["iiif", "iiifCollection"],
+        "assets": ["mirador", "openseadragon"]
+    },
+    "load_order": 80,
+    "minimum_atom_version": "2.10.0"
+}

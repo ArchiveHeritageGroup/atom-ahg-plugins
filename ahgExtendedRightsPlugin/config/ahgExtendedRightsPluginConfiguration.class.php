@@ -8,7 +8,7 @@ class ahgExtendedRightsPluginConfiguration extends sfPluginConfiguration
     public function contextLoadFactories(sfEvent $event)
     {
         $context = $event->getSubject();
-        $context->response->addStylesheet('/plugins/ahgExtendedRightsPlugin/css/extended-rights.css', 'last');
+        $context->response->addStylesheet('/plugins/ahgExtendedRightsPlugin/web/css/extended-rights.css', 'last');
     }
 
     public function initialize()

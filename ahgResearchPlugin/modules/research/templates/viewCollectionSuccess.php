@@ -132,8 +132,8 @@
   <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button><button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button></div>
 </form></div></div></div>
 
-<link href="/plugins/ahgCorePlugin/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgCorePlugin/js/vendor/tom-select.complete.min.js"></script>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   new TomSelect('#itemSearchSelect', {

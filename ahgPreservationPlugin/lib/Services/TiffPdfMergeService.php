@@ -31,9 +31,9 @@ class TiffPdfMergeService
         
         // Get upload directory - handle CLI context
         if (class_exists('sfConfig') && method_exists('sfConfig', 'get')) {
-            $this->uploadDir = \sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+            $this->uploadDir = \sfConfig::get('sf_upload_dir', '' . sfConfig::get('sf_upload_dir') . '');
         } else {
-            $this->uploadDir = '/usr/share/nginx/archive/uploads';
+            $this->uploadDir = '' . sfConfig::get('sf_upload_dir') . '';
         }
 
         // Ensure temp directory exists

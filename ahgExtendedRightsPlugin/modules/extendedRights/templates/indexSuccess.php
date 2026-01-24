@@ -37,7 +37,7 @@
                 <?php foreach ($rightsStatements as $rs): ?>
                   <li class="mb-2">
                     <?php if (!empty($rs->icon_filename)): ?>
-                      <img src="/plugins/ahgExtendedRightsPlugin/images/rights/<?php echo $rs->icon_filename; ?>" 
+                      <img src="/plugins/ahgExtendedRightsPlugin/web/images/rights/<?php echo $rs->icon_filename; ?>" 
                            alt="" style="width: 20px; height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($rs->uri)): ?>
@@ -70,7 +70,7 @@
                 <?php foreach ($ccLicenses as $cc): ?>
                   <li class="mb-2">
                     <?php if (!empty($cc->icon_filename)): ?>
-                      <img src="/plugins/ahgExtendedRightsPlugin/images/cc/<?php echo $cc->icon_filename; ?>" 
+                      <img src="/plugins/ahgExtendedRightsPlugin/web/images/cc/<?php echo $cc->icon_filename; ?>" 
                            alt="" style="height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($cc->uri)): ?>
@@ -103,7 +103,7 @@
                 <?php foreach ($tkLabels as $tk): ?>
                   <li class="mb-2">
                     <?php if (!empty($tk->icon_filename)): ?>
-                      <img src="/plugins/ahgExtendedRightsPlugin/images/tk/<?php echo $tk->icon_filename; ?>" 
+                      <img src="/plugins/ahgExtendedRightsPlugin/web/images/tk/<?php echo $tk->icon_filename; ?>" 
                            alt="" style="width: 20px; height: 20px;" class="me-1">
                     <?php elseif (!empty($tk->icon_url)): ?>
                       <img src="<?php echo $tk->icon_url; ?>" 

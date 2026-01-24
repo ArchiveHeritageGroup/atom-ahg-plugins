@@ -9,8 +9,8 @@ $title = __('Condition Report Photos');
 slot('title', $title);
 
 // Include photo gallery CSS/JS
-use_stylesheet('/plugins/ahgSpectrumPlugin/css/condition-photos.css');
-use_javascript('/plugins/ahgSpectrumPlugin/js/condition-photos.js');
+use_stylesheet('/plugins/ahgSpectrumPlugin/web/css/condition-photos.css');
+use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 ?>
 
 <div class="spectrum-condition-photos">

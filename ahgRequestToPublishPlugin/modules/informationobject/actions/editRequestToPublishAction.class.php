@@ -18,10 +18,17 @@ use AtomExtensions\Services\SettingService;
  * along with Qubit Toolkit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Load PHPMailer manually (since Composer is not used)
-require '/usr/share/nginx/phpmailer/src/PHPMailer.php';
-require '/usr/share/nginx/phpmailer/src/SMTP.php';
-require '/usr/share/nginx/phpmailer/src/Exception.php';
+// Load PHPMailer via framework autoloader or vendor path
+$frameworkAutoload = sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
+if (file_exists($frameworkAutoload)) {
+    require_once $frameworkAutoload;
+} else {
+    // Fallback to vendor directory
+    $vendorPath = sfConfig::get('sf_root_dir') . '/vendor/phpmailer/phpmailer/src';
+    require_once $vendorPath . '/PHPMailer.php';
+    require_once $vendorPath . '/SMTP.php';
+    require_once $vendorPath . '/Exception.php';
+}
 
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;

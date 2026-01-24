@@ -100,7 +100,7 @@ class AhgConfig
             return $path;
         }
 
-        return '/usr/share/nginx/archive';
+        return sfConfig::get('sf_root_dir');
     }
 
     /**

@@ -71,7 +71,7 @@ php plugins/ahgPreservationPlugin/bin/run-fixity-check.php --limit=500 --min-age
         <p class="mt-3">Add to crontab for scheduled runs:</p>
         <pre class="bg-dark text-light p-3 rounded">
 # Daily fixity check at 2am
-0 2 * * * cd /usr/share/nginx/archive && php plugins/ahgPreservationPlugin/bin/run-fixity-check.php >> /var/log/fixity.log 2>&1</pre>
+0 2 * * * cd ' . sfConfig::get('sf_root_dir') . ' && php plugins/ahgPreservationPlugin/bin/run-fixity-check.php >> /var/log/fixity.log 2>&1</pre>
     </div>
 </div>
 

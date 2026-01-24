@@ -177,7 +177,7 @@
             <div class="card-body">
                 <p class="small text-muted mb-2"><?php echo __('Add this cron entry to enable scheduled reports:'); ?></p>
                 <code class="d-block p-2 bg-light rounded small">
-                    0 * * * * cd /usr/share/nginx/archive && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1
+                    0 * * * * cd ' . sfConfig::get('sf_root_dir') . ' && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1
                 </code>
             </div>
         </div>

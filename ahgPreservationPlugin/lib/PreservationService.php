@@ -17,7 +17,7 @@ class PreservationService
 
     public function __construct()
     {
-        $this->uploadsPath = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+        $this->uploadsPath = sfConfig::get('sf_upload_dir', '' . sfConfig::get('sf_upload_dir') . '');
     }
 
     // =========================================
@@ -2911,7 +2911,7 @@ class PreservationService
                 }
 
                 // Build source path: root_dir + path + filename
-                $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                $rootDir = sfConfig::get('sf_root_dir', sfConfig::get('sf_root_dir'));
                 $sourcePath = $rootDir.$obj->digital_object_path.$obj->digital_object_name;
                 $destPath = $packageDir.'/'.$obj->relative_path;
 

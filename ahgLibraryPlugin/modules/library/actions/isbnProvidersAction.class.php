@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * ISBN Providers Admin Action
+ */
+class libraryIsbnProvidersAction extends sfAction
+{
+    public function execute($request)
+    {
+        // Check admin permission
+        if (!$this->context->user->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        \AhgCore\Core\AhgDb::init();
+
+        $this->providers = \Illuminate\Database\Capsule\Manager::table('atom_isbn_provider')
+            ->orderBy('priority')
+            ->get();
+    }
+}

@@ -241,7 +241,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
 <!-- Load required libraries -->
 <link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/css/iiif-viewer.css">
 <link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/viewers/annotorious/annotorious.min.css">
-<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/css/redaction-annotator.css">
+<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css">
 
 <?php if ($docInfo['is_pdf']): ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -253,7 +253,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 <script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js"></script>
 <?php endif; ?>
 
-<script src="/plugins/ahgCorePlugin/js/vendor/fabric.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

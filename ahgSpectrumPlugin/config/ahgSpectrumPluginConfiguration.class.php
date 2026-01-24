@@ -14,7 +14,7 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'spectrum';
         $enabledModules[] = 'spectrumReports';
-        $enabledModules[] = 'api';
+        $enabledModules[] = 'spectrumApi';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
     }
 
@@ -148,17 +148,17 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // API routes
         $routing->prependRoute('spectrum_api_events', new sfRoute(
             '/api/spectrum/events',
-            ['module' => 'api', 'action' => 'spectrumEvents']
+            ['module' => 'spectrumApi', 'action' => 'spectrumEvents']
         ));
 
         $routing->prependRoute('spectrum_api_object_events', new sfRoute(
             '/api/spectrum/objects/:object_id/events',
-            ['module' => 'api', 'action' => 'spectrumObjectEvents']
+            ['module' => 'spectrumApi', 'action' => 'spectrumObjectEvents']
         ));
 
         $routing->prependRoute('spectrum_api_statistics', new sfRoute(
             '/api/spectrum/statistics',
-            ['module' => 'api', 'action' => 'spectrumStatistics']
+            ['module' => 'spectrumApi', 'action' => 'spectrumStatistics']
         ));
 
         // Reports routes - spectrumReports module

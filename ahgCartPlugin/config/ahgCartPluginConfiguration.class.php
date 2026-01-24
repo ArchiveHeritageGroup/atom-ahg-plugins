@@ -38,143 +38,143 @@ class ahgCartPluginConfiguration extends sfPluginConfiguration
         // Cart Browse - override both /cart and /cart/browse
         $routing->prependRoute('ahg_cart_browse', new sfRoute(
             '/cart',
-            ['module' => 'ahgCart', 'action' => 'browse']
+            ['module' => 'cart', 'action' => 'browse']
         ));
         $routing->prependRoute('ahg_cart_browse_legacy', new sfRoute(
             '/cart/browse',
-            ['module' => 'ahgCart', 'action' => 'browse']
+            ['module' => 'cart', 'action' => 'browse']
         ));
 
         // Cart Add
         $routing->prependRoute('ahg_cart_add', new sfRoute(
             '/cart/add/:slug',
-            ['module' => 'ahgCart', 'action' => 'add'],
+            ['module' => 'cart', 'action' => 'add'],
             ['slug' => '[^/]+']
         ));
 
         // Cart Remove
         $routing->prependRoute('ahg_cart_remove', new sfRoute(
             '/cart/remove/:id',
-            ['module' => 'ahgCart', 'action' => 'remove'],
+            ['module' => 'cart', 'action' => 'remove'],
             ['id' => '\d+']
         ));
 
         // Cart Clear
         $routing->prependRoute('ahg_cart_clear', new sfRoute(
             '/cart/clear',
-            ['module' => 'ahgCart', 'action' => 'clear']
+            ['module' => 'cart', 'action' => 'clear']
         ));
 
         // Checkout
         $routing->prependRoute('ahg_cart_thank_you', new sfRoute(
             '/cart/thank-you',
-            ['module' => 'ahgCart', 'action' => 'thankYou']
+            ['module' => 'cart', 'action' => 'thankYou']
         ));
         $routing->prependRoute('ahg_cart_checkout', new sfRoute(
             '/cart/checkout',
-            ['module' => 'ahgCart', 'action' => 'checkout']
+            ['module' => 'cart', 'action' => 'checkout']
         ));
 
         // Update Products (E-Commerce)
         $routing->prependRoute('ahg_cart_update_products', new sfRoute(
             '/cart/update-products',
-            ['module' => 'ahgCart', 'action' => 'updateProducts']
+            ['module' => 'cart', 'action' => 'updateProducts']
         ));
 
         // Update single cart item (AJAX)
         $routing->prependRoute('ahg_cart_update_item', new sfRoute(
             '/cart/update-item',
-            ['module' => 'ahgCart', 'action' => 'updateItem']
+            ['module' => 'cart', 'action' => 'updateItem']
         ));
 
         // Save product selections (AJAX)
         $routing->prependRoute('ahg_cart_save_selections', new sfRoute(
             '/cart/save-selections',
-            ['module' => 'ahgCart', 'action' => 'saveSelections']
+            ['module' => 'cart', 'action' => 'saveSelections']
         ));
 
         // Payment Page (E-Commerce)
         $routing->prependRoute('ahg_cart_payment_return', new sfRoute(
             '/cart/payment-return/:order',
-            ['module' => 'ahgCart', 'action' => 'paymentReturn']
+            ['module' => 'cart', 'action' => 'paymentReturn']
         ));
         $routing->prependRoute('ahg_cart_payment_cancel', new sfRoute(
             '/cart/payment-cancel/:order',
-            ['module' => 'ahgCart', 'action' => 'paymentCancel']
+            ['module' => 'cart', 'action' => 'paymentCancel']
         ));
         $routing->prependRoute('ahg_cart_order_confirmation', new sfRoute(
             '/cart/order/:order',
-            ['module' => 'ahgCart', 'action' => 'orderConfirmation']
+            ['module' => 'cart', 'action' => 'orderConfirmation']
         ));
         $routing->prependRoute('ahg_cart_payment', new sfRoute(
             '/cart/payment/:order',
-            ['module' => 'ahgCart', 'action' => 'payment'],
+            ['module' => 'cart', 'action' => 'payment'],
             ['order' => '[A-Z0-9\-]+']
         ));
 
         // Payment Success Callback
         $routing->prependRoute('ahg_cart_payment_success', new sfRoute(
             '/cart/payment/success/:order',
-            ['module' => 'ahgCart', 'action' => 'paymentSuccess'],
+            ['module' => 'cart', 'action' => 'paymentSuccess'],
             ['order' => '[A-Z0-9\-]+']
         ));
 
         // Payment Cancel Callback
         $routing->prependRoute('ahg_cart_payment_cancel', new sfRoute(
             '/cart/payment/cancel/:order',
-            ['module' => 'ahgCart', 'action' => 'paymentCancel'],
+            ['module' => 'cart', 'action' => 'paymentCancel'],
             ['order' => '[A-Z0-9\-]+']
         ));
 
         // Payment Notification (ITN)
         $routing->prependRoute('ahg_cart_payment_notify', new sfRoute(
             '/cart/payment/notify',
-            ['module' => 'ahgCart', 'action' => 'paymentNotify']
+            ['module' => 'cart', 'action' => 'paymentNotify']
         ));
 
         // Order Confirmation
         $routing->prependRoute('ahg_cart_order_confirmation', new sfRoute(
             '/cart/order/:order',
-            ['module' => 'ahgCart', 'action' => 'orderConfirmation'],
+            ['module' => 'cart', 'action' => 'orderConfirmation'],
             ['order' => '[A-Z0-9\-]+']
         ));
 
         // My Orders
         $routing->prependRoute('ahg_cart_orders', new sfRoute(
             '/cart/orders',
-            ['module' => 'ahgCart', 'action' => 'orders']
+            ['module' => 'cart', 'action' => 'orders']
         ));
 
         // Download (for digital products)
         $routing->prependRoute('ahg_cart_download', new sfRoute(
             '/cart/download/:token',
-            ['module' => 'ahgCart', 'action' => 'download'],
+            ['module' => 'cart', 'action' => 'download'],
             ['token' => '[a-f0-9]+']
         ));
 
         // Admin: E-Commerce Settings
         $routing->prependRoute('ahg_cart_admin_settings', new sfRoute(
             '/admin/ecommerce',
-            ['module' => 'ahgCart', 'action' => 'adminSettings']
+            ['module' => 'cart', 'action' => 'adminSettings']
         ));
 
         // Admin: Orders List
         $routing->prependRoute('ahg_cart_admin_orders', new sfRoute(
             '/admin/orders',
-            ['module' => 'ahgCart', 'action' => 'adminOrders']
+            ['module' => 'cart', 'action' => 'adminOrders']
         ));
 
         // Admin: Order Detail
         $routing->prependRoute('ahg_cart_admin_order_detail', new sfRoute(
             '/admin/orders/:id',
-            ['module' => 'ahgCart', 'action' => 'adminOrderDetail'],
+            ['module' => 'cart', 'action' => 'adminOrderDetail'],
             ['id' => '\d+']
         ));
 
         // Admin: Product Pricing
         $routing->prependRoute('ahg_cart_admin_pricing', new sfRoute(
             '/admin/pricing',
-            ['module' => 'ahgCart', 'action' => 'adminPricing']
+            ['module' => 'cart', 'action' => 'adminPricing']
         ));
     }
 }

@@ -8,7 +8,7 @@
  *   php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php
  *
  * Cron example (run every hour):
- *   0 * * * * cd /usr/share/nginx/archive && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1
+ *   0 * * * * cd ' . sfConfig::get('sf_root_dir') . ' && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1
  */
 
 // Ensure running from CLI
@@ -20,7 +20,7 @@ if (php_sapi_name() !== 'cli') {
 $atomRoot = dirname(dirname(dirname(dirname(__FILE__))));
 if (!file_exists($atomRoot . '/config/ProjectConfiguration.class.php')) {
     // Try alternate path
-    $atomRoot = '/usr/share/nginx/archive';
+    $atomRoot = sfConfig::get('sf_root_dir');
 }
 
 if (!file_exists($atomRoot . '/config/ProjectConfiguration.class.php')) {
@@ -61,7 +61,7 @@ if (isset($options['help'])) {
     echo "  --dry-run      Show what would be run without executing\n";
     echo "  --schedule=ID  Run a specific schedule by ID\n\n";
     echo "Cron example (run every hour):\n";
-    echo "  0 * * * * cd /usr/share/nginx/archive && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1\n\n";
+    echo "  0 * * * * cd ' . sfConfig::get('sf_root_dir') . ' && php plugins/ahgReportBuilderPlugin/bin/run-scheduled-reports.php >> /var/log/atom-reports.log 2>&1\n\n";
     exit(0);
 }
 

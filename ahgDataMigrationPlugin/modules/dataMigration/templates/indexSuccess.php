@@ -106,9 +106,9 @@
                 <div class="col-md-6 d-none" id="serverPathDiv">
                   <label class="form-label">Server Folder Path</label>
                   <select name="digital_object_folder" id="digitalObjectFolder" class="form-select">
-                    <option value="/usr/share/nginx/archive/uploads/migration/">uploads/migration/</option>
-                    <option value="/usr/share/nginx/archive/uploads/imports/">uploads/imports/</option>
-                    <option value="/usr/share/nginx/archive/uploads/digital_objects/">uploads/digital_objects/</option>
+                    <option value="' . sfConfig::get('sf_upload_dir') . '/migration/">uploads/migration/</option>
+                    <option value="' . sfConfig::get('sf_upload_dir') . '/imports/">uploads/imports/</option>
+                    <option value="' . sfConfig::get('sf_upload_dir') . '/digital_objects/">uploads/digital_objects/</option>
                     <option value="custom">Custom path...</option>
                   </select>
                 </div>
@@ -117,7 +117,7 @@
                 <div class="col-md-12">
                   <label class="form-label">Custom Server Path</label>
                   <input type="text" name="custom_digital_path" id="customDigitalPath" class="form-control" 
-                         placeholder="/usr/share/nginx/archive/uploads/myfiles/">
+                         placeholder="' . sfConfig::get('sf_upload_dir') . '/myfiles/">
                   <small class="text-muted">Full server path where digital objects are stored</small>
                 </div>
               </div>
@@ -173,7 +173,7 @@
                   <label class="form-label">Or Select Server Folder</label>
                   <div class="input-group">
                     <input type="text" name="source_folder" id="sourceFolder" class="form-control" 
-                           placeholder="/usr/share/nginx/archive/uploads/preservica_export/">
+                           placeholder="' . sfConfig::get('sf_upload_dir') . '/preservica_export/">
                     <button type="button" class="btn btn-outline-secondary" onclick="browseServerFolder()">
                       <i class="bi bi-folder"></i>
                     </button>

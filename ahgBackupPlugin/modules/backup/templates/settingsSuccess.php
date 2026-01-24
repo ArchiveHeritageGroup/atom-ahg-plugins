@@ -125,7 +125,7 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
                     <p class="small text-muted"><?php echo __('Configure default backup settings. These can be overridden when creating individual backups.') ?></p>
                     <hr>
                     <p class="small text-muted mb-0"><?php echo __('Scheduled backups use a cron job. Set up with:') ?></p>
-                    <code class="small">0 2 * * * /usr/share/nginx/archive/atom-framework/scripts/run-backup.sh</code>
+                    <code class="small">0 2 * * * ' . sfConfig::get('sf_root_dir') . '/atom-framework/scripts/run-backup.sh</code>
                 </div>
             </div>
         </div>

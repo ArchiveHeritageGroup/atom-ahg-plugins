@@ -14,7 +14,7 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "library_item",
         "library_item_creator",

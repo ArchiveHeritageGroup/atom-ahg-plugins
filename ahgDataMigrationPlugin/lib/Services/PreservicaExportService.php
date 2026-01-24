@@ -725,7 +725,7 @@ class PreservicaExportService
      */
     protected function copyDigitalObject($do, string $contentDir): void
     {
-        $uploadsDir = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+        $uploadsDir = sfConfig::get('sf_upload_dir', '' . sfConfig::get('sf_upload_dir') . '');
         $sourcePath = $uploadsDir . '/' . $do->path;
         
         if (file_exists($sourcePath)) {
@@ -917,7 +917,7 @@ class PreservicaExportService
     protected function ensureOutputDir(): void
     {
         if (!$this->outputDir) {
-            $this->outputDir = sfConfig::get('sf_data_dir', '/usr/share/nginx/archive/data') . '/exports';
+            $this->outputDir = sfConfig::get('sf_data_dir', '' . sfConfig::get('sf_root_dir') . '/data') . '/exports';
         }
         
         if (!is_dir($this->outputDir)) {

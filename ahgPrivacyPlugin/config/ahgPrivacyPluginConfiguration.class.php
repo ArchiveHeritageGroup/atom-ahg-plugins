@@ -8,9 +8,12 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
     public function initialize()
     {
         $enabledModules = sfConfig::get('sf_enabled_modules');
-        $enabledModules[] = 'ahgPrivacy';
+        $enabledModules[] = 'privacy';
         $enabledModules[] = 'privacyAdmin';
         sfConfig::set('sf_enabled_modules', $enabledModules);
+
+        // Register PII redaction provider with framework
+        $this->registerProviders();
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
         $this->dispatcher->connect('response.filter_content', [$this, 'addAssets']);
@@ -38,7 +41,7 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- Fabric.js -->
-    <script src="/plugins/ahgCorePlugin/js/vendor/fabric.min.js"></script>
+    <script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
 HTML;
             $content = str_replace('</head>', $css . "\n</head>", $content);
 
@@ -52,6 +55,24 @@ HTML;
         return $content;
     }
 
+    /**
+     * Register providers with the framework.
+     */
+    protected function registerProviders(): void
+    {
+        // Only register if framework is loaded
+        if (!class_exists('AtomFramework\\Providers')) {
+            return;
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Provider/PiiRedactionProvider.php';
+
+        \AtomFramework\Providers::register(
+            'pii_redaction',
+            new \ahgPrivacyPlugin\Provider\PiiRedactionProvider()
+        );
+    }
+
     public function addRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
@@ -59,51 +80,51 @@ HTML;
         // Dashboard
         $routing->prependRoute('privacy_dashboard', new sfRoute(
             '/privacy',
-            ['module' => 'ahgPrivacy', 'action' => 'dashboard']
+            ['module' => 'privacy', 'action' => 'dashboard']
         ));
 
         // DSAR Management
         $routing->prependRoute('privacy_dsar_index', new sfRoute(
             '/privacy/dsar',
-            ['module' => 'ahgPrivacy', 'action' => 'dsarIndex']
+            ['module' => 'privacy', 'action' => 'dsarIndex']
         ));
         $routing->prependRoute('privacy_dsar_new', new sfRoute(
             '/privacy/dsar/new',
-            ['module' => 'ahgPrivacy', 'action' => 'dsarNew']
+            ['module' => 'privacy', 'action' => 'dsarNew']
         ));
         $routing->prependRoute('privacy_dsar_view', new sfRoute(
             '/privacy/dsar/:id',
-            ['module' => 'ahgPrivacy', 'action' => 'dsarView']
+            ['module' => 'privacy', 'action' => 'dsarView']
         ));
         $routing->prependRoute('privacy_dsar_update', new sfRoute(
             '/privacy/dsar/:id/update',
-            ['module' => 'ahgPrivacy', 'action' => 'dsarUpdate']
+            ['module' => 'privacy', 'action' => 'dsarUpdate']
         ));
 
         // Breach Register
         $routing->prependRoute('privacy_breach_index', new sfRoute(
             '/privacy/breaches',
-            ['module' => 'ahgPrivacy', 'action' => 'breachIndex']
+            ['module' => 'privacy', 'action' => 'breachIndex']
         ));
         $routing->prependRoute('privacy_breach_new', new sfRoute(
             '/privacy/breach/new',
-            ['module' => 'ahgPrivacy', 'action' => 'breachNew']
+            ['module' => 'privacy', 'action' => 'breachNew']
         ));
         $routing->prependRoute('privacy_breach_view', new sfRoute(
             '/privacy/breach/:id',
-            ['module' => 'ahgPrivacy', 'action' => 'breachView']
+            ['module' => 'privacy', 'action' => 'breachView']
         ));
 
         // Consent Management
         $routing->prependRoute('privacy_consent_index', new sfRoute(
             '/privacy/consent',
-            ['module' => 'ahgPrivacy', 'action' => 'consentIndex']
+            ['module' => 'privacy', 'action' => 'consentIndex']
         ));
 
         // Processing Activities (ROPA)
         $routing->prependRoute('privacy_ropa', new sfRoute(
             '/privacy/ropa',
-            ['module' => 'ahgPrivacy', 'action' => 'ropa']
+            ['module' => 'privacy', 'action' => 'ropa']
         ));
 
         // Admin

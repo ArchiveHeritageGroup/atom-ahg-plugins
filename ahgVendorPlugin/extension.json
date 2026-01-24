@@ -14,7 +14,7 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "ahg_vendors",
         "ahg_vendor_contacts",

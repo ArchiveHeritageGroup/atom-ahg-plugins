@@ -1,0 +1,4 @@
+all:
+  is_internal: false
+  generator:
+    class: sfPropelAdminGenerator

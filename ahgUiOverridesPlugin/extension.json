@@ -1,0 +1,17 @@
+{
+    "name": "UI Overrides",
+    "machine_name": "ahgUiOverridesPlugin",
+    "version": "1.0.0",
+    "description": "UI action overrides for AtoM modules - centralized location for action customizations",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ]
+}

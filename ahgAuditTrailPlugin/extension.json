@@ -22,7 +22,7 @@
             "AhgCore\\Contracts\\AuditServiceInterface"
         ]
     },
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "ahg_audit_log",
         "ahg_audit_authentication",

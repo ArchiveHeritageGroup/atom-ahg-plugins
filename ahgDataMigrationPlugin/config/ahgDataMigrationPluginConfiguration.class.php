@@ -22,9 +22,10 @@ class ahgDataMigrationPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
-        // Enable module
+        // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'ahgDataMigration';
+        $enabledModules[] = 'preservica';
+        $enabledModules[] = 'dataMigration';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
 
         // Connect to context.load_factories for framework loading

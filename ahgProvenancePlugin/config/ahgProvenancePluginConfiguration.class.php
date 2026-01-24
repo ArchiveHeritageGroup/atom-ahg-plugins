@@ -10,10 +10,10 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
         $context = $event->getSubject();
         
         // Add CSS
-        $context->response->addStylesheet('/plugins/ahgProvenancePlugin/css/provenance.css', 'last');
+        $context->response->addStylesheet('/plugins/ahgProvenancePlugin/web/css/provenance.css', 'last');
         
         // Add JS
-        $context->response->addJavaScript('/plugins/ahgProvenancePlugin/js/provenance.js', 'last');
+        $context->response->addJavaScript('/plugins/ahgProvenancePlugin/web/js/provenance.js', 'last');
     }
 
     public function initialize()

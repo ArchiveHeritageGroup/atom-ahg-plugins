@@ -47,8 +47,8 @@ class ThesaurusService
             : '/var/log/atom';
 
         $frameworkRoot = class_exists('sfConfig')
-            ? \sfConfig::get('sf_root_dir', '/usr/share/nginx/atom') . '/atom-framework'
-            : '/usr/share/nginx/archive/atom-framework';
+            ? \sfConfig::get('sf_root_dir', '/var/www/atom') . '/atom-framework'
+            : '/var/www/atom/atom-framework';
 
         // Load ES synonyms path from DB settings or use default
         $esSynonymsPath = $this->getSettingFromDb('elasticsearch_synonyms_path')

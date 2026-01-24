@@ -229,7 +229,7 @@
                             </a>
                         </div>
                         <div class="col-md-2 col-6 text-center mb-3">
-                            <a href="<?php echo url_for(['module' => 'ahgPrivacy', 'action' => 'index']); ?>" class="btn btn-outline-dark btn-lg w-100" target="_blank">
+                            <a href="<?php echo url_for(['module' => 'privacy', 'action' => 'index']); ?>" class="btn btn-outline-dark btn-lg w-100" target="_blank">
                                 <i class="fas fa-external-link-alt d-block mb-2 fa-2x"></i>
                                 <?php echo __('Public Page'); ?>
                             </a>

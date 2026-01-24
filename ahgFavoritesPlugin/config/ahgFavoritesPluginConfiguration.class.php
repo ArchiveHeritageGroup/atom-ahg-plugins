@@ -15,19 +15,19 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
         $routing = $event->getSubject();
         $routing->prependRoute('ahg_favorites_browse', new sfRoute(
             '/favorites',
-            ['module' => 'ahgFavorites', 'action' => 'browse']
+            ['module' => 'favorites', 'action' => 'browse']
         ));
         $routing->prependRoute('ahg_favorites_add', new sfRoute(
             '/favorites/add/:slug',
-            ['module' => 'ahgFavorites', 'action' => 'add']
+            ['module' => 'favorites', 'action' => 'add']
         ));
         $routing->prependRoute('ahg_favorites_remove', new sfRoute(
             '/favorites/remove/:id',
-            ['module' => 'ahgFavorites', 'action' => 'remove']
+            ['module' => 'favorites', 'action' => 'remove']
         ));
         $routing->prependRoute('ahg_favorites_clear', new sfRoute(
             '/favorites/clear',
-            ['module' => 'ahgFavorites', 'action' => 'clear']
+            ['module' => 'favorites', 'action' => 'clear']
         ));
     }
 
@@ -43,7 +43,7 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
 
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
-        $enabledModules[] = 'ahgFavorites';
+        $enabledModules[] = 'favorites';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 }

@@ -65,7 +65,7 @@ try {
                 'type' => 'secondary',
                 'icon' => 'fa-shield-alt',
                 'text' => sprintf(__('%d access request(s) awaiting approval'), $pendingAccess),
-                'url' => url_for(['module' => 'ahgAccessRequest', 'action' => 'pending']),
+                'url' => url_for(['module' => 'accessRequest', 'action' => 'pending']),
                 'action' => __('Review')
             ];
         }

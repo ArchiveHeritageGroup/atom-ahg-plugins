@@ -19,8 +19,8 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('QubitInformationObject.insert', [$this, 'onInformationObjectSave']);
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
-        $enabledModules[] = 'ahgDisplay';
-        $enabledModules[] = 'ahgDisplaySearch';
+        $enabledModules[] = 'display';
+        $enabledModules[] = 'displaySearch';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -80,7 +80,7 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
         // Core display routes - no theme dependency (fallback)
         $routing->prependRoute('display_browse', new sfRoute(
             '/display/browse',
-            ['module' => 'ahgDisplay', 'action' => 'browse']
+            ['module' => 'display', 'action' => 'browse']
         ));
     }
 

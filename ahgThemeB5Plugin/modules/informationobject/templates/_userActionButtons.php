@@ -86,13 +86,13 @@ $cartEnabled = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->ge
         <?php if ($favoriteId): ?>
           <?php echo link_to(
             '<i class="fas fa-heart-broken me-1"></i>' . __('Remove from Favorites'),
-            ['module' => 'ahgFavorites', 'action' => 'remove', 'id' => $favoriteId],
+            ['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId],
             ['class' => 'btn btn-sm btn-outline-danger']
           ); ?>
         <?php else: ?>
           <?php echo link_to(
             '<i class="fas fa-heart me-1"></i>' . __('Add to Favorites'),
-            ['module' => 'ahgFavorites', 'action' => 'add', 'slug' => $resourceSlug],
+            ['module' => 'favorites', 'action' => 'add', 'slug' => $resourceSlug],
             ['class' => 'btn btn-sm btn-outline-danger']
           ); ?>
         <?php endif; ?>
@@ -102,7 +102,7 @@ $cartEnabled = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->ge
       <?php if ($feedbackEnabled): ?>
         <?php echo link_to(
           '<i class="fas fa-comment me-1"></i>' . __('Item Feedback'),
-          ['module' => 'ahgFeedback', 'action' => 'submit', 'slug' => $resourceSlug],
+          ['module' => 'feedback', 'action' => 'submit', 'slug' => $resourceSlug],
           ['class' => 'btn btn-sm btn-outline-secondary']
         ); ?>
       <?php endif; ?>
@@ -121,13 +121,13 @@ $cartEnabled = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->ge
         <?php if ($cartId): ?>
           <?php echo link_to(
             '<i class="fas fa-shopping-cart me-1"></i>' . __('Go to Cart'),
-            ['module' => 'ahgCart', 'action' => 'browse'],
+            ['module' => 'cart', 'action' => 'browse'],
             ['class' => 'btn btn-sm btn-outline-success']
           ); ?>
         <?php else: ?>
           <?php echo link_to(
             '<i class="fas fa-cart-plus me-1"></i>' . __('Add to Cart'),
-            ['module' => 'ahgCart', 'action' => 'add', 'slug' => $resourceSlug],
+            ['module' => 'cart', 'action' => 'add', 'slug' => $resourceSlug],
             ['class' => 'btn btn-sm btn-outline-success']
           ); ?>
         <?php endif; ?>

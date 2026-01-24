@@ -10,7 +10,7 @@ class BookCoverService
     public const SIZE_SMALL = 'S';
     public const SIZE_MEDIUM = 'M';
     public const SIZE_LARGE = 'L';
-    private const PLACEHOLDER = '/plugins/ahgLibraryPlugin/images/no-cover.png';
+    private const PLACEHOLDER = '/plugins/ahgLibraryPlugin/web/images/no-cover.png';
 
     public static function getOpenLibraryUrl(string $isbn, string $size = self::SIZE_MEDIUM): string
     {

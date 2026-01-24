@@ -136,7 +136,7 @@ class ahgLoanPluginConfiguration extends sfPluginConfiguration
 
         if ($response instanceof sfWebResponse) {
             // Add loan module CSS
-            $response->addStylesheet('/plugins/ahgLoanPlugin/css/loan.css', 'last');
+            $response->addStylesheet('/plugins/ahgLoanPlugin/web/css/loan.css', 'last');
         }
 
         return $content;

@@ -1,5 +1,5 @@
 <!-- Display Mode Switching -->
-<script src="/plugins/ahgCorePlugin/js/vendor/display-mode.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/display-mode.js"></script>
 
 <!-- Base JS for nested dropdowns and UI enhancements -->
-<script src="/plugins/ahgCorePlugin/js/vendor/base.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/base.js"></script>

@@ -36,7 +36,7 @@ declare(strict_types=1);
 
 // Determine paths - detect plugin root from script location
 $pluginRoot = dirname(__DIR__); // Parent of bin/ directory
-$atomRoot = getenv('ATOM_ROOT') ?: '/usr/share/nginx/archive';
+$atomRoot = getenv('ATOM_ROOT') ?: sfConfig::get('sf_root_dir');
 $frameworkRoot = $atomRoot . '/atom-framework';
 
 // Bootstrap

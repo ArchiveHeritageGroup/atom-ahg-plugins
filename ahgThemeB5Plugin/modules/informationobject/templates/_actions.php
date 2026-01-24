@@ -291,7 +291,7 @@ if (io_check_acl($resource, ['create', 'update', 'delete', 'translate'])) {
 			  
 			  <?php if (checkPluginEnabled('ahgConditionPlugin')): ?>
               <li><h6 class="dropdown-header"><?php echo __('Condition Assessment'); ?></h6></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgCondition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Check'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Check'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
               <?php endif; ?>
 			  

@@ -23,23 +23,23 @@ class ahgTranslationPluginConfiguration extends sfPluginConfiguration
 
         $routing->prependRoute('ahg_translation_health', new sfRoute(
             '/translation/health',
-            array('module' => 'ahgTranslation', 'action' => 'health')
+            array('module' => 'translation', 'action' => 'health')
         ));
 
         $routing->prependRoute('ahg_translation_settings', new sfRoute(
             '/translation/settings',
-            array('module' => 'ahgTranslation', 'action' => 'settings')
+            array('module' => 'translation', 'action' => 'settings')
         ));
 
         $routing->prependRoute('ahg_translation_translate', new sfRoute(
             '/translation/translate/:id',
-            array('module' => 'ahgTranslation', 'action' => 'translate'),
+            array('module' => 'translation', 'action' => 'translate'),
             array('id' => '\d+')
         ));
 
         $routing->prependRoute('ahg_translation_apply', new sfRoute(
             '/translation/apply/:draftId',
-            array('module' => 'ahgTranslation', 'action' => 'apply'),
+            array('module' => 'translation', 'action' => 'apply'),
             array('draftId' => '\d+')
         ));
     }

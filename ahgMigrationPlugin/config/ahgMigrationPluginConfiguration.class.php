@@ -7,8 +7,8 @@ class ahgMigrationPluginConfiguration extends sfPluginConfiguration
     public function contextLoadFactories(sfEvent $event)
     {
         $context = $event->getSubject();
-        $context->response->addStylesheet('/plugins/ahgMigrationPlugin/css/migration.css', 'last');
-        $context->response->addJavascript('/plugins/ahgMigrationPlugin/js/migration.js', 'last');
+        $context->response->addStylesheet('/plugins/ahgMigrationPlugin/web/css/migration.css', 'last');
+        $context->response->addJavascript('/plugins/ahgMigrationPlugin/web/js/migration.js', 'last');
     }
 
     public function initialize()

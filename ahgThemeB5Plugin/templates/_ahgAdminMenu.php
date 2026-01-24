@@ -66,12 +66,12 @@ if ($isAdmin && $hasResearch) {
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
     <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
 
     <?php if ($hasSecurityClearance): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Security'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSecurityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Clearances'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Clearances'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
@@ -86,16 +86,16 @@ if ($isAdmin && $hasResearch) {
     <?php if ($hasAccessRequest): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Access'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-1"></i><?php echo __('Requests'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAccessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-1"></i><?php echo __('Approvers'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-1"></i><?php echo __('Requests'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-1"></i><?php echo __('Approvers'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasAuditTrail): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Audit'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'dashboard']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'index']); ?>"><i class="fas fa-clipboard-list fa-fw me-1"></i><?php echo __('Logs'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgAuditTrail', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-1"></i><?php echo __('Settings'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Statistics'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-1"></i><?php echo __('Logs'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-1"></i><?php echo __('Settings'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasRic): ?>

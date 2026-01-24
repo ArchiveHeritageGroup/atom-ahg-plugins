@@ -19,8 +19,8 @@ $mapId = 'map-' . uniqid();
 <?php else: ?>
   <div id="<?php echo $mapId ?>" style="height: <?php echo $height ?>;" class="rounded border"></div>
   
-  <link rel="stylesheet" href="/plugins/ahgCorePlugin/css/vendor/leaflet.min.css" />
-  <script src="/plugins/ahgCorePlugin/js/vendor/leaflet.min.js"></script>
+  <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/leaflet.min.css" />
+  <script src="/plugins/ahgCorePlugin/web/js/vendor/leaflet.min.js"></script>
   
   <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   (function() {

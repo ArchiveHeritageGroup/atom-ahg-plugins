@@ -4,6 +4,11 @@
 !/README.md
 !/ahg*/
 
+# Dependencies and build artifacts
+node_modules/
+.sass-cache/
+*.patch
+
 # Backup and temporary files
 .backups/
 *.bak

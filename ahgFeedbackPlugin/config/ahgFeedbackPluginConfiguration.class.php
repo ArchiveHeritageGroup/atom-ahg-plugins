@@ -21,7 +21,7 @@ class ahgFeedbackPluginConfiguration extends sfPluginConfiguration
 
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
-        $enabledModules[] = 'ahgFeedback';
+        $enabledModules[] = 'feedback';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 }

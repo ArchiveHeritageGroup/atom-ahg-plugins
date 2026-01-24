@@ -14,7 +14,7 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
-    "install_sql": "data/install.sql",
+    "install_sql": "database/install.sql",
     "tables": [
         "object_3d_model",
         "object_3d_model_i18n",

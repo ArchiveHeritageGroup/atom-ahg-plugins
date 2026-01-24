@@ -500,9 +500,9 @@ function cco_edit_form_url($resource): string
     </form>
 
 <!-- Select2 for Creator dropdown -->
-<link href="/plugins/ahgCorePlugin/css/vendor/select2.min.css" rel="stylesheet" />
-<link href="/plugins/ahgCorePlugin/css/vendor/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-<script src="/plugins/ahgCorePlugin/js/vendor/select2.min.js"></script>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/select2.min.css" rel="stylesheet" />
+<link href="/plugins/ahgCorePlugin/web/css/vendor/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<script src="/plugins/ahgCorePlugin/web/js/vendor/select2.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 $(document).ready(function() {
     $('.select2-creators').select2({

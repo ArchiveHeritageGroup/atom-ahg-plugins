@@ -54,7 +54,7 @@ $isAdmin = $sf_user->isAdministrator();
     
     <?php if ($isAdmin): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'damTools']); ?>"><i class="fas fa-tools fa-fw me-2"></i><?php echo __('DAM Tools'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'damTools']); ?>"><i class="fas fa-tools fa-fw me-2"></i><?php echo __('DAM Tools'); ?></a></li>
     <?php endif; ?>
     
   </ul>

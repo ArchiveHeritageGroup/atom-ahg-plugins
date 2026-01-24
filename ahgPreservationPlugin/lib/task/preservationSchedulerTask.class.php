@@ -28,7 +28,7 @@ class preservationSchedulerTask extends arBaseTask
 Executes scheduled preservation workflows based on their configured schedules.
 
 This task should be run via cron every minute:
-  * * * * * cd /usr/share/nginx/archive && php symfony preservation:scheduler
+  * * * * * cd ' . sfConfig::get('sf_root_dir') . ' && php symfony preservation:scheduler
 
 Examples:
   php symfony preservation:scheduler              # Run due workflows
