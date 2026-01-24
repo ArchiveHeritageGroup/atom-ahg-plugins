@@ -5,7 +5,14 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
     {
         // Register plugin as enabled
         sfConfig::set('app_plugins_ahgSecurityClearancePlugin', true);
-        
+
+        // Enable modules
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+        $enabledModules[] = 'ahgSecurityClearance';
+        $enabledModules[] = 'ahgSecurityAudit';
+        $enabledModules[] = 'accessFilter';
+        sfConfig::set('sf_enabled_modules', $enabledModules);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
     }
     

@@ -1,8 +1,7 @@
 all:
   .settings:
     enabled_modules:
-      - api
-      - identifierApi
+      # Note: api, identifierApi moved to ahgAPIPlugin
       - informationobject
       - accession
       - actor

@@ -13,6 +13,12 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Enable modules
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+        $enabledModules[] = 'requestToPublish';
+        $enabledModules[] = 'requesttopublish';
+        sfConfig::set('sf_enabled_modules', $enabledModules);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
     }
 

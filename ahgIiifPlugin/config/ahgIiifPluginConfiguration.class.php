@@ -42,6 +42,8 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'ahgIiifCollection';
         $enabledModules[] = 'ahgIiifAuth';
         $enabledModules[] = 'threeDReports';
+        $enabledModules[] = 'media';
+        $enabledModules[] = 'ahgMediaSettings';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         // Add routes

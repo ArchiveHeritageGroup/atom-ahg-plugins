@@ -11,6 +11,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
     {
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'apiv2';
+        $enabledModules[] = 'api';
+        $enabledModules[] = 'identifierApi';
         sfConfig::set('sf_enabled_modules', $enabledModules);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
     }

@@ -63,9 +63,15 @@ class ahgThemeB5PluginConfiguration extends arDominionB5PluginConfiguration
      */
     private function enableThemeModules(): void
     {
+        // Only theme-specific module overrides remain
+        // Plugin-specific modules moved to their respective plugins:
+        // - api, identifierApi → ahgAPIPlugin
+        // - media, ahgMediaSettings → ahgIiifPlugin
+        // - accessFilter → ahgSecurityClearancePlugin
+        // - isbn → ahgLibraryPlugin
+        // - requesttopublish → ahgRequestToPublishPlugin
+        // - searchEnhancement → ahgSemanticSearchPlugin
         $themeModules = [
-            'api',
-            'identifierApi',
             'informationobject',
         ];
 

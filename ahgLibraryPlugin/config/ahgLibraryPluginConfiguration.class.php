@@ -12,6 +12,8 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'ahgLibraryPlugin';
+        $enabledModules[] = 'isbn';
+        $enabledModules[] = 'libraryReports';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
     
