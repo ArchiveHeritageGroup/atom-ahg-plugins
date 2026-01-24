@@ -3,7 +3,7 @@
  * TIFF to PDF Merge Jobs - Reports Dashboard Widget
  */
 \AhgCore\Core\AhgDb::init();
-require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 use AtomFramework\Repositories\TiffPdfMergeRepository;

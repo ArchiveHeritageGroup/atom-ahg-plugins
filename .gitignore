@@ -2,11 +2,31 @@
 /*
 !/.gitignore
 !/README.md
-!/arAHGThemeB5Plugin/
-!/arSecurityClearancePlugin/
-!/arResearchPlugin/
-!/arAccessRequestPlugin/
-!/arPluginManagerPlugin/
 !/ahg*/
-!/arDisplayPlugin/
-!/arDisplayPlugin/
+
+# Backup and temporary files
+.backups/
+*.bak
+*.bak.*
+*.bak2
+*.old
+*.broken
+*.qubit
+*.snippets
+*.orig
+*.tmp
+*~
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# PHP tools
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# OS files
+.DS_Store
+Thumbs.db

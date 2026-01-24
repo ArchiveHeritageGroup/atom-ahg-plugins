@@ -1,5 +1,7 @@
 -- =====================================================
 -- ahgGalleryPlugin - Database Schema
+-- Gallery-specific: Artists, Loans, Valuations, Spaces
+-- Exhibitions are managed by ahgExhibitionPlugin
 -- DO NOT include INSERT INTO atom_plugin
 -- =====================================================
 
@@ -14,7 +16,11 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_artist`;
+
+-- =====================================================
+-- ARTISTS
+-- =====================================================
+DROP TABLE IF EXISTS `gallery_artist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist` (
@@ -55,9 +61,10 @@ CREATE TABLE IF NOT EXISTS `gallery_artist` (
   KEY `idx_actor` (`actor_id`),
   KEY `idx_name` (`display_name`),
   KEY `idx_represented` (`represented`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_artist_bibliography`;
+
+DROP TABLE IF EXISTS `gallery_artist_bibliography`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist_bibliography` (
@@ -81,7 +88,8 @@ CREATE TABLE IF NOT EXISTS `gallery_artist_bibliography` (
   KEY `idx_type` (`entry_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_artist_exhibition_history`;
+
+DROP TABLE IF EXISTS `gallery_artist_exhibition_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist_exhibition_history` (
@@ -103,147 +111,11 @@ CREATE TABLE IF NOT EXISTS `gallery_artist_exhibition_history` (
   KEY `idx_date` (`start_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_exhibition`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_exhibition` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) NOT NULL,
-  `subtitle` varchar(255) DEFAULT NULL,
-  `description` text,
-  `curator` varchar(255) DEFAULT NULL,
-  `exhibition_type` enum('permanent','temporary','traveling','virtual','pop-up') DEFAULT 'temporary',
-  `status` enum('planning','confirmed','installing','open','closing','closed','cancelled') DEFAULT 'planning',
-  `venue_id` int DEFAULT NULL,
-  `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL,
-  `opening_event_date` datetime DEFAULT NULL,
-  `closing_event_date` datetime DEFAULT NULL,
-  `target_audience` text,
-  `themes` text,
-  `budget` decimal(12,2) DEFAULT NULL,
-  `actual_cost` decimal(12,2) DEFAULT NULL,
-  `visitor_count` int DEFAULT '0',
-  `notes` text,
-  `created_by` int DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_status` (`status`),
-  KEY `idx_dates` (`start_date`,`end_date`),
-  KEY `idx_venue` (`venue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_exhibition_checklist`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_exhibition_checklist` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `exhibition_id` int NOT NULL,
-  `task_name` varchar(255) NOT NULL,
-  `description` text,
-  `category` enum('planning','design','marketing','installation','opening','operation','closing') DEFAULT 'planning',
-  `assigned_to` varchar(255) DEFAULT NULL,
-  `due_date` date DEFAULT NULL,
-  `completed_at` datetime DEFAULT NULL,
-  `completed_by` int DEFAULT NULL,
-  `priority` enum('low','medium','high','critical') DEFAULT 'medium',
-  `status` enum('pending','in_progress','completed','cancelled') DEFAULT 'pending',
-  `notes` text,
-  `sort_order` int DEFAULT '0',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_exhibition` (`exhibition_id`),
-  KEY `idx_status` (`status`),
-  KEY `idx_due` (`due_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_exhibition_object`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_exhibition_object` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `exhibition_id` int NOT NULL,
-  `object_id` int NOT NULL,
-  `space_id` int DEFAULT NULL,
-  `display_order` int DEFAULT '0',
-  `section` varchar(255) DEFAULT NULL,
-  `display_notes` text,
-  `label_text` text,
-  `installation_requirements` text,
-  `installed_at` datetime DEFAULT NULL,
-  `installed_by` int DEFAULT NULL,
-  `removed_at` datetime DEFAULT NULL,
-  `condition_on_install` text,
-  `condition_on_remove` text,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_exhibit` (`exhibition_id`,`object_id`),
-  KEY `idx_exhibition` (`exhibition_id`),
-  KEY `idx_object` (`object_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_facility_report`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_facility_report` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `loan_id` int NOT NULL,
-  `report_type` enum('incoming','outgoing') NOT NULL,
-  `institution_name` varchar(255) DEFAULT NULL,
-  `building_age` int DEFAULT NULL,
-  `construction_type` varchar(100) DEFAULT NULL,
-  `fire_detection` tinyint(1) DEFAULT '0',
-  `fire_suppression` tinyint(1) DEFAULT '0',
-  `security_24hr` tinyint(1) DEFAULT '0',
-  `security_guards` tinyint(1) DEFAULT '0',
-  `cctv` tinyint(1) DEFAULT '0',
-  `intrusion_detection` tinyint(1) DEFAULT '0',
-  `climate_controlled` tinyint(1) DEFAULT '0',
-  `temperature_range` varchar(50) DEFAULT NULL,
-  `humidity_range` varchar(50) DEFAULT NULL,
-  `light_levels` varchar(100) DEFAULT NULL,
-  `uv_filtering` tinyint(1) DEFAULT '0',
-  `trained_handlers` tinyint(1) DEFAULT '0',
-  `loading_dock` tinyint(1) DEFAULT '0',
-  `freight_elevator` tinyint(1) DEFAULT '0',
-  `storage_available` tinyint(1) DEFAULT '0',
-  `insurance_coverage` varchar(255) DEFAULT NULL,
-  `completed_by` varchar(255) DEFAULT NULL,
-  `completed_date` date DEFAULT NULL,
-  `approved` tinyint(1) DEFAULT '0',
-  `approved_by` int DEFAULT NULL,
-  `approved_date` date DEFAULT NULL,
-  `notes` text,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_loan` (`loan_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_insurance_policy`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_insurance_policy` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `policy_number` varchar(100) NOT NULL,
-  `provider` varchar(255) NOT NULL,
-  `policy_type` enum('all_risk','named_perils','transit','exhibition','permanent_collection') DEFAULT 'all_risk',
-  `coverage_amount` decimal(14,2) DEFAULT NULL,
-  `deductible` decimal(12,2) DEFAULT NULL,
-  `premium` decimal(12,2) DEFAULT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `contact_name` varchar(255) DEFAULT NULL,
-  `contact_email` varchar(255) DEFAULT NULL,
-  `contact_phone` varchar(50) DEFAULT NULL,
-  `notes` text,
-  `is_active` tinyint(1) DEFAULT '1',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_dates` (`start_date`,`end_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_loan`;
+
+-- =====================================================
+-- LOANS
+-- =====================================================
+DROP TABLE IF EXISTS `gallery_loan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_loan` (
@@ -282,7 +154,8 @@ CREATE TABLE IF NOT EXISTS `gallery_loan` (
   KEY `idx_dates` (`loan_start_date`,`loan_end_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_loan_object`;
+
+DROP TABLE IF EXISTS `gallery_loan_object`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_loan_object` (
@@ -305,27 +178,49 @@ CREATE TABLE IF NOT EXISTS `gallery_loan_object` (
   KEY `idx_object` (`object_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_space`;
+
+DROP TABLE IF EXISTS `gallery_facility_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_space` (
+CREATE TABLE IF NOT EXISTS `gallery_facility_report` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `venue_id` int NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text,
-  `area_sqm` decimal(10,2) DEFAULT NULL,
-  `wall_length_m` decimal(10,2) DEFAULT NULL,
-  `height_m` decimal(10,2) DEFAULT NULL,
-  `lighting_type` varchar(100) DEFAULT NULL,
+  `loan_id` int NOT NULL,
+  `report_type` enum('incoming','outgoing') NOT NULL,
+  `institution_name` varchar(255) DEFAULT NULL,
+  `building_age` int DEFAULT NULL,
+  `construction_type` varchar(100) DEFAULT NULL,
+  `fire_detection` tinyint(1) DEFAULT '0',
+  `fire_suppression` tinyint(1) DEFAULT '0',
+  `security_24hr` tinyint(1) DEFAULT '0',
+  `security_guards` tinyint(1) DEFAULT '0',
+  `cctv` tinyint(1) DEFAULT '0',
+  `intrusion_detection` tinyint(1) DEFAULT '0',
   `climate_controlled` tinyint(1) DEFAULT '0',
-  `max_weight_kg` decimal(10,2) DEFAULT NULL,
-  `is_active` tinyint(1) DEFAULT '1',
+  `temperature_range` varchar(50) DEFAULT NULL,
+  `humidity_range` varchar(50) DEFAULT NULL,
+  `light_levels` varchar(100) DEFAULT NULL,
+  `uv_filtering` tinyint(1) DEFAULT '0',
+  `trained_handlers` tinyint(1) DEFAULT '0',
+  `loading_dock` tinyint(1) DEFAULT '0',
+  `freight_elevator` tinyint(1) DEFAULT '0',
+  `storage_available` tinyint(1) DEFAULT '0',
+  `insurance_coverage` varchar(255) DEFAULT NULL,
+  `completed_by` varchar(255) DEFAULT NULL,
+  `completed_date` date DEFAULT NULL,
+  `approved` tinyint(1) DEFAULT '0',
+  `approved_by` int DEFAULT NULL,
+  `approved_date` date DEFAULT NULL,
+  `notes` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_venue` (`venue_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_loan` (`loan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_valuation`;
+
+-- =====================================================
+-- VALUATIONS & INSURANCE
+-- =====================================================
+DROP TABLE IF EXISTS `gallery_valuation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_valuation` (
@@ -352,29 +247,56 @@ CREATE TABLE IF NOT EXISTS `gallery_valuation` (
   KEY `idx_current` (`is_current`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS IF EXISTS `gallery_venue`;
+
+DROP TABLE IF EXISTS `gallery_insurance_policy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `gallery_venue` (
+CREATE TABLE IF NOT EXISTS `gallery_insurance_policy` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` text,
-  `address` text,
-  `total_area_sqm` decimal(10,2) DEFAULT NULL,
-  `max_capacity` int DEFAULT NULL,
-  `climate_controlled` tinyint(1) DEFAULT '0',
-  `security_level` varchar(50) DEFAULT NULL,
+  `policy_number` varchar(100) NOT NULL,
+  `provider` varchar(255) NOT NULL,
+  `policy_type` enum('all_risk','named_perils','transit','exhibition','permanent_collection') DEFAULT 'all_risk',
+  `coverage_amount` decimal(14,2) DEFAULT NULL,
+  `deductible` decimal(12,2) DEFAULT NULL,
+  `premium` decimal(12,2) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
   `contact_name` varchar(255) DEFAULT NULL,
   `contact_email` varchar(255) DEFAULT NULL,
   `contact_phone` varchar(50) DEFAULT NULL,
+  `notes` text,
   `is_active` tinyint(1) DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`),
+  KEY `idx_dates` (`start_date`,`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+-- =====================================================
+-- SPACES (references exhibition_venue from ahgExhibitionPlugin)
+-- =====================================================
+DROP TABLE IF EXISTS `gallery_space`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `gallery_space` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `venue_id` int NOT NULL COMMENT 'References exhibition_venue.id',
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `area_sqm` decimal(10,2) DEFAULT NULL,
+  `wall_length_m` decimal(10,2) DEFAULT NULL,
+  `height_m` decimal(10,2) DEFAULT NULL,
+  `lighting_type` varchar(100) DEFAULT NULL,
+  `climate_controlled` tinyint(1) DEFAULT '0',
+  `max_weight_kg` decimal(10,2) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_venue` (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
