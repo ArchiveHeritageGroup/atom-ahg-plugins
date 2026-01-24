@@ -28,7 +28,10 @@
   ]); ?>
 <?php end_slot(); ?>
 
-<?php include_partial('staticpage/featuredCollection') ?>
+<?php // Featured collection carousel - provided by ahgIiifPlugin ?>
+<?php if (class_exists('ahgIiifPluginConfiguration')): ?>
+  <?php include_partial('ahgIiif/featuredCollection') ?>
+<?php endif ?>
 
 <div class="page p-3">
   <?php echo render_value_html($sf_data->getRaw('content')); ?>

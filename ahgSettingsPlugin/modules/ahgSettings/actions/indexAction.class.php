@@ -118,6 +118,17 @@ class AhgSettingsIndexAction extends sfAction
             'url' => 'admin/ahg-settings/plugins'
         ];
 
+        // Multi-Tenant - show when ahgMultiTenantPlugin is enabled
+        $hasMultiTenant = in_array('ahgMultiTenantPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasMultiTenant) {
+            $this->sections['multi_tenant'] = [
+                'label' => 'Multi-Tenancy',
+                'icon' => 'fa-building',
+                'description' => 'Repository-based multi-tenancy with user hierarchy (Admin > Super User > User)',
+                'url' => 'admin/ahg-settings/section?section=multi_tenant'
+            ];
+        }
+
         // API Keys - show when ahgAPIPlugin is enabled
         $hasApi = in_array('ahgAPIPlugin', sfProjectConfiguration::getActive()->getPlugins());
         if ($hasApi) {

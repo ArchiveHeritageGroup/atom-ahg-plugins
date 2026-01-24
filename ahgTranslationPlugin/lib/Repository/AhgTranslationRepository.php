@@ -5,20 +5,45 @@ class AhgTranslationRepository
     /**
      * Map UI field keys to DB columns in information_object_i18n.
      * NOTE: Column names align with AtoM 2.x schema.
+     * All fields from information_object_i18n are now supported.
      */
     public static function allowedFields(): array
     {
         return array(
+            // Primary fields - both camelCase and underscore formats supported
             'title' => 'title',
-            'scopeAndContent' => 'scope_and_content',
+            'alternate_title' => 'alternate_title',
+            'alternateTitle' => 'alternate_title',
+            'edition' => 'edition',
+            'extent_and_medium' => 'extent_and_medium',
+            'extentAndMedium' => 'extent_and_medium',
+            'archival_history' => 'archival_history',
             'archivalHistory' => 'archival_history',
-            'arrangement' => 'arrangement',
-            'findingAids' => 'finding_aids',
-            'accessConditions' => 'access_conditions',
-            'reproductionConditions' => 'reproduction_conditions',
-            'physicalCharacteristics' => 'physical_characteristics',
+            'acquisition' => 'acquisition',
+            'scope_and_content' => 'scope_and_content',
+            'scopeAndContent' => 'scope_and_content',
             'appraisal' => 'appraisal',
-            'immediateSourceOfAcquisition' => 'immediate_source_of_acquisition',
+            'accruals' => 'accruals',
+            'arrangement' => 'arrangement',
+            'access_conditions' => 'access_conditions',
+            'accessConditions' => 'access_conditions',
+            'reproduction_conditions' => 'reproduction_conditions',
+            'reproductionConditions' => 'reproduction_conditions',
+            'physical_characteristics' => 'physical_characteristics',
+            'physicalCharacteristics' => 'physical_characteristics',
+            'finding_aids' => 'finding_aids',
+            'findingAids' => 'finding_aids',
+            'location_of_originals' => 'location_of_originals',
+            'locationOfOriginals' => 'location_of_originals',
+            'location_of_copies' => 'location_of_copies',
+            'locationOfCopies' => 'location_of_copies',
+            'related_units_of_description' => 'related_units_of_description',
+            'relatedUnitsOfDescription' => 'related_units_of_description',
+            'institution_responsible_identifier' => 'institution_responsible_identifier',
+            'rules' => 'rules',
+            'sources' => 'sources',
+            'revision_history' => 'revision_history',
+            'revisionHistory' => 'revision_history',
         );
     }
 
@@ -131,6 +156,19 @@ class AhgTranslationRepository
             "UPDATE ahg_translation_draft SET status='applied', applied_at=NOW() WHERE id=?",
             array($draftId)
         );
+    }
+
+    public function updateDraftText(int $draftId, string $newText): bool
+    {
+        try {
+            AhgTranslationDb::exec(
+                "UPDATE ahg_translation_draft SET translated_text=? WHERE id=? AND status='draft'",
+                array($newText, $draftId)
+            );
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     public function logAttempt(?int $objectId, ?string $field, ?string $src, ?string $tgt, array $result): void

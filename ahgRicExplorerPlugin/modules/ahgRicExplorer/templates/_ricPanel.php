@@ -50,10 +50,11 @@ if (!$resourceId) return;
   <div id="ric-fullscreen-graph" style="width:100%; height:100%;"></div>
 </div>
 
-<script src="/plugins/ahgCorePlugin/js/vendor/cytoscape.min.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/three.min.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/three-spritetext.min.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/3d-force-graph.min.js"></script>
+<!-- RiC Explorer dependencies from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/three-spritetext@1.8.2/dist/three-spritetext.min.js"></script>
+<script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
 
 <script>
 (function() {

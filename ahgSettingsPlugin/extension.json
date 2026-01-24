@@ -1,7 +1,7 @@
 {
     "name": "AHG Settings",
     "machine_name": "ahgSettingsPlugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Extended settings management for AtoM with sections, metadata templates, and configuration tools",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

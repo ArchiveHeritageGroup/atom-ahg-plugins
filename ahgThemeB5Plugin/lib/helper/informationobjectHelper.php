@@ -1,11 +1,8 @@
 <?php
 /**
  * informationobjectHelper - Wrapper for backward compatibility
- * Delegates to IiifViewerHelper when available
+ * Delegates to IiifViewerHelper from ahgIiifPlugin when available
  */
-
-// Load IiifViewerHelper
-require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/helper/IiifViewerHelper.php';
 
 function get_3d_models_from_plugin($objectId)
 {

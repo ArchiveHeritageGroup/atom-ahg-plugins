@@ -140,6 +140,42 @@ class AhgTranslationService
         return array('ok' => true);
     }
 
+    /**
+     * Apply a draft with an explicit target culture (for saveCulture option)
+     */
+    public function applyDraftWithCulture(int $draftId, bool $overwrite = false, ?string $targetCulture = null): array
+    {
+        $draft = $this->repo->getDraft($draftId);
+        if (!$draft) return array('ok' => false, 'error' => 'Draft not found');
+        if ($draft['status'] !== 'draft') return array('ok' => false, 'error' => 'Draft not in draft state');
+
+        $allowed = AhgTranslationRepository::allowedFields();
+        if (!isset($allowed[$draft['field_name']])) return array('ok' => false, 'error' => 'Field not allowed');
+
+        $column = $allowed[$draft['field_name']];
+        $objectId = (int)$draft['object_id'];
+        // Use provided targetCulture or fall back to draft's target_culture
+        $culture = $targetCulture !== null ? $targetCulture : (string)$draft['target_culture'];
+        $text = (string)$draft['translated_text'];
+
+        $this->repo->ensureInformationObjectI18nRow($objectId, $culture);
+
+        $current = $this->repo->getInformationObjectField($objectId, $culture, $column);
+        if (!$overwrite && $current !== null && trim($current) !== '') {
+            return array('ok' => false, 'error' => 'Target field not empty; use overwrite=1 to replace');
+        }
+
+        $this->repo->updateInformationObjectField($objectId, $culture, $column, $text);
+        $this->repo->markDraftApplied($draftId);
+
+        return array('ok' => true, 'culture' => $culture);
+    }
+
+    public function updateDraftText(int $draftId, string $newText): bool
+    {
+        return $this->repo->updateDraftText($draftId, $newText);
+    }
+
     public function logAttempt(?int $objectId, ?string $field, ?string $src, ?string $tgt, array $result): void
     {
         $this->repo->logAttempt($objectId, $field, $src, $tgt, $result);

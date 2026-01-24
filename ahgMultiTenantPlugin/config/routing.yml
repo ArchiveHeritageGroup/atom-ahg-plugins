@@ -1,0 +1,6 @@
+# ahgMultiTenantPlugin routing
+# Note: Routes are also defined programmatically in the plugin configuration class
+
+tenant_switcher_component:
+  url: /tenant/switcher
+  param: { module: tenantSwitcher, action: getSwitcher }

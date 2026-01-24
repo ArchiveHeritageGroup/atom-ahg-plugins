@@ -61,11 +61,13 @@ class ahgTranslationActions extends sfActions
     /**
      * POST /translation/translate/:id
      * Params:
-     *  - field: one of allowed field keys
-     *  - source: culture code (default: current user culture)
-     *  - target: culture code (default: en)
+     *  - field: source field key (one of allowed field keys)
+     *  - targetField: target field key (defaults to same as field)
+     *  - source: source culture code (default: current user culture)
+     *  - target: target culture code (default: from settings)
      *  - apply: 0/1 (default 0) apply immediately
      *  - overwrite: 0/1 (default 0)
+     *  - saveCulture: 0/1 (default 1) save with AtoM culture code
      */
     public function executeTranslate(sfWebRequest $request)
     {
@@ -73,18 +75,24 @@ class ahgTranslationActions extends sfActions
 
         $id = (int)$request->getParameter('id');
         $fieldKey = (string)$request->getParameter('field');
+        $targetFieldKey = (string)$request->getParameter('targetField', $fieldKey); // Default to same field
         $source = (string)$request->getParameter('source', $this->getUser()->getCulture());
         $target = (string)$request->getParameter('target', $this->svc->getSetting('mt.target_culture', 'en'));
         $apply = ((int)$request->getParameter('apply', 0) === 1);
         $overwrite = ((int)$request->getParameter('overwrite', 0) === 1);
+        $saveCulture = ((int)$request->getParameter('saveCulture', 1) === 1);
 
         $allowed = AhgTranslationRepository::allowedFields();
         if (!isset($allowed[$fieldKey])) {
-            return $this->renderText(json_encode(array('ok' => false, 'error' => 'Unsupported field')));
+            return $this->renderText(json_encode(array('ok' => false, 'error' => 'Unsupported source field: ' . $fieldKey)));
+        }
+        if (!isset($allowed[$targetFieldKey])) {
+            return $this->renderText(json_encode(array('ok' => false, 'error' => 'Unsupported target field: ' . $targetFieldKey)));
         }
 
-        $column = $allowed[$fieldKey];
-        $sourceText = $this->svc->repo()->getInformationObjectField($id, $source, $column);
+        $sourceColumn = $allowed[$fieldKey];
+        $targetColumn = $allowed[$targetFieldKey];
+        $sourceText = $this->svc->repo()->getInformationObjectField($id, $source, $sourceColumn);
 
         if ($sourceText === null || trim($sourceText) === '') {
             return $this->renderText(json_encode(array('ok' => false, 'error' => 'No source text for this field/language')));
@@ -106,7 +114,8 @@ class ahgTranslationActions extends sfActions
         $userId = null;
         try { $userId = (int)$this->getUser()->getAttribute('userid'); } catch (Exception $e) {}
 
-        $draft = $this->svc->createDraft($id, $fieldKey, $source, $target, $sourceText, $translated, $userId);
+        // Create draft with target field info
+        $draft = $this->svc->createDraft($id, $targetFieldKey, $source, $target, $sourceText, $translated, $userId);
         if (empty($draft['ok'])) {
             return $this->renderText(json_encode(array('ok' => false, 'error' => $draft['error'] ?? 'Failed to create draft')));
         }
@@ -116,11 +125,17 @@ class ahgTranslationActions extends sfActions
             'draft_id' => $draft['draft_id'],
             'deduped' => $draft['deduped'] ?? false,
             'translation' => $translated,
+            'source_text' => $sourceText,
+            'source_field' => $fieldKey,
+            'target_field' => $targetFieldKey,
         );
 
         if ($apply) {
-            $applied = $this->svc->applyDraft((int)$draft['draft_id'], $overwrite);
+            // Determine target culture - if saveCulture is false, save to source culture
+            $targetCulture = $saveCulture ? $target : $source;
+            $applied = $this->svc->applyDraftWithCulture((int)$draft['draft_id'], $overwrite, $targetCulture);
             $resp['apply_ok'] = !empty($applied['ok']);
+            $resp['saved_culture'] = $targetCulture;
             if (empty($applied['ok'])) $resp['apply_error'] = $applied['error'] ?? 'Apply failed';
         }
 
@@ -133,8 +148,22 @@ class ahgTranslationActions extends sfActions
 
         $draftId = (int)$request->getParameter('draftId');
         $overwrite = ((int)$request->getParameter('overwrite', 0) === 1);
+        $saveCulture = ((int)$request->getParameter('saveCulture', 1) === 1);
+        $targetCulture = (string)$request->getParameter('targetCulture', '');
+        $editedText = $request->getParameter('editedText');
 
-        $result = $this->svc->applyDraft($draftId, $overwrite);
+        // If edited text is provided, update the draft first
+        if ($editedText !== null && $editedText !== '') {
+            $this->svc->updateDraftText($draftId, $editedText);
+        }
+
+        // Apply with culture option
+        if ($saveCulture && $targetCulture !== '') {
+            $result = $this->svc->applyDraftWithCulture($draftId, $overwrite, $targetCulture);
+        } else {
+            $result = $this->svc->applyDraft($draftId, $overwrite);
+        }
+
         return $this->renderText(json_encode($result));
     }
 }

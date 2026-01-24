@@ -1137,8 +1137,12 @@ slot('title', $title);
                                 </fieldset>
                             <?php break; ?>
 
+                        <?php case 'multi_tenant': ?>
+                            <?php include_partial('ahgSettings/multiTenantSettings', ['settings' => $settings]) ?>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
-                        
+
                         <!-- Submit Button -->
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-lg">

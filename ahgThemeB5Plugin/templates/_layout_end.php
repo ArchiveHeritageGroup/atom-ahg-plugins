@@ -1,13 +1,6 @@
 <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/ahgSettings/templates/_dynamicStyles.php'); ?>
 <!-- D3.js for visualizations -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<!-- AHG Media Player Scripts -->
-<script src="/plugins/ahgCorePlugin/js/vendor/atom-media-player.js"></script>
-<script src="/plugins/ahgCorePlugin/js/vendor/media-controls.js"></script>
-<?php // Plugin protection script for admin pages ?>
-<?php if ($sf_user->isAuthenticated() && (strpos($_SERVER['REQUEST_URI'] ?? '', 'ahg-settings/plugins') !== false || strpos($_SERVER['REQUEST_URI'] ?? '', 'sfPluginAdminPlugin') !== false)): ?>
-<script src="/plugins/ahgCorePlugin/js/vendor/plugin-protection.js"></script>
-<?php endif; ?>
 </body>
 </html>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -35,4 +28,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<script src="/plugins/ahgCorePlugin/js/vendor/levelSectorFilter.js"></script>
