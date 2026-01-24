@@ -1,7 +1,7 @@
 <?php
 class ahgGalleryPluginConfiguration extends sfPluginConfiguration
 {
-    public static $summary = 'Gallery & Exhibition Management';
+    public static $summary = 'Gallery Management - Artists, Loans, Valuations';
     public static $version = '1.0.0';
     
     public function initialize()

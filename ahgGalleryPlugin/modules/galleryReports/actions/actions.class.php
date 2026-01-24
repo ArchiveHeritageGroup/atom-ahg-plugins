@@ -19,15 +19,15 @@ class galleryReportsActions extends sfActions
     {
         $this->checkAccess();
         
-        // Dashboard stats
+        // Dashboard stats - using unified exhibition table from ahgExhibitionPlugin
         $this->stats = [
             'exhibitions' => [
-                'total' => DB::table('gallery_exhibition')->count(),
-                'open' => DB::table('gallery_exhibition')->where('status', 'open')->count(),
-                'planning' => DB::table('gallery_exhibition')->where('status', 'planning')->count(),
-                'upcoming' => DB::table('gallery_exhibition')
-                    ->where('start_date', '>', date('Y-m-d'))
-                    ->where('status', '!=', 'cancelled')
+                'total' => DB::table('exhibition')->count(),
+                'open' => DB::table('exhibition')->where('status', 'open')->count(),
+                'planning' => DB::table('exhibition')->where('status', 'planning')->count(),
+                'upcoming' => DB::table('exhibition')
+                    ->where('opening_date', '>', date('Y-m-d'))
+                    ->whereNotIn('status', ['cancelled', 'canceled'])
                     ->count(),
             ],
             'artists' => [
@@ -58,21 +58,22 @@ class galleryReportsActions extends sfActions
     public function executeExhibitions(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+
         $status = $request->getParameter('status');
         $type = $request->getParameter('type');
         $year = $request->getParameter('year');
         $dateFrom = $request->getParameter('date_from');
         $dateTo = $request->getParameter('date_to');
-        
-        $query = DB::table('gallery_exhibition as e')
-            ->leftJoin('gallery_venue as v', 'e.venue_id', '=', 'v.id')
+
+        // Use unified exhibition table from ahgExhibitionPlugin
+        $query = DB::table('exhibition as e')
+            ->leftJoin('exhibition_venue as v', 'e.venue_id', '=', 'v.id')
             ->select(
                 'e.*',
                 'v.name as venue_name',
-                DB::raw('(SELECT COUNT(*) FROM gallery_exhibition_object WHERE exhibition_id = e.id) as object_count')
+                DB::raw('(SELECT COUNT(*) FROM exhibition_object WHERE exhibition_id = e.id) as object_count')
             );
-        
+
         if ($status) {
             $query->where('e.status', $status);
         }
@@ -80,23 +81,23 @@ class galleryReportsActions extends sfActions
             $query->where('e.exhibition_type', $type);
         }
         if ($year) {
-            $query->whereYear('e.start_date', $year);
+            $query->whereYear('e.opening_date', $year);
         }
         if ($dateFrom) {
-            $query->where('e.start_date', '>=', $dateFrom);
+            $query->where('e.opening_date', '>=', $dateFrom);
         }
         if ($dateTo) {
-            $query->where('e.end_date', '<=', $dateTo);
+            $query->where('e.closing_date', '<=', $dateTo);
         }
-        
-        $this->exhibitions = $query->orderBy('e.start_date', 'desc')->get()->toArray();
-        
+
+        $this->exhibitions = $query->orderBy('e.opening_date', 'desc')->get()->toArray();
+
         $this->filters = compact('status', 'type', 'year', 'dateFrom', 'dateTo');
-        $this->statuses = ['planning', 'confirmed', 'installing', 'open', 'closing', 'closed', 'cancelled'];
-        $this->types = ['permanent', 'temporary', 'traveling', 'virtual', 'pop-up'];
-        $this->years = DB::table('gallery_exhibition')
-            ->selectRaw('DISTINCT YEAR(start_date) as year')
-            ->whereNotNull('start_date')
+        $this->statuses = ['concept', 'planning', 'preparation', 'installation', 'open', 'closing', 'closed', 'archived', 'canceled'];
+        $this->types = ['permanent', 'temporary', 'traveling', 'online', 'pop_up'];
+        $this->years = DB::table('exhibition')
+            ->selectRaw('DISTINCT YEAR(opening_date) as year')
+            ->whereNotNull('opening_date')
             ->orderBy('year', 'desc')
             ->pluck('year')
             ->toArray();
@@ -309,8 +310,9 @@ class galleryReportsActions extends sfActions
         
         switch ($report) {
             case 'exhibitions':
-                $data = DB::table('gallery_exhibition')->get()->toArray();
-                $filename = 'gallery_exhibitions_' . date('Y-m-d') . '.csv';
+                // Use unified exhibition table from ahgExhibitionPlugin
+                $data = DB::table('exhibition')->get()->toArray();
+                $filename = 'exhibitions_' . date('Y-m-d') . '.csv';
                 break;
             case 'artists':
                 $data = DB::table('gallery_artist')->get()->toArray();

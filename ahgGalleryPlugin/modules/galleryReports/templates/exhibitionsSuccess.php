@@ -75,9 +75,9 @@
                     <span class="badge bg-<?php echo $color; ?>"><?php echo ucfirst($e->status); ?></span>
                 </td>
                 <td><?php echo esc_specialchars($e->venue_name ?? '-'); ?></td>
-                <td><?php echo $e->start_date ? date('d M Y', strtotime($e->start_date)) : '-'; ?><?php if ($e->end_date): ?> - <?php echo date('d M Y', strtotime($e->end_date)); ?><?php endif; ?></td>
+                <td><?php echo $e->opening_date ? date('d M Y', strtotime($e->opening_date)) : '-'; ?><?php if ($e->closing_date): ?> - <?php echo date('d M Y', strtotime($e->closing_date)); ?><?php endif; ?></td>
                 <td class="text-center"><?php echo $e->object_count; ?></td>
-                <td class="text-end"><?php echo number_format($e->visitor_count ?? 0); ?></td>
+                <td class="text-end"><?php echo number_format($e->actual_visitors ?? 0); ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>

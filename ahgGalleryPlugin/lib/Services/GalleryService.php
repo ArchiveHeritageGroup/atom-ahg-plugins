@@ -1,126 +1,19 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
+/**
+ * Gallery Service
+ *
+ * Provides gallery-specific functionality:
+ * - Loans (incoming/outgoing)
+ * - Valuations
+ * - Artists
+ * - Venues/Spaces (for gallery use)
+ *
+ * Note: Exhibition functionality moved to standalone ahgExhibitionPlugin
+ */
 class GalleryService
 {
-    // =========================================================================
-    // EXHIBITIONS
-    // =========================================================================
-
-    public function getExhibitions(array $filters = []): array
-    {
-        $query = DB::table('gallery_exhibition as e')
-            ->leftJoin('gallery_venue as v', 'e.venue_id', '=', 'v.id')
-            ->select('e.*', 'v.name as venue_name');
-        if (!empty($filters['status'])) $query->where('e.status', $filters['status']);
-        if (!empty($filters['year'])) $query->whereYear('e.start_date', $filters['year']);
-        return $query->orderBy('e.start_date', 'desc')->get()->toArray();
-    }
-
-    public function getExhibition(int $id): ?object
-    {
-        $exhibition = DB::table('gallery_exhibition as e')
-            ->leftJoin('gallery_venue as v', 'e.venue_id', '=', 'v.id')
-            ->where('e.id', $id)
-            ->select('e.*', 'v.name as venue_name')
-            ->first();
-        if ($exhibition) {
-            $exhibition->objects = DB::table('gallery_exhibition_object as eo')
-                ->leftJoin('information_object_i18n as i18n', function($j) {
-                    $j->on('eo.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
-                })
-                ->leftJoin('slug', 'eo.object_id', '=', 'slug.object_id')
-                ->leftJoin('gallery_space as s', 'eo.space_id', '=', 's.id')
-                ->where('eo.exhibition_id', $id)
-                ->select('eo.*', 'i18n.title as object_title', 'slug.slug', 's.name as space_name')
-                ->orderBy('eo.display_order')->get()->toArray();
-            $exhibition->checklist = DB::table('gallery_exhibition_checklist')
-                ->where('exhibition_id', $id)->orderBy('sort_order')->get()->toArray();
-        }
-        return $exhibition;
-    }
-
-    public function createExhibition(array $data): int
-    {
-        return DB::table('gallery_exhibition')->insertGetId([
-            'title' => $data['title'],
-            'subtitle' => $data['subtitle'] ?? null,
-            'description' => $data['description'] ?? null,
-            'curator' => $data['curator'] ?? null,
-            'exhibition_type' => $data['exhibition_type'] ?? 'temporary',
-            'status' => 'planning',
-            'venue_id' => $data['venue_id'] ?? null,
-            'start_date' => $data['start_date'] ?? null,
-            'end_date' => $data['end_date'] ?? null,
-            'budget' => $data['budget'] ?? null,
-            'created_by' => $data['created_by'] ?? null,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-    }
-
-    public function updateExhibition(int $id, array $data): bool
-    {
-        $data['updated_at'] = date('Y-m-d H:i:s');
-        return DB::table('gallery_exhibition')->where('id', $id)->update($data) > 0;
-    }
-
-    public function addExhibitionObject(int $exhibitionId, int $objectId, array $data = []): int
-    {
-        $maxOrder = DB::table('gallery_exhibition_object')->where('exhibition_id', $exhibitionId)->max('display_order') ?? 0;
-        return DB::table('gallery_exhibition_object')->insertGetId([
-            'exhibition_id' => $exhibitionId,
-            'object_id' => $objectId,
-            'space_id' => $data['space_id'] ?? null,
-            'display_order' => $maxOrder + 1,
-            'section' => $data['section'] ?? null,
-            'label_text' => $data['label_text'] ?? null,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-    }
-
-    public function removeExhibitionObject(int $exhibitionId, int $objectId): bool
-    {
-        return DB::table('gallery_exhibition_object')
-            ->where('exhibition_id', $exhibitionId)->where('object_id', $objectId)->delete() > 0;
-    }
-
-    public function addChecklistItem(int $exhibitionId, array $data): int
-    {
-        $maxOrder = DB::table('gallery_exhibition_checklist')->where('exhibition_id', $exhibitionId)->max('sort_order') ?? 0;
-        return DB::table('gallery_exhibition_checklist')->insertGetId([
-            'exhibition_id' => $exhibitionId,
-            'task_name' => $data['task_name'],
-            'description' => $data['description'] ?? null,
-            'category' => $data['category'] ?? 'planning',
-            'assigned_to' => $data['assigned_to'] ?? null,
-            'due_date' => $data['due_date'] ?? null,
-            'priority' => $data['priority'] ?? 'medium',
-            'status' => 'pending',
-            'sort_order' => $maxOrder + 1,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-    }
-
-    public function updateChecklistItem(int $id, array $data): bool
-    {
-        return DB::table('gallery_exhibition_checklist')->where('id', $id)->update($data) > 0;
-    }
-
-    public function getVenues(): array
-    {
-        return DB::table('gallery_venue')->where('is_active', 1)->orderBy('name')->get()->toArray();
-    }
-
-    public function getSpaces(?int $venueId = null): array
-    {
-        $query = DB::table('gallery_space as s')
-            ->join('gallery_venue as v', 's.venue_id', '=', 'v.id')
-            ->where('s.is_active', 1)
-            ->select('s.*', 'v.name as venue_name');
-        if ($venueId) $query->where('s.venue_id', $venueId);
-        return $query->orderBy('v.name')->orderBy('s.name')->get()->toArray();
-    }
-
     // =========================================================================
     // LOANS
     // =========================================================================
@@ -359,17 +252,18 @@ class GalleryService
 
     public function getDashboardStats(): array
     {
+        // Use unified exhibition table from ahgExhibitionPlugin
         return [
-            'exhibitions_open' => DB::table('gallery_exhibition')->where('status', 'open')->count(),
-            'exhibitions_planning' => DB::table('gallery_exhibition')->where('status', 'planning')->count(),
+            'exhibitions_open' => DB::table('exhibition')->where('status', 'open')->count(),
+            'exhibitions_planning' => DB::table('exhibition')->where('status', 'planning')->count(),
             'loans_active' => DB::table('gallery_loan')->whereIn('status', ['on_loan', 'in_transit_out', 'in_transit_return'])->count(),
             'loans_pending' => DB::table('gallery_loan')->whereIn('status', ['inquiry', 'requested'])->count(),
             'artists_represented' => DB::table('gallery_artist')->where('represented', 1)->count(),
             'artists_total' => DB::table('gallery_artist')->count(),
-            'upcoming_exhibitions' => DB::table('gallery_exhibition')
-                ->where('start_date', '>', date('Y-m-d'))
-                ->where('status', '!=', 'cancelled')
-                ->orderBy('start_date')->limit(5)->get()->toArray(),
+            'upcoming_exhibitions' => DB::table('exhibition')
+                ->where('opening_date', '>', date('Y-m-d'))
+                ->whereNotIn('status', ['cancelled', 'canceled'])
+                ->orderBy('opening_date')->limit(5)->get()->toArray(),
             'expiring_loans' => DB::table('gallery_loan')
                 ->where('status', 'on_loan')
                 ->where('loan_end_date', '<=', date('Y-m-d', strtotime('+30 days')))

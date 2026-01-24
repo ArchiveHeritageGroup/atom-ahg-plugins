@@ -19,89 +19,29 @@ class galleryActions extends sfActions
     }
 
     // =========== EXHIBITIONS ===========
+    // Exhibition functionality moved to standalone ahgExhibitionPlugin
+    // These actions redirect to the unified exhibition module
 
     public function executeExhibitions(sfWebRequest $request)
     {
-        $this->exhibitions = $this->service->getExhibitions([
-            'status' => $request->getParameter('status'),
-            'year' => $request->getParameter('year'),
-        ]);
-        $this->currentStatus = $request->getParameter('status');
+        $this->redirect('exhibition/index');
     }
 
     public function executeCreateExhibition(sfWebRequest $request)
     {
-        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
-        $this->venues = $this->service->getVenues();
-        if ($request->isMethod('post')) {
-            $id = $this->service->createExhibition([
-                'title' => $request->getParameter('title'),
-                'subtitle' => $request->getParameter('subtitle'),
-                'description' => $request->getParameter('description'),
-                'curator' => $request->getParameter('curator'),
-                'exhibition_type' => $request->getParameter('exhibition_type'),
-                'venue_id' => $request->getParameter('venue_id'),
-                'start_date' => $request->getParameter('start_date'),
-                'end_date' => $request->getParameter('end_date'),
-                'budget' => $request->getParameter('budget'),
-                'created_by' => $this->getUser()->getAttribute('user_id'),
-            ]);
-            $this->getUser()->setFlash('success', 'Exhibition created');
-            $this->redirect('gallery/viewExhibition?id=' . $id);
-        }
+        $this->redirect('exhibition/add');
     }
 
     public function executeViewExhibition(sfWebRequest $request)
     {
-        $id = (int) $request->getParameter('id');
-        $this->exhibition = $this->service->getExhibition($id);
-        if (!$this->exhibition) { $this->forward404('Exhibition not found'); }
-        $this->spaces = $this->service->getSpaces($this->exhibition->venue_id);
-
-        if ($request->isMethod('post')) {
-            $do = $request->getParameter('do');
-            if ($do === 'update_status') {
-                $this->service->updateExhibition($id, ['status' => $request->getParameter('status')]);
-                $this->getUser()->setFlash('success', 'Status updated');
-            } elseif ($do === 'add_task') {
-                $this->service->addChecklistItem($id, [
-                    'task_name' => $request->getParameter('task_name'),
-                    'category' => $request->getParameter('category'),
-                    'assigned_to' => $request->getParameter('assigned_to'),
-                    'due_date' => $request->getParameter('due_date'),
-                    'priority' => $request->getParameter('priority'),
-                ]);
-                $this->getUser()->setFlash('success', 'Task added');
-            } elseif ($do === 'complete_task') {
-                $this->service->updateChecklistItem((int)$request->getParameter('task_id'), [
-                    'status' => 'completed',
-                    'completed_at' => date('Y-m-d H:i:s'),
-                    'completed_by' => $this->getUser()->getAttribute('user_id'),
-                ]);
-            } elseif ($do === 'remove_object') {
-                $this->service->removeExhibitionObject($id, (int)$request->getParameter('object_id'));
-                $this->getUser()->setFlash('success', 'Object removed');
-            }
-            $this->redirect('gallery/viewExhibition?id=' . $id);
-        }
+        $id = $request->getParameter('id');
+        $this->redirect('exhibition/show?id=' . $id);
     }
 
     public function executeAddExhibitionObject(sfWebRequest $request)
     {
-        $exhibitionId = (int) $request->getParameter('exhibition_id');
-        $this->exhibition = $this->service->getExhibition($exhibitionId);
-        if (!$this->exhibition) { $this->forward404('Exhibition not found'); }
-        $this->spaces = $this->service->getSpaces($this->exhibition->venue_id);
-
-        if ($request->isMethod('post')) {
-            $this->service->addExhibitionObject($exhibitionId, (int)$request->getParameter('object_id'), [
-                'space_id' => $request->getParameter('space_id'),
-                'section' => $request->getParameter('section'),
-                'label_text' => $request->getParameter('label_text'),
-            ]);
-            $this->getUser()->setFlash('success', 'Object added to exhibition');
-            $this->redirect('gallery/viewExhibition?id=' . $exhibitionId);
-        }
+        $id = $request->getParameter('exhibition_id');
+        $this->redirect('exhibition/objects?id=' . $id);
     }
 
     // =========== LOANS ===========
@@ -119,7 +59,12 @@ class galleryActions extends sfActions
     public function executeCreateLoan(sfWebRequest $request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
-        $this->exhibitions = $this->service->getExhibitions(['status' => 'planning']);
+        // Get exhibitions from unified exhibition table
+        $this->exhibitions = DB::table('exhibition')
+            ->whereIn('status', ['planning', 'preparation'])
+            ->orderBy('title')
+            ->get()
+            ->toArray();
         if ($request->isMethod('post')) {
             $id = $this->service->createLoan([
                 'loan_type' => $request->getParameter('loan_type'),
