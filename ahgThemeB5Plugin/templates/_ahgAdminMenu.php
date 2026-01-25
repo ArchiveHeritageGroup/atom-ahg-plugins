@@ -111,6 +111,12 @@ if ($isAdmin && $hasResearch) {
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Heritage'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-landmark fa-fw me-1"></i><?php echo __('Admin'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Analytics'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Custodian'); ?></a></li>
+
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Maintenance'); ?></h6></li>
     <?php if ($hasBackup): ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-database fa-fw me-1"></i><?php echo __('Backup'); ?></a></li>

@@ -10,7 +10,7 @@ class iiifCollectionActions extends sfActions
     protected function initService()
     {
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
-        $this->collectionService = new \AtomFramework\Services\IiifCollectionService();
+        $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
         
         // Initialize database
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
@@ -199,8 +199,9 @@ class iiifCollectionActions extends sfActions
         
         if ($request->isMethod('post')) {
             $objectIds = $request->getParameter('object_ids', []);
+            $includeChildren = $request->getParameter('include_children', []);
             $manifestUri = $request->getParameter('manifest_uri');
-            
+
             if ($manifestUri) {
                 $this->collectionService->addItem($id, [
                     'manifest_uri' => $manifestUri,
@@ -208,15 +209,23 @@ class iiifCollectionActions extends sfActions
                     'item_type' => $request->getParameter('item_type', 'manifest'),
                 ]);
             }
-            
+
             if (is_array($objectIds)) {
                 foreach ($objectIds as $objectId) {
+                    $objectId = (int) $objectId;
+
+                    // Add the main item
                     $this->collectionService->addItem($id, [
-                        'object_id' => (int)$objectId,
+                        'object_id' => $objectId,
                     ]);
+
+                    // If include_children is checked for this item, add all descendants
+                    if (in_array($objectId, (array) $includeChildren)) {
+                        $this->addChildrenToCollection($id, $objectId);
+                    }
                 }
             }
-            
+
             $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $id]);
         }
         
@@ -300,6 +309,37 @@ class iiifCollectionActions extends sfActions
     }
 
     /**
+     * Add all children/descendants of an object to a collection.
+     */
+    protected function addChildrenToCollection(int $collectionId, int $parentObjectId): void
+    {
+        // Get the parent's lft and rgt values for nested set query
+        $parent = \Illuminate\Database\Capsule\Manager::table('information_object')
+            ->where('id', $parentObjectId)
+            ->select('lft', 'rgt')
+            ->first();
+
+        if (!$parent) {
+            return;
+        }
+
+        // Find all descendants with digital objects
+        $children = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->join('digital_object as do', 'io.id', '=', 'do.object_id')
+            ->where('io.lft', '>', $parent->lft)
+            ->where('io.rgt', '<', $parent->rgt)
+            ->select('io.id')
+            ->orderBy('io.lft')
+            ->get();
+
+        foreach ($children as $child) {
+            $this->collectionService->addItem($collectionId, [
+                'object_id' => $child->id,
+            ]);
+        }
+    }
+
+    /**
      * Search objects
      */
     protected function searchObjects(string $query): array
@@ -348,11 +388,12 @@ class iiifCollectionActions extends sfActions
     public function executeAutocomplete(sfWebRequest $request)
     {
         $this->initService();
-        
+
         $query = $request->getParameter('q', '');
         $results = [];
-        
+
         if (strlen($query) >= 2) {
+            // Search for objects - include items without digital objects too (for parent selection)
             $objects = \Illuminate\Database\Capsule\Manager::table('information_object as io')
                 ->leftJoin('information_object_i18n as i18n', function ($join) {
                     $join->on('io.id', '=', 'i18n.id')
@@ -364,23 +405,37 @@ class iiifCollectionActions extends sfActions
                     $q->where('i18n.title', 'LIKE', "%{$query}%")
                         ->orWhere('io.identifier', 'LIKE', "%{$query}%");
                 })
-                ->whereNotNull('do.id')
-                ->select('io.id', 'io.identifier', 'i18n.title', 'slug.slug')
-                ->limit(20)
+                ->select('io.id', 'io.identifier', 'i18n.title', 'slug.slug', 'io.lft', 'io.rgt', 'do.id as has_digital')
+                ->orderByRaw('do.id IS NOT NULL DESC') // Prioritize items with digital objects
+                ->limit(30)
                 ->get();
-            
+
             foreach ($objects as $obj) {
+                // Calculate child count using nested set (children with digital objects)
+                $childCount = 0;
+                if ($obj->rgt - $obj->lft > 1) {
+                    $childCount = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+                        ->join('digital_object as do', 'io.id', '=', 'do.object_id')
+                        ->where('io.lft', '>', $obj->lft)
+                        ->where('io.rgt', '<', $obj->rgt)
+                        ->count();
+                }
+
                 $results[] = [
                     'id' => $obj->id,
                     'text' => ($obj->identifier ? "[{$obj->identifier}] " : '') . ($obj->title ?: 'Untitled'),
                     'identifier' => $obj->identifier,
                     'title' => $obj->title,
                     'slug' => $obj->slug,
+                    'hasDigital' => !empty($obj->has_digital),
+                    'hasChildren' => $childCount > 0,
+                    'childCount' => $childCount,
                 ];
             }
         }
-        
+
         $this->getResponse()->setContentType('application/json');
+
         return $this->renderText(json_encode(['results' => $results]));
     }
 }

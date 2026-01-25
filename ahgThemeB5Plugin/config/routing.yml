@@ -12,6 +12,7 @@
 # Spectrum Reports routes → ahgSpectrumPlugin
 # Search Enhancement routes → ahgSemanticSearchPlugin
 # Request to Publish routes → ahgRequestToPublishPlugin
+# Heritage Platform routes → ahgHeritagePlugin
 #
 # This file is kept for any theme-specific routes only.
 # =============================================================================

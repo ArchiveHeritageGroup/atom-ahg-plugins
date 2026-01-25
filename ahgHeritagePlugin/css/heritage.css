@@ -1,0 +1,96 @@
+/**
+ * Heritage Plugin Styles
+ *
+ * Core styles for the Heritage discovery platform.
+ * Bootstrap 5 classes are used extensively - this file is for custom overrides only.
+ */
+
+/* Landing Page */
+.heritage-landing {}
+
+/* Hero Section */
+.heritage-hero {
+    min-height: 400px;
+}
+
+.heritage-hero-overlay {
+    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+/* Search */
+.heritage-search {}
+
+.heritage-search-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Result Cards */
+.heritage-result-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heritage-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Thumbnails */
+.heritage-thumb {
+    object-fit: cover;
+}
+
+/* Recent Additions Scroll */
+.heritage-recent-scroll {
+    scroll-behavior: smooth;
+}
+
+.heritage-recent-item {
+    transition: transform 0.2s ease;
+}
+
+.heritage-recent-item:hover {
+    transform: translateY(-3px);
+}
+
+/* Story Cards */
+.heritage-story-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heritage-story-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Filter Cards */
+.heritage-filter-card {}
+
+.heritage-filter-link {
+    transition: background-color 0.15s ease;
+}
+
+.heritage-filter-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Contribute */
+.heritage-contribute-card {}
+
+/* Admin */
+.heritage-admin {}
+
+/* Analytics */
+.heritage-analytics {}
+
+/* Custodian */
+.heritage-custodian {}
+
+/* Contributor */
+.heritage-contributor {}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .heritage-hero {
+        min-height: 300px;
+    }
+}

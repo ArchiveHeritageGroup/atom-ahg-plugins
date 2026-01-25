@@ -97,7 +97,7 @@ class AhgSettingsIndexAction extends sfAction
                 'label' => 'Library Settings',
                 'icon' => 'fa-book',
                 'description' => 'ISBN providers and library module configuration',
-                'url' => 'library/isbnProviders'
+                'url' => 'library/isbn-providers'
             ];
         }
 

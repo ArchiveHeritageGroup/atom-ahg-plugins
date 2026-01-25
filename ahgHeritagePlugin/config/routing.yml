@@ -1,0 +1,291 @@
+# Heritage Platform Routes
+# =============================================================================
+
+# Public Landing Page
+heritage_landing:
+  url: /heritage
+  param: { module: heritage, action: landing }
+
+# Public Search/Browse
+heritage_search:
+  url: /heritage/search
+  param: { module: heritage, action: search }
+
+# API: Landing Page Data
+heritage_api_landing:
+  url: /heritage/api/landing
+  param: { module: heritage, action: apiLanding }
+
+# API: Discovery/Search
+heritage_api_discover:
+  url: /heritage/api/discover
+  param: { module: heritage, action: apiDiscover }
+  requirements: { sf_method: [get, post] }
+
+# API: Autocomplete
+heritage_api_autocomplete:
+  url: /heritage/api/autocomplete
+  param: { module: heritage, action: apiAutocomplete }
+
+# API: Click Tracking
+heritage_api_click:
+  url: /heritage/api/click
+  param: { module: heritage, action: apiClick }
+  requirements: { sf_method: post }
+
+# API: Dwell Time
+heritage_api_dwell:
+  url: /heritage/api/dwell
+  param: { module: heritage, action: apiDwell }
+  requirements: { sf_method: post }
+
+# API: Analytics (Admin only)
+heritage_api_analytics:
+  url: /heritage/api/analytics
+  param: { module: heritage, action: apiAnalytics }
+
+# Admin: Configuration
+heritage_admin_config:
+  url: /heritage/admin/config
+  param: { module: heritage, action: adminConfig }
+  requirements: { sf_method: [get, post] }
+
+# =============================================================================
+# Session 8: Admin Configuration
+# =============================================================================
+
+heritage_admin_dashboard:
+  url: /heritage/admin
+  param: { module: heritage, action: adminDashboard }
+
+heritage_admin_features:
+  url: /heritage/admin/features
+  param: { module: heritage, action: adminFeatures }
+  requirements: { sf_method: [get, post] }
+
+heritage_admin_branding:
+  url: /heritage/admin/branding
+  param: { module: heritage, action: adminBranding }
+  requirements: { sf_method: [get, post] }
+
+heritage_admin_users:
+  url: /heritage/admin/users
+  param: { module: heritage, action: adminUsers }
+
+heritage_admin_hero_slides:
+  url: /heritage/admin/hero-slides
+  param: { module: heritage, action: adminHeroSlides }
+  requirements: { sf_method: [get, post] }
+
+heritage_admin_featured_collections:
+  url: /heritage/admin/featured-collections
+  param: { module: heritage, action: adminFeaturedCollections }
+  requirements: { sf_method: [get, post] }
+
+# =============================================================================
+# Session 6: Access Mediation
+# =============================================================================
+
+heritage_request_access:
+  url: /heritage/access/request/:slug
+  param: { module: heritage, action: requestAccess }
+  requirements: { sf_method: [get, post] }
+
+heritage_my_access_requests:
+  url: /heritage/my/access-requests
+  param: { module: heritage, action: myAccessRequests }
+
+heritage_admin_access_requests:
+  url: /heritage/admin/access-requests
+  param: { module: heritage, action: adminAccessRequests }
+  requirements: { sf_method: [get, post] }
+
+heritage_admin_embargoes:
+  url: /heritage/admin/embargoes
+  param: { module: heritage, action: adminEmbargoes }
+  requirements: { sf_method: [get, post] }
+
+heritage_admin_popia:
+  url: /heritage/admin/popia
+  param: { module: heritage, action: adminPopia }
+  requirements: { sf_method: [get, post] }
+
+# =============================================================================
+# Session 7: Custodian Interface
+# =============================================================================
+
+heritage_custodian_dashboard:
+  url: /heritage/custodian
+  param: { module: heritage, action: custodianDashboard }
+
+heritage_custodian_item:
+  url: /heritage/custodian/:slug
+  param: { module: heritage, action: custodianItem }
+  requirements: { sf_method: [get, post] }
+
+heritage_custodian_batch:
+  url: /heritage/custodian/batch
+  param: { module: heritage, action: custodianBatch }
+
+heritage_custodian_history:
+  url: /heritage/custodian/history
+  param: { module: heritage, action: custodianHistory }
+
+# =============================================================================
+# Session 9: Analytics & Learning
+# =============================================================================
+
+heritage_analytics_dashboard:
+  url: /heritage/analytics
+  param: { module: heritage, action: analyticsDashboard }
+
+heritage_analytics_search:
+  url: /heritage/analytics/search
+  param: { module: heritage, action: analyticsSearch }
+
+heritage_analytics_content:
+  url: /heritage/analytics/content
+  param: { module: heritage, action: analyticsContent }
+
+heritage_analytics_alerts:
+  url: /heritage/analytics/alerts
+  param: { module: heritage, action: analyticsAlerts }
+  requirements: { sf_method: [get, post] }
+
+# =============================================================================
+# Contributions Module
+# =============================================================================
+
+# Contributor Authentication
+heritage_contributor_login:
+  url: /heritage/login
+  param: { module: heritage, action: contributorLogin }
+  requirements: { sf_method: [get, post] }
+
+heritage_contributor_register:
+  url: /heritage/register
+  param: { module: heritage, action: contributorRegister }
+  requirements: { sf_method: [get, post] }
+
+heritage_contributor_logout:
+  url: /heritage/logout
+  param: { module: heritage, action: contributorLogout }
+
+heritage_contributor_verify:
+  url: /heritage/verify/:token
+  param: { module: heritage, action: contributorVerify }
+
+# Contributions
+heritage_contribute:
+  url: /heritage/contribute/:slug
+  param: { module: heritage, action: contribute }
+  requirements: { sf_method: [get, post] }
+
+heritage_my_contributions:
+  url: /heritage/my/contributions
+  param: { module: heritage, action: myContributions }
+
+heritage_contributor_profile:
+  url: /heritage/contributor/:id
+  param: { module: heritage, action: contributorProfile }
+
+heritage_leaderboard:
+  url: /heritage/leaderboard
+  param: { module: heritage, action: leaderboard }
+
+# Review (Custodian/Admin)
+heritage_review_queue:
+  url: /heritage/review
+  param: { module: heritage, action: reviewQueue }
+
+heritage_review_contribution:
+  url: /heritage/review/:id
+  param: { module: heritage, action: reviewContribution }
+  requirements: { sf_method: [get, post] }
+
+# API
+heritage_api_submit_contribution:
+  url: /heritage/api/contribution/submit
+  param: { module: heritage, action: apiSubmitContribution }
+  requirements: { sf_method: post }
+
+heritage_api_contribution_status:
+  url: /heritage/api/contribution/:id
+  param: { module: heritage, action: apiContributionStatus }
+
+heritage_api_suggest_tags:
+  url: /heritage/api/suggest-tags
+  param: { module: heritage, action: apiSuggestTags }
+
+# =============================================================================
+# Enhanced Landing Page: Explore & Timeline
+# =============================================================================
+
+# Explore categories
+heritage_explore:
+  url: /heritage/explore
+  param: { module: heritage, action: explore }
+
+heritage_explore_category:
+  url: /heritage/explore/:category
+  param: { module: heritage, action: explore }
+
+# Timeline navigation
+heritage_timeline:
+  url: /heritage/timeline
+  param: { module: heritage, action: timeline }
+
+heritage_timeline_period:
+  url: /heritage/timeline/:period_id
+  param: { module: heritage, action: timeline }
+
+# Creators/People browse
+heritage_creators:
+  url: /heritage/creators
+  param: { module: heritage, action: creators }
+
+heritage_creators_autocomplete:
+  url: /heritage/creators/autocomplete
+  param: { module: heritage, action: creatorsAutocomplete }
+
+# Featured collections
+heritage_collections:
+  url: /heritage/collections
+  param: { module: heritage, action: collections }
+
+heritage_collection_detail:
+  url: /heritage/collection/:id
+  param: { module: heritage, action: collections }
+
+# Trending/Popular
+heritage_trending:
+  url: /heritage/trending
+  param: { module: heritage, action: trending }
+
+# =============================================================================
+# Enhanced Landing Page: API Endpoints
+# =============================================================================
+
+heritage_api_hero_slides:
+  url: /heritage/api/hero-slides
+  param: { module: heritage, action: apiHeroSlides }
+
+heritage_api_featured_collections:
+  url: /heritage/api/featured-collections
+  param: { module: heritage, action: apiFeaturedCollections }
+
+heritage_api_explore_categories:
+  url: /heritage/api/explore-categories
+  param: { module: heritage, action: apiExploreCategories }
+
+heritage_api_explore_items:
+  url: /heritage/api/explore/:category/items
+  param: { module: heritage, action: apiExploreCategoryItems }
+
+heritage_api_timeline_periods:
+  url: /heritage/api/timeline-periods
+  param: { module: heritage, action: apiTimelinePeriods }
+
+heritage_api_timeline_items:
+  url: /heritage/api/timeline/:period_id/items
+  param: { module: heritage, action: apiTimelinePeriodItems }

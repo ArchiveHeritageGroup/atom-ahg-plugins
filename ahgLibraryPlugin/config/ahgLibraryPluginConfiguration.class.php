@@ -31,7 +31,9 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         // (most general first, most specific last)
 
         // Library view by slug (catch-all - add FIRST so it's checked LAST)
-        $routing->prependRoute('library_view', new AhgMetadataRoute(
+        // Use sfRoute (NOT AhgMetadataRoute) to prevent URL generation conflicts
+        // AhgMetadataRoute was causing /library/ URLs to be generated for non-library items
+        $routing->prependRoute('library_view', new sfRoute(
             '/library/:slug',
             ['module' => 'library', 'action' => 'index'],
             ['slug' => '[^/]+']

@@ -13,6 +13,51 @@
  */
 
 /**
+ * Get base URL from current request or configuration
+ * Auto-detects from request if not configured
+ */
+function get_iiif_base_url()
+{
+    static $baseUrl = null;
+    if ($baseUrl !== null) {
+        return $baseUrl;
+    }
+
+    // Try config first
+    $configured = sfConfig::get('app_iiif_base_url', '');
+    if (!empty($configured)) {
+        $baseUrl = rtrim($configured, '/');
+        return $baseUrl;
+    }
+
+    // Auto-detect from request
+    if (isset($_SERVER['HTTP_HOST'])) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $baseUrl = $scheme . '://' . $_SERVER['HTTP_HOST'];
+    } else {
+        // Fallback for CLI
+        $baseUrl = 'http://localhost';
+    }
+
+    return $baseUrl;
+}
+
+/**
+ * Get full Cantaloupe URL (handles relative paths)
+ */
+function get_iiif_cantaloupe_url()
+{
+    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', '/iiif/2');
+
+    // If it's a relative URL, prepend base URL
+    if (!empty($cantaloupeUrl) && strpos($cantaloupeUrl, 'http') !== 0) {
+        return get_iiif_base_url() . '/' . ltrim($cantaloupeUrl, '/');
+    }
+
+    return $cantaloupeUrl;
+}
+
+/**
  * Check if IIIF/Cantaloupe is available
  */
 function is_iiif_available()
@@ -131,9 +176,9 @@ function render_iiif_viewer($resource, $options = [])
     $objectId = $resource->id;
     $slug = $resource->slug ?? $objectId;
     
-    // Configuration
-    $baseUrl = sfConfig::get('app_iiif_base_url', 'http://localhost');
-    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'http://localhost:8182/iiif/2');
+    // Configuration - use helper functions for dynamic URL resolution
+    $baseUrl = get_iiif_base_url();
+    $cantaloupeUrl = get_iiif_cantaloupe_url();
     $pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin');
     $defaultViewer = sfConfig::get('app_iiif_default_viewer', 'openseadragon');
     $enableAnnotations = sfConfig::get('app_iiif_enable_annotations', true);
@@ -412,8 +457,8 @@ function ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $op
     
     // IIIF badge
     $html .= '<div>';
-    $html .= '<span class="badge bg-info"><i class="fas fa-certificate me-1"></i>IIIF 3.0</span>';
-    $html .= '<small class="text-muted ms-2 d-none d-sm-inline">Presentation API 3.0</small>';
+    $html .= '<span class="badge bg-info"><i class="fas fa-certificate me-1"></i>IIIF</span>';
+    $html .= '<small class="text-muted ms-2 d-none d-sm-inline">Presentation API 2.1</small>';
     $html .= '</div>';
     
     // Control buttons
@@ -614,12 +659,12 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
 function render_3d_model_viewer($resource, $options = [])
 {
     $model = get_primary_3d_model($resource);
-    
+
     if (!$model) {
         return '';
     }
-    
-    $baseUrl = sfConfig::get('app_iiif_base_url', 'http://localhost');
+
+    $baseUrl = get_iiif_base_url();
     $height = $options['height'] ?? '600px';
     $viewerId = 'model-viewer-' . $resource->id . '-' . substr(md5(uniqid()), 0, 8);
     
@@ -646,7 +691,7 @@ function render_3d_model_viewer($resource, $options = [])
  */
 function render_iiif_image($identifier, $options = [])
 {
-    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'http://localhost:8182/iiif/2');
+    $cantaloupeUrl = get_iiif_cantaloupe_url();
     
     $region = $options['region'] ?? 'full';
     $size = $options['size'] ?? 'max';

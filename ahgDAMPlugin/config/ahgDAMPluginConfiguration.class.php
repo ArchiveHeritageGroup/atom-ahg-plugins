@@ -18,8 +18,9 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
         // Base route (must be first - checked last)
         $routing->prependRoute('dam_index', new sfRoute('/dam', ['module' => 'dam', 'action' => 'dashboard']));
 
-        // Catch-all slug route (checked second-to-last)
-        $routing->prependRoute('dam_view', new AhgMetadataRoute('/dam/:slug', ['module' => 'dam', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
+        // Catch-all slug route - use sfRoute (NOT AhgMetadataRoute) to prevent URL generation conflicts
+        // AhgMetadataRoute was causing /dam/ URLs to be generated for non-DAM items
+        $routing->prependRoute('dam_view', new sfRoute('/dam/:slug', ['module' => 'dam', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
 
         // Specific routes (added last so they are checked first)
         $routing->prependRoute('dam_browse', new sfRoute('/dam/browse', ['module' => 'dam', 'action' => 'browse']));

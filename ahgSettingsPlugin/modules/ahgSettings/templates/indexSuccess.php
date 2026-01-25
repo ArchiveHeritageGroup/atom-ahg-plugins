@@ -11,6 +11,62 @@ try {
 } catch (Exception $e) {
     $damEnabled = false;
 }
+
+// Build complete list of all cards
+$allCards = [];
+
+// Add dynamic sections from controller
+foreach ($sections as $key => $section) {
+    $allCards[$section['label']] = [
+        'label' => $section['label'],
+        'icon' => $section['icon'],
+        'icon_prefix' => 'fas',
+        'description' => $section['description'],
+        'url' => '/index.php/' . $section['url'],
+        'color' => 'primary',
+        'btn_text' => 'Configure',
+        'btn_icon' => 'fa-cog'
+    ];
+}
+
+// Add static cards
+if ($damEnabled) {
+    $allCards['Digital Asset Management'] = [
+        'label' => 'Digital Asset Management',
+        'icon' => 'fa-photo-video',
+        'icon_prefix' => 'fas',
+        'description' => 'PDF merge, digital objects, 3D viewer, and media tools',
+        'url' => url_for(['module' => 'ahgSettings', 'action' => 'damTools']),
+        'color' => 'info',
+        'btn_text' => 'Open Tools',
+        'btn_icon' => 'fa-tools'
+    ];
+}
+
+$allCards['Heritage Platform'] = [
+    'label' => 'Heritage Platform',
+    'icon' => 'fa-landmark',
+    'icon_prefix' => 'fas',
+    'description' => 'Access control, analytics, branding, custodian tools, and community features',
+    'url' => url_for(['module' => 'heritage', 'action' => 'adminDashboard']),
+    'color' => 'warning',
+    'btn_text' => 'Admin',
+    'btn_icon' => 'fa-tools'
+];
+
+$allCards['Preservation & Backup'] = [
+    'label' => 'Preservation & Backup',
+    'icon' => 'fa-cloud-upload-alt',
+    'icon_prefix' => 'fas',
+    'description' => 'Configure backup replication targets, verify integrity, and manage preservation',
+    'url' => url_for(['module' => 'ahgSettings', 'action' => 'preservation']),
+    'color' => 'success',
+    'btn_text' => 'Configure',
+    'btn_icon' => 'fa-cog'
+];
+
+// Sort alphabetically by label
+ksort($allCards);
 ?>
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h1 class="mb-0"><i class="fas fa-cogs"></i> AHG Plugin Settings</h1>
@@ -20,62 +76,24 @@ try {
 </div>
 <p class="text-muted mb-4">Configure AHG theme and plugin settings</p>
 <div class="row">
-    <?php foreach ($sections as $key => $section): ?>
+    <?php foreach ($allCards as $card): ?>
     <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm <?php echo $card['color'] !== 'primary' ? 'border-' . $card['color'] : ''; ?>">
             <div class="card-body text-center py-4">
                 <div class="mb-3">
-                    <i class="fas <?php echo $section['icon']; ?> fa-3x text-primary"></i>
+                    <i class="<?php echo $card['icon_prefix']; ?> <?php echo $card['icon']; ?> fa-3x text-<?php echo $card['color']; ?>"></i>
                 </div>
-                <h5 class="card-title"><?php echo __($section['label']); ?></h5>
-                <p class="card-text text-muted small"><?php echo __($section['description']); ?></p>
+                <h5 class="card-title"><?php echo __($card['label']); ?></h5>
+                <p class="card-text text-muted small"><?php echo __($card['description']); ?></p>
             </div>
             <div class="card-footer bg-white border-0 text-center pb-4">
-                <a href="/index.php/<?php echo $section['url']; ?>" class="btn btn-primary">
-                    <i class="fas fa-cog"></i> <?php echo __('Configure'); ?>
+                <a href="<?php echo $card['url']; ?>" class="btn btn-<?php echo $card['color']; ?>">
+                    <i class="fas <?php echo $card['btn_icon']; ?>"></i> <?php echo __($card['btn_text']); ?>
                 </a>
             </div>
         </div>
     </div>
     <?php endforeach; ?>
-
-    <?php if ($damEnabled): ?>
-    <!-- DAM Tools Card -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card h-100 shadow-sm border-info">
-            <div class="card-body text-center py-4">
-                <div class="mb-3">
-                    <i class="fas fa-photo-video fa-3x text-info"></i>
-                </div>
-                <h5 class="card-title"><?php echo __('Digital Asset Management'); ?></h5>
-                <p class="card-text text-muted small"><?php echo __('PDF merge, digital objects, 3D viewer, and media tools'); ?></p>
-            </div>
-            <div class="card-footer bg-white border-0 text-center pb-4">
-                <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'damTools']); ?>" class="btn btn-info">
-                    <i class="fas fa-tools"></i> <?php echo __('Open Tools'); ?>
-                </a>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Preservation & Backup Card -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card h-100 shadow-sm border-success">
-            <div class="card-body text-center py-4">
-                <div class="mb-3">
-                    <i class="fas fa-cloud-upload-alt fa-3x text-success"></i>
-                </div>
-                <h5 class="card-title"><?php echo __('Preservation & Backup'); ?></h5>
-                <p class="card-text text-muted small"><?php echo __('Configure backup replication targets, verify integrity, and manage preservation'); ?></p>
-            </div>
-            <div class="card-footer bg-white border-0 text-center pb-4">
-                <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'preservation']); ?>" class="btn btn-success">
-                    <i class="fas fa-cog"></i> <?php echo __('Configure'); ?>
-                </a>
-            </div>
-        </div>
-    </div>
 </div>
 
 <?php if ($damEnabled): ?>

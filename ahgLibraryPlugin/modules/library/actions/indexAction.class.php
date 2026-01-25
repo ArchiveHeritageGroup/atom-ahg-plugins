@@ -33,6 +33,17 @@ class libraryIndexAction extends sfAction
             $this->forward404('Library item not found: ' . $slug);
         }
 
+        // Check if this is actually a library object - if not, redirect to the correct URL
+        // This prevents /library/slug from displaying non-library items
+        $objectType = \Illuminate\Database\Capsule\Manager::table('display_object_config')
+            ->where('object_id', $this->resource->id)
+            ->value('object_type');
+
+        // If not a library item, redirect to the standard slug route
+        if ($objectType !== 'library') {
+            $this->redirect('@slug?slug=' . $this->resource->slug);
+        }
+
         // Check read permission
         if (!QubitAcl::check($this->resource, 'read')) {
             QubitAcl::forwardToSecureAction();

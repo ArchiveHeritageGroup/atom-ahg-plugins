@@ -12,6 +12,17 @@ class damIndexAction extends InformationObjectIndexAction
     {
         parent::execute($request);
 
+        // Check if this is actually a DAM object - if not, redirect to the correct URL
+        // This prevents /dam/slug from displaying non-DAM items
+        $objectType = \Illuminate\Database\Capsule\Manager::table('display_object_config')
+            ->where('object_id', $this->resource->id)
+            ->value('object_type');
+
+        // If not a DAM item, redirect to the standard slug route
+        if ($objectType !== 'dam') {
+            $this->redirect('@slug?slug=' . $this->resource->slug);
+        }
+
         // Check embargo access
         if (!\AhgCore\Access\AhgAccessGate::canView($this->resource->id, $this)) {
             return sfView::NONE;

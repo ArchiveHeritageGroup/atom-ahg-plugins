@@ -41,3 +41,15 @@ repositoryBrowse:
 search:
   stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
   javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+
+# Heritage Platform Assets
+heritageLanding:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/heritage.js]
+
+heritageSearch:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]
+  javascripts: [/plugins/ahgThemeB5Plugin/js/heritage.js]
+
+heritageAdminConfig:
+  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]

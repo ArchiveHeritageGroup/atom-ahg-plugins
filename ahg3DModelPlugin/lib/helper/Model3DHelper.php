@@ -245,7 +245,7 @@ function get_iiif_3d_manifest_url(int $modelId): string
  */
 function is_3d_format(string $extension): bool
 {
-    $supported = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
+    $supported = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz', 'splat', 'ksplat'];
     return in_array(strtolower($extension), $supported);
 }
 
@@ -265,6 +265,8 @@ function get_3d_format_label(string $format): string
         'fbx' => 'Autodesk FBX',
         'ply' => 'Polygon File Format',
         'usdz' => 'Apple AR Format',
+        'splat' => 'Gaussian Splat',
+        'ksplat' => 'Compressed Gaussian Splat',
     ];
     
     return $labels[strtolower($format)] ?? strtoupper($format);

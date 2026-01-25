@@ -114,7 +114,7 @@
         }
         
         searchTimeout = setTimeout(function() {
-            fetch('/index.php/object/autocomplete?q=' + encodeURIComponent(query))
+            fetch('/index.php/manifest-collections/autocomplete?q=' + encodeURIComponent(query))
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     searchResults.innerHTML = '';
@@ -123,9 +123,17 @@
                             if (!selected[item.id]) {
                                 var div = document.createElement('a');
                                 div.href = '#';
-                                div.className = 'list-group-item list-group-item-action';
-                                div.innerHTML = '<strong>' + (item.title || 'Untitled') + '</strong>' + 
-                                    (item.identifier ? ' <code class="ms-2">' + item.identifier + '</code>' : '');
+                                div.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                                var badges = '';
+                                if (item.hasChildren) {
+                                    badges += '<span class="badge bg-info ms-2"><i class="fas fa-sitemap me-1"></i>' + item.childCount + ' children</span>';
+                                }
+                                if (!item.hasDigital) {
+                                    badges += '<span class="badge bg-warning ms-1">No image</span>';
+                                }
+                                div.innerHTML = '<span><strong>' + (item.title || 'Untitled') + '</strong>' +
+                                    (item.identifier ? ' <code class="ms-2 small">' + item.identifier + '</code>' : '') +
+                                    '</span><span>' + badges + '</span>';
                                 div.onclick = function(e) {
                                     e.preventDefault();
                                     addToSelected(item);
@@ -150,19 +158,39 @@
         if (selected[item.id]) return;
         selected[item.id] = item;
         noSelection.style.display = 'none';
-        
-        var badge = document.createElement('span');
-        badge.className = 'badge bg-success me-2 mb-1 p-2';
-        badge.id = 'sel-' + item.id;
-        badge.innerHTML = (item.title || 'Untitled') + 
-            ' <i class="fas fa-times ms-1" style="cursor:pointer"></i>' +
-            '<input type="hidden" name="object_ids[]" value="' + item.id + '">';
-        badge.querySelector('i').onclick = function() {
+
+        var card = document.createElement('div');
+        card.className = 'card mb-2 selected-item-card';
+        card.id = 'sel-' + item.id;
+        card.innerHTML =
+            '<div class="card-body p-2">' +
+                '<div class="d-flex justify-content-between align-items-start">' +
+                    '<div>' +
+                        '<strong>' + (item.title || 'Untitled') + '</strong>' +
+                        (item.identifier ? ' <code class="ms-2 small">' + item.identifier + '</code>' : '') +
+                        (item.hasChildren ? '<span class="badge bg-info ms-2">Has children</span>' : '') +
+                    '</div>' +
+                    '<button type="button" class="btn btn-sm btn-outline-danger remove-btn">' +
+                        '<i class="fas fa-times"></i>' +
+                    '</button>' +
+                '</div>' +
+                (item.hasChildren ?
+                    '<div class="form-check mt-2">' +
+                        '<input type="checkbox" class="form-check-input include-children" ' +
+                               'name="include_children[]" value="' + item.id + '" id="children-' + item.id + '">' +
+                        '<label class="form-check-label small" for="children-' + item.id + '">' +
+                            '<i class="fas fa-sitemap me-1"></i>Include all children (' + item.childCount + ' items)' +
+                        '</label>' +
+                    '</div>'
+                : '') +
+                '<input type="hidden" name="object_ids[]" value="' + item.id + '">' +
+            '</div>';
+        card.querySelector('.remove-btn').onclick = function() {
             delete selected[item.id];
-            badge.remove();
+            card.remove();
             updateUI();
         };
-        selectedItems.appendChild(badge);
+        selectedItems.appendChild(card);
         updateUI();
     }
     
@@ -175,7 +203,9 @@
 </script>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-#selectedItems { display: flex; flex-wrap: wrap; gap: 5px; }
+#selectedItems { display: flex; flex-direction: column; gap: 8px; }
 #searchResults .list-group-item:hover { background: #e9ecef; }
+.selected-item-card { border: 1px solid #198754; background: #f8fff8; }
+.selected-item-card .form-check { background: #e8f5e9; padding: 8px 12px; border-radius: 4px; margin: 0 -8px -8px -8px; }
 </style>
 <?php end_slot() ?>
