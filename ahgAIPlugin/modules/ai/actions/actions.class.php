@@ -16,10 +16,10 @@ class aiActions extends sfActions
         }
 
         $text = $this->getObjectText($object);
-        $pdfPath = $this->getDigitalObjectPath($object);
-        
+        $pdfPath = $this->getDigitalObjectPath($object, 'pdf');  // Only get PDF files
+
         $nerService = new ahgNerService();
-        
+
         if ($pdfPath && file_exists($pdfPath)) {
             $result = $nerService->extractFromPdf($pdfPath);
             
@@ -366,23 +366,60 @@ class aiActions extends sfActions
         return implode("\n\n", $parts);
     }
 
-    private function getDigitalObjectPath($object)
+    private function getDigitalObjectPath($object, $type = 'any')
     {
         $digitalObject = $object->getDigitalObject();
         if (!$digitalObject) return null;
 
+        // Supported extensions by type
+        $pdfExts = ['pdf'];
+        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'tif', 'tiff', 'bmp', 'webp'];
+
+        if ($type === 'pdf') {
+            $allowedExts = $pdfExts;
+        } elseif ($type === 'image') {
+            $allowedExts = $imageExts;
+        } else {
+            $allowedExts = array_merge($pdfExts, $imageExts);
+        }
+
+        // First try the direct path
         $path = $digitalObject->getAbsolutePath();
         if ($path && file_exists($path)) {
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            if ($ext === 'pdf') return $path;
+            if (in_array($ext, $allowedExts)) return $path;
         }
 
+        // Try upload directory
         $uploadPath = sfConfig::get('sf_upload_dir');
         $objectPath = $uploadPath . '/r/' . $digitalObject->id;
         if (is_dir($objectPath)) {
-            $files = glob($objectPath . '/*.pdf');
-            if (!empty($files)) return $files[0];
+            foreach ($allowedExts as $ext) {
+                $files = glob($objectPath . '/*.' . $ext);
+                if (!empty($files)) return $files[0];
+            }
         }
+
+        // Try path from database (path + name)
+        $path = $digitalObject->path;
+        $name = $digitalObject->name;
+        if ($path && $name) {
+            $fullPath = sfConfig::get('sf_web_dir') . '/' . ltrim($path, '/') . $name;
+            if (file_exists($fullPath)) {
+                $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+                if (in_array($ext, $allowedExts)) return $fullPath;
+            }
+        }
+
+        // Try uploads directory with path + name
+        if ($path && $name) {
+            $fullPath = sfConfig::get('sf_upload_dir') . '/' . ltrim(str_replace('/uploads/', '', $path), '/') . $name;
+            if (file_exists($fullPath)) {
+                $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+                if (in_array($ext, $allowedExts)) return $fullPath;
+            }
+        }
+
         return null;
     }
 
@@ -1183,5 +1220,129 @@ class aiActions extends sfActions
             'success' => true,
             'translated' => $data['translated'] ?? ''
         ];
+    }
+
+    /**
+     * Handwriting Text Recognition (HTR) with Zone Detection
+     * Uses models at /opt/ahg-ai/models/date, digits, letters
+     * Zone detection enabled by default - detects text lines and processes each separately
+     */
+    public function executeHtr(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true);
+        $mode = $data['mode'] ?? 'all';
+        $useZones = $data['use_zones'] ?? true;  // Zone detection enabled by default
+
+        $object = QubitInformationObject::getById($objectId);
+
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        // Get digital object path (images only for HTR)
+        $imagePath = $this->getDigitalObjectPath($object, 'image');
+
+        if (!$imagePath || !file_exists($imagePath)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No image found for HTR. Path checked: ' . ($imagePath ?: 'none')]));
+        }
+
+        $startTime = microtime(true);
+
+        // Stub mode for testing - returns test data without calling API
+        if ($mode === 'stub') {
+            $processingTime = round((microtime(true) - $startTime) * 1000);
+            return $this->renderText(json_encode([
+                'success' => true,
+                'results' => ['Test Result 1', 'Test Result 2', '1923-04-15', 'Sample Text'],
+                'zones' => [
+                    ['zone_id' => 0, 'bbox' => ['x' => 10, 'y' => 20, 'w' => 200, 'h' => 30], 'text' => 'Test Result 1'],
+                    ['zone_id' => 1, 'bbox' => ['x' => 10, 'y' => 60, 'w' => 200, 'h' => 30], 'text' => 'Test Result 2'],
+                    ['zone_id' => 2, 'bbox' => ['x' => 10, 'y' => 100, 'w' => 150, 'h' => 30], 'text' => '1923-04-15'],
+                    ['zone_id' => 3, 'bbox' => ['x' => 10, 'y' => 140, 'w' => 180, 'h' => 30], 'text' => 'Sample Text']
+                ],
+                'zones_detected' => 4,
+                'count' => 4,
+                'processing_time_ms' => $processingTime,
+                'image_path' => $imagePath,
+                'use_zones' => true,
+                'debug' => 'Stub mode - API not called'
+            ]));
+        }
+
+        // Call the Python HTR API
+        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
+        $apiKey = sfConfig::get('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+
+        $url = $apiUrl . '/ai/v1/htr';
+
+        $payload = json_encode([
+            'image_path' => $imagePath,
+            'mode' => $mode,  // all, date, digits, letters
+            'use_zones' => $useZones  // Enable zone detection
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-API-Key: ' . $apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        $processingTime = round((microtime(true) - $startTime) * 1000);
+
+        if ($error) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Connection error: ' . $error
+            ]));
+        }
+
+        if ($httpCode !== 200) {
+            $data = json_decode($response, true);
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $data['error'] ?? "HTTP $httpCode"
+            ]));
+        }
+
+        $result = json_decode($response, true);
+
+        if (!$result || !isset($result['success']) || !$result['success']) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $result['error'] ?? 'HTR extraction failed'
+            ]));
+        }
+
+        // Build response with zone information
+        $response = [
+            'success' => true,
+            'mode' => $mode,
+            'use_zones' => $result['use_zones'] ?? $useZones,
+            'results' => $result['results'] ?? [],
+            'text' => $result['text'] ?? '',
+            'count' => count($result['results'] ?? []),
+            'processing_time_ms' => $processingTime,
+            'image_path' => $imagePath
+        ];
+
+        // Include zone info if available
+        if (!empty($result['zones'])) {
+            $response['zones'] = $result['zones'];
+            $response['zones_detected'] = $result['zones_detected'] ?? count($result['zones']);
+        }
+
+        return $this->renderText(json_encode($response));
     }
 }

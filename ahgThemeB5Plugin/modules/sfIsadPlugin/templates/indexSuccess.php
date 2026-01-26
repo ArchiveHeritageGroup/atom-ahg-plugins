@@ -474,7 +474,7 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   </div>
 
   <!-- EXTENDED RIGHTS AREA -->
-  <?php include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
+  <?php // include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
 
 </section> <!-- /section#accessionArea -->
 

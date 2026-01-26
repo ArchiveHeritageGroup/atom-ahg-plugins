@@ -56,15 +56,29 @@ export class IiifViewerManager {
 
         // Use content-specific viewer if set, otherwise check localStorage
         const savedViewer = localStorage.getItem('iiif_viewer_pref');
+
+        // Only use saved viewer if it's a valid image viewer type
+        const validImageViewers = ['openseadragon', 'mirador'];
+        const effectiveSavedViewer = validImageViewers.includes(savedViewer) ? savedViewer : null;
+
         this.currentViewer = isContentSpecific
             ? this.options.defaultViewer
-            : (savedViewer || this.options.defaultViewer);
+            : (effectiveSavedViewer || this.options.defaultViewer);
 
         // Bind events
         this.bindEvents();
 
-        // Load initial viewer
-        await this.showViewer(this.currentViewer);
+        // Load initial viewer with fallback
+        try {
+            await this.showViewer(this.currentViewer);
+        } catch (error) {
+            console.error('Initial viewer failed, falling back to openseadragon:', error);
+            // Reset localStorage preference on failure
+            localStorage.removeItem('iiif_viewer_pref');
+            if (this.currentViewer !== 'openseadragon') {
+                await this.showViewer('openseadragon');
+            }
+        }
 
         // Load annotations if enabled
         if (this.options.flags.enableAnnotations) {
@@ -208,44 +222,112 @@ export class IiifViewerManager {
     async initOpenSeadragon() {
         if (this.osdViewer) return;
 
-        // Load OSD if not loaded
-        if (!window.OpenSeadragon) {
-            await this.loadScript('https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js');
-        }
-
         const vid = this.viewerId;
         const containerId = `osd-${vid}`;
 
-        // Fetch manifest to get tile sources
-        const manifest = await this.fetchManifest();
-        const tileSources = this.extractTileSources(manifest);
+        try {
+            // Load OSD if not loaded
+            if (!window.OpenSeadragon) {
+                await this.loadScript('https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js');
+            }
 
-        if (tileSources.length === 0) {
-            console.error('No tile sources found in manifest');
-            return;
+            // Verify OpenSeadragon loaded
+            if (!window.OpenSeadragon) {
+                console.error('OpenSeadragon failed to load');
+                this.showError(containerId, 'Failed to load image viewer');
+                return;
+            }
+
+            // Fetch manifest to get tile sources
+            const manifest = await this.fetchManifest();
+
+            if (!manifest) {
+                console.error('Failed to fetch manifest from:', this.options.manifestUrl);
+                this.showError(containerId, 'Failed to load image manifest');
+                return;
+            }
+
+            const tileSources = this.extractTileSources(manifest);
+
+            if (tileSources.length === 0) {
+                console.error('No tile sources found in manifest:', manifest);
+                this.showError(containerId, 'No images found in manifest');
+                return;
+            }
+
+            // Filter out any undefined or invalid tile sources
+            const validTileSources = tileSources.filter(ts => ts && typeof ts === 'string' && ts.startsWith('http'));
+
+            if (validTileSources.length === 0) {
+                console.error('No valid tile sources after filtering:', tileSources);
+                this.showError(containerId, 'Invalid image sources');
+                return;
+            }
+
+            console.log('IIIF tile sources:', validTileSources);
+
+            const config = {
+                id: containerId,
+                prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/',
+                tileSources: validTileSources,
+                showNavigator: true,
+                navigatorPosition: 'BOTTOM_RIGHT',
+                showRotationControl: true,
+                showFlipControl: true,
+                gestureSettingsMouse: { scrollToZoom: true },
+                crossOriginPolicy: 'Anonymous',
+                ajaxWithCredentials: false,
+                ...this.options.osdConfig
+            };
+
+            // Multi-image mode
+            if (validTileSources.length > 1) {
+                config.sequenceMode = true;
+                config.showReferenceStrip = true;
+                config.referenceStripScroll = 'horizontal';
+            }
+
+            this.osdViewer = OpenSeadragon(config);
+
+            // Add error handler for debugging
+            this.osdViewer.addHandler('open-failed', (event) => {
+                console.error('OpenSeadragon open-failed:', {
+                    message: event.message,
+                    source: event.source,
+                    eventSource: event.eventSource ? 'present' : 'none'
+                });
+            });
+
+            this.osdViewer.addHandler('tile-load-failed', (event) => {
+                console.error('OpenSeadragon tile-load-failed:', {
+                    message: event.message,
+                    tile: event.tile ? event.tile.url : 'unknown'
+                });
+            });
+
+            this.loaded.osd = true;
+        } catch (error) {
+            console.error('OpenSeadragon initialization failed:', error);
+            this.showError(containerId, 'Failed to initialize image viewer');
         }
+    }
 
-        const config = {
-            id: containerId,
-            prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/',
-            tileSources: tileSources,
-            showNavigator: true,
-            navigatorPosition: 'BOTTOM_RIGHT',
-            showRotationControl: true,
-            showFlipControl: true,
-            gestureSettingsMouse: { scrollToZoom: true },
-            ...this.options.osdConfig
-        };
-
-        // Multi-image mode
-        if (tileSources.length > 1) {
-            config.sequenceMode = true;
-            config.showReferenceStrip = true;
-            config.referenceStripScroll = 'horizontal';
+    /**
+     * Show error message in viewer container
+     */
+    showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;text-align:center;padding:20px;">
+                    <div>
+                        <i class="fas fa-exclamation-triangle" style="font-size:48px;color:#ffc107;margin-bottom:16px;"></i>
+                        <p style="margin:0;font-size:16px;">${message}</p>
+                        <p style="margin:8px 0 0;font-size:14px;opacity:0.7;">Check browser console for details</p>
+                    </div>
+                </div>
+            `;
         }
-
-        this.osdViewer = OpenSeadragon(config);
-        this.loaded.osd = true;
     }
 
     /**
@@ -268,6 +350,7 @@ export class IiifViewerManager {
                                 : annotation.body.service;
 
                             if (service && service.id) {
+                                // Pass just the URL - OpenSeadragon will auto-detect IIIF
                                 tileSources.push(service.id + '/info.json');
                             }
                         }
@@ -288,6 +371,7 @@ export class IiifViewerManager {
                                     const serviceId = service['@id'] || service.id;
 
                                     if (serviceId) {
+                                        // Pass just the URL - OpenSeadragon will auto-detect IIIF
                                         tileSources.push(serviceId + '/info.json');
                                     }
                                 }
@@ -311,43 +395,71 @@ export class IiifViewerManager {
         const vid = this.viewerId;
         const path = this.options.pluginPath;
 
-        // Load Mirador CSS
-        if (!document.getElementById('mirador-css')) {
-            const link = document.createElement('link');
-            link.id = 'mirador-css';
-            link.rel = 'stylesheet';
-            link.href = `${path}/public/mirador/mirador.min.css`;
-            document.head.appendChild(link);
+        try {
+            // Load Mirador CSS (styles are bundled in JS, this is just for any overrides)
+            if (!document.getElementById('mirador-css')) {
+                const link = document.createElement('link');
+                link.id = 'mirador-css';
+                link.rel = 'stylesheet';
+                link.href = `${path}/public/mirador/mirador.min.css`;
+                document.head.appendChild(link);
+            }
+
+            // Load Mirador JS
+            if (!window.Mirador) {
+                await this.loadScript(`${path}/public/mirador/mirador.min.js`);
+            }
+
+            // Verify Mirador loaded
+            if (!window.Mirador || !window.Mirador.viewer) {
+                console.error('Mirador failed to load');
+                // Fall back to OpenSeadragon
+                await this.showViewer('openseadragon');
+                return;
+            }
+
+            // Pre-fetch manifest to validate it
+            const manifest = await this.fetchManifest();
+            if (!manifest || !manifest.sequences || !manifest.sequences[0]?.canvases?.length) {
+                console.error('Invalid manifest for Mirador:', manifest);
+                await this.showViewer('openseadragon');
+                return;
+            }
+
+            console.log('Initializing Mirador with manifest:', this.options.manifestUrl);
+
+            this.miradorInstance = Mirador.viewer({
+                id: `mirador-${vid}`,
+                windows: [{ manifestId: this.options.manifestUrl }],
+                window: {
+                    allowClose: false,
+                    allowMaximize: true,
+                    defaultSideBarPanel: 'info',
+                    sideBarOpenByDefault: false,
+                    panels: {
+                        info: true,
+                        attribution: true,
+                        canvas: true,
+                        annotations: true,
+                        search: true
+                    }
+                },
+                workspace: {
+                    showZoomControls: true
+                },
+                osdConfig: {
+                    crossOriginPolicy: 'Anonymous',
+                    ajaxWithCredentials: false
+                },
+                ...this.options.miradorConfig
+            });
+
+            this.loaded.mirador = true;
+        } catch (error) {
+            console.error('Mirador initialization failed:', error);
+            // Fall back to OpenSeadragon on error
+            await this.showViewer('openseadragon');
         }
-
-        // Load Mirador JS
-        if (!window.Mirador) {
-            await this.loadScript(`${path}/public/mirador/mirador.min.js`);
-        }
-
-        this.miradorInstance = Mirador.viewer({
-            id: `mirador-${vid}`,
-            windows: [{ manifestId: this.options.manifestUrl }],
-            window: {
-                allowClose: false,
-                allowMaximize: true,
-                defaultSideBarPanel: 'info',
-                sideBarOpenByDefault: false,
-                panels: {
-                    info: true,
-                    attribution: true,
-                    canvas: true,
-                    annotations: true,
-                    search: true
-                }
-            },
-            workspace: {
-                showZoomControls: true
-            },
-            ...this.options.miradorConfig
-        });
-
-        this.loaded.mirador = true;
     }
 
     // ========================================================================

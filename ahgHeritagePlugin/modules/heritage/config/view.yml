@@ -1,0 +1,5 @@
+# Heritage module view configuration
+all:
+  stylesheets:
+    - /ahgThemeB5Plugin/css/heritage.css
+    - /ahgThemeB5Plugin/css/heritage-landing.css

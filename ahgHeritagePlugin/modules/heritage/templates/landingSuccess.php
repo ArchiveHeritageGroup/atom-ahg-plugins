@@ -56,7 +56,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 <?php end_slot(); ?>
 
 <?php slot('pre'); ?>
-<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/heritage-landing.css">
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/heritage-landing.css">
 <style>
 :root {
     --heritage-primary: <?php echo $primaryColor; ?>;

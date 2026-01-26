@@ -9,11 +9,6 @@
   <h1><i class="fa fa-project-diagram"></i> <?php echo __('RIC Sync Dashboard'); ?></h1>
 <?php end_slot(); ?>
 
-<?php slot('head'); ?>
-
-
-<?php end_slot(); ?>
-
 <?php slot('content'); ?>
 
 <!-- Status Cards Row -->
@@ -35,7 +30,13 @@
         </div>
         <?php if ($fusekiStatus['online']): ?>
           <p class="mb-0 mt-2 text-muted small">
-            <i class="fa fa-database"></i> <?php echo number_format($fusekiStatus['triple_count']); ?> <?php echo __('triples'); ?>
+            <?php if (isset($fusekiStatus['triple_count'])): ?>
+              <i class="fa fa-database"></i> <?php echo number_format($fusekiStatus['triple_count']); ?> <?php echo __('triples'); ?>
+            <?php elseif (!empty($fusekiStatus['has_data'])): ?>
+              <i class="fa fa-check"></i> <?php echo __('Connected with data'); ?>
+            <?php else: ?>
+              <i class="fa fa-check"></i> <?php echo __('Connected'); ?>
+            <?php endif; ?>
           </p>
         <?php endif; ?>
       </div>
@@ -49,18 +50,13 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="card-subtitle text-muted mb-1"><?php echo __('Queue'); ?></h6>
-            <h3 class="mb-0" id="queue-count"><?php echo number_format($queueStatus['queued'] ?? 0); ?></h3>
+            <h3 class="mb-0" id="queue-count">
+              <span class="spinner-border spinner-border-sm text-muted"></span>
+            </h3>
           </div>
           <div class="fs-1 text-primary"><i class="fa fa-list-ol"></i></div>
         </div>
-        <p class="mb-0 mt-2">
-          <?php if (($queueStatus['processing'] ?? 0) > 0): ?>
-            <span class="badge bg-warning"><?php echo ($queueStatus['processing'] ?? 0); ?> <?php echo __('processing'); ?></span>
-          <?php endif; ?>
-          <?php if (($queueStatus['failed'] ?? 0) > 0): ?>
-            <span class="badge bg-danger"><?php echo ($queueStatus['failed'] ?? 0); ?> <?php echo __('failed'); ?></span>
-          <?php endif; ?>
-        </p>
+        <p class="mb-0 mt-2" id="queue-badges"></p>
       </div>
       <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'queue']); ?>" class="card-footer text-decoration-none text-center">
         <?php echo __('Manage queue'); ?> <i class="fa fa-arrow-right"></i>
@@ -70,16 +66,16 @@
 
   <!-- Orphaned Triples -->
   <div class="col-md-3">
-    <div class="card h-100 <?php echo $orphanCount > 0 ? 'border-warning' : ''; ?>">
+    <div class="card h-100" id="orphan-card">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="card-subtitle text-muted mb-1"><?php echo __('Orphaned Triples'); ?></h6>
-            <h3 class="mb-0 <?php echo $orphanCount > 0 ? 'text-warning' : 'text-success'; ?>" id="orphan-count">
-              <?php echo number_format($orphanCount); ?>
+            <h3 class="mb-0" id="orphan-count">
+              <span class="spinner-border spinner-border-sm text-muted"></span>
             </h3>
           </div>
-          <div class="fs-1 <?php echo $orphanCount > 0 ? 'text-warning' : 'text-success'; ?>">
+          <div class="fs-1 text-muted" id="orphan-icon">
             <i class="fa fa-unlink"></i>
           </div>
         </div>
@@ -118,13 +114,25 @@
   <div class="col-md-8">
     <div class="card h-100">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Sync Trend (7 Days)'); ?></h5></div>
-      <div class="card-body"><canvas id="syncTrendChart" height="200"></canvas></div>
+      <div class="card-body position-relative" style="min-height: 200px;">
+        <div id="chart-loading-1" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted"><?php echo __('Loading chart...'); ?></p>
+        </div>
+        <canvas id="syncTrendChart" height="200" style="display:none;"></canvas>
+      </div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Operations by Type'); ?></h5></div>
-      <div class="card-body"><canvas id="operationsChart" height="200"></canvas></div>
+      <div class="card-body position-relative" style="min-height: 200px;">
+        <div id="chart-loading-2" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted"><?php echo __('Loading chart...'); ?></p>
+        </div>
+        <canvas id="operationsChart" height="200" style="display:none;"></canvas>
+      </div>
     </div>
   </div>
 </div>
@@ -134,44 +142,11 @@
   <div class="col-md-8">
     <div class="card">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Entity Sync Status'); ?></h5></div>
-      <div class="card-body">
-        <table class="table table-sm table-hover mb-0">
-          <thead>
-            <tr>
-              <th><?php echo __('Entity Type'); ?></th>
-              <th class="text-center"><?php echo __('Synced'); ?></th>
-              <th class="text-center"><?php echo __('Pending'); ?></th>
-              <th class="text-center"><?php echo __('Failed'); ?></th>
-              <th class="text-center"><?php echo __('Total'); ?></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($syncSummary as $entityType => $statuses): ?>
-              <?php
-                $synced = 0; $pending = 0; $failed = 0;
-                foreach ($statuses as $s) {
-                  if ($s->sync_status === 'synced') $synced = $s->count;
-                  elseif ($s->sync_status === 'pending') $pending = $s->count;
-                  elseif ($s->sync_status === 'failed') $failed = $s->count;
-                }
-                $total = $synced + $pending + $failed;
-              ?>
-              <tr>
-                <td><code><?php echo $entityType; ?></code></td>
-                <td class="text-center"><span class="badge bg-success"><?php echo number_format($synced); ?></span></td>
-                <td class="text-center"><span class="badge bg-warning text-dark"><?php echo number_format($pending); ?></span></td>
-                <td class="text-center"><span class="badge bg-danger"><?php echo number_format($failed); ?></span></td>
-                <td class="text-center"><?php echo number_format($total); ?></td>
-                <td class="text-end">
-                  <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'syncStatus', 'entity_type' => $entityType]); ?>" class="btn btn-sm btn-outline-primary">
-                    <i class="fa fa-eye"></i>
-                  </a>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+      <div class="card-body" id="entity-status-body">
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted"><?php echo __('Loading entity status...'); ?></p>
+        </div>
       </div>
     </div>
   </div>
@@ -210,32 +185,15 @@
 
 <!-- Recent Operations -->
 <div class="card">
-  <div class="card-header"><h5 class="mb-0"><?php echo __('Recent Operations'); ?></h5></div>
-  <div class="card-body">
-    <table class="table table-sm table-hover mb-0">
-      <thead>
-        <tr>
-          <th><?php echo __('Time'); ?></th>
-          <th><?php echo __('Operation'); ?></th>
-          <th><?php echo __('Entity'); ?></th>
-          <th><?php echo __('Status'); ?></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach (array_slice($sf_data->getRaw('recentOperations'), 0, 10) as $op): ?>
-          <tr>
-            <td class="text-muted small"><?php echo date('H:i:s', strtotime($op->created_at)); ?></td>
-            <td><span class="badge bg-secondary"><?php echo $op->operation; ?></span></td>
-            <td><code><?php echo $op->entity_type; ?>/<?php echo $op->entity_id; ?></code></td>
-            <td>
-              <span class="badge bg-<?php echo $op->status === 'success' ? 'success' : ($op->status === 'failure' ? 'danger' : 'warning'); ?>">
-                <?php echo $op->status; ?>
-              </span>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><?php echo __('Recent Operations'); ?></h5>
+    <small class="text-muted" id="last-updated"></small>
+  </div>
+  <div class="card-body" id="recent-ops-body">
+    <div class="text-center py-4">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2 text-muted"><?php echo __('Loading recent operations...'); ?></p>
+    </div>
   </div>
 </div>
 
@@ -244,46 +202,159 @@
 <?php slot('after-content'); ?>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/chart.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-const syncTrendData = <?php echo json_encode($syncTrend); ?>;
-const operationsData = <?php echo json_encode($operationsByType); ?>;
+let syncTrendChart = null;
+let operationsChart = null;
 
-new Chart(document.getElementById('syncTrendChart').getContext('2d'), {
-  type: 'line',
-  data: {
-    labels: syncTrendData.map(d => d.date),
-    datasets: [
-      { label: 'Success', data: syncTrendData.map(d => d.success), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, tension: 0.3 },
-      { label: 'Failure', data: syncTrendData.map(d => d.failure), borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true, tension: 0.3 }
-    ]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+// Load dashboard data asynchronously on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadDashboardData();
 });
 
-new Chart(document.getElementById('operationsChart').getContext('2d'), {
-  type: 'doughnut',
-  data: {
-    labels: Object.keys(operationsData),
-    datasets: [{ data: Object.values(operationsData), backgroundColor: ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#6c757d', '#0dcaf0'] }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-});
-
-setInterval(refreshStats, 30000);
-
-function refreshStats() {
-  fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxStats']); ?>')
+function loadDashboardData() {
+  fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxDashboard']); ?>')
     .then(r => r.json())
     .then(data => {
-      document.getElementById('queue-count').textContent = data.queue_status.queued || 0;
-      document.getElementById('orphan-count').textContent = data.orphan_count || 0;
+      updateQueueStatus(data.queue_status || {});
+      updateOrphanCount(data.orphan_count || 0);
+      updateEntityStatus(data.sync_summary || {});
+      updateRecentOperations(data.recent_operations || []);
+      updateCharts(data.sync_trend || [], data.operations_by_type || {});
+
+      const cacheNote = data.from_cache ? ' (cached)' : '';
+      document.getElementById('last-updated').textContent = 'Updated: ' + data.timestamp + cacheNote;
+    })
+    .catch(err => {
+      console.error('Failed to load dashboard:', err);
+      document.getElementById('entity-status-body').innerHTML =
+        '<div class="alert alert-danger">Failed to load data. <a href="javascript:loadDashboardData()">Retry</a></div>';
     });
 }
+
+function updateQueueStatus(status) {
+  const queued = status.queued || 0;
+  const processing = status.processing || 0;
+  const failed = status.failed || 0;
+
+  document.getElementById('queue-count').textContent = queued.toLocaleString();
+
+  let badges = '';
+  if (processing > 0) badges += '<span class="badge bg-warning">' + processing + ' processing</span> ';
+  if (failed > 0) badges += '<span class="badge bg-danger">' + failed + ' failed</span>';
+  document.getElementById('queue-badges').innerHTML = badges;
+}
+
+function updateOrphanCount(count) {
+  const el = document.getElementById('orphan-count');
+  const icon = document.getElementById('orphan-icon');
+  const card = document.getElementById('orphan-card');
+
+  el.textContent = count.toLocaleString();
+  el.className = 'mb-0 ' + (count > 0 ? 'text-warning' : 'text-success');
+  icon.className = 'fs-1 ' + (count > 0 ? 'text-warning' : 'text-success');
+  card.className = 'card h-100' + (count > 0 ? ' border-warning' : '');
+}
+
+function updateEntityStatus(summary) {
+  if (!summary || Object.keys(summary).length === 0) {
+    document.getElementById('entity-status-body').innerHTML =
+      '<div class="alert alert-info mb-0">No sync status data available.</div>';
+    return;
+  }
+
+  let html = '<table class="table table-sm table-hover mb-0"><thead><tr>' +
+    '<th>Entity Type</th><th class="text-center">Synced</th>' +
+    '<th class="text-center">Pending</th><th class="text-center">Failed</th>' +
+    '<th class="text-center">Total</th><th></th></tr></thead><tbody>';
+
+  for (const [entityType, statuses] of Object.entries(summary)) {
+    let synced = 0, pending = 0, failed = 0;
+    statuses.forEach(s => {
+      if (s.sync_status === 'synced') synced = s.count;
+      else if (s.sync_status === 'pending') pending = s.count;
+      else if (s.sync_status === 'failed') failed = s.count;
+    });
+    const total = synced + pending + failed;
+
+    html += '<tr><td><code>' + entityType + '</code></td>' +
+      '<td class="text-center"><span class="badge bg-success">' + synced.toLocaleString() + '</span></td>' +
+      '<td class="text-center"><span class="badge bg-warning text-dark">' + pending.toLocaleString() + '</span></td>' +
+      '<td class="text-center"><span class="badge bg-danger">' + failed.toLocaleString() + '</span></td>' +
+      '<td class="text-center">' + total.toLocaleString() + '</td>' +
+      '<td class="text-end"><a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'syncStatus']); ?>?entity_type=' + entityType + '" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a></td></tr>';
+  }
+
+  html += '</tbody></table>';
+  document.getElementById('entity-status-body').innerHTML = html;
+}
+
+function updateRecentOperations(ops) {
+  if (!ops || ops.length === 0) {
+    document.getElementById('recent-ops-body').innerHTML =
+      '<div class="alert alert-info mb-0">No recent operations.</div>';
+    return;
+  }
+
+  let html = '<table class="table table-sm table-hover mb-0"><thead><tr>' +
+    '<th>Time</th><th>Operation</th><th>Entity</th><th>Status</th></tr></thead><tbody>';
+
+  ops.slice(0, 10).forEach(op => {
+    const time = new Date(op.created_at).toLocaleTimeString();
+    const statusClass = op.status === 'success' ? 'success' : (op.status === 'failure' ? 'danger' : 'warning');
+    html += '<tr><td class="text-muted small">' + time + '</td>' +
+      '<td><span class="badge bg-secondary">' + op.operation + '</span></td>' +
+      '<td><code>' + op.entity_type + '/' + op.entity_id + '</code></td>' +
+      '<td><span class="badge bg-' + statusClass + '">' + op.status + '</span></td></tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('recent-ops-body').innerHTML = html;
+}
+
+function updateCharts(trendData, opsData) {
+  // Hide loading, show canvas
+  document.getElementById('chart-loading-1').style.display = 'none';
+  document.getElementById('chart-loading-2').style.display = 'none';
+  document.getElementById('syncTrendChart').style.display = 'block';
+  document.getElementById('operationsChart').style.display = 'block';
+
+  // Sync Trend Chart
+  if (trendData && trendData.length > 0) {
+    if (syncTrendChart) syncTrendChart.destroy();
+    syncTrendChart = new Chart(document.getElementById('syncTrendChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: trendData.map(d => d.date),
+        datasets: [
+          { label: 'Success', data: trendData.map(d => d.success), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, tension: 0.3 },
+          { label: 'Failure', data: trendData.map(d => d.failure), borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true, tension: 0.3 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // Operations Chart
+  if (opsData && Object.keys(opsData).length > 0) {
+    if (operationsChart) operationsChart.destroy();
+    operationsChart = new Chart(document.getElementById('operationsChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(opsData),
+        datasets: [{ data: Object.values(opsData), backgroundColor: ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#6c757d', '#0dcaf0'] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadDashboardData, 30000);
 
 function runIntegrityCheck() {
   const btn = event.target;
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Running...';
-  
+
   fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxIntegrityCheck']); ?>', { method: 'POST' })
     .then(r => r.json())
     .then(data => {
@@ -321,13 +392,13 @@ function previewCleanup() {
 
 function executeCleanup() {
   if (!confirm('Delete all orphaned triples? This cannot be undone.')) return;
-  
+
   fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxCleanupOrphans']); ?>', { method: 'POST' })
     .then(r => r.json())
     .then(data => {
       if (data.success) {
         alert('Cleanup complete. Removed ' + data.stats.triples_removed + ' triples.');
-        location.reload();
+        loadDashboardData();
       }
     });
 }

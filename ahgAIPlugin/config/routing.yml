@@ -42,6 +42,11 @@ ahg_ai_summarize:
   url: /ai/summarize/:id
   param: { module: ai, action: summarize }
 
+# Handwriting Text Recognition (HTR) Route
+ahg_ai_htr:
+  url: /ai/htr/:id
+  param: { module: ai, action: htr }
+
 # Legacy NER routes (backward compatibility)
 ahg_ner_extract:
   url: /ner/extract/:id
@@ -54,3 +59,8 @@ ahg_ner_review:
 ahg_ner_summarize:
   url: /ner/summarize/:id
   param: { module: ai, action: summarize }
+
+# HTR (Handwriting Text Recognition) routes
+ahg_ner_htr:
+  url: /ner/htr/:id
+  param: { module: ai, action: htr }

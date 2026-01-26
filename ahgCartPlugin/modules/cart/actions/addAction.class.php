@@ -49,6 +49,7 @@ class cartAddAction extends sfAction
         $result = $service->addToCart($userId, $objectId, $title, $slug, $sessionId);
         
         $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
-        $this->redirect(['module' => 'informationobject', 'slug' => $slug]);
+        // Use direct slug URL to avoid routing conflicts
+        $this->redirect('/' . $slug);
     }
 }

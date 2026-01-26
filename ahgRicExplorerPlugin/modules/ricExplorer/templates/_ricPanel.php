@@ -79,7 +79,7 @@ if (!$resourceId) return;
     document.getElementById('ric-loading').style.display = 'flex';
     document.getElementById('ric-load-btn').disabled = true;
 
-    fetch('/index.php/ahgRicExplorer/getData?id=' + resourceId + '&_=' + Date.now())
+    fetch('/index.php/ricExplorer/getData?id=' + resourceId + '&_=' + Date.now())
       .then(function(r) { return r.json(); })
       .then(function(data) {
         document.getElementById('ric-loading').style.display = 'none';

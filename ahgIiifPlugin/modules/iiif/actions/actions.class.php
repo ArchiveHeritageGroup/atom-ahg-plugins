@@ -357,4 +357,161 @@ class iiifActions extends sfActions
 
         $this->setTemplate('settings');
     }
+
+    // =========================================================================
+    // ANNOTATION ACTIONS
+    // =========================================================================
+
+    /**
+     * Get annotations for an object
+     * GET /iiif/annotations/object/:id
+     */
+    public function executeAnnotationsList(sfWebRequest $request)
+    {
+        $this->response->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+
+        if (!$objectId) {
+            $this->response->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Object ID required']));
+        }
+
+        $service = new IiifAnnotationService();
+        $annotations = $service->getAnnotationsForObject($objectId);
+        $page = $service->formatAsAnnotationPage($annotations, $objectId);
+
+        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        return $this->renderText(json_encode($page, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Create a new annotation
+     * POST /iiif/annotations
+     */
+    public function executeAnnotationsCreate(sfWebRequest $request)
+    {
+        $this->response->setContentType('application/json');
+        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        if (!$this->context->user->isAuthenticated()) {
+            $this->response->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || empty($data['object_id'])) {
+            $this->response->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Invalid annotation data']));
+        }
+
+        $service = new IiifAnnotationService();
+        $parsed = $service->parseAnnotoriousAnnotation($data, $data['object_id']);
+        $parsed['created_by'] = $this->context->user->getAttribute('user_id');
+
+        $annotationId = $service->createAnnotation($parsed);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'id' => '#' . $annotationId,
+        ]));
+    }
+
+    /**
+     * Update an annotation
+     * PUT /iiif/annotations/:id
+     */
+    public function executeAnnotationsUpdate(sfWebRequest $request)
+    {
+        $this->response->setContentType('application/json');
+        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        if (!$this->context->user->isAuthenticated()) {
+            $this->response->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $annotationId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true);
+
+        if (!$annotationId || !$data) {
+            $this->response->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Invalid request']));
+        }
+
+        $service = new IiifAnnotationService();
+
+        // Check annotation exists
+        $existing = $service->getAnnotation($annotationId);
+        if (!$existing) {
+            $this->response->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Annotation not found']));
+        }
+
+        $updateData = [];
+
+        if (isset($data['target']['selector'])) {
+            $updateData['target_selector'] = $data['target']['selector'];
+        }
+
+        if (isset($data['body'])) {
+            $body = is_array($data['body']) && isset($data['body'][0]) ? $data['body'][0] : $data['body'];
+            $updateData['body'] = [
+                'type' => $body['type'] ?? 'TextualBody',
+                'value' => $body['value'] ?? '',
+                'format' => $body['format'] ?? 'text/plain',
+                'purpose' => $body['purpose'] ?? null,
+            ];
+        }
+
+        $service->updateAnnotation($annotationId, $updateData);
+
+        return $this->renderText(json_encode(['success' => true]));
+    }
+
+    /**
+     * Delete an annotation
+     * DELETE /iiif/annotations/:id
+     */
+    public function executeAnnotationsDelete(sfWebRequest $request)
+    {
+        $this->response->setContentType('application/json');
+        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        if (!$this->context->user->isAuthenticated()) {
+            $this->response->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $annotationId = $request->getParameter('id');
+
+        if (!$annotationId) {
+            $this->response->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Annotation ID required']));
+        }
+
+        $service = new IiifAnnotationService();
+
+        // Check annotation exists
+        $existing = $service->getAnnotation($annotationId);
+        if (!$existing) {
+            $this->response->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Annotation not found']));
+        }
+
+        $service->deleteAnnotation($annotationId);
+
+        return $this->renderText(json_encode(['success' => true]));
+    }
 }

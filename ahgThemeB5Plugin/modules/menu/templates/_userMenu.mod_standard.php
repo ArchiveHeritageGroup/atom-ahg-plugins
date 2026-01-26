@@ -10,11 +10,13 @@ $isAuthenticated = $sf_user->isAuthenticated();
 $routing = sfContext::getInstance()->getRouting();
 $hasAccessRequest = $routing->hasRouteName('access_request_my');
 $hasResearch = $routing->hasRouteName('research_workspace');
+$hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
 
 // Get pending counts only if plugins exist
 $pendingCount = 0;
 $pendingResearcherCount = 0;
 $pendingBookingCount = 0;
+$spectrumTaskCount = 0;
 
 if ($isAuthenticated && $hasAccessRequest) {
     try {
@@ -35,6 +37,17 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
             ->count();
         $pendingBookingCount = \Illuminate\Database\Capsule\Manager::table('research_booking')
             ->where('status', 'pending')
+            ->count();
+    } catch (Exception $e) {
+        // Table may not exist
+    }
+}
+
+// Get Spectrum task count for current user
+if ($isAuthenticated && $hasSpectrum) {
+    try {
+        $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
+            ->where('assigned_to', $userId)
             ->count();
     } catch (Exception $e) {
         // Table may not exist
@@ -100,6 +113,25 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
         <i class="fas fa-key me-2"></i><?php echo __('Change Password'); ?>
       </a>
     </li>
+
+    <?php if ($hasSpectrum): ?>
+    <!-- Spectrum Tasks Section -->
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><i class="fas fa-tasks me-1"></i><?php echo __('Tasks'); ?></h6></li>
+    <li>
+      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@spectrum_my_tasks'); ?>">
+        <span><i class="fas fa-clipboard-list me-2"></i><?php echo __('My Tasks'); ?></span>
+        <?php if ($spectrumTaskCount > 0): ?>
+        <span class="badge bg-danger"><?php echo $spectrumTaskCount; ?></span>
+        <?php endif; ?>
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="<?php echo url_for('@spectrum_dashboard'); ?>">
+        <span><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Workflow Dashboard'); ?></span>
+      </a>
+    </li>
+    <?php endif; ?>
 
     <?php if ($hasResearch): ?>
     <!-- Research Section -->

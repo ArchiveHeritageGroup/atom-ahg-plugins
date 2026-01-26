@@ -54,14 +54,19 @@ class ricDashboardActions extends sfActions
             return;
         }
 
-        $this->syncSummary = $this->getSyncSummary();
-        $this->queueStatus = $this->getQueueStatus();
-        $this->recentOperations = $this->getRecentOperations(20);
-        $this->orphanCount = $this->getOrphanCount();
-        $this->fusekiStatus = $this->checkFusekiStatus();
-        $this->configSettings = $this->getConfigSettings();
-        $this->syncTrend = $this->getSyncTrend(7);
-        $this->operationsByType = $this->getOperationsByType();
+        // OPTIMIZATION: Only load minimal data for initial page render
+        // Heavy data is loaded via AJAX after page load
+        $this->fusekiStatus = $this->checkFusekiStatus();  // Fast ASK query
+        $this->configSettings = $this->getConfigSettings(); // Fast DB query
+
+        // These will be loaded via AJAX
+        $this->syncSummary = [];
+        $this->queueStatus = [];
+        $this->recentOperations = [];
+        $this->orphanCount = 0;
+        $this->syncTrend = [];
+        $this->operationsByType = [];
+        $this->asyncLoad = true;  // Flag for template to load via AJAX
     }
 
     public function executeSyncStatus(sfWebRequest $request)
@@ -149,7 +154,7 @@ class ricDashboardActions extends sfActions
     public function executeConfig(sfWebRequest $request)
     {
         // Redirect to AHG Settings - Fuseki section (centralized config)
-        $this->redirect(['module' => 'settings', 'action' => 'section', 'section' => 'fuseki']);
+        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']);
     }
 
     // AJAX Endpoints
@@ -163,6 +168,67 @@ class ricDashboardActions extends sfActions
             'recent_operations' => $this->getRecentOperations(10),
             'timestamp' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    /**
+     * Full dashboard data endpoint - used for async loading
+     * Includes caching to reduce database load
+     */
+    public function executeAjaxDashboard(sfWebRequest $request)
+    {
+        $cacheKey = 'ric_dashboard_stats';
+        $cacheTtl = 60; // Cache for 60 seconds
+
+        // Try cache first
+        $cached = $this->getFromCache($cacheKey);
+        if ($cached && !$request->getParameter('refresh')) {
+            $cached['from_cache'] = true;
+            return $this->renderJson($cached);
+        }
+
+        // Build fresh data
+        $data = [
+            'sync_summary' => $this->getSyncSummary(),
+            'queue_status' => $this->getQueueStatus(),
+            'orphan_count' => $this->getOrphanCount(),
+            'recent_operations' => $this->getRecentOperations(10),
+            'sync_trend' => $this->getSyncTrend(7),
+            'operations_by_type' => $this->getOperationsByType(),
+            'timestamp' => date('Y-m-d H:i:s'),
+            'from_cache' => false,
+        ];
+
+        // Save to cache
+        $this->saveToCache($cacheKey, $data, $cacheTtl);
+
+        return $this->renderJson($data);
+    }
+
+    /**
+     * Simple file-based cache for dashboard stats
+     */
+    protected function getFromCache(string $key): ?array
+    {
+        $cacheFile = sfConfig::get('sf_cache_dir') . "/ric_{$key}.json";
+        if (!file_exists($cacheFile)) {
+            return null;
+        }
+
+        $data = json_decode(file_get_contents($cacheFile), true);
+        if (!$data || !isset($data['_expires']) || $data['_expires'] < time()) {
+            @unlink($cacheFile);
+            return null;
+        }
+
+        unset($data['_expires']);
+        return $data;
+    }
+
+    protected function saveToCache(string $key, array $data, int $ttl): void
+    {
+        $cacheFile = sfConfig::get('sf_cache_dir') . "/ric_{$key}.json";
+        $data['_expires'] = time() + $ttl;
+        @file_put_contents($cacheFile, json_encode($data));
     }
 
     public function executeAjaxIntegrityCheck(sfWebRequest $request)
@@ -306,23 +372,31 @@ class ricDashboardActions extends sfActions
         $password = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
 
         try {
+            // Use ASK query for quick connectivity check (faster than COUNT on large datasets)
             $ch = curl_init($endpoint . '/query');
-            curl_setopt_array($ch, [
+            $headers = ['Content-Type: application/sparql-query', 'Accept: application/json'];
+            $curlOpts = [
                 CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => 'SELECT (COUNT(*) AS ?count) WHERE { ?s ?p ?o }',
-                CURLOPT_HTTPHEADER => ['Content-Type: application/sparql-query', 'Accept: application/json'],
-                CURLOPT_USERPWD => "{$username}:{$password}",
+                CURLOPT_POSTFIELDS => 'ASK { ?s ?p ?o }',
+                CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 5,
-            ]);
+            ];
+
+            // Only add auth if password is set
+            if (!empty($password)) {
+                $curlOpts[CURLOPT_USERPWD] = "{$username}:{$password}";
+            }
+
+            curl_setopt_array($ch, $curlOpts);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
             if ($httpCode === 200) {
                 $data = json_decode($response, true);
-                $count = $data['results']['bindings'][0]['count']['value'] ?? 0;
-                return ['online' => true, 'triple_count' => (int) $count];
+                $hasData = $data['boolean'] ?? false;
+                return ['online' => true, 'has_data' => $hasData];
             }
             return ['online' => false, 'error' => 'HTTP ' . $httpCode];
         } catch (\Exception $e) {

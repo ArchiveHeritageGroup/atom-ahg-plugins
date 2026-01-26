@@ -40,9 +40,28 @@
                 <i class="fas fa-tachometer-alt fa-fw"></i> <?php echo __('Spectrum Dashboard'); ?>
             </a>
         </li>
-        
+        <li>
+            <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'myTasks']); ?>">
+                <i class="fas fa-clipboard-list fa-fw"></i> <?php echo __('My Tasks'); ?>
+                <?php
+                // Show count badge if user is authenticated
+                if ($sf_user->isAuthenticated()) {
+                    $userId = $sf_user->getAttribute('user_id');
+                    if ($userId) {
+                        $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
+                            ->where('assigned_to', $userId)
+                            ->count();
+                        if ($taskCount > 0) {
+                            echo '<span class="badge bg-primary ms-1">' . $taskCount . '</span>';
+                        }
+                    }
+                }
+                ?>
+            </a>
+        </li>
+
         <li role="separator" class="divider"></li>
-        
+
         <!-- Data Protection -->
         <li class="dropdown-header"><?php echo __('Data Protection'); ?></li>
         <li>

@@ -31,8 +31,8 @@ $redirectTarget = $sf_data->getRaw('redirectTarget');
       <ul>
         <?php if ($parent): ?>
           <li><?php echo link_to(__('Cancel'), ['module' => 'digitalobject', 'action' => 'edit', 'id' => $parent->id], ['class' => 'c-btn']) ?></li>
-        <?php elseif ($redirectTarget): ?>
-          <li><?php echo link_to(__('Cancel'), ['module' => $redirectTarget->module, 'slug' => $redirectTarget->slug], ['class' => 'c-btn']) ?></li>
+        <?php elseif ($redirectTarget && $redirectTarget->slug): ?>
+          <li><?php echo link_to(__('Cancel'), '@slug?slug=' . $redirectTarget->slug, ['class' => 'c-btn']) ?></li>
         <?php else: ?>
           <li><?php echo link_to(__('Cancel'), '@homepage', ['class' => 'c-btn']) ?></li>
         <?php endif; ?>

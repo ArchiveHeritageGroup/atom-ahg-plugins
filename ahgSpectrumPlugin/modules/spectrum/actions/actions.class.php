@@ -72,6 +72,65 @@ class spectrumActions extends sfActions
         return $conditionCheck;
     }
 
+    /**
+     * Create assignment notification for a user
+     */
+    protected function createAssignmentNotification($assignedToUserId, $resource, $procedureType, $state, $assignedByUserId)
+    {
+        // Get assignee user details
+        $assignee = DB::table('user')->where('id', $assignedToUserId)->first();
+        if (!$assignee) {
+            return;
+        }
+
+        // Get assigner user details
+        $assigner = DB::table('user')->where('id', $assignedByUserId)->first();
+        $assignerName = $assigner ? $assigner->username : 'System';
+
+        // Get procedure label
+        $procedures = ahgSpectrumWorkflowService::getProcedures();
+        $procedureLabel = $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
+
+        // Get state label from config
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+        $stateLabel = $state;
+        if ($config) {
+            $configData = json_decode($config->config_json, true);
+            $stateLabel = $configData['state_labels'][$state] ?? ucwords(str_replace('_', ' ', $state));
+        }
+
+        $objectTitle = $resource->title ?: $resource->slug;
+        $objectLink = '/' . $resource->slug . '/spectrum';
+
+        $subject = "Task Assigned: {$procedureLabel}";
+        $message = "You have been assigned a task by {$assignerName}.\n\n" .
+                   "Object: {$objectTitle}\n" .
+                   "Procedure: {$procedureLabel}\n" .
+                   "State: {$stateLabel}\n\n" .
+                   "View task: {$objectLink}";
+
+        // Create notification
+        DB::table('spectrum_notification')->insert([
+            'user_id' => $assignedToUserId,
+            'notification_type' => 'task_assignment',
+            'subject' => $subject,
+            'message' => $message,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
+     * Get procedure label helper
+     */
+    protected function getProcedureLabel($procedureType)
+    {
+        $procedures = ahgSpectrumWorkflowService::getProcedures();
+        return $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
+    }
+
     public function executeIndex(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
@@ -237,30 +296,50 @@ class spectrumActions extends sfActions
             $this->forward404();
         }
         
+        // Prepare assignment data
+        $assignedToInt = $assignedTo ? (int) $assignedTo : null;
+        $assignmentData = [];
+        if ($assignedToInt) {
+            $assignmentData = [
+                'assigned_to' => $assignedToInt,
+                'assigned_at' => date('Y-m-d H:i:s'),
+                'assigned_by' => $userId
+            ];
+        }
+
         // Update or create workflow state
         $existingState = DB::table('spectrum_workflow_state')
             ->where('record_id', $resource->id)
             ->where('procedure_type', $procedureType)
             ->first();
-        
+
         if ($existingState) {
+            $updateData = [
+                'current_state' => $toState,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            // Update assignment if provided
+            if ($assignedToInt) {
+                $updateData = array_merge($updateData, $assignmentData);
+            }
             DB::table('spectrum_workflow_state')
                 ->where('id', $existingState->id)
-                ->update([
-                    'current_state' => $toState,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
+                ->update($updateData);
         } else {
-            DB::table('spectrum_workflow_state')->insert([
+            $insertData = [
                 'procedure_type' => $procedureType,
                 'record_id' => $resource->id,
                 'current_state' => $toState,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
-            ]);
+            ];
+            if ($assignedToInt) {
+                $insertData = array_merge($insertData, $assignmentData);
+            }
+            DB::table('spectrum_workflow_state')->insert($insertData);
         }
-        
-        // Record history
+
+        // Record history with assignment
         DB::table('spectrum_workflow_history')->insert([
             'procedure_type' => $procedureType,
             'record_id' => $resource->id,
@@ -268,11 +347,23 @@ class spectrumActions extends sfActions
             'to_state' => $toState,
             'transition_key' => $transitionKey,
             'user_id' => $userId,
+            'assigned_to' => $assignedToInt,
             'note' => $note,
-            'metadata' => $assignedTo ? json_encode(['assigned_to' => $assignedTo]) : null,
+            'metadata' => $assignedToInt ? json_encode(['assigned_to' => $assignedToInt]) : null,
             'created_at' => date('Y-m-d H:i:s')
         ]);
-        
+
+        // Create notification for assignee if task was assigned
+        if ($assignedToInt && $assignedToInt !== $userId) {
+            $this->createAssignmentNotification(
+                $assignedToInt,
+                $resource,
+                $procedureType,
+                $toState,
+                $userId
+            );
+        }
+
         // Redirect back
         $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
     }
@@ -288,6 +379,78 @@ class spectrumActions extends sfActions
         
         $this->labelType = $request->getParameter('type', 'full');
         $this->labelSize = $request->getParameter('size', 'medium');
+    }
+
+    /**
+     * My Tasks - Show tasks assigned to current user
+     */
+    public function executeMyTasks(sfWebRequest $request)
+    {
+        // Require authentication
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $procedureTypeFilter = $request->getParameter('procedure_type');
+
+        // Build query for assigned tasks
+        $query = DB::table('spectrum_workflow_state as sws')
+            ->select([
+                'sws.*',
+                'io.id as object_id',
+                'io.identifier',
+                'io.repository_id',
+                'ioi18n.title as object_title',
+                'slug.slug',
+                'assigner.username as assigned_by_name'
+            ])
+            ->leftJoin('information_object as io', 'sws.record_id', '=', 'io.id')
+            ->leftJoin('information_object_i18n as ioi18n', function($join) {
+                $join->on('io.id', '=', 'ioi18n.id')
+                     ->where('ioi18n.culture', '=', 'en');
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->leftJoin('user as assigner', 'sws.assigned_by', '=', 'assigner.id')
+            ->where('sws.assigned_to', $userId);
+
+        // Apply procedure type filter
+        if ($procedureTypeFilter) {
+            $query->where('sws.procedure_type', $procedureTypeFilter);
+        }
+
+        // Order by most recently assigned
+        $query->orderBy('sws.assigned_at', 'desc');
+
+        $this->tasks = $query->get();
+
+        // Get procedure labels for display
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
+
+        // Get workflow configs for state labels
+        $this->workflowConfigs = [];
+        $configs = DB::table('spectrum_workflow_config')
+            ->where('is_active', 1)
+            ->get();
+        foreach ($configs as $config) {
+            $configData = json_decode($config->config_json, true);
+            $this->workflowConfigs[$config->procedure_type] = $configData;
+        }
+
+        // Get unread notification count
+        $this->unreadCount = DB::table('spectrum_notification')
+            ->where('user_id', $userId)
+            ->whereNull('read_at')
+            ->count();
+
+        // Get procedure types for filter dropdown
+        $this->procedureTypes = DB::table('spectrum_workflow_state')
+            ->where('assigned_to', $userId)
+            ->distinct()
+            ->pluck('procedure_type')
+            ->toArray();
+
+        $this->currentFilter = $procedureTypeFilter;
     }
 
     public function executeDashboard(sfWebRequest $request)
@@ -516,19 +679,178 @@ class spectrumActions extends sfActions
     {
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
-        
+
         if (!$this->resource) {
             $this->forward404();
         }
-        
+
+        // Load heritage asset data
         $this->grapData = null;
+        $this->totalAssets = 0;
+        $this->valuedAssets = 0;
+        $this->pendingValuation = 0;
+        $this->totalValue = 0;
+        $this->categories = [];
+        $this->assetRegisterComplete = false;
+        $this->valuationsCurrent = false;
+        $this->conditionComplete = false;
+        $this->depreciationRecorded = false;
+        $this->insuranceComplete = false;
+
         try {
             $this->grapData = DB::table('grap_heritage_asset')
                 ->where('object_id', $this->resource->id)
                 ->first();
+
+            if ($this->grapData) {
+                $this->totalAssets = 1;
+                $this->valuedAssets = $this->grapData->current_value ? 1 : 0;
+                $this->pendingValuation = $this->grapData->current_value ? 0 : 1;
+                $this->totalValue = $this->grapData->current_value ?? 0;
+                $this->assetRegisterComplete = true;
+                $this->valuationsCurrent = $this->grapData->valuation_date &&
+                    strtotime($this->grapData->valuation_date) > strtotime('-5 years');
+                $this->insuranceComplete = !empty($this->grapData->insurance_value);
+            }
         } catch (\Exception $e) {
-            // Table may not exist
+            // Table may not exist - use defaults
         }
+
+        // Handle export
+        $export = $request->getParameter('export');
+        if ($export) {
+            return $this->exportHeritageAssets($export);
+        }
+    }
+
+    /**
+     * Export heritage assets data
+     */
+    protected function exportHeritageAssets(string $format)
+    {
+        $data = [
+            'title' => $this->resource->title ?? $this->resource->slug,
+            'slug' => $this->resource->slug,
+            'total_assets' => $this->totalAssets,
+            'valued_assets' => $this->valuedAssets,
+            'pending_valuation' => $this->pendingValuation,
+            'total_value' => $this->totalValue,
+            'asset_register_complete' => $this->assetRegisterComplete ? 'Yes' : 'No',
+            'valuations_current' => $this->valuationsCurrent ? 'Yes' : 'No',
+            'condition_complete' => $this->conditionComplete ? 'Yes' : 'No',
+            'insurance_complete' => $this->insuranceComplete ? 'Yes' : 'No',
+        ];
+
+        if ($this->grapData) {
+            $data['acquisition_date'] = $this->grapData->acquisition_date ?? '';
+            $data['acquisition_method'] = $this->grapData->acquisition_method ?? '';
+            $data['acquisition_cost'] = $this->grapData->acquisition_cost ?? '';
+            $data['current_value'] = $this->grapData->current_value ?? '';
+            $data['valuation_date'] = $this->grapData->valuation_date ?? '';
+            $data['valuation_method'] = $this->grapData->valuation_method ?? '';
+            $data['insurance_value'] = $this->grapData->insurance_value ?? '';
+        }
+
+        $filename = 'heritage_assets_' . $this->resource->slug . '_' . date('Ymd');
+
+        switch ($format) {
+            case 'csv':
+                return $this->exportCsv($data, $filename);
+            case 'xlsx':
+                return $this->exportXlsx($data, $filename);
+            case 'pdf':
+                return $this->exportPdf($data, $filename);
+            default:
+                return sfView::NONE;
+        }
+    }
+
+    protected function exportCsv(array $data, string $filename)
+    {
+        $response = $this->getResponse();
+        $response->setContentType('text/csv');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '.csv"');
+
+        $output = fopen('php://output', 'w');
+
+        // Header row
+        fputcsv($output, array_keys($data));
+        // Data row
+        fputcsv($output, array_values($data));
+
+        fclose($output);
+
+        return sfView::NONE;
+    }
+
+    protected function exportXlsx(array $data, string $filename)
+    {
+        // Simple Excel XML format (works without PhpSpreadsheet)
+        $response = $this->getResponse();
+        $response->setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '.xlsx"');
+
+        // Use simple HTML table that Excel can read
+        $response->setContentType('application/vnd.ms-excel');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '.xls"');
+
+        $html = '<html><head><meta charset="UTF-8"></head><body>';
+        $html .= '<table border="1">';
+        $html .= '<tr>';
+        foreach (array_keys($data) as $header) {
+            $html .= '<th>' . htmlspecialchars(ucwords(str_replace('_', ' ', $header))) . '</th>';
+        }
+        $html .= '</tr><tr>';
+        foreach (array_values($data) as $value) {
+            $html .= '<td>' . htmlspecialchars($value) . '</td>';
+        }
+        $html .= '</tr></table></body></html>';
+
+        echo $html;
+        return sfView::NONE;
+    }
+
+    protected function exportPdf(array $data, string $filename)
+    {
+        $response = $this->getResponse();
+        $response->setContentType('text/html');
+
+        // Generate printable HTML (user can print to PDF)
+        $html = '<!DOCTYPE html><html><head>';
+        $html .= '<meta charset="UTF-8">';
+        $html .= '<title>Heritage Assets Report - ' . htmlspecialchars($data['title']) . '</title>';
+        $html .= '<style>';
+        $html .= 'body { font-family: Arial, sans-serif; margin: 40px; }';
+        $html .= 'h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }';
+        $html .= 'table { width: 100%; border-collapse: collapse; margin-top: 20px; }';
+        $html .= 'th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }';
+        $html .= 'th { background-color: #007bff; color: white; }';
+        $html .= 'tr:nth-child(even) { background-color: #f9f9f9; }';
+        $html .= '.footer { margin-top: 30px; font-size: 12px; color: #666; }';
+        $html .= '@media print { body { margin: 20px; } }';
+        $html .= '</style>';
+        $html .= '</head><body>';
+        $html .= '<h1>Heritage Assets Report</h1>';
+        $html .= '<p><strong>Record:</strong> ' . htmlspecialchars($data['title']) . '</p>';
+        $html .= '<p><strong>Generated:</strong> ' . date('Y-m-d H:i:s') . '</p>';
+        $html .= '<table>';
+        foreach ($data as $key => $value) {
+            if ($key === 'title' || $key === 'slug') continue;
+            $html .= '<tr>';
+            $html .= '<th>' . htmlspecialchars(ucwords(str_replace('_', ' ', $key))) . '</th>';
+            $html .= '<td>' . htmlspecialchars($value) . '</td>';
+            $html .= '</tr>';
+        }
+        $html .= '</table>';
+        $html .= '<div class="footer">';
+        $html .= '<p>This report complies with international heritage asset accounting standards (IPSAS 17/31, GRAP 103).</p>';
+        $html .= '<p>Use your browser\'s Print function (Ctrl+P) to save as PDF.</p>';
+        $html .= '</div>';
+        $html .= '<script>window.print();</script>';
+        $html .= '</body></html>';
+
+        echo $html;
+        return sfView::NONE;
     }
 
     public function executeLoanDashboard(sfWebRequest $request)
@@ -1259,19 +1581,20 @@ class spectrumActions extends sfActions
     /**
      * Spectrum History Export (PDF/CSV)
      */
-    public function executeSpectrumExport(sfWebRequest $request)
+    public function executeExport(sfWebRequest $request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
         }
-        
+
         $format = $request->getParameter('format', 'csv');
         $type = $request->getParameter('type', 'condition');
-        
+        $slug = $request->getParameter('slug');
+
         if ($request->getParameter('download')) {
             return $this->handleSpectrumDownload($format, $type, $request);
         }
-        
+
         $this->exportTypes = [
             'condition' => 'Condition Check History',
             'valuation' => 'Valuation History',
@@ -1279,6 +1602,48 @@ class spectrumActions extends sfActions
             'loan' => 'Loan History',
             'workflow' => 'Workflow History',
         ];
+
+        // Get object ID from slug if provided
+        $objectId = null;
+        $this->identifier = null;
+        $this->slug = $slug;
+
+        if ($slug) {
+            $slugRecord = DB::table('slug')->where('slug', $slug)->first();
+            if ($slugRecord) {
+                $objectId = $slugRecord->object_id;
+                $object = DB::table('information_object as io')
+                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                        $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                    })
+                    ->where('io.id', $objectId)
+                    ->select('io.identifier', 'i18n.title')
+                    ->first();
+                $this->identifier = $object ? ($object->title ?: $object->identifier) : $slug;
+            }
+        }
+
+        // Query data for display counts
+        $movementQuery = DB::table('spectrum_movement');
+        $conditionQuery = DB::table('spectrum_condition_check');
+        $valuationQuery = DB::table('spectrum_valuation');
+        $loansInQuery = DB::table('spectrum_loan_in');
+        $loansOutQuery = DB::table('spectrum_loan_out');
+
+        if ($objectId) {
+            $movementQuery->where('object_id', $objectId);
+            $conditionQuery->where('object_id', $objectId);
+            $valuationQuery->where('object_id', $objectId);
+            $loansInQuery->where('object_id', $objectId);
+            $loansOutQuery->where('object_id', $objectId);
+        }
+
+        $this->movements = $movementQuery->get()->toArray();
+        $this->conditions = $conditionQuery->get()->toArray();
+        $this->valuations = $valuationQuery->get()->toArray();
+        $this->loansIn = $loansInQuery->get()->toArray();
+        $this->loansOut = $loansOutQuery->get()->toArray();
+        $this->format = $format;
     }
 
     protected function handleSpectrumDownload($format, $type, $request)

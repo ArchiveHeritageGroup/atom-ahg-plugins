@@ -69,11 +69,11 @@
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Queue'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'logs']); ?>"><i class="fas fa-history me-2"></i><?php echo __('Sync Logs'); ?></a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'section', 'section' => 'fuseki']); ?>"><i class="fas fa-cog me-2"></i><?php echo __('Settings'); ?></a></li>
+              <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']); ?>"><i class="fas fa-cog me-2"></i><?php echo __('Settings'); ?></a></li>
               <li><a class="dropdown-item" href="https://www.ica.org/standards/RiC/ontology" target="_blank"><i class="fas fa-book me-2"></i><?php echo __('RiC-O Reference'); ?></a></li>
             </ul>
           </li>
-          </li>
+          
           <?php endif; ?>
           <?php echo get_component('menu', 'mainMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>
           <?php echo get_component('menu', 'clipboardMenu'); ?>

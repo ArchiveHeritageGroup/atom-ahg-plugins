@@ -68,7 +68,7 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         sfConfig::set('app_iiif_base_url', $baseUrl);
         sfConfig::set('app_iiif_cantaloupe_url', "{$baseUrl}/iiif/2");
         sfConfig::set('app_iiif_cantaloupe_internal_url', 'http://127.0.0.1:8182');
-        sfConfig::set('app_iiif_plugin_path', '/plugins/ahgIiifPlugin');
+        sfConfig::set('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
         sfConfig::set('app_iiif_default_viewer', 'openseadragon');
         sfConfig::set('app_iiif_viewer_height', '600px');
         sfConfig::set('app_iiif_enable_annotations', true);
@@ -107,6 +107,38 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('iiif_settings', new sfRoute(
             '/admin/iiif-settings',
             ['module' => 'iiif', 'action' => 'settings']
+        ));
+
+        // ===================
+        // ANNOTATION ROUTES
+        // ===================
+
+        // Get annotations for an object
+        $routing->prependRoute('iiif_annotations_object', new sfRoute(
+            '/iiif/annotations/object/:id',
+            ['module' => 'iiif', 'action' => 'annotationsList'],
+            ['id' => '\d+']
+        ));
+
+        // Create annotation
+        $routing->prependRoute('iiif_annotations_create', new sfRoute(
+            '/iiif/annotations',
+            ['module' => 'iiif', 'action' => 'annotationsCreate'],
+            ['sf_method' => ['post']]
+        ));
+
+        // Update annotation
+        $routing->prependRoute('iiif_annotations_update', new sfRoute(
+            '/iiif/annotations/:id',
+            ['module' => 'iiif', 'action' => 'annotationsUpdate'],
+            ['id' => '\d+', 'sf_method' => ['put']]
+        ));
+
+        // Delete annotation
+        $routing->prependRoute('iiif_annotations_delete', new sfRoute(
+            '/iiif/annotations/:id',
+            ['module' => 'iiif', 'action' => 'annotationsDelete'],
+            ['id' => '\d+', 'sf_method' => ['delete']]
         ));
 
         // ===================

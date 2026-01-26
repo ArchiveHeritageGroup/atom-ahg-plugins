@@ -9,7 +9,7 @@ const IsbnLookup = (function() {
 
     // Configuration
     const config = {
-        endpoint: '/informationobject/isbnLookup',
+        endpoint: '/isbn/lookup',
         debounceMs: 300,
         minIsbnLength: 10
     };
@@ -522,7 +522,7 @@ const IsbnLookup = (function() {
 
     // Configuration
     const config = {
-        endpoint: '/informationobject/isbnLookup',
+        endpoint: '/isbn/lookup',
         debounceMs: 300,
         minIsbnLength: 10
     };

@@ -54,6 +54,12 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
             ['module' => 'ai', 'action' => 'spellcheck']
         ));
 
+        // Handwriting Text Recognition (HTR) routes
+        $routing->prependRoute('ahg_ai_htr', new sfRoute(
+            '/ai/htr/:id',
+            ['module' => 'ai', 'action' => 'htr']
+        ));
+
         // Settings & Health
         $routing->prependRoute('ahg_ai_settings', new sfRoute(
             '/ai/settings',
@@ -68,6 +74,11 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Enable the ai module
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+        $enabledModules[] = 'ai';
+        sfConfig::set('sf_enabled_modules', $enabledModules);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         $this->dispatcher->connect('response.filter_content', [$this, 'filterContent']);
     }

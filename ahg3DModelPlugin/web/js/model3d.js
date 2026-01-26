@@ -339,7 +339,7 @@
      * @returns {Array} Array of extensions
      */
     Model3D.getSupportedExtensions = function() {
-        return ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
+        return ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz', 'splat', 'ksplat'];
     };
 
     /**
@@ -350,6 +350,60 @@
     Model3D.isSupportedFormat = function(filename) {
         var ext = filename.split('.').pop().toLowerCase();
         return Model3D.getSupportedExtensions().indexOf(ext) !== -1;
+    };
+
+    /**
+     * Initialize Gaussian Splat viewer
+     * @param {HTMLElement} container - Container element
+     * @param {string} splatUrl - URL to .splat/.ksplat/.ply file
+     * @param {Object} options - Viewer options
+     * @returns {Object} Viewer instance
+     */
+    Model3D.initSplatViewer = function(container, splatUrl, options) {
+        options = options || {};
+
+        // Check if GaussianSplats3D is loaded
+        if (typeof GaussianSplats3D === 'undefined') {
+            console.error('GaussianSplats3D library not loaded');
+            container.innerHTML = '<div class="alert alert-danger">Gaussian Splat viewer not available</div>';
+            return null;
+        }
+
+        var viewer = new GaussianSplats3D.Viewer({
+            cameraUp: options.cameraUp || [0, 1, 0],
+            initialCameraPosition: options.cameraPosition || [0, 0, 5],
+            initialCameraLookAt: options.cameraLookAt || [0, 0, 0],
+            rootElement: container,
+            selfDrivenMode: true,
+            useBuiltInControls: true,
+            dynamicScene: false,
+            sharedMemoryForWorkers: false
+        });
+
+        viewer.addSplatScene(splatUrl, {
+            splatAlphaRemovalThreshold: options.alphaThreshold || 5,
+            showLoadingUI: true,
+            position: options.position || [0, 0, 0],
+            rotation: options.rotation || [0, 0, 0, 1],
+            scale: options.scale || [1, 1, 1]
+        }).then(function() {
+            viewer.start();
+            if (options.onLoad) options.onLoad(viewer);
+        }).catch(function(err) {
+            console.error('Failed to load splat:', err);
+            if (options.onError) options.onError(err);
+        });
+
+        return viewer;
+    };
+
+    /**
+     * Check if extension is a Gaussian Splat format
+     * @param {string} ext - File extension
+     * @returns {boolean}
+     */
+    Model3D.isSplatFormat = function(ext) {
+        return ['splat', 'ksplat', 'ply'].indexOf(ext.toLowerCase()) !== -1;
     };
 
     // Initialize on DOM ready

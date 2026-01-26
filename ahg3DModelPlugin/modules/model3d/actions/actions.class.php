@@ -528,7 +528,10 @@ class model3dActions extends sfActions
             ->delete();
 
         $this->getUser()->setFlash('notice', '3D model deleted');
-        $this->redirect(['module' => 'informationobject', 'action' => 'index', 'slug' => $objectId]);
+        // Get the slug for redirect
+        $slug = $db::table('slug')->where('object_id', $objectId)->value('slug');
+        // Use direct slug URL to avoid routing conflicts
+        $this->redirect('/' . $slug);
     }
 
     /**

@@ -17,12 +17,13 @@
   <?php
     $statuses = ['all' => 'All', 'queued' => 'Queued', 'processing' => 'Processing', 'completed' => 'Completed', 'failed' => 'Failed'];
     $colors = ['all' => 'secondary', 'queued' => 'primary', 'processing' => 'warning', 'completed' => 'success', 'failed' => 'danger'];
+    $rawStatusCounts = $sf_data->getRaw('statusCounts') ?: [];
   ?>
   <?php foreach ($statuses as $key => $label): ?>
     <li class="nav-item">
       <a class="nav-link <?php echo $currentStatus === $key ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'queue', 'status' => $key]); ?>">
         <?php echo __($label); ?>
-        <span class="badge bg-<?php echo $colors[$key]; ?>"><?php echo $key === 'all' ? array_sum($statusCounts) : ($statusCounts[$key] ?? 0); ?></span>
+        <span class="badge bg-<?php echo $colors[$key]; ?>"><?php echo $key === 'all' ? array_sum($rawStatusCounts) : ($rawStatusCounts[$key] ?? 0); ?></span>
       </a>
     </li>
   <?php endforeach; ?>

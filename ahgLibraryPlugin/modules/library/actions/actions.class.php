@@ -101,6 +101,15 @@ class libraryActions extends sfActions
     }
 
     /**
+     * ISBN lookup (for edit form AJAX calls)
+     * Alias for executeApiIsbnLookup
+     */
+    public function executeIsbnLookup(sfWebRequest $request)
+    {
+        return $this->executeApiIsbnLookup($request);
+    }
+
+    /**
      * API: ISBN lookup via Open Library
      */
     public function executeApiIsbnLookup(sfWebRequest $request)

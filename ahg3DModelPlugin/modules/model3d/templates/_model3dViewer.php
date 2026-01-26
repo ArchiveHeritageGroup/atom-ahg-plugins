@@ -36,33 +36,44 @@ $modelCount = count($models);
     </div>
 
     <?php if ($modelCount === 1): ?>
-        <?php 
+        <?php
         $model = $models[0];
-        echo render_3d_model_viewer($model->id, [
-            'height' => '500px',
-            'base_url' => sfContext::getInstance()->getRequest()->getUriPrefix()
-        ]);
+        $baseUrl = sfContext::getInstance()->getRequest()->getUriPrefix();
+
+        // Check if this is a Gaussian Splat format
+        if (is_splat_format($model->format ?? '')):
+            $splatUrl = $baseUrl . '/uploads/' . $model->file_path;
+            echo render_splat_viewer($splatUrl, [
+                'height' => '500px',
+                'title' => $model->title ?? $model->original_filename ?? 'Gaussian Splat'
+            ]);
+        else:
+            echo render_3d_model_viewer($model->id, [
+                'height' => '500px',
+                'base_url' => $baseUrl
+            ]);
+        endif;
         ?>
-        
+
         <div class="mt-2">
             <small class="text-muted">
-                <?php echo get_3d_format_label($model->format) ?> • 
+                <?php echo get_3d_format_label($model->format) ?> •
                 <?php echo number_format($model->file_size / 1024 / 1024, 2) ?> MB
-                <?php if ($model->ar_enabled): ?>
+                <?php if (!empty($model->ar_enabled) && !is_splat_format($model->format ?? '')): ?>
                 • <span class="badge bg-success"><i class="fas fa-mobile-alt me-1"></i>AR Ready</span>
                 <?php endif ?>
             </small>
-            
+
             <?php if ($sf_user->hasCredential('administrator') || $sf_user->hasCredential('editor')): ?>
             <div class="mt-1">
-                <a href="<?php echo url_for(['module' => 'model3d', 'action' => 'edit', 'id' => $model->id]) ?>" 
+                <a href="<?php echo url_for(['module' => 'model3d', 'action' => 'edit', 'id' => $model->id]) ?>"
                    class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-cog me-1"></i>Settings
                 </a>
             </div>
             <?php endif ?>
         </div>
-        
+
     <?php else: ?>
         <?php echo render_3d_model_gallery($resource, [
             'height' => '500px',

@@ -179,7 +179,7 @@ function render_iiif_viewer($resource, $options = [])
     // Configuration - use helper functions for dynamic URL resolution
     $baseUrl = get_iiif_base_url();
     $cantaloupeUrl = get_iiif_cantaloupe_url();
-    $pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin');
+    $pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
     $defaultViewer = sfConfig::get('app_iiif_default_viewer', 'openseadragon');
     $enableAnnotations = sfConfig::get('app_iiif_enable_annotations', true);
     $viewerHeight = $options['height'] ?? sfConfig::get('app_iiif_viewer_height', '600px');
@@ -362,20 +362,36 @@ function get_primary_3d_model($resource)
 endif;
 
 /**
- * Get digital object URL
+ * Get digital object URL - with redaction support
  */
 function get_digital_object_url($digitalObject)
 {
+    $objectId = $digitalObject->objectId ?? null;
+    $mimeType = $digitalObject->mimeType ?? '';
+    
+    // Check if it's a PDF and has redactions
+    if ($objectId && stripos($mimeType, 'pdf') !== false) {
+        // Check if redactions exist for this object
+        $hasRedactions = \Illuminate\Database\Capsule\Manager::table('privacy_visual_redaction')
+            ->where('object_id', $objectId)
+            ->exists();
+        
+        if ($hasRedactions) {
+            // Return redacted PDF URL
+            return sfContext::getInstance()->getRouting()->generate(null, [
+                'module' => 'privacyAdmin',
+                'action' => 'downloadPdf',
+                'id' => $objectId
+            ]);
+        }
+    }
+    
+    // Original logic - return direct path
     $path = $digitalObject->path ?? '';
     $name = $digitalObject->name ?? '';
-
-    // Path already includes /uploads/ prefix from database
     $fullPath = rtrim($path, '/') . '/' . $name;
-
-    // Ensure single leading slash
     return '/' . ltrim($fullPath, '/');
 }
-
 /**
  * Build IIIF identifier from path and name
  */
@@ -632,7 +648,9 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     ]);
     
     // OpenSeadragon loaded from CDN by the viewer manager module
-    $js = '<script type="module">' . "\n";
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+    $js = '<script type="module"' . $nonceAttr . '>' . "\n";
     $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js";' . "\n";
     $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
     $js .= '    const viewer = new IiifViewerManager("' . $viewerId . '", {' . "\n";

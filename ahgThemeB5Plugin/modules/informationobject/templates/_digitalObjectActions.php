@@ -23,28 +23,14 @@ $resourceSlug = $resource->slug ?? null;
         </a>
         
         <!-- TIFF to PDF Merge -->
-        <button type="button"
-                class="btn btn-outline-secondary btn-sm"
-                data-bs-toggle="modal"
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm" 
+                data-bs-toggle="modal" 
                 data-bs-target="#tiffPdfMergeModal"
                 title="Upload multiple TIFF/image files and merge into a single PDF/A document">
             <i class="fas fa-layer-group me-1"></i>
             Merge to PDF
         </button>
-
-        <?php
-        // Visual Redaction Editor - only show if a digital object exists
-        $hasDigitalObject = QubitDigitalObject::getByInformationObjectId($resourceId) !== null;
-        if ($hasDigitalObject && $sf_user->hasCredential(['editor', 'administrator'], false)):
-        ?>
-        <!-- Visual Redaction Editor -->
-        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resourceId]); ?>"
-           class="btn btn-outline-dark btn-sm"
-           title="Visual Redaction Editor - Draw redactions on PDF/Image to mask sensitive content">
-            <i class="fas fa-mask me-1"></i>
-            Redact
-        </a>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -169,7 +155,7 @@ $resourceSlug = $resource->slug ?? null;
 .tpm-sortable-ghost { opacity: 0.4; background-color: #e7f1ff; }
 </style>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/sortable.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
     'use strict';

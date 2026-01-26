@@ -1016,6 +1016,7 @@ CREATE TABLE IF NOT EXISTS `spectrum_workflow_history` (
   `to_state` varchar(50) NOT NULL,
   `transition_key` varchar(50) NOT NULL,
   `user_id` int DEFAULT NULL,
+  `assigned_to` int DEFAULT NULL,
   `note` text,
   `metadata` json DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -1064,11 +1065,15 @@ CREATE TABLE IF NOT EXISTS `spectrum_workflow_state` (
   `procedure_type` varchar(50) NOT NULL,
   `record_id` int NOT NULL,
   `current_state` varchar(50) NOT NULL,
+  `assigned_to` int DEFAULT NULL,
+  `assigned_at` datetime DEFAULT NULL,
+  `assigned_by` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_record` (`procedure_type`,`record_id`),
-  KEY `idx_procedure_state` (`procedure_type`,`current_state`)
+  KEY `idx_procedure_state` (`procedure_type`,`current_state`),
+  KEY `idx_assigned_to` (`assigned_to`)
 ) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

@@ -469,11 +469,61 @@
 }
 
 /* =====================================================
+   GAUSSIAN SPLAT VIEWER
+   ===================================================== */
+.splat-viewer-container {
+    position: relative;
+    width: 100%;
+}
+
+.splat-viewer-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 8px;
+}
+
+.splat-viewer-container:fullscreen {
+    background: #1a1a2e;
+    padding: 0;
+}
+
+.splat-viewer-container:fullscreen > div:first-of-type {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 100;
+}
+
+.splat-viewer-container:fullscreen > div:nth-of-type(2) {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0;
+}
+
+.splat-viewer-container:fullscreen > small {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.7);
+    z-index: 100;
+}
+
+/* Splat loading overlay */
+.splat-viewer-container .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* =====================================================
    PRINT STYLES
    ===================================================== */
 @media print {
     .model-viewer-container,
-    .model-3d-section {
+    .model-3d-section,
+    .splat-viewer-container {
         display: none !important;
     }
 }

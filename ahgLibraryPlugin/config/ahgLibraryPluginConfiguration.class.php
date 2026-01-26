@@ -14,7 +14,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'library';
         $enabledModules[] = 'isbn';
         $enabledModules[] = 'libraryReports';
-        $enabledModules[] = 'informationobject'; // For ISBN lookup action
+        // Note: informationobject module no longer needed - ISBN lookup moved to isbn module
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -58,9 +58,9 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
             ['module' => 'library', 'action' => 'browse']
         ));
 
-        // ISBN lookup
+        // ISBN lookup for library module (matches JavaScript fetch call)
         $routing->prependRoute('library_isbn_lookup', new sfRoute(
-            '/library/isbn-lookup',
+            '/library/isbnLookup',
             ['module' => 'library', 'action' => 'isbnLookup']
         ));
 
@@ -98,10 +98,12 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
             ['module' => 'library', 'action' => 'coverProxy']
         ));
 
-        // ISBN lookup for information objects (moved from theme routing_isbn.yml)
-        $routing->prependRoute('informationobject_isbn_lookup', new sfRoute(
-            '/informationobject/isbnLookup',
-            ['module' => 'informationobject', 'action' => 'isbnLookup']
+        // ISBN lookup for information objects
+        // IMPORTANT: Use 'isbn' module, NOT 'informationobject' to avoid URL generation conflicts
+        // Using 'informationobject' causes url_for(['module'=>'informationobject', 'slug'=>...]) to match this route
+        $routing->prependRoute('isbn_lookup', new sfRoute(
+            '/isbn/lookup',
+            ['module' => 'isbn', 'action' => 'lookup']
         ));
 
         // ISBN test routes

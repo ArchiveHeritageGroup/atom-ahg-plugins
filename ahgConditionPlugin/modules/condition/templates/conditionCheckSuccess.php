@@ -25,7 +25,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
         <i class="fas fa-arrow-left me-2"></i><?php echo __('Back') ?>
       </a>
       <?php if ($sf_user->isAuthenticated()): ?>
-      <a href="<?php echo $baseUrl ?>/ahgCondition/photos?id=new&object_id=<?php echo $resource->id ?>" class="btn btn-primary">
+      <a href="<?php echo url_for('@condition_photos?id=new') ?>?object_id=<?php echo $resource->id ?>" class="btn btn-primary">
         <i class="fas fa-plus me-2"></i><?php echo __('New Condition Check') ?>
       </a>
       <?php endif; ?>
@@ -67,7 +67,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
             <?php echo esc_entities($latestCondition->assessor ?? 'N/A') ?>
           </div>
           <div class="col-md-3">
-            <a href="<?php echo $baseUrl ?>/ahgCondition/photos?id=<?php echo $latestCondition->id ?>" class="btn btn-outline-primary btn-sm">
+            <a href="<?php echo url_for('@condition_photos?id=' . $latestCondition->id) ?>" class="btn btn-outline-primary btn-sm">
               <i class="fas fa-images me-1"></i><?php echo __('View Photos') ?>
             </a>
           </div>
@@ -122,7 +122,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
                     <td><?php echo esc_entities($condition->assessor ?? '') ?></td>
                     <td><?php echo esc_entities(truncate_text($condition->notes ?? '', 50)) ?></td>
                     <td>
-                      <a href="<?php echo $baseUrl ?>/ahgCondition/photos?id=<?php echo $condition->id ?>" 
+                      <a href="<?php echo url_for('@condition_photos?id=' . $condition->id) ?>" 
                          class="btn btn-sm btn-outline-primary" title="<?php echo __('View Photos') ?>">
                         <i class="fas fa-images"></i>
                       </a>
@@ -137,7 +137,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
             <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
             <p class="text-muted mb-0"><?php echo __('No condition reports found for this object.') ?></p>
             <?php if ($sf_user->isAuthenticated()): ?>
-            <a href="<?php echo $baseUrl ?>/ahgCondition/photos?id=new&object_id=<?php echo $resource->id ?>" class="btn btn-primary mt-3">
+            <a href="<?php echo url_for('@condition_photos?id=new') ?>?object_id=<?php echo $resource->id ?>" class="btn btn-primary mt-3">
               <i class="fas fa-plus me-2"></i><?php echo __('Create First Condition Check') ?>
             </a>
             <?php endif; ?>

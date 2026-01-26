@@ -104,7 +104,8 @@ class embargoActions extends sfActions
         }
 
         $resource = $this->getResource($objectId);
-        $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
+        // Use direct slug URL to avoid routing conflicts
+        $this->redirect('/' . $resource->slug);
     }
 
     public function executeEdit(sfWebRequest $request)
@@ -155,7 +156,8 @@ class embargoActions extends sfActions
 
         $embargo = $service->getEmbargo($embargoId);
         $resource = $this->getResource($embargo->object_id);
-        $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
+        // Use direct slug URL to avoid routing conflicts
+        $this->redirect('/' . $resource->slug);
     }
 
     public function executeLift(sfWebRequest $request)
@@ -179,7 +181,8 @@ class embargoActions extends sfActions
             $service->liftEmbargo((int)$embargoId, $reason, $userId);
 
             $resource = $this->getResource($embargo->object_id);
-            $this->redirect(['module' => 'informationobject', 'slug' => $resource->slug]);
+            // Use direct slug URL to avoid routing conflicts
+            $this->redirect('/' . $resource->slug);
         }
 
         $this->embargo = $embargo;

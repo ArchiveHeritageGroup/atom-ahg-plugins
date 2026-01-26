@@ -239,7 +239,7 @@ function get_iiif_3d_manifest_url(int $modelId): string
 
 /**
  * Check if a file extension is a supported 3D format
- * 
+ *
  * @param string $extension File extension (without dot)
  * @return bool
  */
@@ -247,6 +247,72 @@ function is_3d_format(string $extension): bool
 {
     $supported = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz', 'splat', 'ksplat'];
     return in_array(strtolower($extension), $supported);
+}
+
+/**
+ * Check if a file extension is a Gaussian Splat format
+ *
+ * @param string $extension File extension (without dot)
+ * @return bool
+ */
+function is_splat_format(string $extension): bool
+{
+    $splatFormats = ['splat', 'ksplat'];
+    return in_array(strtolower($extension), $splatFormats);
+}
+
+/**
+ * Render Gaussian Splat viewer
+ *
+ * @param string $url URL to the splat file
+ * @param array $options Viewer options (height, title)
+ * @return string HTML output
+ */
+function render_splat_viewer(string $url, array $options = []): string
+{
+    $height = $options['height'] ?? '500px';
+    $title = $options['title'] ?? 'Gaussian Splat';
+    $viewerId = 'splat-' . substr(md5($url . uniqid()), 0, 8);
+    $pluginPath = '/plugins/ahg3DModelPlugin';
+
+    $html = <<<HTML
+<div class="splat-viewer-container" id="{$viewerId}-container">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="badge bg-info">
+            <i class="fas fa-cloud me-1"></i>{$title} (Gaussian Splat)
+        </span>
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('{$viewerId}-container').requestFullscreen()" title="Fullscreen">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </div>
+    <div id="{$viewerId}" style="width:100%; height:{$height}; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; position:relative;">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-white" id="{$viewerId}-loading">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <span>Loading Gaussian Splat...</span>
+        </div>
+    </div>
+    <small class="text-muted mt-2 d-block">
+        <i class="fas fa-mouse me-1"></i>Drag to rotate | <i class="fas fa-search-plus me-1"></i>Scroll to zoom
+    </small>
+</div>
+<script src="{$pluginPath}/web/vendor/gaussian-splats3d/gaussian-splats-3d.umd.js"></script>
+<script src="{$pluginPath}/web/js/model3d.js"></script>
+<script>
+(function() {
+    var container = document.getElementById('{$viewerId}');
+    var loading = document.getElementById('{$viewerId}-loading');
+    if (!container) return;
+    Model3D.initSplatViewer(container, '{$url}', {
+        onLoad: function() { if (loading) loading.style.display = 'none'; },
+        onError: function(err) { if (loading) loading.innerHTML = '<i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>Error loading splat'; }
+    });
+})();
+</script>
+HTML;
+
+    return $html;
 }
 
 /**

@@ -49,7 +49,37 @@
 <div class="card">
     <div class="card-header"><h5 class="mb-0">Export Options</h5></div>
     <div class="card-body">
-        <a href="?format=json" class="btn btn-primary"><i class="fas fa-code me-2"></i>Export as JSON</a>
-        <a href="?format=csv" class="btn btn-success"><i class="fas fa-file-csv me-2"></i>Export as CSV</a>
+        <form method="get" action="" class="row g-3">
+            <?php if ($slug): ?>
+            <input type="hidden" name="slug" value="<?php echo htmlspecialchars($slug); ?>">
+            <?php endif; ?>
+            <input type="hidden" name="download" value="1">
+
+            <div class="col-md-4">
+                <label class="form-label">Export Type</label>
+                <select name="type" class="form-select">
+                    <option value="movement">Movements (<?php echo count($movements); ?>)</option>
+                    <option value="condition">Condition Checks (<?php echo count($conditions); ?>)</option>
+                    <option value="valuation">Valuations (<?php echo count($valuations); ?>)</option>
+                    <option value="loan">Loans (<?php echo count($loansIn) + count($loansOut); ?>)</option>
+                    <option value="workflow">Workflow History</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Format</label>
+                <select name="format" class="form-select">
+                    <option value="csv">CSV</option>
+                    <option value="json">JSON</option>
+                    <option value="pdf">PDF</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-download me-2"></i>Download
+                </button>
+            </div>
+        </form>
     </div>
 </div>

@@ -81,18 +81,52 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
 
             <!-- Custom Plugins List -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-list me-2"></i><?php echo __('Custom Plugins to Backup') ?></h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllPlugins()"><?php echo __('Select All') ?></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllPlugins()"><?php echo __('Deselect All') ?></button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <?php
-                    $customPlugins = $settingsMap['custom_plugins'] ?? '[]';
-                    $pluginList = json_decode($customPlugins, true) ?: [];
+                    $customPlugins = $settingsMap['custom_plugins'] ?? [];
+                    // Handle both array (already decoded) and string (JSON) formats
+                    $selectedPlugins = is_array($customPlugins) ? $customPlugins : (json_decode($customPlugins, true) ?: []);
                     ?>
-                    <textarea class="form-control font-monospace" id="custom_plugins" name="custom_plugins" rows="6" placeholder="ahgThemeB5Plugin&#10;ahgBackupPlugin&#10;ahgResearchPlugin"><?php echo esc_entities(implode("\n", $pluginList)) ?></textarea>
-                    <div class="form-text"><?php echo __('One plugin name per line. Only these plugins will be included in plugin backups.') ?></div>
+                    <div class="row">
+                        <?php foreach ($availablePlugins as $plugin): ?>
+                        <div class="col-md-4 col-lg-3 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input plugin-checkbox" type="checkbox"
+                                       name="selected_plugins[]" value="<?php echo esc_entities($plugin) ?>"
+                                       id="plugin_<?php echo esc_entities($plugin) ?>"
+                                       <?php echo in_array($plugin, $selectedPlugins) ? 'checked' : '' ?>>
+                                <label class="form-check-label small" for="plugin_<?php echo esc_entities($plugin) ?>">
+                                    <?php echo esc_entities(str_replace(['ahg', 'Plugin'], ['', ''], $plugin)) ?>
+                                </label>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <input type="hidden" name="custom_plugins" id="custom_plugins" value="">
+                    <div class="form-text mt-2"><?php echo __('Select which AHG plugins to include in plugin backups. Found %1% plugins.', ['%1%' => count($availablePlugins)]) ?></div>
                 </div>
             </div>
+            <script>
+            function selectAllPlugins() {
+                document.querySelectorAll('.plugin-checkbox').forEach(cb => cb.checked = true);
+            }
+            function deselectAllPlugins() {
+                document.querySelectorAll('.plugin-checkbox').forEach(cb => cb.checked = false);
+            }
+            // Before form submit, gather selected plugins into hidden field
+            document.querySelector('form').addEventListener('submit', function() {
+                var selected = [];
+                document.querySelectorAll('.plugin-checkbox:checked').forEach(cb => selected.push(cb.value));
+                document.getElementById('custom_plugins').value = selected.join('\n');
+            });
+            </script>
 
             <!-- Notifications -->
             <div class="card mb-4">

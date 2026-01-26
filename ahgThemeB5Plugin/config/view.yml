@@ -1,10 +1,10 @@
 # AHG Theme B5 - Override default assets for Bootstrap 5 compatibility
 default:
   stylesheets:
-    /plugins/ahgThemeB5Plugin/css/ahg-theme.css:
-    /plugins/ahgThemeB5Plugin/css/ahg-generated.css:
-    /plugins/ahgThemeB5Plugin/css/custom.css:
-    /plugins/ahgThemeB5Plugin/css/style.css:
+    /ahgThemeB5Plugin/css/ahg-theme.css:
+    /ahgThemeB5Plugin/css/ahg-generated.css:
+    /ahgThemeB5Plugin/css/custom.css:
+    /ahgThemeB5Plugin/css/style.css:
   javascripts:
     /vendor/jquery:
     /plugins/sfDrupalPlugin/vendor/drupal/misc/drupal:
@@ -23,33 +23,33 @@ default:
     treeView:
     /plugins/arDominionB5Plugin/js/clipboard:
     dominion:
-    /plugins/ahgThemeB5Plugin/js/base.js: { position: last }
+    /ahgThemeB5Plugin/js/base.js: { position: last }
 
 # Display Mode Switching Assets
 informationobjectBrowse:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+  stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
 actorBrowse:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+  stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
 repositoryBrowse:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+  stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
 search:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/display-modes.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/display-mode.js]
+  stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
+  javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
 # Heritage Platform Assets
 heritageLanding:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/heritage.js]
+  stylesheets: [/ahgThemeB5Plugin/css/heritage.css]
+  javascripts: [/ahgThemeB5Plugin/js/heritage.js]
 
 heritageSearch:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]
-  javascripts: [/plugins/ahgThemeB5Plugin/js/heritage.js]
+  stylesheets: [/ahgThemeB5Plugin/css/heritage.css]
+  javascripts: [/ahgThemeB5Plugin/js/heritage.js]
 
 heritageAdminConfig:
-  stylesheets: [/plugins/ahgThemeB5Plugin/css/heritage.css]
+  stylesheets: [/ahgThemeB5Plugin/css/heritage.css]

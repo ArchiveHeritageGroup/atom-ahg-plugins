@@ -54,8 +54,14 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
             ['module' => 'spectrum', 'action' => 'dashboard']
         ));
 
+        // My Tasks route
+        $routing->prependRoute('spectrum_my_tasks', new sfRoute(
+            '/spectrum/my-tasks',
+            ['module' => 'spectrum', 'action' => 'myTasks']
+        ));
+
         $routing->prependRoute('spectrum_grap_dashboard', new sfRoute(
-            '/spectrum/grap',
+            '/:slug/spectrum/grap',
             ['module' => 'spectrum', 'action' => 'grapDashboard']
         ));
 

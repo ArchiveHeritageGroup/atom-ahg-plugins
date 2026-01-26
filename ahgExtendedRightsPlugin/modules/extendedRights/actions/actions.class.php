@@ -223,7 +223,8 @@ class extendedRightsActions extends sfActions
             }
 
             $this->getUser()->setFlash('notice', 'Rights updated.');
-            $this->redirect(['module' => 'informationobject', 'action' => 'index', 'slug' => $this->resource->slug]);
+            // Use direct slug URL to avoid routing conflicts
+            $this->redirect('/' . $this->resource->slug);
         }
     }
 

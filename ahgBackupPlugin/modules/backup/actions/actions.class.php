@@ -37,6 +37,13 @@ class backupActions extends sfActions
         $this->settings = $settingsService->getAllWithMeta();
         $this->settingsMap = $settingsService->all();
 
+        // Get all available AHG plugins from database
+        $this->availablePlugins = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+            ->where('name', 'like', 'ahg%')
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
         if ($request->isMethod('post')) {
             $data = [
                 'backup_path' => $request->getParameter('backup_path'),
@@ -53,10 +60,21 @@ class backupActions extends sfActions
                 'notify_on_failure' => $request->getParameter('notify_on_failure') ? '1' : '0',
             ];
 
-            $customPlugins = $request->getParameter('custom_plugins');
-            if ($customPlugins) {
-                $plugins = array_filter(array_map('trim', explode("\n", $customPlugins)));
-                $data['custom_plugins'] = json_encode(array_values($plugins));
+            // Process selected plugins from checkboxes (array) or hidden field (newline-separated string)
+            $selectedPlugins = $request->getParameter('selected_plugins');
+            if (is_array($selectedPlugins) && !empty($selectedPlugins)) {
+                // Direct checkbox submission (array)
+                $data['custom_plugins'] = json_encode(array_values($selectedPlugins));
+            } else {
+                // Fallback: hidden field populated by JavaScript (newline-separated string)
+                $customPlugins = $request->getParameter('custom_plugins');
+                if ($customPlugins) {
+                    $plugins = array_filter(array_map('trim', explode("\n", $customPlugins)));
+                    $data['custom_plugins'] = json_encode(array_values($plugins));
+                } else {
+                    // No plugins selected - save empty array
+                    $data['custom_plugins'] = json_encode([]);
+                }
             }
 
             if ($settingsService->saveMultiple($data)) {

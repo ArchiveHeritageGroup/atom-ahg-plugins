@@ -35,8 +35,8 @@
         </a>
       </li>
       <li class="list-group-item">
-        <a href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>">
-          <i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('GRAP Data'); ?>
+        <a href="<?php echo url_for('@spectrum_grap_dashboard?slug=' . $resource->slug); ?>">
+          <i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('Heritage Assets'); ?>
         </a>
       </li>
     </ul>

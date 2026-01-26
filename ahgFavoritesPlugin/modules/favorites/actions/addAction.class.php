@@ -47,7 +47,7 @@ class favoritesAddAction extends sfAction
 
         $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
 
-        // Redirect back to the item
-        $this->redirect(['module' => 'informationobject', 'slug' => $slug]);
+        // Redirect back to the item using direct slug URL to avoid routing conflicts
+        $this->redirect('/' . $slug);
     }
 }

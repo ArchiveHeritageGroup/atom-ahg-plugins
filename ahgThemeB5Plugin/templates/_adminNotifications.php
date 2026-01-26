@@ -4,10 +4,11 @@
  */
 $isAdmin = $sf_user->isAdministrator();
 $userId = $sf_user->getUserID();
+$isAuthenticated = $sf_user->isAuthenticated();
 
 // Check if user is an approver
 $isApprover = false;
-if ($sf_user->isAuthenticated() && !$isAdmin) {
+if ($isAuthenticated && !$isAdmin) {
     try {
         $isApprover = \AtomExtensions\Services\AccessRequestService::isApprover($userId);
     } catch (Exception $e) {
@@ -15,8 +16,24 @@ if ($sf_user->isAuthenticated() && !$isAdmin) {
     }
 }
 
-// Only show to admin or approvers
-if (!$isAdmin && !$isApprover) {
+// Check if Spectrum plugin is available
+$routing = sfContext::getInstance()->getRouting();
+$hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
+
+// Get Spectrum task count for any authenticated user
+$spectrumTaskCount = 0;
+if ($isAuthenticated && $hasSpectrum) {
+    try {
+        $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
+            ->where('assigned_to', $userId)
+            ->count();
+    } catch (Exception $e) {
+        // Table may not exist
+    }
+}
+
+// Only show to admin, approvers, or users with spectrum tasks
+if (!$isAdmin && !$isApprover && $spectrumTaskCount === 0) {
     return;
 }
 
@@ -74,19 +91,32 @@ try {
     // Tables may not exist - silently fail
 }
 
+// Add Spectrum task notifications for any authenticated user
+if ($spectrumTaskCount > 0) {
+    $notifications[] = [
+        'type' => 'primary',
+        'icon' => 'fa-clipboard-list',
+        'text' => sprintf(__('You have %d task(s) assigned to you'), $spectrumTaskCount),
+        'url' => url_for('@spectrum_my_tasks'),
+        'action' => __('View Tasks')
+    ];
+}
+
 if (empty($notifications)) {
     return;
 }
 ?>
-<div class="ahg-admin-notifications mb-3">
+<div class="ahg-admin-notifications">
   <?php foreach ($notifications as $n): ?>
-  <div class="alert alert-<?php echo $n['type']; ?> alert-dismissible fade show d-flex align-items-center py-2 mb-2" role="alert">
-    <i class="fas <?php echo $n['icon']; ?> me-2"></i>
-    <span class="flex-grow-1"><?php echo $n['text']; ?></span>
-    <a href="<?php echo $n['url']; ?>" class="btn btn-sm btn-<?php echo $n['type']; ?> ms-2">
-      <?php echo $n['action']; ?>
-    </a>
-    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div class="alert alert-<?php echo $n['type']; ?> alert-dismissible fade show d-flex align-items-center justify-content-center py-2 mb-0 rounded-0 border-0" role="alert">
+    <div class="container-xxl d-flex align-items-center">
+      <i class="fas <?php echo $n['icon']; ?> me-2"></i>
+      <span class="flex-grow-1"><?php echo $n['text']; ?></span>
+      <a href="<?php echo $n['url']; ?>" class="btn btn-sm btn-light ms-2">
+        <?php echo $n['action']; ?>
+      </a>
+      <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
   </div>
   <?php endforeach; ?>
 </div>

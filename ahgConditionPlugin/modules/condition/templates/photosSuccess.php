@@ -202,7 +202,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
 <link rel="stylesheet" href="/plugins/ahgConditionPlugin/web/css/condition-photos.css">
 
 <!-- External JS -->
-<script src="/plugins/ahgMuseumPlugin/web/js/fabric.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
 <script src="/plugins/ahgConditionPlugin/web/js/condition-annotator.js?v=<?php echo time(); ?>"></script>
 <script src="/plugins/ahgConditionPlugin/web/js/condition-photos.js?v=<?php echo time(); ?>"></script>
 

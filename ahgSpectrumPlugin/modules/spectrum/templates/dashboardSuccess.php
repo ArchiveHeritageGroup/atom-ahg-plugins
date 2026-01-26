@@ -36,6 +36,22 @@
                 <h5 class="mb-0"><?php echo __('Quick Links'); ?></h5>
             </div>
             <div class="card-body">
+                <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'myTasks']); ?>" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="fas fa-clipboard-list me-1"></i><?php echo __('My Tasks'); ?>
+                    <?php
+                    if ($sf_user->isAuthenticated()) {
+                        $userId = $sf_user->getAttribute('user_id');
+                        if ($userId) {
+                            $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
+                                ->where('assigned_to', $userId)
+                                ->count();
+                            if ($taskCount > 0) {
+                                echo '<span class="badge bg-danger ms-1">' . $taskCount . '</span>';
+                            }
+                        }
+                    }
+                    ?>
+                </a>
                 <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dataQuality']); ?>" class="btn btn-outline-success w-100 mb-2">
                     <i class="fas fa-check-circle me-1"></i><?php echo __('Data Quality Dashboard'); ?>
                 </a>

@@ -7,21 +7,37 @@ class ahgContactPluginConfiguration extends sfPluginConfiguration
 {
     public function initialize()
     {
-        // Register Contact extension classes
+        // Register autoloader for Contact extension classes immediately
+        $this->registerAutoloader();
+
+        // Also connect to context.load_factories for any late initialization
         $this->dispatcher->connect('context.load_factories', [$this, 'loadContact']);
+    }
+
+    /**
+     * Register PSR-4 style autoloader for plugin classes
+     */
+    protected function registerAutoloader()
+    {
+        $libPath = sfConfig::get('sf_plugins_dir') . '/ahgContactPlugin/lib';
+
+        spl_autoload_register(function ($class) use ($libPath) {
+            // Handle AtomFramework\Extensions\Contact namespace
+            $prefix = 'AtomFramework\\Extensions\\Contact\\';
+            if (strpos($class, $prefix) === 0) {
+                $relativeClass = substr($class, strlen($prefix));
+                $file = $libPath . '/Extensions/Contact/' . str_replace('\\', '/', $relativeClass) . '.php';
+                if (file_exists($file)) {
+                    require_once $file;
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     public function loadContact(sfEvent $event)
     {
-        // Load contact services
-        $libPath = sfConfig::get('sf_plugins_dir') . '/ahgContactPlugin/lib';
-
-        if (file_exists($libPath . '/Extensions/Contact/Services/ContactService.php')) {
-            require_once $libPath . '/Extensions/Contact/Services/ContactService.php';
-        }
-
-        if (file_exists($libPath . '/Extensions/Contact/Repositories/ContactInformationRepository.php')) {
-            require_once $libPath . '/Extensions/Contact/Repositories/ContactInformationRepository.php';
-        }
+        // Classes are now autoloaded, this is kept for any additional initialization
     }
 }

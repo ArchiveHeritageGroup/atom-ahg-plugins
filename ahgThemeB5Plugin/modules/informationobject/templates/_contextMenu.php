@@ -32,7 +32,7 @@ if (isset($resource)) {
   } elseif (is_object($resource) && isset($resource->slug)) {
     $resourceSlug = $resource->slug;
   }
-
+  
   // Check which plugins are enabled
   $hasCco = isPluginActive('ahgCcoPlugin');
   $hasCondition = isPluginActive('ahgConditionPlugin');
@@ -41,26 +41,24 @@ if (isset($resource)) {
   $hasOais = isPluginActive('ahgOaisPlugin');
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
-  $hasProvenance = isPluginActive('ahgProvenancePlugin');
-
+  
   // Only show section if at least one plugin is enabled
-  if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay || $hasProvenance)) {
+  if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul>
-    <?php if ($hasProvenance): ?>
-    <li><?php echo link_to(__('Chain of Custody'), ['module' => 'provenance', 'action' => 'timeline', 'slug' => $resourceSlug]); ?></li>
-    <li><?php echo link_to(__('Edit Provenance'), ['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
+    <?php if ($hasCco): ?>
+    <li><?php echo link_to(__('Provenance'), ['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?></li>
     <?php endif; ?>
     <?php if ($hasCondition): ?>
-    <li><?php echo link_to(__('Condition assessment'), ['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Condition assessment'), '@condition_check_by_slug?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><?php echo link_to(__('Spectrum data'), '/index.php/' . $resourceSlug . '/spectrum'); ?></li>
+    <li><?php echo link_to(__('Spectrum data'), '@spectrum_index?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
-    <li><?php echo link_to(__('GRAP data'), ['module' => 'grap', 'action' => 'view', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Heritage Assets'), '@spectrum_grap_dashboard?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
     <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'oais', 'action' => 'createSip', 'slug' => $resourceSlug]); ?></li>
@@ -74,15 +72,16 @@ if (isset($resource)) {
   }
 }
 ?>
+<!-- EXTENDED RIGHTS CONTEXT MENU (Only if plugin enabled) -->
 
-<!-- AI Tools Section (NER, Summarize, Translate) -->
-<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<!-- AI Tools Section (NER, Summarize, Translate, Handwriting) -->
+<?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgAIPlugin')): ?>
 <section class="sidebar-widget">
-  <h4><?php echo __('Named Entity Recognition'); ?></h4>
+  <h4><?php echo __('AI Tools'); ?></h4>
   <ul>
     <li>
       <a href="#" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>); return false;">
-        <i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities'); ?>
+        <i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities (NER)'); ?>
       </a>
     </li>
     <li>
@@ -90,12 +89,38 @@ if (isset($resource)) {
         <i class="bi bi-file-text me-1"></i><?php echo __('Generate Summary'); ?>
       </a>
     </li>
-    <li>
+    <?php if (isPluginActive('ahgTranslationPlugin')): ?>
+    <li><?php include_partial('translation/translateModal', ['objectId' => $resource->id]); ?></li>
+    <?php endif; ?>
+    <li class="mt-2">
       <a href="/ner/review">
         <i class="bi bi-list-check me-1"></i><?php echo __('Review Dashboard'); ?>
       </a>
     </li>
+    <li class="mt-2" style="list-style:none; margin-left:-1rem;"><span class="fw-semibold text-secondary"><?php echo __('Handwriting Recognition'); ?></span></li>
+    <li>
+      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'all'); return false;">
+        <i class="bi bi-pencil me-1"></i><?php echo __('Extract All (HTR)'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'date'); return false;">
+        <i class="bi bi-calendar-event me-1"></i><?php echo __('Extract Dates'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'digits'); return false;">
+        <i class="bi bi-123 me-1"></i><?php echo __('Extract Digits'); ?>
+      </a>
+    </li>
+    <li>
+      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'letters'); return false;">
+        <i class="bi bi-alphabet me-1"></i><?php echo __('Extract Letters'); ?>
+      </a>
+    </li>
   </ul>
+  <div id="summaryResult" class="mt-2" style="display: none;"></div>
+  <div id="htrResult" class="mt-2" style="display: none;"></div>
 </section>
 
 <!-- NER Results Modal -->
@@ -115,6 +140,23 @@ if (isset($resource)) {
     </div>
   </div>
 </div>
+
+<!-- HTR Results Modal -->
+<div class="modal fade" id="htrModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Handwriting Recognition (HTR)</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="htrModalBody"></div>
+      <div class="modal-footer">
+        <span id="htrProcessingTime" class="text-muted small me-auto"></span>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 function extractEntities(objectId) {
   var modal = new bootstrap.Modal(document.getElementById('nerModal'));
@@ -122,7 +164,7 @@ function extractEntities(objectId) {
   document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting...</p></div>';
   document.getElementById('nerReviewBtn').style.display = 'none';
 
-  fetch('/index.php/ner/extract/' + objectId, { method: 'POST' })
+  fetch('/ner/extract/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data.success) {
@@ -153,41 +195,211 @@ function extractEntities(objectId) {
 }
 
 function generateSummary(objectId) {
-  var modal = new bootstrap.Modal(document.getElementById('nerModal'));
-  modal.show();
-  document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Generating summary...</p></div>';
-  document.getElementById('nerReviewBtn').style.display = 'none';
-  document.getElementById('nerProcessingTime').textContent = '';
+  var btn = document.getElementById('aiSummarizeBtn');
+  var resultDiv = document.getElementById('summaryResult');
 
-  fetch('/index.php/ner/summarize/' + objectId, { method: 'POST' })
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating...';
+  resultDiv.style.display = 'none';
+
+  fetch('/ner/summarize/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
+      btn.innerHTML = '<i class="bi bi-file-text me-1"></i>Generate Summary';
+
       if (!data.success) {
-        document.getElementById('nerModalBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Summary generation failed') + '</div>';
+        resultDiv.innerHTML = '<div class="alert alert-danger py-2 small"><i class="bi bi-exclamation-circle me-1"></i>' + (data.error || 'Failed') + '</div>';
+        resultDiv.style.display = 'block';
         return;
       }
-      var savedMsg = data.saved ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Saved to Scope \& Content</span>' : '<span class="text-warning">Generated (not saved)</span>';
-      var html = '<div class="alert alert-success mb-3">' + savedMsg + '</div>';
-      html += '<div class="card"><div class="card-header"><i class="bi bi-file-text me-1"></i>Generated Summary</div>';
-      html += '<div class="card-body">' + data.summary + '</div></div>';
-      html += '<div class="mt-3"><button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh Page</button></div>';
-      document.getElementById('nerModalBody').innerHTML = html;
-      document.getElementById('nerProcessingTime').textContent = 'Source: ' + data.source + ' | ' + (data.processing_time_ms||0) + 'ms';
-      if (data.saved && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('Summary Generated', { body: 'Scope \& Content field updated', icon: '/favicon.ico' });
-      }
+
+      var savedMsg = data.saved ? 'Saved to Scope & Content' : 'Generated (not saved)';
+      resultDiv.innerHTML = '<div class="alert alert-success py-2 small"><i class="bi bi-check-circle me-1"></i>' + savedMsg + '</div>' +
+        '<div class="card"><div class="card-body py-2 small">' + data.summary + '</div></div>' +
+        '<button class="btn btn-sm btn-outline-secondary mt-2" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>';
+      resultDiv.style.display = 'block';
     })
     .catch(function(err) {
-      document.getElementById('nerModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
+      btn.innerHTML = '<i class="bi bi-file-text me-1"></i>Generate Summary';
+      resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + err.message + '</div>';
+      resultDiv.style.display = 'block';
     });
 }
 
-if ('Notification' in window && Notification.permission === 'default') { Notification.requestPermission(); }
+// Show alert at top of page
+function showTopAlert(message, type) {
+  type = type || 'danger';
+  var wrapper = document.getElementById('wrapper');
+  if (!wrapper) wrapper = document.querySelector('.container-xxl');
+  if (!wrapper) return;
+
+  // Remove any existing top alerts
+  var existing = document.getElementById('js-top-alert');
+  if (existing) existing.remove();
+
+  var alertHtml = '<div id="js-top-alert" class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+    '<i class="bi bi-exclamation-circle me-2"></i>' + message +
+    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+    '</div>';
+  wrapper.insertAdjacentHTML('afterbegin', alertHtml);
+
+  // Scroll to top to show the alert
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function extractHandwriting(objectId, mode) {
+  var modal = new bootstrap.Modal(document.getElementById('htrModal'));
+  var modalBody = document.getElementById('htrModalBody');
+  var modeLabels = {
+    'all': 'Extract All (HTR)',
+    'date': 'Extract Dates',
+    'digits': 'Extract Digits',
+    'letters': 'Extract Letters',
+    'stub': 'Test (Stub)'
+  };
+
+  modal.show();
+  modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">' + modeLabels[mode] + '...</p><p class="small text-muted">Using zone detection for better accuracy</p></div>';
+  document.getElementById('htrProcessingTime').textContent = '';
+
+  fetch('/ner/htr/' + objectId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: mode, use_zones: true })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        modalBody.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i>' + (data.error || 'HTR extraction failed') + '</div>';
+        return;
+      }
+
+      var html = '';
+      var zonesDetected = data.zones_detected || 0;
+      var resultCount = data.count || 0;
+
+      // Show zone detection status
+      if (data.use_zones && zonesDetected > 0) {
+        html += '<div class="alert alert-success"><i class="bi bi-grid-3x3 me-2"></i>Detected ' + zonesDetected + ' text zone(s) - extracted ' + resultCount + ' item(s)</div>';
+      } else if (resultCount > 0) {
+        html += '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>Extracted ' + resultCount + ' item(s)</div>';
+      } else {
+        html += '<div class="alert alert-warning"><i class="bi bi-exclamation-circle me-2"></i>No text detected</div>';
+      }
+
+      // Show zone details if available
+      if (data.zones && data.zones.length > 0) {
+        html += '<div class="mb-3">';
+        html += '<h6 class="text-info"><i class="bi bi-bounding-box me-1"></i>Detected Zones:</h6>';
+        html += '<div class="border rounded p-2 bg-light" style="max-height:250px;overflow-y:auto;">';
+        html += '<table class="table table-sm table-striped mb-0">';
+        html += '<thead><tr><th>#</th><th>Text</th><th>Position</th></tr></thead><tbody>';
+        for (var i = 0; i < data.zones.length; i++) {
+          var zone = data.zones[i];
+          var bbox = zone.bbox || {};
+          html += '<tr>';
+          html += '<td><span class="badge bg-secondary">' + (zone.zone_id + 1) + '</span></td>';
+          html += '<td><strong>' + (zone.text || 'N/A') + '</strong></td>';
+          html += '<td class="small text-muted">x:' + (bbox.x || 0) + ' y:' + (bbox.y || 0) + ' ' + (bbox.w || 0) + 'x' + (bbox.h || 0) + '</td>';
+          html += '</tr>';
+        }
+        html += '</tbody></table></div></div>';
+      }
+
+      // Show combined results as badges
+      if (data.results && data.results.length > 0) {
+        html += '<div class="mb-3">';
+        html += '<h6 class="text-primary"><i class="bi bi-list-ul me-1"></i>Extracted Text:</h6>';
+        html += '<div class="d-flex flex-wrap gap-2">';
+        for (var j = 0; j < data.results.length; j++) {
+          html += '<span class="badge bg-info bg-opacity-75 fs-6 fw-normal">' + data.results[j] + '</span>';
+        }
+        html += '</div></div>';
+      }
+
+      // Show full combined text
+      if (data.text) {
+        html += '<div class="mb-3">';
+        html += '<h6 class="text-secondary"><i class="bi bi-file-text me-1"></i>Combined Text:</h6>';
+        html += '<div class="border rounded p-2 bg-light"><pre class="mb-0" style="white-space:pre-wrap;">' + data.text + '</pre></div>';
+        html += '</div>';
+      }
+
+      // Show image path for debugging
+      if (data.image_path) {
+        html += '<div class="small text-muted"><i class="bi bi-image me-1"></i><strong>Image:</strong> ' + data.image_path + '</div>';
+      }
+
+      modalBody.innerHTML = html;
+
+      var timeInfo = 'Processed in ' + (data.processing_time_ms || 0) + 'ms';
+      if (data.use_zones) timeInfo += ' (zone detection enabled)';
+      document.getElementById('htrProcessingTime').textContent = timeInfo;
+    })
+    .catch(function(err) {
+      modalBody.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i>' + (err.message || 'HTR extraction failed') + '</div>';
+    });
+}
+
+function scanForPii(objectId) {
+  var btn = document.getElementById('piiScanBtn');
+  var resultDiv = document.getElementById('piiResult');
+
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Scanning...';
+  resultDiv.style.display = 'none';
+
+  // Use NER extract endpoint - PII entities are PERSON type
+  fetch('/ner/extract/' + objectId, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.innerHTML = '<i class="bi bi-shield-exclamation me-1"></i>Scan for PII';
+
+      if (!data.success) {
+        resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + (data.error || 'Scan failed') + '</div>';
+        resultDiv.style.display = 'block';
+        return;
+      }
+
+      // Check for PII-relevant entities (PERSON, EMAIL, PHONE, ID numbers)
+      var piiTypes = ['PERSON', 'EMAIL', 'PHONE', 'CARDINAL', 'NORP'];
+      var piiFound = [];
+      var piiCount = 0;
+
+      for (var type in data.entities) {
+        if (piiTypes.indexOf(type) !== -1 && data.entities[type] && data.entities[type].length > 0) {
+          piiCount += data.entities[type].length;
+          piiFound.push({type: type, items: data.entities[type]});
+        }
+      }
+
+      if (piiCount === 0) {
+        resultDiv.innerHTML = '<div class="alert alert-success py-2 small"><i class="bi bi-check-circle me-1"></i>No PII detected</div>';
+      } else {
+        var html = '<div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle me-1"></i><strong>' + piiCount + ' potential PII items found</strong></div>';
+        html += '<div class="small">';
+        for (var i = 0; i < piiFound.length; i++) {
+          html += '<div class="mb-1"><strong>' + piiFound[i].type + ':</strong> ';
+          html += piiFound[i].items.slice(0, 5).join(', ');
+          if (piiFound[i].items.length > 5) html += '...';
+          html += '</div>';
+        }
+        html += '</div>';
+        html += '<a href="/admin/privacy/redaction/' + objectId + '" class="btn btn-sm btn-warning mt-2"><i class="bi bi-eraser me-1"></i>Review & Redact</a>';
+        resultDiv.innerHTML = html;
+      }
+      resultDiv.style.display = 'block';
+    })
+    .catch(function(err) {
+      btn.innerHTML = '<i class="bi bi-shield-exclamation me-1"></i>Scan for PII';
+      resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + err.message + '</div>';
+      resultDiv.style.display = 'block';
+    });
+}
+
 </script>
 <?php endif; ?>
 
 <!-- Privacy & PII Section -->
-<?php if (isset($resource) && $sf_user->isAuthenticated() && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgPrivacyPlugin')): ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Privacy & PII'); ?></h4>
   <ul>
@@ -196,247 +408,21 @@ if ('Notification' in window && Notification.permission === 'default') { Notific
         <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Scan for PII'); ?>
       </a>
     </li>
+    <?php if ($resource->digitalObjectsRelatedByobjectId->count() > 0): ?>
     <li>
-      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiReview']); ?>">
-        <i class="bi bi-clipboard-check me-1"></i><?php echo __('PII Review Queue'); ?>
-      </a>
+      <?php echo link_to('<i class="bi bi-eraser me-1"></i>' . __('Visual Redaction'), ['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>
     </li>
+    <?php endif; ?>
     <li>
-      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>">
-        <i class="bi bi-eraser-fill me-1"></i><?php echo __('Visual Redaction Editor'); ?>
-      </a>
-    </li>
-    <li>
-      <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScan']); ?>">
-        <i class="bi bi-speedometer2 me-1"></i><?php echo __('PII Dashboard'); ?>
+      <a href="/privacy">
+        <i class="bi bi-clipboard-check me-1"></i><?php echo __('Privacy Dashboard'); ?>
       </a>
     </li>
   </ul>
+  <div id="piiResult" class="mt-2" style="display: none;"></div>
 </section>
-
-<!-- PII Results Modal -->
-<div class="modal fade" id="piiModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title"><i class="bi bi-shield-exclamation me-2"></i>PII Detection Results</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="piiModalBody"></div>
-      <div class="modal-footer">
-        <span id="piiRiskScore" class="me-auto"></span>
-        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiReview']); ?>" class="btn btn-warning" id="piiReviewBtn" style="display:none;">Review PII</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-function scanForPii(objectId) {
-  var modal = new bootstrap.Modal(document.getElementById('piiModal'));
-  modal.show();
-  document.getElementById('piiModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-warning"></div><p class="mt-2">Scanning for PII...</p></div>';
-  document.getElementById('piiReviewBtn').style.display = 'none';
-  document.getElementById('piiRiskScore').textContent = '';
-
-  fetch('/index.php/privacyAdmin/piiScanAjax?id=' + objectId, { method: 'GET' })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data.success) {
-        document.getElementById('piiModalBody').innerHTML = '<div class="alert alert-danger">' + (data.error || 'Scan failed') + '</div>';
-        return;
-      }
-      var html = '';
-      var cfg = {
-        PERSON: {icon:'bi-person-fill',color:'info',label:'People'},
-        ORG: {icon:'bi-building',color:'secondary',label:'Organizations'},
-        GPE: {icon:'bi-geo-alt-fill',color:'secondary',label:'Places'},
-        DATE: {icon:'bi-calendar',color:'secondary',label:'Dates'},
-        SA_ID: {icon:'bi-credit-card-fill',color:'danger',label:'SA ID Numbers'},
-        NG_NIN: {icon:'bi-credit-card-fill',color:'danger',label:'Nigerian NIN'},
-        PASSPORT: {icon:'bi-passport',color:'danger',label:'Passport Numbers'},
-        EMAIL: {icon:'bi-envelope-fill',color:'warning',label:'Email Addresses'},
-        PHONE_SA: {icon:'bi-telephone-fill',color:'warning',label:'Phone Numbers (SA)'},
-        PHONE_INTL: {icon:'bi-telephone-fill',color:'warning',label:'Phone Numbers (Intl)'},
-        BANK_ACCOUNT: {icon:'bi-bank',color:'danger',label:'Bank Accounts'},
-        TAX_NUMBER: {icon:'bi-file-earmark-text',color:'danger',label:'Tax Numbers'},
-        CREDIT_CARD: {icon:'bi-credit-card',color:'danger',label:'Credit Cards'}
-      };
-      var total = 0;
-      for (var type in data.entities) {
-        var items = data.entities[type];
-        if (items && items.length) {
-          total += items.length;
-          var c = cfg[type] || {icon:'bi-tag',color:'secondary',label:type};
-          html += '<div class="mb-3"><h6 class="text-'+c.color+'"><i class="'+c.icon+' me-1"></i>'+c.label+' <span class="badge bg-'+c.color+'">'+items.length+'</span></h6><div class="d-flex flex-wrap gap-2">';
-          for (var i=0; i<items.length; i++) {
-            var riskBadge = items[i].risk === 'high' || items[i].risk === 'critical' ? 'bg-danger' : (items[i].risk === 'medium' ? 'bg-warning text-dark' : 'bg-secondary');
-            html += '<span class="badge '+riskBadge+' fs-6 fw-normal" title="Confidence: '+items[i].confidence+'%">'+items[i].value+'</span>';
-          }
-          html += '</div></div>';
-        }
-      }
-      if (total === 0) { html = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>No PII detected in this record</div>'; }
-      else {
-        document.getElementById('piiReviewBtn').style.display = 'inline-block';
-        if (data.high_risk > 0) {
-          html = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i><strong>' + data.high_risk + ' high-risk PII entities detected!</strong></div>' + html;
-        }
-      }
-      document.getElementById('piiModalBody').innerHTML = html;
-      document.getElementById('piiRiskScore').innerHTML = '<span class="badge '+(data.risk_score > 50 ? 'bg-danger' : (data.risk_score > 20 ? 'bg-warning text-dark' : 'bg-success'))+'">Risk Score: '+data.risk_score+'/100</span> | Found ' + total + ' entities';
-    })
-    .catch(function(err) {
-      document.getElementById('piiModalBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
-    });
-}
-</script>
-<?php endif; ?>
-
-<!-- Digital Object Tools Section -->
-<?php if (isset($resource) && $sf_user->isAuthenticated()): ?>
-<?php
-if (!isset($hasDigitalObject)) {
-    $hasDigitalObject = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists();
-}
-if ($hasDigitalObject):
-    // Get digital object details
-    $doInfo = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->first();
-    $digitalObjectId = $doInfo->id ?? null;
-    $mimeType = $doInfo->mime_type ?? '';
-    $isVideo = strpos($mimeType, 'video') !== false;
-    $isAudio = strpos($mimeType, 'audio') !== false;
-    $isImage = strpos($mimeType, 'image') !== false;
-
-    // Check for existing transcription
-    $hasTranscription = false;
-    if ($digitalObjectId && ($isVideo || $isAudio)) {
-        try {
-            $hasTranscription = \Illuminate\Database\Capsule\Manager::table('media_transcription')->where('digital_object_id', $digitalObjectId)->exists();
-        } catch (Exception $e) {}
-    }
-?>
-<section class="sidebar-widget">
-  <h4><?php echo __('Digital Object Tools'); ?></h4>
-  <ul>
-    <?php if ($isVideo || $isAudio): ?>
-    <li>
-      <?php if ($hasTranscription): ?>
-      <a href="#" onclick="document.querySelector('[data-bs-target*=transcript-panel]')?.click(); return false;">
-        <i class="bi bi-card-text me-1"></i><?php echo __('View Transcript'); ?>
-      </a>
-      <?php else: ?>
-      <a href="#" onclick="triggerTranscription(<?php echo $digitalObjectId; ?>); return false;" id="transcribe-link">
-        <i class="bi bi-mic me-1"></i><?php echo __('Transcribe (Whisper)'); ?>
-      </a>
-      <?php endif; ?>
-    </li>
-    <?php endif; ?>
-    <li>
-      <a href="#" onclick="showTechnicalData(<?php echo $digitalObjectId; ?>); return false;">
-        <i class="bi bi-info-circle me-1"></i><?php echo __('Technical Data'); ?>
-      </a>
-    </li>
-    <?php if ($isImage): ?>
-    <li>
-      <a href="#" onclick="extractExifMetadata(<?php echo $digitalObjectId; ?>); return false;">
-        <i class="bi bi-camera me-1"></i><?php echo __('Extract EXIF/XMP'); ?>
-      </a>
-    </li>
-    <?php endif; ?>
-    <?php if (in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-    <li>
-      <a href="#" onclick="generateSummary(<?php echo $resource->id; ?>); return false;">
-        <i class="bi bi-file-text me-1"></i><?php echo __('Summarize'); ?>
-      </a>
-    </li>
-    <?php endif; ?>
-    <?php if (in_array('ahgTranslationPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-    <li>
-      <?php include_partial('translation/translateModal', ['objectId' => $resource->id]); ?>
-    </li>
-    <?php endif; ?>
-  </ul>
-</section>
-
-<!-- Technical Data Modal -->
-<div class="modal fade" id="technicalDataModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-info text-white">
-        <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i><?php echo __('Technical Data'); ?></h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="technicalDataBody">
-        <div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Loading...</p></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-function triggerTranscription(doId) {
-  var btn = document.getElementById('transcribe-btn-' + doId);
-  if (btn) { btn.click(); return; }
-  var link = document.getElementById('transcribe-link');
-  if (link) { link.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Transcribing...'; link.style.pointerEvents = 'none'; }
-  fetch('/media/transcribe/' + doId, { method: 'POST' })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.success) location.reload();
-      else { alert('Transcription failed: ' + (data.error || 'Unknown')); if (link) { link.innerHTML = '<i class="bi bi-mic me-1"></i>Transcribe (Whisper)'; link.style.pointerEvents = 'auto'; } }
-    })
-    .catch(function(err) { alert('Error: ' + err.message); if (link) { link.innerHTML = '<i class="bi bi-mic me-1"></i>Transcribe (Whisper)'; link.style.pointerEvents = 'auto'; } });
-}
-
-function showTechnicalData(doId) {
-  var modal = new bootstrap.Modal(document.getElementById('technicalDataModal'));
-  modal.show();
-  document.getElementById('technicalDataBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-info"></div><p class="mt-2">Loading...</p></div>';
-  fetch('/media/metadata/' + doId)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.error) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-warning">' + data.error + '</div><button class="btn btn-primary" onclick="extractMetadataAndRefresh(' + doId + ')"><i class="bi bi-cogs me-1"></i>Extract Metadata</button>'; return; }
-      var html = '<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>';
-      if (data.filename) html += '<tr><td><strong>Filename</strong></td><td>' + data.filename + '</td></tr>';
-      if (data.mime_type) html += '<tr><td><strong>MIME Type</strong></td><td>' + data.mime_type + '</td></tr>';
-      if (data.byte_size) html += '<tr><td><strong>File Size</strong></td><td>' + formatBytes(data.byte_size) + '</td></tr>';
-      if (data.duration) html += '<tr><td><strong>Duration</strong></td><td>' + formatDuration(data.duration) + '</td></tr>';
-      if (data.width && data.height) html += '<tr><td><strong>Dimensions</strong></td><td>' + data.width + ' x ' + data.height + ' px</td></tr>';
-      if (data.codec) html += '<tr><td><strong>Codec</strong></td><td>' + data.codec + '</td></tr>';
-      if (data.bitrate) html += '<tr><td><strong>Bitrate</strong></td><td>' + Math.round(data.bitrate / 1000) + ' kbps</td></tr>';
-      if (data.sample_rate) html += '<tr><td><strong>Sample Rate</strong></td><td>' + data.sample_rate + ' Hz</td></tr>';
-      if (data.channels) html += '<tr><td><strong>Channels</strong></td><td>' + data.channels + '</td></tr>';
-      if (data.exif) { for (var k in data.exif) html += '<tr><td><strong>' + k + '</strong></td><td>' + data.exif[k] + '</td></tr>'; }
-      if (data.metadata) { for (var k in data.metadata) html += '<tr><td><strong>' + k + '</strong></td><td>' + data.metadata[k] + '</td></tr>'; }
-      html += '</tbody></table></div>';
-      if (!data.filename && !data.mime_type && !data.exif && !data.metadata) html = '<div class="alert alert-info">No technical metadata. Click "Extract Metadata" to generate it.</div><button class="btn btn-primary" onclick="extractMetadataAndRefresh(' + doId + ')"><i class="bi bi-cogs me-1"></i>Extract Metadata</button>';
-      document.getElementById('technicalDataBody').innerHTML = html;
-    })
-    .catch(function(err) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>'; });
-}
-
-function formatBytes(b) { if (!b) return '0 B'; var k = 1024, s = ['B','KB','MB','GB'], i = Math.floor(Math.log(b)/Math.log(k)); return parseFloat((b/Math.pow(k,i)).toFixed(2)) + ' ' + s[i]; }
-function formatDuration(sec) { if (!sec) return '0:00'; var h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60); return h > 0 ? h + ':' + (m<10?'0':'') + m + ':' + (s<10?'0':'') + s : m + ':' + (s<10?'0':'') + s; }
-
-function extractMetadataAndRefresh(doId) {
-  document.getElementById('technicalDataBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting metadata...</p></div>';
-  fetch('/media/extract/' + doId, { method: 'POST' })
-    .then(function(r) { return r.json(); })
-    .then(function(data) { if (data.success) showTechnicalData(doId); else document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Extraction failed: ' + (data.error || 'Unknown') + '</div>'; })
-    .catch(function(err) { document.getElementById('technicalDataBody').innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>'; });
-}
-
-function extractExifMetadata(doId) { showTechnicalData(doId); }
-
-</script>
-
-<?php endif; ?>
 <?php endif; ?>
 
 <?php if (isPluginActive('ahgExtendedRightsPlugin')): ?>
-<?php if (file_exists(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_extendedRightsContextMenu.php')) { include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); } ?>
+<?php include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); ?>
 <?php endif; ?>

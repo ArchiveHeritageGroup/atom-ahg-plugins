@@ -91,10 +91,10 @@ foreach ($backups as $backup) {
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-outline-primary btn-sm btn-quick-backup" data-type="db">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#dbBackupModal">
                         <i class="fas fa-database me-1"></i><?php echo __('Database Only') ?>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm btn-quick-backup" data-type="full">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#fullBackupModal">
                         <i class="fas fa-archive me-1"></i><?php echo __('Full Backup') ?>
                     </button>
                 </div>
@@ -230,6 +230,128 @@ foreach ($backups as $backup) {
     </div>
 </div>
 
+<!-- Database Only Backup Modal -->
+<div class="modal fade" id="dbBackupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-database me-2"></i><?php echo __('Database Backup') ?></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted"><?php echo __('Select components to include:') ?></p>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="db-opt-database" checked disabled>
+                    <label class="form-check-label" for="db-opt-database">
+                        <i class="fas fa-database me-1 text-success"></i><?php echo __('Database') ?>
+                        <small class="text-muted">(<?php echo __('Required') ?>)</small>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="db-opt-uploads">
+                    <label class="form-check-label" for="db-opt-uploads">
+                        <i class="fas fa-images me-1 text-warning"></i><?php echo __('Uploads / Digital Objects') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="db-opt-plugins">
+                    <label class="form-check-label" for="db-opt-plugins">
+                        <i class="fas fa-puzzle-piece me-1 text-info"></i><?php echo __('Custom Plugins') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="db-opt-framework">
+                    <label class="form-check-label" for="db-opt-framework">
+                        <i class="fas fa-code me-1 text-secondary"></i><?php echo __('AHG Framework') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="db-opt-fuseki">
+                    <label class="form-check-label" for="db-opt-fuseki">
+                        <i class="fas fa-project-diagram me-1 text-purple"></i><?php echo __('Fuseki / RIC Triplestore') ?>
+                    </label>
+                </div>
+                <div id="db-backup-progress" class="mt-3 d-none">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: 100%"></div>
+                    </div>
+                    <small class="text-muted mt-1 d-block"><?php echo __('Creating backup...') ?></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
+                <button type="button" class="btn btn-primary" id="btn-db-backup">
+                    <i class="fas fa-play me-1"></i><?php echo __('Start Backup') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Backup Modal -->
+<div class="modal fade" id="fullBackupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-archive me-2"></i><?php echo __('Full Backup') ?></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted"><?php echo __('Select components to include:') ?></p>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full-opt-database" checked disabled>
+                    <label class="form-check-label" for="full-opt-database">
+                        <i class="fas fa-database me-1 text-success"></i><?php echo __('Database') ?>
+                        <small class="text-muted">(<?php echo __('Required') ?>)</small>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full-opt-uploads" checked>
+                    <label class="form-check-label" for="full-opt-uploads">
+                        <i class="fas fa-images me-1 text-warning"></i><?php echo __('Uploads / Digital Objects') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full-opt-plugins" checked>
+                    <label class="form-check-label" for="full-opt-plugins">
+                        <i class="fas fa-puzzle-piece me-1 text-info"></i><?php echo __('Custom Plugins') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full-opt-framework" checked>
+                    <label class="form-check-label" for="full-opt-framework">
+                        <i class="fas fa-code me-1 text-secondary"></i><?php echo __('AHG Framework') ?>
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full-opt-fuseki">
+                    <label class="form-check-label" for="full-opt-fuseki">
+                        <i class="fas fa-project-diagram me-1 text-purple"></i><?php echo __('Fuseki / RIC Triplestore') ?>
+                        <small class="text-muted">(<?php echo __('May take longer') ?>)</small>
+                    </label>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="full-select-all"><?php echo __('Select All') ?></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="full-select-none"><?php echo __('Deselect All') ?></button>
+                </div>
+                <div id="full-backup-progress" class="mt-3 d-none">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: 100%"></div>
+                    </div>
+                    <small class="text-muted mt-1 d-block"><?php echo __('Creating backup...') ?></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
+                <button type="button" class="btn btn-dark" id="btn-full-backup">
+                    <i class="fas fa-play me-1"></i><?php echo __('Start Backup') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Test connection
@@ -255,14 +377,45 @@ document.addEventListener('DOMContentLoaded', function() {
         .finally(() => btn.disabled = false);
     });
 
-    // Quick backup buttons
-    document.querySelectorAll('.btn-quick-backup').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.dataset.type;
-            const options = type === 'db' 
-                ? {database: true, uploads: false, plugins: false, framework: false}
-                : {database: true, uploads: true, plugins: true, framework: true};
-            createBackup(options, this);
+    // Database backup from modal
+    document.getElementById('btn-db-backup')?.addEventListener('click', function() {
+        const options = {
+            database: true,
+            uploads: document.getElementById('db-opt-uploads')?.checked || false,
+            plugins: document.getElementById('db-opt-plugins')?.checked || false,
+            framework: document.getElementById('db-opt-framework')?.checked || false,
+            fuseki: document.getElementById('db-opt-fuseki')?.checked || false
+        };
+        document.getElementById('db-backup-progress').classList.remove('d-none');
+        this.disabled = true;
+        createBackup(options, this);
+    });
+
+    // Full backup from modal
+    document.getElementById('btn-full-backup')?.addEventListener('click', function() {
+        const options = {
+            database: true,
+            uploads: document.getElementById('full-opt-uploads')?.checked || false,
+            plugins: document.getElementById('full-opt-plugins')?.checked || false,
+            framework: document.getElementById('full-opt-framework')?.checked || false,
+            fuseki: document.getElementById('full-opt-fuseki')?.checked || false
+        };
+        document.getElementById('full-backup-progress').classList.remove('d-none');
+        this.disabled = true;
+        createBackup(options, this);
+    });
+
+    // Full backup select all/none
+    document.getElementById('full-select-all')?.addEventListener('click', function() {
+        ['full-opt-uploads', 'full-opt-plugins', 'full-opt-framework', 'full-opt-fuseki'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = true;
+        });
+    });
+    document.getElementById('full-select-none')?.addEventListener('click', function() {
+        ['full-opt-uploads', 'full-opt-plugins', 'full-opt-framework', 'full-opt-fuseki'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
         });
     });
 

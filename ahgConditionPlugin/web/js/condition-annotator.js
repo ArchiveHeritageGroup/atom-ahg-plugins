@@ -243,31 +243,42 @@ class ConditionAnnotator {
     if (maxWidth < 400) maxWidth = 600;
     if (maxHeight < 300) maxHeight = 400;
 
-    this.loadImageWithOrientation(url).then(function(result) {
-      var width = result.width, height = result.height, dataUrl = result.dataUrl;
-      if (width === 0 || height === 0) return self.setStatus("Invalid image dimensions");
+    // Add cache-busting parameter
+    var imageUrl = url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now();
+
+    // Load image directly with fabric.js (simpler, avoids canvas intermediate step)
+    fabric.Image.fromURL(imageUrl, function(fabricImg) {
+      if (!fabricImg) {
+        console.error("Failed to load image from URL:", imageUrl);
+        self.setStatus("Failed to load image");
+        return;
+      }
+
+      var width = fabricImg.width;
+      var height = fabricImg.height;
+
+      if (width === 0 || height === 0) {
+        self.setStatus("Invalid image dimensions");
+        return;
+      }
+
       self.originalImageSize = { width: width, height: height };
       var scaleX = maxWidth / width;
       var scaleY = maxHeight / height;
       self.scale = Math.min(scaleX, scaleY, 1);
       if (self.scale < 0.1) self.scale = 0.1;
+
       self.canvas.setWidth(Math.round(width * self.scale));
       self.canvas.setHeight(Math.round(height * self.scale));
 
-      fabric.Image.fromURL(dataUrl, function(fabricImg) {
-        if (!fabricImg) return self.setStatus("Failed to create fabric image");
-        fabricImg.set({ scaleX: self.scale, scaleY: self.scale, left: 0, top: 0, originX: "left", originY: "top" });
-        self.canvas.setBackgroundImage(fabricImg, function() {
-          self.canvas.renderAll();
-          self.imageLoaded = true;
-          self.setStatus("Loaded " + width + "x" + height + " at " + Math.round(self.scale * 100) + "%");
-          if (self.options.photoId) setTimeout(function() { self.loadAnnotations(); }, 100);
-        });
+      fabricImg.set({ scaleX: self.scale, scaleY: self.scale, left: 0, top: 0, originX: "left", originY: "top" });
+      self.canvas.setBackgroundImage(fabricImg, function() {
+        self.canvas.renderAll();
+        self.imageLoaded = true;
+        self.setStatus("Loaded " + width + "x" + height + " at " + Math.round(self.scale * 100) + "%");
+        if (self.options.photoId) setTimeout(function() { self.loadAnnotations(); }, 100);
       });
-    }).catch(function(err) {
-      console.error("Image load error:", err);
-      self.setStatus("Failed to load image");
-    });
+    }, { crossOrigin: 'anonymous' });
   }
 
   loadImageWithOrientation(url) {

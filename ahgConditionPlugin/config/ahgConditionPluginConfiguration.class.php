@@ -46,7 +46,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('condition_photos', new sfRoute(
             '/condition/check/:id/photos',
             ['module' => 'condition', 'action' => 'photos'],
-            ['id' => '\d+']
+            ['id' => '\d+|new']  // Allow numeric ID or 'new' for creating new condition check
         ));
 
         $routing->prependRoute('condition_annotate', new sfRoute(
@@ -68,7 +68,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('condition_photo_upload', new sfRoute(
             '/condition/check/:id/upload',
             ['module' => 'condition', 'action' => 'upload'],
-            ['id' => '\d+']
+            ['id' => '\d+|new']  // Allow numeric ID or 'new' for new condition check
         ));
 
         $routing->prependRoute('condition_photo_delete', new sfRoute(
@@ -98,7 +98,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $routing->prependRoute('condition_list_photos', new sfRoute(
             '/condition/check/:id/list',
             ['module' => 'condition', 'action' => 'listPhotos'],
-            ['id' => '\d+']
+            ['id' => '\d+|new']  // Allow numeric ID or 'new'
         ));
 
         // Template routes
