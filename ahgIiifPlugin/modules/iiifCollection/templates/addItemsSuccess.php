@@ -205,7 +205,7 @@
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 #selectedItems { display: flex; flex-direction: column; gap: 8px; }
 #searchResults .list-group-item:hover { background: #e9ecef; }
-.selected-item-card { border: 1px solid #198754; background: #f8fff8; }
+.selected-item-card { border: 1px solid var(--ahg-primary, #005837); background: #f8fff8; }
 .selected-item-card .form-check { background: #e8f5e9; padding: 8px 12px; border-radius: 4px; margin: 0 -8px -8px -8px; }
 </style>
 <?php end_slot() ?>

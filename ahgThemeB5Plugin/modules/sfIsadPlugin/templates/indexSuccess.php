@@ -124,8 +124,21 @@ if ($userId) {
     $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
 }
 $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
+$pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
 ?>
-<div class="d-flex flex-wrap gap-1 mb-3">
+<div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+  <!-- TTS Button -->
+  <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+  <script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+  <button type="button"
+          class="btn btn-sm btn-outline-secondary"
+          data-tts-action="toggle"
+          data-tts-target="#tts-content-area"
+          title="<?php echo __('Read metadata aloud'); ?>"
+          data-bs-toggle="tooltip"><i class="fas fa-volume-up"></i></button>
+  <?php if ($pdfDigitalObject): ?>
+  <button type="button" class="btn btn-sm btn-outline-info" data-tts-action="read-pdf" data-tts-pdf-id="<?php echo $pdfDigitalObject->id; ?>" title="<?php echo __('Read PDF content aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-pdf"></i></button>
+  <?php endif; ?>
   <?php if (in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $userId): ?>
     <?php if ($favoriteId): ?>
       <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
@@ -157,6 +170,9 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     $headingsCondition = SecurityPrivileges::editCredentials($sf_user, 'informationObject');
     $headingsUrl = [$resource, 'module' => 'informationobject', 'action' => 'edit'];
 ?>
+
+<!-- TTS Content Area -->
+<div id="tts-content-area" data-tts-content>
 
 <section id="identityArea" class="border-bottom">
 
@@ -487,6 +503,8 @@ $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 <?php endif ?>
 
 <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ricExplorer', 'ricPanel', ['resource' => $resource]); } ?>
+
+</div><!-- /TTS Content Area -->
 
 <?php slot('after-content'); ?>
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?> 

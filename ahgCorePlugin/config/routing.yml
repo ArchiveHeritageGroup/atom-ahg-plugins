@@ -1,0 +1,9 @@
+# ahgCorePlugin routes
+
+tts_settings:
+  url: /tts/settings
+  param: { module: tts, action: settings }
+
+tts_pdf_text:
+  url: /tts/pdfText
+  param: { module: tts, action: pdfText }

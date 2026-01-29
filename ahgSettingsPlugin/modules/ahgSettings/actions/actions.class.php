@@ -196,6 +196,116 @@ class ahgSettingsActions extends sfActions
         return $this->executeSettingsAction('identifierAction', $request);
     }
 
+    public function executeSectorNumbering(sfWebRequest $request)
+    {
+        error_log('=== executeSectorNumbering CALLED ===');
+
+        if (!$this->context->user->isAdministrator()) {
+            error_log('=== NOT ADMIN, forwarding ===');
+            $this->forward('admin', 'secure');
+        }
+
+        error_log('=== ADMIN CHECK PASSED ===');
+
+        $this->i18n = sfContext::getInstance()->i18n;
+        $this->form = new sfForm();
+
+        // GLAM/DAM sectors - always show all 5
+        $this->sectors = [
+            'archive' => 'Archive',
+            'museum' => 'Museum',
+            'library' => 'Library',
+            'gallery' => 'Gallery',
+            'dam' => 'DAM',
+        ];
+
+        error_log('=== SECTORS SET: ' . print_r($this->sectors, true));
+
+        // Sector field keys
+        $sectorKeys = [
+            'accession_mask_enabled',
+            'accession_mask',
+            'accession_counter',
+            'identifier_mask_enabled',
+            'identifier_mask',
+            'identifier_counter',
+        ];
+
+        // Add form fields for each sector
+        foreach (array_keys($this->sectors) as $sector) {
+            foreach ($sectorKeys as $baseKey) {
+                $fieldName = 'sector_' . $sector . '__' . $baseKey;
+                $settingName = $fieldName;
+
+                $existing = \AtomExtensions\Services\SettingService::getByName($settingName);
+                $default = $existing ? $existing->getValue(['sourceCulture' => true]) : '';
+
+                if (in_array($baseKey, ['accession_mask_enabled', 'identifier_mask_enabled'], true)) {
+                    $choices = [
+                        '' => $this->i18n->__('Inherit (global)'),
+                        '0' => $this->i18n->__('No'),
+                        '1' => $this->i18n->__('Yes'),
+                    ];
+                    $this->form->setDefault($fieldName, (string) $default);
+                    $this->form->setValidator($fieldName, new sfValidatorChoice([
+                        'required' => false,
+                        'choices' => array_keys($choices),
+                    ]));
+                    $this->form->setWidget($fieldName, new sfWidgetFormChoice([
+                        'choices' => $choices,
+                        'expanded' => true,
+                    ], ['class' => 'radio']));
+                } else {
+                    $this->form->setDefault($fieldName, (string) $default);
+                    $this->form->setValidator($fieldName, new sfValidatorString(['required' => false]));
+                    $this->form->setWidget($fieldName, new sfWidgetFormInput());
+                }
+            }
+        }
+
+        // Get global values for reference
+        $this->globalValues = [];
+        foreach ($sectorKeys as $key) {
+            $setting = \AtomExtensions\Services\SettingService::getByName($key);
+            $this->globalValues[$key] = $setting ? $setting->getValue(['sourceCulture' => true]) : '';
+        }
+
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters());
+
+            if ($this->form->isValid()) {
+                // Process form
+                foreach (array_keys($this->sectors) as $sector) {
+                    foreach ($sectorKeys as $baseKey) {
+                        $fieldName = 'sector_' . $sector . '__' . $baseKey;
+                        $value = $this->form->getValue($fieldName);
+
+                        if ($value === '' || $value === null) {
+                            // Empty = inherit: delete sector setting if exists
+                            if (null !== $existing = \AtomExtensions\Services\SettingService::getByName($fieldName)) {
+                                if (method_exists($existing, 'delete')) {
+                                    $existing->delete();
+                                }
+                            }
+                        } else {
+                            // Save sector override
+                            if (null === $setting = \AtomExtensions\Services\SettingService::getByName($fieldName)) {
+                                $setting = new QubitSetting();
+                                $setting->name = $fieldName;
+                            }
+                            $setting->setValue((string) $value, ['sourceCulture' => true]);
+                            $setting->save();
+                        }
+                    }
+                }
+
+                \AtomExtensions\Services\CacheService::getInstance()->removePattern('settings:i18n:*');
+                $this->getUser()->setFlash('notice', $this->i18n->__('Sector numbering settings saved.'));
+                $this->redirect(['module' => 'ahgSettings', 'action' => 'sectorNumbering']);
+            }
+        }
+    }
+
     public function executeDiacritics(sfWebRequest $request)
     {
         return $this->executeSettingsAction('diacriticsAction', $request);
@@ -209,6 +319,11 @@ class ahgSettingsActions extends sfActions
     public function executeClipboard(sfWebRequest $request)
     {
         return $this->executeSettingsAction('clipboardAction', $request);
+    }
+
+    public function executeTts(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('ttsAction', $request);
     }
 
     // Aliases for legacy URLs

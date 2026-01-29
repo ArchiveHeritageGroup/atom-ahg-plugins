@@ -17,7 +17,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .dashboard-title {
-    color: #1a5c4c;
+    color: var(--ahg-primary, #005837);
     font-size: 28px;
     margin-bottom: 25px;
     font-weight: 600;
@@ -42,7 +42,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 .summary-card.orange { background: #d35400; }
 .summary-card.cyan { background: #17a2b8; }
 .summary-card.yellow { background: #f1c40f; color: #333; }
-.summary-card.green { background: #1a5c4c; }
+.summary-card.green { background: var(--ahg-primary, #005837); }
 
 .summary-card .value {
     font-size: 36px;
@@ -75,7 +75,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 .stat-box .value {
     font-size: 28px;
     font-weight: 700;
-    color: #1a5c4c;
+    color: var(--ahg-primary, #005837);
 }
 
 .stat-box .label {
@@ -94,7 +94,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 }
 
 .panel-header {
-    background: #1a5c4c;
+    background: var(--ahg-primary, #005837);
     color: #fff;
     padding: 12px 20px;
     font-size: 16px;
@@ -206,7 +206,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 }
 
 .filter-form button {
-    background: #1a5c4c;
+    background: var(--ahg-primary, #005837);
     color: #fff;
     border: none;
     padding: 8px 20px;
@@ -220,7 +220,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 
 /* Record Link */
 .record-link {
-    color: #1a5c4c;
+    color: var(--ahg-primary, #005837);
     text-decoration: none;
 }
 

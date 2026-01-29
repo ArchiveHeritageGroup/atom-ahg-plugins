@@ -22,9 +22,14 @@
                     </select>
                 </div>
                 
-                <a href="<?php echo url_for(['module' => 'export', 'action' => 'index']); ?>" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="<?php echo url_for(['module' => 'export', 'action' => 'index']); ?>" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
+                    </a>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-download me-1"></i><?php echo __('Export'); ?>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

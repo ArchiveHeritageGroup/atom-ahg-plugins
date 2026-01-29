@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 .sidebar-section h4 {
-  color: #1a5c4c;
+  color: var(--ahg-primary, #005837);
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -131,13 +131,13 @@ document.addEventListener("DOMContentLoaded", function() {
 .template-option:hover {
   background: #e9ecef;
   text-decoration: none;
-  color: #1a5c4c;
+  color: var(--ahg-primary, #005837);
 }
 
 .template-option.active {
-  background: #1a5c4c;
+  background: var(--ahg-primary, #005837);
   color: #fff;
-  border-color: #1a5c4c;
+  border-color: var(--ahg-primary, #005837);
 }
 
 .template-option i {
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 .btn-cco-guide {
-  background: #1a5c4c;
+  background: var(--ahg-primary, #005837);
   color: #fff;
   border: none;
 }
@@ -226,17 +226,17 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 .cco-cataloguing-form .accordion-button {
-  background: #1a5c4c !important;
+  background: var(--ahg-primary, #005837) !important;
   color: #fff !important;
 }
 
 .cco-cataloguing-form .accordion-button:not(.collapsed) {
-  background: #1a5c4c !important;
+  background: var(--ahg-primary, #005837) !important;
   color: #fff !important;
 }
 
 .cco-cataloguing-form .accordion-button.collapsed {
-  background-color: #1a5c4c;
+  background-color: var(--ahg-primary, #005837);
   color: #fff;
 }
 
@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function() {
 .btn-help {
   background: none;
   border: none;
-  color: #1a5c4c;
+  color: var(--ahg-primary, #005837);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 14px;
@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function() {
 .field-input input:focus,
 .field-input select:focus,
 .field-input textarea:focus {
-  border-color: #1a5c4c;
+  border-color: var(--ahg-primary, #005837);
   outline: none;
   box-shadow: 0 0 0 3px rgba(26, 92, 76, 0.1);
 }
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
 .help-spectrum {
   margin-top: 8px;
   font-size: 12px;
-  color: #1a5c4c;
+  color: var(--ahg-primary, #005837);
 }
 
 /* Actions */
@@ -489,6 +489,17 @@ document.addEventListener("DOMContentLoaded", function() {
 <?php if ($resourceId): ?>
   <input type="hidden" name="id" value="<?php echo $resourceId; ?>">
 <?php endif; ?>
+
+<?php // Auto-generated identifier component for new records ?>
+<?php if (!$resourceId): ?>
+  <?php echo get_component('informationobject', 'identifierGenerator', [
+    'sector' => 'museum',
+    'current_identifier' => $ccoData['object_number'] ?? '',
+    'field_name' => 'object_number',
+    'repository_id' => $resource->repository_id ?? null,
+  ]); ?>
+<?php endif; ?>
+
 <div class="accordion" id="ccoAccordion">
   <?php
   $accordionIndex = 0;

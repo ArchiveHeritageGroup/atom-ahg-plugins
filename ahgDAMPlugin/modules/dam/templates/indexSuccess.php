@@ -1,5 +1,6 @@
 <?php decorate_with('layout_2col.php'); ?>
 <?php use_helper('Date'); ?>
+<?php require_once sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php'; ?>
 <?php $rawResource = sfOutputEscaper::unescape($resource); ?>
 
 <?php slot('sidebar'); ?>
@@ -12,12 +13,11 @@
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
-<!-- DEBUG START -->
-<!-- resource id: <?php echo $resource->id; ?> -->
-<!-- digitalObjects count: <?php echo count($resource->digitalObjectsRelatedByobjectId); ?> -->
-<!-- digitalObjectLink: <?php echo $digitalObjectLink; ?> -->
-<!-- DEBUG END -->
 
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+<script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+
+<div id="tts-content-area" data-tts-content>
 
   <?php if (isset($errorSchema)) { ?>
     <div class="messages error">
@@ -93,8 +93,15 @@
       $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
   }
   $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
+  $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
   ?>
-  <div class="d-flex flex-wrap gap-1 mb-3">
+  <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+    <!-- TTS Button (read metadata) -->
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-tts-action="toggle" data-tts-target="#tts-content-area" title="<?php echo __('Read metadata aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-volume-up"></i></button>
+    <?php if ($pdfDigitalObject): ?>
+    <!-- TTS PDF Button (read PDF content) -->
+    <button type="button" class="btn btn-sm btn-outline-info" data-tts-action="read-pdf" data-tts-pdf-id="<?php echo $pdfDigitalObject->id; ?>" title="<?php echo __('Read PDF content aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-pdf"></i></button>
+    <?php endif; ?>
     <?php if (in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $userId): ?>
       <?php if ($favoriteId): ?>
         <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
@@ -103,7 +110,7 @@
       <?php endif; ?>
     <?php endif; ?>
     <?php if (in_array('ahgFeedbackPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-      <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
+      <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Item Feedback'); ?>" data-bs-toggle="tooltip"><i class="fas fa-comment"></i></a>
     <?php endif; ?>
     <?php if (in_array('ahgRequestToPublishPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $hasDigitalObject): ?>
       <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'submit', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-primary" title="<?php echo __('Request to Publish'); ?>" data-bs-toggle="tooltip"><i class="fas fa-paper-plane"></i></a>
@@ -539,10 +546,33 @@
   <?php endif; ?>
 
   <!-- Access Points -->
-  <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource]); ?>
-  <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
-  <?php echo get_partial('informationobject/genreAccessPoints', ['resource' => $resource]); ?>
-  <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource]); ?>
+  <?php
+  $hasSubjects = !empty(ahg_get_subject_access_points($resource->id));
+  $hasPlaces = !empty(ahg_get_place_access_points($resource->id));
+  $hasGenres = count($resource->getTermRelations(QubitTaxonomy::GENRE_ID)) > 0;
+  $hasNames = count($resource->getActorEvents()) > 0;
+  if (!$hasNames) {
+      foreach ($resource->relationsRelatedBysubjectId as $rel) {
+          if (isset($rel->type) && QubitTerm::NAME_ACCESS_POINT_ID == $rel->type->id) {
+              $hasNames = true;
+              break;
+          }
+      }
+  }
+  ?>
+  <?php if ($hasSubjects || $hasPlaces || $hasGenres || $hasNames): ?>
+  <section class="card mb-3">
+    <div class="card-header" style="background-color: var(--ahg-primary, #005837); color: var(--ahg-card-header-text, #fff);">
+      <h4 class="mb-0"><i class="fas fa-tags me-2"></i><?php echo __('Access Points'); ?></h4>
+    </div>
+    <div class="card-body">
+      <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource]); ?>
+      <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
+      <?php echo get_partial('informationobject/genreAccessPoints', ['resource' => $resource]); ?>
+      <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource]); ?>
+    </div>
+  </section>
+  <?php endif; ?>
 
   <!-- Repository -->
   <?php if ($resource->repository): ?>
@@ -562,7 +592,9 @@
   <?php endif; ?>
   <!-- Digital object metadata -->
   <?php if (0 < count($resource->digitalObjectsRelatedByobjectId)): ?>
-    <?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
+    <div class="digitalObjectMetadata mb-3">
+      <?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
+    </div>
   <?php endif; ?>
 
   <!-- Privacy & PII -->
@@ -590,7 +622,8 @@
   </section>
   <?php endif ?>
   <!-- Admin Info -->
-  
+
+</div><!-- /TTS Content Area -->
 
 <?php end_slot(); ?>
 

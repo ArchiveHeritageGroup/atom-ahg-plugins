@@ -29,6 +29,11 @@ $rawResource = sfOutputEscaper::unescape($resource);
 <?php slot('sidebar'); ?>
   <?php include_partial('library/librarySidebar', ['resource' => $rawResource, 'sf_user' => $sf_user]); ?>
 <?php end_slot(); ?>
+
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+<script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+
+<div id="tts-content-area" data-tts-content>
     <!-- Basic Information -->
     <section class="card mb-4">
       <div class="card-header bg-primary text-white">
@@ -339,6 +344,8 @@ $rawResource = sfOutputEscaper::unescape($resource);
     </section>
     <?php endif; ?>
 
+</div><!-- /TTS Content Area -->
+
 <?php slot('context-menu'); ?>
     <!-- Cover Image -->
     <?php if (isset($digitalObject) && $digitalObject): ?>
@@ -403,8 +410,14 @@ $rawResource = sfOutputEscaper::unescape($resource);
         $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
     }
     $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
+    $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
     ?>
-    <div class="d-flex flex-wrap gap-1 mb-3">
+    <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+      <!-- TTS Button -->
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-tts-action="toggle" data-tts-target="#tts-content-area" title="<?php echo __('Read metadata aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-volume-up"></i></button>
+      <?php if ($pdfDigitalObject): ?>
+      <button type="button" class="btn btn-sm btn-outline-info" data-tts-action="read-pdf" data-tts-pdf-id="<?php echo $pdfDigitalObject->id; ?>" title="<?php echo __('Read PDF content aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-pdf"></i></button>
+      <?php endif; ?>
       <?php if (in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $userId): ?>
         <?php if ($favoriteId): ?>
           <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
@@ -557,7 +570,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
           $childCount = $resource->getDescendants()->count();
           if ($childCount > 0):
         ?>
-        <a href="<?php echo url_for([$resource, 'module' => 'informationobject', 'action' => 'browse']); ?>" class="btn btn-outline-secondary w-100">
+        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'collection' => $resource->id, 'topLod' => 0]); ?>" class="btn btn-outline-secondary w-100">
           <i class="fas fa-sitemap me-2"></i><?php echo __('%1% child records', ['%1%' => $childCount]); ?>
         </a>
         <?php endif; ?>

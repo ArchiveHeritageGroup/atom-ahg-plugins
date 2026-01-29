@@ -49,6 +49,16 @@
               </div>
             <?php } ?>
 
+            <?php // Auto-generated identifier component for new records ?>
+            <?php if (!isset($sf_request->getAttribute('sf_route')->resource)): ?>
+              <?php echo get_component('informationobject', 'identifierGenerator', [
+                'sector' => 'archive',
+                'current_identifier' => $resource->identifier ?? '',
+                'field_name' => 'identifier',
+                'repository_id' => $resource->repositoryId ?? null,
+              ]); ?>
+            <?php endif; ?>
+
             <?php echo render_field($form->identifier
                 ->help(__('Provide a specific local reference code, control number, or other unique identifier. The country and repository code will be automatically added from the linked repository record to form a full reference code. (ISAD 3.1.1)'))
                 ->label(__('Identifier').' <span class="form-required" title="'.__('This is a mandatory element.').'">*</span>')

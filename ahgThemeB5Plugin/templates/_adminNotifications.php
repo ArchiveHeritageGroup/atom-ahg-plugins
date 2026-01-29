@@ -20,13 +20,29 @@ if ($isAuthenticated && !$isAdmin) {
 $routing = sfContext::getInstance()->getRouting();
 $hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
 
-// Get Spectrum task count for any authenticated user
+// Get Spectrum task count for any authenticated user (exclude final states)
 $spectrumTaskCount = 0;
 if ($isAuthenticated && $hasSpectrum) {
     try {
-        $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
-            ->where('assigned_to', $userId)
-            ->count();
+        // Collect all final states from all procedures
+        $allFinalStates = [];
+        $configs = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_config')
+            ->where('is_active', 1)
+            ->get();
+        foreach ($configs as $config) {
+            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
+            $allFinalStates = array_merge($allFinalStates, $finalStates);
+        }
+        $allFinalStates = array_unique($allFinalStates);
+
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
+            ->where('assigned_to', $userId);
+
+        if (!empty($allFinalStates)) {
+            $query->whereNotIn('current_state', $allFinalStates);
+        }
+
+        $spectrumTaskCount = $query->count();
     } catch (Exception $e) {
         // Table may not exist
     }

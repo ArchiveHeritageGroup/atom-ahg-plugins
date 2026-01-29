@@ -132,8 +132,14 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
       $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
   }
   $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
+  $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
   ?>
-  <div class="d-flex flex-wrap gap-1 mb-3">
+  <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+    <!-- TTS Button -->
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-tts-action="toggle" data-tts-target="#tts-content-area" title="<?php echo __('Read metadata aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-volume-up"></i></button>
+    <?php if ($pdfDigitalObject): ?>
+    <button type="button" class="btn btn-sm btn-outline-info" data-tts-action="read-pdf" data-tts-pdf-id="<?php echo $pdfDigitalObject->id; ?>" title="<?php echo __('Read PDF content aloud'); ?>" data-bs-toggle="tooltip"><i class="fas fa-file-pdf"></i></button>
+    <?php endif; ?>
     <?php if (in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins()) && $userId): ?>
       <?php if ($favoriteId): ?>
         <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
@@ -249,6 +255,10 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
 
 <?php slot('content'); ?>
 
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+<script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+
+<div id="tts-content-area" data-tts-content>
   <!-- Object Identification -->
   <section class="card mb-4">
     <div class="card-header bg-primary text-white">
@@ -864,4 +874,5 @@ window.cleanupThreeJs = function() { if (renderer) { renderer.dispose(); rendere
 </script>
 <?php endif; ?>
 <?php endif; ?>
+</div><!-- /TTS Content Area -->
 <?php end_slot(); ?>

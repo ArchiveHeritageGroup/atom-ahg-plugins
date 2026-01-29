@@ -97,6 +97,7 @@ if (isset($resource)) {
         <i class="bi bi-list-check me-1"></i><?php echo __('Review Dashboard'); ?>
       </a>
     </li>
+    <?php /* Handwriting Recognition - commented out for now
     <li class="mt-2" style="list-style:none; margin-left:-1rem;"><span class="fw-semibold text-secondary"><?php echo __('Handwriting Recognition'); ?></span></li>
     <li>
       <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'all'); return false;">
@@ -118,6 +119,7 @@ if (isset($resource)) {
         <i class="bi bi-alphabet me-1"></i><?php echo __('Extract Letters'); ?>
       </a>
     </li>
+    */ ?>
   </ul>
   <div id="summaryResult" class="mt-2" style="display: none;"></div>
   <div id="htrResult" class="mt-2" style="display: none;"></div>

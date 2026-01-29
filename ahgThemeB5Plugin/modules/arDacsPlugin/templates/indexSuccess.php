@@ -71,6 +71,15 @@ function pii_filter($objectId, $content) {
   <?php echo get_component('digitalobject', 'show', ['link' => $digitalObjectLink, 'resource' => $resource->digitalObjectsRelatedByobjectId[0], 'usageType' => QubitTerm::REFERENCE_ID]); ?>
 <?php } ?>
 
+<!-- TTS Button -->
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+<script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+<div class="mb-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" data-tts-action="toggle" data-tts-target="#tts-content-area" title="<?php echo __('Read aloud (Alt+P to play/pause)'); ?>" data-bs-toggle="tooltip"><i class="fas fa-volume-up"></i></button>
+</div>
+
+<div id="tts-content-area" data-tts-content>
+
 <?php
     // TODO: Move this to the controller when we only have B5 themes
     $headingsCondition = SecurityPrivileges::editCredentials($sf_user, 'informationObject');
@@ -357,6 +366,8 @@ function pii_filter($objectId, $content) {
   <?php echo get_component('informationobject', 'accessions', ['resource' => $resource]); ?>
 
 </section> <!-- /section#accessionArea -->
+
+</div><!-- /TTS Content Area -->
 
 <?php slot('after-content'); ?>
   <?php echo get_partial('informationobject/actions', ['resource' => $resource]); ?>

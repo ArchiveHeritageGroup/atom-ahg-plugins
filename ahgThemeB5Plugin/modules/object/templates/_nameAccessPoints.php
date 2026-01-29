@@ -144,25 +144,26 @@ $isSidebar = isset($sidebar) && $sidebar;
     </ul>
   </section>
 <?php } else { ?>
-  <div class="field">
-    <h3><?php echo __('Related people and organizations'); ?></h3>
-    <div>
-      <ul>
-        <?php foreach ($allActors as $actor) { ?>
-          <li>
-            <?php if ($actor->slug) { ?>
-              <a href="<?php echo url_for(['module' => 'actor', 'action' => 'index', 'slug' => $actor->slug]); ?>">
-                <?php echo htmlspecialchars($actor->name ?? ''); ?>
-              </a>
-            <?php } else { ?>
-              <?php echo htmlspecialchars($actor->name ?? ''); ?>
-            <?php } ?>
-            <?php if (!empty($actor->event_type)) { ?>
-              <span class="text-muted">(<?php echo htmlspecialchars($actor->event_type); ?>)</span>
-            <?php } ?>
-          </li>
-        <?php } ?>
-      </ul>
-    </div>
+<div class="field<?php echo isset($sidebar) ? '' : ' '.render_b5_show_field_css_classes(); ?>">
+
+  <?php echo render_b5_show_label(__('Related people and organizations')); ?>
+
+  <div<?php echo isset($sidebar) ? '' : ' class="'.render_b5_show_value_css_classes().'"'; ?>>
+    <ul class="<?php echo isset($sidebar) ? 'list-unstyled' : render_b5_show_list_css_classes(); ?>">
+      <?php foreach ($allActors as $actor) { ?>
+        <li>
+          <?php if ($actor->slug) { ?>
+            <?php echo link_to(htmlspecialchars($actor->name ?? ''), ['module' => 'actor', 'action' => 'index', 'slug' => $actor->slug]); ?>
+          <?php } else { ?>
+            <?php echo htmlspecialchars($actor->name ?? ''); ?>
+          <?php } ?>
+          <?php if (!empty($actor->event_type)) { ?>
+            <span class="text-muted">(<?php echo htmlspecialchars($actor->event_type); ?>)</span>
+          <?php } ?>
+        </li>
+      <?php } ?>
+    </ul>
   </div>
+
+</div>
 <?php } ?>

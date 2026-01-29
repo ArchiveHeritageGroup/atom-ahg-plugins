@@ -547,8 +547,10 @@ function ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $height, $showByDef
  */
 function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl, $showByDefault = false)
 {
-    // Use standard digital object path
-    $modelUrl = $baseUrl . '/uploads/' . trim($model->path ?? '', '/') . '/' . $model->filename;
+    // Use standard digital object path (path already includes /uploads/)
+    $path = trim($model->path ?? '', '/');
+    // Don't add /uploads/ if path already starts with it
+    $modelUrl = $baseUrl . '/' . $path . '/' . $model->filename;
     $arAttr = !empty($model->ar_enabled) ? 'ar ar-modes="webxr scene-viewer quick-look"' : '';
     $autoRotate = !empty($model->auto_rotate) ? 'auto-rotate' : '';
     $cameraOrbit = $model->camera_orbit ?? '0deg 75deg 105%';

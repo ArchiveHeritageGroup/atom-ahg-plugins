@@ -9,11 +9,12 @@
       <?php endif; ?>
     </h1>
     <?php if ($count > 0): ?>
-      <a href="<?php echo url_for(['module' => 'cart', 'action' => 'clear']); ?>" 
-         class="btn btn-outline-danger btn-sm"
-         onclick="return confirm('<?php echo __('Clear all items from cart?'); ?>');">
-        <i class="fas fa-trash me-1"></i><?php echo __('Clear Cart'); ?>
-      </a>
+      <form action="<?php echo url_for(['module' => 'cart', 'action' => 'clear']); ?>" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('<?php echo __('Clear all items from cart?'); ?>');">
+          <i class="fas fa-trash me-1"></i><?php echo __('Clear Cart'); ?>
+        </button>
+      </form>
     <?php endif; ?>
   </div>
 <?php end_slot(); ?>

@@ -44,12 +44,13 @@
             <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'myTasks']); ?>">
                 <i class="fas fa-clipboard-list fa-fw"></i> <?php echo __('My Tasks'); ?>
                 <?php
-                // Show count badge if user is authenticated
+                // Show count badge if user is authenticated (exclude completed tasks)
                 if ($sf_user->isAuthenticated()) {
                     $userId = $sf_user->getAttribute('user_id');
                     if ($userId) {
                         $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
                             ->where('assigned_to', $userId)
+                            ->where('current_state', '!=', 'completed')
                             ->count();
                         if ($taskCount > 0) {
                             echo '<span class="badge bg-primary ms-1">' . $taskCount . '</span>';

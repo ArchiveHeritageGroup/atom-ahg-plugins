@@ -43,9 +43,14 @@
                     <?php echo __('To export specific records, navigate to the record and use the export option from the More menu. This page is for bulk/batch exports.'); ?>
                 </div>
                 
-                <a href="<?php echo url_for(['module' => 'export', 'action' => 'index']); ?>" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="<?php echo url_for(['module' => 'export', 'action' => 'index']); ?>" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download me-1"></i><?php echo __('Export'); ?>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

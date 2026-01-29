@@ -64,12 +64,12 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 </style>
 <?php end_slot(); ?>
 
-<div class="heritage-landing" style="margin: -1rem calc(-50vw + 50%); width: 100vw;">
+<div class="heritage-landing" style="margin: 0; width: 100%; max-width: none;">
 
     <!-- ================================================================
          Section 1: Hero (Full Viewport)
          ================================================================ -->
-    <section class="heritage-hero" id="heritage-hero" style="height: 100vh; min-height: 600px;">
+    <section class="heritage-hero" id="heritage-hero" style="height: calc(100vh - 280px); min-height: 450px;">
 
         <!-- Background Images -->
         <div class="heritage-hero-backgrounds">

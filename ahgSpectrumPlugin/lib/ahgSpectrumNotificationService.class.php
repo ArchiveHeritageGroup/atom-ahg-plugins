@@ -289,6 +289,38 @@ class ahgSpectrumNotificationService
     }
 
     /**
+     * Mark task notifications as read when task reaches final state
+     *
+     * @param string $slug Object slug
+     * @param string|null $procedureType Optional procedure type filter
+     * @return int Number of notifications marked as read
+     */
+    public static function markTaskNotificationsAsReadBySlug($slug, $procedureType = null)
+    {
+        if (!$slug) {
+            return 0;
+        }
+
+        // Build pattern to match in message: "View task: /slug/spectrum"
+        $pattern = '/' . $slug . '/spectrum';
+
+        $query = DB::table('spectrum_notification')
+            ->where('notification_type', 'task_assignment')
+            ->where('message', 'like', '%' . $pattern . '%')
+            ->whereNull('read_at');
+
+        // If procedure type provided, also match in subject
+        if ($procedureType) {
+            $procedureLabel = self::getProcedureLabel($procedureType);
+            $query->where('subject', 'like', '%' . $procedureLabel . '%');
+        }
+
+        return $query->update([
+            'read_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
      * Get assigned task count for a user
      *
      * @param int $userId User ID
@@ -306,7 +338,7 @@ class ahgSpectrumNotificationService
     }
 
     /**
-     * Get pending tasks for a user (tasks not in completed state)
+     * Get pending tasks for a user (tasks not in final states)
      *
      * @param int $userId User ID
      * @return array Pending tasks
@@ -317,7 +349,18 @@ class ahgSpectrumNotificationService
             return [];
         }
 
-        return DB::table('spectrum_workflow_state as sws')
+        // Collect all final states from all procedures
+        $allFinalStates = [];
+        $configs = DB::table('spectrum_workflow_config')
+            ->where('is_active', 1)
+            ->get();
+        foreach ($configs as $config) {
+            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
+            $allFinalStates = array_merge($allFinalStates, $finalStates);
+        }
+        $allFinalStates = array_unique($allFinalStates);
+
+        $query = DB::table('spectrum_workflow_state as sws')
             ->select([
                 'sws.*',
                 'io.identifier',
@@ -330,9 +373,14 @@ class ahgSpectrumNotificationService
                      ->where('ioi18n.culture', '=', 'en');
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
-            ->where('sws.assigned_to', $userId)
-            ->where('sws.current_state', '!=', 'completed')
-            ->orderBy('sws.assigned_at', 'desc')
+            ->where('sws.assigned_to', $userId);
+
+        // Exclude all final states
+        if (!empty($allFinalStates)) {
+            $query->whereNotIn('sws.current_state', $allFinalStates);
+        }
+
+        return $query->orderBy('sws.assigned_at', 'desc')
             ->get()
             ->toArray();
     }

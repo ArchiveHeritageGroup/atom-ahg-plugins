@@ -143,6 +143,34 @@ ahg_settings_identifier:
   url: /ahgSettings/identifier
   param: { module: ahgSettings, action: identifier }
 
+ahg_settings_sector_numbering:
+  url: /ahgSettings/sectorNumbering
+  param: { module: ahgSettings, action: sectorNumbering }
+
+ahg_settings_numbering_schemes:
+  url: /ahgSettings/numberingSchemes
+  param: { module: ahgSettings, action: numberingSchemes }
+
+ahg_settings_numbering_scheme_edit:
+  url: /ahgSettings/numberingSchemeEdit
+  param: { module: ahgSettings, action: numberingSchemeEdit }
+
+ahg_settings_generate_identifier:
+  url: /ahgSettings/generateIdentifier
+  param: { module: ahgSettings, action: generateIdentifier }
+
+api_generate_identifier:
+  url: /api/numbering/generate
+  param: { module: ahgSettings, action: generateIdentifier }
+
+ahg_settings_validate_identifier:
+  url: /ahgSettings/validateIdentifier
+  param: { module: ahgSettings, action: validateIdentifier }
+
+api_validate_identifier:
+  url: /api/numbering/validate
+  param: { module: ahgSettings, action: validateIdentifier }
+
 ahg_settings_diacritics:
   url: /ahgSettings/diacritics
   param: { module: ahgSettings, action: diacritics }
@@ -154,3 +182,11 @@ ahg_settings_csv_validator:
 ahg_settings_clipboard:
   url: /ahgSettings/clipboard
   param: { module: ahgSettings, action: clipboard }
+
+ahg_settings_tts:
+  url: /ahgSettings/tts
+  param: { module: ahgSettings, action: tts }
+
+admin_ahg_settings_tts:
+  url: /admin/ahg-settings/tts
+  param: { module: ahgSettings, action: tts }

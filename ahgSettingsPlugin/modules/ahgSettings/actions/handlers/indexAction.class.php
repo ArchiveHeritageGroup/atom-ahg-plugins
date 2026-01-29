@@ -47,6 +47,13 @@ class AhgSettingsIndexAction extends sfAction
             'url' => 'admin/ahg-settings/email'
         ];
 
+        $this->sections['sectorNumbering'] = [
+            'label' => 'Sector Numbering',
+            'icon' => 'fa-hashtag',
+            'description' => 'Configure unique numbering schemes per GLAM/DAM sector (Archive, Museum, Library, Gallery, DAM)',
+            'url' => 'ahgSettings/sectorNumbering',
+        ];
+
         // Researcher - conditional but part of default install
         if ($hasResearch) {
             $this->sections['research'] = [
@@ -78,6 +85,12 @@ class AhgSettingsIndexAction extends sfAction
             'url' => 'mediaSettings/index'
         ];
 
+        $this->sections['tts'] = [
+            'label' => 'Text-to-Speech',
+            'icon' => 'fa-volume-up',
+            'description' => 'Configure read-aloud accessibility feature for record pages',
+            'url' => 'ahgSettings/tts'
+        ];
 
         $this->sections['watermark'] = [
             'label' => 'Watermark Settings',

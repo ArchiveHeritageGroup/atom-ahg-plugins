@@ -145,7 +145,7 @@ foreach ($collection->items as $item) {
             <h5 class="mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Actions') ?></h5>
         </div>
         <div class="card-body">
-            <a href="<?php echo '/index.php/ahgIiifCollection/manifest?slug=' . $collection->slug ?>" class="btn btn-info w-100 mb-2" target="_blank">
+            <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'manifest', 'slug' => $collection->slug]) ?>" class="btn btn-info w-100 mb-2" target="_blank">
                 <i class="fas fa-code me-2"></i><?php echo __('View IIIF JSON') ?>
             </a>
             <?php if ($sf_user->isAuthenticated()): ?>

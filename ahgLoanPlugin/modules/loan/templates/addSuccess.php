@@ -27,8 +27,25 @@
           <?php endif; ?>
         </p>
       </div>
-      <form action="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => $loanType]); ?>" method="post">
+      <form action="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => $loanType, 'sector' => $sector] + (isset($objectId) && $objectId ? ['object_id' => $objectId] : [])); ?>" method="post">
+        <input type="hidden" name="sector" value="<?php echo htmlspecialchars($sector); ?>">
+        <?php if (isset($objectId) && $objectId): ?>
+          <input type="hidden" name="object_id" value="<?php echo (int)$objectId; ?>">
+        <?php endif; ?>
         <div class="card-body">
+          <?php if (isset($object) && $object): ?>
+          <!-- Linked Object -->
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading mb-2"><i class="fa-solid fa-link me-2"></i>Linked Object</h5>
+            <p class="mb-1"><strong><?php echo htmlspecialchars($object->title ?? 'Untitled'); ?></strong></p>
+            <?php if (!empty($object->identifier)): ?>
+              <small class="text-muted">Identifier: <?php echo htmlspecialchars($object->identifier); ?></small>
+            <?php endif; ?>
+            <hr class="my-2">
+            <small>This object will be automatically added to the loan.</small>
+          </div>
+          <?php endif; ?>
+
           <!-- Basic Information -->
           <h5 class="mb-3">Basic Information</h5>
           <div class="row mb-3">

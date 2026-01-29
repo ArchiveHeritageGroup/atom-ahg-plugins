@@ -16,11 +16,12 @@ $isEditor = \Illuminate\Database\Capsule\Manager::table('acl_user_group')
 if (!$isEditor) return;
 
 $itemLocation = $itemLocation ?? [];
+$culture = sfContext::getInstance()->getUser()->getCulture();
 
 $physicalObjects = [];
 $poResult = \Illuminate\Database\Capsule\Manager::table('physical_object as po')
-    ->leftJoin('physical_object_i18n as poi', function($join) {
-        $join->on('poi.id', '=', 'po.id')->where('poi.culture', '=', 'en');
+    ->leftJoin('physical_object_i18n as poi', function($join) use ($culture) {
+        $join->on('poi.id', '=', 'po.id')->where('poi.culture', '=', $culture);
     })
     ->select(['po.id', 'poi.name', 'poi.location'])
     ->orderBy('poi.name')
@@ -58,7 +59,7 @@ foreach ($poResult as $po) {
       </div>
 
       <!-- Location within container -->
-      <h6 class="text-white py-2 px-3 mb-3" style="background-color: #198754;"><i class="fas fa-box me-2"></i><?php echo __('Location within container'); ?></h6>
+      <h6 class="text-white py-2 px-3 mb-3" style="background-color: var(--ahg-primary, #005837);"><i class="fas fa-box me-2"></i><?php echo __('Location within container'); ?></h6>
       <div class="row mb-3">
         <div class="col-md-2">
           <label class="form-label"><?php echo __('Box'); ?></label>
@@ -106,7 +107,7 @@ foreach ($poResult as $po) {
       </div>
 
       <!-- Condition & Status -->
-      <h6 class="text-white py-2 px-3 mb-3" style="background-color: #198754;"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition & Status'); ?></h6>
+      <h6 class="text-white py-2 px-3 mb-3" style="background-color: var(--ahg-primary, #005837);"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition & Status'); ?></h6>
       <div class="row mb-3">
         <div class="col-md-3">
           <label class="form-label"><?php echo __('Condition'); ?></label>

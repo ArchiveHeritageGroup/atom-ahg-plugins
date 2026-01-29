@@ -53,8 +53,12 @@
       </thead>
       <tbody>
         <?php foreach ($records as $record): ?>
+          <?php $key = $record->entity_type . '/' . $record->entity_id; ?>
           <tr>
-            <td><code><?php echo $record->entity_type; ?>/<?php echo $record->entity_id; ?></code></td>
+            <td>
+              <strong><?php echo htmlspecialchars($entityNames[$key] ?? '(unknown)'); ?></strong>
+              <br><small class="text-muted"><?php echo $record->entity_type; ?> #<?php echo $record->entity_id; ?></small>
+            </td>
             <td class="small"><code><?php echo htmlspecialchars(substr($record->ric_uri, -40)); ?></code></td>
             <td>
               <?php $colors = ['synced' => 'success', 'pending' => 'warning', 'failed' => 'danger', 'deleted' => 'secondary', 'orphaned' => 'info']; ?>

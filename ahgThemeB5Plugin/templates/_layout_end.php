@@ -1,4 +1,10 @@
-<?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/ahgSettings/templates/_dynamicStyles.php'); ?>
+<?php
+// Include dynamic CSS variables from AHG Settings
+$dynamicStylesPath = sfConfig::get('sf_plugins_dir').'/ahgSettingsPlugin/modules/ahgSettings/templates/_dynamicStyles.php';
+if (file_exists($dynamicStylesPath)) {
+    include($dynamicStylesPath);
+}
+?>
 <!-- D3.js for visualizations -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 </body>

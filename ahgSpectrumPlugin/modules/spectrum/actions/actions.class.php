@@ -353,8 +353,11 @@ class spectrumActions extends sfActions
             'created_at' => date('Y-m-d H:i:s')
         ]);
 
-        // Create notification for assignee if task was assigned
-        if ($assignedToInt && $assignedToInt !== $userId) {
+        // Check if target state is a final state
+        $isFinalState = ahgSpectrumWorkflowService::isFinalState($procedureType, $toState);
+
+        // Create notification for assignee if task was assigned (but not when transitioning to final state)
+        if ($assignedToInt && $assignedToInt !== $userId && !$isFinalState) {
             $this->createAssignmentNotification(
                 $assignedToInt,
                 $resource,
@@ -362,6 +365,11 @@ class spectrumActions extends sfActions
                 $toState,
                 $userId
             );
+        }
+
+        // Mark existing notifications as read when task reaches final state
+        if ($isFinalState) {
+            ahgSpectrumNotificationService::markTaskNotificationsAsReadBySlug($slug, $procedureType);
         }
 
         // Redirect back
@@ -394,7 +402,22 @@ class spectrumActions extends sfActions
         $userId = $this->getUser()->getAttribute('user_id');
         $procedureTypeFilter = $request->getParameter('procedure_type');
 
-        // Build query for assigned tasks
+        // Get workflow configs for state labels and final states
+        $this->workflowConfigs = [];
+        $allFinalStates = [];
+        $configs = DB::table('spectrum_workflow_config')
+            ->where('is_active', 1)
+            ->get();
+        foreach ($configs as $config) {
+            $configData = json_decode($config->config_json, true);
+            $this->workflowConfigs[$config->procedure_type] = $configData;
+            // Collect final states for this procedure
+            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
+            $allFinalStates = array_merge($allFinalStates, $finalStates);
+        }
+        $allFinalStates = array_unique($allFinalStates);
+
+        // Build query for assigned tasks (excluding final states)
         $query = DB::table('spectrum_workflow_state as sws')
             ->select([
                 'sws.*',
@@ -414,6 +437,11 @@ class spectrumActions extends sfActions
             ->leftJoin('user as assigner', 'sws.assigned_by', '=', 'assigner.id')
             ->where('sws.assigned_to', $userId);
 
+        // Exclude all final states from all procedures
+        if (!empty($allFinalStates)) {
+            $query->whereNotIn('sws.current_state', $allFinalStates);
+        }
+
         // Apply procedure type filter
         if ($procedureTypeFilter) {
             $query->where('sws.procedure_type', $procedureTypeFilter);
@@ -426,16 +454,6 @@ class spectrumActions extends sfActions
 
         // Get procedure labels for display
         $this->procedures = ahgSpectrumWorkflowService::getProcedures();
-
-        // Get workflow configs for state labels
-        $this->workflowConfigs = [];
-        $configs = DB::table('spectrum_workflow_config')
-            ->where('is_active', 1)
-            ->get();
-        foreach ($configs as $config) {
-            $configData = json_decode($config->config_json, true);
-            $this->workflowConfigs[$config->procedure_type] = $configData;
-        }
 
         // Get unread notification count
         $this->unreadCount = DB::table('spectrum_notification')

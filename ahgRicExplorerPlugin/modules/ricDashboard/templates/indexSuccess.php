@@ -300,9 +300,10 @@ function updateRecentOperations(ops) {
   ops.slice(0, 10).forEach(op => {
     const time = new Date(op.created_at).toLocaleTimeString();
     const statusClass = op.status === 'success' ? 'success' : (op.status === 'failure' ? 'danger' : 'warning');
+    const entityName = op.entity_name || (op.entity_type + '/' + op.entity_id);
     html += '<tr><td class="text-muted small">' + time + '</td>' +
       '<td><span class="badge bg-secondary">' + op.operation + '</span></td>' +
-      '<td><code>' + op.entity_type + '/' + op.entity_id + '</code></td>' +
+      '<td><strong>' + entityName + '</strong><br><small class="text-muted">' + op.entity_type + ' #' + op.entity_id + '</small></td>' +
       '<td><span class="badge bg-' + statusClass + '">' + op.status + '</span></td></tr>';
   });
 

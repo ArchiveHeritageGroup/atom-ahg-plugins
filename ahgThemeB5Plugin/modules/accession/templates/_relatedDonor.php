@@ -4,7 +4,7 @@
 
 <div
   class="atom-table-modal"
-  data-current-resource="<?php echo url_for([$resource]); ?>"
+  data-current-resource="<?php echo isset($resource->id) ? url_for([$resource, 'module' => 'accession']) : ''; ?>"
   data-required-fields="<?php echo $form->resource->renderId(); ?>"
   data-delete-field-name="deleteRelations"
   data-iframe-error="<?php echo __('The following resources could not be created:'); ?>">

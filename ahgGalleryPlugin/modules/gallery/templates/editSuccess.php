@@ -724,7 +724,7 @@ document.addEventListener("DOMContentLoaded", function() {
         preload: "focus",
         load: function(query, callback) {
           var results = [];
-          fetch("/index.php/ahgMuseumPlugin/vocabulary?field=" + encodeURIComponent(fieldName) + "&query=" + encodeURIComponent(query))
+          fetch("/index.php/museum/vocabulary?field=" + encodeURIComponent(fieldName) + "&query=" + encodeURIComponent(query))
             .then(function(r) { return r.json(); })
             .then(function(localData) {
               if (localData.success && localData.results) {
@@ -735,7 +735,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
               }
               if (query.length >= 2) {
-                return fetch("/index.php/ahgMuseumPlugin/getty?vocabulary=" + gettyVocab + "&query=" + encodeURIComponent(query) + "&limit=10");
+                return fetch("/index.php/museum/getty?vocabulary=" + gettyVocab + "&query=" + encodeURIComponent(query) + "&limit=10");
               }
               return Promise.resolve(null);
             })

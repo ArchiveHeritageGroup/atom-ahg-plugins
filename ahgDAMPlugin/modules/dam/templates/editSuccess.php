@@ -24,6 +24,16 @@
 
     <?php echo $form->renderHiddenFields(); ?>
 
+    <?php // Auto-generated identifier component for new records ?>
+    <?php if (!isset($sf_request->getAttribute('sf_route')->resource)): ?>
+      <?php echo get_component('informationobject', 'identifierGenerator', [
+        'sector' => 'dam',
+        'current_identifier' => '',
+        'field_name' => 'identifier',
+        'repository_id' => null,
+      ]); ?>
+    <?php endif; ?>
+
     <!-- Identification -->
     <div class="card mb-3">
       <div class="card-header bg-success text-white">

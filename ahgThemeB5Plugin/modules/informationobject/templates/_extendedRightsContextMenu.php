@@ -32,6 +32,14 @@ $hasEmbargo = $activeEmbargo !== null;
         <?php echo $hasRights ? __('Edit extended rights') : __('Add extended rights'); ?>
       </a>
     </li>
+    <?php if ($hasRights): ?>
+    <li>
+      <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'clear', 'slug' => $resource->slug]); ?>" class="text-danger">
+        <i class="fas fa-eraser fa-fw me-1"></i>
+        <?php echo __('Clear extended rights'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
     <?php if ($hasEmbargo): ?>
     <li>
       <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'id' => $activeEmbargo->id]); ?>">
@@ -68,7 +76,7 @@ $hasEmbargo = $activeEmbargo !== null;
   <h4><?php echo __('Rights Status'); ?></h4>
   <ul class="list-unstyled">
     <?php if ($hasRights): ?>
-    <li><i class="fas fa-check-circle text-success fa-fw me-1"></i><?php echo __('Has extended rights'); ?></li>
+    <li><i class="fas fa-copyright text-info fa-fw me-1"></i><?php echo __('Extended rights applied'); ?></li>
     <?php endif; ?>
     <?php if ($hasEmbargo): ?>
     <li><i class="fas fa-lock text-warning fa-fw me-1"></i><?php echo __('Under embargo'); ?></li>

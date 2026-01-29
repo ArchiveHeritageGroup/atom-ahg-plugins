@@ -53,9 +53,13 @@
         </thead>
         <tbody>
           <?php foreach ($orphans as $orphan): ?>
+            <?php $key = $orphan->expected_entity_type . '/' . $orphan->expected_entity_id; ?>
             <tr>
               <td><code class="small"><?php echo htmlspecialchars(substr($orphan->ric_uri, -50)); ?></code></td>
-              <td><code><?php echo $orphan->expected_entity_type; ?>/<?php echo $orphan->expected_entity_id; ?></code></td>
+              <td>
+                <strong><?php echo htmlspecialchars($orphanNames[$key] ?? '(deleted)'); ?></strong>
+                <br><small class="text-muted"><?php echo $orphan->expected_entity_type; ?> #<?php echo $orphan->expected_entity_id; ?></small>
+              </td>
               <td class="small text-muted"><?php echo date('Y-m-d H:i', strtotime($orphan->detected_at)); ?></td>
               <td>
                 <?php

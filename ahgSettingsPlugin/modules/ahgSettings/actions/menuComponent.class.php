@@ -71,6 +71,14 @@ class ahgSettingsMenuComponent extends sfComponent
                 'action' => 'identifier',
             ],
             [
+                'label' => $i18n->__('Sector Numbering'),
+                'action' => 'sectorNumbering',
+            ],
+            [
+                'label' => $i18n->__('Numbering Schemes'),
+                'action' => 'numberingSchemes',
+            ],
+            [
                 'label' => $i18n->__('Inventory'),
                 'action' => 'inventory',
             ],

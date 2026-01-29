@@ -9,6 +9,16 @@
 <input type="hidden" name="parent" value="<?php echo $sf_request->getParameter('parent'); ?>">
 <?php endif; ?>
 
+<?php // Auto-generated identifier component for new records ?>
+<?php if (!isset($resource->id)): ?>
+  <?php echo get_component('informationobject', 'identifierGenerator', [
+    'sector' => 'library',
+    'current_identifier' => $resource->identifier ?? '',
+    'field_name' => 'identifier',
+    'repository_id' => null,
+  ]); ?>
+<?php endif; ?>
+
   <div class="row">
     <div class="col-md-8">
 

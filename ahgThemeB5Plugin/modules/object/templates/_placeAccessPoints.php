@@ -41,9 +41,12 @@ $isSidebar = isset($sidebar) && $sidebar;
     </ul>
   </section>
 <?php } else { ?>
-  <div class="field">
-    <h3><?php echo __('Place access points'); ?></h3>
-    <div><ul>
+<div class="field<?php echo isset($sidebar) ? '' : ' '.render_b5_show_field_css_classes(); ?>">
+
+  <?php echo render_b5_show_label(__('Place access points')); ?>
+
+  <div<?php echo isset($sidebar) ? '' : ' class="'.render_b5_show_value_css_classes().'"'; ?>>
+    <ul class="<?php echo isset($sidebar) ? 'list-unstyled' : render_b5_show_list_css_classes(); ?>">
       <?php foreach ($places as $place) {
         $placeName = $place->name ?? '';
         $isMasked = false;
@@ -59,12 +62,14 @@ $isSidebar = isset($sidebar) && $sidebar;
           <?php if ($isMasked): ?>
             <span class="text-danger"><?php echo htmlspecialchars($placeName); ?></span>
           <?php elseif ($place->slug): ?>
-            <a href="<?php echo url_for(['module' => 'term', 'action' => 'index', 'slug' => $place->slug]); ?>"><?php echo htmlspecialchars($placeName); ?></a>
+            <?php echo link_to(htmlspecialchars($placeName), ['module' => 'term', 'action' => 'index', 'slug' => $place->slug]); ?>
           <?php else: ?>
             <?php echo htmlspecialchars($placeName); ?>
           <?php endif; ?>
         </li>
       <?php } ?>
-    </ul></div>
+    </ul>
   </div>
+
+</div>
 <?php } ?>

@@ -43,11 +43,12 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     }
 }
 
-// Get Spectrum task count for current user
+// Get Spectrum task count for current user (exclude completed tasks)
 if ($isAuthenticated && $hasSpectrum) {
     try {
         $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
             ->where('assigned_to', $userId)
+            ->where('current_state', '!=', 'completed')
             ->count();
     } catch (Exception $e) {
         // Table may not exist

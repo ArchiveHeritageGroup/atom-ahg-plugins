@@ -1,14 +1,14 @@
 <?php use_helper('Text'); ?>
 
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy Compliance'); ?></h1>
-        <div class="d-flex gap-2">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <h1 class="h2 mb-0"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy Compliance'); ?></h1>
+        <div class="d-flex flex-wrap gap-2">
             <!-- Jurisdiction Selector -->
             <div class="dropdown">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-globe me-1"></i>
-                    <?php 
+                    <?php
                     $currentJurisdiction = $sf_request->getParameter('jurisdiction', 'all');
                     $jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
                     echo $currentJurisdiction === 'all' ? __('All Jurisdictions') : ($jurisdictions[$currentJurisdiction]['name'] ?? $currentJurisdiction);
@@ -29,13 +29,7 @@
                 </ul>
             </div>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'report']); ?>" class="btn btn-outline-secondary">
-                <i class="fas fa-chart-bar me-1"></i><?php echo __('Reports'); ?>
-            </a>
-            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary position-relative">
-                <i class="fas fa-bell"></i>
-                <?php $notifCount = $sf_data->getRaw('notificationCount') ?? 0; if ($notifCount > 0): ?>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?php echo $notifCount; ?></span>
-                <?php endif; ?>
+                <i class="fas fa-chart-bar me-1"></i><span class="d-none d-sm-inline"><?php echo __('Reports'); ?></span>
             </a>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary position-relative">
                 <i class="fas fa-bell"></i>
@@ -44,7 +38,7 @@
                 <?php endif; ?>
             </a>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'config']); ?>" class="btn btn-outline-secondary">
-                <i class="fas fa-cog me-1"></i><?php echo __('Settings'); ?>
+                <i class="fas fa-cog"></i><span class="d-none d-sm-inline ms-1"><?php echo __('Settings'); ?></span>
             </a>
         </div>
     </div>

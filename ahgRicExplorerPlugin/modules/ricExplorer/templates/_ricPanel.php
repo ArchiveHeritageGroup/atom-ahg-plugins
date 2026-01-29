@@ -155,15 +155,15 @@ if (!$resourceId) return;
         container: container,
         elements: elements,
         style: [
-          { selector: 'node', style: { 
-            'background-color': 'data(color)', 
-            'label': 'data(label)', 
-            'font-size': '9px', 
-            'color': '#fff', 
-            'text-valign': 'bottom', 
-            'text-margin-y': '3px', 
-            'width': '18px', 
-            'height': '18px' 
+          { selector: 'node', style: {
+            'background-color': 'data(color)',
+            'label': 'data(label)',
+            'font-size': '6px',
+            'color': '#fff',
+            'text-valign': 'bottom',
+            'text-margin-y': '2px',
+            'width': '10px',
+            'height': '10px'
           }},
           { selector: 'edge', style: { 
             'width': 1, 
@@ -200,6 +200,16 @@ if (!$resourceId) return;
         .nodeColor('color')
         .nodeVal('val')
         .nodeLabel('name')
+        .nodeThreeObject(function(node) {
+          var sprite = new SpriteText(node.name.length > 15 ? node.name.substring(0,15) + '...' : node.name);
+          sprite.color = '#ffffff';
+          sprite.textHeight = 3;
+          sprite.backgroundColor = node.color;
+          sprite.padding = 0.5;
+          sprite.borderRadius = 1;
+          return sprite;
+        })
+        .nodeThreeObjectExtend(false)
         .linkDirectionalParticles(1)
         .backgroundColor('#1a1a2e')
         .width(w)

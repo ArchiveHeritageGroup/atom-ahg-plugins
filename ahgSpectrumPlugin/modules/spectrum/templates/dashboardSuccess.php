@@ -44,6 +44,7 @@
                         if ($userId) {
                             $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
                                 ->where('assigned_to', $userId)
+                                ->where('current_state', '!=', 'completed')
                                 ->count();
                             if ($taskCount > 0) {
                                 echo '<span class="badge bg-danger ms-1">' . $taskCount . '</span>';

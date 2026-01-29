@@ -75,7 +75,7 @@
                         <i class="fas fa-images me-1"></i><?php echo $collection->item_count ?> <?php echo __('items') ?>
                     </span>
                     <div class="btn-group btn-group-sm">
-                        <a href="<?php echo '/index.php/ahgIiifCollection/manifest?slug=' . $collection->slug ?>" class="btn btn-outline-info" title="<?php echo __('IIIF Manifest') ?>" target="_blank">
+                        <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'manifest', 'slug' => $collection->slug]) ?>" class="btn btn-outline-info" title="<?php echo __('IIIF Manifest') ?>" target="_blank">
                             <i class="fas fa-code"></i>
                         </a>
                         <?php if ($sf_user->isAuthenticated()): ?>

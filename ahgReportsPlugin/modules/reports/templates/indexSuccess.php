@@ -59,7 +59,7 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
 
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
     </ul>
 
     <h4 class="mt-4"><?php echo __('Compliance'); ?></h4>
@@ -203,7 +203,9 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasMuseum): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Dashboard"); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museum', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Dashboard"); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __("Data Quality Dashboard"); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>"><i class="fas fa-theater-masks me-2 text-muted"></i><?php echo __("Exhibitions"); ?></a></li>
                     <?php endif; ?>
                 </ul>
             </div>

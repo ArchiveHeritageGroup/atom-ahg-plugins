@@ -9,9 +9,56 @@ $title = __('Condition Report Photos');
 slot('title', $title);
 
 // Include photo gallery CSS/JS
-use_stylesheet('/plugins/ahgSpectrumPlugin/web/css/condition-photos.css');
+use_stylesheet('/plugins/ahgSpectrumPlugin/web/css/condition-photos.css?v=' . time());
 use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 ?>
+
+<style>
+/* Inline styles for photo grid - compact thumbnails */
+.photo-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+    gap: 0.5rem !important;
+}
+.photo-image {
+    position: relative;
+    width: 100%;
+    height: 100px !important;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+.photo-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+.photo-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.photo-info {
+    padding: 0.25rem;
+    font-size: 0.6rem;
+}
+.photo-meta small {
+    font-size: 0.55rem;
+}
+.photo-actions {
+    padding: 0.2rem;
+    border-top: 1px solid #eee;
+}
+.photo-actions .btn {
+    padding: 0.1rem 0.25rem;
+    font-size: 0.6rem;
+}
+.photo-badge, .photo-type-badge {
+    font-size: 0.5rem !important;
+    padding: 1px 3px !important;
+}
+</style>
 
 <div class="spectrum-condition-photos">
     
@@ -153,7 +200,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                         <div class="photo-item" data-type="<?php echo $photo['photo_type']; ?>" data-id="<?php echo $photo['id']; ?>">
                             <div class="photo-card">
                                 <div class="photo-image">
-                                    <img src="/uploads/<?php echo $photo['file_path']; ?>" 
+                                    <img src="<?php echo $photo['file_path']; ?>" 
                                          alt="<?php echo htmlspecialchars($photo['caption'] ?? ''); ?>"
                                          loading="lazy"
                                          onclick="openLightbox(<?php echo $photo['id']; ?>)">
@@ -444,12 +491,173 @@ function initDropzone() {
         preview.innerHTML = '';
         preview.style.display = 'flex';
         uploadBtn.disabled = files.length === 0;
-        
+
         Array.from(files).forEach(function(file) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var col = document.createElement('div');
                 col.className = 'col-md-3 mb-2';
+                col.innerHTML = '<div class="preview-thumb"><img src="' + e.target.result + '" class="img-thumbnail"><small>' + file.name + '</small></div>';
+                preview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+function initPhotoFilters() {
+    var filterBtns = document.querySelectorAll('#photo-type-filter button');
+    var photoItems = document.querySelectorAll('.photo-item');
+
+    filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var type = this.dataset.type;
+
+            filterBtns.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+
+            photoItems.forEach(function(photo) {
+                if (type === 'all' || photo.dataset.type === type) {
+                    photo.style.display = '';
+                } else {
+                    photo.style.display = 'none';
+                }
+            });
+        });
+    });
+}
+
+function initComparisonSliders() {
+    document.querySelectorAll('.comparison-slider').forEach(function(slider) {
+        var range = slider.querySelector('.comparison-range');
+        var afterImage = slider.querySelector('.after-image');
+
+        range.addEventListener('input', function() {
+            afterImage.style.clipPath = 'inset(0 0 0 ' + this.value + '%)';
+        });
+    });
+}
+
+function initSortable() {
+    var grid = document.getElementById('photo-grid');
+    if (grid && typeof Sortable !== 'undefined') {
+        new Sortable(grid, {
+            animation: 150,
+            onEnd: function() {
+                var order = Array.from(grid.querySelectorAll('.photo-item')).map(function(el) {
+                    return el.dataset.id;
+                });
+
+                fetch(baseUrl + '&photo_action=reorder', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({order: order})
+                });
+            }
+        });
+    }
+}
+
+function openLightbox(photoId) {
+    currentPhotoIndex = photos.findIndex(function(p) { return p.id == photoId; });
+    updateLightbox();
+    $('#photo-lightbox').modal('show');
+}
+
+function updateLightbox() {
+    var photo = photos[currentPhotoIndex];
+    document.getElementById('lightbox-image').src = photo.file_path;
+    document.getElementById('lightbox-title').textContent = photo.caption || photo.original_filename;
+    document.getElementById('lightbox-info').textContent = (currentPhotoIndex + 1) + ' / ' + photos.length;
+}
+
+document.getElementById('lightbox-prev').addEventListener('click', function() {
+    currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+    updateLightbox();
+});
+
+document.getElementById('lightbox-next').addEventListener('click', function() {
+    currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+    updateLightbox();
+});
+
+function editPhoto(photoId) {
+    var photo = photos.find(function(p) { return p.id == photoId; });
+    if (!photo) return;
+
+    document.getElementById('edit-photo-id').value = photo.id;
+    document.getElementById('edit-photo-type').value = photo.photo_type;
+    document.getElementById('edit-caption').value = photo.caption || '';
+    document.getElementById('edit-description').value = photo.description || '';
+    document.getElementById('edit-location').value = photo.location_on_object || '';
+    document.getElementById('edit-photographer').value = photo.photographer || '';
+    document.getElementById('edit-photo-date').value = photo.photo_date || '';
+
+    $('#edit-photo-modal').modal('show');
+}
+
+document.getElementById('edit-photo-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+
+    fetch(baseUrl + '&photo_action=edit&photo_id=' + formData.get('photo_id'), {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            location.reload();
+        }
+    });
+});
+
+function rotatePhoto(photoId, degrees) {
+    fetch(baseUrl + '&photo_action=rotate&photo_id=' + photoId + '&degrees=' + degrees, {
+        method: 'POST'
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            var img = document.querySelector('.photo-item[data-id="' + photoId + '"] img');
+            if (img) {
+                img.src = data.thumbnail_url;
+            }
+        }
+    });
+}
+
+function setPrimary(photoId) {
+    fetch(baseUrl + '&photo_action=set_primary&photo_id=' + photoId, {
+        method: 'POST'
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function deletePhoto(photoId) {
+    if (!confirm('<?php echo __('Are you sure you want to delete this photo?'); ?>')) {
+        return;
+    }
+
+    fetch(baseUrl + '&photo_action=delete&photo_id=' + photoId, {
+        method: 'POST'
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            var item = document.querySelector('.photo-item[data-id="' + photoId + '"]');
+            if (item) {
+                item.remove();
+            }
+        }
+    });
+}
+</script>
 
 <!-- Annotation Modal -->
 <div class="modal fade" id="annotation-modal" tabindex="-1" aria-labelledby="annotation-modal-label" aria-hidden="true">
@@ -517,7 +725,7 @@ function initAnnotator(photo) {
         currentAnnotator.destroy();
     }
     
-    var imageUrl = '/uploads/' + photo.file_path;
+    var imageUrl = photo.file_path;
     
     // Check if Fabric is loaded
     if (typeof fabric === 'undefined') {
@@ -612,169 +820,8 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
 
 /* Tool buttons in annotator */
 .annotator-toolbar .tool-btn.active {
-    background-color: #198754 !important;
-    border-color: #198754 !important;
+    background-color: var(--ahg-primary, #005837) !important;
+    border-color: var(--ahg-primary, #005837) !important;
     color: white !important;
 }
 </style>
-                col.innerHTML = '<div class="preview-thumb"><img src="' + e.target.result + '" class="img-thumbnail"><small>' + file.name + '</small></div>';
-                preview.appendChild(col);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-}
-
-function initPhotoFilters() {
-    var filterBtns = document.querySelectorAll('#photo-type-filter button');
-    var photos = document.querySelectorAll('.photo-item');
-    
-    filterBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var type = this.dataset.type;
-            
-            filterBtns.forEach(function(b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            
-            photos.forEach(function(photo) {
-                if (type === 'all' || photo.dataset.type === type) {
-                    photo.style.display = '';
-                } else {
-                    photo.style.display = 'none';
-                }
-            });
-        });
-    });
-}
-
-function initComparisonSliders() {
-    document.querySelectorAll('.comparison-slider').forEach(function(slider) {
-        var range = slider.querySelector('.comparison-range');
-        var afterImage = slider.querySelector('.after-image');
-        
-        range.addEventListener('input', function() {
-            afterImage.style.clipPath = 'inset(0 0 0 ' + this.value + '%)';
-        });
-    });
-}
-
-function initSortable() {
-    var grid = document.getElementById('photo-grid');
-    if (grid && typeof Sortable !== 'undefined') {
-        new Sortable(grid, {
-            animation: 150,
-            onEnd: function() {
-                var order = Array.from(grid.querySelectorAll('.photo-item')).map(function(el) {
-                    return el.dataset.id;
-                });
-                
-                fetch(baseUrl + '&photo_action=reorder', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({order: order})
-                });
-            }
-        });
-    }
-}
-
-function openLightbox(photoId) {
-    currentPhotoIndex = photos.findIndex(function(p) { return p.id == photoId; });
-    updateLightbox();
-    $('#photo-lightbox').modal('show');
-}
-
-function updateLightbox() {
-    var photo = photos[currentPhotoIndex];
-    document.getElementById('lightbox-image').src = '/uploads/' + photo.file_path;
-    document.getElementById('lightbox-title').textContent = photo.caption || photo.original_filename;
-    document.getElementById('lightbox-info').textContent = (currentPhotoIndex + 1) + ' / ' + photos.length;
-}
-
-document.getElementById('lightbox-prev').addEventListener('click', function() {
-    currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
-    updateLightbox();
-});
-
-document.getElementById('lightbox-next').addEventListener('click', function() {
-    currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-    updateLightbox();
-});
-
-function editPhoto(photoId) {
-    var photo = photos.find(function(p) { return p.id == photoId; });
-    if (!photo) return;
-    
-    document.getElementById('edit-photo-id').value = photo.id;
-    document.getElementById('edit-photo-type').value = photo.photo_type;
-    document.getElementById('edit-caption').value = photo.caption || '';
-    document.getElementById('edit-description').value = photo.description || '';
-    document.getElementById('edit-location').value = photo.location_on_object || '';
-    document.getElementById('edit-photographer').value = photo.photographer || '';
-    document.getElementById('edit-photo-date').value = photo.photo_date || '';
-    
-    $('#edit-photo-modal').modal('show');
-}
-
-document.getElementById('edit-photo-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    var formData = new FormData(this);
-    
-    fetch(baseUrl + '&photo_action=edit&photo_id=' + formData.get('photo_id'), {
-        method: 'POST',
-        body: formData
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-        if (data.success) {
-            location.reload();
-        }
-    });
-});
-
-function rotatePhoto(photoId, degrees) {
-    fetch(baseUrl + '&photo_action=rotate&photo_id=' + photoId + '&degrees=' + degrees, {
-        method: 'POST'
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-        if (data.success) {
-            var img = document.querySelector('.photo-item[data-id="' + photoId + '"] img');
-            if (img) {
-                img.src = data.thumbnail_url;
-            }
-        }
-    });
-}
-
-function setPrimary(photoId) {
-    fetch(baseUrl + '&photo_action=set_primary&photo_id=' + photoId, {
-        method: 'POST'
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-        if (data.success) {
-            location.reload();
-        }
-    });
-}
-
-function deletePhoto(photoId) {
-    if (!confirm('<?php echo __('Are you sure you want to delete this photo?'); ?>')) {
-        return;
-    }
-    
-    fetch(baseUrl + '&photo_action=delete&photo_id=' + photoId, {
-        method: 'POST'
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-        if (data.success) {
-            var item = document.querySelector('.photo-item[data-id="' + photoId + '"]');
-            if (item) {
-                item.remove();
-            }
-        }
-    });
-}
-</script>

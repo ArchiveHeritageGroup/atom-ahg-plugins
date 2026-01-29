@@ -619,6 +619,74 @@ class ahgSpectrumWorkflowService
     }
 
     /**
+     * Check if a state is a final state (no outgoing transitions)
+     *
+     * @param string $procedureType Procedure type
+     * @param string $state State to check
+     * @return bool True if state is final (no outgoing transitions)
+     */
+    public static function isFinalState(string $procedureType, string $state): bool
+    {
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$config) {
+            // Fallback: treat 'completed' and 'resolved' as final if no config
+            return in_array($state, ['completed', 'resolved']);
+        }
+
+        $configData = json_decode($config->config_json, true);
+        $transitions = $configData['transitions'] ?? [];
+
+        // Check if this state appears in any "from" array
+        foreach ($transitions as $transition) {
+            $fromStates = $transition['from'] ?? [];
+            if (in_array($state, $fromStates)) {
+                // State has outgoing transitions, not final
+                return false;
+            }
+        }
+
+        // No outgoing transitions found, this is a final state
+        return true;
+    }
+
+    /**
+     * Get all final states for a procedure type
+     *
+     * @param string $procedureType Procedure type
+     * @return array List of final state names
+     */
+    public static function getFinalStates(string $procedureType): array
+    {
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$config) {
+            return ['completed', 'resolved'];
+        }
+
+        $configData = json_decode($config->config_json, true);
+        $states = $configData['states'] ?? [];
+        $transitions = $configData['transitions'] ?? [];
+
+        // Collect all states that appear in "from" arrays
+        $statesWithOutgoing = [];
+        foreach ($transitions as $transition) {
+            $fromStates = $transition['from'] ?? [];
+            $statesWithOutgoing = array_merge($statesWithOutgoing, $fromStates);
+        }
+        $statesWithOutgoing = array_unique($statesWithOutgoing);
+
+        // Final states are those without outgoing transitions
+        return array_values(array_diff($states, $statesWithOutgoing));
+    }
+
+    /**
      * Get property from database
      */
     protected static function getProperty(int $objectId, string $name): ?object

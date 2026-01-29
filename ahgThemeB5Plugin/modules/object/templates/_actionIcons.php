@@ -97,14 +97,10 @@ $showInventory = ahg_show_inventory($resource);
 <section id="action-icons">
 
   <h4 class="h5 mb-2"><?php echo __('Clipboard'); ?></h4>
-  <ul class="list-unstyled">
-    <li>
-      <?php echo get_component('clipboard', 'button', ['slug' => $slug, 'wide' => true, 'type' => 'informationObject']); ?>
-    </li>
-  </ul>
+  <?php echo get_component('clipboard', 'button', ['slug' => $slug, 'wide' => true, 'type' => 'informationObject']); ?>
 
-  <h4 class="h5 mb-2"><?php echo __('Explore'); ?></h4>
-  <ul class="list-unstyled">
+  <h4 class="h5 mb-2 mt-3"><?php echo __('Explore'); ?></h4>
+  <ul class="ps-3">
 
     <li>
       <a class="atom-icon-link" href="<?php echo ahg_resource_url($resource, 'informationobject', 'reports'); ?>">
@@ -160,7 +156,7 @@ $showInventory = ahg_show_inventory($resource);
 
   <?php if ($sf_user->isAdministrator()) { ?>
     <h4 class="h5 mb-2"><?php echo __('Import'); ?></h4>
-    <ul class="list-unstyled">
+    <ul class="ps-3">
       <li>
         <a class="atom-icon-link" href="<?php echo ahg_resource_url($resource, 'object', 'importSelect') . '?type=xml'; ?>">
           <i class="fas fa-fw fa-download me-1" aria-hidden="true">
@@ -178,7 +174,7 @@ $showInventory = ahg_show_inventory($resource);
   <?php } ?>
 
   <h4 class="h5 mb-2"><?php echo __('Export'); ?></h4>
-  <ul class="list-unstyled">
+  <ul class="ps-3">
     <?php if ($sf_context->getConfiguration()->isPluginEnabled('sfDcPlugin')) { ?>
       <li>
         <a class="atom-icon-link" href="<?php echo ahg_url_for_dc_export($resource); ?>">
