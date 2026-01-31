@@ -72,3 +72,52 @@ ahg_ner_summarize:
 ahg_ner_htr:
   url: /ner/htr/:id
   param: { module: ai, action: htr }
+
+# ============================================================================
+# LLM Description Suggestion Routes
+# ============================================================================
+
+# Generate suggestion
+ahg_ai_suggest:
+  url: /ai/suggest/:id
+  param: { module: ai, action: suggest }
+
+# Preview suggestion without saving
+ahg_ai_suggest_preview:
+  url: /ai/suggest/:id/preview
+  param: { module: ai, action: suggestPreview }
+
+# View single suggestion
+ahg_ai_suggest_view:
+  url: /ai/suggest/:id/view
+  param: { module: ai, action: suggestView }
+
+# Process suggestion decision (approve/reject)
+ahg_ai_suggest_decision:
+  url: /ai/suggest/:id/decision
+  param: { module: ai, action: suggestDecision }
+
+# Get suggestions for an object
+ahg_ai_suggest_object:
+  url: /ai/suggest/object/:id
+  param: { module: ai, action: suggestObject }
+
+# Suggestion review dashboard
+ahg_ai_suggest_review:
+  url: /ai/suggest/review
+  param: { module: ai, action: suggestReview }
+
+# LLM configurations
+ahg_ai_llm_configs:
+  url: /ai/llm/configs
+  param: { module: ai, action: llmConfigs }
+
+# LLM health check
+ahg_ai_llm_health:
+  url: /ai/llm/health
+  param: { module: ai, action: llmHealth }
+
+# Prompt templates
+ahg_ai_templates:
+  url: /ai/templates
+  param: { module: ai, action: templates }

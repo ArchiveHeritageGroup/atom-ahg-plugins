@@ -1,8 +1,8 @@
 {
     "name": "AI Tools",
     "machine_name": "ahgAIPlugin",
-    "version": "2.0.0",
-    "description": "AI-powered tools for archival management: Named Entity Recognition (NER), Translation, Summarization, and Spellcheck",
+    "version": "2.1.0",
+    "description": "AI-powered tools for archival management: Named Entity Recognition (NER), Translation, Summarization, Spellcheck, and LLM Description Suggestions",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "ai",
@@ -21,16 +21,25 @@
         "ahg_ner_entity",
         "ahg_ner_entity_link",
         "ahg_translation_queue",
-        "ahg_translation_log"
+        "ahg_translation_log",
+        "ahg_llm_config",
+        "ahg_prompt_template",
+        "ahg_description_suggestion"
     ],
     "features": {
         "ner": "Named Entity Recognition - extract persons, organizations, places, dates",
         "translate": "Machine translation using Argos Translate (offline)",
         "summarize": "AI-powered text summarization",
-        "spellcheck": "Spelling and grammar checking"
+        "spellcheck": "Spelling and grammar checking",
+        "suggest": "LLM-based description suggestions from OCR and metadata"
     },
     "python": {
         "module": "atom_ahg.resources.translation",
         "requirements": ["argostranslate>=1.9.0"]
+    },
+    "llm_providers": {
+        "ollama": "Local Ollama instance (default)",
+        "openai": "OpenAI API (GPT-4, GPT-4o-mini)",
+        "anthropic": "Anthropic API (Claude 3)"
     }
 }

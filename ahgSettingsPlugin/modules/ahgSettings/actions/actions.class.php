@@ -391,4 +391,9 @@ class ahgSettingsActions extends sfActions
     {
         return $this->executeSettingsAction('cronJobsAction', $request);
     }
+
+    public function executeSystemInfo(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('systemInfoAction', $request);
+    }
 }

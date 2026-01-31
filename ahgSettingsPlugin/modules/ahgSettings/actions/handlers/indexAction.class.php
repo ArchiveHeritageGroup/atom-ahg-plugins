@@ -259,10 +259,18 @@ class AhgSettingsIndexAction extends sfAction
 
         // Cron Jobs Info - always available
         $this->sections['cron_jobs'] = [
-            'label' => 'Cron Jobs & System Info',
+            'label' => 'Cron Jobs',
             'icon' => 'fa-clock',
-            'description' => 'View all available cron jobs, scheduling examples, and installed software versions',
+            'description' => 'View all available cron jobs with scheduling examples and CLI commands',
             'url' => 'ahgSettings/cronJobs'
+        ];
+
+        // System Information - always available
+        $this->sections['system_info'] = [
+            'label' => 'System Information',
+            'icon' => 'fa-server',
+            'description' => 'Installed software versions, PHP extensions, disk usage, and system health',
+            'url' => 'ahgSettings/systemInfo'
         ];
 
         // Semantic Search - always available (core feature)

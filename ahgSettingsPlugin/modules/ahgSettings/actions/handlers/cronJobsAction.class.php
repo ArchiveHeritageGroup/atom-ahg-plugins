@@ -27,12 +27,9 @@ class SettingsCronJobsAction extends sfAction
 
         // Group by category
         $this->categories = $this->groupByCategory($this->cronJobs);
-
-        // Get software versions
-        $this->softwareVersions = $this->getSoftwareVersions();
     }
 
-    protected function getSoftwareVersions(): array
+    protected function _unusedGetSoftwareVersions(): array
     {
         $versions = [];
 
@@ -862,6 +859,47 @@ class SettingsCronJobsAction extends sfAction
                 'category' => 'ahg',
             ],
             [
+                'name' => 'AI Description Suggestion',
+                'command' => 'php symfony ai:suggest-description',
+                'description' => 'Generates AI-powered scope_and_content suggestions using LLM (Ollama, OpenAI, or Anthropic). Analyzes OCR text and metadata to draft descriptions for custodian review. Suggestions are saved for approval before being applied to records.',
+                'options' => [
+                    '--object=ID' => 'Process specific object ID',
+                    '--repository=ID' => 'Filter by repository ID',
+                    '--level=LEVEL' => 'Filter by level (fonds, series, file, item)',
+                    '--empty-only' => 'Only records with empty scope_and_content',
+                    '--with-ocr' => 'Only records that have OCR text',
+                    '--limit=N' => 'Maximum number to process (default: 50)',
+                    '--template=ID' => 'Prompt template ID to use',
+                    '--llm-config=ID' => 'LLM configuration ID to use',
+                    '--dry-run' => 'Preview without generating suggestions',
+                    '--delay=N' => 'Delay between requests in seconds (default: 2)',
+                ],
+                'schedule' => 'Nightly or weekly, depending on collection size',
+                'example' => '0 2 * * * cd {root} && php symfony ai:suggest-description --repository=5 --empty-only --with-ocr --limit=100 >> /var/log/atom/ai-suggest.log 2>&1',
+                'duration' => 'Long (depends on number of records and LLM response time)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'AI Suggestion Review Dashboard',
+                'command' => 'curl -s "URL/ai/suggest/review"',
+                'description' => 'Access the web-based review dashboard to approve, edit, or reject AI-generated description suggestions. Custodians can compare existing vs. suggested text side-by-side before applying changes.',
+                'options' => [],
+                'schedule' => 'Access via web browser as needed',
+                'example' => '# Open in browser: https://your-site.com/ai/suggest/review',
+                'duration' => 'N/A (Web UI)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'LLM Health Check',
+                'command' => 'curl -s "URL/ai/llm/health"',
+                'description' => 'Checks the health status of configured LLM providers (Ollama, OpenAI, Anthropic). Returns connection status, available models, and configuration details.',
+                'options' => [],
+                'schedule' => 'Every 5 minutes for monitoring',
+                'example' => '*/5 * * * * curl -s "https://your-site.com/ai/llm/health" | jq .providers.*.status',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
                 'name' => 'ICIP Consent Expiry Check',
                 'command' => 'php symfony icip:check-expiry',
                 'description' => 'Checks for ICIP consents expiring soon and sends notification emails.',
@@ -990,6 +1028,47 @@ class SettingsCronJobsAction extends sfAction
                 'schedule' => 'Run manually as needed',
                 'example' => 'cd {root} && php symfony heritage:region --set-active=africa_ipsas',
                 'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'TripoSR 3D Model Generation',
+                'command' => 'php symfony triposr:generate',
+                'description' => 'Generates 3D models from 2D images using TripoSR AI. Supports local CPU/GPU processing or remote GPU server with automatic fallback. Models are output as GLB or OBJ format.',
+                'options' => [
+                    '--image=PATH' => 'Path to input image (PNG, JPG, WEBP)',
+                    '--object-id=ID' => 'Link to information_object ID',
+                    '--import' => 'Import generated model to AtoM after generation',
+                    '--remove-bg=BOOL' => 'Remove background from image (default: true)',
+                    '--resolution=N' => 'Mesh resolution 128-512 (default: 256)',
+                    '--texture' => 'Bake texture into model (exports as OBJ)',
+                    '--health' => 'Check TripoSR API health status',
+                    '--preload' => 'Preload TripoSR model into memory',
+                    '--stats' => 'Show generation statistics',
+                    '--jobs' => 'List recent generation jobs',
+                ],
+                'schedule' => 'Run manually or batch process nightly',
+                'example' => 'cd {root} && php symfony triposr:generate --image=/imports/artifacts/*.jpg --import >> /var/log/atom/triposr.log 2>&1',
+                'duration' => 'Long (60-180s per image on CPU, 10-30s with GPU)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'TripoSR Health Check',
+                'command' => 'php symfony triposr:generate --health',
+                'description' => 'Checks the health status of the TripoSR API server including CUDA/GPU availability, model loading status, and remote GPU server configuration.',
+                'options' => [],
+                'schedule' => 'Every 5 minutes for monitoring',
+                'example' => '*/5 * * * * cd {root} && php symfony triposr:generate --health | grep -q "API Status: OK" || echo "TripoSR DOWN" | mail -s "Alert" admin@example.com',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'TripoSR Model Preload',
+                'command' => 'php symfony triposr:generate --preload',
+                'description' => 'Preloads the TripoSR AI model into memory for faster subsequent generation requests. Run after server restart to warm up the model.',
+                'options' => [],
+                'schedule' => 'After server restart or service restart',
+                'example' => '# Add to systemd service or run manually:\ncd {root} && php symfony triposr:generate --preload',
+                'duration' => 'Medium (2-5 minutes to load model)',
                 'category' => 'ahg',
             ],
             // ============================================

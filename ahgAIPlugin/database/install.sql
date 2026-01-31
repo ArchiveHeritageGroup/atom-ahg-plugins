@@ -164,6 +164,217 @@ INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
 ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 
 -- ============================================================================
+-- LLM DESCRIPTION SUGGESTION TABLES
+-- ============================================================================
+
+-- LLM Provider Configurations (Ollama, OpenAI, Anthropic)
+CREATE TABLE IF NOT EXISTS ahg_llm_config (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    provider VARCHAR(50) NOT NULL,              -- 'ollama', 'openai', 'anthropic'
+    name VARCHAR(100) NOT NULL UNIQUE,
+    is_active TINYINT(1) DEFAULT 1,
+    is_default TINYINT(1) DEFAULT 0,
+    endpoint_url VARCHAR(500),                  -- 'http://localhost:11434'
+    api_key_encrypted TEXT,                     -- Encrypted API key (NULL for Ollama)
+    model VARCHAR(100) NOT NULL,                -- 'llama3.1:8b', 'gpt-4o-mini', 'claude-3-haiku-20240307'
+    max_tokens INT DEFAULT 2000,
+    temperature DECIMAL(3,2) DEFAULT 0.70,
+    timeout_seconds INT DEFAULT 120,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_llm_config_provider (provider),
+    INDEX idx_llm_config_active (is_active),
+    INDEX idx_llm_config_default (is_default)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Prompt Templates for different description contexts
+CREATE TABLE IF NOT EXISTS ahg_prompt_template (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    system_prompt TEXT NOT NULL,
+    user_prompt_template TEXT NOT NULL,         -- Contains {title}, {ocr_text}, etc.
+    level_of_description VARCHAR(50),           -- NULL=all, or 'fonds','series','file','item'
+    repository_id INT,                          -- NULL=global
+    is_default TINYINT(1) DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    include_ocr TINYINT(1) DEFAULT 1,
+    max_ocr_chars INT DEFAULT 8000,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_prompt_template_level (level_of_description),
+    INDEX idx_prompt_template_repo (repository_id),
+    INDEX idx_prompt_template_default (is_default),
+    INDEX idx_prompt_template_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Description Suggestions with review workflow
+CREATE TABLE IF NOT EXISTS ahg_description_suggestion (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    suggested_text TEXT NOT NULL,
+    existing_text TEXT,
+    prompt_template_id INT UNSIGNED,
+    llm_config_id INT UNSIGNED,
+    source_data JSON,                           -- {has_ocr: true, fields: [...]}
+    status ENUM('pending','approved','rejected','edited') DEFAULT 'pending',
+    edited_text TEXT,
+    reviewed_by INT,
+    reviewed_at TIMESTAMP NULL,
+    review_notes TEXT,
+    generation_time_ms INT,
+    tokens_used INT,
+    model_used VARCHAR(100),
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    INDEX idx_suggestion_object (object_id),
+    INDEX idx_suggestion_status (status),
+    INDEX idx_suggestion_created (created_at),
+    INDEX idx_suggestion_template (prompt_template_id),
+    INDEX idx_suggestion_llm (llm_config_id),
+    FOREIGN KEY (prompt_template_id) REFERENCES ahg_prompt_template(id) ON DELETE SET NULL,
+    FOREIGN KEY (llm_config_id) REFERENCES ahg_llm_config(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- DEFAULT LLM CONFIGURATIONS
+-- ============================================================================
+
+-- Default Ollama configuration (local)
+INSERT INTO ahg_llm_config (provider, name, is_active, is_default, endpoint_url, model, max_tokens, temperature, timeout_seconds)
+VALUES ('ollama', 'Local Ollama (llama3.1:8b)', 1, 1, 'http://localhost:11434', 'llama3.1:8b', 2000, 0.70, 120)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- OpenAI placeholder (disabled by default, needs API key)
+INSERT INTO ahg_llm_config (provider, name, is_active, is_default, endpoint_url, model, max_tokens, temperature, timeout_seconds)
+VALUES ('openai', 'OpenAI GPT-4o-mini', 0, 0, 'https://api.openai.com/v1', 'gpt-4o-mini', 2000, 0.70, 60)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- Anthropic placeholder (disabled by default, needs API key)
+INSERT INTO ahg_llm_config (provider, name, is_active, is_default, endpoint_url, model, max_tokens, temperature, timeout_seconds)
+VALUES ('anthropic', 'Anthropic Claude Haiku', 0, 0, 'https://api.anthropic.com/v1', 'claude-3-haiku-20240307', 2000, 0.70, 60)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================================
+-- DEFAULT PROMPT TEMPLATES
+-- ============================================================================
+
+-- Standard Archival Description Template
+INSERT INTO ahg_prompt_template (name, slug, system_prompt, user_prompt_template, level_of_description, is_default, is_active, include_ocr, max_ocr_chars)
+VALUES (
+    'Standard Archival Description',
+    'standard-archival',
+    'You are an expert archivist creating scope and content descriptions for archival records. Write professional, objective descriptions following ISAD(G) standards. Focus on:
+- What the materials document
+- The activities, functions, or transactions they record
+- Any significant persons, organizations, places, or events mentioned
+- The date range and extent of materials
+- The arrangement and organization
+
+Write in third person, past tense. Be concise but comprehensive. Do not include subjective assessments or opinions.',
+    'Create a scope and content description for the following archival record:
+
+Title: {title}
+Reference Code: {identifier}
+Level of Description: {level_of_description}
+Date Range: {date_range}
+Creator: {creator}
+Repository: {repository}
+
+{existing_metadata}
+
+{ocr_section}
+
+Based on the above information, write a professional scope and content description (2-4 paragraphs).',
+    NULL,
+    1,
+    1,
+    1,
+    8000
+)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- Item-Level OCR Focus Template
+INSERT INTO ahg_prompt_template (name, slug, system_prompt, user_prompt_template, level_of_description, is_default, is_active, include_ocr, max_ocr_chars)
+VALUES (
+    'Item-Level with OCR',
+    'item-ocr',
+    'You are an expert archivist creating item-level descriptions based primarily on OCR text extracted from documents. Your task is to:
+- Summarize the main content and purpose of the document
+- Identify key persons, organizations, and places mentioned
+- Note significant dates and events
+- Describe the document type and any notable features
+
+Write in third person, past tense. Be concise and accurate. If the OCR text is fragmentary, acknowledge limitations.',
+    'Create a scope and content description for this item:
+
+Title: {title}
+Reference Code: {identifier}
+Date: {date_range}
+Document Type: {extent_and_medium}
+
+The following OCR text was extracted from the document:
+---
+{ocr_text}
+---
+
+Based on the document content, write a scope and content description (1-2 paragraphs) summarizing what this document contains and its significance.',
+    'item',
+    0,
+    1,
+    1,
+    12000
+)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- Photograph/Image Description Template
+INSERT INTO ahg_prompt_template (name, slug, system_prompt, user_prompt_template, level_of_description, is_default, is_active, include_ocr, max_ocr_chars)
+VALUES (
+    'Photograph Description',
+    'photograph',
+    'You are an expert archivist creating descriptions for historical photographs. Focus on:
+- The subject matter and scene depicted
+- Identifiable persons, places, and events
+- The photographic technique and format
+- Historical context and significance
+
+Write in third person, past tense. Be objective and descriptive. Note any inscriptions, captions, or annotations.',
+    'Create a scope and content description for this photograph:
+
+Title: {title}
+Reference Code: {identifier}
+Date: {date_range}
+Physical Description: {extent_and_medium}
+Creator: {creator}
+
+{existing_metadata}
+
+{ocr_section}
+
+Based on the available information, write a scope and content description (1-2 paragraphs) for this photograph.',
+    'item',
+    0,
+    1,
+    1,
+    4000
+)
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================================
+-- DESCRIPTION SUGGESTION SETTINGS
+-- ============================================================================
+
+INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
+    ('suggest', 'enabled', '1'),
+    ('suggest', 'require_review', '1'),
+    ('suggest', 'auto_expire_days', '30'),
+    ('suggest', 'default_llm_config', '1'),
+    ('suggest', 'default_template', '1'),
+    ('suggest', 'max_pending_per_object', '3')
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================================
 -- MIGRATION: Move data from old ahg_ner_settings if exists
 -- ============================================================================
 

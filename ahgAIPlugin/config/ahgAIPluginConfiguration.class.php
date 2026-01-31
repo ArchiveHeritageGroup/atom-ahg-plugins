@@ -70,6 +70,42 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
             '/ai/health',
             ['module' => 'ai', 'action' => 'health']
         ));
+
+        // LLM Description Suggestion routes
+        $routing->prependRoute('ahg_ai_suggest', new sfRoute(
+            '/ai/suggest/:id',
+            ['module' => 'ai', 'action' => 'suggest']
+        ));
+
+        $routing->prependRoute('ahg_ai_suggest_preview', new sfRoute(
+            '/ai/suggest/:id/preview',
+            ['module' => 'ai', 'action' => 'suggestPreview']
+        ));
+
+        $routing->prependRoute('ahg_ai_suggest_review', new sfRoute(
+            '/ai/suggest/review',
+            ['module' => 'ai', 'action' => 'suggestReview']
+        ));
+
+        $routing->prependRoute('ahg_ai_suggest_decision', new sfRoute(
+            '/ai/suggest/:id/decision',
+            ['module' => 'ai', 'action' => 'suggestDecision']
+        ));
+
+        $routing->prependRoute('ahg_ai_llm_configs', new sfRoute(
+            '/ai/llm/configs',
+            ['module' => 'ai', 'action' => 'llmConfigs']
+        ));
+
+        $routing->prependRoute('ahg_ai_llm_health', new sfRoute(
+            '/ai/llm/health',
+            ['module' => 'ai', 'action' => 'llmHealth']
+        ));
+
+        $routing->prependRoute('ahg_ai_templates', new sfRoute(
+            '/ai/templates',
+            ['module' => 'ai', 'action' => 'templates']
+        ));
     }
 
     public function initialize()

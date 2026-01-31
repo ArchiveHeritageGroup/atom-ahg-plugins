@@ -7,7 +7,7 @@
 <?php slot('title'); ?>
   <h1>
     <i class="bi bi-clock-history me-2"></i>
-    <?php echo __('Cron Jobs & System Info'); ?>
+    <?php echo __('Cron Jobs'); ?>
   </h1>
 <?php end_slot(); ?>
 
@@ -15,7 +15,6 @@
 
 <?php
 $categories = $sf_data->getRaw('categories');
-$softwareVersions = $sf_data->getRaw('softwareVersions');
 $atomRoot = $sf_data->getRaw('atomRoot');
 ?>
 
@@ -45,13 +44,6 @@ $atomRoot = $sf_data->getRaw('atomRoot');
 .duration-short { color: #198754; }
 .duration-medium { color: #fd7e14; }
 .duration-long { color: #dc3545; }
-.software-card {
-  border-left: 4px solid #0d6efd;
-}
-.software-version {
-  font-family: monospace;
-  font-weight: bold;
-}
 .copy-btn {
   cursor: pointer;
   opacity: 0.7;
@@ -60,43 +52,6 @@ $atomRoot = $sf_data->getRaw('atomRoot');
   opacity: 1;
 }
 </style>
-
-<!-- Software Versions Section -->
-<div class="card mb-4">
-  <div class="card-header bg-primary text-white">
-    <i class="bi bi-box-seam me-2"></i>
-    <?php echo __('Installed Software & Versions'); ?>
-  </div>
-  <div class="card-body">
-    <div class="row g-3">
-      <?php foreach ($softwareVersions as $software): ?>
-        <div class="col-md-4 col-lg-3">
-          <div class="card software-card h-100">
-            <div class="card-body py-2 px-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="<?php echo $software['icon']; ?> me-2 text-<?php echo $software['status'] === 'ok' ? 'success' : ($software['status'] === 'warning' ? 'warning' : 'danger'); ?>"></i>
-                  <strong><?php echo $software['name']; ?></strong>
-                </div>
-                <?php if ($software['status'] !== 'ok'): ?>
-                  <span class="badge bg-<?php echo $software['status'] === 'warning' ? 'warning' : 'danger'; ?>"><?php echo $software['status']; ?></span>
-                <?php endif; ?>
-              </div>
-              <div class="software-version text-<?php echo $software['status'] === 'ok' ? 'success' : 'muted'; ?> mt-1">
-                <?php echo $software['version']; ?>
-              </div>
-              <?php if (!empty($software['path'])): ?>
-                <small class="text-muted d-block text-truncate" title="<?php echo htmlspecialchars($software['path']); ?>">
-                  <?php echo htmlspecialchars($software['path']); ?>
-                </small>
-              <?php endif; ?>
-            </div>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    </div>
-  </div>
-</div>
 
 <!-- Quick Reference -->
 <div class="alert alert-info mb-4">

@@ -199,6 +199,10 @@ ahg_settings_cron_jobs:
   url: /ahgSettings/cronJobs
   param: { module: ahgSettings, action: cronJobs }
 
+ahg_settings_system_info:
+  url: /ahgSettings/systemInfo
+  param: { module: ahgSettings, action: systemInfo }
+
 ahg_settings_icip_settings:
   url: /ahgSettings/icipSettings
   param: { module: ahgSettings, action: icipSettings }

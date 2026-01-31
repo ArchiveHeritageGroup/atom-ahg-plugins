@@ -1,5 +1,5 @@
 <?php
-class ahgNerComponents extends sfComponents
+class aiComponents extends sfComponents
 {
     public function executeExtractButton(sfWebRequest $request)
     {
@@ -15,6 +15,15 @@ class ahgNerComponents extends sfComponents
      * Combined AI tools button (NER + Summarize)
      */
     public function executeAiTools(sfWebRequest $request)
+    {
+        $this->resource = $this->getVar('resource');
+    }
+
+    /**
+     * AI Description Suggestion button
+     * Usage: include_component('ai', 'suggestButton', ['resource' => $resource])
+     */
+    public function executeSuggestButton(sfWebRequest $request)
     {
         $this->resource = $this->getVar('resource');
     }

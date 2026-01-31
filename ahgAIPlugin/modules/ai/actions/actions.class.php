@@ -1,6 +1,9 @@
 <?php
 
 require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
+require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
+require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
+require_once dirname(__FILE__).'/../../../lib/Services/PromptService.php';
 
 class aiActions extends sfActions
 {
@@ -1344,5 +1347,277 @@ class aiActions extends sfActions
         }
 
         return $this->renderText(json_encode($response));
+    }
+
+    // =========================================================================
+    // LLM DESCRIPTION SUGGESTION ACTIONS
+    // =========================================================================
+
+    /**
+     * Generate a description suggestion for an object
+     * POST /ai/suggest/:id
+     */
+    public function executeSuggest(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true) ?: [];
+
+        $templateId = $data['template_id'] ?? null;
+        $llmConfigId = $data['llm_config_id'] ?? null;
+
+        $object = QubitInformationObject::getById($objectId);
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        $service = new DescriptionService();
+        $result = $service->generateSuggestion($objectId, $templateId, $llmConfigId, $userId);
+
+        return $this->renderText(json_encode($result));
+    }
+
+    /**
+     * Get suggestion review dashboard
+     * GET /ai/suggest/review
+     */
+    public function executeSuggestReview(sfWebRequest $request)
+    {
+        $service = new DescriptionService();
+
+        $repositoryId = $request->getParameter('repository');
+        $this->pendingSuggestions = $service->getPendingSuggestions($repositoryId, 100);
+        $this->stats = $service->getStatistics();
+
+        // Get repositories for filter dropdown
+        $this->repositories = Illuminate\Database\Capsule\Manager::table('actor as a')
+            ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
+            ->whereIn('a.id', function ($query) {
+                $query->select('repository_id')
+                    ->from('information_object')
+                    ->whereNotNull('repository_id')
+                    ->distinct();
+            })
+            ->where('ai.culture', 'en')
+            ->select('a.id', 'ai.authorized_form_of_name as name')
+            ->orderBy('ai.authorized_form_of_name')
+            ->get()
+            ->toArray();
+
+        $this->selectedRepository = $repositoryId;
+    }
+
+    /**
+     * View a single suggestion
+     * GET /ai/suggest/:id/view
+     */
+    public function executeSuggestView(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $suggestionId = $request->getParameter('id');
+
+        $service = new DescriptionService();
+        $suggestion = $service->getSuggestion($suggestionId);
+
+        if (!$suggestion) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Suggestion not found']));
+        }
+
+        // Get object title
+        $object = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->where('id', $suggestion->object_id)
+            ->where('culture', 'en')
+            ->first();
+
+        $slug = Illuminate\Database\Capsule\Manager::table('slug')
+            ->where('object_id', $suggestion->object_id)
+            ->first();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'suggestion' => $suggestion,
+            'object_title' => $object->title ?? 'Untitled',
+            'object_slug' => $slug->slug ?? null,
+        ]));
+    }
+
+    /**
+     * Process suggestion decision (approve/reject)
+     * POST /ai/suggest/:id/decision
+     */
+    public function executeSuggestDecision(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $suggestionId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true) ?: [];
+
+        $decision = $data['decision'] ?? '';
+        $editedText = $data['edited_text'] ?? null;
+        $notes = $data['notes'] ?? null;
+
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        $service = new DescriptionService();
+
+        if ($decision === 'approve') {
+            $result = $service->approveSuggestion($suggestionId, $userId, $editedText, $notes);
+        } elseif ($decision === 'reject') {
+            $result = $service->rejectSuggestion($suggestionId, $userId, $notes);
+        } else {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid decision']));
+        }
+
+        return $this->renderText(json_encode($result));
+    }
+
+    /**
+     * Get suggestions for a specific object
+     * GET /ai/suggest/object/:id
+     */
+    public function executeSuggestObject(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $status = $request->getParameter('status');
+
+        $service = new DescriptionService();
+        $suggestions = $service->getSuggestionsForObject($objectId, $status);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'suggestions' => $suggestions,
+        ]));
+    }
+
+    /**
+     * Get LLM configurations
+     * GET /ai/llm/configs
+     */
+    public function executeLlmConfigs(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $activeOnly = $request->getParameter('active', '1') === '1';
+
+        $service = new LlmService();
+        $configs = $service->getConfigurations($activeOnly);
+
+        // Remove encrypted API keys from response
+        foreach ($configs as &$config) {
+            unset($config->api_key_encrypted);
+            $config->has_api_key = !empty($config->api_key_encrypted);
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'configs' => $configs,
+        ]));
+    }
+
+    /**
+     * Get LLM health status
+     * GET /ai/llm/health
+     */
+    public function executeLlmHealth(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $service = new LlmService();
+        $health = $service->getAllHealth();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'providers' => $health,
+        ]));
+    }
+
+    /**
+     * Get prompt templates
+     * GET /ai/templates
+     */
+    public function executeTemplates(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $activeOnly = $request->getParameter('active', '1') === '1';
+
+        $service = new PromptService();
+        $templates = $service->getTemplates($activeOnly);
+        $variables = $service->getTemplateVariables();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'templates' => $templates,
+            'variables' => $variables,
+        ]));
+    }
+
+    /**
+     * Preview a suggestion without saving
+     * POST /ai/suggest/:id/preview
+     */
+    public function executeSuggestPreview(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        $data = json_decode($request->getContent(), true) ?: [];
+
+        $templateId = $data['template_id'] ?? null;
+        $llmConfigId = $data['llm_config_id'] ?? null;
+
+        $object = QubitInformationObject::getById($objectId);
+        if (!$object) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
+        }
+
+        // Gather context
+        $descService = new DescriptionService();
+        $context = $descService->gatherContext($objectId);
+
+        if (!$context['success']) {
+            return $this->renderText(json_encode($context));
+        }
+
+        // Get template and build prompt
+        $promptService = new PromptService();
+        $template = $promptService->getTemplateForObject($objectId, $templateId);
+
+        if (!$template) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No template available']));
+        }
+
+        $prompts = $promptService->buildPrompt($template, $context['data']);
+
+        // Generate (but don't save)
+        $llmService = new LlmService();
+        $result = $llmService->complete($prompts['system'], $prompts['user'], $llmConfigId);
+
+        if (!$result['success']) {
+            return $this->renderText(json_encode($result));
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'preview_text' => $result['text'],
+            'existing_text' => $context['data']['scope_and_content'] ?? null,
+            'tokens_used' => $result['tokens_used'],
+            'model_used' => $result['model'],
+            'generation_time_ms' => $result['generation_time_ms'] ?? 0,
+            'template_name' => $template->name,
+            'has_ocr' => !empty($context['data']['ocr_text']),
+            'context_summary' => [
+                'title' => $context['data']['title'],
+                'identifier' => $context['data']['identifier'],
+                'level' => $context['data']['level_of_description'],
+                'date_range' => $context['data']['date_range'],
+            ],
+        ]));
     }
 }

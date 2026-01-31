@@ -276,8 +276,162 @@ function isSettingEnabled($settings, $key) {
 
                     <div class="mb-3">
                         <label class="form-label">Watermark Text</label>
-                        <input type="text" class="form-control" name="watermark_text" 
+                        <input type="text" class="form-control" name="watermark_text"
                                value="<?php echo esc_entities(getSetting($settings, 'watermark_text', 'The Archive and Heritage Group')) ?>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TripoSR - Image to 3D -->
+            <?php
+            $triposrHealth = $sf_data->getRaw('triposrHealth') ?? ['status' => 'unknown'];
+            $triposrOnline = ($triposrHealth['status'] ?? '') === 'ok';
+            ?>
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-magic me-2"></i>TripoSR - Image to 3D</h5>
+                    <span class="badge <?php echo $triposrOnline ? 'bg-success' : 'bg-danger' ?>">
+                        <?php echo $triposrOnline ? 'Online' : 'Offline' ?>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Generate 3D models from 2D images using AI. Supports local CPU processing or remote GPU server.
+                    </p>
+
+                    <?php if ($triposrOnline): ?>
+                    <div class="alert alert-success small mb-3">
+                        <i class="fas fa-check-circle me-1"></i>
+                        <strong>API Status:</strong> Online |
+                        <strong>Device:</strong> <?php echo $triposrHealth['device'] ?? 'unknown' ?> |
+                        <strong>Mode:</strong> <?php echo $triposrHealth['mode'] ?? 'unknown' ?>
+                        <?php if ($triposrHealth['cuda_available'] ?? false): ?>
+                        | <strong>CUDA:</strong> Available
+                        <?php endif ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="alert alert-warning small mb-3">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        TripoSR service not responding. Check if the service is running.
+                    </div>
+                    <?php endif ?>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="triposr_enabled" name="triposr_enabled" value="1"
+                                       <?php echo isSettingEnabled($settings, 'triposr_enabled') ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="triposr_enabled">
+                                    <strong>Enable TripoSR</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Processing Mode</label>
+                                <select class="form-select" name="triposr_mode" id="triposr_mode">
+                                    <option value="local" <?php echo getSetting($settings, 'triposr_mode', 'local') == 'local' ? 'selected' : '' ?>>
+                                        Local (CPU/GPU)
+                                    </option>
+                                    <option value="remote" <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'selected' : '' ?>>
+                                        Remote GPU Server
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="triposr_remote_config" style="display: <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
+                        <div class="alert alert-info small mb-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Configure remote GPU server for faster processing. The local server will auto-fallback if remote fails.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">Remote GPU Server URL</label>
+                                    <input type="url" class="form-control" name="triposr_remote_url"
+                                           value="<?php echo esc_entities(getSetting($settings, 'triposr_remote_url')) ?>"
+                                           placeholder="https://gpu-server.example.com:5050">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">API Key (optional)</label>
+                                    <?php
+                                    $apiKey = getSetting($settings, 'triposr_remote_api_key');
+                                    $maskedKey = $apiKey ? '***' : '';
+                                    ?>
+                                    <input type="password" class="form-control" name="triposr_remote_api_key"
+                                           value="<?php echo $maskedKey ?>"
+                                           placeholder="API key">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-muted mb-3">Default Generation Options</h6>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="triposr_remove_bg" name="triposr_remove_bg" value="1"
+                                       <?php echo getSetting($settings, 'triposr_remove_bg', '1') === '1' ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="triposr_remove_bg">
+                                    Remove Background
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Foreground Ratio</label>
+                                <input type="number" class="form-control" name="triposr_foreground_ratio"
+                                       value="<?php echo getSetting($settings, 'triposr_foreground_ratio', '0.85') ?>"
+                                       min="0.5" max="1" step="0.05">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Resolution</label>
+                                <select class="form-select" name="triposr_mc_resolution">
+                                    <option value="128" <?php echo getSetting($settings, 'triposr_mc_resolution', '256') == '128' ? 'selected' : '' ?>>128 (Fast)</option>
+                                    <option value="256" <?php echo getSetting($settings, 'triposr_mc_resolution', '256') == '256' ? 'selected' : '' ?>>256 (Balanced)</option>
+                                    <option value="512" <?php echo getSetting($settings, 'triposr_mc_resolution', '256') == '512' ? 'selected' : '' ?>>512 (High Quality)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="triposr_bake_texture" name="triposr_bake_texture" value="1"
+                                       <?php echo isSettingEnabled($settings, 'triposr_bake_texture') ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="triposr_bake_texture">
+                                    Bake Texture (OBJ output)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Timeout (seconds)</label>
+                                <input type="number" class="form-control" name="triposr_timeout"
+                                       value="<?php echo getSetting($settings, 'triposr_timeout', '300') ?>"
+                                       min="60" max="600">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Local API URL</label>
+                                <input type="text" class="form-control" name="triposr_api_url"
+                                       value="<?php echo esc_entities(getSetting($settings, 'triposr_api_url', 'http://127.0.0.1:5050')) ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-muted small">
+                        <strong>CLI:</strong> <code>php symfony triposr:generate --image=/path/to/image.jpg</code>
                     </div>
                 </div>
             </div>
@@ -306,6 +460,9 @@ function isSettingEnabled($settings, $key) {
                 <div class="list-group list-group-flush">
                     <a href="<?php echo url_for(['module' => 'model3d', 'action' => 'index']) ?>" class="list-group-item list-group-item-action">
                         <i class="fas fa-cubes me-2"></i>View All 3D Models
+                    </a>
+                    <a href="<?php echo url_for(['module' => 'model3dSettings', 'action' => 'triposr']) ?>" class="list-group-item list-group-item-action">
+                        <i class="fas fa-magic me-2"></i>TripoSR Settings
                     </a>
                     <a href="https://modelviewer.dev/" target="_blank" class="list-group-item list-group-item-action">
                         <i class="fas fa-external-link-alt me-2"></i>Model Viewer Documentation
@@ -353,3 +510,17 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php endif ?>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle TripoSR remote config visibility
+    const modeSelect = document.getElementById('triposr_mode');
+    const remoteConfig = document.getElementById('triposr_remote_config');
+
+    if (modeSelect && remoteConfig) {
+        modeSelect.addEventListener('change', function() {
+            remoteConfig.style.display = this.value === 'remote' ? 'block' : 'none';
+        });
+    }
+});
+</script>
