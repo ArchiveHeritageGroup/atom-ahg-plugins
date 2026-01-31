@@ -1,8 +1,8 @@
 {
     "name": "Heritage Asset Accounting",
     "machine_name": "ahgHeritageAccountingPlugin",
-    "version": "1.2.4",
-    "description": "Multi-standard heritage asset financial accounting (GRAP 103, FRS 102, GASB 34, PSAS 3150)",
+    "version": "2.0.0",
+    "description": "Multi-regional heritage asset financial accounting with support for IPSAS, GRAP, FRS, GASB, AASB, PSAS standards",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "accounting",
@@ -14,15 +14,57 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
-    "optional": {
-        "modules": [
-            "ahgGrapModule",
-            "ahgFrsModule",
-            "ahgGasbModule",
-            "ahgPsasModule"
-        ]
+    "install_sql": "database/core.sql",
+    "regions": {
+        "africa_ipsas": {
+            "name": "Africa (IPSAS 45)",
+            "standard": "IPSAS45",
+            "countries": ["Zimbabwe", "Kenya", "Nigeria", "Ghana", "Tanzania", "Uganda", "Rwanda", "Botswana", "Zambia", "Malawi"],
+            "sql": "database/regions/africa_ipsas.sql"
+        },
+        "south_africa_grap": {
+            "name": "South Africa (GRAP 103)",
+            "standard": "GRAP103",
+            "countries": ["South Africa"],
+            "sql": "database/regions/south_africa_grap.sql"
+        },
+        "uk_frs": {
+            "name": "United Kingdom (FRS 102)",
+            "standard": "FRS102",
+            "countries": ["United Kingdom", "Ireland"],
+            "sql": "database/regions/uk_frs.sql"
+        },
+        "usa_government": {
+            "name": "USA Government (GASB 34)",
+            "standard": "GASB34",
+            "countries": ["United States"],
+            "sql": "database/regions/usa_government.sql"
+        },
+        "usa_nonprofit": {
+            "name": "USA Non-Profit (FASB 958)",
+            "standard": "FASB958",
+            "countries": ["United States"],
+            "sql": "database/regions/usa_nonprofit.sql"
+        },
+        "australia_nz": {
+            "name": "Australia & NZ (AASB 116)",
+            "standard": "AASB116",
+            "countries": ["Australia", "New Zealand"],
+            "sql": "database/regions/australia_nz.sql"
+        },
+        "canada_psas": {
+            "name": "Canada (PSAS 3150)",
+            "standard": "PSAS3150",
+            "countries": ["Canada"],
+            "sql": "database/regions/canada_psas.sql"
+        },
+        "international_private": {
+            "name": "International Private (IAS 16)",
+            "standard": "IAS16",
+            "countries": ["International"],
+            "sql": "database/regions/international_private.sql"
+        }
     },
-    "install_sql": "database/install.sql",
     "tables": [
         "heritage_accounting_standard",
         "heritage_asset_class",
@@ -31,9 +73,13 @@
         "heritage_impairment_assessment",
         "heritage_movement_register",
         "heritage_journal_entry",
-        "heritage_financial_year_snapshot",
-        "heritage_depreciation_schedule",
+        "heritage_compliance_rule",
         "heritage_transaction_log",
-        "heritage_regional_data"
+        "heritage_regional_config",
+        "heritage_institution_config"
+    ],
+    "cli_commands": [
+        "heritage:install",
+        "heritage:region"
     ]
 }

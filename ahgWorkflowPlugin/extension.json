@@ -1,0 +1,39 @@
+{
+    "name": "Workflow Manager",
+    "machine_name": "ahgWorkflowPlugin",
+    "version": "1.0.0",
+    "description": "Configurable approval workflow system for archival submissions with role-based task routing, pool claiming, and email notifications",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "workflow",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgSecurityClearancePlugin"
+    ],
+    "optional": {
+        "extensions": []
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "ahg_workflow",
+        "ahg_workflow_step",
+        "ahg_workflow_task",
+        "ahg_workflow_history"
+    ],
+    "provides": {
+        "admin_section": {
+            "id": "workflow",
+            "section": "admin",
+            "title": "Workflow Manager",
+            "description": "Configure approval workflows and manage pending tasks",
+            "icon": "fa-tasks",
+            "route": "workflow/dashboard",
+            "permission": "administrator"
+        }
+    }
+}

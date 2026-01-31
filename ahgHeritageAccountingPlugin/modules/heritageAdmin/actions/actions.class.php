@@ -18,15 +18,182 @@ class heritageAdminActions extends sfActions
         $this->standards = DB::table('heritage_accounting_standard')
             ->orderBy('sort_order')
             ->get();
-        
+
         $this->stats = [
             'total_assets' => DB::table('heritage_asset')->count(),
             'by_standard' => DB::table('heritage_asset as ha')
                 ->join('heritage_accounting_standard as hs', 'ha.accounting_standard_id', '=', 'hs.id')
                 ->select('hs.code', 'hs.name', DB::raw('COUNT(*) as count'))
                 ->groupBy('hs.id', 'hs.code', 'hs.name')
-                ->get()
+                ->get(),
         ];
+
+        // Get regions summary
+        $this->regions = DB::table('heritage_regional_config')
+            ->orderBy('region_name')
+            ->get()
+            ->map(function ($row) {
+                $row->countries = json_decode($row->countries, true) ?? [];
+
+                return $row;
+            });
+
+        // Get active region
+        $this->activeConfig = DB::table('heritage_institution_config')
+            ->whereNull('repository_id')
+            ->first();
+    }
+
+    // =====================
+    // Regions Management
+    // =====================
+    public function executeRegions(sfWebRequest $request)
+    {
+        $this->regions = DB::table('heritage_regional_config')
+            ->orderBy('region_name')
+            ->get()
+            ->map(function ($row) {
+                $row->countries = json_decode($row->countries, true) ?? [];
+
+                return $row;
+            });
+
+        // Get installed standards count per region
+        $this->standardsByRegion = DB::table('heritage_accounting_standard')
+            ->whereNotNull('region_code')
+            ->select('region_code', DB::raw('COUNT(*) as count'))
+            ->groupBy('region_code')
+            ->pluck('count', 'region_code')
+            ->toArray();
+
+        // Get compliance rules count per region
+        $this->rulesByRegion = DB::table('heritage_compliance_rule as r')
+            ->join('heritage_accounting_standard as s', 'r.standard_id', '=', 's.id')
+            ->whereNotNull('s.region_code')
+            ->select('s.region_code', DB::raw('COUNT(*) as count'))
+            ->groupBy('s.region_code')
+            ->pluck('count', 'region_code')
+            ->toArray();
+
+        // Get active region config
+        $this->activeConfig = DB::table('heritage_institution_config')
+            ->whereNull('repository_id')
+            ->first();
+    }
+
+    public function executeRegionInstall(sfWebRequest $request)
+    {
+        $regionCode = $request->getParameter('region');
+
+        if (!$regionCode) {
+            $this->getUser()->setFlash('error', 'No region specified');
+            $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+        }
+
+        // Load RegionManager
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        $manager = \RegionManager::getInstance();
+
+        $result = $manager->installRegion($regionCode);
+
+        if ($result['success']) {
+            if (!empty($result['already_installed'])) {
+                $this->getUser()->setFlash('notice', $result['message']);
+            } else {
+                $msg = "Region '{$regionCode}' installed successfully. ";
+                $msg .= "Standard: {$result['standard_code']}. ";
+                $msg .= "Compliance rules: {$result['compliance_rules_installed']}";
+                $this->getUser()->setFlash('success', $msg);
+            }
+        } else {
+            $this->getUser()->setFlash('error', 'Installation failed: ' . $result['error']);
+        }
+
+        $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+    }
+
+    public function executeRegionUninstall(sfWebRequest $request)
+    {
+        $regionCode = $request->getParameter('region');
+
+        if (!$regionCode) {
+            $this->getUser()->setFlash('error', 'No region specified');
+            $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+        }
+
+        // Load RegionManager
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        $manager = \RegionManager::getInstance();
+
+        $result = $manager->uninstallRegion($regionCode);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('success', $result['message']);
+        } else {
+            $this->getUser()->setFlash('error', 'Uninstall failed: ' . $result['error']);
+        }
+
+        $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+    }
+
+    public function executeRegionSetActive(sfWebRequest $request)
+    {
+        $regionCode = $request->getParameter('region');
+
+        if (!$regionCode) {
+            $this->getUser()->setFlash('error', 'No region specified');
+            $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+        }
+
+        // Load RegionManager
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        $manager = \RegionManager::getInstance();
+
+        $result = $manager->setActiveRegion($regionCode);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('success', "Active region set to '{$regionCode}' ({$result['standard_code']})");
+        } else {
+            $this->getUser()->setFlash('error', 'Activation failed: ' . $result['error']);
+        }
+
+        $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
+    }
+
+    public function executeRegionInfo(sfWebRequest $request)
+    {
+        $regionCode = $request->getParameter('region');
+
+        $this->region = DB::table('heritage_regional_config')
+            ->where('region_code', $regionCode)
+            ->first();
+
+        if (!$this->region) {
+            $this->forward404();
+        }
+
+        $this->region->countries = json_decode($this->region->countries, true) ?? [];
+
+        // Get standard if installed
+        $this->standard = DB::table('heritage_accounting_standard')
+            ->where('region_code', $regionCode)
+            ->first();
+
+        // Get compliance rules if installed
+        $this->rules = [];
+        if ($this->standard) {
+            $this->rules = DB::table('heritage_compliance_rule')
+                ->where('standard_id', $this->standard->id)
+                ->orderBy('category')
+                ->orderBy('sort_order')
+                ->get();
+        }
+
+        // Check if active
+        $activeConfig = DB::table('heritage_institution_config')
+            ->whereNull('repository_id')
+            ->first();
+        $this->isActive = $activeConfig && $activeConfig->region_code === $regionCode;
     }
 
     // =====================

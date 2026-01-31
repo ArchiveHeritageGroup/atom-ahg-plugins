@@ -25,6 +25,8 @@ class ahgSettingsMenuComponent extends sfComponent
         $this->response->setTitle("{$title} setting - {$this->response->getTitle()}");
 
         $i18n = $this->context->i18n;
+
+        // Core AtoM Settings only - AHG plugin settings are in AHG Plugin Settings page
         $this->nodes = [
             [
                 'label' => $i18n->__('Clipboard'),
@@ -67,22 +69,9 @@ class ahgSettingsMenuComponent extends sfComponent
                 'action' => 'language',
             ],
             [
-                'label' => $i18n->__('Identifiers'),
-                'action' => 'identifier',
-            ],
-            [
-                'label' => $i18n->__('Sector Numbering'),
-                'action' => 'sectorNumbering',
-            ],
-            [
-                'label' => $i18n->__('Numbering Schemes'),
-                'action' => 'numberingSchemes',
-            ],
-            [
                 'label' => $i18n->__('Inventory'),
                 'action' => 'inventory',
             ],
-            // Only show LDAP authentication settings if LDAP authentication's used
             [
                 'label' => $i18n->__('LDAP Authentication'),
                 'action' => 'ldap',
@@ -110,11 +99,6 @@ class ahgSettingsMenuComponent extends sfComponent
                 'action' => 'security',
             ],
             [
-                'label' => $i18n->__('API Keys'),
-                'action' => 'apiKeys',
-                'hide' => !$this->context->getConfiguration()->isPluginEnabled('ahgAPIPlugin'),
-            ],
-            [
                 'label' => $i18n->__('Site information'),
                 'action' => 'siteInformation',
             ],
@@ -122,9 +106,7 @@ class ahgSettingsMenuComponent extends sfComponent
                 'label' => $i18n->__('Storage service'),
                 'module' => 'arStorageServiceSettings',
                 'action' => 'settings',
-                'hide' => !$this->context->getConfiguration()->isPluginEnabled(
-                    'arStorageServicePlugin'
-                ),
+                'hide' => !$this->context->getConfiguration()->isPluginEnabled('arStorageServicePlugin'),
             ],
             [
                 'label' => $i18n->__('Treeview'),
@@ -140,19 +122,21 @@ class ahgSettingsMenuComponent extends sfComponent
             ],
         ];
 
+        // Process nodes - remove hidden and set active state
         foreach ($this->nodes as $i => &$node) {
-            // Remove hidden nodes
             if (!empty($node['hide']) && true === $node['hide']) {
                 unset($this->nodes[$i]);
+                continue;
             }
-
-            // Active bool
             $node['active'] = $this->context->getActionName() === $node['action'];
         }
+        unset($node);
 
         // Sort alphabetically
-        usort($this->nodes, function ($el1, $el2) {
-            return strnatcmp($el1['label'], $el2['label']);
+        usort($this->nodes, function ($a, $b) {
+            return strnatcasecmp($a['label'], $b['label']);
         });
+
+        $this->nodes = array_values($this->nodes);
     }
 }

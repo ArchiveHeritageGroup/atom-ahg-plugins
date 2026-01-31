@@ -1,0 +1,147 @@
+# ahgICIPPlugin Routing Configuration
+
+# Dashboard
+icip_dashboard:
+  url: /icip
+  param: { module: icip, action: dashboard }
+
+# Community Management
+icip_communities:
+  url: /icip/communities
+  param: { module: icip, action: communities }
+
+icip_community_add:
+  url: /icip/community/add
+  param: { module: icip, action: communityEdit }
+
+icip_community_edit:
+  url: /icip/community/:id/edit
+  param: { module: icip, action: communityEdit }
+  requirements: { id: \d+ }
+
+icip_community_view:
+  url: /icip/community/:id
+  param: { module: icip, action: communityView }
+  requirements: { id: \d+ }
+
+icip_community_delete:
+  url: /icip/community/:id/delete
+  param: { module: icip, action: communityDelete }
+  requirements: { id: \d+ }
+
+# Consent Management
+icip_consent_list:
+  url: /icip/consent
+  param: { module: icip, action: consentList }
+
+icip_consent_add:
+  url: /icip/consent/add
+  param: { module: icip, action: consentEdit }
+
+icip_consent_edit:
+  url: /icip/consent/:id/edit
+  param: { module: icip, action: consentEdit }
+  requirements: { id: \d+ }
+
+icip_consent_view:
+  url: /icip/consent/:id
+  param: { module: icip, action: consentView }
+  requirements: { id: \d+ }
+
+# Consultations
+icip_consultations:
+  url: /icip/consultations
+  param: { module: icip, action: consultations }
+
+icip_consultation_add:
+  url: /icip/consultation/add
+  param: { module: icip, action: consultationEdit }
+
+icip_consultation_edit:
+  url: /icip/consultation/:id/edit
+  param: { module: icip, action: consultationEdit }
+  requirements: { id: \d+ }
+
+icip_consultation_view:
+  url: /icip/consultation/:id
+  param: { module: icip, action: consultationView }
+  requirements: { id: \d+ }
+
+# TK Labels
+icip_tk_labels:
+  url: /icip/tk-labels
+  param: { module: icip, action: tkLabels }
+
+# Cultural Notices
+icip_notices:
+  url: /icip/notices
+  param: { module: icip, action: notices }
+
+icip_notice_types:
+  url: /icip/notice-types
+  param: { module: icip, action: noticeTypes }
+
+# Access Restrictions
+icip_restrictions:
+  url: /icip/restrictions
+  param: { module: icip, action: restrictions }
+
+# Reports
+icip_reports:
+  url: /icip/reports
+  param: { module: icip, action: reports }
+
+icip_report_pending:
+  url: /icip/reports/pending-consultation
+  param: { module: icip, action: reportPending }
+
+icip_report_expiry:
+  url: /icip/reports/consent-expiry
+  param: { module: icip, action: reportExpiry }
+
+icip_report_community:
+  url: /icip/reports/community/:id
+  param: { module: icip, action: reportCommunity }
+  requirements: { id: \d+ }
+
+# Object-specific ICIP management (linked from information object)
+icip_object:
+  url: /object/:slug/icip
+  param: { module: icip, action: objectIcip }
+
+icip_object_consent:
+  url: /object/:slug/icip/consent
+  param: { module: icip, action: objectConsent }
+
+icip_object_notices:
+  url: /object/:slug/icip/notices
+  param: { module: icip, action: objectNotices }
+
+icip_object_labels:
+  url: /object/:slug/icip/labels
+  param: { module: icip, action: objectLabels }
+
+icip_object_restrictions:
+  url: /object/:slug/icip/restrictions
+  param: { module: icip, action: objectRestrictions }
+
+icip_object_consultations:
+  url: /object/:slug/icip/consultations
+  param: { module: icip, action: objectConsultations }
+
+# Acknowledgement
+icip_acknowledge:
+  url: /icip/acknowledge/:notice_id
+  param: { module: icip, action: acknowledge }
+  requirements: { notice_id: \d+ }
+
+# API endpoints
+icip_api_summary:
+  url: /icip/api/summary/:object_id
+  param: { module: icip, action: apiSummary }
+  requirements: { object_id: \d+ }
+
+icip_api_check_access:
+  url: /icip/api/check-access/:object_id
+  param: { module: icip, action: apiCheckAccess }
+  requirements: { object_id: \d+ }

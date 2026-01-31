@@ -64,6 +64,9 @@ class privacyAdminActions extends sfActions
         $this->recentDsars = $service->getDsarList(['jurisdiction' => $jurisdiction, 'limit' => 5]);
         $this->openBreaches = $service->getBreachList(['status' => 'investigating', 'jurisdiction' => $jurisdiction]);
         $this->notificationCount = $service->getNotificationCount($this->getUserId());
+
+        // Get active jurisdiction from regional architecture
+        $this->activeJurisdiction = $this->getJurisdictionManager()->getActiveJurisdiction();
     }
 
     // =====================
@@ -1876,6 +1879,161 @@ class privacyAdminActions extends sfActions
 
         } catch (\Exception $e) {
             $this->forward404('Error: ' . $e->getMessage());
+        }
+    }
+
+    // =====================================================
+    // Regional Jurisdiction Management (New Architecture)
+    // =====================================================
+
+    protected function getJurisdictionManager(): \JurisdictionManager
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Jurisdictions/JurisdictionManager.php';
+        return \JurisdictionManager::getInstance();
+    }
+
+    /**
+     * List all available jurisdictions (regional architecture)
+     */
+    public function executeJurisdictions(sfWebRequest $request)
+    {
+        $manager = $this->getJurisdictionManager();
+        $this->jurisdictions = $manager->getAvailableJurisdictions();
+        $this->activeJurisdiction = $manager->getActiveJurisdiction();
+
+        // Group by region
+        $this->byRegion = [];
+        foreach ($this->jurisdictions as $j) {
+            $region = $j->region ?? 'International';
+            if (!isset($this->byRegion[$region])) {
+                $this->byRegion[$region] = [];
+            }
+            $this->byRegion[$region][] = $j;
+        }
+        ksort($this->byRegion);
+    }
+
+    /**
+     * Install a jurisdiction
+     */
+    public function executeJurisdictionInstall(sfWebRequest $request)
+    {
+        $code = $request->getParameter('code');
+        if (!$code) {
+            $this->getUser()->setFlash('error', 'Jurisdiction code required');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+        }
+
+        $manager = $this->getJurisdictionManager();
+        $result = $manager->installJurisdiction($code);
+
+        if ($result['success']) {
+            if (!empty($result['already_installed'])) {
+                $this->getUser()->setFlash('notice', $result['message']);
+            } else {
+                $this->getUser()->setFlash('success', sprintf(
+                    '%s installed successfully. Lawful bases: %d, Special categories: %d, Request types: %d, Rules: %d',
+                    $result['full_name'] ?? $code,
+                    $result['lawful_bases_installed'] ?? 0,
+                    $result['special_categories_installed'] ?? 0,
+                    $result['request_types_installed'] ?? 0,
+                    $result['compliance_rules_installed'] ?? 0
+                ));
+            }
+        } else {
+            $this->getUser()->setFlash('error', 'Installation failed: ' . ($result['error'] ?? 'Unknown error'));
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+    }
+
+    /**
+     * Uninstall a jurisdiction
+     */
+    public function executeJurisdictionUninstall(sfWebRequest $request)
+    {
+        $code = $request->getParameter('code');
+        if (!$code) {
+            $this->getUser()->setFlash('error', 'Jurisdiction code required');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+        }
+
+        $manager = $this->getJurisdictionManager();
+        $result = $manager->uninstallJurisdiction($code);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('success', $result['message']);
+        } else {
+            $this->getUser()->setFlash('error', 'Uninstall failed: ' . ($result['error'] ?? 'Unknown error'));
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+    }
+
+    /**
+     * Set active jurisdiction
+     */
+    public function executeJurisdictionSetActive(sfWebRequest $request)
+    {
+        $code = $request->getParameter('code');
+        $repositoryId = $request->getParameter('repository_id');
+
+        if (!$code) {
+            $this->getUser()->setFlash('error', 'Jurisdiction code required');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+        }
+
+        $manager = $this->getJurisdictionManager();
+        $result = $manager->setActiveJurisdiction($code, $repositoryId ? (int)$repositoryId : null);
+
+        if ($result['success']) {
+            $scope = $repositoryId ? "repository #{$repositoryId}" : 'all repositories';
+            $this->getUser()->setFlash('success', sprintf(
+                'Active jurisdiction set to %s for %s',
+                $result['jurisdiction_name'] ?? $code,
+                $scope
+            ));
+        } else {
+            $this->getUser()->setFlash('error', 'Activation failed: ' . ($result['error'] ?? 'Unknown error'));
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictions']);
+    }
+
+    /**
+     * Show jurisdiction details
+     */
+    public function executeJurisdictionInfo(sfWebRequest $request)
+    {
+        $code = $request->getParameter('code');
+        if (!$code) {
+            $this->forward404('Jurisdiction code required');
+        }
+
+        $manager = $this->getJurisdictionManager();
+        $jurisdictions = $manager->getAvailableJurisdictions();
+        $this->jurisdiction = null;
+
+        foreach ($jurisdictions as $j) {
+            if ($j->code === $code) {
+                $this->jurisdiction = $j;
+                break;
+            }
+        }
+
+        if (!$this->jurisdiction) {
+            $this->forward404('Jurisdiction not found');
+        }
+
+        $this->activeJurisdiction = $manager->getActiveJurisdiction();
+
+        // Get installed components if installed
+        if ($this->jurisdiction->is_installed) {
+            $this->stats = $manager->getJurisdictionStats($code);
+            $this->lawfulBases = $manager->getLawfulBases($code);
+            $this->specialCategories = $manager->getSpecialCategories($code);
+            $this->requestTypes = $manager->getRequestTypes($code);
+            $this->complianceRules = $manager->getComplianceRules($code);
         }
     }
 }

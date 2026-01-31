@@ -56,6 +56,14 @@ ahg_ner_review:
   url: /ner/review
   param: { module: ai, action: review }
 
+ahg_ner_entities:
+  url: /ner/entities/:id
+  param: { module: ai, action: getEntities }
+
+ahg_ner_bulk_save:
+  url: /ner/bulk-save
+  param: { module: ai, action: bulkSave }
+
 ahg_ner_summarize:
   url: /ner/summarize/:id
   param: { module: ai, action: summarize }

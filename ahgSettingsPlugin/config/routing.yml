@@ -190,3 +190,15 @@ ahg_settings_tts:
 admin_ahg_settings_tts:
   url: /admin/ahg-settings/tts
   param: { module: ahgSettings, action: tts }
+
+ahg_settings_services:
+  url: /ahgSettings/services
+  param: { module: ahgSettings, action: services }
+
+ahg_settings_cron_jobs:
+  url: /ahgSettings/cronJobs
+  param: { module: ahgSettings, action: cronJobs }
+
+ahg_settings_icip_settings:
+  url: /ahgSettings/icipSettings
+  param: { module: ahgSettings, action: icipSettings }

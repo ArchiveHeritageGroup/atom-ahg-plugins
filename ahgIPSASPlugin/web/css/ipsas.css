@@ -1,0 +1,130 @@
+/**
+ * ahgIPSASPlugin Styles
+ * IPSAS Heritage Asset Management
+ */
+
+/* Valuation Basis Colors */
+.valuation-historical_cost {
+    background-color: #0d6efd !important;
+}
+
+.valuation-fair_value {
+    background-color: #198754 !important;
+}
+
+.valuation-nominal {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.valuation-not_recognized {
+    background-color: #6c757d !important;
+}
+
+/* Asset Status */
+.status-active {
+    background-color: #198754 !important;
+}
+
+.status-on_loan {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+}
+
+.status-disposed {
+    background-color: #dc3545 !important;
+}
+
+/* Condition Indicators */
+.condition-excellent {
+    background-color: #198754 !important;
+}
+
+.condition-good {
+    background-color: #0dcaf0 !important;
+}
+
+.condition-fair {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.condition-poor {
+    background-color: #fd7e14 !important;
+}
+
+.condition-critical {
+    background-color: #dc3545 !important;
+}
+
+/* Value Change Indicators */
+.value-increase {
+    color: #198754;
+}
+
+.value-decrease {
+    color: #dc3545;
+}
+
+/* Dashboard Cards */
+.ipsas-stat-card {
+    transition: transform 0.2s;
+}
+
+.ipsas-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Financial Summary Table */
+.financial-summary th {
+    width: 60%;
+}
+
+.financial-summary td {
+    text-align: right;
+    font-family: monospace;
+}
+
+/* Insurance Expiry Warning */
+.insurance-expiring {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107;
+}
+
+.insurance-expired {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545;
+}
+
+/* Asset Number Badge */
+.asset-number {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Form styling */
+.ipsas-form-section {
+    border-left: 4px solid #0d6efd;
+    padding-left: 16px;
+    margin-bottom: 24px;
+}
+
+.ipsas-form-section h5 {
+    color: #0d6efd;
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-header .btn {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        page-break-inside: avoid;
+    }
+
+    .financial-summary {
+        font-size: 12pt;
+    }
+}

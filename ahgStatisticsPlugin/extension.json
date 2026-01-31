@@ -1,0 +1,39 @@
+{
+    "name": "Usage Statistics",
+    "machine_name": "ahgStatisticsPlugin",
+    "version": "1.0.0",
+    "description": "Usage statistics tracking with page views, downloads, GeoIP lookup, bot filtering, and reporting dashboards",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "analytics",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": []
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "ahg_usage_event",
+        "ahg_statistics_daily",
+        "ahg_statistics_monthly",
+        "ahg_bot_list",
+        "ahg_statistics_config"
+    ],
+    "provides": {
+        "admin_section": {
+            "id": "statistics",
+            "section": "admin",
+            "title": "Usage Statistics",
+            "description": "View usage statistics and reports",
+            "icon": "fa-chart-bar",
+            "route": "statistics/dashboard",
+            "permission": "administrator"
+        }
+    }
+}

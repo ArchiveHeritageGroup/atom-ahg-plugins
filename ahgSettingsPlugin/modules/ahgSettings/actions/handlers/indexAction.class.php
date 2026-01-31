@@ -238,6 +238,33 @@ class AhgSettingsIndexAction extends sfAction
             ];
         }
 
+        // ICIP - show when ahgICIPPlugin is enabled
+        $hasIcip = in_array('ahgICIPPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasIcip) {
+            $this->sections['icip'] = [
+                'label' => 'ICIP Settings',
+                'icon' => 'fa-shield-alt',
+                'description' => 'Indigenous Cultural and Intellectual Property management settings',
+                'url' => 'ahgSettings/icipSettings'
+            ];
+        }
+
+        // Services Monitor - always available
+        $this->sections['services'] = [
+            'label' => 'Services Monitor',
+            'icon' => 'fa-heartbeat',
+            'description' => 'Monitor system services health and configure notifications',
+            'url' => 'ahgSettings/services'
+        ];
+
+        // Cron Jobs Info - always available
+        $this->sections['cron_jobs'] = [
+            'label' => 'Cron Jobs & System Info',
+            'icon' => 'fa-clock',
+            'description' => 'View all available cron jobs, scheduling examples, and installed software versions',
+            'url' => 'ahgSettings/cronJobs'
+        ];
+
         // Semantic Search - always available (core feature)
         $this->sections['semantic_search'] = [
             'label' => 'Semantic Search',

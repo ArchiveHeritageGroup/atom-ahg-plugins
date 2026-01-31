@@ -196,6 +196,11 @@ class ahgSettingsActions extends sfActions
         return $this->executeSettingsAction('identifierAction', $request);
     }
 
+    public function executeIcipSettings(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('icipSettingsAction', $request);
+    }
+
     public function executeSectorNumbering(sfWebRequest $request)
     {
         error_log('=== executeSectorNumbering CALLED ===');
@@ -326,6 +331,51 @@ class ahgSettingsActions extends sfActions
         return $this->executeSettingsAction('ttsAction', $request);
     }
 
+    public function executeServices(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('servicesAction', $request);
+    }
+
+    public function executeMarkdown(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('markdownAction', $request);
+    }
+
+    public function executePrivacyNotification(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('privacyNotificationAction', $request);
+    }
+
+    public function executeDigitalObjectDerivatives(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('digitalObjectDerivativesAction', $request);
+    }
+
+    public function executeDipUpload(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('dipUploadAction', $request);
+    }
+
+    public function executeInventory(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('inventoryAction', $request);
+    }
+
+    public function executeInterfaceLabel(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('interfaceLabelAction', $request);
+    }
+
+    public function executeLdap(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('ldapAction', $request);
+    }
+
+    public function executeNumberingSchemes(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('numberingSchemesAction', $request);
+    }
+
     // Aliases for legacy URLs
     public function executeAhgSettings(sfWebRequest $request)
     {
@@ -335,5 +385,10 @@ class ahgSettingsActions extends sfActions
     public function executeAhgDashboard(sfWebRequest $request)
     {
         return $this->executeIndex($request);
+    }
+
+    public function executeCronJobs(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('cronJobsAction', $request);
     }
 }

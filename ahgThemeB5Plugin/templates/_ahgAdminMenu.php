@@ -29,6 +29,9 @@ $hasAccessRequest = ahgIsPluginEnabled('ahgAccessRequestPlugin');
 $hasResearch = ahgIsPluginEnabled('ahgResearchPlugin');
 $hasRic = ahgIsPluginEnabled('ahgRicExplorerPlugin');
 $hasDataMigration = ahgIsPluginEnabled('ahgDataMigrationPlugin');
+$hasFormsPlugin = ahgIsPluginEnabled('ahgFormsPlugin');
+$hasDoiPlugin = ahgIsPluginEnabled('ahgDoiPlugin');
+$hasDedupePlugin = ahgIsPluginEnabled('ahgDedupePlugin');
 
 // Get pending counts for badges
 $pendingBookings = 0;
@@ -43,6 +46,28 @@ if ($isAdmin && $hasResearch) {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM research_researcher WHERE status = 'pending'");
         $stmt->execute();
         $pendingResearchers = (int)$stmt->fetchColumn();
+    } catch (Exception $e) {}
+}
+
+// Pending duplicates count
+$pendingDuplicates = 0;
+if ($isAdmin && ahgIsPluginEnabled('ahgDedupePlugin')) {
+    try {
+        $conn = Propel::getConnection();
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM ahg_duplicate_detection WHERE status = 'pending'");
+        $stmt->execute();
+        $pendingDuplicates = (int)$stmt->fetchColumn();
+    } catch (Exception $e) {}
+}
+
+// Pending DOI queue count
+$pendingDois = 0;
+if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
+    try {
+        $conn = Propel::getConnection();
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM ahg_doi_queue WHERE status = 'pending'");
+        $stmt->execute();
+        $pendingDois = (int)$stmt->fetchColumn();
     } catch (Exception $e) {}
 }
 ?>
@@ -104,10 +129,28 @@ if ($isAdmin && $hasResearch) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-1"></i><?php echo __('RiC Dashboard'); ?></a></li>
     <?php endif; ?>
 
-    <?php if ($hasDataMigration): ?>
+    <?php if ($hasDataMigration || $hasDedupePlugin): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Data'); ?></h6></li>
+    <li><h6 class="dropdown-header"><?php echo __('Data Quality'); ?></h6></li>
+    <?php if ($hasDataMigration): ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-exchange-alt fa-fw me-1"></i><?php echo __('Data Migration'); ?></a></li>
+    <?php endif; ?>
+    <?php if ($hasDedupePlugin): ?>
+    <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'dedupe', 'action' => 'index']); ?>"><span><i class="fas fa-clone fa-fw me-1"></i><?php echo __('Duplicate Detection'); ?></span><?php if ($pendingDuplicates > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingDuplicates; ?></span><?php endif; ?></a></li>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if ($hasFormsPlugin): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Data Entry'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-edit fa-fw me-1"></i><?php echo __('Form Templates'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasDoiPlugin): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('DOI Management'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'doi', 'action' => 'index']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('DOI Dashboard'); ?></a></li>
+    <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'doi', 'action' => 'queue']); ?>"><span><i class="fas fa-tasks fa-fw me-1"></i><?php echo __('Minting Queue'); ?></span><?php if ($pendingDois > 0): ?><span class="badge bg-info rounded-pill"><?php echo $pendingDois; ?></span><?php endif; ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

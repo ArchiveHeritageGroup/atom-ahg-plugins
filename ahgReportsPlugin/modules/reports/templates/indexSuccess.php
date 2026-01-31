@@ -36,6 +36,19 @@ $has3D = isPluginActive('ar3DPlugin');
 $hasOais = isPluginActive('arOaisPlugin');
 $hasPreservation = isPluginActive('ahgPreservationPlugin');
 $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
+$hasAccessRequest = isPluginActive('ahgAccessRequestPlugin');
+$hasRic = isPluginActive('ahgRicExplorerPlugin');
+$hasDataMigration = isPluginActive('ahgDataMigrationPlugin');
+$hasBackup = isPluginActive('ahgBackupPlugin');
+$hasDedupe = isPluginActive('ahgDedupePlugin');
+$hasForms = isPluginActive('ahgFormsPlugin');
+$hasDoi = isPluginActive('ahgDoiPlugin');
+$hasHeritage2 = isPluginActive('ahgHeritagePlugin');
+// Zimbabwe Compliance Plugins
+$hasCDPA = isPluginActive('ahgCDPAPlugin');
+$hasNAZ = isPluginActive('ahgNAZPlugin');
+$hasIPSAS = isPluginActive('ahgIPSASPlugin');
+$hasNMMZ = isPluginActive('ahgNMMZPlugin');
 ?>
 
 <?php slot('sidebar'); ?>
@@ -57,8 +70,25 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
     </ul>
     <?php endif; ?>
 
+    <?php if (isPluginActive('ahgResearchPlugin')): ?>
+    <h4 class="mt-4"><?php echo __('Research'); ?></h4>
+    <ul class="list-unstyled">
+        <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research Dashboard'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><i class="fas fa-calendar-alt me-2"></i><?php echo __('Bookings'); ?></a></li>
+    </ul>
+    <?php endif; ?>
+
+    <?php if (isPluginActive('ahgAuditTrailPlugin')): ?>
+    <h4 class="mt-4"><?php echo __('Audit'); ?></h4>
+    <ul class="list-unstyled">
+        <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line me-2"></i><?php echo __('Statistics'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list me-2"></i><?php echo __('Logs'); ?></a></li>
+    </ul>
+    <?php endif; ?>
+
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
+        <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs me-2"></i><?php echo __('AHG Settings'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
     </ul>
 
@@ -77,6 +107,24 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
         <li><a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'dashboard']); ?>"><i class="fas fa-gavel me-2"></i><?php echo __('Rights'); ?></a></li>
         <?php endif; ?>
     </ul>
+
+    <?php if ($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ): ?>
+    <h4 class="mt-4"><?php echo __('Zimbabwe Compliance'); ?></h4>
+    <ul class="list-unstyled">
+        <?php if ($hasCDPA): ?>
+        <li><a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'index']); ?>"><i class="fas fa-shield-alt me-2"></i><?php echo __('CDPA (Data Protection)'); ?></a></li>
+        <?php endif; ?>
+        <?php if ($hasNAZ): ?>
+        <li><a href="<?php echo url_for(['module' => 'naz', 'action' => 'index']); ?>"><i class="fas fa-landmark me-2"></i><?php echo __('NAZ (Archives)'); ?></a></li>
+        <?php endif; ?>
+        <?php if ($hasIPSAS): ?>
+        <li><a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'index']); ?>"><i class="fas fa-coins me-2"></i><?php echo __('IPSAS (Assets)'); ?></a></li>
+        <?php endif; ?>
+        <?php if ($hasNMMZ): ?>
+        <li><a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'index']); ?>"><i class="fas fa-monument me-2"></i><?php echo __('NMMZ (Monuments)'); ?></a></li>
+        <?php endif; ?>
+    </ul>
+    <?php endif; ?>
 </div>
 <?php end_slot(); ?>
 
@@ -406,6 +454,215 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
     </div>
     <?php endif; ?>
 
+    <?php if ($hasAccessRequest || $hasRic || $hasBackup): ?>
+    <!-- Access, RiC & Maintenance Row -->
+    <div class="row mb-4">
+        <?php if ($hasAccessRequest): ?>
+        <!-- Access Requests -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Access Requests'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'pending']); ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Pending Requests'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check me-2 text-muted"></i><?php echo __('Approvers'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Request History'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasRic): ?>
+        <!-- RiC Explorer -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6f42c1 !important;">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Records in Contexts (RiC)'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('RiC Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'explorer']); ?>"><i class="fas fa-sitemap me-2 text-muted"></i><?php echo __('RiC Explorer'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'sync']); ?>"><i class="fas fa-sync me-2 text-muted"></i><?php echo __('Sync Status'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasBackup): ?>
+        <!-- Backup & Maintenance -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i><?php echo __('Backup & Maintenance'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Backup Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt me-2 text-muted"></i><?php echo __('Restore'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'jobs', 'action' => 'browse']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Background Jobs'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($hasDedupe || $hasForms || $hasDoi): ?>
+    <!-- Data Quality, Forms & DOI Row -->
+    <div class="row mb-4">
+        <?php if ($hasDedupe): ?>
+        <!-- Duplicate Detection -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #dc3545 !important;">
+                    <h5 class="mb-0"><i class="fas fa-clone me-2"></i><?php echo __('Duplicate Detection'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Dedupe Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Duplicates'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'scan']); ?>"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Run Scan'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'rules']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Detection Rules'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'report']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Reports'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasForms): ?>
+        <!-- Form Templates -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #198754 !important;">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i><?php echo __('Form Templates'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Forms Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Templates'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'create']); ?>"><i class="fas fa-plus me-2 text-muted"></i><?php echo __('Create Template'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'assignments']); ?>"><i class="fas fa-link me-2 text-muted"></i><?php echo __('Assignments'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasDoi): ?>
+        <!-- DOI Management -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
+                    <h5 class="mb-0"><i class="fas fa-link me-2"></i><?php echo __('DOI Management'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('DOI Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse DOIs'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Minting Queue'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'batchMint']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Mint'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'config']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('DataCite Config'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($hasDataMigration || $hasHeritage2): ?>
+    <!-- Data Migration & Heritage Row -->
+    <div class="row mb-4">
+        <?php if ($hasDataMigration): ?>
+        <!-- Data Migration -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #fd7e14 !important;">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Data Migration'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Migration Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'import']); ?>"><i class="fas fa-upload me-2 text-muted"></i><?php echo __('Import Data'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Data'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Migration History'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasHeritage2): ?>
+        <!-- Heritage Management -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                    <h5 class="mb-0"><i class="fas fa-landmark me-2"></i><?php echo __('Heritage Management'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Admin Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __('Analytics Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Custodian Dashboard'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <?php if ($hasPreservation): ?>
     <!-- Digital Preservation Row -->
     <div class="row mb-4">
@@ -475,6 +732,116 @@ $hasReportBuilder = isPluginActive('ahgReportBuilderPlugin');
             </div>
         </div>
     </div>
+    <?php endif; ?>
+
+    <?php if ($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ): ?>
+    <!-- Zimbabwe Compliance Row -->
+    <div class="row mb-4">
+        <?php if ($hasCDPA): ?>
+        <!-- CDPA - Data Protection -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #198754 !important;">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('CDPA Data Protection'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('CDPA Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'license']); ?>"><i class="fas fa-id-card me-2 text-muted"></i><?php echo __('POTRAZ License'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'requests']); ?>"><i class="fas fa-user-clock me-2 text-muted"></i><?php echo __('Data Subject Requests'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'breaches']); ?>"><i class="fas fa-exclamation-triangle me-2 text-muted"></i><?php echo __('Breach Register'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasNAZ): ?>
+        <!-- NAZ - National Archives -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                    <h5 class="mb-0"><i class="fas fa-landmark me-2"></i><?php echo __('NAZ Archives'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'naz', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('NAZ Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'naz', 'action' => 'closures']); ?>"><i class="fas fa-lock me-2 text-muted"></i><?php echo __('Closure Periods'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'naz', 'action' => 'permits']); ?>"><i class="fas fa-id-card me-2 text-muted"></i><?php echo __('Research Permits'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'naz', 'action' => 'transfers']); ?>"><i class="fas fa-truck me-2 text-muted"></i><?php echo __('Records Transfers'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasIPSAS): ?>
+        <!-- IPSAS - Heritage Assets -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #ffc107 !important; color: #000 !important;">
+                    <h5 class="mb-0" style="color: #000 !important;"><i class="fas fa-coins me-2"></i><?php echo __('IPSAS Heritage Assets'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('IPSAS Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'assets']); ?>"><i class="fas fa-archive me-2 text-muted"></i><?php echo __('Asset Register'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'valuations']); ?>"><i class="fas fa-calculator me-2 text-muted"></i><?php echo __('Valuations'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'insurance']); ?>"><i class="fas fa-shield-alt me-2 text-muted"></i><?php echo __('Insurance'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($hasNMMZ): ?>
+    <!-- NMMZ Row (separate if all 4 plugins are active) -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                    <h5 class="mb-0"><i class="fas fa-monument me-2"></i><?php echo __('NMMZ Monuments'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('NMMZ Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'monuments']); ?>"><i class="fas fa-monument me-2 text-muted"></i><?php echo __('National Monuments'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'antiquities']); ?>"><i class="fas fa-vase me-2 text-muted"></i><?php echo __('Antiquities Register'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'permits']); ?>"><i class="fas fa-file-export me-2 text-muted"></i><?php echo __('Export Permits'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'sites']); ?>"><i class="fas fa-map-marker-alt me-2 text-muted"></i><?php echo __('Archaeological Sites'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
     <?php endif; ?>
 </div>
 <?php end_slot(); ?>

@@ -43,6 +43,33 @@
         </div>
     </div>
 
+    <!-- Active Jurisdiction Banner -->
+    <?php if (isset($activeJurisdiction) && $activeJurisdiction): ?>
+    <div class="alert alert-primary d-flex align-items-center mb-4">
+        <i class="fas fa-globe-africa fa-2x me-3"></i>
+        <div class="flex-grow-1">
+            <strong><?php echo __('Active Jurisdiction'); ?>:</strong>
+            <?php echo htmlspecialchars($activeJurisdiction->name); ?> -
+            <?php echo htmlspecialchars($activeJurisdiction->full_name); ?>
+            (<?php echo htmlspecialchars($activeJurisdiction->country); ?>)
+        </div>
+        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictions']); ?>" class="btn btn-primary btn-sm">
+            <i class="fas fa-cog me-1"></i><?php echo __('Manage'); ?>
+        </a>
+    </div>
+    <?php else: ?>
+    <div class="alert alert-warning d-flex align-items-center mb-4">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div class="flex-grow-1">
+            <strong><?php echo __('No Active Jurisdiction'); ?></strong> -
+            <?php echo __('Install and activate a jurisdiction to enable compliance tracking.'); ?>
+        </div>
+        <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictions']); ?>" class="btn btn-warning btn-sm">
+            <i class="fas fa-globe me-1"></i><?php echo __('Configure'); ?>
+        </a>
+    </div>
+    <?php endif; ?>
+
     <!-- Compliance Score -->
     <div class="row mb-4">
         <div class="col-12">
@@ -217,7 +244,7 @@
                             </a>
                         </div>
                         <div class="col-md-2 col-6 text-center mb-3">
-                            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']); ?>" class="btn btn-outline-info btn-lg w-100">
+                            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictions']); ?>" class="btn btn-outline-info btn-lg w-100">
                                 <i class="fas fa-globe d-block mb-2 fa-2x"></i>
                                 <?php echo __('Jurisdictions'); ?>
                             </a>

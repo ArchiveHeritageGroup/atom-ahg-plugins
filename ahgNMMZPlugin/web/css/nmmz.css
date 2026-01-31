@@ -1,0 +1,73 @@
+/**
+ * ahgNMMZPlugin Styles
+ * National Museums and Monuments of Zimbabwe
+ */
+
+/* Monument Status */
+.status-gazetted { background-color: #198754 !important; }
+.status-provisional { background-color: #0dcaf0 !important; color: #000 !important; }
+.status-proposed { background-color: #ffc107 !important; color: #000 !important; }
+.status-at_risk { background-color: #fd7e14 !important; }
+.status-destroyed { background-color: #dc3545 !important; }
+
+/* Condition Rating */
+.condition-excellent { background-color: #198754 !important; }
+.condition-good { background-color: #0dcaf0 !important; }
+.condition-fair { background-color: #ffc107 !important; color: #000 !important; }
+.condition-poor { background-color: #fd7e14 !important; }
+.condition-critical { background-color: #dc3545 !important; }
+
+/* World Heritage Badge */
+.world-heritage-badge {
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* Monument Card */
+.nmmz-monument-card { transition: transform 0.2s; }
+.nmmz-monument-card:hover { transform: translateY(-2px); }
+
+/* At Risk Warning */
+.at-risk-warning {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #fd7e14;
+}
+
+/* Map placeholder */
+.nmmz-map-placeholder {
+    background: #e9ecef;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Protection level badges */
+.protection-national { background-color: #0d6efd !important; }
+.protection-provincial { background-color: #6c757d !important; }
+.protection-local { background-color: #adb5bd !important; color: #000 !important; }
+
+/* Permit status */
+.permit-pending { animation: pulse 2s infinite; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Form styling */
+.nmmz-form-section {
+    border-left: 4px solid #0d6efd;
+    padding-left: 16px;
+    margin-bottom: 24px;
+}
+
+/* Print styles */
+@media print {
+    .btn { display: none !important; }
+    .card { border: 1px solid #000 !important; page-break-inside: avoid; }
+}

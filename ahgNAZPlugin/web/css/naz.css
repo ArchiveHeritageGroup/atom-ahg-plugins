@@ -1,0 +1,174 @@
+/**
+ * ahgNAZPlugin Styles
+ * National Archives of Zimbabwe Act [Chapter 25:06]
+ */
+
+/* Closure Type Colors */
+.closure-type-standard {
+    background-color: #0d6efd !important;
+}
+
+.closure-type-extended {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.closure-type-indefinite {
+    background-color: #dc3545 !important;
+}
+
+.closure-type-ministerial {
+    background-color: #212529 !important;
+}
+
+/* Researcher Type Colors */
+.researcher-local {
+    background-color: #198754 !important;
+}
+
+.researcher-foreign {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+}
+
+.researcher-institutional {
+    background-color: #6c757d !important;
+}
+
+/* Dashboard Cards */
+.naz-stat-card {
+    transition: transform 0.2s;
+}
+
+.naz-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Transfer Status */
+.transfer-overdue {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545;
+}
+
+/* Permit Status Badge */
+.permit-pending {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Timeline for transfers */
+.naz-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.naz-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.naz-timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.naz-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #0d6efd;
+    border: 2px solid #fff;
+}
+
+.naz-timeline-item.completed::before {
+    background: #198754;
+}
+
+.naz-timeline-item.current::before {
+    background: #ffc107;
+}
+
+/* Schedule Classification */
+.classification-vital {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.classification-important {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.classification-useful {
+    background-color: #0dcaf0;
+    color: #000;
+}
+
+.classification-non-essential {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+/* Access Restriction */
+.restriction-open {
+    color: #198754;
+}
+
+.restriction-restricted {
+    color: #ffc107;
+}
+
+.restriction-confidential {
+    color: #fd7e14;
+}
+
+.restriction-secret {
+    color: #dc3545;
+}
+
+/* Form styling */
+.naz-form-section {
+    border-left: 4px solid #0d6efd;
+    padding-left: 16px;
+    margin-bottom: 24px;
+}
+
+.naz-form-section h5 {
+    color: #0d6efd;
+}
+
+/* Permit fee indicator */
+.fee-unpaid {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.fee-paid {
+    color: #198754;
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-header .btn {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        page-break-inside: avoid;
+    }
+}

@@ -40,6 +40,7 @@ class AhgSettingsPluginsAction extends sfAction
     {
         return [
             'core' => ['label' => 'Core Plugins', 'icon' => 'fa-cube', 'class' => 'primary'],
+            'admin' => ['label' => 'Admin & Settings', 'icon' => 'fa-cogs', 'class' => 'dark'],
             'theme' => ['label' => 'Themes', 'icon' => 'fa-palette', 'class' => 'info'],
             'ahg' => ['label' => 'AHG Extensions', 'icon' => 'fa-puzzle-piece', 'class' => 'success'],
             'integration' => ['label' => 'Integrations', 'icon' => 'fa-plug', 'class' => 'warning'],
