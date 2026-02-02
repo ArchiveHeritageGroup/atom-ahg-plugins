@@ -101,7 +101,7 @@
     font-size: 18px;
     color: #2c3e50;
     padding-bottom: 10px;
-    border-bottom: 2px solid #3498db;
+    border-bottom: 2px solid var(--ahg-primary);
 }
 
 .section-description {
@@ -205,11 +205,11 @@
 
 /* Field Completeness Table */
 .field-completeness-table .low-completeness {
-    background: #fff5f5;
+    background: rgba(var(--ahg-danger-rgb), 0.1);
 }
 
 .field-completeness-table .badge-required {
-    background: #e74c3c;
+    background: var(--ahg-danger);
     color: #fff;
     font-size: 10px;
     padding: 2px 6px;
@@ -218,7 +218,7 @@
 }
 
 .category-badge {
-    background: #3498db;
+    background: var(--ahg-primary);
     color: #fff;
     font-size: 10px;
     padding: 3px 8px;
@@ -259,11 +259,11 @@
     font-size: 14px;
 }
 
-.grade-badge.grade-a { background: #27ae60; }
+.grade-badge.grade-a { background: var(--ahg-success); }
 .grade-badge.grade-b { background: #2ecc71; }
-.grade-badge.grade-c { background: #f39c12; }
+.grade-badge.grade-c { background: var(--ahg-warning); }
 .grade-badge.grade-d { background: #e67e22; }
-.grade-badge.grade-f { background: #e74c3c; }
+.grade-badge.grade-f { background: var(--ahg-danger); }
 
 /* Sidebar Styles */
 .grade-legend {
@@ -292,13 +292,13 @@
     align-items: center;
     gap: 10px;
     padding: 12px 15px;
-    background: #fff5f5;
-    border-left: 4px solid #e74c3c;
+    background: rgba(var(--ahg-danger-rgb), 0.1);
+    border-left: 4px solid var(--ahg-danger);
     border-radius: 6px;
 }
 
 .issue-item i {
-    color: #e74c3c;
+    color: var(--ahg-danger);
 }
 
 .issue-label {
@@ -381,9 +381,9 @@
     margin-right: 5px;
 }
 
-.progress-stats .stat.completed i { color: #27ae60; }
-.progress-stats .stat.in-progress i { color: #3498db; }
-.progress-stats .stat.overdue i { color: #e74c3c; }
+.progress-stats .stat.completed i { color: var(--ahg-success); }
+.progress-stats .stat.in-progress i { color: var(--ahg-primary); }
+.progress-stats .stat.overdue i { color: var(--ahg-danger); }
 
 /* Workflow Categories */
 .workflow-categories {
@@ -407,17 +407,17 @@
     align-items: center;
     gap: 10px;
     padding: 12px 15px;
-    background: #f8f9fa;
+    background: var(--ahg-light);
     cursor: pointer;
     transition: background 0.2s;
 }
 
 .category-header:hover {
-    background: #ecf0f1;
+    background: var(--ahg-border);
 }
 
 .category-header i {
-    color: #3498db;
+    color: var(--ahg-primary);
     width: 20px;
     text-align: center;
 }
@@ -452,7 +452,7 @@
 }
 
 .procedure-item:hover {
-    background: #f8f9fa;
+    background: var(--ahg-light);
 }
 
 .procedure-item:last-child {
@@ -498,8 +498,8 @@
 }
 
 .procedure-due.overdue {
-    background: #ffebeb;
-    color: #e74c3c;
+    background: rgba(var(--ahg-danger-rgb), 0.15);
+    color: var(--ahg-danger);
 }
 
 .procedure-actions {
@@ -525,7 +525,7 @@
 }
 
 .btn-procedure-action:hover {
-    background: #3498db;
+    background: var(--ahg-primary);
     color: #fff;
 }
 

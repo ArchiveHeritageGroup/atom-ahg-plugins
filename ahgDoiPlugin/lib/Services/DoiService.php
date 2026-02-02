@@ -1003,4 +1003,425 @@ class DoiService
 
         return null;
     }
+
+    // =========================================
+    // BULK OPERATIONS
+    // =========================================
+
+    /**
+     * Bulk sync all DOI metadata to DataCite.
+     *
+     * @param array $options Options: status, repository_id, limit
+     *
+     * @return array Results with counts
+     */
+    public function bulkSync(array $options = []): array
+    {
+        $results = [
+            'total' => 0,
+            'synced' => 0,
+            'failed' => 0,
+            'skipped' => 0,
+            'errors' => [],
+        ];
+
+        $query = DB::table('ahg_doi as d')
+            ->join('information_object as io', 'd.information_object_id', '=', 'io.id')
+            ->whereIn('d.status', ['findable', 'registered', 'draft']);
+
+        // Filter by status
+        if (!empty($options['status'])) {
+            $query->where('d.status', $options['status']);
+        }
+
+        // Filter by repository
+        if (!empty($options['repository_id'])) {
+            $query->where('io.repository_id', $options['repository_id']);
+        }
+
+        // Apply limit
+        $limit = $options['limit'] ?? 100;
+        $dois = $query->select('d.id')->limit($limit)->get();
+
+        $results['total'] = $dois->count();
+
+        foreach ($dois as $doi) {
+            $updateResult = $this->updateDoi($doi->id);
+
+            if ($updateResult['success']) {
+                $results['synced']++;
+            } else {
+                $results['failed']++;
+                $results['errors'][] = "DOI #{$doi->id}: " . ($updateResult['error'] ?? 'Unknown error');
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Queue all DOIs for sync.
+     *
+     * @param array $options Filter options
+     *
+     * @return int Number queued
+     */
+    public function queueForSync(array $options = []): int
+    {
+        $query = DB::table('ahg_doi as d')
+            ->join('information_object as io', 'd.information_object_id', '=', 'io.id')
+            ->whereIn('d.status', ['findable', 'registered', 'draft']);
+
+        // Filter by status
+        if (!empty($options['status'])) {
+            $query->where('d.status', $options['status']);
+        }
+
+        // Filter by repository
+        if (!empty($options['repository_id'])) {
+            $query->where('io.repository_id', $options['repository_id']);
+        }
+
+        $dois = $query->select('d.information_object_id')->get();
+        $queued = 0;
+
+        foreach ($dois as $doi) {
+            $this->queueForMinting($doi->information_object_id, 'update');
+            $queued++;
+        }
+
+        return $queued;
+    }
+
+    // =========================================
+    // DEACTIVATION / TOMBSTONE
+    // =========================================
+
+    /**
+     * Deactivate a DOI (create tombstone).
+     *
+     * This sets the DOI to "registered" state (hides from discovery)
+     * but maintains the landing page for citation integrity.
+     *
+     * @param int    $doiId  DOI record ID
+     * @param string $reason Reason for deactivation
+     *
+     * @return array Result
+     */
+    public function deactivateDoi(int $doiId, string $reason = ''): array
+    {
+        $doiRecord = DB::table('ahg_doi')->where('id', $doiId)->first();
+        if (!$doiRecord) {
+            return ['success' => false, 'error' => 'DOI record not found'];
+        }
+
+        if ($doiRecord->status === 'deleted') {
+            return ['success' => false, 'error' => 'DOI already deactivated'];
+        }
+
+        $record = $this->getRecordDetails($doiRecord->information_object_id);
+        $config = $record ? $this->getConfig($record->repository_id) : $this->getConfig();
+
+        if (!$config) {
+            return ['success' => false, 'error' => 'No configuration found'];
+        }
+
+        $previousStatus = $doiRecord->status;
+
+        // Send hide event to DataCite (changes to registered state)
+        $result = $this->sendStateChange($doiRecord->doi, 'hide', $config);
+
+        if (!$result['success']) {
+            $this->logDoiAction($doiId, $doiRecord->information_object_id, 'deactivate_failed', $previousStatus, null, [
+                'error' => $result['error'],
+                'reason' => $reason,
+            ]);
+
+            return $result;
+        }
+
+        // Update local record
+        DB::table('ahg_doi')
+            ->where('id', $doiId)
+            ->update([
+                'status' => 'deleted',
+                'deactivated_at' => date('Y-m-d H:i:s'),
+                'deactivation_reason' => $reason,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->logDoiAction($doiId, $doiRecord->information_object_id, 'deactivated', $previousStatus, 'deleted', [
+            'reason' => $reason,
+            'datacite_response' => $result['response'] ?? null,
+        ]);
+
+        return [
+            'success' => true,
+            'doi' => $doiRecord->doi,
+            'previous_status' => $previousStatus,
+        ];
+    }
+
+    /**
+     * Reactivate a deactivated DOI.
+     *
+     * @param int $doiId DOI record ID
+     *
+     * @return array Result
+     */
+    public function reactivateDoi(int $doiId): array
+    {
+        $doiRecord = DB::table('ahg_doi')->where('id', $doiId)->first();
+        if (!$doiRecord) {
+            return ['success' => false, 'error' => 'DOI record not found'];
+        }
+
+        if ($doiRecord->status !== 'deleted') {
+            return ['success' => false, 'error' => 'DOI is not deactivated'];
+        }
+
+        $record = $this->getRecordDetails($doiRecord->information_object_id);
+        $config = $record ? $this->getConfig($record->repository_id) : $this->getConfig();
+
+        if (!$config) {
+            return ['success' => false, 'error' => 'No configuration found'];
+        }
+
+        // Send publish event to DataCite (changes back to findable)
+        $result = $this->sendStateChange($doiRecord->doi, 'publish', $config);
+
+        if (!$result['success']) {
+            return $result;
+        }
+
+        // Update local record
+        DB::table('ahg_doi')
+            ->where('id', $doiId)
+            ->update([
+                'status' => 'findable',
+                'deactivated_at' => null,
+                'deactivation_reason' => null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->logDoiAction($doiId, $doiRecord->information_object_id, 'reactivated', 'deleted', 'findable');
+
+        return [
+            'success' => true,
+            'doi' => $doiRecord->doi,
+        ];
+    }
+
+    /**
+     * Send state change event to DataCite.
+     *
+     * @param string $doi    DOI string
+     * @param string $event  Event: publish, register, hide
+     * @param object $config Configuration
+     *
+     * @return array Result
+     */
+    protected function sendStateChange(string $doi, string $event, object $config): array
+    {
+        $url = rtrim($config->datacite_url, '/') . '/dois/' . urlencode($doi);
+
+        $payload = [
+            'data' => [
+                'type' => 'dois',
+                'attributes' => [
+                    'event' => $event,
+                ],
+            ],
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'PATCH',
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/vnd.api+json',
+            ],
+            CURLOPT_USERPWD => $config->datacite_repo_id . ':' . $config->datacite_password,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['success' => false, 'error' => 'cURL error: ' . $error];
+        }
+
+        $responseData = json_decode($response, true);
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+            return ['success' => true, 'response' => $responseData];
+        }
+
+        $errorMsg = $responseData['errors'][0]['title'] ?? "HTTP {$httpCode}";
+
+        return ['success' => false, 'error' => $errorMsg, 'response' => $responseData];
+    }
+
+    // =========================================
+    // EXPORT
+    // =========================================
+
+    /**
+     * Export DOIs to CSV format.
+     *
+     * @param array $options Filter options: status, repository_id, from_date, to_date
+     *
+     * @return string CSV content
+     */
+    public function exportToCsv(array $options = []): string
+    {
+        $dois = $this->getDoiExportData($options);
+
+        $output = fopen('php://temp', 'r+');
+
+        // Header row
+        fputcsv($output, [
+            'DOI',
+            'Title',
+            'Status',
+            'Minted Date',
+            'Landing URL',
+            'Repository',
+            'Object ID',
+        ]);
+
+        // Data rows
+        foreach ($dois as $doi) {
+            fputcsv($output, [
+                $doi->doi,
+                $doi->title ?? 'Untitled',
+                $doi->status,
+                $doi->minted_at,
+                'https://doi.org/' . $doi->doi,
+                $doi->repository_name ?? '',
+                $doi->information_object_id,
+            ]);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+
+        return $csv;
+    }
+
+    /**
+     * Export DOIs to JSON format.
+     *
+     * @param array $options Filter options
+     *
+     * @return string JSON content
+     */
+    public function exportToJson(array $options = []): string
+    {
+        $dois = $this->getDoiExportData($options);
+
+        $data = [];
+        foreach ($dois as $doi) {
+            $data[] = [
+                'doi' => $doi->doi,
+                'url' => 'https://doi.org/' . $doi->doi,
+                'title' => $doi->title ?? 'Untitled',
+                'status' => $doi->status,
+                'minted_at' => $doi->minted_at,
+                'repository' => $doi->repository_name ?? null,
+                'object_id' => $doi->information_object_id,
+                'last_sync' => $doi->last_sync_at,
+            ];
+        }
+
+        return json_encode([
+            'exported_at' => date('c'),
+            'count' => count($data),
+            'dois' => $data,
+        ], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Get DOI data for export.
+     *
+     * @param array $options Filter options
+     *
+     * @return Collection
+     */
+    protected function getDoiExportData(array $options = []): Collection
+    {
+        $query = DB::table('ahg_doi as d')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('d.information_object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('information_object as io', 'd.information_object_id', '=', 'io.id')
+            ->leftJoin('repository_i18n as ri', function ($join) {
+                $join->on('io.repository_id', '=', 'ri.id')
+                    ->where('ri.culture', '=', 'en');
+            })
+            ->select([
+                'd.doi',
+                'd.status',
+                'd.minted_at',
+                'd.last_sync_at',
+                'd.information_object_id',
+                'ioi.title',
+                'ri.authorized_form_of_name as repository_name',
+            ]);
+
+        // Filter by status
+        if (!empty($options['status'])) {
+            $query->where('d.status', $options['status']);
+        }
+
+        // Filter by repository
+        if (!empty($options['repository_id'])) {
+            $query->where('io.repository_id', $options['repository_id']);
+        }
+
+        // Filter by date range
+        if (!empty($options['from_date'])) {
+            $query->where('d.minted_at', '>=', $options['from_date']);
+        }
+        if (!empty($options['to_date'])) {
+            $query->where('d.minted_at', '<=', $options['to_date'] . ' 23:59:59');
+        }
+
+        return $query->orderBy('d.minted_at', 'desc')->get();
+    }
+
+    /**
+     * Get DOI by information object ID.
+     *
+     * @param int $objectId Information object ID
+     *
+     * @return object|null
+     */
+    public function getDoiByObjectId(int $objectId): ?object
+    {
+        return DB::table('ahg_doi')
+            ->where('information_object_id', $objectId)
+            ->first();
+    }
+
+    /**
+     * Check if record has a minted DOI.
+     *
+     * @param int $objectId Information object ID
+     *
+     * @return bool
+     */
+    public function hasDoi(int $objectId): bool
+    {
+        return DB::table('ahg_doi')
+            ->where('information_object_id', $objectId)
+            ->whereIn('status', ['findable', 'registered', 'draft'])
+            ->exists();
+    }
 }

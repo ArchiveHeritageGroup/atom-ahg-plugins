@@ -24,7 +24,30 @@
     </section>
   </noscript>
 
-  <?php if (false /* TODO: implement upload limit check */) { ?>
+  <?php
+  // Check upload disk space limit
+  $uploadLimitReached = false;
+  $uploadLimitGb = sfConfig::get('app_upload_limit', 0); // 0 = no limit
+
+  if ($uploadLimitGb > 0) {
+      $uploadsPath = sfConfig::get('sf_upload_dir', sfConfig::get('sf_web_dir') . '/uploads');
+      if (is_dir($uploadsPath)) {
+          // Calculate current uploads folder size
+          $currentSizeBytes = 0;
+          $iterator = new RecursiveIteratorIterator(
+              new RecursiveDirectoryIterator($uploadsPath, RecursiveDirectoryIterator::SKIP_DOTS)
+          );
+          foreach ($iterator as $file) {
+              if ($file->isFile()) {
+                  $currentSizeBytes += $file->getSize();
+              }
+          }
+          $limitBytes = $uploadLimitGb * 1024 * 1024 * 1024;
+          $uploadLimitReached = ($currentSizeBytes >= $limitBytes);
+      }
+  }
+  ?>
+  <?php if ($uploadLimitReached): ?>
 
     <div id="upload_limit_reached">
       <div class="alert alert-warning" role="alert">

@@ -1,5 +1,6 @@
 <?php
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -12,7 +13,20 @@ class gettyLinksAction extends sfAction
     public $links = [];
     public $statistics = [];
     public $vocabularies = ['aat', 'tgn', 'ulan'];
-    public $statuses = ['pending', 'confirmed', 'suggested', 'rejected'];
+    public $statuses = [];
+
+    public function preExecute()
+    {
+        parent::preExecute();
+        // Load statuses from database
+        $taxonomyService = new AhgTaxonomyService();
+        $this->statuses = array_keys($taxonomyService->getLinkStatuses(false));
+
+        // Fallback if not populated
+        if (empty($this->statuses)) {
+            $this->statuses = ['pending', 'confirmed', 'suggested', 'rejected'];
+        }
+    }
     
     public function execute($request)
     {

@@ -90,7 +90,16 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">ORCID ID</label>
-                        <input type="text" name="orcid_id" class="form-control" value="<?php echo $researcher->orcid_id; ?>">
+                        <div class="input-group">
+                            <input type="text" name="orcid_id" class="form-control" value="<?php echo $researcher->orcid_id; ?>" <?php echo ($researcher->orcid_verified ?? false) ? 'readonly' : ''; ?>>
+                            <?php if ($researcher->orcid_verified ?? false): ?>
+                                <span class="input-group-text bg-success text-white"><i class="fas fa-check-circle me-1"></i> Verified</span>
+                                <a href="<?php echo url_for('research/orcidDisconnect'); ?>" class="btn btn-outline-danger" onclick="return confirm('Disconnect ORCID?')">Disconnect</a>
+                            <?php else: ?>
+                                <a href="<?php echo url_for('research/orcidConnect'); ?>" class="btn btn-outline-success"><i class="fab fa-orcid me-1"></i> Verify with ORCID</a>
+                            <?php endif; ?>
+                        </div>
+                        <small class="text-muted">Connect your ORCID for verified researcher identity</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Research Interests</label>
@@ -135,6 +144,26 @@
             <?php else: ?>
                 <div class="card-body text-muted">No collections</div>
             <?php endif; ?>
+        </div>
+        <?php if ($researcher->status === 'approved'): ?>
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white"><h6 class="mb-0"><i class="fas fa-key me-2"></i>API Access</h6></div>
+            <div class="card-body">
+                <p class="small text-muted mb-2">Access your research data programmatically via REST API.</p>
+                <a href="<?php echo url_for('research/apiKeys'); ?>" class="btn btn-sm btn-outline-dark w-100">
+                    <i class="fas fa-key me-1"></i> Manage API Keys
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+        <div class="card">
+            <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="fas fa-link me-2"></i>Quick Links</h6></div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="<?php echo url_for('research/projects'); ?>"><i class="fas fa-project-diagram me-2"></i>My Projects</a></li>
+                <li class="list-group-item"><a href="<?php echo url_for('research/bibliographies'); ?>"><i class="fas fa-book me-2"></i>Bibliographies</a></li>
+                <li class="list-group-item"><a href="<?php echo url_for('research/workspaces'); ?>"><i class="fas fa-users-cog me-2"></i>Workspaces</a></li>
+                <li class="list-group-item"><a href="<?php echo url_for('research/reproductions'); ?>"><i class="fas fa-copy me-2"></i>Reproduction Requests</a></li>
+            </ul>
         </div>
     </div>
 </div>

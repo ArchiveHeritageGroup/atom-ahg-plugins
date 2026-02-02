@@ -10,6 +10,7 @@ require_once dirname(__FILE__)."/../RightsConstants.php";
  * @subpackage Service
  */
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
@@ -19,6 +20,7 @@ class RightsService
     protected static ?RightsService $instance = null;
     protected Logger $logger;
     protected string $culture;
+    protected AhgTaxonomyService $taxonomyService;
 
     // PREMIS acts
     public const ACT_RENDER = 'render';
@@ -39,6 +41,7 @@ class RightsService
     public function __construct(?string $culture = null)
     {
         $this->culture = $culture ?? sfContext::getInstance()->getUser()->getCulture() ?? 'en';
+        $this->taxonomyService = new AhgTaxonomyService();
         $this->initLogger();
     }
 
@@ -619,49 +622,12 @@ class RightsService
     public function getFormOptions(): array
     {
         return [
-            'basis_options' => [
-                'copyright' => 'Copyright',
-                'license' => 'License',
-                'statute' => 'Statute',
-                'donor' => 'Donor',
-                'policy' => 'Policy',
-                'other' => 'Other',
-            ],
-            'copyright_status_options' => [
-                'copyrighted' => 'In Copyright',
-                'public_domain' => 'Public Domain',
-                'unknown' => 'Unknown',
-            ],
-            'act_options' => [
-                'render' => 'Render / Display',
-                'disseminate' => 'Disseminate / Distribute',
-                'replicate' => 'Replicate / Copy',
-                'migrate' => 'Migrate / Transform',
-                'modify' => 'Modify / Edit',
-                'delete' => 'Delete',
-                'print' => 'Print',
-                'use' => 'Use',
-            ],
-            'restriction_options' => [
-                'allow' => 'Allow',
-                'disallow' => 'Disallow',
-                'conditional' => 'Conditional',
-            ],
-            'embargo_type_options' => [
-                'full' => 'Full Embargo',
-                'metadata_only' => 'Metadata Only (No Digital)',
-                'digital_only' => 'Digital Only (Metadata Visible)',
-                'partial' => 'Partial',
-            ],
-            'embargo_reason_options' => [
-                'donor_restriction' => 'Donor Restriction',
-                'copyright' => 'Copyright',
-                'privacy' => 'Privacy',
-                'legal' => 'Legal Hold',
-                'commercial' => 'Commercial Sensitivity',
-                'research' => 'Research Embargo',
-                'other' => 'Other',
-            ],
+            'basis_options' => $this->taxonomyService->getRightsBasis(false),
+            'copyright_status_options' => $this->taxonomyService->getCopyrightStatuses(false),
+            'act_options' => $this->taxonomyService->getActTypes(false),
+            'restriction_options' => $this->taxonomyService->getRestrictionTypes(false),
+            'embargo_type_options' => $this->taxonomyService->getEmbargoTypes(false),
+            'embargo_reason_options' => $this->taxonomyService->getEmbargoReasons(false),
             'rights_statements' => $this->getRightsStatements(),
             'cc_licenses' => $this->getCcLicenses(),
             'tk_labels' => $this->getTkLabels(),

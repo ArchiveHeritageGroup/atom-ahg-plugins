@@ -1,0 +1,342 @@
+{
+  "name": "DAM (Dublin Core/IPTC)",
+  "target_type": "dam",
+  "category": "Digital Asset Management",
+  "description": "Default mapping for Digital Asset Management records using Dublin Core and IPTC metadata fields",
+  "display_standard_id": 452,
+  "fields": [
+    {
+      "source_field": "identifier",
+      "atom_field": "identifier",
+      "include": true
+    },
+    {
+      "source_field": "filename",
+      "atom_field": "identifier",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " - "
+    },
+    {
+      "source_field": "title",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "headline",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "alternativeTitle",
+      "atom_field": "alternateTitle",
+      "include": true
+    },
+    {
+      "source_field": "creator",
+      "atom_field": "eventActors",
+      "include": true
+    },
+    {
+      "source_field": "contributor",
+      "atom_field": "eventActors",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "publisher",
+      "atom_field": "eventActors",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "dateCreated",
+      "atom_field": "eventDates",
+      "include": true
+    },
+    {
+      "source_field": "dateCaptured",
+      "atom_field": "eventDates",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " (captured: "
+    },
+    {
+      "source_field": "dateModified",
+      "atom_field": "revisionHistory",
+      "constant_value": "Modified: ",
+      "concat_constant": true,
+      "include": true
+    },
+    {
+      "source_field": "description",
+      "atom_field": "scopeAndContent",
+      "include": true
+    },
+    {
+      "source_field": "caption",
+      "atom_field": "scopeAndContent",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "\n\n"
+    },
+    {
+      "source_field": "format",
+      "atom_field": "extentAndMedium",
+      "include": true
+    },
+    {
+      "source_field": "formatMimeType",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " ("
+    },
+    {
+      "source_field": "dimensions",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "fileSize",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "duration",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; duration: "
+    },
+    {
+      "source_field": "extent",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "type",
+      "atom_field": "levelOfDescription",
+      "include": true
+    },
+    {
+      "source_field": "source",
+      "atom_field": "archivalHistory",
+      "include": true
+    },
+    {
+      "source_field": "language",
+      "atom_field": "language",
+      "include": true
+    },
+    {
+      "source_field": "coverage",
+      "atom_field": "scopeAndContent",
+      "constant_value": "Coverage: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "\n",
+      "include": true
+    },
+    {
+      "source_field": "keywords",
+      "atom_field": "subjectAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "category",
+      "atom_field": "subjectAccessPoints",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "rights",
+      "atom_field": "reproductionConditions",
+      "include": true
+    },
+    {
+      "source_field": "rightsHolder",
+      "atom_field": "reproductionConditions",
+      "constant_value": "Rights holder: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "license",
+      "atom_field": "reproductionConditions",
+      "constant_value": "License: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "usageTerms",
+      "atom_field": "reproductionConditions",
+      "constant_value": "Usage terms: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "credit",
+      "atom_field": "reproductionConditions",
+      "constant_value": "Credit: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "locationCreated",
+      "atom_field": "placeAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "locationShown",
+      "atom_field": "placeAccessPoints",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "gpsLatitude",
+      "atom_field": "generalNote",
+      "constant_value": "GPS: ",
+      "concat_constant": true,
+      "include": true
+    },
+    {
+      "source_field": "gpsLongitude",
+      "atom_field": "generalNote",
+      "concatenate": true,
+      "concat_symbol": ", ",
+      "include": true
+    },
+    {
+      "source_field": "gpsAltitude",
+      "atom_field": "generalNote",
+      "concatenate": true,
+      "concat_symbol": " (alt: ",
+      "include": true
+    },
+    {
+      "source_field": "cameraModel",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Camera: ",
+      "concat_constant": true,
+      "include": true
+    },
+    {
+      "source_field": "cameraMake",
+      "atom_field": "physicalCharacteristics",
+      "concatenate": true,
+      "concat_symbol": " ",
+      "include": true
+    },
+    {
+      "source_field": "focalLength",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Focal length: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "exposureTime",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Exposure: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "aperture",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Aperture: f/",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "iso",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "ISO: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "colorSpace",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Color space: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "resolution",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Resolution: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "orientation",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Orientation: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "; ",
+      "include": true
+    },
+    {
+      "source_field": "subjectAccessPoints",
+      "atom_field": "subjectAccessPoints",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "placeAccessPoints",
+      "atom_field": "placeAccessPoints",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "nameAccessPoints",
+      "atom_field": "nameAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectPath",
+      "atom_field": "digitalObjectPath",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectURI",
+      "atom_field": "digitalObjectURI",
+      "include": true
+    }
+  ]
+}

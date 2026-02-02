@@ -5,9 +5,12 @@
     <div class="col-lg-8">
       
       <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Data Migration Tool</h5>
-        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'jobs']) ?>" class="btn btn-sm btn-outline-light"><i class="bi bi-list-task me-1"></i>View Jobs</a>
+          <div>
+            <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'batchExport']) ?>" class="btn btn-sm btn-outline-light me-2"><i class="bi bi-download me-1"></i>Batch Export</a>
+            <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'jobs']) ?>" class="btn btn-sm btn-outline-light"><i class="bi bi-list-task me-1"></i>View Jobs</a>
+          </div>
         </div>
         <div class="card-body">
           

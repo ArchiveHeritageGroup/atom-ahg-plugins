@@ -1,8 +1,8 @@
 {
     "name": "Research Portal",
     "machine_name": "ahgResearchPlugin",
-    "version": "1.3.8",
-    "description": "Research support plugin with reading room booking, researcher registration, and workspace management",
+    "version": "2.0.0",
+    "description": "Professional research support platform with ORCID integration, multi-researcher collaboration, research projects, bibliography management, reproduction requests, private workspaces, and REST API access",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "research",
@@ -16,29 +16,88 @@
         "ahgAccessRequestPlugin"
     ],
     "optional": {
-        "extensions": []
+        "extensions": [
+            "ahgAuditTrailPlugin"
+        ]
     },
     "tables": [
         "research_researcher",
-        "research_booking",
+        "research_researcher_audit",
+        "research_researcher_type",
+        "research_researcher_type_i18n",
+        "research_verification",
         "research_reading_room",
+        "research_booking",
+        "research_material_request",
+        "research_request_status_history",
+        "research_reproduction_request",
+        "research_reproduction_item",
+        "research_reproduction_file",
+        "research_project",
+        "research_project_collaborator",
+        "research_project_resource",
+        "research_project_milestone",
+        "research_activity_log",
         "research_collection",
         "research_collection_item",
-        "research_material_request",
         "research_annotation",
         "research_saved_search",
+        "research_search_alert_log",
+        "research_bibliography",
+        "research_bibliography_entry",
+        "research_workspace",
+        "research_workspace_member",
+        "research_workspace_resource",
+        "research_discussion",
+        "research_statistics_daily",
         "research_citation_log",
-        "research_password_reset"
+        "research_password_reset",
+        "research_api_key",
+        "research_api_log"
     ],
     "provides": {
         "admin_section": {
             "id": "research",
             "section": "services",
             "title": "Research Services",
-            "description": "Researcher registration and reading room management",
+            "description": "Professional research support with ORCID, collaboration, and API access",
             "icon": "fa-book-reader",
             "route": "research/dashboard",
             "permission": "administrator"
+        },
+        "api": {
+            "base_path": "/api/research",
+            "authentication": "api_key",
+            "endpoints": [
+                "GET /profile",
+                "GET /projects",
+                "POST /projects",
+                "GET /collections",
+                "POST /collections",
+                "GET /collections/:id",
+                "GET /searches",
+                "GET /bookings",
+                "POST /bookings",
+                "GET /citations/:id/:format",
+                "GET /bibliographies",
+                "GET /bibliographies/:id/export/:format",
+                "GET /annotations",
+                "GET /stats"
+            ]
         }
+    },
+    "features": {
+        "orcid_integration": true,
+        "multi_researcher_collaboration": true,
+        "research_projects": true,
+        "bibliography_management": true,
+        "reproduction_requests": true,
+        "private_workspaces": true,
+        "real_time_alerts": true,
+        "rest_api": true,
+        "admin_configurable_types": true,
+        "verification_system": true,
+        "activity_tracking": true,
+        "analytics_dashboard": true
     }
 }

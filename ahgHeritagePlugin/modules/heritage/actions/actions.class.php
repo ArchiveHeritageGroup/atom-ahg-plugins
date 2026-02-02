@@ -1436,7 +1436,13 @@ class heritageActions extends sfActions
 
                 if ($response['success']) {
                     $this->success = true;
-                    // TODO: Send verification email
+
+                    // Send verification email
+                    $this->sendVerificationEmail(
+                        $response['data']['email'],
+                        $response['data']['display_name'],
+                        $response['data']['verify_token']
+                    );
                 } else {
                     $this->error = $response['error'];
                 }
@@ -2188,5 +2194,71 @@ class heritageActions extends sfActions
                 'total_pages' => ceil($result['total'] / $limit),
             ],
         ]);
+    }
+
+    /**
+     * Send verification email to new contributor.
+     *
+     * @param string $email       Recipient email
+     * @param string $displayName Recipient name
+     * @param string $token       Verification token
+     */
+    protected function sendVerificationEmail(string $email, string $displayName, string $token): bool
+    {
+        $siteName = sfConfig::get('app_siteTitle', 'Heritage Portal');
+        $baseUrl = sfConfig::get('app_siteBaseUrl', $this->getRequest()->getUriPrefix());
+        $verifyUrl = $baseUrl . url_for([
+            'module' => 'heritage',
+            'action' => 'contributorVerify',
+            'token' => $token,
+        ]);
+
+        $subject = sprintf('%s - Verify your email address', $siteName);
+
+        $body = <<<EMAIL
+Hello {$displayName},
+
+Thank you for registering with {$siteName}.
+
+Please click the link below to verify your email address:
+
+{$verifyUrl}
+
+This link will expire in 48 hours.
+
+If you did not create an account, please ignore this email.
+
+Best regards,
+{$siteName} Team
+EMAIL;
+
+        // Use Symfony mailer if available, otherwise PHP mail
+        try {
+            if (class_exists('sfMail')) {
+                $mail = new sfMail();
+                $mail->initialize();
+                $mail->setFrom(sfConfig::get('app_mail_from', 'noreply@' . $_SERVER['HTTP_HOST']));
+                $mail->addAddress($email);
+                $mail->setSubject($subject);
+                $mail->setBody($body);
+
+                return $mail->send();
+            }
+
+            // Fallback to PHP mail
+            $headers = [
+                'From: ' . sfConfig::get('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
+                'Reply-To: ' . sfConfig::get('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
+                'X-Mailer: PHP/' . phpversion(),
+                'Content-Type: text/plain; charset=UTF-8',
+            ];
+
+            return mail($email, $subject, $body, implode("\r\n", $headers));
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            error_log('Failed to send verification email: ' . $e->getMessage());
+
+            return false;
+        }
     }
 }

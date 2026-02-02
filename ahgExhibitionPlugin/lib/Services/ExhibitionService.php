@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ahgExhibitionPlugin\Services;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -22,7 +23,9 @@ use Psr\Log\NullLogger;
  */
 class ExhibitionService
 {
-    /** Exhibition types */
+    /**
+     * @deprecated Use AhgTaxonomyService::getExhibitionTypes() instead
+     */
     public const TYPES = [
         'permanent' => 'Permanent Exhibition',
         'temporary' => 'Temporary Exhibition',
@@ -31,7 +34,9 @@ class ExhibitionService
         'pop_up' => 'Pop-up Exhibition',
     ];
 
-    /** Exhibition statuses */
+    /**
+     * @deprecated Use AhgTaxonomyService::getExhibitionStatusesWithColors() instead
+     */
     public const STATUSES = [
         'concept' => ['label' => 'Concept', 'color' => '#9e9e9e', 'order' => 1],
         'planning' => ['label' => 'Planning', 'color' => '#2196f3', 'order' => 2],
@@ -44,7 +49,9 @@ class ExhibitionService
         'canceled' => ['label' => 'Canceled', 'color' => '#f44336', 'order' => 9],
     ];
 
-    /** Object status in exhibition */
+    /**
+     * @deprecated Use AhgTaxonomyService::getExhibitionObjectStatuses() instead
+     */
     public const OBJECT_STATUSES = [
         'proposed' => 'Proposed',
         'confirmed' => 'Confirmed',
@@ -69,13 +76,16 @@ class ExhibitionService
 
     private ConnectionInterface $db;
     private LoggerInterface $logger;
+    private AhgTaxonomyService $taxonomyService;
 
     public function __construct(
         ConnectionInterface $db,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?AhgTaxonomyService $taxonomyService = null
     ) {
         $this->db = $db;
         $this->logger = $logger ?? new NullLogger();
+        $this->taxonomyService = $taxonomyService ?? new AhgTaxonomyService();
     }
 
     // =========================================================================
@@ -157,8 +167,10 @@ class ExhibitionService
         }
 
         $data = (array) $exhibition;
-        $data['status_info'] = self::STATUSES[$data['status']] ?? null;
-        $data['type_label'] = self::TYPES[$data['exhibition_type']] ?? $data['exhibition_type'];
+        $statuses = $this->getStatuses();
+        $types = $this->getTypes();
+        $data['status_info'] = $statuses[$data['status']] ?? null;
+        $data['type_label'] = $types[$data['exhibition_type']] ?? $data['exhibition_type'];
 
         // Calculate days until opening/since closing
         $data['timing'] = $this->calculateTiming($data);
@@ -340,8 +352,10 @@ class ExhibitionService
             ->get()
             ->map(function ($row) {
                 $data = (array) $row;
-                $data['status_info'] = self::STATUSES[$data['status']] ?? null;
-                $data['type_label'] = self::TYPES[$data['exhibition_type']] ?? $data['exhibition_type'];
+                $statuses = $this->getStatuses();
+                $types = $this->getTypes();
+                $data['status_info'] = $statuses[$data['status']] ?? null;
+                $data['type_label'] = $types[$data['exhibition_type']] ?? $data['exhibition_type'];
 
                 return $data;
             })
@@ -576,7 +590,8 @@ class ExhibitionService
             ->get()
             ->map(function ($row) {
                 $data = (array) $row;
-                $data['status_label'] = self::OBJECT_STATUSES[$data['status']] ?? $data['status'];
+                $objectStatuses = $this->getObjectStatuses();
+                $data['status_label'] = $objectStatuses[$data['status']] ?? $data['status'];
                 if (!empty($data['thumbnail_path']) && !empty($data['thumbnail_name'])) {
                     // Path already contains /uploads/, just append filename
                     $data['thumbnail_url'] = rtrim($data['thumbnail_path'], '/').'/'.ltrim($data['thumbnail_name'], '/');
@@ -1399,19 +1414,37 @@ class ExhibitionService
     }
 
     /**
-     * Get available types.
+     * Get available types from database.
      */
     public function getTypes(): array
     {
-        return self::TYPES;
+        return $this->taxonomyService->getExhibitionTypes(false);
     }
 
     /**
-     * Get available statuses.
+     * Get available statuses with attributes from database.
      */
     public function getStatuses(): array
     {
-        return self::STATUSES;
+        $terms = $this->taxonomyService->getExhibitionStatusesWithColors();
+        $result = [];
+        foreach ($terms as $code => $term) {
+            $result[$code] = [
+                'label' => $term->name,
+                'color' => $term->color ?? '#6c757d',
+                'order' => $term->sort_order ?? 0,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get object statuses from database.
+     */
+    public function getObjectStatuses(): array
+    {
+        return $this->taxonomyService->getExhibitionObjectStatuses(false);
     }
 
     /**

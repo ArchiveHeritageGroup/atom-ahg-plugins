@@ -145,6 +145,10 @@ class SettingsServicesAction extends sfAction
             $host = sfConfig::get('app_elasticsearch_host', 'localhost');
             $port = sfConfig::get('app_elasticsearch_port', '9200');
 
+            // Auto-detect engine type (Elasticsearch or OpenSearch)
+            $engineName = SearchEngineFactory::getEngineName($host, (int) $port);
+            $engineVersion = SearchEngineFactory::getEngineVersion($host, (int) $port);
+
             $ch = curl_init("http://{$host}:{$port}/_cluster/health");
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -168,8 +172,10 @@ class SettingsServicesAction extends sfAction
                     default => self::STATUS_ERROR,
                 };
 
+                $versionInfo = $engineVersion ? " v{$engineVersion}" : '';
+
                 return [
-                    'name' => 'Elasticsearch',
+                    'name' => $engineName . $versionInfo,
                     'status' => $status,
                     'message' => "Cluster: {$clusterStatus}, Nodes: " . ($health['number_of_nodes'] ?? '?'),
                     'response_time' => $responseTime,
@@ -179,7 +185,7 @@ class SettingsServicesAction extends sfAction
             }
 
             return [
-                'name' => 'Elasticsearch',
+                'name' => $engineName ?: 'Search Engine',
                 'status' => self::STATUS_ERROR,
                 'message' => "HTTP {$httpCode} - Service unavailable",
                 'response_time' => $responseTime,
@@ -188,7 +194,7 @@ class SettingsServicesAction extends sfAction
             ];
         } catch (\Exception $e) {
             return [
-                'name' => 'Elasticsearch',
+                'name' => 'Search Engine',
                 'status' => self::STATUS_ERROR,
                 'message' => 'Connection failed: ' . $e->getMessage(),
                 'response_time' => null,

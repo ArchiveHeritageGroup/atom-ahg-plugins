@@ -1,0 +1,3 @@
+# API module security - no Symfony authentication required (uses API key)
+all:
+  is_secure: false

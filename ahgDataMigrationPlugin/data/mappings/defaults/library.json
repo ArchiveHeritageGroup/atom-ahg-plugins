@@ -1,0 +1,174 @@
+{
+  "name": "Library (MARC/RDA)",
+  "target_type": "library",
+  "category": "Library",
+  "description": "Default mapping for Library records using MARC/RDA standard fields",
+  "display_standard_id": 450,
+  "fields": [
+    {
+      "source_field": "isbn",
+      "atom_field": "identifier",
+      "include": true
+    },
+    {
+      "source_field": "issn",
+      "atom_field": "identifier",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "callNumber",
+      "atom_field": "identifier",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "title",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "titleProper",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "parallelTitle",
+      "atom_field": "alternateTitle",
+      "include": true
+    },
+    {
+      "source_field": "otherTitleInfo",
+      "atom_field": "alternateTitle",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "statementOfResponsibility",
+      "atom_field": "eventActors",
+      "include": true
+    },
+    {
+      "source_field": "publisher",
+      "atom_field": "eventActors",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "dateOfPublication",
+      "atom_field": "eventDates",
+      "include": true
+    },
+    {
+      "source_field": "copyrightDate",
+      "atom_field": "eventDates",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " (c)"
+    },
+    {
+      "source_field": "placeOfPublication",
+      "atom_field": "placeAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "extent",
+      "atom_field": "extentAndMedium",
+      "include": true
+    },
+    {
+      "source_field": "dimensions",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "seriesTitle",
+      "atom_field": "relatedUnitsOfDescription",
+      "include": true
+    },
+    {
+      "source_field": "seriesNumber",
+      "atom_field": "relatedUnitsOfDescription",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ", no. "
+    },
+    {
+      "source_field": "editionStatement",
+      "atom_field": "generalNote",
+      "include": true
+    },
+    {
+      "source_field": "language",
+      "atom_field": "language",
+      "include": true
+    },
+    {
+      "source_field": "summary",
+      "atom_field": "scopeAndContent",
+      "include": true
+    },
+    {
+      "source_field": "tableOfContents",
+      "atom_field": "scopeAndContent",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "\n\nTable of Contents:\n"
+    },
+    {
+      "source_field": "note",
+      "atom_field": "generalNote",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "generalNote",
+      "atom_field": "generalNote",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "subjectAccessPoints",
+      "atom_field": "subjectAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "nameAccessPoints",
+      "atom_field": "nameAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "genreAccessPoints",
+      "atom_field": "genreAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "physicalLocation",
+      "atom_field": "locationOfOriginals",
+      "include": true
+    },
+    {
+      "source_field": "repository",
+      "atom_field": "repository",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectPath",
+      "atom_field": "digitalObjectPath",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectURI",
+      "atom_field": "digitalObjectURI",
+      "include": true
+    }
+  ]
+}

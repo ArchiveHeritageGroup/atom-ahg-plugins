@@ -1,0 +1,15 @@
+# ahgCartPlugin Routes
+
+cart_download:
+  url: /cart/download/:token
+  param: { module: cart, action: download }
+  requirements: { token: '[a-f0-9]+' }
+
+cart_order:
+  url: /cart/order/:order
+  param: { module: cart, action: orderConfirmation }
+  requirements: { order: 'ORD-[A-Z0-9-]+' }
+
+cart_payment_notify:
+  url: /cart/payment/notify
+  param: { module: cart, action: paymentNotify }

@@ -224,6 +224,18 @@
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>" class="list-group-item list-group-item-action">
             <i class="fas fa-folder me-2"></i><?php echo __('My Collections'); ?>
           </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'projects']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-project-diagram me-2"></i><?php echo __('My Projects'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'bibliographies']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-book me-2"></i><?php echo __('Bibliographies'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'workspaces']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-users-cog me-2"></i><?php echo __('Team Workspaces'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-copy me-2"></i><?php echo __('Reproduction Requests'); ?>
+          </a>
           <?php endif; ?>
           <?php if ($sf_user->isAdministrator()): ?>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>" class="list-group-item list-group-item-action">
@@ -234,6 +246,24 @@
           </a>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'rooms']); ?>" class="list-group-item list-group-item-action">
             <i class="fas fa-door-open me-2"></i><?php echo __('Reading Rooms'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'seats']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-chair me-2"></i><?php echo __('Seat Management'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'equipment']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-tools me-2"></i><?php echo __('Equipment'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'retrievalQueue']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-boxes-stacked me-2"></i><?php echo __('Retrieval Queue'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'walkIn']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-walking me-2"></i><?php echo __('Walk-In Visitors'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminTypes']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-user-tag me-2"></i><?php echo __('Researcher Types'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminStatistics']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-chart-bar me-2"></i><?php echo __('Statistics'); ?>
           </a>
           <?php endif; ?>
         <?php else: ?>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AhgLoan\Services\Loan;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -18,13 +19,17 @@ use Psr\Log\NullLogger;
  */
 class CourierManagementService
 {
-    /** Shipment types */
+    /**
+     * @deprecated Use AhgTaxonomyService::getShipmentTypes() instead
+     */
     public const SHIPMENT_TYPES = [
         'outbound' => 'Outbound (To Borrower)',
         'return' => 'Return (To Lender)',
     ];
 
-    /** Shipment statuses */
+    /**
+     * @deprecated Use AhgTaxonomyService::getShipmentStatuses() instead
+     */
     public const SHIPMENT_STATUSES = [
         'planned' => 'Planned',
         'picked_up' => 'Picked Up',
@@ -36,7 +41,9 @@ class CourierManagementService
         'returned' => 'Returned to Sender',
     ];
 
-    /** Cost types */
+    /**
+     * @deprecated Use AhgTaxonomyService::getCostTypes() instead
+     */
     public const COST_TYPES = [
         'transport' => 'Transport/Shipping',
         'insurance' => 'Insurance',
@@ -52,11 +59,37 @@ class CourierManagementService
 
     private ConnectionInterface $db;
     private LoggerInterface $logger;
+    private AhgTaxonomyService $taxonomyService;
 
     public function __construct(ConnectionInterface $db, ?LoggerInterface $logger = null)
     {
         $this->db = $db;
         $this->logger = $logger ?? new NullLogger();
+        $this->taxonomyService = new AhgTaxonomyService();
+    }
+
+    /**
+     * Get shipment types from database.
+     */
+    public function getShipmentTypes(): array
+    {
+        return $this->taxonomyService->getShipmentTypes(false);
+    }
+
+    /**
+     * Get shipment statuses from database.
+     */
+    public function getShipmentStatuses(): array
+    {
+        return $this->taxonomyService->getShipmentStatuses(false);
+    }
+
+    /**
+     * Get cost types from database.
+     */
+    public function getCostTypes(): array
+    {
+        return $this->taxonomyService->getCostTypes(false);
     }
 
     // =========================================================================

@@ -10,6 +10,7 @@
  * @package ahgMuseumPlugin
  */
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 
 class ahgSpectrumWorkflowService
@@ -48,7 +49,9 @@ class ahgSpectrumWorkflowService
     // Property name for storage
     const PROPERTY_NAME = 'spectrumProcedures';
 
-    // Status colors for UI
+    /**
+     * @deprecated Use getStatusColors() method instead
+     */
     public static $statusColors = [
         self::STATUS_NOT_STARTED => '#95a5a6',
         self::STATUS_IN_PROGRESS => '#3498db',
@@ -57,6 +60,32 @@ class ahgSpectrumWorkflowService
         self::STATUS_ON_HOLD => '#9b59b6',
         self::STATUS_OVERDUE => '#e74c3c',
     ];
+
+    /**
+     * Get procedure statuses from database.
+     */
+    public static function getStatuses(): array
+    {
+        $service = new AhgTaxonomyService();
+
+        return $service->getSpectrumProcedureStatuses(false);
+    }
+
+    /**
+     * Get status colors from database.
+     */
+    public static function getStatusColors(): array
+    {
+        $service = new AhgTaxonomyService();
+        $terms = $service->getSpectrumProcedureStatusesWithColors();
+
+        $colors = [];
+        foreach ($terms as $code => $term) {
+            $colors[$code] = $term->color ?? '#6c757d';
+        }
+
+        return $colors;
+    }
 
     /**
      * Get all procedure definitions

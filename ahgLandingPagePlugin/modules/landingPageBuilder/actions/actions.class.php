@@ -423,7 +423,6 @@ class landingPageBuilderActions extends sfActions
         
         if (!$page) {
             $this->forward404();
-        error_log("ACTION DEBUG: blocks count=" . count($blocks) . " first_id=" . ($blocks->first()->id ?? "none") . " first_config=" . json_encode($blocks->first()->config ?? []));
         }
 
         $blocks = $repository->getPageBlocks($pageId, false); // Include hidden blocks

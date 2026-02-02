@@ -15,7 +15,7 @@
 }
 .annotator-canvas-container {
     flex: 1;
-    background: #2a2a2a;
+    background: var(--ahg-dark);
     overflow: auto;
     display: flex;
     justify-content: center;
@@ -31,7 +31,7 @@
     background: #1a1a1a;
 }
 .annotator-canvas-container::-webkit-scrollbar-thumb {
-    background: #555;
+    background: var(--ahg-muted);
     border-radius: 4px;
 }
 .annotator-canvas-container::-webkit-scrollbar-thumb:hover {
@@ -41,8 +41,8 @@
     display: flex;
     justify-content: space-between;
     padding: 8px 15px;
-    background: #f8f9fa;
-    border-top: 1px solid #dee2e6;
+    background: var(--ahg-light);
+    border-top: 1px solid var(--ahg-border);
     font-size: 0.85em;
     font-family: monospace;
 }
@@ -52,7 +52,7 @@
     gap: 8px;
     padding: 10px 15px;
     background: #e9ecef;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--ahg-border);
     align-items: center;
 }
 .annotator-toolbar .btn {
@@ -93,16 +93,16 @@
 .annotator-legend {
     width: 260px;
     min-width: 260px;
-    background: #f8f9fa;
-    border-left: 1px solid #dee2e6;
+    background: var(--ahg-light);
+    border-left: 1px solid var(--ahg-border);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
 }
 .legend-header {
     padding: 12px 15px;
-    border-bottom: 1px solid #dee2e6;
-    background: #495057;
+    border-bottom: 1px solid var(--ahg-border);
+    background: var(--ahg-dark);
     color: white;
 }
 .legend-items {
@@ -122,7 +122,7 @@
 }
 .legend-empty {
     font-size: 0.85em;
-    color: #6c757d;
+    color: var(--ahg-muted);
     text-align: center;
     padding: 16px 0;
 }

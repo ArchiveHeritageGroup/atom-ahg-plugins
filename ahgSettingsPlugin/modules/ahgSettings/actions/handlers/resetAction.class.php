@@ -29,6 +29,17 @@ class AhgSettingsResetAction extends sfAction
                 'ahg_link_color' => '#005837',
                 'ahg_sidebar_bg' => '#f8f9fa',
                 'ahg_sidebar_text' => '#333333',
+                // Extended theme colors
+                'ahg_success_color' => '#28a745',
+                'ahg_warning_color' => '#ffc107',
+                'ahg_danger_color' => '#dc3545',
+                'ahg_info_color' => '#17a2b8',
+                'ahg_light_color' => '#f8f9fa',
+                'ahg_dark_color' => '#343a40',
+                'ahg_muted_color' => '#6c757d',
+                'ahg_border_color' => '#dee2e6',
+                'ahg_body_bg' => '#ffffff',
+                'ahg_body_text' => '#212529',
             ],
             'metadata' => [
                 'meta_extract_on_upload' => 'true',

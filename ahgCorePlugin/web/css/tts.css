@@ -12,9 +12,9 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
-  color: #1a5c4c;
+  color: var(--ahg-primary);
   background-color: transparent;
-  border: 1px solid #1a5c4c;
+  border: 1px solid var(--ahg-primary);
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
@@ -22,13 +22,13 @@
 
 .tts-btn:hover {
   color: #fff;
-  background-color: #1a5c4c;
-  border-color: #1a5c4c;
+  background-color: var(--ahg-primary);
+  border-color: var(--ahg-primary);
 }
 
 .tts-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(26, 92, 76, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(var(--ahg-primary-rgb), 0.25);
 }
 
 .tts-btn:disabled {
@@ -39,8 +39,8 @@
 /* Playing state */
 .tts-btn.tts-playing {
   color: #fff;
-  background-color: #1a5c4c;
-  border-color: #1a5c4c;
+  background-color: var(--ahg-primary);
+  border-color: var(--ahg-primary);
 }
 
 .tts-btn.tts-playing i {
@@ -78,9 +78,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  background: #f8f9fa;
+  background: var(--ahg-light);
   border-radius: 0.5rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--ahg-border);
 }
 
 /* Speed control */
@@ -92,7 +92,7 @@
 
 .tts-speed-control label {
   font-size: 0.75rem;
-  color: #6c757d;
+  color: var(--ahg-muted);
   margin: 0;
 }
 
@@ -100,7 +100,7 @@
   width: 80px;
   height: 4px;
   -webkit-appearance: none;
-  background: #dee2e6;
+  background: var(--ahg-border);
   border-radius: 2px;
   cursor: pointer;
 }
@@ -109,7 +109,7 @@
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  background: #1a5c4c;
+  background: var(--ahg-primary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -117,7 +117,7 @@
 .tts-speed-value {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #1a5c4c;
+  color: var(--ahg-primary);
   min-width: 2.5rem;
   text-align: center;
 }
@@ -135,7 +135,7 @@
   height: 3rem;
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background: #1a5c4c;
+  background: var(--ahg-primary);
   color: #fff;
   border: none;
 }
@@ -152,7 +152,7 @@
   z-index: 100;
   display: none;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #1a5c4c 0%, #2a7c6c 100%);
+  background: linear-gradient(135deg, var(--ahg-primary) 0%, var(--ahg-secondary) 100%);
   color: #fff;
   border-radius: 0 0 0.5rem 0.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -240,7 +240,7 @@
 
 /* TTS content highlight during reading */
 [data-tts-content].tts-reading {
-  outline: 2px solid rgba(26, 92, 76, 0.3);
+  outline: 2px solid rgba(var(--ahg-primary-rgb), 0.3);
   outline-offset: 4px;
   border-radius: 4px;
 }

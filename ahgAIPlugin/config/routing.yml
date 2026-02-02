@@ -121,3 +121,47 @@ ahg_ai_llm_health:
 ahg_ai_templates:
   url: /ai/templates
   param: { module: ai, action: templates }
+
+# ============================================================================
+# AI Batch Queue Routes
+# ============================================================================
+
+# Batch queue dashboard
+ahg_ai_batch:
+  url: /ai/batch
+  param: { module: ai, action: batch }
+
+# Create new batch
+ahg_ai_batch_create:
+  url: /ai/batch/create
+  param: { module: ai, action: batchCreate }
+
+# View batch details
+ahg_ai_batch_view:
+  url: /ai/batch/:id
+  param: { module: ai, action: batchView }
+  requirements: { id: \d+ }
+
+# Get batch progress (AJAX)
+ahg_ai_batch_progress:
+  url: /ai/batch/:id/progress
+  param: { module: ai, action: batchProgress }
+  requirements: { id: \d+ }
+
+# Batch actions (start, pause, resume, cancel, retry)
+ahg_ai_batch_action:
+  url: /ai/batch/:id/action
+  param: { module: ai, action: batchAction }
+  requirements: { id: \d+ }
+
+# Process next jobs (called by Gearman or cron)
+ahg_ai_batch_process:
+  url: /ai/batch/:id/process
+  param: { module: ai, action: batchProcess }
+  requirements: { id: \d+ }
+
+# View individual job
+ahg_ai_job_view:
+  url: /ai/job/:id
+  param: { module: ai, action: jobView }
+  requirements: { id: \d+ }

@@ -395,6 +395,174 @@ class doiActions extends sfActions
     }
 
     /**
+     * Export DOIs.
+     */
+    public function executeExport(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        $service = new \ahgDoiPlugin\Services\DoiService();
+
+        $format = $request->getParameter('format', 'csv');
+        $options = [
+            'status' => $request->getParameter('status'),
+            'repository_id' => $request->getParameter('repository_id'),
+            'from_date' => $request->getParameter('from_date'),
+            'to_date' => $request->getParameter('to_date'),
+        ];
+
+        // Filter out empty options
+        $options = array_filter($options);
+
+        if ($format === 'json') {
+            $content = $service->exportToJson($options);
+            $filename = 'dois_export_' . date('Y-m-d_His') . '.json';
+            $contentType = 'application/json';
+        } else {
+            $content = $service->exportToCsv($options);
+            $filename = 'dois_export_' . date('Y-m-d_His') . '.csv';
+            $contentType = 'text/csv';
+        }
+
+        $this->getResponse()->setHttpHeader('Content-Type', $contentType);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $this->getResponse()->setHttpHeader('Content-Length', strlen($content));
+
+        return $this->renderText($content);
+    }
+
+    /**
+     * Bulk sync DOI metadata.
+     */
+    public function executeSync(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        $service = new \ahgDoiPlugin\Services\DoiService();
+
+        if ($request->isMethod('post')) {
+            $queueAll = $request->getParameter('queue_all', false);
+            $options = [
+                'status' => $request->getParameter('status'),
+                'repository_id' => $request->getParameter('repository_id'),
+            ];
+            $options = array_filter($options);
+
+            if ($queueAll) {
+                // Queue all for background processing
+                $queued = $service->queueForSync($options);
+                $this->getUser()->setFlash('notice', "{$queued} DOIs queued for sync. Run the queue processor to complete.");
+            } else {
+                // Direct sync (limited)
+                $options['limit'] = (int) $request->getParameter('limit', 50);
+                $result = $service->bulkSync($options);
+                $this->getUser()->setFlash('notice', "Sync complete: {$result['synced']} synced, {$result['failed']} failed");
+            }
+
+            $this->redirect(['module' => 'doi', 'action' => 'index']);
+        }
+
+        // Show sync form
+        $this->stats = $service->getStatistics();
+        $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository as r')
+            ->leftJoin('repository_i18n as ri', function ($join) {
+                $join->on('r.id', '=', 'ri.id')
+                    ->where('ri.culture', '=', 'en');
+            })
+            ->select(['r.id', 'ri.authorized_form_of_name as name'])
+            ->get();
+    }
+
+    /**
+     * Deactivate a DOI.
+     */
+    public function executeDeactivate(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        $doiId = (int) $request->getParameter('id');
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        $service = new \ahgDoiPlugin\Services\DoiService();
+
+        $this->doi = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('d.information_object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->where('d.id', $doiId)
+            ->select(['d.*', 'ioi.title as object_title'])
+            ->first();
+
+        $this->forward404Unless($this->doi);
+
+        if ($request->isMethod('post')) {
+            $reason = $request->getParameter('reason', '');
+            $result = $service->deactivateDoi($doiId, $reason);
+
+            if ($result['success']) {
+                $this->getUser()->setFlash('notice', 'DOI deactivated successfully');
+            } else {
+                $this->getUser()->setFlash('error', "Deactivation failed: {$result['error']}");
+            }
+
+            $this->redirect(['module' => 'doi', 'action' => 'view', 'id' => $doiId]);
+        }
+    }
+
+    /**
+     * Reactivate a DOI.
+     */
+    public function executeReactivate(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        $doiId = (int) $request->getParameter('id');
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        $service = new \ahgDoiPlugin\Services\DoiService();
+
+        $result = $service->reactivateDoi($doiId);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('notice', 'DOI reactivated successfully');
+        } else {
+            $this->getUser()->setFlash('error', "Reactivation failed: {$result['error']}");
+        }
+
+        $this->redirect(['module' => 'doi', 'action' => 'view', 'id' => $doiId]);
+    }
+
+    /**
+     * Verify DOI resolution.
+     */
+    public function executeVerify(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        $doiId = (int) $request->getParameter('id');
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        $service = new \ahgDoiPlugin\Services\DoiService();
+
+        $result = $service->verifyDoi($doiId);
+
+        if ($result['success']) {
+            if ($result['resolves']) {
+                $this->getUser()->setFlash('notice', "DOI resolves correctly to: {$result['final_url']}");
+            } else {
+                $this->getUser()->setFlash('error', "DOI does not resolve (HTTP {$result['http_code']})");
+            }
+        } else {
+            $this->getUser()->setFlash('error', "Verification failed: {$result['error']}");
+        }
+
+        $this->redirect(['module' => 'doi', 'action' => 'view', 'id' => $doiId]);
+    }
+
+    /**
      * Check if admin.
      */
     protected function checkAdmin(): void

@@ -14,11 +14,11 @@
 
 /* Comparison View */
 .comparison-highlight {
-    background-color: #fff3cd !important;
+    background-color: rgba(var(--ahg-warning-rgb), 0.2) !important;
 }
 
 .comparison-match {
-    background-color: #d1e7dd !important;
+    background-color: rgba(var(--ahg-success-rgb), 0.2) !important;
 }
 
 /* Card Selection */
@@ -34,8 +34,8 @@
 }
 
 .primary-option.selected {
-    border-color: #0d6efd !important;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    border-color: var(--ahg-primary) !important;
+    box-shadow: 0 0 0 3px rgba(var(--ahg-primary-rgb), 0.25);
 }
 
 /* Duplicate List Items */
@@ -44,19 +44,19 @@
 }
 
 .duplicate-item:hover {
-    background-color: #f8f9fa;
+    background-color: var(--ahg-light);
 }
 
 .duplicate-item.high-confidence {
-    border-left: 4px solid #dc3545;
+    border-left: 4px solid var(--ahg-danger);
 }
 
 .duplicate-item.medium-confidence {
-    border-left: 4px solid #ffc107;
+    border-left: 4px solid var(--ahg-warning);
 }
 
 .duplicate-item.low-confidence {
-    border-left: 4px solid #0dcaf0;
+    border-left: 4px solid var(--ahg-info);
 }
 
 /* Real-time Detection Warning */
@@ -87,11 +87,11 @@
     right: 12px;
     cursor: pointer;
     font-size: 1.2rem;
-    color: #6c757d;
+    color: var(--ahg-muted);
 }
 
 .dedupe-warning .close-btn:hover {
-    color: #000;
+    color: var(--ahg-body-text);
 }
 
 /* Statistics Cards */
@@ -127,16 +127,16 @@
     font-size: 0.75rem;
     padding: 2px 8px;
     border-radius: 12px;
-    background-color: #e9ecef;
-    color: #495057;
+    background-color: var(--ahg-border);
+    color: var(--ahg-dark);
 }
 
-.method-tag.title_similarity { background-color: #cfe2ff; color: #084298; }
-.method-tag.identifier_exact { background-color: #d1e7dd; color: #0f5132; }
-.method-tag.identifier_fuzzy { background-color: #cff4fc; color: #055160; }
-.method-tag.date_creator { background-color: #fff3cd; color: #664d03; }
-.method-tag.checksum { background-color: #e2e3e5; color: #41464b; }
-.method-tag.combined { background-color: #f8d7da; color: #842029; }
+.method-tag.title_similarity { background-color: rgba(var(--ahg-info-rgb), 0.3); color: var(--ahg-dark); }
+.method-tag.identifier_exact { background-color: rgba(var(--ahg-success-rgb), 0.3); color: var(--ahg-dark); }
+.method-tag.identifier_fuzzy { background-color: rgba(var(--ahg-info-rgb), 0.4); color: var(--ahg-dark); }
+.method-tag.date_creator { background-color: rgba(var(--ahg-warning-rgb), 0.3); color: var(--ahg-dark); }
+.method-tag.checksum { background-color: var(--ahg-light); color: var(--ahg-dark); }
+.method-tag.combined { background-color: rgba(var(--ahg-danger-rgb), 0.2); color: var(--ahg-dark); }
 
 /* Compare Side-by-Side */
 .compare-panel {
@@ -150,41 +150,41 @@
 }
 
 .compare-panel.panel-a {
-    border-color: #0d6efd;
+    border-color: var(--ahg-primary);
 }
 
 .compare-panel.panel-a .panel-header {
-    background-color: #0d6efd;
+    background-color: var(--ahg-primary);
     color: #fff;
 }
 
 .compare-panel.panel-b {
-    border-color: #198754;
+    border-color: var(--ahg-success);
 }
 
 .compare-panel.panel-b .panel-header {
-    background-color: #198754;
+    background-color: var(--ahg-success);
     color: #fff;
 }
 
 /* Field Difference Highlighting */
 .field-diff {
-    background-color: #fff3cd;
+    background-color: rgba(var(--ahg-warning-rgb), 0.2);
     padding: 4px 8px;
     border-radius: 4px;
     margin: 2px 0;
 }
 
 .field-match {
-    color: #198754;
+    color: var(--ahg-success);
 }
 
 /* Merge Preview */
 .merge-preview {
-    border: 2px dashed #6c757d;
+    border: 2px dashed var(--ahg-muted);
     border-radius: 8px;
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: var(--ahg-light);
 }
 
 .merge-arrow {
@@ -192,7 +192,7 @@
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    color: #6c757d;
+    color: var(--ahg-muted);
 }
 
 /* Cluster Visualization */
@@ -203,19 +203,19 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #0d6efd;
+    background-color: var(--ahg-primary);
     color: #fff;
     font-weight: 600;
     font-size: 0.9rem;
 }
 
 .cluster-link {
-    stroke: #dee2e6;
+    stroke: var(--ahg-border);
     stroke-width: 2px;
 }
 
 .cluster-link.strong {
-    stroke: #dc3545;
+    stroke: var(--ahg-danger);
     stroke-width: 3px;
 }
 

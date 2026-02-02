@@ -22,7 +22,7 @@
     width: 100%;
     height: 100%;
     --poster-color: transparent;
-    --progress-bar-color: #1a73e8;
+    --progress-bar-color: var(--ahg-primary);
     --progress-bar-height: 4px;
 }
 
@@ -57,11 +57,11 @@
 }
 
 /* Hotspot type colors */
-.hotspot[data-type="annotation"] { --hotspot-color: #1a73e8; }
-.hotspot[data-type="info"] { --hotspot-color: #34a853; }
-.hotspot[data-type="damage"] { --hotspot-color: #ea4335; }
-.hotspot[data-type="detail"] { --hotspot-color: #fbbc04; }
-.hotspot[data-type="link"] { --hotspot-color: #4285f4; }
+.hotspot[data-type="annotation"] { --hotspot-color: var(--ahg-primary); }
+.hotspot[data-type="info"] { --hotspot-color: var(--ahg-success); }
+.hotspot[data-type="damage"] { --hotspot-color: var(--ahg-danger); }
+.hotspot[data-type="detail"] { --hotspot-color: var(--ahg-warning); }
+.hotspot[data-type="link"] { --hotspot-color: var(--ahg-info); }
 
 /* Hotspot annotation popup */
 .hotspot-annotation {
@@ -157,7 +157,7 @@
 
 .mv-btn.active,
 .viewer-btn.active {
-    background: #1a73e8;
+    background: var(--ahg-primary);
 }
 
 /* AR Button */
@@ -169,7 +169,7 @@
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background: #1a73e8;
+    background: var(--ahg-primary);
     color: white;
     font-weight: 500;
     font-size: 14px;
@@ -184,7 +184,7 @@
 
 .ar-button:hover,
 .mv-ar-btn:hover {
-    background: #1557b0;
+    filter: brightness(0.85);
 }
 
 .ar-button:active,
@@ -215,7 +215,7 @@
 .model-viewer-progress-bar .update-bar,
 .progress-bar .update-bar {
     height: 100%;
-    background: linear-gradient(90deg, #1a73e8, #34a853);
+    background: linear-gradient(90deg, var(--ahg-primary), var(--ahg-secondary));
     transition: width 0.1s ease;
 }
 
@@ -276,7 +276,7 @@
 }
 
 .model-3d-gallery .nav-tabs {
-    border-bottom: 2px solid #dee2e6;
+    border-bottom: 2px solid var(--ahg-border);
 }
 
 .model-3d-gallery .nav-link {
@@ -295,8 +295,8 @@
 }
 
 .model-3d-gallery .nav-link.active {
-    color: #1a73e8;
-    border-bottom-color: #1a73e8;
+    color: var(--ahg-primary);
+    border-bottom-color: var(--ahg-primary);
     background: transparent;
 }
 
@@ -313,10 +313,10 @@
    3D MODEL SECTION
    ===================================================== */
 .model-3d-section {
-    background: #f8f9fa;
+    background: var(--ahg-light);
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--ahg-border);
 }
 
 .model-3d-section h4 {
@@ -332,20 +332,20 @@
    UPLOAD ZONE
    ===================================================== */
 .upload-zone {
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--ahg-border);
     border-radius: 12px;
     padding: 48px;
     text-align: center;
     cursor: pointer;
     transition: border-color 0.3s, background-color 0.3s;
     position: relative;
-    background: #fafafa;
+    background: var(--ahg-light);
 }
 
 .upload-zone:hover,
 .upload-zone.dragover {
-    border-color: #1a73e8;
-    background-color: #f0f7ff;
+    border-color: var(--ahg-primary);
+    background-color: rgba(var(--ahg-primary-rgb), 0.05);
 }
 
 .upload-zone input[type="file"] {
@@ -359,8 +359,8 @@
 }
 
 .upload-zone.has-file {
-    border-color: #34a853;
-    background-color: #f0fff4;
+    border-color: var(--ahg-success);
+    background-color: rgba(var(--ahg-success-rgb), 0.1);
 }
 
 .upload-zone.has-file .upload-content {
@@ -384,7 +384,7 @@
 }
 
 .upload-preview i {
-    color: #34a853;
+    color: var(--ahg-success);
 }
 
 /* =====================================================

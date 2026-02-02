@@ -23,14 +23,14 @@
 }
 
 .template-option:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
+  border-color: var(--ahg-primary);
+  background: var(--ahg-light);
   text-decoration: none;
 }
 
 .template-option.active {
-  border-color: #3498db;
-  background: #3498db;
+  border-color: var(--ahg-primary);
+  background: var(--ahg-primary);
   color: #fff;
 }
 
@@ -60,9 +60,9 @@
   transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.progress-bar.bg-success { background: #27ae60; }
-.progress-bar.bg-warning { background: #f39c12; }
-.progress-bar.bg-danger { background: #e74c3c; }
+.progress-bar.bg-success { background: var(--ahg-success); }
+.progress-bar.bg-warning { background: var(--ahg-warning); }
+.progress-bar.bg-danger { background: var(--ahg-danger); }
 
 .completeness-value {
   font-weight: 600;
@@ -122,12 +122,12 @@
 }
 
 .badge-required {
-  background: #e74c3c;
+  background: var(--ahg-danger);
   color: #fff;
 }
 
 .badge-recommended {
-  background: #f39c12;
+  background: var(--ahg-warning);
   color: #fff;
 }
 
@@ -137,7 +137,7 @@
 }
 
 .badge-cco {
-  background: #3498db;
+  background: var(--ahg-primary);
   color: #fff;
 }
 
@@ -162,7 +162,7 @@
   font-size: 18px;
   font-weight: 600;
   color: #2c3e50;
-  border-bottom: 2px solid #3498db;
+  border-bottom: 2px solid var(--ahg-primary);
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
@@ -170,8 +170,8 @@
 .cco-chapter {
   font-size: 12px;
   font-weight: normal;
-  color: #7f8c8d;
-  background: #f8f9fa;
+  color: var(--ahg-muted);
+  background: var(--ahg-light);
   padding: 4px 10px;
   border-radius: 12px;
 }
@@ -194,11 +194,11 @@
 }
 
 .cco-field.level-required {
-  border-left-color: #e74c3c;
+  border-left-color: var(--ahg-danger);
 }
 
 .cco-field.level-recommended {
-  border-left-color: #f39c12;
+  border-left-color: var(--ahg-warning);
 }
 
 .cco-field:focus-within {
@@ -222,7 +222,7 @@
 }
 
 .field-header label .required {
-  color: #e74c3c;
+  color: var(--ahg-danger);
   margin-left: 3px;
 }
 
@@ -236,7 +236,7 @@
   margin-left: auto;
   background: none;
   border: none;
-  color: #3498db;
+  color: var(--ahg-primary);
   cursor: pointer;
   padding: 5px;
   font-size: 16px;
@@ -268,8 +268,8 @@
 .field-input input:focus,
 .field-input select:focus,
 .field-input textarea:focus {
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  border-color: var(--ahg-primary);
+  box-shadow: 0 0 0 3px rgba(var(--ahg-primary-rgb), 0.15);
   outline: none;
 }
 
@@ -283,11 +283,11 @@
 
 /* Field Help */
 .field-help {
-  background: #e8f4fd;
+  background: rgba(var(--ahg-primary-rgb), 0.1);
   border-radius: 6px;
   padding: 15px;
   margin-top: 10px;
-  border-left: 3px solid #3498db;
+  border-left: 3px solid var(--ahg-primary);
 }
 
 .field-help .help-text {
@@ -362,7 +362,7 @@
 }
 
 .autocomplete-option:hover {
-  background: #f8f9fa;
+  background: var(--ahg-light);
 }
 
 /* Validation Alerts */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace arMuseumMetadataPlugin\Services;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -135,13 +136,16 @@ class ConditionReportService
 
     private ConnectionInterface $db;
     private LoggerInterface $logger;
+    private AhgTaxonomyService $taxonomyService;
 
     public function __construct(
         ConnectionInterface $db,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?AhgTaxonomyService $taxonomyService = null
     ) {
         $this->db = $db;
         $this->logger = $logger ?? new NullLogger();
+        $this->taxonomyService = $taxonomyService ?? new AhgTaxonomyService();
     }
 
     /**
@@ -595,29 +599,58 @@ class ConditionReportService
     }
 
     /**
-     * Get condition ratings for dropdown.
+     * Get condition ratings for dropdown (from database).
      */
     public function getRatings(): array
     {
-        return self::RATINGS;
+        $terms = $this->taxonomyService->getConditionGradesWithColors();
+        if (empty($terms)) {
+            return self::RATINGS; // Fallback
+        }
+
+        $ratings = [];
+        foreach ($terms as $code => $term) {
+            $ratings[$code] = [
+                'value' => $term->sort_order ?? 0,
+                'label' => $term->name,
+                'color' => $term->color ?? '#9e9e9e',
+            ];
+        }
+
+        return $ratings;
     }
 
     /**
-     * Get damage types for dropdown.
+     * Get damage types for dropdown (from database).
      */
     public function getDamageTypes(): array
     {
-        return self::DAMAGE_TYPES;
+        $terms = $this->taxonomyService->getDamageTypesWithAttributes();
+        if (empty($terms)) {
+            return self::DAMAGE_TYPES; // Fallback
+        }
+
+        $types = [];
+        foreach ($terms as $code => $term) {
+            $metadata = $term->metadata ? json_decode($term->metadata, true) : [];
+            $types[$code] = [
+                'category' => $metadata['category'] ?? 'other',
+                'label' => $term->name,
+            ];
+        }
+
+        return $types;
     }
 
     /**
-     * Get damage types grouped by category.
+     * Get damage types grouped by category (from database).
      */
     public function getDamageTypesByCategory(): array
     {
+        $damageTypes = $this->getDamageTypes();
         $grouped = [];
 
-        foreach (self::DAMAGE_TYPES as $key => $type) {
+        foreach ($damageTypes as $key => $type) {
             $category = $type['category'];
             if (!isset($grouped[$category])) {
                 $grouped[$category] = [];

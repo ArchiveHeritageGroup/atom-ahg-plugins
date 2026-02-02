@@ -25,6 +25,9 @@ function pii_filter($objectId, $content) {
   <?php if (in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
   <?php include_partial('securityClearance/securityBadge', ['resource' => $resource]); ?>
   <?php endif; ?>
+  <?php if (in_array('ahgDoiPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+  <?php include_partial('doi/recordBadge', ['resource' => $resource]); ?>
+  <?php endif; ?>
   <?php if (function_exists('pii_has_redacted') && pii_has_redacted($resource->id)): ?>
   <div class="alert alert-warning py-1 px-2 mb-2 d-inline-block">
     <i class="fas fa-shield-alt me-1"></i>

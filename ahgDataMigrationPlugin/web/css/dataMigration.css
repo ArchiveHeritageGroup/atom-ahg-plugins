@@ -1,8 +1,8 @@
-.sector-badge.archive { background: #6c757d; color: white; }
+.sector-badge.archive { background: var(--ahg-muted); color: white; }
 .sector-badge.museum { background: #fd7e14; color: white; }
-.sector-badge.library { background: #0dcaf0; color: black; }
+.sector-badge.library { background: var(--ahg-info); color: black; }
 .sector-badge.gallery { background: #d63384; color: white; }
-.sector-badge.dam { background: #20c997; color: black; }
+.sector-badge.dam { background: var(--ahg-secondary); color: black; }
 
 /* Target Type Card Selection */
 .target-type-card {
@@ -21,19 +21,19 @@
 .target-type-card .card {
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--ahg-border);
 }
 
 .target-type-card .card:hover {
-  border-color: #0d6efd;
+  border-color: var(--ahg-primary);
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .target-type-card .form-check-input:checked + .card {
-  border-color: #0d6efd;
-  background-color: rgba(13, 110, 253, 0.05);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+  border-color: var(--ahg-primary);
+  background-color: rgba(var(--ahg-primary-rgb), 0.05);
+  box-shadow: 0 0 0 3px rgba(var(--ahg-primary-rgb), 0.2);
 }
 
 .target-type-card .form-check-input:checked + .card::after {
@@ -42,7 +42,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  color: #0d6efd;
+  color: var(--ahg-primary);
   font-size: 1.5rem;
 }
 
@@ -53,5 +53,5 @@
 
 .target-type-card .form-check-input:checked + .card i {
   opacity: 1;
-  color: #0d6efd !important;
+  color: var(--ahg-primary) !important;
 }

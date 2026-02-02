@@ -1,0 +1,196 @@
+{
+    "name": "ahgMetadataExportPlugin",
+    "displayName": "GLAM Metadata Export Framework",
+    "description": "Unified export framework supporting 10 metadata standards across GLAM sectors (Galleries, Libraries, Archives, Museums) and digital preservation.",
+    "version": "1.0.0",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "authorEmail": "johan@theahg.co.za",
+    "license": "MIT",
+    "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
+
+    "category": "export",
+    "tags": [
+        "export",
+        "metadata",
+        "GLAM",
+        "archives",
+        "museums",
+        "libraries",
+        "EAD3",
+        "RIC-O",
+        "LIDO",
+        "MARC21",
+        "BIBFRAME",
+        "VRA Core",
+        "PBCore",
+        "EBUCore",
+        "PREMIS",
+        "linked data"
+    ],
+
+    "requires": {
+        "atom": ">=2.6.0",
+        "php": ">=7.4",
+        "atom-framework": ">=1.0.0"
+    },
+
+    "dependencies": [],
+
+    "conflicts": [],
+
+    "provides": [
+        "metadata-export"
+    ],
+
+    "autoload": {
+        "psr-4": {
+            "AhgMetadataExport\\": "lib/"
+        }
+    },
+
+    "modules": [
+        "metadataExport"
+    ],
+
+    "tasks": [
+        "metadataExportTask"
+    ],
+
+    "database": {
+        "install": "database/install.sql",
+        "uninstall": null,
+        "migrations": []
+    },
+
+    "settings": {
+        "defaultExportPath": {
+            "type": "string",
+            "default": "/tmp/exports",
+            "description": "Default output directory for exports"
+        },
+        "enabledFormats": {
+            "type": "array",
+            "default": ["ead3", "rico", "lido", "premis", "marc21"],
+            "description": "List of enabled export formats"
+        },
+        "maxBulkExportRecords": {
+            "type": "integer",
+            "default": 1000,
+            "description": "Maximum records for bulk export via web interface"
+        }
+    },
+
+    "features": {
+        "exportFormats": {
+            "ead3": {
+                "name": "EAD3",
+                "sector": "Archives",
+                "output": "XML",
+                "description": "Encoded Archival Description version 3",
+                "schema": "https://www.loc.gov/ead/ead3.xsd"
+            },
+            "rico": {
+                "name": "RIC-O",
+                "sector": "Archives",
+                "output": "RDF/JSON-LD",
+                "description": "Records in Contexts Ontology",
+                "ontology": "https://www.ica.org/standards/RiC/ontology"
+            },
+            "lido": {
+                "name": "LIDO",
+                "sector": "Museums",
+                "output": "XML",
+                "description": "Lightweight Information Describing Objects",
+                "schema": "http://www.lido-schema.org/schema/v1.1/lido-v1.1.xsd"
+            },
+            "cidoc-crm": {
+                "name": "CIDOC-CRM",
+                "sector": "Museums",
+                "output": "RDF/JSON-LD",
+                "description": "CIDOC Conceptual Reference Model",
+                "note": "Uses existing ahgMuseumPlugin implementation"
+            },
+            "marc21": {
+                "name": "MARC21",
+                "sector": "Libraries",
+                "output": "MARCXML",
+                "description": "Machine-Readable Cataloging",
+                "schema": "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"
+            },
+            "bibframe": {
+                "name": "BIBFRAME",
+                "sector": "Libraries",
+                "output": "RDF/JSON-LD",
+                "description": "Bibliographic Framework",
+                "ontology": "http://id.loc.gov/ontologies/bibframe/"
+            },
+            "vra-core": {
+                "name": "VRA Core 4",
+                "sector": "Visual",
+                "output": "XML",
+                "description": "Visual Resources Association Core",
+                "schema": "http://www.loc.gov/standards/vracore/vra.xsd"
+            },
+            "pbcore": {
+                "name": "PBCore",
+                "sector": "Media",
+                "output": "XML",
+                "description": "Public Broadcasting Metadata Dictionary",
+                "schema": "https://pbcore.org/xsd/pbcore-2.1.xsd"
+            },
+            "ebucore": {
+                "name": "EBUCore",
+                "sector": "Media",
+                "output": "XML",
+                "description": "European Broadcasting Union Core Metadata",
+                "schema": "https://www.ebu.ch/metadata/schemas/EBUCore/ebucore.xsd"
+            },
+            "premis": {
+                "name": "PREMIS",
+                "sector": "Preservation",
+                "output": "XML",
+                "description": "Preservation Metadata Implementation Strategies",
+                "schema": "https://www.loc.gov/standards/premis/premis.xsd"
+            }
+        }
+    },
+
+    "cli": {
+        "commands": [
+            {
+                "name": "metadata:export",
+                "description": "Export archival descriptions to various metadata standards",
+                "options": [
+                    "--format",
+                    "--slug",
+                    "--id",
+                    "--repository",
+                    "--output",
+                    "--include-digital-objects",
+                    "--include-drafts",
+                    "--include-children",
+                    "--max-depth",
+                    "--rdf-format",
+                    "--list",
+                    "--preview"
+                ]
+            }
+        ]
+    },
+
+    "menu": {
+        "admin": [
+            {
+                "label": "Metadata Export",
+                "route": "metadataExport/index",
+                "icon": "fa-download"
+            }
+        ]
+    },
+
+    "documentation": {
+        "readme": "README.md",
+        "userGuide": "docs/user-guide.md",
+        "technicalGuide": "docs/technical-guide.md"
+    }
+}

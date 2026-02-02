@@ -5,34 +5,34 @@
 
 /* Closure Type Colors */
 .closure-type-standard {
-    background-color: #0d6efd !important;
+    background-color: var(--ahg-primary) !important;
 }
 
 .closure-type-extended {
-    background-color: #ffc107 !important;
+    background-color: var(--ahg-warning) !important;
     color: #000 !important;
 }
 
 .closure-type-indefinite {
-    background-color: #dc3545 !important;
+    background-color: var(--ahg-danger) !important;
 }
 
 .closure-type-ministerial {
-    background-color: #212529 !important;
+    background-color: var(--ahg-dark) !important;
 }
 
 /* Researcher Type Colors */
 .researcher-local {
-    background-color: #198754 !important;
+    background-color: var(--ahg-success) !important;
 }
 
 .researcher-foreign {
-    background-color: #0dcaf0 !important;
+    background-color: var(--ahg-info) !important;
     color: #000 !important;
 }
 
 .researcher-institutional {
-    background-color: #6c757d !important;
+    background-color: var(--ahg-muted) !important;
 }
 
 /* Dashboard Cards */
@@ -46,8 +46,8 @@
 
 /* Transfer Status */
 .transfer-overdue {
-    background-color: #f8d7da !important;
-    border-left: 4px solid #dc3545;
+    background-color: rgba(var(--ahg-danger-rgb), 0.15) !important;
+    border-left: 4px solid var(--ahg-danger);
 }
 
 /* Permit Status Badge */
@@ -74,7 +74,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: #dee2e6;
+    background: var(--ahg-border);
 }
 
 .naz-timeline-item {
@@ -90,46 +90,46 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #0d6efd;
+    background: var(--ahg-primary);
     border: 2px solid #fff;
 }
 
 .naz-timeline-item.completed::before {
-    background: #198754;
+    background: var(--ahg-success);
 }
 
 .naz-timeline-item.current::before {
-    background: #ffc107;
+    background: var(--ahg-warning);
 }
 
 /* Schedule Classification */
 .classification-vital {
-    background-color: #dc3545;
+    background-color: var(--ahg-danger);
     color: #fff;
 }
 
 .classification-important {
-    background-color: #ffc107;
+    background-color: var(--ahg-warning);
     color: #000;
 }
 
 .classification-useful {
-    background-color: #0dcaf0;
+    background-color: var(--ahg-info);
     color: #000;
 }
 
 .classification-non-essential {
-    background-color: #6c757d;
+    background-color: var(--ahg-muted);
     color: #fff;
 }
 
 /* Access Restriction */
 .restriction-open {
-    color: #198754;
+    color: var(--ahg-success);
 }
 
 .restriction-restricted {
-    color: #ffc107;
+    color: var(--ahg-warning);
 }
 
 .restriction-confidential {
@@ -137,28 +137,28 @@
 }
 
 .restriction-secret {
-    color: #dc3545;
+    color: var(--ahg-danger);
 }
 
 /* Form styling */
 .naz-form-section {
-    border-left: 4px solid #0d6efd;
+    border-left: 4px solid var(--ahg-primary);
     padding-left: 16px;
     margin-bottom: 24px;
 }
 
 .naz-form-section h5 {
-    color: #0d6efd;
+    color: var(--ahg-primary);
 }
 
 /* Permit fee indicator */
 .fee-unpaid {
-    color: #dc3545;
+    color: var(--ahg-danger);
     font-weight: bold;
 }
 
 .fee-paid {
-    color: #198754;
+    color: var(--ahg-success);
 }
 
 /* Print styles */

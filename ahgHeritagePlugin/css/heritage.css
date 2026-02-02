@@ -21,7 +21,7 @@
 .heritage-search {}
 
 .heritage-search-input:focus {
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(var(--ahg-primary-rgb), 0.25);
 }
 
 /* Result Cards */

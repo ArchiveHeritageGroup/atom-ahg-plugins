@@ -7,10 +7,25 @@
             <p class="text-muted">Mint and manage DOIs via DataCite</p>
         </div>
         <div class="col-auto">
+            <div class="btn-group me-2">
+                <a href="<?php echo url_for(['module' => 'doi', 'action' => 'export', 'format' => 'csv']) ?>" class="btn btn-outline-primary" title="Export CSV">
+                    <i class="fas fa-file-csv me-1"></i> Export
+                </a>
+                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'doi', 'action' => 'export', 'format' => 'csv']) ?>"><i class="fas fa-file-csv me-2"></i>Export as CSV</a></li>
+                    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'doi', 'action' => 'export', 'format' => 'json']) ?>"><i class="fas fa-file-code me-2"></i>Export as JSON</a></li>
+                </ul>
+            </div>
+            <a href="<?php echo url_for(['module' => 'doi', 'action' => 'sync']) ?>" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-sync me-1"></i> Bulk Sync
+            </a>
             <a href="<?php echo url_for(['module' => 'doi', 'action' => 'batchMint']) ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i> Batch Mint
             </a>
-            <a href="<?php echo url_for(['module' => 'doi', 'action' => 'config']) ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for(['module' => 'doi', 'action' => 'config']) ?>" class="btn btn-outline-secondary ms-2">
                 <i class="fas fa-cog me-1"></i> Configuration
             </a>
         </div>

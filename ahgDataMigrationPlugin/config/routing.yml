@@ -64,6 +64,11 @@ dataMigration_exportCsv:
   url: /dataMigration/exportCsv
   param: { module: dataMigration, action: exportCsv }
 
+# Batch export existing records
+dataMigration_batchExport:
+  url: /dataMigration/batchExport
+  param: { module: dataMigration, action: batchExport }
+
 # Other missing routes for the dataMigration module
 dataMigration_index:
   url: /dataMigration

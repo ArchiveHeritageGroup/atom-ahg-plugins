@@ -1,8 +1,8 @@
 <?php
 
-namespace AhgLandingPage\Services;
+namespace AtomExtensions\Services;
 
-use AhgLandingPage\Repositories\LandingPageRepository;
+use AtomExtensions\Repositories\LandingPageRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Collection;
 
@@ -495,7 +495,8 @@ class LandingPageService
 
         switch ($entityType) {
             case 'informationobject':
-                return DB::table('information_object as io')
+                // Get items with their master digital object
+                $items = DB::table('information_object as io')
                     ->join('object as obj', 'io.id', '=', 'obj.id')
                     ->join('information_object_i18n as i18n', function ($join) use ($culture) {
                         $join->on('io.id', '=', 'i18n.id')
@@ -508,12 +509,32 @@ class LandingPageService
                         'i18n.title',
                         'slug.slug',
                         'obj.created_at',
-                        'do.id as has_digital_object',
+                        'do.id as digital_object_id',
                     ])
                     ->orderBy('obj.created_at', 'desc')
                     ->limit($limit)
-                    ->get()
-                    ->toArray();
+                    ->get();
+
+                // Get thumbnail paths for items with digital objects
+                $doIds = $items->pluck('digital_object_id')->filter()->toArray();
+                $thumbnails = [];
+                if (!empty($doIds)) {
+                    // usage_id 142 = Thumbnail in AtoM
+                    $thumbRecords = DB::table('digital_object')
+                        ->whereIn('parent_id', $doIds)
+                        ->where('usage_id', 142)
+                        ->select(['parent_id', 'path', 'name'])
+                        ->get();
+                    foreach ($thumbRecords as $thumb) {
+                        $thumbnails[$thumb->parent_id] = $thumb->path.$thumb->name;
+                    }
+                }
+
+                // Add thumbnail_url to each item
+                return $items->map(function ($item) use ($thumbnails) {
+                    $item->thumbnail_url = $thumbnails[$item->digital_object_id] ?? null;
+                    return $item;
+                })->toArray();
 
             case 'repository':
                 return DB::table('repository as r')

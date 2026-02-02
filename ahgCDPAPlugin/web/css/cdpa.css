@@ -5,16 +5,16 @@
 
 /* Compliance Status Colors */
 .compliance-status-compliant {
-    background-color: #198754 !important;
+    background-color: var(--ahg-success) !important;
 }
 
 .compliance-status-warning {
-    background-color: #ffc107 !important;
+    background-color: var(--ahg-warning) !important;
     color: #000 !important;
 }
 
 .compliance-status-non_compliant {
-    background-color: #dc3545 !important;
+    background-color: var(--ahg-danger) !important;
 }
 
 /* Dashboard Cards */
@@ -28,28 +28,28 @@
 
 /* Request Status */
 .request-overdue {
-    background-color: #f8d7da !important;
-    border-left: 4px solid #dc3545;
+    background-color: rgba(var(--ahg-danger-rgb), 0.15) !important;
+    border-left: 4px solid var(--ahg-danger);
 }
 
 /* Breach Severity */
 .severity-critical {
-    background-color: #212529;
+    background-color: var(--ahg-dark);
     color: #fff;
 }
 
 .severity-high {
-    background-color: #dc3545;
+    background-color: var(--ahg-danger);
     color: #fff;
 }
 
 .severity-medium {
-    background-color: #ffc107;
+    background-color: var(--ahg-warning);
     color: #000;
 }
 
 .severity-low {
-    background-color: #198754;
+    background-color: var(--ahg-success);
     color: #fff;
 }
 
@@ -66,7 +66,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: #dee2e6;
+    background: var(--ahg-border);
 }
 
 .cdpa-timeline-item {
@@ -82,7 +82,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #0d6efd;
+    background: var(--ahg-primary);
     border: 2px solid #fff;
 }
 
@@ -130,13 +130,13 @@
 
 /* Form styling */
 .cdpa-form-section {
-    border-left: 4px solid #0d6efd;
+    border-left: 4px solid var(--ahg-primary);
     padding-left: 16px;
     margin-bottom: 24px;
 }
 
 .cdpa-form-section h5 {
-    color: #0d6efd;
+    color: var(--ahg-primary);
 }
 
 /* Print styles */

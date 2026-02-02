@@ -121,12 +121,23 @@ class RequestToPublishEditRequestToPublishAction extends DefaultEditAction {
 				break;
 			
 			case 'outcome':
-				$choices = array('In review', 'Rejected', 'Approved');
+				// Load RTP status choices from taxonomy (issue #130)
+				require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+				$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+				$choices = $taxonomyService->getRtpStatuses(false);
+
+				// Fallback if taxonomy not yet populated
+				if (empty($choices)) {
+					$choices = array(
+						'in_review' => 'In review',
+						'rejected' => 'Rejected',
+						'approved' => 'Approved'
+					);
+				}
+
 				$this->form->setValidator($name, new sfValidatorChoice(array('choices' => array_keys($choices))));
 				$this->form->setWidget($name, new arWidgetFormSelectRadio(array('choices' => $choices, 'class' => 'radio inline')));
 				break;
-
-		        break;
 				
 			default:
 				return parent::addField($name);
@@ -198,20 +209,20 @@ class RequestToPublishEditRequestToPublishAction extends DefaultEditAction {
 			}
 			$requesttopublish->rtp_planned_use = $rtp_planned_use;
 
-			if ($this->form->getValue('outcome') == null || $this->form->getValue('outcome') == "") {
-				$outcome = "";
-			} else {
-				$outcome = $this->form->getValue('outcome');
-			}
-			if ($outcome == 2) {
-				$outcome = QubitTerm::APPROVED_ID;
-			} else if ($outcome == 1) {
-				$outcome = QubitTerm::REJECTED_ID;
-			} else if ($outcome == 0) {
-				$outcome = QubitTerm::IN_REVIEW_ID;
-			} else {
-				$outcome = QubitTerm::IN_REVIEW_ID;
-			}
+			$outcomeValue = $this->form->getValue('outcome');
+
+			// Map taxonomy codes to QubitTerm IDs (issue #130)
+			$outcomeMap = array(
+				'approved' => QubitTerm::APPROVED_ID,
+				'rejected' => QubitTerm::REJECTED_ID,
+				'in_review' => QubitTerm::IN_REVIEW_ID,
+				// Backward compatibility with old numeric values
+				'2' => QubitTerm::APPROVED_ID,
+				'1' => QubitTerm::REJECTED_ID,
+				'0' => QubitTerm::IN_REVIEW_ID,
+			);
+
+			$outcome = isset($outcomeMap[$outcomeValue]) ? $outcomeMap[$outcomeValue] : QubitTerm::IN_REVIEW_ID;
 
 			$requesttopublish->rtp_planned_use = $rtp_planned_use;
 			$requesttopublish->completedAt = date('Y-m-d H:i:s');

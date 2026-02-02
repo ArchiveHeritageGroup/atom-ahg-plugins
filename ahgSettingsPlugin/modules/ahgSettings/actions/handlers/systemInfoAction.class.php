@@ -36,6 +36,12 @@ class SettingsSystemInfoAction extends sfAction
 
         // Get disk usage
         $this->diskUsage = $this->getDiskUsage();
+
+        // Get metadata export formats
+        $this->exportFormats = $this->getMetadataExportFormats();
+
+        // Get DOI statistics
+        $this->doiStats = $this->getDoiStatistics();
     }
 
     protected function getSystemInfo(): array
@@ -177,7 +183,9 @@ class SettingsSystemInfoAction extends sfAction
             'AtoM' => 'core',
             'Symfony' => 'core',
             'MySQL' => 'database',
+            'OpenSearch' => 'database',
             'Elasticsearch' => 'database',
+            'Search Engine' => 'database',
             'Redis' => 'database',
             'Memcached' => 'database',
             'Gearman' => 'core',
@@ -246,30 +254,28 @@ class SettingsSystemInfoAction extends sfAction
             $versions[] = ['name' => 'MySQL', 'version' => 'Not found', 'icon' => 'bi-database', 'status' => 'error', 'path' => ''];
         }
 
-        // Elasticsearch
+        // Search Engine (auto-detect Elasticsearch or OpenSearch)
         try {
-            $esHost = sfConfig::get('app_elasticsearch_host', 'localhost:9200');
-            $ch = curl_init("http://{$esHost}");
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 2,
-            ]);
-            $response = curl_exec($ch);
-            curl_close($ch);
-            if ($response && $data = json_decode($response, true)) {
-                $esVersion = $data['version']['number'] ?? 'Unknown';
+            $esHost = sfConfig::get('app_elasticsearch_host', 'localhost');
+            $esPort = sfConfig::get('app_elasticsearch_port', 9200);
+
+            // Use factory for auto-detection
+            $engineName = SearchEngineFactory::getEngineName($esHost, (int) $esPort);
+            $engineVersion = SearchEngineFactory::getEngineVersion($esHost, (int) $esPort);
+
+            if ($engineVersion) {
                 $versions[] = [
-                    'name' => 'Elasticsearch',
-                    'version' => $esVersion,
+                    'name' => $engineName,
+                    'version' => $engineVersion,
                     'icon' => 'bi-search',
                     'status' => 'ok',
-                    'path' => "http://{$esHost}",
+                    'path' => "http://{$esHost}:{$esPort}",
                 ];
             } else {
-                $versions[] = ['name' => 'Elasticsearch', 'version' => 'Not responding', 'icon' => 'bi-search', 'status' => 'error', 'path' => ''];
+                $versions[] = ['name' => 'Search Engine', 'version' => 'Not responding', 'icon' => 'bi-search', 'status' => 'error', 'path' => ''];
             }
         } catch (\Exception $e) {
-            $versions[] = ['name' => 'Elasticsearch', 'version' => 'Error', 'icon' => 'bi-search', 'status' => 'error', 'path' => ''];
+            $versions[] = ['name' => 'Search Engine', 'version' => 'Error', 'icon' => 'bi-search', 'status' => 'error', 'path' => ''];
         }
 
         // Nginx
@@ -585,5 +591,189 @@ class SettingsSystemInfoAction extends sfAction
         ];
 
         return $versions;
+    }
+
+    /**
+     * Get metadata export formats from ahgMetadataExportPlugin
+     */
+    protected function getMetadataExportFormats(): array
+    {
+        $formats = [
+            [
+                'code' => 'ead3',
+                'name' => 'EAD3',
+                'sector' => 'Archives',
+                'output' => 'XML',
+                'icon' => 'bi-file-earmark-code',
+                'description' => 'Encoded Archival Description v3 for finding aids',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'rico',
+                'name' => 'RIC-O',
+                'sector' => 'Archives',
+                'output' => 'JSON-LD',
+                'icon' => 'bi-diagram-3',
+                'description' => 'Records in Contexts Ontology (ICA linked data)',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'lido',
+                'name' => 'LIDO',
+                'sector' => 'Museums',
+                'output' => 'XML',
+                'icon' => 'bi-bank',
+                'description' => 'Lightweight Information Describing Objects',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'marc21',
+                'name' => 'MARC21',
+                'sector' => 'Libraries',
+                'output' => 'XML',
+                'icon' => 'bi-book',
+                'description' => 'Machine-Readable Cataloging for libraries',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'bibframe',
+                'name' => 'BIBFRAME',
+                'sector' => 'Libraries',
+                'output' => 'JSON-LD',
+                'icon' => 'bi-diagram-2',
+                'description' => 'Bibliographic Framework (Library of Congress)',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'vra-core',
+                'name' => 'VRA Core 4',
+                'sector' => 'Visual',
+                'output' => 'XML',
+                'icon' => 'bi-images',
+                'description' => 'Visual Resources Association core categories',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'pbcore',
+                'name' => 'PBCore',
+                'sector' => 'Media',
+                'output' => 'XML',
+                'icon' => 'bi-film',
+                'description' => 'Public Broadcasting metadata standard',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'ebucore',
+                'name' => 'EBUCore',
+                'sector' => 'Media',
+                'output' => 'XML',
+                'icon' => 'bi-broadcast',
+                'description' => 'European Broadcasting Union core metadata',
+                'status' => 'ok',
+            ],
+            [
+                'code' => 'premis',
+                'name' => 'PREMIS',
+                'sector' => 'Preservation',
+                'output' => 'XML',
+                'icon' => 'bi-shield-lock',
+                'description' => 'Preservation Metadata Implementation Strategies',
+                'status' => 'ok',
+            ],
+        ];
+
+        // Check if ahgMetadataExportPlugin is enabled
+        $pluginEnabled = class_exists('AhgMetadataExport\Services\ExportService');
+
+        if (!$pluginEnabled) {
+            foreach ($formats as &$format) {
+                $format['status'] = 'warning';
+            }
+        }
+
+        return [
+            'formats' => $formats,
+            'pluginEnabled' => $pluginEnabled,
+            'command' => 'php symfony metadata:export --list',
+        ];
+    }
+
+    /**
+     * Get DOI statistics from ahgDoiPlugin
+     */
+    protected function getDoiStatistics(): array
+    {
+        $stats = [
+            'enabled' => false,
+            'total' => 0,
+            'by_status' => [
+                'draft' => 0,
+                'registered' => 0,
+                'findable' => 0,
+                'failed' => 0,
+            ],
+            'queue_pending' => 0,
+            'config' => null,
+        ];
+
+        // Check if DOI tables exist
+        try {
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+
+            // Check if table exists
+            if (!$db->getSchemaBuilder()->hasTable('ahg_doi')) {
+                return $stats;
+            }
+
+            $stats['enabled'] = true;
+
+            // Get DOI counts by status
+            $counts = $db->table('ahg_doi')
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) as draft,
+                    SUM(CASE WHEN status = 'registered' THEN 1 ELSE 0 END) as registered,
+                    SUM(CASE WHEN status = 'findable' THEN 1 ELSE 0 END) as findable,
+                    SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
+                ")
+                ->first();
+
+            if ($counts) {
+                $stats['total'] = (int) ($counts->total ?? 0);
+                $stats['by_status'] = [
+                    'draft' => (int) ($counts->draft ?? 0),
+                    'registered' => (int) ($counts->registered ?? 0),
+                    'findable' => (int) ($counts->findable ?? 0),
+                    'failed' => (int) ($counts->failed ?? 0),
+                ];
+            }
+
+            // Get queue pending count
+            if ($db->getSchemaBuilder()->hasTable('ahg_doi_queue')) {
+                $stats['queue_pending'] = $db->table('ahg_doi_queue')
+                    ->where('status', 'pending')
+                    ->count();
+            }
+
+            // Get configuration status
+            if ($db->getSchemaBuilder()->hasTable('ahg_doi_config')) {
+                $config = $db->table('ahg_doi_config')
+                    ->where('is_active', 1)
+                    ->first();
+
+                if ($config) {
+                    $stats['config'] = [
+                        'prefix' => $config->datacite_prefix ?? 'Not set',
+                        'environment' => $config->environment ?? 'test',
+                        'auto_mint' => (bool) ($config->auto_mint ?? false),
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            // DOI plugin not installed or tables don't exist
+            return $stats;
+        }
+
+        return $stats;
     }
 }

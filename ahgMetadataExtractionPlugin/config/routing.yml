@@ -1,0 +1,26 @@
+# ahgMetadataExtractionPlugin routing
+
+metadataExtraction_index:
+  url: /metadataExtraction
+  param: { module: metadataExtraction, action: index }
+
+metadataExtraction_view:
+  url: /metadataExtraction/view/:id
+  param: { module: metadataExtraction, action: view }
+  requirements: { id: \d+ }
+
+metadataExtraction_extract:
+  url: /metadataExtraction/extract
+  param: { module: metadataExtraction, action: extract }
+
+metadataExtraction_batchExtract:
+  url: /metadataExtraction/batchExtract
+  param: { module: metadataExtraction, action: batchExtract }
+
+metadataExtraction_delete:
+  url: /metadataExtraction/delete
+  param: { module: metadataExtraction, action: delete }
+
+metadataExtraction_status:
+  url: /metadataExtraction/status
+  param: { module: metadataExtraction, action: status }

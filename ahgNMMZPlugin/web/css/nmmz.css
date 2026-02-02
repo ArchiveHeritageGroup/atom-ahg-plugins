@@ -4,22 +4,22 @@
  */
 
 /* Monument Status */
-.status-gazetted { background-color: #198754 !important; }
-.status-provisional { background-color: #0dcaf0 !important; color: #000 !important; }
-.status-proposed { background-color: #ffc107 !important; color: #000 !important; }
+.status-gazetted { background-color: var(--ahg-success) !important; }
+.status-provisional { background-color: var(--ahg-info) !important; color: #000 !important; }
+.status-proposed { background-color: var(--ahg-warning) !important; color: #000 !important; }
 .status-at_risk { background-color: #fd7e14 !important; }
-.status-destroyed { background-color: #dc3545 !important; }
+.status-destroyed { background-color: var(--ahg-danger) !important; }
 
 /* Condition Rating */
-.condition-excellent { background-color: #198754 !important; }
-.condition-good { background-color: #0dcaf0 !important; }
-.condition-fair { background-color: #ffc107 !important; color: #000 !important; }
+.condition-excellent { background-color: var(--ahg-success) !important; }
+.condition-good { background-color: var(--ahg-info) !important; }
+.condition-fair { background-color: var(--ahg-warning) !important; color: #000 !important; }
 .condition-poor { background-color: #fd7e14 !important; }
-.condition-critical { background-color: #dc3545 !important; }
+.condition-critical { background-color: var(--ahg-danger) !important; }
 
 /* World Heritage Badge */
 .world-heritage-badge {
-    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    background: linear-gradient(135deg, var(--ahg-primary), #6f42c1);
     color: #fff;
     padding: 4px 12px;
     border-radius: 20px;
@@ -32,13 +32,13 @@
 
 /* At Risk Warning */
 .at-risk-warning {
-    background-color: #fff3cd !important;
+    background-color: rgba(var(--ahg-warning-rgb), 0.2) !important;
     border-left: 4px solid #fd7e14;
 }
 
 /* Map placeholder */
 .nmmz-map-placeholder {
-    background: #e9ecef;
+    background: var(--ahg-border);
     min-height: 200px;
     display: flex;
     align-items: center;
@@ -46,8 +46,8 @@
 }
 
 /* Protection level badges */
-.protection-national { background-color: #0d6efd !important; }
-.protection-provincial { background-color: #6c757d !important; }
+.protection-national { background-color: var(--ahg-primary) !important; }
+.protection-provincial { background-color: var(--ahg-muted) !important; }
 .protection-local { background-color: #adb5bd !important; color: #000 !important; }
 
 /* Permit status */
@@ -61,7 +61,7 @@
 
 /* Form styling */
 .nmmz-form-section {
-    border-left: 4px solid #0d6efd;
+    border-left: 4px solid var(--ahg-primary);
     padding-left: 16px;
     margin-bottom: 24px;
 }

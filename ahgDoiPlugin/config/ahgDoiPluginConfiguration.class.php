@@ -108,6 +108,38 @@ class ahgDoiPluginConfiguration extends sfPluginConfiguration
             ['module' => 'doi', 'action' => 'report']
         ));
 
+        // Export
+        $routing->prependRoute('ahg_doi_export', new sfRoute(
+            '/admin/doi/export',
+            ['module' => 'doi', 'action' => 'export']
+        ));
+
+        // Bulk sync
+        $routing->prependRoute('ahg_doi_sync', new sfRoute(
+            '/admin/doi/sync',
+            ['module' => 'doi', 'action' => 'sync']
+        ));
+
+        // Deactivate/Reactivate
+        $routing->prependRoute('ahg_doi_deactivate', new sfRoute(
+            '/admin/doi/deactivate/:id',
+            ['module' => 'doi', 'action' => 'deactivate'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('ahg_doi_reactivate', new sfRoute(
+            '/admin/doi/reactivate/:id',
+            ['module' => 'doi', 'action' => 'reactivate'],
+            ['id' => '\d+']
+        ));
+
+        // Verify resolution
+        $routing->prependRoute('ahg_doi_verify', new sfRoute(
+            '/admin/doi/verify/:id',
+            ['module' => 'doi', 'action' => 'verify'],
+            ['id' => '\d+']
+        ));
+
         // API routes
         $routing->prependRoute('ahg_doi_api_mint', new sfRoute(
             '/api/doi/mint/:id',

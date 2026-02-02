@@ -375,6 +375,118 @@ INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
 ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 
 -- ============================================================================
+-- AI JOB QUEUE TABLES
+-- ============================================================================
+
+-- Batch Jobs (container for multiple job items)
+CREATE TABLE IF NOT EXISTS ahg_ai_batch (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    task_types JSON NOT NULL,                    -- ["ner", "summarize", "suggest", "translate", "spellcheck"]
+    status ENUM('pending', 'running', 'paused', 'completed', 'failed', 'cancelled') DEFAULT 'pending',
+    priority TINYINT DEFAULT 5,                  -- 1=highest, 10=lowest
+    total_items INT DEFAULT 0,
+    completed_items INT DEFAULT 0,
+    failed_items INT DEFAULT 0,
+    progress_percent DECIMAL(5,2) DEFAULT 0.00,
+
+    -- Resource throttling
+    max_concurrent INT DEFAULT 5,                -- Max parallel jobs
+    delay_between_ms INT DEFAULT 1000,           -- Delay between jobs (ms)
+    max_retries INT DEFAULT 3,                   -- Max retries per item
+
+    -- Scheduling
+    scheduled_at TIMESTAMP NULL,                 -- When to start (NULL = immediate)
+    started_at TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
+    estimated_completion TIMESTAMP NULL,
+
+    -- Options
+    options JSON,                                -- Task-specific options
+
+    -- Audit
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_batch_status (status),
+    INDEX idx_batch_priority (priority),
+    INDEX idx_batch_scheduled (scheduled_at),
+    INDEX idx_batch_created_by (created_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Individual Job Items within a Batch
+CREATE TABLE IF NOT EXISTS ahg_ai_job (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    batch_id BIGINT UNSIGNED NOT NULL,
+    object_id INT NOT NULL,
+    task_type VARCHAR(50) NOT NULL,              -- 'ner', 'summarize', 'suggest', 'translate', 'spellcheck', 'ocr'
+    status ENUM('pending', 'queued', 'running', 'completed', 'failed', 'skipped') DEFAULT 'pending',
+    priority TINYINT DEFAULT 5,
+
+    -- Execution
+    gearman_handle VARCHAR(255),                 -- Gearman job handle
+    worker_id VARCHAR(100),                      -- Worker that processed this
+    attempt_count INT DEFAULT 0,
+
+    -- Results
+    result_data JSON,                            -- Task-specific results
+    error_message TEXT,
+    error_code VARCHAR(50),
+
+    -- Timing
+    queued_at TIMESTAMP NULL,
+    started_at TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
+    processing_time_ms INT,
+
+    -- Audit
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_job_batch (batch_id),
+    INDEX idx_job_object (object_id),
+    INDEX idx_job_status (status),
+    INDEX idx_job_task_type (task_type),
+    INDEX idx_job_batch_status (batch_id, status),
+    FOREIGN KEY (batch_id) REFERENCES ahg_ai_batch(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Job Event Log (for tracking progress and debugging)
+CREATE TABLE IF NOT EXISTS ahg_ai_job_log (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    batch_id BIGINT UNSIGNED,
+    job_id BIGINT UNSIGNED,
+    event_type VARCHAR(50) NOT NULL,             -- 'started', 'completed', 'failed', 'retry', 'paused', 'resumed'
+    message TEXT,
+    details JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_job_log_batch (batch_id),
+    INDEX idx_job_log_job (job_id),
+    INDEX idx_job_log_type (event_type),
+    INDEX idx_job_log_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- JOB QUEUE SETTINGS
+-- ============================================================================
+
+INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
+    ('jobqueue', 'enabled', '1'),
+    ('jobqueue', 'default_max_concurrent', '5'),
+    ('jobqueue', 'default_delay_ms', '1000'),
+    ('jobqueue', 'default_max_retries', '3'),
+    ('jobqueue', 'auto_cleanup_days', '30'),
+    ('jobqueue', 'pause_on_high_load', '1'),
+    ('jobqueue', 'high_load_threshold', '80'),
+    ('jobqueue', 'notification_email', ''),
+    ('jobqueue', 'notify_on_complete', '0'),
+    ('jobqueue', 'notify_on_failure', '1')
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================================
 -- MIGRATION: Move data from old ahg_ner_settings if exists
 -- ============================================================================
 

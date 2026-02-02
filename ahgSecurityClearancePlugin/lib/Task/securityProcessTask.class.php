@@ -177,17 +177,34 @@ EOF;
             $clearance->days_remaining
         );
 
-        // Use AtoM's email system if available
-        // QubitJob replaced with framework JobService - TODO: implement
-            try {
-                // $job = new QubitJob(); // Use JobService instead
-                $job->setName('Email: Clearance Expiry Warning');
-                $job->setDownloadPath(null);
-                $job->setCompletedAt(null);
-                // Queue email job...
-            } catch (Exception $e) {
-                $this->logSection('security', 'Email failed: '.$e->getMessage(), null, 'ERROR');
+        // Send email using PHP mail or Symfony mailer
+        try {
+            $fromEmail = sfConfig::get('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+            $siteName = sfConfig::get('app_siteTitle', 'AtoM');
+
+            // Try Symfony mailer first if available
+            if (class_exists('sfMail')) {
+                $mail = new sfMail();
+                $mail->initialize();
+                $mail->setFrom($fromEmail, $siteName);
+                $mail->addAddress($clearance->email);
+                $mail->setSubject($subject);
+                $mail->setBody($body);
+                $mail->send();
+            } else {
+                // Fallback to PHP mail
+                $headers = [
+                    'From: ' . $fromEmail,
+                    'Reply-To: ' . $fromEmail,
+                    'X-Mailer: PHP/' . phpversion(),
+                    'Content-Type: text/plain; charset=UTF-8',
+                ];
+                mail($clearance->email, $subject, $body, implode("\r\n", $headers));
             }
+
+            $this->logSection('security', 'Sent expiry warning to: ' . $clearance->email);
+        } catch (Exception $e) {
+            $this->logSection('security', 'Email failed: ' . $e->getMessage(), null, 'ERROR');
         }
     }
 

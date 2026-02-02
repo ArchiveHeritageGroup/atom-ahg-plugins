@@ -1,0 +1,223 @@
+{
+  "name": "Gallery (CCO/VRA)",
+  "target_type": "gallery",
+  "category": "Gallery",
+  "description": "Default mapping for Gallery/Art records using CCO/VRA standard fields",
+  "display_standard_id": 451,
+  "fields": [
+    {
+      "source_field": "objectNumber",
+      "atom_field": "identifier",
+      "include": true
+    },
+    {
+      "source_field": "title",
+      "atom_field": "title",
+      "include": true
+    },
+    {
+      "source_field": "titleType",
+      "atom_field": "generalNote",
+      "constant_value": "Title type: ",
+      "concat_constant": true,
+      "include": true
+    },
+    {
+      "source_field": "workType",
+      "atom_field": "levelOfDescription",
+      "include": true
+    },
+    {
+      "source_field": "creator",
+      "atom_field": "eventActors",
+      "include": true
+    },
+    {
+      "source_field": "creatorRole",
+      "atom_field": "eventActors",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " ("
+    },
+    {
+      "source_field": "creationDate",
+      "atom_field": "eventDates",
+      "include": true
+    },
+    {
+      "source_field": "creationDateEarliest",
+      "atom_field": "eventStartDates",
+      "include": true
+    },
+    {
+      "source_field": "creationDateLatest",
+      "atom_field": "eventEndDates",
+      "include": true
+    },
+    {
+      "source_field": "creationPlace",
+      "atom_field": "placeAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "stylePeriod",
+      "atom_field": "generalNote",
+      "constant_value": "Style/Period: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "culturalContext",
+      "atom_field": "generalNote",
+      "constant_value": "Cultural context: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "materials",
+      "atom_field": "physicalCharacteristics",
+      "include": true
+    },
+    {
+      "source_field": "technique",
+      "atom_field": "physicalCharacteristics",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "; "
+    },
+    {
+      "source_field": "measurements",
+      "atom_field": "extentAndMedium",
+      "include": true
+    },
+    {
+      "source_field": "measurementType",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " "
+    },
+    {
+      "source_field": "measurementUnit",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": " "
+    },
+    {
+      "source_field": "measurementValue",
+      "atom_field": "extentAndMedium",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ": "
+    },
+    {
+      "source_field": "subject",
+      "atom_field": "scopeAndContent",
+      "include": true
+    },
+    {
+      "source_field": "inscriptions",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Inscriptions: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "stateEdition",
+      "atom_field": "generalNote",
+      "constant_value": "State/Edition: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "conditionDescription",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Condition: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "treatmentHistory",
+      "atom_field": "physicalCharacteristics",
+      "constant_value": "Treatment history: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": ". ",
+      "include": true
+    },
+    {
+      "source_field": "provenance",
+      "atom_field": "archivalHistory",
+      "include": true
+    },
+    {
+      "source_field": "exhibitionHistory",
+      "atom_field": "archivalHistory",
+      "constant_value": "Exhibition history: ",
+      "concat_constant": true,
+      "concatenate": true,
+      "concat_symbol": "\n",
+      "include": true
+    },
+    {
+      "source_field": "bibliographicReferences",
+      "atom_field": "publicationNote",
+      "include": true
+    },
+    {
+      "source_field": "relatedWorks",
+      "atom_field": "relatedUnitsOfDescription",
+      "include": true
+    },
+    {
+      "source_field": "creditLine",
+      "atom_field": "reproductionConditions",
+      "include": true
+    },
+    {
+      "source_field": "rights",
+      "atom_field": "reproductionConditions",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": ". "
+    },
+    {
+      "source_field": "subjectAccessPoints",
+      "atom_field": "subjectAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "placeAccessPoints",
+      "atom_field": "placeAccessPoints",
+      "include": true,
+      "concatenate": true,
+      "concat_symbol": "|"
+    },
+    {
+      "source_field": "nameAccessPoints",
+      "atom_field": "nameAccessPoints",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectPath",
+      "atom_field": "digitalObjectPath",
+      "include": true
+    },
+    {
+      "source_field": "digitalObjectURI",
+      "atom_field": "digitalObjectURI",
+      "include": true
+    }
+  ]
+}

@@ -1,6 +1,16 @@
 <?php
+
 use Illuminate\Database\Capsule\Manager as DB;
 
+/**
+ * ResearchService - Core Research Portal Service
+ *
+ * Handles researcher management, bookings, collections, annotations,
+ * citations, and researcher types/verification.
+ *
+ * @package ahgResearchPlugin
+ * @version 2.0.0
+ */
 class ResearchService
 {
     public function getResearcherByUserId(int $userId): ?object
@@ -609,5 +619,552 @@ class ResearchService
         } catch (\Exception $e) {
             error_log("ResearchService AUDIT ERROR: " . $e->getMessage());
         }
+    }
+
+    // =========================================================================
+    // RESEARCHER TYPES
+    // =========================================================================
+
+    /**
+     * Get all researcher types.
+     *
+     * @param bool $activeOnly Only return active types
+     * @return array List of researcher types
+     */
+    public function getResearcherTypes(bool $activeOnly = true): array
+    {
+        $query = DB::table('research_researcher_type');
+
+        if ($activeOnly) {
+            $query->where('is_active', 1);
+        }
+
+        return $query->orderBy('sort_order')->get()->toArray();
+    }
+
+    /**
+     * Get a researcher type by ID.
+     *
+     * @param int $id The type ID
+     * @return object|null The researcher type or null
+     */
+    public function getResearcherType(int $id): ?object
+    {
+        return DB::table('research_researcher_type')->where('id', $id)->first();
+    }
+
+    /**
+     * Get a researcher type by code.
+     *
+     * @param string $code The type code
+     * @return object|null The researcher type or null
+     */
+    public function getResearcherTypeByCode(string $code): ?object
+    {
+        return DB::table('research_researcher_type')->where('code', $code)->first();
+    }
+
+    /**
+     * Create a new researcher type.
+     *
+     * @param array $data Type data
+     * @return int The new type ID
+     */
+    public function createResearcherType(array $data): int
+    {
+        $maxOrder = DB::table('research_researcher_type')->max('sort_order') ?? 0;
+
+        return DB::table('research_researcher_type')->insertGetId([
+            'name' => $data['name'],
+            'code' => $data['code'],
+            'description' => $data['description'] ?? null,
+            'max_booking_days_advance' => $data['max_booking_days_advance'] ?? 14,
+            'max_booking_hours_per_day' => $data['max_booking_hours_per_day'] ?? 4,
+            'max_materials_per_booking' => $data['max_materials_per_booking'] ?? 10,
+            'can_remote_access' => $data['can_remote_access'] ?? 0,
+            'can_request_reproductions' => $data['can_request_reproductions'] ?? 1,
+            'can_export_data' => $data['can_export_data'] ?? 1,
+            'requires_id_verification' => $data['requires_id_verification'] ?? 1,
+            'auto_approve' => $data['auto_approve'] ?? 0,
+            'expiry_months' => $data['expiry_months'] ?? 12,
+            'priority_level' => $data['priority_level'] ?? 5,
+            'is_active' => $data['is_active'] ?? 1,
+            'sort_order' => $data['sort_order'] ?? ($maxOrder + 10),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    /**
+     * Update a researcher type.
+     *
+     * @param int $id The type ID
+     * @param array $data Fields to update
+     * @return bool Success status
+     */
+    public function updateResearcherType(int $id, array $data): bool
+    {
+        $allowed = [
+            'name', 'code', 'description', 'max_booking_days_advance',
+            'max_booking_hours_per_day', 'max_materials_per_booking',
+            'can_remote_access', 'can_request_reproductions', 'can_export_data',
+            'requires_id_verification', 'auto_approve', 'expiry_months',
+            'priority_level', 'is_active', 'sort_order',
+        ];
+
+        $updateData = array_intersect_key($data, array_flip($allowed));
+        $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+        return DB::table('research_researcher_type')
+            ->where('id', $id)
+            ->update($updateData) >= 0;
+    }
+
+    /**
+     * Delete a researcher type.
+     *
+     * @param int $id The type ID
+     * @return array Result with success status
+     */
+    public function deleteResearcherType(int $id): array
+    {
+        // Check if any researchers are using this type
+        $count = DB::table('research_researcher')
+            ->where('researcher_type_id', $id)
+            ->count();
+
+        if ($count > 0) {
+            return [
+                'success' => false,
+                'error' => "Cannot delete: {$count} researcher(s) are using this type",
+            ];
+        }
+
+        $deleted = DB::table('research_researcher_type')->where('id', $id)->delete() > 0;
+
+        return ['success' => $deleted];
+    }
+
+    /**
+     * Get default researcher types for seeding.
+     *
+     * @return array Default researcher types
+     */
+    public function getDefaultTypes(): array
+    {
+        return [
+            [
+                'name' => 'General Public',
+                'code' => 'public',
+                'description' => 'Members of the general public with casual research needs',
+                'max_booking_days_advance' => 7,
+                'max_booking_hours_per_day' => 2,
+                'max_materials_per_booking' => 5,
+                'can_remote_access' => 0,
+                'requires_id_verification' => 1,
+                'auto_approve' => 0,
+                'expiry_months' => 6,
+                'priority_level' => 1,
+            ],
+            [
+                'name' => 'Registered Researcher',
+                'code' => 'researcher',
+                'description' => 'Registered independent researchers',
+                'max_booking_days_advance' => 14,
+                'max_booking_hours_per_day' => 4,
+                'max_materials_per_booking' => 10,
+                'can_remote_access' => 0,
+                'requires_id_verification' => 1,
+                'auto_approve' => 0,
+                'expiry_months' => 12,
+                'priority_level' => 3,
+            ],
+            [
+                'name' => 'Academic Staff',
+                'code' => 'academic',
+                'description' => 'University and college academic staff members',
+                'max_booking_days_advance' => 30,
+                'max_booking_hours_per_day' => 8,
+                'max_materials_per_booking' => 20,
+                'can_remote_access' => 1,
+                'requires_id_verification' => 0,
+                'auto_approve' => 1,
+                'expiry_months' => 24,
+                'priority_level' => 7,
+            ],
+            [
+                'name' => 'Postgraduate Student',
+                'code' => 'postgraduate',
+                'description' => 'Masters and doctoral students',
+                'max_booking_days_advance' => 21,
+                'max_booking_hours_per_day' => 6,
+                'max_materials_per_booking' => 15,
+                'can_remote_access' => 0,
+                'requires_id_verification' => 1,
+                'auto_approve' => 0,
+                'expiry_months' => 12,
+                'priority_level' => 5,
+            ],
+            [
+                'name' => 'Heritage Professional',
+                'code' => 'professional',
+                'description' => 'Archivists, librarians, and heritage professionals',
+                'max_booking_days_advance' => 30,
+                'max_booking_hours_per_day' => 8,
+                'max_materials_per_booking' => 25,
+                'can_remote_access' => 1,
+                'requires_id_verification' => 0,
+                'auto_approve' => 1,
+                'expiry_months' => 24,
+                'priority_level' => 7,
+            ],
+        ];
+    }
+
+    /**
+     * Check if a researcher type allows a specific action.
+     *
+     * @param int $researcherId The researcher ID
+     * @param string $permission Permission to check (can_remote_access, can_request_reproductions, can_export_data)
+     * @return bool True if permitted
+     */
+    public function checkTypePermission(int $researcherId, string $permission): bool
+    {
+        $researcher = $this->getResearcher($researcherId);
+
+        if (!$researcher || !$researcher->researcher_type_id) {
+            // Default permissions if no type assigned
+            return $permission !== 'can_remote_access';
+        }
+
+        $type = $this->getResearcherType($researcher->researcher_type_id);
+
+        if (!$type) {
+            return $permission !== 'can_remote_access';
+        }
+
+        return (bool) ($type->$permission ?? false);
+    }
+
+    /**
+     * Get booking limits for a researcher based on their type.
+     *
+     * @param int $researcherId The researcher ID
+     * @return array Booking limits
+     */
+    public function getResearcherBookingLimits(int $researcherId): array
+    {
+        $researcher = $this->getResearcher($researcherId);
+
+        $defaults = [
+            'max_booking_days_advance' => 14,
+            'max_booking_hours_per_day' => 4,
+            'max_materials_per_booking' => 10,
+        ];
+
+        if (!$researcher || !$researcher->researcher_type_id) {
+            return $defaults;
+        }
+
+        $type = $this->getResearcherType($researcher->researcher_type_id);
+
+        if (!$type) {
+            return $defaults;
+        }
+
+        return [
+            'max_booking_days_advance' => $type->max_booking_days_advance ?? $defaults['max_booking_days_advance'],
+            'max_booking_hours_per_day' => $type->max_booking_hours_per_day ?? $defaults['max_booking_hours_per_day'],
+            'max_materials_per_booking' => $type->max_materials_per_booking ?? $defaults['max_materials_per_booking'],
+        ];
+    }
+
+    // =========================================================================
+    // VERIFICATION SYSTEM
+    // =========================================================================
+
+    /**
+     * Create a verification record.
+     *
+     * @param int $researcherId The researcher ID
+     * @param array $data Verification data
+     * @return int The verification ID
+     */
+    public function createVerification(int $researcherId, array $data): int
+    {
+        return DB::table('research_verification')->insertGetId([
+            'researcher_id' => $researcherId,
+            'verification_type' => $data['verification_type'],
+            'document_type' => $data['document_type'] ?? null,
+            'document_reference' => $data['document_reference'] ?? null,
+            'document_path' => $data['document_path'] ?? null,
+            'verification_data' => isset($data['verification_data']) ? json_encode($data['verification_data']) : null,
+            'status' => 'pending',
+            'expires_at' => $data['expires_at'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    /**
+     * Get verifications for a researcher.
+     *
+     * @param int $researcherId The researcher ID
+     * @param string|null $status Filter by status
+     * @return array List of verifications
+     */
+    public function getVerifications(int $researcherId, ?string $status = null): array
+    {
+        $query = DB::table('research_verification as v')
+            ->leftJoin('user as u', 'v.verified_by', '=', 'u.id')
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+            })
+            ->where('v.researcher_id', $researcherId)
+            ->select('v.*', 'ai.authorized_form_of_name as verified_by_name');
+
+        if ($status) {
+            $query->where('v.status', $status);
+        }
+
+        return $query->orderBy('v.created_at', 'desc')->get()->toArray();
+    }
+
+    /**
+     * Update a verification record.
+     *
+     * @param int $verificationId The verification ID
+     * @param array $data Fields to update
+     * @return bool Success status
+     */
+    public function updateVerification(int $verificationId, array $data): bool
+    {
+        $allowed = [
+            'document_type', 'document_reference', 'document_path',
+            'verification_data', 'status', 'verified_by', 'verified_at',
+            'expires_at', 'rejection_reason', 'notes',
+        ];
+
+        $updateData = array_intersect_key($data, array_flip($allowed));
+        $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+        if (isset($updateData['verification_data']) && is_array($updateData['verification_data'])) {
+            $updateData['verification_data'] = json_encode($updateData['verification_data']);
+        }
+
+        return DB::table('research_verification')
+            ->where('id', $verificationId)
+            ->update($updateData) >= 0;
+    }
+
+    /**
+     * Verify a researcher (mark verification as verified).
+     *
+     * @param int $verificationId The verification ID
+     * @param int $verifiedBy User ID who verified
+     * @param string|null $notes Optional notes
+     * @return bool Success status
+     */
+    public function verifyResearcher(int $verificationId, int $verifiedBy, ?string $notes = null): bool
+    {
+        $verification = DB::table('research_verification')
+            ->where('id', $verificationId)
+            ->first();
+
+        if (!$verification) {
+            return false;
+        }
+
+        // Update verification
+        $updated = DB::table('research_verification')
+            ->where('id', $verificationId)
+            ->update([
+                'status' => 'verified',
+                'verified_by' => $verifiedBy,
+                'verified_at' => date('Y-m-d H:i:s'),
+                'notes' => $notes,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]) > 0;
+
+        if ($updated && $verification->verification_type === 'id_document') {
+            // Update researcher ID verification status
+            DB::table('research_researcher')
+                ->where('id', $verification->researcher_id)
+                ->update([
+                    'id_verified' => 1,
+                    'id_verified_by' => $verifiedBy,
+                    'id_verified_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Reject a verification.
+     *
+     * @param int $verificationId The verification ID
+     * @param int $rejectedBy User ID who rejected
+     * @param string $reason Rejection reason
+     * @return bool Success status
+     */
+    public function rejectVerification(int $verificationId, int $rejectedBy, string $reason): bool
+    {
+        return DB::table('research_verification')
+            ->where('id', $verificationId)
+            ->update([
+                'status' => 'rejected',
+                'verified_by' => $rejectedBy,
+                'verified_at' => date('Y-m-d H:i:s'),
+                'rejection_reason' => $reason,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]) > 0;
+    }
+
+    /**
+     * Check if a researcher has a valid verification of a specific type.
+     *
+     * @param int $researcherId The researcher ID
+     * @param string $verificationType The verification type
+     * @return bool True if valid verification exists
+     */
+    public function hasValidVerification(int $researcherId, string $verificationType): bool
+    {
+        return DB::table('research_verification')
+            ->where('researcher_id', $researcherId)
+            ->where('verification_type', $verificationType)
+            ->where('status', 'verified')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', date('Y-m-d'));
+            })
+            ->exists();
+    }
+
+    /**
+     * Get expired verifications that need renewal.
+     *
+     * @param int $daysBeforeExpiry Days before expiry to include
+     * @return array List of expiring verifications
+     */
+    public function getExpiringVerifications(int $daysBeforeExpiry = 30): array
+    {
+        $expiryDate = date('Y-m-d', strtotime("+{$daysBeforeExpiry} days"));
+
+        return DB::table('research_verification as v')
+            ->join('research_researcher as r', 'v.researcher_id', '=', 'r.id')
+            ->where('v.status', 'verified')
+            ->whereNotNull('v.expires_at')
+            ->where('v.expires_at', '<=', $expiryDate)
+            ->where('v.expires_at', '>', date('Y-m-d'))
+            ->select(
+                'v.*',
+                'r.first_name',
+                'r.last_name',
+                'r.email'
+            )
+            ->orderBy('v.expires_at')
+            ->get()
+            ->toArray();
+    }
+
+    // =========================================================================
+    // API KEY MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Generate an API key for a researcher.
+     *
+     * @param int $researcherId The researcher ID
+     * @param string $name Key name/description
+     * @param array|null $permissions Optional permissions array
+     * @param int $expiryDays Days until expiry (default 365)
+     * @return array The generated key info
+     */
+    public function generateApiKey(int $researcherId, string $name, ?array $permissions = null, int $expiryDays = 365): array
+    {
+        $apiKey = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime("+{$expiryDays} days"));
+
+        $keyId = DB::table('research_api_key')->insertGetId([
+            'researcher_id' => $researcherId,
+            'name' => $name,
+            'api_key' => $apiKey,
+            'permissions' => $permissions ? json_encode($permissions) : null,
+            'rate_limit' => 1000,
+            'expires_at' => $expiresAt,
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return [
+            'id' => $keyId,
+            'api_key' => $apiKey,
+            'expires_at' => $expiresAt,
+        ];
+    }
+
+    /**
+     * Validate an API key.
+     *
+     * @param string $apiKey The API key
+     * @return object|null Researcher info if valid, null if invalid
+     */
+    public function validateApiKey(string $apiKey): ?object
+    {
+        $key = DB::table('research_api_key as k')
+            ->join('research_researcher as r', 'k.researcher_id', '=', 'r.id')
+            ->where('k.api_key', $apiKey)
+            ->where('k.is_active', 1)
+            ->where(function ($q) {
+                $q->whereNull('k.expires_at')
+                    ->orWhere('k.expires_at', '>', date('Y-m-d H:i:s'));
+            })
+            ->where('r.status', 'approved')
+            ->select('r.*', 'k.id as api_key_id', 'k.permissions as api_permissions', 'k.rate_limit')
+            ->first();
+
+        if ($key) {
+            // Update last used
+            DB::table('research_api_key')
+                ->where('api_key', $apiKey)
+                ->update([
+                    'last_used_at' => date('Y-m-d H:i:s'),
+                    'request_count' => DB::raw('request_count + 1'),
+                ]);
+        }
+
+        return $key;
+    }
+
+    /**
+     * Get API keys for a researcher.
+     *
+     * @param int $researcherId The researcher ID
+     * @return array List of API keys (without the actual key value)
+     */
+    public function getApiKeys(int $researcherId): array
+    {
+        return DB::table('research_api_key')
+            ->where('researcher_id', $researcherId)
+            ->select('id', 'name', 'permissions', 'rate_limit', 'last_used_at', 'request_count', 'expires_at', 'is_active', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Revoke an API key.
+     *
+     * @param int $keyId The key ID
+     * @param int $researcherId The researcher ID (for verification)
+     * @return bool Success status
+     */
+    public function revokeApiKey(int $keyId, int $researcherId): bool
+    {
+        return DB::table('research_api_key')
+            ->where('id', $keyId)
+            ->where('researcher_id', $researcherId)
+            ->update(['is_active' => 0]) > 0;
     }
 }

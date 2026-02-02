@@ -29,8 +29,8 @@
     font-size: 14px;
 }
 .redaction-toolbar .tool-btn.active {
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.5);
-    background: #0d6efd !important;
+    box-shadow: 0 0 0 2px rgba(var(--ahg-primary-rgb), 0.5);
+    background: var(--ahg-primary) !important;
     color: white !important;
 }
 .redaction-toolbar .divider {
@@ -160,7 +160,7 @@
     background: #333;
 }
 .panel-tabs .tab-btn.active {
-    background: #0d6efd;
+    background: var(--ahg-primary);
     color: white;
 }
 
@@ -203,7 +203,7 @@
 }
 .region-item.selected {
     background: #1e3a5f;
-    border-left-color: #0d6efd;
+    border-left-color: var(--ahg-primary);
 }
 .region-body {
     flex: 1;
@@ -240,26 +240,26 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
-    border-left: 3px solid #ffc107;
+    border-left: 3px solid var(--ahg-warning);
 }
 .ner-entity-item:hover {
     background: #3d3d3d;
 }
 .ner-entity-item.converted {
     opacity: 0.5;
-    border-left-color: #28a745;
+    border-left-color: var(--ahg-success);
 }
 .ner-type {
     font-size: 0.7em;
     padding: 2px 6px;
     border-radius: 3px;
-    background: #ffc107;
+    background: var(--ahg-warning);
     color: #000;
 }
-.ner-type.person { background: #17a2b8; color: #fff; }
-.ner-type.email { background: #ffc107; color: #000; }
+.ner-type.person { background: var(--ahg-info); color: #fff; }
+.ner-type.email { background: var(--ahg-warning); color: #000; }
 .ner-type.phone { background: #fd7e14; color: #fff; }
-.ner-type.id { background: #dc3545; color: #fff; }
+.ner-type.id { background: var(--ahg-danger); color: #fff; }
 .ner-type.bank { background: #6f42c1; color: #fff; }
 
 /* Empty State */
@@ -297,14 +297,14 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #28a745;
+    background: var(--ahg-success);
 }
 .status-indicator.saving {
-    background: #ffc107;
+    background: var(--ahg-warning);
     animation: pulse 1s infinite;
 }
 .status-indicator.error {
-    background: #dc3545;
+    background: var(--ahg-danger);
 }
 @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -364,7 +364,7 @@
 }
 .redaction-box.approved {
     fill: rgba(0, 0, 0, 0.9);
-    stroke: #28a745;
+    stroke: var(--ahg-success);
     stroke-width: 2;
 }
 

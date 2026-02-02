@@ -25,7 +25,7 @@ try {
     // Use defaults
 }
 
-// Extract values with defaults
+// Extract values with defaults - Primary theme colors
 $primary = $settings['ahg_primary_color'] ?? '#005837';
 $secondary = $settings['ahg_secondary_color'] ?? '#37A07F';
 $cardHeaderBg = $settings['ahg_card_header_bg'] ?? '#005837';
@@ -35,6 +35,18 @@ $buttonText = $settings['ahg_button_text'] ?? '#ffffff';
 $linkColor = $settings['ahg_link_color'] ?? '#005837';
 $sidebarBg = $settings['ahg_sidebar_bg'] ?? '#f8f9fa';
 $sidebarText = $settings['ahg_sidebar_text'] ?? '#333333';
+
+// Extended theme colors (Bootstrap-compatible)
+$success = $settings['ahg_success_color'] ?? '#28a745';
+$warning = $settings['ahg_warning_color'] ?? '#ffc107';
+$danger = $settings['ahg_danger_color'] ?? '#dc3545';
+$info = $settings['ahg_info_color'] ?? '#17a2b8';
+$light = $settings['ahg_light_color'] ?? '#f8f9fa';
+$dark = $settings['ahg_dark_color'] ?? '#343a40';
+$muted = $settings['ahg_muted_color'] ?? '#6c757d';
+$borderColor = $settings['ahg_border_color'] ?? '#dee2e6';
+$bodyBg = $settings['ahg_body_bg'] ?? '#ffffff';
+$bodyText = $settings['ahg_body_text'] ?? '#212529';
 
 // Helper function
 if (!function_exists('ahgHexToRgba')) {
@@ -50,6 +62,7 @@ if (!function_exists('ahgHexToRgba')) {
 ?>
 <style id="ahg-theme-variables">
 :root {
+    /* Primary theme colors */
     --ahg-primary: <?= $primary ?>;
     --ahg-secondary: <?= $secondary ?>;
     --ahg-card-header-bg: <?= $cardHeaderBg ?>;
@@ -60,6 +73,26 @@ if (!function_exists('ahgHexToRgba')) {
     --ahg-sidebar-bg: <?= $sidebarBg ?>;
     --ahg-sidebar-text: <?= $sidebarText ?>;
     --ahg-input-focus: <?= ahgHexToRgba($primary, 0.25) ?>;
+
+    /* Extended colors (Bootstrap-compatible) */
+    --ahg-success: <?= $success ?>;
+    --ahg-warning: <?= $warning ?>;
+    --ahg-danger: <?= $danger ?>;
+    --ahg-info: <?= $info ?>;
+    --ahg-light: <?= $light ?>;
+    --ahg-dark: <?= $dark ?>;
+    --ahg-muted: <?= $muted ?>;
+    --ahg-border: <?= $borderColor ?>;
+    --ahg-body-bg: <?= $bodyBg ?>;
+    --ahg-body-text: <?= $bodyText ?>;
+
+    /* Computed variants */
+    --ahg-primary-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($primary, '#'), 2))) ?>;
+    --ahg-secondary-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($secondary, '#'), 2))) ?>;
+    --ahg-success-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($success, '#'), 2))) ?>;
+    --ahg-danger-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($danger, '#'), 2))) ?>;
+    --ahg-warning-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($warning, '#'), 2))) ?>;
+    --ahg-info-rgb: <?= implode(',', array_map('hexdec', str_split(ltrim($info, '#'), 2))) ?>;
 }
 
 /* Apply to Bootstrap components */

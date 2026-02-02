@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AhgLoan\Services\Loan;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -18,7 +19,9 @@ use Psr\Log\NullLogger;
  */
 class ConditionReportService
 {
-    /** Report types */
+    /**
+     * @deprecated Use AhgTaxonomyService::getReportTypes() instead
+     */
     public const REPORT_TYPES = [
         'pre_loan' => 'Pre-Loan Examination',
         'post_loan' => 'Post-Loan Examination',
@@ -26,7 +29,9 @@ class ConditionReportService
         'periodic' => 'Periodic Check',
     ];
 
-    /** Condition ratings */
+    /**
+     * @deprecated Use AhgTaxonomyService::getConditionGrades() instead
+     */
     public const CONDITIONS = [
         'excellent' => 'Excellent - No visible issues',
         'good' => 'Good - Minor wear consistent with age',
@@ -35,7 +40,9 @@ class ConditionReportService
         'critical' => 'Critical - Immediate treatment required',
     ];
 
-    /** Image types */
+    /**
+     * @deprecated Use AhgTaxonomyService::getImageTypes() instead
+     */
     public const IMAGE_TYPES = [
         'overall' => 'Overall View',
         'detail' => 'Detail Shot',
@@ -59,11 +66,37 @@ class ConditionReportService
 
     private ConnectionInterface $db;
     private LoggerInterface $logger;
+    private AhgTaxonomyService $taxonomyService;
 
     public function __construct(ConnectionInterface $db, ?LoggerInterface $logger = null)
     {
         $this->db = $db;
         $this->logger = $logger ?? new NullLogger();
+        $this->taxonomyService = new AhgTaxonomyService();
+    }
+
+    /**
+     * Get report types from database.
+     */
+    public function getReportTypes(): array
+    {
+        return $this->taxonomyService->getReportTypes(false);
+    }
+
+    /**
+     * Get condition grades from database.
+     */
+    public function getConditions(): array
+    {
+        return $this->taxonomyService->getConditionGrades(false);
+    }
+
+    /**
+     * Get image types from database.
+     */
+    public function getImageTypes(): array
+    {
+        return $this->taxonomyService->getImageTypes(false);
     }
 
     /**

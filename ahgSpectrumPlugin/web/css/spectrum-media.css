@@ -476,30 +476,30 @@
 
 .spectrum-condition-photos .photo-actions {
     padding: 8px 12px;
-    background: #f8f9fa;
-    border-top: 1px solid #e0e0e0;
+    background: var(--ahg-light);
+    border-top: 1px solid var(--ahg-border);
 }
 
 /* Photo type badges */
 .badge-before {
-    background-color: #dc3545;
+    background-color: var(--ahg-danger);
 }
 
 .badge-after {
-    background-color: #28a745;
+    background-color: var(--ahg-success);
 }
 
 .badge-detail {
-    background-color: #6c757d;
+    background-color: var(--ahg-muted);
 }
 
 .badge-damage {
-    background-color: #ffc107;
+    background-color: var(--ahg-warning);
     color: #333;
 }
 
 .badge-overall {
-    background-color: #17a2b8;
+    background-color: var(--ahg-info);
 }
 
 .badge-other {

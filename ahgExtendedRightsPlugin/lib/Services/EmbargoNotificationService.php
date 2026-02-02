@@ -2,6 +2,7 @@
 
 namespace ahgExtendedRightsPlugin\Services;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -286,7 +287,7 @@ class EmbargoNotificationService
     }
 
     /**
-     * Get human-readable embargo type label.
+     * Get human-readable embargo type label (from database).
      *
      * @param string $type Embargo type
      *
@@ -294,14 +295,10 @@ class EmbargoNotificationService
      */
     protected function getEmbargoTypeLabel(string $type): string
     {
-        $labels = [
-            'full' => 'Full Access Restriction',
-            'metadata_only' => 'Metadata Only (Digital Content Restricted)',
-            'digital_only' => 'Digital Content Restricted',
-            'partial' => 'Partial Restriction',
-        ];
+        $taxonomyService = new AhgTaxonomyService();
+        $label = $taxonomyService->getTermName(AhgTaxonomyService::EMBARGO_TYPE, $type);
 
-        return $labels[$type] ?? 'Access Restriction';
+        return $label ?? 'Access Restriction';
     }
 
     /**

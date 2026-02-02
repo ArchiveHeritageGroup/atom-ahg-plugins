@@ -19,6 +19,8 @@ $systemInfo = $sf_data->getRaw('systemInfo');
 $phpExtensions = $sf_data->getRaw('phpExtensions');
 $diskUsage = $sf_data->getRaw('diskUsage');
 $atomRoot = $sf_data->getRaw('atomRoot');
+$exportFormats = $sf_data->getRaw('exportFormats');
+$doiStats = $sf_data->getRaw('doiStats');
 ?>
 
 <style>
@@ -187,6 +189,172 @@ $atomRoot = $sf_data->getRaw('atomRoot');
   </div>
 </div>
 <?php endforeach; ?>
+
+<!-- Metadata Export Formats -->
+<?php if (!empty($exportFormats['formats'])): ?>
+<div class="card mb-4">
+  <div class="card-header bg-info text-white">
+    <i class="bi bi-file-earmark-code me-2"></i>
+    <strong><?php echo __('GLAM Metadata Export Formats'); ?></strong>
+    <span class="badge bg-light text-dark ms-2"><?php echo count($exportFormats['formats']); ?> formats</span>
+    <?php if (!$exportFormats['pluginEnabled']): ?>
+      <span class="badge bg-warning ms-2">Plugin not enabled</span>
+    <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <p class="text-muted small mb-3">
+      Export archival descriptions to international GLAM standards. Use CLI command:
+      <code><?php echo $exportFormats['command']; ?></code>
+    </p>
+    <div class="row g-3">
+      <?php foreach ($exportFormats['formats'] as $format): ?>
+        <div class="col-md-4 col-lg-3">
+          <div class="card software-card h-100" style="border-left-color: <?php echo $format['status'] === 'ok' ? '#198754' : '#fd7e14'; ?>;">
+            <div class="card-body py-2 px-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="<?php echo $format['icon']; ?> me-2 status-<?php echo $format['status']; ?>"></i>
+                  <strong><?php echo $format['name']; ?></strong>
+                </div>
+                <span class="badge bg-secondary"><?php echo $format['output']; ?></span>
+              </div>
+              <div class="mt-1">
+                <span class="badge bg-light text-dark"><?php echo $format['sector']; ?></span>
+                <code class="ms-1 small"><?php echo $format['code']; ?></code>
+              </div>
+              <small class="text-muted d-block mt-1"><?php echo $format['description']; ?></small>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <div class="card-footer bg-light">
+    <small class="text-muted">
+      <i class="bi bi-terminal me-1"></i>
+      <strong>CLI:</strong>
+      <code>php symfony metadata:export --format=ead3 --slug=my-record</code> |
+      <code>php symfony metadata:export --format=all --repository=5</code>
+    </small>
+  </div>
+</div>
+<?php endif; ?>
+
+<!-- DOI Integration Status -->
+<?php if (!empty($doiStats)): ?>
+<div class="card mb-4">
+  <div class="card-header bg-success text-white">
+    <i class="bi bi-link-45deg me-2"></i>
+    <strong><?php echo __('DOI Integration (DataCite)'); ?></strong>
+    <?php if ($doiStats['enabled']): ?>
+      <span class="badge bg-light text-success ms-2">Enabled</span>
+    <?php else: ?>
+      <span class="badge bg-warning text-dark ms-2">Not Configured</span>
+    <?php endif; ?>
+  </div>
+  <div class="card-body">
+    <?php if ($doiStats['enabled']): ?>
+      <div class="row">
+        <div class="col-md-6">
+          <h6><i class="bi bi-bar-chart me-1"></i> DOI Statistics</h6>
+          <table class="table table-sm table-borderless mb-0">
+            <tr>
+              <td class="text-muted" style="width: 150px;">Total DOIs</td>
+              <td><strong><?php echo number_format($doiStats['total']); ?></strong></td>
+            </tr>
+            <tr>
+              <td class="text-muted">Findable</td>
+              <td>
+                <span class="badge bg-success"><?php echo number_format($doiStats['by_status']['findable']); ?></span>
+                <small class="text-muted ms-1">publicly discoverable</small>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-muted">Registered</td>
+              <td>
+                <span class="badge bg-primary"><?php echo number_format($doiStats['by_status']['registered']); ?></span>
+                <small class="text-muted ms-1">reserved but not public</small>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-muted">Draft</td>
+              <td>
+                <span class="badge bg-secondary"><?php echo number_format($doiStats['by_status']['draft']); ?></span>
+              </td>
+            </tr>
+            <?php if ($doiStats['by_status']['failed'] > 0): ?>
+            <tr>
+              <td class="text-muted">Failed</td>
+              <td>
+                <span class="badge bg-danger"><?php echo number_format($doiStats['by_status']['failed']); ?></span>
+              </td>
+            </tr>
+            <?php endif; ?>
+            <?php if ($doiStats['queue_pending'] > 0): ?>
+            <tr>
+              <td class="text-muted">Queue Pending</td>
+              <td>
+                <span class="badge bg-warning text-dark"><?php echo number_format($doiStats['queue_pending']); ?></span>
+              </td>
+            </tr>
+            <?php endif; ?>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <?php if ($doiStats['config']): ?>
+            <h6><i class="bi bi-gear me-1"></i> Configuration</h6>
+            <table class="table table-sm table-borderless mb-0">
+              <tr>
+                <td class="text-muted" style="width: 150px;">DOI Prefix</td>
+                <td><code><?php echo htmlspecialchars($doiStats['config']['prefix']); ?></code></td>
+              </tr>
+              <tr>
+                <td class="text-muted">Environment</td>
+                <td>
+                  <span class="badge bg-<?php echo $doiStats['config']['environment'] === 'production' ? 'success' : 'warning'; ?>">
+                    <?php echo htmlspecialchars($doiStats['config']['environment']); ?>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted">Auto-mint</td>
+                <td>
+                  <?php if ($doiStats['config']['auto_mint']): ?>
+                    <i class="bi bi-check-circle-fill text-success"></i> Enabled
+                  <?php else: ?>
+                    <i class="bi bi-x-circle text-muted"></i> Disabled
+                  <?php endif; ?>
+                </td>
+              </tr>
+            </table>
+          <?php else: ?>
+            <div class="alert alert-warning mb-0">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              DataCite not configured. Go to <strong>Admin > DOI Settings</strong> to set up.
+            </div>
+          <?php endif; ?>
+        </div>
+      </div>
+    <?php else: ?>
+      <p class="text-muted mb-2">
+        <i class="bi bi-info-circle me-1"></i>
+        DOI integration allows you to mint persistent identifiers for your records via DataCite.
+      </p>
+      <p class="mb-0">
+        <strong>To enable:</strong> Install and enable the ahgDoiPlugin, then configure your DataCite credentials.
+      </p>
+    <?php endif; ?>
+  </div>
+  <div class="card-footer bg-light">
+    <small class="text-muted">
+      <i class="bi bi-terminal me-1"></i>
+      <strong>CLI:</strong>
+      <code>php symfony doi:mint --slug=my-record</code> |
+      <code>php symfony doi:process-queue --limit=10</code>
+    </small>
+  </div>
+</div>
+<?php endif; ?>
 
 <!-- PHP Extensions -->
 <div class="card mb-4">

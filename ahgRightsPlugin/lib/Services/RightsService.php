@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plugins\ahgRightsPlugin\Services;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Collection;
 
@@ -26,10 +27,12 @@ class RightsService
     protected static ?RightsService $instance = null;
     protected string $culture;
     protected array $cache = [];
+    protected AhgTaxonomyService $taxonomyService;
 
     public function __construct(?string $culture = null)
     {
         $this->culture = $culture ?? $this->getDefaultCulture();
+        $this->taxonomyService = new AhgTaxonomyService();
     }
 
     public static function getInstance(?string $culture = null): self
@@ -803,82 +806,19 @@ class RightsService
     }
 
     /**
-     * Get form options for dropdowns
+     * Get form options for dropdowns (loaded from database)
      */
     public function getFormOptions(): array
     {
         return [
-            'basis_options' => [
-                'copyright' => 'Copyright',
-                'license' => 'License',
-                'statute' => 'Statute',
-                'donor' => 'Donor Agreement',
-                'policy' => 'Institutional Policy',
-                'other' => 'Other',
-            ],
-            'copyright_status_options' => [
-                'copyrighted' => 'In Copyright',
-                'public_domain' => 'Public Domain',
-                'unknown' => 'Unknown',
-            ],
-            'act_options' => [
-                'render' => 'Render / Display',
-                'disseminate' => 'Disseminate / Distribute',
-                'replicate' => 'Replicate / Copy',
-                'migrate' => 'Migrate / Transform',
-                'modify' => 'Modify / Edit',
-                'delete' => 'Delete',
-                'print' => 'Print',
-                'publish' => 'Publish',
-                'use' => 'Use',
-                'excerpt' => 'Excerpt',
-                'annotate' => 'Annotate',
-            ],
-            'restriction_options' => [
-                'allow' => 'Allow',
-                'disallow' => 'Disallow',
-                'conditional' => 'Conditional',
-            ],
-            'embargo_type_options' => [
-                'full' => 'Full Embargo',
-                'metadata_only' => 'Metadata Only (No Digital)',
-                'digital_only' => 'Digital Only (Metadata Visible)',
-                'partial' => 'Partial',
-            ],
-            'embargo_reason_options' => [
-                'donor_restriction' => 'Donor Restriction',
-                'copyright' => 'Copyright',
-                'privacy' => 'Privacy',
-                'legal' => 'Legal Hold',
-                'commercial' => 'Commercial Sensitivity',
-                'research' => 'Research Embargo',
-                'cultural' => 'Cultural Sensitivity',
-                'security' => 'Security Classification',
-                'other' => 'Other',
-            ],
-            'work_type_options' => [
-                'literary' => 'Literary Work',
-                'dramatic' => 'Dramatic Work',
-                'musical' => 'Musical Work',
-                'artistic' => 'Artistic Work',
-                'film' => 'Film',
-                'sound_recording' => 'Sound Recording',
-                'broadcast' => 'Broadcast',
-                'photograph' => 'Photograph',
-                'database' => 'Database',
-                'other' => 'Other',
-            ],
-            'search_source_options' => [
-                'database' => 'Database/Registry',
-                'registry' => 'Copyright Registry',
-                'publisher' => 'Publisher',
-                'author_society' => 'Author/Rights Society',
-                'archive' => 'Archive/Library',
-                'library' => 'Library Catalog',
-                'internet' => 'Internet Search',
-                'newspaper' => 'Newspaper/Publication',
-                'other' => 'Other',
-            ],
+            'basis_options' => $this->taxonomyService->getRightsBasis(false),
+            'copyright_status_options' => $this->taxonomyService->getCopyrightStatuses(false),
+            'act_options' => $this->taxonomyService->getActTypes(false),
+            'restriction_options' => $this->taxonomyService->getRestrictionTypes(false),
+            'embargo_type_options' => $this->taxonomyService->getEmbargoTypes(false),
+            'embargo_reason_options' => $this->taxonomyService->getEmbargoReasons(false),
+            'work_type_options' => $this->taxonomyService->getWorkTypes(false),
+            'search_source_options' => $this->taxonomyService->getSourceTypes(false),
             'rights_statements' => $this->getRightsStatements(),
             'cc_licenses' => $this->getCcLicenses(),
             'tk_labels' => $this->getTkLabels(),

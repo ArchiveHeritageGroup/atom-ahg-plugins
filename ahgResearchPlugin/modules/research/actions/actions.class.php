@@ -1165,20 +1165,20 @@ class researchActions extends sfActions
         }
         $userId = $this->getUser()->getAttribute('user_id');
         $this->researcher = $this->service->getResearcherByUserId($userId);
-        
+
         if (!$this->researcher) {
             $this->redirect('research/register');
         }
-        
+
         // Only allow renewal for expired or soon-to-expire
         if (!in_array($this->researcher->status, ['expired', 'approved'])) {
             $this->getUser()->setFlash('error', 'Renewal not available for your current status');
             $this->redirect('research/profile');
         }
-        
+
         if ($request->isMethod('post')) {
             $reason = trim($request->getParameter('reason', ''));
-            
+
             // Create renewal request via access_request
             $requestId = DB::table('access_request')->insertGetId([
                 'request_type' => 'researcher',
@@ -1187,11 +1187,1507 @@ class researchActions extends sfActions
                 'reason' => $reason ?: 'Researcher registration renewal request',
                 'status' => 'pending',
                 'created_at' => date('Y-m-d H:i:s'),
-                
+
             ]);
-            
+
             $this->getUser()->setFlash('success', 'Renewal request submitted. You will be notified when reviewed.');
             $this->redirect('research/profile');
+        }
+    }
+
+    // =========================================================================
+    // ORCID INTEGRATION
+    // =========================================================================
+
+    /**
+     * Initiate ORCID OAuth connection.
+     */
+    public function executeOrcidConnect(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->getUser()->setFlash('error', 'You must be a registered researcher');
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcidService = new OrcidService();
+
+        $authUrl = $orcidService->getAuthorizationUrl($researcher->id);
+        $this->redirect($authUrl);
+    }
+
+    /**
+     * ORCID OAuth callback.
+     */
+    public function executeOrcidCallback(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $code = $request->getParameter('code');
+        $state = $request->getParameter('state');
+        $error = $request->getParameter('error');
+
+        if ($error) {
+            $this->getUser()->setFlash('error', 'ORCID authorization was cancelled or failed');
+            $this->redirect('research/profile');
+        }
+
+        if (!$code || !$state) {
+            $this->getUser()->setFlash('error', 'Invalid ORCID callback');
+            $this->redirect('research/profile');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcidService = new OrcidService();
+
+        $result = $orcidService->exchangeCodeForToken($code, $state);
+
+        if (isset($result['error'])) {
+            $this->getUser()->setFlash('error', $result['error']);
+        } else {
+            $this->getUser()->setFlash('success', 'ORCID connected successfully: ' . $result['orcid']);
+        }
+
+        $this->redirect('research/profile');
+    }
+
+    /**
+     * Disconnect ORCID from researcher profile.
+     */
+    public function executeOrcidDisconnect(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcidService = new OrcidService();
+
+        $result = $orcidService->disconnectOrcid($researcher->id);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('success', 'ORCID disconnected');
+        } else {
+            $this->getUser()->setFlash('error', $result['error'] ?? 'Failed to disconnect ORCID');
+        }
+
+        $this->redirect('research/profile');
+    }
+
+    // =========================================================================
+    // ADMIN: RESEARCHER TYPES
+    // =========================================================================
+
+    /**
+     * List and manage researcher types.
+     */
+    public function executeAdminTypes(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $this->types = $this->service->getResearcherTypes();
+    }
+
+    /**
+     * Edit or create researcher type.
+     */
+    public function executeEditResearcherType(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $id = (int) $request->getParameter('id');
+        $this->type = $id ? $this->service->getResearcherType($id) : null;
+        $this->isNew = !$this->type;
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'name' => $request->getParameter('name'),
+                'code' => $request->getParameter('code'),
+                'description' => $request->getParameter('description'),
+                'max_booking_days_advance' => (int) $request->getParameter('max_booking_days_advance', 14),
+                'max_booking_hours_per_day' => (int) $request->getParameter('max_booking_hours_per_day', 4),
+                'max_materials_per_booking' => (int) $request->getParameter('max_materials_per_booking', 10),
+                'can_remote_access' => $request->getParameter('can_remote_access') ? 1 : 0,
+                'can_request_reproductions' => $request->getParameter('can_request_reproductions') ? 1 : 0,
+                'can_export_data' => $request->getParameter('can_export_data') ? 1 : 0,
+                'requires_id_verification' => $request->getParameter('requires_id_verification') ? 1 : 0,
+                'auto_approve' => $request->getParameter('auto_approve') ? 1 : 0,
+                'expiry_months' => (int) $request->getParameter('expiry_months', 12),
+                'priority_level' => (int) $request->getParameter('priority_level', 5),
+                'is_active' => $request->getParameter('is_active') ? 1 : 0,
+                'sort_order' => (int) $request->getParameter('sort_order', 100),
+            ];
+
+            if ($id && $this->type) {
+                $this->service->updateResearcherType($id, $data);
+                $this->getUser()->setFlash('success', 'Researcher type updated');
+            } else {
+                $this->service->createResearcherType($data);
+                $this->getUser()->setFlash('success', 'Researcher type created');
+            }
+
+            $this->redirect('research/adminTypes');
+        }
+    }
+
+    // =========================================================================
+    // RESEARCH PROJECTS
+    // =========================================================================
+
+    /**
+     * List researcher's projects.
+     */
+    public function executeProjects(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $this->projects = $projectService->getProjects($this->researcher->id, [
+            'status' => $request->getParameter('status'),
+        ]);
+
+        // Handle project creation
+        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+            $result = $projectService->createProject($this->researcher->id, [
+                'title' => $request->getParameter('title'),
+                'description' => $request->getParameter('description'),
+                'project_type' => $request->getParameter('project_type', 'personal'),
+                'institution' => $request->getParameter('institution'),
+                'start_date' => $request->getParameter('start_date'),
+                'expected_end_date' => $request->getParameter('expected_end_date'),
+            ]);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Project created');
+                $this->redirect('research/viewProject?id=' . $result['id']);
+            }
+        }
+    }
+
+    /**
+     * View project details.
+     */
+    public function executeViewProject(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $projectId = (int) $request->getParameter('id');
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+
+        if (!$this->project) {
+            $this->forward404('Project not found');
+        }
+
+        $this->collaborators = $projectService->getCollaborators($projectId);
+        $this->resources = DB::table('research_project_resource')
+            ->where('project_id', $projectId)
+            ->orderBy('added_at', 'desc')
+            ->get()->toArray();
+        $this->milestones = DB::table('research_project_milestone')
+            ->where('project_id', $projectId)
+            ->orderBy('sort_order')
+            ->get()->toArray();
+        $this->activities = DB::table('research_activity_log')
+            ->where('project_id', $projectId)
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()->toArray();
+    }
+
+    /**
+     * Edit project.
+     */
+    public function executeEditProject(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $projectId = (int) $request->getParameter('id');
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+
+        if (!$this->project) {
+            $this->forward404('Project not found');
+        }
+
+        // Only owner can edit
+        if ($this->project->owner_id != $this->researcher->id) {
+            $this->getUser()->setFlash('error', 'Only the project owner can edit');
+            $this->redirect('research/viewProject?id=' . $projectId);
+        }
+
+        if ($request->isMethod('post')) {
+            $result = $projectService->updateProject($projectId, $this->researcher->id, [
+                'title' => $request->getParameter('title'),
+                'description' => $request->getParameter('description'),
+                'project_type' => $request->getParameter('project_type'),
+                'institution' => $request->getParameter('institution'),
+                'supervisor' => $request->getParameter('supervisor'),
+                'funding_source' => $request->getParameter('funding_source'),
+                'start_date' => $request->getParameter('start_date'),
+                'expected_end_date' => $request->getParameter('expected_end_date'),
+                'status' => $request->getParameter('status'),
+                'visibility' => $request->getParameter('visibility'),
+            ]);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Project updated');
+                $this->redirect('research/viewProject?id=' . $projectId);
+            }
+        }
+    }
+
+    /**
+     * Manage project collaborators.
+     */
+    public function executeProjectCollaborators(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $projectId = (int) $request->getParameter('id');
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+
+        if (!$this->project) {
+            $this->forward404('Project not found');
+        }
+
+        $this->collaborators = $projectService->getCollaborators($projectId);
+
+        // Handle remove collaborator
+        if ($request->isMethod('post') && $request->getParameter('action') === 'remove') {
+            $collaboratorId = (int) $request->getParameter('collaborator_id');
+            DB::table('research_project_collaborator')
+                ->where('id', $collaboratorId)
+                ->where('project_id', $projectId)
+                ->delete();
+            $this->getUser()->setFlash('success', 'Collaborator removed');
+            $this->redirect('research/projectCollaborators?id=' . $projectId);
+        }
+    }
+
+    /**
+     * Invite collaborator to project.
+     */
+    public function executeInviteCollaborator(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $projectId = (int) $request->getParameter('id');
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+
+        if (!$this->project || $this->project->owner_id != $this->researcher->id) {
+            $this->getUser()->setFlash('error', 'Only project owner can invite collaborators');
+            $this->redirect('research/projects');
+        }
+
+        if ($request->isMethod('post')) {
+            $email = trim($request->getParameter('email'));
+            $role = $request->getParameter('role', 'contributor');
+
+            $result = $projectService->inviteCollaborator($projectId, $this->researcher->id, $email, $role);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Invitation sent');
+                $this->redirect('research/projectCollaborators?id=' . $projectId);
+            }
+        }
+    }
+
+    /**
+     * Accept collaboration invitation.
+     */
+    public function executeAcceptInvitation(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $token = $request->getParameter('token');
+        $result = $projectService->acceptInvitation($token, $researcher->id);
+
+        if (isset($result['error'])) {
+            $this->getUser()->setFlash('error', $result['error']);
+            $this->redirect('research/projects');
+        }
+
+        $this->getUser()->setFlash('success', 'You have joined the project');
+        $this->redirect('research/viewProject?id=' . $result['project_id']);
+    }
+
+    // =========================================================================
+    // REPRODUCTION REQUESTS
+    // =========================================================================
+
+    /**
+     * List reproduction requests.
+     */
+    public function executeReproductions(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        $reproductionService = new ReproductionService();
+
+        $this->requests = $reproductionService->getRequests($this->researcher->id, [
+            'status' => $request->getParameter('status'),
+        ]);
+    }
+
+    /**
+     * Create new reproduction request.
+     */
+    public function executeNewReproduction(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher || $this->researcher->status !== 'approved') {
+            $this->getUser()->setFlash('error', 'Must be an approved researcher');
+            $this->redirect('research/dashboard');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        $reproductionService = new ReproductionService();
+
+        if ($request->isMethod('post')) {
+            $result = $reproductionService->createRequest($this->researcher->id, [
+                'purpose' => $request->getParameter('purpose'),
+                'intended_use' => $request->getParameter('intended_use'),
+                'publication_details' => $request->getParameter('publication_details'),
+                'delivery_method' => $request->getParameter('delivery_method', 'digital'),
+                'urgency' => $request->getParameter('urgency', 'normal'),
+                'special_instructions' => $request->getParameter('special_instructions'),
+            ]);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Reproduction request created');
+                $this->redirect('research/viewReproduction?id=' . $result['id']);
+            }
+        }
+    }
+
+    /**
+     * View reproduction request details.
+     */
+    public function executeViewReproduction(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        $reproductionService = new ReproductionService();
+
+        $requestId = (int) $request->getParameter('id');
+        $this->reproductionRequest = $reproductionService->getRequest($requestId, $this->researcher->id);
+
+        if (!$this->reproductionRequest) {
+            $this->forward404('Request not found');
+        }
+
+        $this->items = $reproductionService->getItems($requestId);
+
+        // Handle item actions
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'add_item') {
+                $objectId = (int) $request->getParameter('object_id');
+                $result = $reproductionService->addItem($requestId, $this->researcher->id, [
+                    'object_id' => $objectId,
+                    'reproduction_type' => $request->getParameter('reproduction_type', 'digital_scan'),
+                    'format' => $request->getParameter('format'),
+                    'size' => $request->getParameter('size'),
+                    'resolution' => $request->getParameter('resolution'),
+                    'color_mode' => $request->getParameter('color_mode', 'color'),
+                    'quantity' => (int) $request->getParameter('quantity', 1),
+                    'special_instructions' => $request->getParameter('special_instructions'),
+                ]);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Item added');
+                }
+                $this->redirect('research/viewReproduction?id=' . $requestId);
+            }
+
+            if ($action === 'remove_item') {
+                $itemId = (int) $request->getParameter('item_id');
+                $reproductionService->removeItem($requestId, $itemId, $this->researcher->id);
+                $this->getUser()->setFlash('success', 'Item removed');
+                $this->redirect('research/viewReproduction?id=' . $requestId);
+            }
+
+            if ($action === 'submit') {
+                $result = $reproductionService->submitRequest($requestId, $this->researcher->id);
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Request submitted');
+                }
+                $this->redirect('research/viewReproduction?id=' . $requestId);
+            }
+        }
+    }
+
+    // =========================================================================
+    // BIBLIOGRAPHY MANAGEMENT
+    // =========================================================================
+
+    /**
+     * List bibliographies.
+     */
+    public function executeBibliographies(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        $bibliographyService = new BibliographyService();
+
+        $this->bibliographies = $bibliographyService->getBibliographies($this->researcher->id);
+
+        // Handle create
+        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+            $result = $bibliographyService->createBibliography($this->researcher->id, [
+                'name' => $request->getParameter('name'),
+                'description' => $request->getParameter('description'),
+                'citation_style' => $request->getParameter('citation_style', 'chicago'),
+            ]);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Bibliography created');
+                $this->redirect('research/viewBibliography?id=' . $result['id']);
+            }
+        }
+    }
+
+    /**
+     * View bibliography details.
+     */
+    public function executeViewBibliography(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        $bibliographyService = new BibliographyService();
+
+        $bibliographyId = (int) $request->getParameter('id');
+        $this->bibliography = $bibliographyService->getBibliography($bibliographyId, $this->researcher->id);
+
+        if (!$this->bibliography) {
+            $this->forward404('Bibliography not found');
+        }
+
+        $this->entries = DB::table('research_bibliography_entry')
+            ->where('bibliography_id', $bibliographyId)
+            ->orderBy('sort_order')
+            ->get()->toArray();
+
+        // Handle actions
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'add_entry') {
+                $objectId = (int) $request->getParameter('object_id');
+                if ($objectId) {
+                    $result = $bibliographyService->addEntryFromObject($bibliographyId, $this->researcher->id, $objectId);
+                    if (isset($result['error'])) {
+                        $this->getUser()->setFlash('error', $result['error']);
+                    } else {
+                        $this->getUser()->setFlash('success', 'Entry added');
+                    }
+                }
+                $this->redirect('research/viewBibliography?id=' . $bibliographyId);
+            }
+
+            if ($action === 'remove_entry') {
+                $entryId = (int) $request->getParameter('entry_id');
+                DB::table('research_bibliography_entry')
+                    ->where('id', $entryId)
+                    ->where('bibliography_id', $bibliographyId)
+                    ->delete();
+                $this->getUser()->setFlash('success', 'Entry removed');
+                $this->redirect('research/viewBibliography?id=' . $bibliographyId);
+            }
+
+            if ($action === 'delete') {
+                DB::table('research_bibliography_entry')->where('bibliography_id', $bibliographyId)->delete();
+                DB::table('research_bibliography')->where('id', $bibliographyId)->delete();
+                $this->getUser()->setFlash('success', 'Bibliography deleted');
+                $this->redirect('research/bibliographies');
+            }
+        }
+    }
+
+    /**
+     * Export bibliography in various formats.
+     */
+    public function executeExportBibliography(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        $bibliographyService = new BibliographyService();
+
+        $bibliographyId = (int) $request->getParameter('id');
+        $format = $request->getParameter('format', 'ris');
+
+        $result = match ($format) {
+            'bibtex' => $bibliographyService->exportBibTeX($bibliographyId, $researcher->id),
+            'zotero' => $bibliographyService->exportZoteroRDF($bibliographyId, $researcher->id),
+            'mendeley' => $bibliographyService->exportMendeleyJSON($bibliographyId, $researcher->id),
+            'csl' => $bibliographyService->exportCSLJSON($bibliographyId, $researcher->id),
+            default => $bibliographyService->exportRIS($bibliographyId, $researcher->id),
+        };
+
+        if (isset($result['error'])) {
+            $this->getUser()->setFlash('error', $result['error']);
+            $this->redirect('research/viewBibliography?id=' . $bibliographyId);
+        }
+
+        $this->getResponse()->setContentType($result['mime_type']);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $result['filename'] . '"');
+
+        return $this->renderText($result['content']);
+    }
+
+    // =========================================================================
+    // PRIVATE WORKSPACES (Enhanced)
+    // =========================================================================
+
+    /**
+     * List researcher's workspaces.
+     */
+    public function executeWorkspaces(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
+        $collaborationService = new CollaborationService();
+
+        $this->workspaces = $collaborationService->getWorkspaces($this->researcher->id);
+
+        // Handle create
+        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+            $result = $collaborationService->createWorkspace($this->researcher->id, [
+                'name' => $request->getParameter('name'),
+                'description' => $request->getParameter('description'),
+                'visibility' => $request->getParameter('visibility', 'private'),
+            ]);
+
+            if (isset($result['error'])) {
+                $this->getUser()->setFlash('error', $result['error']);
+            } else {
+                $this->getUser()->setFlash('success', 'Workspace created');
+                $this->redirect('research/viewWorkspace?id=' . $result['id']);
+            }
+        }
+    }
+
+    /**
+     * View workspace details.
+     */
+    public function executeViewWorkspace(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
+        $collaborationService = new CollaborationService();
+
+        $workspaceId = (int) $request->getParameter('id');
+        $this->workspaceData = $collaborationService->getWorkspace($workspaceId, $this->researcher->id);
+
+        if (!$this->workspaceData) {
+            $this->forward404('Workspace not found');
+        }
+
+        $this->members = $collaborationService->getMembers($workspaceId);
+        $this->discussions = $collaborationService->getDiscussions($workspaceId);
+
+        // Handle actions
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'invite') {
+                $email = trim($request->getParameter('email'));
+                $role = $request->getParameter('role', 'member');
+                $result = $collaborationService->addMember($workspaceId, $this->researcher->id, $email, $role);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Member invited');
+                }
+                $this->redirect('research/viewWorkspace?id=' . $workspaceId);
+            }
+
+            if ($action === 'create_discussion') {
+                $result = $collaborationService->createDiscussion($workspaceId, $this->researcher->id, [
+                    'title' => $request->getParameter('title'),
+                    'content' => $request->getParameter('content'),
+                ]);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Discussion created');
+                }
+                $this->redirect('research/viewWorkspace?id=' . $workspaceId);
+            }
+
+            if ($action === 'add_resource') {
+                $result = $collaborationService->addResource($workspaceId, $this->researcher->id, [
+                    'resource_type' => $request->getParameter('resource_type'),
+                    'resource_id' => (int) $request->getParameter('resource_id'),
+                    'title' => $request->getParameter('title'),
+                    'notes' => $request->getParameter('notes'),
+                ]);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Resource added');
+                }
+                $this->redirect('research/viewWorkspace?id=' . $workspaceId);
+            }
+        }
+    }
+
+    // =========================================================================
+    // ADMIN: STATISTICS & ANALYTICS
+    // =========================================================================
+
+    /**
+     * Admin statistics dashboard.
+     */
+    public function executeAdminStatistics(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/StatisticsService.php';
+        $statisticsService = new StatisticsService();
+
+        $dateFrom = $request->getParameter('date_from', date('Y-m-01'));
+        $dateTo = $request->getParameter('date_to', date('Y-m-d'));
+
+        $this->stats = $statisticsService->getAdminStats($dateFrom, $dateTo);
+        $this->mostViewed = $statisticsService->getMostViewedItems($dateFrom, $dateTo, 10);
+        $this->mostCited = $statisticsService->getMostCitedItems($dateFrom, $dateTo, 10);
+        $this->activeResearchers = $statisticsService->getActiveResearchers($dateFrom, $dateTo, 10);
+
+        $this->dateFrom = $dateFrom;
+        $this->dateTo = $dateTo;
+    }
+
+    // =========================================================================
+    // API KEY MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Manage API keys.
+     */
+    public function executeApiKeys(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher || $this->researcher->status !== 'approved') {
+            $this->getUser()->setFlash('error', 'Must be an approved researcher');
+            $this->redirect('research/dashboard');
+        }
+
+        $this->apiKeys = $this->service->getApiKeys($this->researcher->id);
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'generate') {
+                $name = trim($request->getParameter('name', 'API Key'));
+                $permissions = $request->getParameter('permissions', []);
+                $expiresAt = $request->getParameter('expires_at');
+
+                $result = $this->service->generateApiKey($this->researcher->id, $name, $permissions, $expiresAt ?: null);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'API key generated. Key: <strong>' . $result['key'] . '</strong> - Save this now, it will not be shown again.');
+                }
+                $this->redirect('research/apiKeys');
+            }
+
+            if ($action === 'revoke') {
+                $keyId = (int) $request->getParameter('key_id');
+                $this->service->revokeApiKey($keyId, $this->researcher->id);
+                $this->getUser()->setFlash('success', 'API key revoked');
+                $this->redirect('research/apiKeys');
+            }
+        }
+    }
+
+    // =========================================================================
+    // RETRIEVAL QUEUE MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Retrieval queue dashboard for staff.
+     */
+    public function executeRetrievalQueue(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        $retrievalService = new RetrievalService();
+
+        $this->queueCounts = $retrievalService->getQueueCounts();
+        $this->rooms = $this->service->getReadingRooms();
+
+        $queueCode = $request->getParameter('queue', 'new');
+        $queue = $retrievalService->getQueueByCode($queueCode);
+
+        if ($queue) {
+            $this->currentQueue = $queue;
+            $this->requests = $retrievalService->getQueueRequests($queue->id);
+        } else {
+            $this->currentQueue = null;
+            $this->requests = [];
+        }
+
+        // Handle status updates
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+            $requestIds = $request->getParameter('request_ids', []);
+            $userId = $this->getUser()->getAttribute('user_id');
+
+            if ($action === 'update_status' && !empty($requestIds)) {
+                $newStatus = $request->getParameter('new_status');
+                $notes = $request->getParameter('notes');
+                $count = $retrievalService->batchUpdateStatus($requestIds, $newStatus, $userId, $notes);
+                $this->getUser()->setFlash('success', "{$count} request(s) updated");
+            }
+
+            $this->redirect('research/retrievalQueue?queue=' . $queueCode);
+        }
+    }
+
+    /**
+     * Print call slips.
+     */
+    public function executePrintCallSlips(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        $retrievalService = new RetrievalService();
+
+        $requestIds = $request->getParameter('ids');
+        if (is_string($requestIds)) {
+            $requestIds = array_map('intval', explode(',', $requestIds));
+        }
+
+        if (empty($requestIds)) {
+            $this->getUser()->setFlash('error', 'No requests selected');
+            $this->redirect('research/retrievalQueue');
+        }
+
+        $templateCode = $request->getParameter('template', 'call_slip_standard');
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        // Mark as printed
+        foreach ($requestIds as $requestId) {
+            $retrievalService->markCallSlipPrinted($requestId, $userId);
+        }
+
+        // Generate print view
+        $this->html = $retrievalService->renderBatchCallSlips($requestIds, $templateCode);
+        $this->setLayout(false);
+    }
+
+    // =========================================================================
+    // SEAT MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Manage reading room seats.
+     */
+    public function executeSeats(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        $seatService = new SeatService();
+
+        $roomId = (int) $request->getParameter('room_id');
+        $this->rooms = $this->service->getReadingRooms(false);
+        $this->currentRoom = $roomId ? $this->service->getReadingRoom($roomId) : null;
+
+        if ($roomId) {
+            $this->seats = $seatService->getSeatsForRoom($roomId, false);
+            $this->occupancy = $seatService->getRoomOccupancy($roomId);
+        } else {
+            $this->seats = [];
+            $this->occupancy = null;
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'create') {
+                $seatService->createSeat([
+                    'reading_room_id' => $roomId,
+                    'seat_number' => $request->getParameter('seat_number'),
+                    'seat_label' => $request->getParameter('seat_label'),
+                    'seat_type' => $request->getParameter('seat_type', 'standard'),
+                    'zone' => $request->getParameter('zone'),
+                    'has_power' => $request->getParameter('has_power') ? 1 : 0,
+                    'has_lamp' => $request->getParameter('has_lamp') ? 1 : 0,
+                    'has_computer' => $request->getParameter('has_computer') ? 1 : 0,
+                    'notes' => $request->getParameter('notes'),
+                ]);
+                $this->getUser()->setFlash('success', 'Seat created');
+            }
+
+            if ($action === 'bulk_create') {
+                $pattern = $request->getParameter('pattern');
+                $seatType = $request->getParameter('seat_type', 'standard');
+                $zone = $request->getParameter('zone');
+                $count = $seatService->bulkCreateSeats($roomId, $pattern, $seatType, $zone);
+                $this->getUser()->setFlash('success', "{$count} seat(s) created");
+            }
+
+            if ($action === 'update') {
+                $seatId = (int) $request->getParameter('seat_id');
+                $seatService->updateSeat($seatId, [
+                    'seat_number' => $request->getParameter('seat_number'),
+                    'seat_label' => $request->getParameter('seat_label'),
+                    'seat_type' => $request->getParameter('seat_type'),
+                    'zone' => $request->getParameter('zone'),
+                    'has_power' => $request->getParameter('has_power') ? 1 : 0,
+                    'has_lamp' => $request->getParameter('has_lamp') ? 1 : 0,
+                    'has_computer' => $request->getParameter('has_computer') ? 1 : 0,
+                    'is_active' => $request->getParameter('is_active') ? 1 : 0,
+                    'notes' => $request->getParameter('notes'),
+                ]);
+                $this->getUser()->setFlash('success', 'Seat updated');
+            }
+
+            if ($action === 'delete') {
+                $seatId = (int) $request->getParameter('seat_id');
+                $seatService->deleteSeat($seatId);
+                $this->getUser()->setFlash('success', 'Seat deactivated');
+            }
+
+            $this->redirect('research/seats?room_id=' . $roomId);
+        }
+    }
+
+    /**
+     * Seat assignment for a booking.
+     */
+    public function executeAssignSeat(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        $seatService = new SeatService();
+
+        $bookingId = (int) $request->getParameter('booking_id');
+        $this->booking = $this->service->getBooking($bookingId);
+
+        if (!$this->booking) {
+            $this->forward404('Booking not found');
+        }
+
+        $this->availableSeats = $seatService->getAvailableSeats(
+            $this->booking->reading_room_id,
+            $this->booking->booking_date,
+            $this->booking->start_time,
+            $this->booking->end_time
+        );
+
+        $this->currentAssignment = $seatService->getSeatAssignment($bookingId);
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+            $userId = $this->getUser()->getAttribute('user_id');
+
+            if ($action === 'assign') {
+                $seatId = (int) $request->getParameter('seat_id');
+                try {
+                    $seatService->assignSeat($bookingId, $seatId, $userId);
+                    $this->getUser()->setFlash('success', 'Seat assigned');
+                } catch (Exception $e) {
+                    $this->getUser()->setFlash('error', $e->getMessage());
+                }
+            }
+
+            if ($action === 'release') {
+                $seatService->releaseSeat($bookingId, $userId);
+                $this->getUser()->setFlash('success', 'Seat released');
+            }
+
+            if ($action === 'auto_assign') {
+                $assignmentId = $seatService->autoAssignSeat($bookingId, [], $userId);
+                if ($assignmentId) {
+                    $this->getUser()->setFlash('success', 'Seat auto-assigned');
+                } else {
+                    $this->getUser()->setFlash('error', 'No available seats');
+                }
+            }
+
+            $this->redirect('research/viewBooking?id=' . $bookingId);
+        }
+    }
+
+    /**
+     * Get seat map data (AJAX).
+     */
+    public function executeSeatMap(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        $seatService = new SeatService();
+
+        $roomId = (int) $request->getParameter('room_id');
+        $date = $request->getParameter('date', date('Y-m-d'));
+        $time = $request->getParameter('time', date('H:i:s'));
+
+        $seatMap = $seatService->getSeatMapData($roomId, $date, $time);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'seats' => $seatMap,
+        ]));
+    }
+
+    // =========================================================================
+    // EQUIPMENT MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Manage reading room equipment.
+     */
+    public function executeEquipment(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
+        $equipmentService = new EquipmentService();
+
+        $roomId = (int) $request->getParameter('room_id');
+        $this->rooms = $this->service->getReadingRooms(false);
+        $this->currentRoom = $roomId ? $this->service->getReadingRoom($roomId) : null;
+
+        if ($roomId) {
+            $this->equipment = $equipmentService->getEquipmentForRoom($roomId);
+            $this->typeCounts = $equipmentService->getEquipmentTypeCounts($roomId);
+        } else {
+            $this->equipment = [];
+            $this->typeCounts = [];
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'create') {
+                $equipmentService->createEquipment([
+                    'reading_room_id' => $roomId,
+                    'name' => $request->getParameter('name'),
+                    'code' => $request->getParameter('code'),
+                    'equipment_type' => $request->getParameter('equipment_type'),
+                    'brand' => $request->getParameter('brand'),
+                    'model' => $request->getParameter('model'),
+                    'serial_number' => $request->getParameter('serial_number'),
+                    'description' => $request->getParameter('description'),
+                    'location' => $request->getParameter('location'),
+                    'requires_training' => $request->getParameter('requires_training') ? 1 : 0,
+                    'max_booking_hours' => (int) $request->getParameter('max_booking_hours', 4),
+                ]);
+                $this->getUser()->setFlash('success', 'Equipment added');
+            }
+
+            if ($action === 'update') {
+                $equipmentId = (int) $request->getParameter('equipment_id');
+                $equipmentService->updateEquipment($equipmentId, [
+                    'name' => $request->getParameter('name'),
+                    'code' => $request->getParameter('code'),
+                    'equipment_type' => $request->getParameter('equipment_type'),
+                    'brand' => $request->getParameter('brand'),
+                    'model' => $request->getParameter('model'),
+                    'location' => $request->getParameter('location'),
+                    'condition_status' => $request->getParameter('condition_status'),
+                    'is_available' => $request->getParameter('is_available') ? 1 : 0,
+                    'notes' => $request->getParameter('notes'),
+                ]);
+                $this->getUser()->setFlash('success', 'Equipment updated');
+            }
+
+            if ($action === 'maintenance') {
+                $equipmentId = (int) $request->getParameter('equipment_id');
+                $equipmentService->logMaintenance(
+                    $equipmentId,
+                    $request->getParameter('maintenance_description'),
+                    $request->getParameter('new_condition', 'good'),
+                    $request->getParameter('next_maintenance_date')
+                );
+                $this->getUser()->setFlash('success', 'Maintenance logged');
+            }
+
+            $this->redirect('research/equipment?room_id=' . $roomId);
+        }
+    }
+
+    /**
+     * Book equipment for a session.
+     */
+    public function executeBookEquipment(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$this->researcher || $this->researcher->status !== 'approved') {
+            $this->getUser()->setFlash('error', 'Must be an approved researcher');
+            $this->redirect('research/dashboard');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
+        $equipmentService = new EquipmentService();
+
+        $bookingId = (int) $request->getParameter('booking_id');
+        $this->booking = $this->service->getBooking($bookingId);
+
+        if (!$this->booking || $this->booking->researcher_id != $this->researcher->id) {
+            $this->forward404('Booking not found');
+        }
+
+        $this->availableEquipment = $equipmentService->getAvailableEquipment(
+            $this->booking->reading_room_id,
+            $this->booking->booking_date,
+            $this->booking->start_time,
+            $this->booking->end_time
+        );
+
+        $this->bookedEquipment = $equipmentService->getBookingsForRoomBooking($bookingId);
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+
+            if ($action === 'book') {
+                $equipmentId = (int) $request->getParameter('equipment_id');
+                try {
+                    $equipment = $equipmentService->getEquipment($equipmentId);
+                    $equipmentService->createBooking([
+                        'booking_id' => $bookingId,
+                        'researcher_id' => $this->researcher->id,
+                        'equipment_id' => $equipmentId,
+                        'booking_date' => $this->booking->booking_date,
+                        'start_time' => $this->booking->start_time,
+                        'end_time' => $this->booking->end_time,
+                        'reading_room_id' => $equipment->reading_room_id,
+                        'purpose' => $request->getParameter('purpose'),
+                    ]);
+                    $this->getUser()->setFlash('success', 'Equipment booked');
+                } catch (Exception $e) {
+                    $this->getUser()->setFlash('error', $e->getMessage());
+                }
+            }
+
+            if ($action === 'cancel') {
+                $equipmentBookingId = (int) $request->getParameter('equipment_booking_id');
+                $equipmentService->cancelBooking($equipmentBookingId);
+                $this->getUser()->setFlash('success', 'Equipment booking cancelled');
+            }
+
+            $this->redirect('research/bookEquipment?booking_id=' . $bookingId);
+        }
+    }
+
+    // =========================================================================
+    // WALK-IN VISITOR MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Register a walk-in visitor.
+     */
+    public function executeWalkIn(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        $retrievalService = new RetrievalService();
+        $seatService = new SeatService();
+
+        $this->rooms = $this->service->getReadingRooms();
+        $roomId = (int) $request->getParameter('room_id');
+        $this->currentRoom = $roomId ? $this->service->getReadingRoom($roomId) : null;
+
+        if ($roomId) {
+            $this->currentWalkIns = $retrievalService->getCurrentWalkIns($roomId);
+            $this->availableSeats = $seatService->getAvailableSeats($roomId, date('Y-m-d'), date('H:i:s'), '23:59:59');
+        } else {
+            $this->currentWalkIns = [];
+            $this->availableSeats = [];
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+            $userId = $this->getUser()->getAttribute('user_id');
+
+            if ($action === 'register') {
+                $visitorId = $retrievalService->registerWalkIn([
+                    'reading_room_id' => $roomId,
+                    'first_name' => $request->getParameter('first_name'),
+                    'last_name' => $request->getParameter('last_name'),
+                    'email' => $request->getParameter('email'),
+                    'phone' => $request->getParameter('phone'),
+                    'id_type' => $request->getParameter('id_type'),
+                    'id_number' => $request->getParameter('id_number'),
+                    'organization' => $request->getParameter('organization'),
+                    'purpose' => $request->getParameter('purpose'),
+                    'research_topic' => $request->getParameter('research_topic'),
+                    'rules_acknowledged' => $request->getParameter('rules_acknowledged') ? 1 : 0,
+                    'seat_id' => $request->getParameter('seat_id') ?: null,
+                    'checked_in_by' => $userId,
+                ]);
+                $this->getUser()->setFlash('success', 'Walk-in visitor registered');
+            }
+
+            if ($action === 'checkout') {
+                $visitorId = (int) $request->getParameter('visitor_id');
+                $retrievalService->checkOutWalkIn($visitorId, $userId);
+                $this->getUser()->setFlash('success', 'Visitor checked out');
+            }
+
+            $this->redirect('research/walkIn?room_id=' . $roomId);
+        }
+    }
+
+    // =========================================================================
+    // ACTIVITIES (Classes, Events)
+    // =========================================================================
+
+    /**
+     * List and manage activities.
+     */
+    public function executeActivities(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $this->rooms = $this->service->getReadingRooms();
+        $status = $request->getParameter('status');
+        $type = $request->getParameter('type');
+
+        $query = DB::table('research_activity as a')
+            ->leftJoin('research_reading_room as rm', 'a.reading_room_id', '=', 'rm.id');
+
+        if ($status) {
+            $query->where('a.status', $status);
+        }
+
+        if ($type) {
+            $query->where('a.activity_type', $type);
+        }
+
+        $this->activities = $query->select('a.*', 'rm.name as room_name')
+            ->orderBy('a.start_date', 'desc')
+            ->limit(50)
+            ->get()
+            ->toArray();
+
+        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+            $activityId = DB::table('research_activity')->insertGetId([
+                'activity_type' => $request->getParameter('activity_type'),
+                'title' => $request->getParameter('title'),
+                'description' => $request->getParameter('description'),
+                'organizer_name' => $request->getParameter('organizer_name'),
+                'organizer_email' => $request->getParameter('organizer_email'),
+                'organizer_phone' => $request->getParameter('organizer_phone'),
+                'organization' => $request->getParameter('organization'),
+                'expected_attendees' => (int) $request->getParameter('expected_attendees'),
+                'reading_room_id' => $request->getParameter('reading_room_id') ?: null,
+                'start_date' => $request->getParameter('start_date'),
+                'end_date' => $request->getParameter('end_date') ?: null,
+                'start_time' => $request->getParameter('start_time') ?: null,
+                'end_time' => $request->getParameter('end_time') ?: null,
+                'setup_requirements' => $request->getParameter('setup_requirements'),
+                'av_requirements' => $request->getParameter('av_requirements'),
+                'status' => 'requested',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+            $this->getUser()->setFlash('success', 'Activity request created');
+            $this->redirect('research/viewActivity?id=' . $activityId);
+        }
+    }
+
+    /**
+     * View activity details.
+     */
+    public function executeViewActivity(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $activityId = (int) $request->getParameter('id');
+        $this->activity = DB::table('research_activity as a')
+            ->leftJoin('research_reading_room as rm', 'a.reading_room_id', '=', 'rm.id')
+            ->where('a.id', $activityId)
+            ->select('a.*', 'rm.name as room_name')
+            ->first();
+
+        if (!$this->activity) {
+            $this->forward404('Activity not found');
+        }
+
+        $this->materials = DB::table('research_activity_material as am')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('am.object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->where('am.activity_id', $activityId)
+            ->select('am.*', 'ioi.title as item_title')
+            ->get()
+            ->toArray();
+
+        $this->participants = DB::table('research_activity_participant')
+            ->where('activity_id', $activityId)
+            ->orderBy('name')
+            ->get()
+            ->toArray();
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('action');
+            $userId = $this->getUser()->getAttribute('user_id');
+
+            if ($action === 'confirm' && $this->getUser()->isAdministrator()) {
+                DB::table('research_activity')
+                    ->where('id', $activityId)
+                    ->update([
+                        'status' => 'confirmed',
+                        'confirmed_by' => $userId,
+                        'confirmed_at' => date('Y-m-d H:i:s'),
+                    ]);
+                $this->getUser()->setFlash('success', 'Activity confirmed');
+            }
+
+            if ($action === 'cancel') {
+                DB::table('research_activity')
+                    ->where('id', $activityId)
+                    ->update([
+                        'status' => 'cancelled',
+                        'cancelled_by' => $userId,
+                        'cancelled_at' => date('Y-m-d H:i:s'),
+                        'cancellation_reason' => $request->getParameter('cancellation_reason'),
+                    ]);
+                $this->getUser()->setFlash('success', 'Activity cancelled');
+            }
+
+            if ($action === 'add_participant') {
+                DB::table('research_activity_participant')->insert([
+                    'activity_id' => $activityId,
+                    'name' => $request->getParameter('participant_name'),
+                    'email' => $request->getParameter('participant_email'),
+                    'role' => $request->getParameter('participant_role', 'visitor'),
+                    'registered_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Participant added');
+            }
+
+            $this->redirect('research/viewActivity?id=' . $activityId);
         }
     }
 

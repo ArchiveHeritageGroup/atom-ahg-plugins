@@ -61,18 +61,18 @@
 }
 
 .icip-notice-critical {
-    background-color: #f8d7da;
-    border-left: 4px solid #dc3545;
+    background-color: rgba(var(--ahg-danger-rgb), 0.15);
+    border-left: 4px solid var(--ahg-danger);
 }
 
 .icip-notice-warning {
-    background-color: #fff3cd;
-    border-left: 4px solid #ffc107;
+    background-color: rgba(var(--ahg-warning-rgb), 0.2);
+    border-left: 4px solid var(--ahg-warning);
 }
 
 .icip-notice-info {
-    background-color: #cff4fc;
-    border-left: 4px solid #0dcaf0;
+    background-color: rgba(var(--ahg-info-rgb), 0.2);
+    border-left: 4px solid var(--ahg-info);
 }
 
 /* Notice display on record view */
@@ -146,15 +146,15 @@
     display: flex;
     align-items: flex-start;
     padding: 0.75rem 1rem;
-    background-color: #f8d7da;
-    border-left: 4px solid #dc3545;
+    background-color: rgba(var(--ahg-danger-rgb), 0.15);
+    border-left: 4px solid var(--ahg-danger);
     border-radius: 0 8px 8px 0;
     margin-bottom: 0.5rem;
 }
 
 .icip-restriction-icon {
     margin-right: 0.75rem;
-    color: #dc3545;
+    color: var(--ahg-danger);
 }
 
 .icip-restriction-override {
@@ -185,7 +185,7 @@
 }
 
 .icip-dashboard-stat .stat-label {
-    color: #6c757d;
+    color: var(--ahg-muted);
     font-size: 0.875rem;
 }
 
@@ -208,13 +208,13 @@
 }
 
 .icip-community-card:hover {
-    border-left-color: #0d6efd;
+    border-left-color: var(--ahg-primary);
 }
 
 .icip-community-state {
     display: inline-block;
     padding: 0.125rem 0.5rem;
-    background-color: #6c757d;
+    background-color: var(--ahg-muted);
     color: white;
     font-size: 0.75rem;
     border-radius: 4px;
@@ -247,14 +247,14 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background-color: #dee2e6;
+    background-color: var(--ahg-border);
 }
 
 .icip-consultation-item {
     position: relative;
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--ahg-border);
 }
 
 .icip-consultation-item::before {
@@ -264,20 +264,20 @@
     top: 0.25rem;
     width: 12px;
     height: 12px;
-    background-color: #0d6efd;
+    background-color: var(--ahg-primary);
     border-radius: 50%;
     border: 2px solid white;
-    box-shadow: 0 0 0 2px #0d6efd;
+    box-shadow: 0 0 0 2px var(--ahg-primary);
 }
 
 .icip-consultation-item.completed::before {
-    background-color: #198754;
-    box-shadow: 0 0 0 2px #198754;
+    background-color: var(--ahg-success);
+    box-shadow: 0 0 0 2px var(--ahg-success);
 }
 
 .icip-consultation-item.pending::before {
-    background-color: #ffc107;
-    box-shadow: 0 0 0 2px #ffc107;
+    background-color: var(--ahg-warning);
+    box-shadow: 0 0 0 2px var(--ahg-warning);
 }
 
 /* ========================================
@@ -395,7 +395,7 @@
 .icip-form-section h5 {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #0d6efd;
+    border-bottom: 2px solid var(--ahg-primary);
     display: inline-block;
 }
 
@@ -418,12 +418,12 @@
 
 /* Expired indicator */
 .icip-expired {
-    color: #dc3545;
+    color: var(--ahg-danger);
     font-weight: 600;
 }
 
 .icip-expiring-soon {
-    color: #ffc107;
+    color: var(--ahg-warning);
     font-weight: 600;
 }
 

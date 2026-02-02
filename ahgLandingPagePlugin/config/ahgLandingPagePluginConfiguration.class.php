@@ -11,6 +11,29 @@ class ahgLandingPagePluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'landingPageBuilder';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
+        // Register autoloader for AtomExtensions namespace
+        $pluginLibPath = dirname(__FILE__).'/../lib/';
+        spl_autoload_register(function ($class) use ($pluginLibPath) {
+            // Only handle AtomExtensions namespace
+            if (strpos($class, 'AtomExtensions\\') !== 0) {
+                return false;
+            }
+
+            // Map namespace to directory structure
+            // AtomExtensions\Services\LandingPageService -> lib/Services/LandingPageService.php
+            // AtomExtensions\Repositories\LandingPageRepository -> lib/Repositories/LandingPageRepository.php
+            $relativePath = str_replace('AtomExtensions\\', '', $class);
+            $relativePath = str_replace('\\', '/', $relativePath);
+            $file = $pluginLibPath.$relativePath.'.php';
+
+            if (file_exists($file)) {
+                require_once $file;
+                return true;
+            }
+
+            return false;
+        }, true, true);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
     }
 

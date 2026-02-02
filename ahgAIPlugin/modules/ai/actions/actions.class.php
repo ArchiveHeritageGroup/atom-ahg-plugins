@@ -1620,4 +1620,390 @@ class aiActions extends sfActions
             ],
         ]));
     }
+
+    // =========================================================================
+    // BATCH JOB QUEUE ACTIONS
+    // =========================================================================
+
+    /**
+     * Batch job queue dashboard
+     * GET /ai/batch
+     */
+    public function executeBatch(sfWebRequest $request)
+    {
+        if (!$this->context->user->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        $this->batches = $service->getBatches([], 20);
+        $this->taskTypes = $service::getTaskTypes();
+
+        // Get repositories for filter
+        $this->repositories = Illuminate\Database\Capsule\Manager::table('actor')
+            ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
+            ->where('actor.class_name', 'QubitRepository')
+            ->where('actor_i18n.culture', 'en')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->select('actor.id', 'actor_i18n.authorized_form_of_name as name')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Create new batch job
+     * POST /ai/batch/create
+     */
+    public function executeBatchCreate(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->context->user->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+            $data = $request->getParameterHolder()->getAll();
+        }
+
+        if (empty($data['name']) || empty($data['task_types'])) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Name and task types are required']));
+        }
+
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        try {
+            // Create batch
+            $batchId = $service->createBatch([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'task_types' => $data['task_types'],
+                'priority' => $data['priority'] ?? 5,
+                'max_concurrent' => $data['max_concurrent'] ?? 5,
+                'delay_between_ms' => $data['delay_between_ms'] ?? 1000,
+                'max_retries' => $data['max_retries'] ?? 3,
+                'options' => $data['options'] ?? null,
+                'created_by' => $this->context->user->getUserId(),
+            ]);
+
+            // Get object IDs
+            $objectIds = [];
+
+            if (!empty($data['object_ids'])) {
+                $objectIds = is_array($data['object_ids']) ? $data['object_ids'] : explode(',', $data['object_ids']);
+            } elseif (!empty($data['repository_id'])) {
+                // Get objects from repository
+                $query = Illuminate\Database\Capsule\Manager::table('information_object')
+                    ->where('repository_id', $data['repository_id'])
+                    ->where('id', '!=', 1);
+
+                if (!empty($data['level_id'])) {
+                    $query->where('level_of_description_id', $data['level_id']);
+                }
+
+                if (!empty($data['empty_scope_only'])) {
+                    $query->whereNotExists(function($q) {
+                        $q->select(Illuminate\Database\Capsule\Manager::raw(1))
+                          ->from('information_object_i18n')
+                          ->whereRaw('information_object_i18n.id = information_object.id')
+                          ->whereNotNull('scope_and_content')
+                          ->where('scope_and_content', '!=', '');
+                    });
+                }
+
+                $objectIds = $query->limit($data['limit'] ?? 1000)->pluck('id')->toArray();
+            } elseif (!empty($data['search_query'])) {
+                // Search-based selection using title and scope_and_content
+                $searchTerm = '%' . trim($data['search_query']) . '%';
+                $query = Illuminate\Database\Capsule\Manager::table('information_object')
+                    ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
+                    ->where('information_object.id', '!=', 1)
+                    ->where('information_object_i18n.culture', '=', 'en')
+                    ->where(function ($q) use ($searchTerm) {
+                        $q->where('information_object_i18n.title', 'LIKE', $searchTerm)
+                          ->orWhere('information_object_i18n.scope_and_content', 'LIKE', $searchTerm)
+                          ->orWhere('information_object.identifier', 'LIKE', $searchTerm);
+                    });
+
+                // Optional repository filter
+                if (!empty($data['repository_id'])) {
+                    $query->where('information_object.repository_id', $data['repository_id']);
+                }
+
+                // Optional level filter
+                if (!empty($data['level_id'])) {
+                    $query->where('information_object.level_of_description_id', $data['level_id']);
+                }
+
+                // Filter for empty scope if requested
+                if (!empty($data['empty_scope_only'])) {
+                    $query->where(function ($q) {
+                        $q->whereNull('information_object_i18n.scope_and_content')
+                          ->orWhere('information_object_i18n.scope_and_content', '=', '');
+                    });
+                }
+
+                $objectIds = $query->limit($data['limit'] ?? 1000)
+                    ->pluck('information_object.id')
+                    ->toArray();
+            }
+
+            if (empty($objectIds)) {
+                $service->deleteBatch($batchId);
+                return $this->renderText(json_encode(['success' => false, 'error' => 'No objects selected']));
+            }
+
+            // Add items
+            $itemCount = $service->addItemsToBatch($batchId, $objectIds, $data['task_types']);
+
+            // Auto-start if requested
+            if (!empty($data['auto_start'])) {
+                $service->startBatch($batchId);
+            }
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'batch_id' => $batchId,
+                'item_count' => $itemCount,
+                'message' => "Batch created with {$itemCount} items",
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * Get batch details
+     * GET /ai/batch/:id
+     */
+    public function executeBatchView(sfWebRequest $request)
+    {
+        if (!$this->context->user->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $batchId = (int) $request->getParameter('id');
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        $this->batch = $service->getBatch($batchId);
+        if (!$this->batch) {
+            $this->forward404();
+        }
+
+        $this->stats = $service->getBatchStats($batchId);
+        $this->jobs = $service->getBatchJobs($batchId, [], 100);
+        $this->logs = $service->getLogEvents($batchId, 50);
+        $this->taskTypes = $service::getTaskTypes();
+
+        // Get object info for display
+        $objectIds = array_map(function($job) { return $job->object_id; }, $this->jobs);
+        $this->objects = [];
+        if (!empty($objectIds)) {
+            $objects = Illuminate\Database\Capsule\Manager::table('information_object')
+                ->join('slug', 'information_object.id', '=', 'slug.object_id')
+                ->leftJoin('information_object_i18n', function($join) {
+                    $join->on('information_object.id', '=', 'information_object_i18n.id')
+                         ->where('information_object_i18n.culture', '=', 'en');
+                })
+                ->whereIn('information_object.id', $objectIds)
+                ->select('information_object.id', 'slug.slug', 'information_object_i18n.title')
+                ->get();
+            foreach ($objects as $obj) {
+                $this->objects[$obj->id] = $obj;
+            }
+        }
+    }
+
+    /**
+     * Get batch progress (AJAX)
+     * GET /ai/batch/:id/progress
+     */
+    public function executeBatchProgress(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $batchId = (int) $request->getParameter('id');
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        $batch = $service->getBatch($batchId);
+        if (!$batch) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Batch not found']));
+        }
+
+        $stats = $service->getBatchStats($batchId);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'status' => $batch->status,
+            'progress_percent' => (float) $batch->progress_percent,
+            'total' => (int) $batch->total_items,
+            'completed' => (int) $batch->completed_items,
+            'failed' => (int) $batch->failed_items,
+            'stats' => $stats,
+        ]));
+    }
+
+    /**
+     * Batch action (start, pause, resume, cancel, retry)
+     * POST /ai/batch/:id/action
+     */
+    public function executeBatchAction(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->context->user->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $batchId = (int) $request->getParameter('id');
+        $data = json_decode($request->getContent(), true) ?: $request->getParameterHolder()->getAll();
+        $action = $data['action'] ?? '';
+
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        try {
+            switch ($action) {
+                case 'start':
+                    $result = $service->startBatch($batchId);
+                    $message = $result ? 'Batch started' : 'Could not start batch';
+                    break;
+
+                case 'pause':
+                    $result = $service->pauseBatch($batchId);
+                    $message = $result ? 'Batch paused' : 'Could not pause batch';
+                    break;
+
+                case 'resume':
+                    $result = $service->resumeBatch($batchId);
+                    $message = $result ? 'Batch resumed' : 'Could not resume batch';
+                    break;
+
+                case 'cancel':
+                    $result = $service->cancelBatch($batchId);
+                    $message = $result ? 'Batch cancelled' : 'Could not cancel batch';
+                    break;
+
+                case 'retry':
+                    $count = $service->retryFailed($batchId);
+                    $result = $count > 0;
+                    $message = $result ? "Retrying {$count} failed jobs" : 'No failed jobs to retry';
+                    break;
+
+                case 'delete':
+                    $result = $service->deleteBatch($batchId);
+                    $message = $result ? 'Batch deleted' : 'Could not delete batch';
+                    break;
+
+                default:
+                    return $this->renderText(json_encode(['success' => false, 'error' => 'Unknown action']));
+            }
+
+            return $this->renderText(json_encode([
+                'success' => $result,
+                'message' => $message,
+            ]));
+
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * Process next jobs (called by cron or manually)
+     * POST /ai/batch/process
+     */
+    public function executeBatchProcess(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        // Check server load
+        if (!$service->checkServerLoad()) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Server under high load',
+            ]));
+        }
+
+        // Get running batches
+        $batches = $service->getBatches(['status' => 'running']);
+        $processed = 0;
+
+        foreach ($batches as $batch) {
+            // Get pending jobs
+            $jobs = Illuminate\Database\Capsule\Manager::table('ahg_ai_job')
+                ->where('batch_id', $batch->id)
+                ->where('status', 'pending')
+                ->orderBy('priority')
+                ->limit($batch->max_concurrent)
+                ->get();
+
+            foreach ($jobs as $job) {
+                $result = $service->processJob($job->id);
+                $processed++;
+
+                // Apply delay
+                if ($batch->delay_between_ms > 0) {
+                    usleep($batch->delay_between_ms * 1000);
+                }
+            }
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'processed' => $processed,
+        ]));
+    }
+
+    /**
+     * Get job details
+     * GET /ai/job/:id
+     */
+    public function executeJobView(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once dirname(__FILE__).'/../../../lib/Services/JobQueueService.php';
+
+        $jobId = (int) $request->getParameter('id');
+        $service = new \ahgAIPlugin\Services\JobQueueService();
+
+        $job = $service->getJob($jobId);
+        if (!$job) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Job not found']));
+        }
+
+        // Get object info
+        $object = Illuminate\Database\Capsule\Manager::table('information_object')
+            ->join('slug', 'information_object.id', '=', 'slug.object_id')
+            ->leftJoin('information_object_i18n', function($join) {
+                $join->on('information_object.id', '=', 'information_object_i18n.id')
+                     ->where('information_object_i18n.culture', '=', 'en');
+            })
+            ->where('information_object.id', $job->object_id)
+            ->select('slug.slug', 'information_object_i18n.title')
+            ->first();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'job' => $job,
+            'object' => $object,
+        ]));
+    }
 }

@@ -1017,7 +1017,178 @@ class reportsreportAction extends sfAction
     
     protected function exportPdf($filename)
     {
-        // TODO: Implement PDF export with TCPDF or similar
-        return $this->exportCsv($filename);
+        $response = $this->getResponse();
+
+        // Try to use TCPDF if available
+        $tcpdfPath = sfConfig::get('sf_root_dir') . '/vendor/tecnickcom/tcpdf/tcpdf.php';
+        if (file_exists($tcpdfPath)) {
+            require_once $tcpdfPath;
+            return $this->exportPdfWithTcpdf($filename);
+        }
+
+        // Fallback: Generate HTML for browser print-to-PDF
+        return $this->exportPdfAsHtml($filename);
+    }
+
+    /**
+     * Export PDF using TCPDF library
+     */
+    protected function exportPdfWithTcpdf($filename)
+    {
+        $pdf = new \TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+
+        // Set document info
+        $pdf->SetCreator('AtoM Reports');
+        $pdf->SetAuthor('AtoM');
+        $pdf->SetTitle($this->reportDef->name ?? 'Report');
+        $pdf->SetSubject('Report Export');
+
+        // Remove header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(true);
+        $pdf->setFooterData(['Report generated: ' . date('Y-m-d H:i:s')]);
+
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(true, 15);
+
+        // Add page
+        $pdf->AddPage();
+
+        // Title
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->Cell(0, 10, $this->reportDef->name ?? 'Report', 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Date
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(0, 5, 'Generated: ' . date('Y-m-d H:i:s'), 0, 1, 'R');
+        $pdf->Ln(5);
+
+        if (!empty($this->results)) {
+            // Build HTML table
+            $html = '<table border="1" cellpadding="4" cellspacing="0">';
+
+            // Header
+            $html .= '<tr style="background-color:#4472C4;color:#ffffff;font-weight:bold;">';
+            $first = (array) $this->results[0];
+            foreach (array_keys($first) as $col) {
+                $html .= '<th>' . htmlspecialchars($this->formatColumnHeader($col)) . '</th>';
+            }
+            $html .= '</tr>';
+
+            // Data rows
+            $rowNum = 0;
+            foreach ($this->results as $row) {
+                $bgColor = ($rowNum % 2 == 0) ? '#ffffff' : '#f2f2f2';
+                $html .= '<tr style="background-color:' . $bgColor . ';">';
+                foreach ((array) $row as $value) {
+                    $html .= '<td>' . htmlspecialchars($value ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+                $rowNum++;
+            }
+
+            $html .= '</table>';
+
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->writeHTML($html, true, false, true, false, '');
+        } else {
+            $pdf->SetFont('helvetica', 'I', 12);
+            $pdf->Cell(0, 10, 'No data found', 0, 1, 'C');
+        }
+
+        // Output
+        $response = $this->getResponse();
+        $response->setContentType('application/pdf');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
+
+        echo $pdf->Output($filename . '.pdf', 'S');
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Fallback: Export as printable HTML (user can print to PDF)
+     */
+    protected function exportPdfAsHtml($filename)
+    {
+        $response = $this->getResponse();
+        $response->setContentType('text/html');
+
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>' . htmlspecialchars($this->reportDef->name ?? 'Report') . '</title>
+    <style>
+        @media print {
+            body { margin: 0; padding: 20px; }
+            .no-print { display: none; }
+        }
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { color: #333; margin-bottom: 5px; }
+        .meta { color: #666; margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th { background-color: #4472C4; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+        td { padding: 6px 8px; border: 1px solid #ddd; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .print-btn { margin: 20px 0; padding: 10px 20px; background: #4472C4; color: white; border: none; cursor: pointer; font-size: 14px; }
+        .print-btn:hover { background: #3461a8; }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <h1>' . htmlspecialchars($this->reportDef->name ?? 'Report') . '</h1>
+    <div class="meta">Generated: ' . date('Y-m-d H:i:s') . '</div>';
+
+        if (!empty($this->results)) {
+            $html .= '<table>';
+
+            // Header
+            $html .= '<tr>';
+            $first = (array) $this->results[0];
+            foreach (array_keys($first) as $col) {
+                $html .= '<th>' . htmlspecialchars($this->formatColumnHeader($col)) . '</th>';
+            }
+            $html .= '</tr>';
+
+            // Data rows
+            foreach ($this->results as $row) {
+                $html .= '<tr>';
+                foreach ((array) $row as $value) {
+                    $html .= '<td>' . htmlspecialchars($value ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+
+            $html .= '</table>';
+        } else {
+            $html .= '<p><em>No data found</em></p>';
+        }
+
+        $html .= '
+    <div class="no-print" style="margin-top: 20px;">
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+</body>
+</html>';
+
+        echo $html;
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Format column header for display
+     */
+    protected function formatColumnHeader($column)
+    {
+        // Convert snake_case or camelCase to Title Case
+        $column = preg_replace('/([a-z])([A-Z])/', '$1 $2', $column);
+        $column = str_replace('_', ' ', $column);
+        return ucwords($column);
     }
 }

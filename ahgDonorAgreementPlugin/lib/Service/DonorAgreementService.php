@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AtomFramework\Services\DonorAgreement;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use AtomExtensions\Helpers\CultureHelper;
 
 use Illuminate\Database\Capsule\Manager as DB;
@@ -11,20 +12,19 @@ use Illuminate\Support\Collection;
 
 class DonorAgreementService
 {
+    protected AhgTaxonomyService $taxonomyService;
+
+    public function __construct()
+    {
+        $this->taxonomyService = new AhgTaxonomyService();
+    }
+
     /**
-     * Status options
+     * Status options (loaded from database)
      */
     public function getStatuses(): array
     {
-        return [
-            'draft' => 'Draft',
-            'pending_approval' => 'Pending Approval',
-            'active' => 'Active',
-            'suspended' => 'Suspended',
-            'expired' => 'Expired',
-            'terminated' => 'Terminated',
-            'renewed' => 'Renewed',
-        ];
+        return $this->taxonomyService->getAgreementStatuses(false);
     }
 
     /**

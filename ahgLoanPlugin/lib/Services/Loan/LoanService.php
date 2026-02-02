@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AhgLoan\Services\Loan;
 
+use ahgCorePlugin\Services\AhgTaxonomyService;
 use AhgLoan\Adapters\SectorAdapterInterface;
 use Illuminate\Database\ConnectionInterface;
 use Psr\Log\LoggerInterface;
@@ -47,7 +48,9 @@ class LoanService
         'none' => 'No Insurance Required',
     ];
 
-    /** Loan statuses */
+    /**
+     * @deprecated Use AhgTaxonomyService::getLoanStatuses() instead
+     */
     public const STATUSES = [
         'draft' => 'Draft',
         'submitted' => 'Submitted',
@@ -69,13 +72,16 @@ class LoanService
     private LoggerInterface $logger;
     private ?SectorAdapterInterface $sectorAdapter = null;
     private string $sector = 'museum';
+    private AhgTaxonomyService $taxonomyService;
 
     public function __construct(
         ConnectionInterface $db,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?AhgTaxonomyService $taxonomyService = null
     ) {
         $this->db = $db;
         $this->logger = $logger ?? new NullLogger();
+        $this->taxonomyService = $taxonomyService ?? new AhgTaxonomyService();
     }
 
     /**
@@ -697,10 +703,18 @@ class LoanService
     }
 
     /**
-     * Get statuses for dropdown.
+     * Get statuses for dropdown from database.
      */
     public function getStatuses(): array
     {
-        return self::STATUSES;
+        return $this->taxonomyService->getLoanStatuses(false);
+    }
+
+    /**
+     * Get statuses with colors from database.
+     */
+    public function getStatusesWithColors(): array
+    {
+        return $this->taxonomyService->getLoanStatusesWithColors();
     }
 }

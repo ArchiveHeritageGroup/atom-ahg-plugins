@@ -92,6 +92,7 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
     <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'index']); ?>"><i class="fas fa-list-alt fa-fw me-1"></i><?php echo __('Dropdown Manager'); ?></a></li>
 
     <?php if ($hasSecurityClearance): ?>
     <li><hr class="dropdown-divider"></li>

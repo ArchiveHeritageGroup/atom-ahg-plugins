@@ -5,47 +5,47 @@
 
 /* Valuation Basis Colors */
 .valuation-historical_cost {
-    background-color: #0d6efd !important;
+    background-color: var(--ahg-primary) !important;
 }
 
 .valuation-fair_value {
-    background-color: #198754 !important;
+    background-color: var(--ahg-success) !important;
 }
 
 .valuation-nominal {
-    background-color: #ffc107 !important;
+    background-color: var(--ahg-warning) !important;
     color: #000 !important;
 }
 
 .valuation-not_recognized {
-    background-color: #6c757d !important;
+    background-color: var(--ahg-muted) !important;
 }
 
 /* Asset Status */
 .status-active {
-    background-color: #198754 !important;
+    background-color: var(--ahg-success) !important;
 }
 
 .status-on_loan {
-    background-color: #0dcaf0 !important;
+    background-color: var(--ahg-info) !important;
     color: #000 !important;
 }
 
 .status-disposed {
-    background-color: #dc3545 !important;
+    background-color: var(--ahg-danger) !important;
 }
 
 /* Condition Indicators */
 .condition-excellent {
-    background-color: #198754 !important;
+    background-color: var(--ahg-success) !important;
 }
 
 .condition-good {
-    background-color: #0dcaf0 !important;
+    background-color: var(--ahg-info) !important;
 }
 
 .condition-fair {
-    background-color: #ffc107 !important;
+    background-color: var(--ahg-warning) !important;
     color: #000 !important;
 }
 
@@ -54,16 +54,16 @@
 }
 
 .condition-critical {
-    background-color: #dc3545 !important;
+    background-color: var(--ahg-danger) !important;
 }
 
 /* Value Change Indicators */
 .value-increase {
-    color: #198754;
+    color: var(--ahg-success);
 }
 
 .value-decrease {
-    color: #dc3545;
+    color: var(--ahg-danger);
 }
 
 /* Dashboard Cards */
@@ -87,13 +87,13 @@
 
 /* Insurance Expiry Warning */
 .insurance-expiring {
-    background-color: #fff3cd !important;
-    border-left: 4px solid #ffc107;
+    background-color: rgba(var(--ahg-warning-rgb), 0.2) !important;
+    border-left: 4px solid var(--ahg-warning);
 }
 
 .insurance-expired {
-    background-color: #f8d7da !important;
-    border-left: 4px solid #dc3545;
+    background-color: rgba(var(--ahg-danger-rgb), 0.15) !important;
+    border-left: 4px solid var(--ahg-danger);
 }
 
 /* Asset Number Badge */
@@ -104,13 +104,13 @@
 
 /* Form styling */
 .ipsas-form-section {
-    border-left: 4px solid #0d6efd;
+    border-left: 4px solid var(--ahg-primary);
     padding-left: 16px;
     margin-bottom: 24px;
 }
 
 .ipsas-form-section h5 {
-    color: #0d6efd;
+    color: var(--ahg-primary);
 }
 
 /* Print styles */

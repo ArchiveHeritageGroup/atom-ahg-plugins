@@ -5,7 +5,7 @@
 /* Designer Canvas */
 #designerCanvas {
     min-height: 500px;
-    background: #f8f9fa;
+    background: var(--ahg-light);
     border-radius: 0.25rem;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .layout-block.sortable-chosen {
-    box-shadow: 0 0 20px rgba(13, 110, 253, 0.3);
+    box-shadow: 0 0 20px rgba(var(--ahg-primary-rgb), 0.3);
 }
 
 /* Drag Handles */
@@ -42,7 +42,7 @@
 }
 
 .column-item:hover {
-    background: #f8f9fa;
+    background: var(--ahg-light);
 }
 
 .column-item .form-check-input:checked ~ span {
@@ -73,7 +73,7 @@
 }
 
 .filter-item:hover {
-    background: #f8f9fa;
+    background: var(--ahg-light);
 }
 
 /* Data Source Selection */
@@ -89,7 +89,7 @@
 
 /* Report Cards */
 .report-row:hover {
-    background: rgba(13, 110, 253, 0.05);
+    background: rgba(var(--ahg-primary-rgb), 0.05);
 }
 
 /* Stat Cards */

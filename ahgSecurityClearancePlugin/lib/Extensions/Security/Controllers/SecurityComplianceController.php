@@ -708,14 +708,128 @@ class SecurityComplianceController
     }
 
     /**
-     * Helper: Export PDF (placeholder)
+     * Helper: Export PDF
      */
     private function exportPdf(Response $response, array $data, string $filename): Response
     {
-        // TODO: Implement PDF generation with TCPDF or similar
-        $response->getBody()->write(json_encode(['error' => 'PDF export not yet implemented', 'data' => $data]));
+        // Try TCPDF if available
+        $tcpdfPath = \sfConfig::get('sf_root_dir') . '/vendor/tecnickcom/tcpdf/tcpdf.php';
+        if (file_exists($tcpdfPath)) {
+            require_once $tcpdfPath;
+            return $this->exportPdfWithTcpdf($response, $data, $filename);
+        }
 
-        return $response->withHeader('Content-Type', 'application/json');
+        // Fallback: Generate printable HTML
+        return $this->exportPdfAsHtml($response, $data, $filename);
+    }
+
+    /**
+     * Export PDF using TCPDF
+     */
+    private function exportPdfWithTcpdf(Response $response, array $data, string $filename): Response
+    {
+        $pdf = new \TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+
+        $pdf->SetCreator('AtoM Security Compliance');
+        $pdf->SetAuthor('AtoM');
+        $pdf->SetTitle('Security Compliance Report');
+        $pdf->setPrintHeader(false);
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(true, 15);
+        $pdf->AddPage();
+
+        // Title
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->Cell(0, 10, 'Security Compliance Report', 0, 1, 'C');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(0, 5, 'Generated: ' . date('Y-m-d H:i:s'), 0, 1, 'R');
+        $pdf->Ln(10);
+
+        // Flatten data for table
+        $flatData = $this->flattenForExport($data);
+
+        if (!empty($flatData)) {
+            $html = '<table border="1" cellpadding="4" cellspacing="0">';
+            $html .= '<tr style="background-color:#4472C4;color:#ffffff;font-weight:bold;">';
+            $first = (array) $flatData[0];
+            foreach (array_keys($first) as $col) {
+                $html .= '<th>' . htmlspecialchars(ucwords(str_replace('_', ' ', $col))) . '</th>';
+            }
+            $html .= '</tr>';
+
+            foreach ($flatData as $row) {
+                $html .= '<tr>';
+                foreach ((array) $row as $value) {
+                    $html .= '<td>' . htmlspecialchars($value ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+            $html .= '</table>';
+
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->writeHTML($html, true, false, true, false, '');
+        }
+
+        $pdfContent = $pdf->Output($filename . '.pdf', 'S');
+
+        $response->getBody()->write($pdfContent);
+
+        return $response
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', "attachment; filename=\"{$filename}-" . date('Y-m-d') . ".pdf\"");
+    }
+
+    /**
+     * Fallback: Export as printable HTML
+     */
+    private function exportPdfAsHtml(Response $response, array $data, string $filename): Response
+    {
+        $flatData = $this->flattenForExport($data);
+
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Security Compliance Report</title>
+    <style>
+        @media print { body { margin: 0; padding: 20px; } .no-print { display: none; } }
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { color: #333; }
+        .meta { color: #666; margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th { background-color: #4472C4; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+        td { padding: 6px 8px; border: 1px solid #ddd; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .print-btn { margin: 20px 0; padding: 10px 20px; background: #4472C4; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="no-print"><button class="print-btn" onclick="window.print()">Print / Save as PDF</button></div>
+    <h1>Security Compliance Report</h1>
+    <div class="meta">Generated: ' . date('Y-m-d H:i:s') . '</div>';
+
+        if (!empty($flatData)) {
+            $html .= '<table><tr>';
+            $first = (array) $flatData[0];
+            foreach (array_keys($first) as $col) {
+                $html .= '<th>' . htmlspecialchars(ucwords(str_replace('_', ' ', $col))) . '</th>';
+            }
+            $html .= '</tr>';
+            foreach ($flatData as $row) {
+                $html .= '<tr>';
+                foreach ((array) $row as $value) {
+                    $html .= '<td>' . htmlspecialchars($value ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+            $html .= '</table>';
+        }
+
+        $html .= '</body></html>';
+
+        $response->getBody()->write($html);
+
+        return $response->withHeader('Content-Type', 'text/html');
     }
 
     /**

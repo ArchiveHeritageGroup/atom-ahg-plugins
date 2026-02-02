@@ -20,8 +20,11 @@
     "display_panels": [],
     "display_badges": [],
     "tables": [
-        "landing_page",
-        "landing_page_block"
+        "atom_landing_page",
+        "atom_landing_page_block",
+        "atom_landing_page_block_type",
+        "atom_landing_page_version",
+        "atom_landing_page_audit_log"
     ],
     "shared_tables": [],
     "helpers": [],
