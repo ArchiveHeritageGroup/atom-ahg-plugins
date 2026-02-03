@@ -221,7 +221,235 @@ DB::table('event')
     ->get(['start_date', 'end_date']);
 ```
 
-### CLI Commands
+---
+
+## CLI Tasks
+
+### privacyScanPiiTask
+
+PII Detection scanner for archival descriptions.
+
+```php
+// Location: lib/task/privacyScanPiiTask.class.php
+
+class privacyScanPiiTask extends arBaseTask
+{
+    // Namespace: privacy
+    // Command: scan-pii
+}
+```
+
+**Options:**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `--application` | optional | Application name (default: qubit) |
+| `--env` | required | Environment (default: cli) |
+| `--id` | optional | Scan specific object ID |
+| `--repository` | optional | Scan by repository ID |
+| `--limit` | optional | Batch limit (default: 100) |
+| `--rescan` | none | Re-scan already scanned objects |
+| `--stats` | none | Show statistics only |
+| `--verbose` | none | Verbose output with entity details |
+
+**Usage Examples:**
+
+```bash
+# Show statistics
+php symfony privacy:scan-pii --stats
+
+# Scan specific object
+php symfony privacy:scan-pii --id=123
+
+# Batch scan (default 100 objects)
+php symfony privacy:scan-pii
+
+# Limit batch size
+php symfony privacy:scan-pii --limit=50
+
+# Scan specific repository
+php symfony privacy:scan-pii --repository=5
+
+# Re-scan already scanned objects
+php symfony privacy:scan-pii --rescan
+
+# Verbose output (show entity details)
+php symfony privacy:scan-pii --verbose
+```
+
+**Output Example:**
+
+```
+pii-scan  PII Detection Scanner
+
+  ╔════════════════════════════════════════════════════════╗
+  ║              PII Detection Statistics                  ║
+  ╚════════════════════════════════════════════════════════╝
+
+  Objects Scanned:      1247
+  Objects with PII:     342
+  High-Risk Entities:   156
+  Pending Review:       28
+  Coverage:             54.2%
+
+  Entities by Type:
+  ----------------------------------------
+    PERSON               412
+    EMAIL                287
+    PHONE_SA             156
+    SA_ID                 89
+```
+
+---
+
+### privacyJurisdictionTask
+
+Manages privacy compliance jurisdictions.
+
+```php
+// Location: lib/task/privacyJurisdictionTask.class.php
+
+class privacyJurisdictionTask extends sfBaseTask
+{
+    // Namespace: privacy
+    // Command: jurisdiction
+}
+```
+
+**Options:**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `--application` | optional | Application name (default: qubit) |
+| `--env` | required | Environment (default: cli) |
+| `--install` | optional | Install a jurisdiction by code |
+| `--uninstall` | optional | Uninstall a jurisdiction by code |
+| `--set-active` | optional | Set active jurisdiction for institution |
+| `--info` | optional | Show jurisdiction details |
+| `--repository` | optional | Repository ID for --set-active |
+
+**Usage Examples:**
+
+```bash
+# List all jurisdictions with status
+php symfony privacy:jurisdiction
+
+# Install a jurisdiction
+php symfony privacy:jurisdiction --install=popia
+php symfony privacy:jurisdiction --install=gdpr
+
+# Uninstall a jurisdiction
+php symfony privacy:jurisdiction --uninstall=ccpa
+
+# Set active jurisdiction globally
+php symfony privacy:jurisdiction --set-active=popia
+
+# Set active jurisdiction for specific repository
+php symfony privacy:jurisdiction --set-active=popia --repository=5
+
+# Show jurisdiction details
+php symfony privacy:jurisdiction --info=popia
+```
+
+**Available Jurisdictions:**
+
+| Code | Name | Country | DSAR Days | Breach Hours |
+|------|------|---------|-----------|--------------|
+| popia | POPIA | South Africa | 30 | 72 |
+| gdpr | GDPR | European Union | 30 | 72 |
+| uk_gdpr | UK GDPR | United Kingdom | 30 | 72 |
+| pipeda | PIPEDA | Canada | 30 | ASAP |
+| ccpa | CCPA/CPRA | USA (California) | 45 | Varies |
+| ndpa | NDPA | Nigeria | 30 | 72 |
+| kenya_dpa | DPA | Kenya | 30 | 72 |
+| lgpd | LGPD | Brazil | 15 | 72 |
+| australia_privacy | Privacy Act | Australia | 30 | 72 |
+| pdpa_sg | PDPA | Singapore | 30 | 72 |
+
+**Jurisdiction Info Output:**
+
+```
+=== Jurisdiction: POPIA ===
+
+Code:             popia
+Name:             Protection of Personal Information Act
+Full Name:        POPIA (South Africa)
+Status:           INSTALLED
+Country:          South Africa
+Region:           Africa
+Default Currency: ZAR
+DSAR Days:        30
+Breach Hours:     72
+Regulator:        Information Regulator
+Regulator URL:    https://www.inforegulator.org.za
+Effective Date:   2020-07-01
+Installed:        2026-01-15 10:30:45
+
+Installed Components:
+  Lawful Bases:       7
+  Special Categories: 8
+  Request Types:      6
+  Compliance Rules:   24
+
+Usage:
+  DSARs:              12
+  Breaches:           3
+```
+
+---
+
+### JurisdictionManager
+
+The JurisdictionManager singleton handles jurisdiction installation and configuration.
+
+```php
+// Location: lib/Jurisdictions/JurisdictionManager.php
+
+class JurisdictionManager
+{
+    // Singleton access
+    public static function getInstance(): JurisdictionManager
+
+    // Jurisdiction operations
+    public function getAvailableJurisdictions(): Collection
+    public function installJurisdiction(string $code): array
+    public function uninstallJurisdiction(string $code): array
+    public function setActiveJurisdiction(string $code, ?int $repositoryId = null): array
+    public function getActiveJurisdiction(?int $repositoryId = null): ?object
+    public function getJurisdictionStats(string $code): array
+}
+```
+
+**installJurisdiction() Return Structure:**
+
+```php
+[
+    'success' => bool,
+    'message' => string,
+    'already_installed' => bool,
+    'full_name' => string,
+    'lawful_bases_installed' => int,
+    'special_categories_installed' => int,
+    'request_types_installed' => int,
+    'compliance_rules_installed' => int,
+    'error' => string  // only on failure
+]
+```
+
+---
+
+## Cron Integration
+
+The privacy tasks can be integrated with the AHG Settings cron system:
+
+| Job Name | Command | Recommended Schedule |
+|----------|---------|---------------------|
+| PII Batch Scan | `privacy:scan-pii --limit=100` | Daily (off-peak) |
+| PII Statistics | `privacy:scan-pii --stats` | Weekly report |
+
+---
+
+### PII Detection Quick Reference
 
 ```bash
 # Show statistics

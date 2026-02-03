@@ -576,6 +576,116 @@ Option A: From a Record                Option B: From Admin
 
 ---
 
+## Part 9: CLI Commands (System Administrators)
+
+For system administrators, the plugin provides command-line tools for installation and regional configuration.
+
+### Installation Commands
+```
+┌─────────────────────────────────────────────────────────────┐
+│  INSTALL HERITAGE ACCOUNTING                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Install core schema only:                                  │
+│  $ php symfony heritage:install                             │
+│                                                             │
+│  Install with a specific region:                            │
+│  $ php symfony heritage:install --region=africa_ipsas       │
+│                                                             │
+│  Install with multiple regions:                             │
+│  $ php symfony heritage:install --region=africa_ipsas,uk_frs│
+│                                                             │
+│  Install with ALL regions:                                  │
+│  $ php symfony heritage:install --all-regions               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Region Management Commands
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MANAGE REGIONS                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  List all available regions:                                │
+│  $ php symfony heritage:region                              │
+│                                                             │
+│  Install a region:                                          │
+│  $ php symfony heritage:region --install=africa_ipsas       │
+│                                                             │
+│  Uninstall a region:                                        │
+│  $ php symfony heritage:region --uninstall=uk_frs           │
+│                                                             │
+│  Set active region globally:                                │
+│  $ php symfony heritage:region --set-active=africa_ipsas    │
+│                                                             │
+│  Set active region for a repository:                        │
+│  $ php symfony heritage:region --set-active=africa_ipsas \  │
+│                                --repository=5               │
+│                                                             │
+│  Override currency:                                         │
+│  $ php symfony heritage:region --set-active=africa_ipsas \  │
+│                                --currency=USD               │
+│                                                             │
+│  View region details:                                       │
+│  $ php symfony heritage:region --info=africa_ipsas          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Available Regions
+```
+┌───────────────────────┬─────────────────────────────────────┐
+│  CODE                 │  DESCRIPTION                        │
+├───────────────────────┼─────────────────────────────────────┤
+│  africa_ipsas         │  Africa (IPSAS 45)                  │
+│                       │  Zimbabwe, Kenya, Nigeria, Ghana    │
+│                       │                                     │
+│  south_africa_grap    │  South Africa (GRAP 103)            │
+│                       │  National Treasury compliance       │
+│                       │                                     │
+│  uk_frs               │  United Kingdom (FRS 102)           │
+│                       │  Charity Commission SORP            │
+│                       │                                     │
+│  usa_government       │  USA Government (GASB 34)           │
+│                       │  State and local governments        │
+│                       │                                     │
+│  usa_nonprofit        │  USA Non-Profit (FASB 958)          │
+│                       │  Museums, galleries                 │
+│                       │                                     │
+│  australia_nz         │  Australia/NZ (AASB 116)            │
+│                       │  AASB compliance                    │
+│                       │                                     │
+│  canada_psas          │  Canada (PSAS 3150)                 │
+│                       │  Public accounts                    │
+│                       │                                     │
+│  international_private│  International Private (IAS 16)     │
+│                       │  Private sector compliance          │
+└───────────────────────┴─────────────────────────────────────┘
+```
+
+### Region Output Example
+```
+$ php symfony heritage:region
+
+=== Heritage Accounting Regions ===
+
+Available Regions:
+
+Code                     Name                               Status      Countries
+----------------------------------------------------------------------------------------------------
+africa_ipsas             Africa (IPSAS 45)                  [INSTALLED] Zimbabwe, Kenya, Nigeria...
+south_africa_grap        South Africa (GRAP 103)            [not installed]
+uk_frs                   United Kingdom (FRS 102)           [not installed]
+usa_government           USA Government (GASB 34)           [not installed]
+...
+
+To install a region: php symfony heritage:region --install=<region_code>
+To see region details: php symfony heritage:region --info=<region_code>
+```
+
+---
+
 ## Troubleshooting
 ```
 Problem                          Solution

@@ -499,6 +499,106 @@ TK Labels are designed by indigenous communities to indicate cultural protocols 
 
 ---
 
+## Part 5: CLI Commands (System Administrators)
+
+For system administrators, the plugin provides command-line tools for automated embargo management.
+
+### Automated Embargo Processing
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMBARGO:PROCESS - Automated Daily Processing               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Process all (lift expired + send notifications):           │
+│  $ php symfony embargo:process                              │
+│                                                             │
+│  Preview without making changes:                            │
+│  $ php symfony embargo:process --dry-run                    │
+│                                                             │
+│  Send notifications only:                                   │
+│  $ php symfony embargo:process --notify-only                │
+│                                                             │
+│  Lift expired embargoes only:                               │
+│  $ php symfony embargo:process --lift-only                  │
+│                                                             │
+│  Custom warning intervals:                                  │
+│  $ php symfony embargo:process --warn-days=14,7,3           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cron Setup
+```
+┌─────────────────────────────────────────────────────────────┐
+│  RECOMMENDED CRON CONFIGURATION                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Run daily at 6am to:                                       │
+│  • Automatically lift expired embargoes                     │
+│  • Send expiry warning notifications (30, 7, 1 days)        │
+│                                                             │
+│  Add to crontab:                                            │
+│  0 6 * * * cd /usr/share/nginx/archive && \                 │
+│            php symfony embargo:process                      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Embargo Reports
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMBARGO:REPORT - Generate Reports                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Summary statistics:                                        │
+│  $ php symfony embargo:report                               │
+│                                                             │
+│  List all active embargoes:                                 │
+│  $ php symfony embargo:report --active                      │
+│                                                             │
+│  List embargoes expiring in N days:                         │
+│  $ php symfony embargo:report --expiring=30                 │
+│                                                             │
+│  List recently lifted embargoes:                            │
+│  $ php symfony embargo:report --lifted --days=7             │
+│                                                             │
+│  List expired but not lifted:                               │
+│  $ php symfony embargo:report --expired                     │
+│                                                             │
+│  Export as CSV:                                             │
+│  $ php symfony embargo:report --active --format=csv \       │
+│                               --output=/tmp/report.csv      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Report Output Example
+```
+$ php symfony embargo:report
+
+=== Embargo Status Report ===
+
+Summary Statistics:
+  Total Active Embargoes:    47
+  Expiring in 30 days:        5
+  Expired (not lifted):      12
+  Lifted (last 30 days):      8
+
+Embargo Types:
+  Full:           23 (49%)
+  Metadata Only:  12 (26%)
+  Digital Only:    8 (17%)
+  Partial:         4 (8%)
+
+Top Embargo Reasons:
+  1. Donor Restriction    18
+  2. Privacy              14
+  3. Copyright             9
+  4. Legal                 6
+```
+
+---
+
 ## Troubleshooting
 ```
 Problem                          Solution
