@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class AhgSettingsImportAction extends sfAction
 {
@@ -13,7 +14,7 @@ class AhgSettingsImportAction extends sfAction
         if ($request->isMethod('post')) {
             // Handle file upload
             $file = $request->getFiles('settings_file');
-            
+
             if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
                 $this->getUser()->setFlash('error', 'Please select a valid settings file.');
                 $this->redirect(['module' => 'ahgSettings', 'action' => 'import']);
@@ -28,16 +29,18 @@ class AhgSettingsImportAction extends sfAction
             }
 
             // Import settings
-            $conn = Propel::getConnection();
             $imported = 0;
 
             foreach ($data['settings'] as $group => $groupSettings) {
                 foreach ($groupSettings as $key => $value) {
-                    $sql = "INSERT INTO ahg_settings (setting_key, setting_value, setting_group, updated_at)
-                            VALUES (?, ?, ?, NOW())
-                            ON DUPLICATE KEY UPDATE setting_value = ?, updated_at = NOW()";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->execute([$key, $value, $group, $value]);
+                    DB::table('ahg_settings')->updateOrInsert(
+                        ['setting_key' => $key],
+                        [
+                            'setting_value' => $value,
+                            'setting_group' => $group,
+                            'updated_at' => DB::raw('NOW()')
+                        ]
+                    );
                     $imported++;
                 }
             }

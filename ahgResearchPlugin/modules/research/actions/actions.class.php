@@ -474,9 +474,9 @@ class researchActions extends sfActions
         $userId = $this->getUser()->getAttribute('user_id');
         $this->researcher = $this->service->getResearcherByUserId($userId);
         if (!$this->researcher) { $this->redirect('research/register'); }
-        
+
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('booking_action');
+            $action = $request->getParameter('do');
             
             if ($action === 'delete') {
                 $this->service->deleteAnnotation((int) $request->getParameter('id'), $this->researcher->id);
@@ -1219,7 +1219,15 @@ class researchActions extends sfActions
         require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
-        $authUrl = $orcidService->getAuthorizationUrl($researcher->id);
+        if (!$orcidService->isConfigured()) {
+            $this->getUser()->setFlash('error', 'ORCID integration is not configured. Please contact the administrator.');
+            $this->redirect('research/profile');
+        }
+
+        $state = $orcidService->generateState();
+        $this->getUser()->setAttribute('orcid_state', $state);
+
+        $authUrl = $orcidService->getAuthorizationUrl($state);
         $this->redirect($authUrl);
     }
 
@@ -1246,15 +1254,37 @@ class researchActions extends sfActions
             $this->redirect('research/profile');
         }
 
+        // Validate CSRF state token
+        $savedState = $this->getUser()->getAttribute('orcid_state');
+        $this->getUser()->setAttribute('orcid_state', null);
+
+        if (!$savedState || $state !== $savedState) {
+            $this->getUser()->setFlash('error', 'Invalid state token. Please try again.');
+            $this->redirect('research/profile');
+        }
+
         require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
-        $result = $orcidService->exchangeCodeForToken($code, $state);
+        if (!$orcidService->isConfigured()) {
+            $this->getUser()->setFlash('error', 'ORCID integration is not configured');
+            $this->redirect('research/profile');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->getUser()->setFlash('error', 'Researcher profile not found');
+            $this->redirect('research/profile');
+        }
+
+        $result = $orcidService->verifyOrcid($researcher->id, $code);
 
         if (isset($result['error'])) {
             $this->getUser()->setFlash('error', $result['error']);
         } else {
-            $this->getUser()->setFlash('success', 'ORCID connected successfully: ' . $result['orcid']);
+            $this->getUser()->setFlash('success', 'ORCID connected successfully: ' . $result['orcid_id']);
         }
 
         $this->redirect('research/profile');
@@ -1381,20 +1411,19 @@ class researchActions extends sfActions
 
         // Handle project creation
         if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
-            $result = $projectService->createProject($this->researcher->id, [
-                'title' => $request->getParameter('title'),
-                'description' => $request->getParameter('description'),
-                'project_type' => $request->getParameter('project_type', 'personal'),
-                'institution' => $request->getParameter('institution'),
-                'start_date' => $request->getParameter('start_date'),
-                'expected_end_date' => $request->getParameter('expected_end_date'),
-            ]);
-
-            if (isset($result['error'])) {
-                $this->getUser()->setFlash('error', $result['error']);
-            } else {
+            try {
+                $projectId = $projectService->createProject($this->researcher->id, [
+                    'title' => $request->getParameter('title'),
+                    'description' => $request->getParameter('description'),
+                    'project_type' => $request->getParameter('project_type', 'personal'),
+                    'institution' => $request->getParameter('institution'),
+                    'start_date' => $request->getParameter('start_date'),
+                    'expected_end_date' => $request->getParameter('expected_end_date'),
+                ]);
                 $this->getUser()->setFlash('success', 'Project created');
-                $this->redirect('research/viewProject?id=' . $result['id']);
+                $this->redirect('research/viewProject?id=' . $projectId);
+            } catch (Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
     }
@@ -1775,17 +1804,16 @@ class researchActions extends sfActions
 
         // Handle create
         if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
-            $result = $bibliographyService->createBibliography($this->researcher->id, [
-                'name' => $request->getParameter('name'),
-                'description' => $request->getParameter('description'),
-                'citation_style' => $request->getParameter('citation_style', 'chicago'),
-            ]);
-
-            if (isset($result['error'])) {
-                $this->getUser()->setFlash('error', $result['error']);
-            } else {
+            try {
+                $bibliographyId = $bibliographyService->createBibliography($this->researcher->id, [
+                    'name' => $request->getParameter('name'),
+                    'description' => $request->getParameter('description'),
+                    'citation_style' => $request->getParameter('citation_style', 'chicago'),
+                ]);
                 $this->getUser()->setFlash('success', 'Bibliography created');
-                $this->redirect('research/viewBibliography?id=' . $result['id']);
+                $this->redirect('research/viewBibliography?id=' . $bibliographyId);
+            } catch (Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
     }
@@ -2039,9 +2067,9 @@ class researchActions extends sfActions
         $dateTo = $request->getParameter('date_to', date('Y-m-d'));
 
         $this->stats = $statisticsService->getAdminStats($dateFrom, $dateTo);
-        $this->mostViewed = $statisticsService->getMostViewedItems($dateFrom, $dateTo, 10);
-        $this->mostCited = $statisticsService->getMostCitedItems($dateFrom, $dateTo, 10);
-        $this->activeResearchers = $statisticsService->getActiveResearchers($dateFrom, $dateTo, 10);
+        $this->mostViewed = $statisticsService->getMostViewedItems(10, $dateFrom, $dateTo);
+        $this->mostCited = $statisticsService->getMostCitedItems(10, $dateFrom, $dateTo);
+        $this->activeResearchers = $statisticsService->getActiveResearchers(10);
 
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;

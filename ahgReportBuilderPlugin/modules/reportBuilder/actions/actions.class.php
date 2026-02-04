@@ -24,7 +24,7 @@ class reportBuilderActions extends sfActions
     }
 
     /**
-     * Check if user is authenticated and has admin access.
+     * Check if user is authenticated and has admin/editor access.
      */
     protected function checkAdminAccess(): void
     {
@@ -32,10 +32,11 @@ class reportBuilderActions extends sfActions
             $this->redirect('user/login');
         }
 
-        // Check for admin/editor role
-        if (!$this->getUser()->hasCredential('administrator') &&
-            !$this->getUser()->hasCredential('editor')) {
-            $this->forward404('Access denied');
+        // Check for admin, editor, or contributor role (AtoM method)
+        if (!$this->context->user->isAdministrator() &&
+            !$this->context->user->hasCredential('editor') &&
+            !$this->context->user->hasCredential('contributor')) {
+            QubitAcl::forwardUnauthorized();
         }
     }
 

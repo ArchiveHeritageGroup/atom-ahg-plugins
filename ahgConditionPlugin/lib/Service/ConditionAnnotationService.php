@@ -456,8 +456,13 @@ class ConditionAnnotationService
     protected function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void
     {
         try {
-            // Use AhgAuditService if available
-            $auditServicePath = \sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            // Load interface first, then service
+            $interfacePath = \sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Contracts/AuditServiceInterface.php';
+            if (file_exists($interfacePath)) {
+                require_once $interfacePath;
+            }
+
+            $auditServicePath = \sfConfig::get('sf_plugins_dir') . '/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
             if (file_exists($auditServicePath)) {
                 require_once $auditServicePath;
             }

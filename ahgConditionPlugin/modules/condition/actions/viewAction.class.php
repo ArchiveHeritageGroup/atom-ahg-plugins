@@ -5,6 +5,16 @@
  */
 class conditionViewAction extends sfAction
 {
+    public function preExecute()
+    {
+        // Load AhgDb class for Laravel Query Builder
+        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($ahgDbFile)) {
+            require_once $ahgDbFile;
+            \AhgCore\Core\AhgDb::init();
+        }
+    }
+
     public function execute($request)
     {
         $checkId = $request->getParameter('id');

@@ -36,11 +36,11 @@ class feedbackBrowseAction extends sfAction
         $this->totalCount = DB::table('feedback_i18n')->where('culture', $culture)->count();
         $this->pendingCount = DB::table('feedback_i18n')
             ->where('culture', $culture)
-            ->where('status_id', QubitTerm::PENDING_ID)
+            ->where('status', 'pending')
             ->count();
         $this->completedCount = DB::table('feedback_i18n')
             ->where('culture', $culture)
-            ->where('status_id', QubitTerm::COMPLETED_ID)
+            ->where('status', 'completed')
             ->count();
 
         // Build query
@@ -58,16 +58,16 @@ class feedbackBrowseAction extends sfAction
                 'feedback_i18n.name',
                 'feedback_i18n.remarks',
                 'feedback_i18n.object_id',
-                'feedback_i18n.status_id',
+                'feedback_i18n.status',
                 'feedback_i18n.created_at',
                 'feedback_i18n.completed_at'
             );
 
         // Apply filter
         if ($this->filter === 'pending') {
-            $query->where('feedback_i18n.status_id', QubitTerm::PENDING_ID);
+            $query->where('feedback_i18n.status', 'pending');
         } elseif ($this->filter === 'completed') {
-            $query->where('feedback_i18n.status_id', QubitTerm::COMPLETED_ID);
+            $query->where('feedback_i18n.status', 'completed');
         }
 
         // Apply sorting

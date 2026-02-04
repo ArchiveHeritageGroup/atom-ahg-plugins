@@ -95,6 +95,14 @@ class auditTrailActions extends sfActions
             'public' => 'Public', 'restricted' => 'Restricted',
             'confidential' => 'Confidential', 'secret' => 'Secret', 'top_secret' => 'Top Secret',
         ];
+
+        // Get distinct usernames from audit log for dropdown
+        $this->usernames = DB::table('ahg_audit_log')
+            ->whereNotNull('username')
+            ->distinct()
+            ->orderBy('username')
+            ->pluck('username')
+            ->toArray();
     }
 
     public function executeView(sfWebRequest $request)
@@ -171,9 +179,10 @@ class auditTrailActions extends sfActions
             $this->forward404('User ID is required');
         }
 
+        $culture = $this->context->user->getCulture();
         $this->targetUser = DB::table("user as u")
             ->join("actor as a", "u.id", "=", "a.id")
-            ->leftJoin("actor_i18n as ai", function($j) { $j->on("a.id", "=", "ai.id")->where("ai.culture", "=", "en"); })
+            ->leftJoin("actor_i18n as ai", function($j) use ($culture) { $j->on("a.id", "=", "ai.id")->where("ai.culture", "=", $culture); })
             ->leftJoin("slug as s", "u.id", "=", "s.object_id")
             ->where("u.id", $userId)
             ->select("u.*", "ai.authorized_form_of_name as name", "s.slug")
@@ -287,6 +296,8 @@ class auditTrailActions extends sfActions
      */
     public function executeCompareData(sfWebRequest $request)
     {
+        $this->initFramework();
+        $this->setLayout(false);
         $this->getResponse()->setContentType('application/json');
 
         $id = $request->getParameter('id');
@@ -296,7 +307,7 @@ class auditTrailActions extends sfActions
         }
 
         try {
-            $record = \Illuminate\Database\Capsule\Manager::table('ahg_audit_log')
+            $record = DB::table('ahg_audit_log')
                 ->where('id', $id)
                 ->first();
 

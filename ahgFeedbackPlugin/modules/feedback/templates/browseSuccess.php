@@ -78,7 +78,7 @@
                 <?php foreach ($feedbackItems as $item): ?>
                 <?php $counter++; ?>
                 <?php
-                    $isPending = ($item->status_id == QubitTerm::PENDING_ID);
+                    $isPending = ($item->status === 'pending');
                     
                     $typeLabels = [
                         0 => ['label' => 'General', 'class' => 'bg-secondary'],

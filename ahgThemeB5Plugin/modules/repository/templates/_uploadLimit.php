@@ -12,7 +12,7 @@
     <?php echo __('Upload limit'); ?>
     <?php if ('sfIsdiahPlugin' != $sf_context->getModuleName()) { ?>
       <span class="d-block text-muted small mt-1">
-        <?php echo __('for %repo%', ['%repo%' => link_to($resource->__toString(), [$resource, 'module' => 'repository'])]); ?>
+        <?php echo __('for %repo%', ['%repo%' => link_to($resource->getAuthorizedFormOfName(['cultureFallback' => true]), ['module' => 'repository', 'slug' => $resource->slug])]); ?>
       </span>
     <?php } ?>
   </h5>

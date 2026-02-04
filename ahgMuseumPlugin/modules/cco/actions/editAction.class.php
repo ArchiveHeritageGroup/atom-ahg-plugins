@@ -162,7 +162,7 @@ class ccoEditAction extends InformationObjectEditAction
 
         $title = $this->context->i18n->__('Add new museum object');
         if (isset($this->getRoute()->resource)) {
-            if (1 > strlen($title = $this->resource->__toString())) {
+            if (1 > strlen($title = $this->resource->getTitle(['cultureFallback' => true]))) {
                 $title = $this->context->i18n->__('Untitled');
             }
             $title = $this->context->i18n->__('Edit %1%', ['%1%' => $title]);
@@ -595,24 +595,48 @@ class ccoEditAction extends InformationObjectEditAction
             if (empty($classificationId)) {
                 $existing = \AtomExtensions\Services\SecurityClearanceService::getObjectClassification($this->resource->id);
                 if ($existing) {
-                    \AtomExtensions\Services\SecurityClearanceService::declassifyObject(
-                        $this->resource->id,
-                        $userId,
-                        'Classification removed via edit form'
-                    );
+                    // Check escalation constraint for declassification
+                    $parentClass = \AtomExtensions\Services\SecurityClearanceService::getParentEffectiveClassification($this->resource->id);
+                    if ($parentClass) {
+                        // Cannot remove classification if parent has one
+                        $this->context->user->setFlash(
+                            'error',
+                            sprintf(
+                                'Cannot remove classification. Parent record has classification "%s". Child records must maintain at least the parent\'s classification level.',
+                                $parentClass->name
+                            )
+                        );
+                    } else {
+                        \AtomExtensions\Services\SecurityClearanceService::declassifyObject(
+                            $this->resource->id,
+                            null,
+                            $userId,
+                            'Classification removed via edit form'
+                        );
+                    }
                 }
             } else {
-                \AtomExtensions\Services\SecurityClearanceService::classifyObject(
+                // Build classification data array
+                $data = [
+                    'reason' => $this->request->getParameter('security_reason'),
+                    'review_date' => $this->request->getParameter('security_review_date') ?: null,
+                    'declassify_date' => $this->request->getParameter('security_declassify_date') ?: null,
+                    'handling_instructions' => $this->request->getParameter('security_handling_instructions'),
+                    'inherit_to_children' => (bool) $this->request->getParameter('security_inherit_to_children', false),
+                ];
+
+                // Apply classification (with escalation constraint validation)
+                $result = \AtomExtensions\Services\SecurityClearanceService::classifyObject(
                     $this->resource->id,
                     (int) $classificationId,
-                    $userId,
-                    $this->request->getParameter('security_reason'),
-                    $this->request->getParameter('security_review_date') ?: null,
-                    $this->request->getParameter('security_declassify_date') ?: null,
-                    null,
-                    $this->request->getParameter('security_handling_instructions'),
-                    (bool) $this->request->getParameter('security_inherit_to_children', false)
+                    $data,
+                    $userId
                 );
+
+                // Handle validation failure (e.g., escalation constraint violated)
+                if (!$result['success']) {
+                    $this->context->user->setFlash('error', $result['error']);
+                }
             }
 
 

@@ -43,7 +43,7 @@ class physicalobjectActions extends sfActions
         // Set page title
         $title = $this->context->i18n->__('Add new physical storage');
         if (isset($this->getRoute()->resource)) {
-            if (1 > strlen($title = $this->resource->__toString())) {
+            if (1 > strlen($title = $this->resource->getName(['cultureFallback' => true]))) {
                 $title = $this->context->i18n->__('Untitled');
             }
             $title = $this->context->i18n->__('Edit %1%', ['%1%' => $title]);

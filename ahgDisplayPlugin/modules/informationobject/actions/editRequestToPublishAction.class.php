@@ -136,8 +136,9 @@ class InformationObjectEditRequestToPublishAction extends DefaultEditAction
             $mail->From     = $rtp_email;
             $mail->FromName = $rtp_name.' '.$rtp_surname;
 
-            $mail->addAddress(trim($to), 'Rock Art Research Institute (RARI)');
-            $mail->addAddress('johan@theahg.co.za', 'Johan-AHG');
+            // Get recipient name from settings, fallback to generic name
+            $recipientName = SettingService::getByNameAndScope('recipient_name', 'email') ?: 'Archive';
+            $mail->addAddress(trim($to), $recipientName);
 
             $mail->addReplyTo($reply_to, 'Reply');
             $mail->addCC($cc);

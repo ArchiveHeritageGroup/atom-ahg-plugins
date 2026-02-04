@@ -8,6 +8,16 @@ class conditionTemplateAction extends sfAction
 {
     protected $templateService;
 
+    public function preExecute()
+    {
+        // Load AhgDb class for Laravel Query Builder
+        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($ahgDbFile)) {
+            require_once $ahgDbFile;
+            \AhgCore\Core\AhgDb::init();
+        }
+    }
+
     protected function initService()
     {
         require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';

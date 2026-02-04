@@ -1,0 +1,159 @@
+/**
+ * Federation Plugin Styles
+ */
+
+/* Federation Dashboard Cards */
+.federation-stat-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.federation-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Peer Status Indicators */
+.peer-status-active {
+    position: relative;
+}
+
+.peer-status-active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #28a745;
+}
+
+.peer-status-inactive::before {
+    background-color: #6c757d;
+}
+
+/* Harvest Progress */
+.harvest-progress-container {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.harvest-stats {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.harvest-stat-item {
+    flex: 1;
+    padding: 0.5rem;
+}
+
+.harvest-stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.harvest-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+/* Log Table */
+.federation-log-table .source-id {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* OAI Identifier Display */
+.oai-identifier {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.875rem;
+    background-color: #f8f9fa;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    word-break: break-all;
+}
+
+/* Provenance Badge */
+.federation-source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #e7f5ff;
+    color: #1971c2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.federation-source-badge i {
+    font-size: 0.875rem;
+}
+
+/* Harvest History Timeline */
+.harvest-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.harvest-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.harvest-timeline-item {
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.harvest-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.25rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #007bff;
+}
+
+.harvest-timeline-item.success::before {
+    border-color: #28a745;
+}
+
+.harvest-timeline-item.failed::before {
+    border-color: #dc3545;
+}
+
+.harvest-timeline-item.running::before {
+    border-color: #007bff;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .harvest-stats {
+        flex-wrap: wrap;
+    }
+
+    .harvest-stat-item {
+        flex-basis: 50%;
+        margin-bottom: 0.5rem;
+    }
+}

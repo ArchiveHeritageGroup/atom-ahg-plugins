@@ -83,7 +83,7 @@
      <?php foreach ($pager->getResults() as $result) { ?>
         <tr class="<?php echo 0 == @++$row % 2 ? 'even' : 'odd'; ?>">
 			<?php if (isset($result->id)) { ?> 
-				<td><?php echo link_to(render_title($result->getUniqueIdentifier(['cultureFallback' => true])), [$result, 'module' => 'physicalobject']); ?></td>
+				<td><?php echo link_to($result->getUniqueIdentifier(['cultureFallback' => true]) ?? $result->getName(['cultureFallback' => true]) ?? '-', ['module' => 'physicalobject', 'slug' => $result->slug]); ?></td>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>

@@ -2,6 +2,8 @@
 
 namespace ahgDataMigrationPlugin\Exporters;
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Gallery (CCO/VRA) CSV exporter for AtoM import.
  */
@@ -10,6 +12,68 @@ class GalleryExporter extends BaseExporter
     public function getSectorCode(): string
     {
         return 'gallery';
+    }
+
+    /**
+     * Override to add gallery-specific metadata.
+     */
+    protected function loadRecordFromDatabase(int $id): ?array
+    {
+        $record = parent::loadRecordFromDatabase($id);
+
+        if (null === $record) {
+            return null;
+        }
+
+        // Map base fields to gallery fields
+        $record['objectNumber'] = $record['identifier'] ?? null;
+        $record['creationDate'] = $record['dateRange'] ?? null;
+        $record['creationDateEarliest'] = $record['dateStart'] ?? null;
+        $record['creationDateLatest'] = $record['dateEnd'] ?? null;
+        $record['creator'] = $record['creators'] ?? null;
+        $record['subject'] = $record['scope_and_content'] ?? null;
+        $record['provenance'] = $record['archival_history'] ?? null;
+        $record['materials'] = $record['extent_and_medium'] ?? null;
+        $record['conditionDescription'] = $record['physical_characteristics'] ?? null;
+
+        // Load gallery-specific metadata if table exists
+        $galleryMeta = $this->loadGalleryMetadata($id);
+        if ($galleryMeta) {
+            $record = array_merge($record, $galleryMeta);
+        }
+
+        return $record;
+    }
+
+    /**
+     * Load gallery-specific metadata from custom table.
+     */
+    protected function loadGalleryMetadata(int $id): ?array
+    {
+        try {
+            $meta = DB::table('gallery_metadata')
+                ->where('information_object_id', $id)
+                ->first();
+
+            if (!$meta) {
+                return null;
+            }
+
+            return [
+                'workType' => $meta->work_type ?? null,
+                'stylePeriod' => $meta->style_period ?? null,
+                'culturalContext' => $meta->cultural_context ?? null,
+                'technique' => $meta->technique ?? null,
+                'measurements' => $meta->measurements ?? null,
+                'inscriptions' => $meta->inscriptions ?? null,
+                'stateEdition' => $meta->edition_number ?? null,
+                'exhibitionHistory' => $meta->exhibition_history ?? null,
+                'creditLine' => $meta->credit_line ?? null,
+                'rights' => $meta->rights ?? null,
+            ];
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function getColumns(): array

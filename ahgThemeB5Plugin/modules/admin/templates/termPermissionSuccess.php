@@ -16,7 +16,7 @@
         <?php } else { ?>
           <?php echo __(
               'This is a non-preferred term and cannot be edited - please use <a href="%1%">%2%</a>.',
-              ['%1%' => url_for([$use, 'module' => 'term']), '%2%' => $use->__toString()]
+              ['%1%' => url_for(['module' => 'term', 'slug' => $use->slug]), '%2%' => $use->getName(['cultureFallback' => true])]
           ); ?>
         <?php } ?>
       </p>

@@ -93,6 +93,23 @@ class apiv2DescriptionsCreateAction extends AhgApiAction
 
             DB::commit();
 
+            // Trigger webhook for item.created
+            try {
+                \AhgAPI\Services\WebhookService::trigger(
+                    \AhgAPI\Services\WebhookService::EVENT_CREATED,
+                    \AhgAPI\Services\WebhookService::ENTITY_DESCRIPTION,
+                    $objectId,
+                    [
+                        'slug' => $slug,
+                        'title' => $data['title'],
+                        'identifier' => $data['identifier'] ?? null,
+                        'repository_id' => $data['repository_id'] ?? null,
+                    ]
+                );
+            } catch (\Exception $webhookError) {
+                error_log('Webhook trigger error: ' . $webhookError->getMessage());
+            }
+
             return $this->success([
                 'id' => $objectId,
                 'slug' => $slug,

@@ -1,8 +1,11 @@
 <?php decorate_with('layout_2col'); ?>
 <?php
+// Load viewer helper from ahgUiOverridesPlugin
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
 // Get raw resource for embargo checks
 $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource) : (isset($resource) ? sfOutputEscaper::unescape($resource) : null);
 ?>
+<?php use_helper('informationobject', 'DigitalObjectViewer'); ?>
 
 <?php slot('sidebar'); ?>
 
@@ -11,9 +14,17 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
     <div class="card-body text-center">
       <?php if ($digitalObject && $rawResource && EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
         <?php
+          // Get reference derivative for display (better browser compatibility)
+          $refDerivative = \Illuminate\Database\Capsule\Manager::table('digital_object')
+              ->where('parent_id', $digitalObject->id)
+              ->where('usage_id', 141) // Reference usage
+              ->first();
+          $displayPath = $refDerivative
+              ? $refDerivative->path . $refDerivative->name
+              : $digitalObject->path . $digitalObject->name;
           $fullPath = $digitalObject->path . $digitalObject->name;
           $ext = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));
-          $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+          $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif']);
           $is3D = in_array($ext, ['obj', 'glb', 'gltf', 'fbx', 'stl', 'ply', 'dae']);
         ?>
         <?php
@@ -26,7 +37,9 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
           <!-- Video/Audio player with transcription support -->
           <?php include_partial('digitalobject/showVideo', ['resource' => $qubitResource->digitalObjectsRelatedByobjectId[0]]); ?>
         <?php elseif ($isImage): ?>
-          <img src="<?php echo esc_entities($fullPath); ?>" alt="" class="img-fluid" style="max-height: 300px;">
+          <a href="<?php echo esc_entities($displayPath); ?>" data-bs-toggle="modal" data-bs-target="#imageFullscreenModal" onclick="document.getElementById('fullscreenImage').src=this.href; return false;" style="cursor:zoom-in;">
+            <img src="<?php echo esc_entities($displayPath); ?>" alt="" class="img-fluid" style="max-height: 300px;">
+          </a>
         <?php elseif ($is3D): ?>
           <!-- 3D Preview with model-viewer -->
           <div class="position-relative">
@@ -239,6 +252,15 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
     </ul>
   </div>
 
+  <!-- Related People and Organizations -->
+  <?php
+  $_origResource = $resource;
+  $sidebar = true;
+  $resource = $qubitResource;
+  include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php');
+  $resource = $_origResource;
+  ?>
+
   <!-- Privacy & PII -->
   <?php include_partial('informationobject/privacyPiiSection', ['resource' => $resource, 'sf_user' => $sf_user]); ?>
 <?php end_slot(); ?>
@@ -257,6 +279,22 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
 
 <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
 <script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
+
+<?php // Digital Object Viewer with zoom ?>
+<?php if (0 < count($qubitResource->digitalObjectsRelatedByobjectId)): ?>
+  <?php if (EmbargoHelper::canViewDigitalObject($rawResource->id)): ?>
+    <?php foreach ($qubitResource->digitalObjectsRelatedByobjectId as $obj): ?>
+      <?php echo render_digital_object_viewer($qubitResource, $obj); ?>
+    <?php endforeach; ?>
+  <?php elseif (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
+    <div class="digital-object-restricted text-center p-4 bg-light rounded mb-3">
+      <i class="fas fa-image fa-3x text-muted mb-2"></i>
+      <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'digital_object']); ?>
+    </div>
+  <?php else: ?>
+    <?php include_partial('extendedRights/embargoBlock', ['objectId' => $rawResource->id, 'type' => 'thumbnail']); ?>
+  <?php endif; ?>
+<?php endif; ?>
 
 <div id="tts-content-area" data-tts-content>
   <!-- Object Identification -->
@@ -875,4 +913,18 @@ window.cleanupThreeJs = function() { if (renderer) { renderer.dispose(); rendere
 <?php endif; ?>
 <?php endif; ?>
 </div><!-- /TTS Content Area -->
+
+<!-- Fullscreen Image Modal -->
+<div class="modal fade" id="imageFullscreenModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-0 position-absolute w-100" style="z-index:1051;">
+        <button type="button" class="btn btn-light btn-sm ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i> <?php echo __('Close'); ?></button>
+      </div>
+      <div class="modal-body d-flex align-items-center justify-content-center p-0">
+        <img id="fullscreenImage" src="" alt="" class="img-fluid" style="max-height:100vh;max-width:100vw;object-fit:contain;">
+      </div>
+    </div>
+  </div>
+</div>
 <?php end_slot(); ?>

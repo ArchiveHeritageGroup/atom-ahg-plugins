@@ -55,7 +55,13 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
 
         $routing->prependRoute('export_authorities', new sfRoute('/export/authorities', [
             'module' => 'export',
-            'action' => 'archival',
+            'action' => 'authority',
+        ]));
+
+        // Legacy route for object/export
+        $routing->prependRoute('object_export', new sfRoute('/object/export', [
+            'module' => 'export',
+            'action' => 'index',
         ]));
     }
 }

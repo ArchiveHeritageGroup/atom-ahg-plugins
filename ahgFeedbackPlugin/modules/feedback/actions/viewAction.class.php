@@ -1,7 +1,9 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
- * View Feedback action.
+ * View Feedback action using Laravel Query Builder.
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
@@ -9,16 +11,38 @@ class feedbackViewAction extends sfAction
 {
     public function execute($request)
     {
-        $this->resource = QubitFeedback::getById($request->getParameter('id'));
+        // Initialize Laravel
+        if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
+            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
+        }
 
-        if (!isset($this->resource)) {
+        $id = $request->getParameter('id');
+        $culture = $this->getUser()->getCulture();
+
+        // Load feedback from database
+        $this->resource = DB::table('feedback')
+            ->join('feedback_i18n', 'feedback.id', '=', 'feedback_i18n.id')
+            ->where('feedback.id', $id)
+            ->where('feedback_i18n.culture', $culture)
+            ->select(
+                'feedback.*',
+                'feedback_i18n.name',
+                'feedback_i18n.remarks',
+                'feedback_i18n.object_id',
+                'feedback_i18n.status',
+                'feedback_i18n.created_at',
+                'feedback_i18n.completed_at'
+            )
+            ->first();
+
+        if (!$this->resource) {
             $this->forward404();
         }
 
         // Get linked information object if exists
         $this->informationObject = null;
-        if ($this->resource->objectId) {
-            $this->informationObject = QubitInformationObject::getById($this->resource->objectId);
+        if ($this->resource->object_id) {
+            $this->informationObject = QubitInformationObject::getById($this->resource->object_id);
         }
 
         // Feedback type labels

@@ -19,6 +19,27 @@ class ahgNAZPluginConfiguration extends sfPluginConfiguration
     public static $summary = 'National Archives of Zimbabwe Act [Chapter 25:06] compliance plugin';
     public static $version = '1.0.0';
 
+    /**
+     * Register PSR-4 autoloader for plugin classes
+     */
+    protected function registerAutoloader(): void
+    {
+        spl_autoload_register(function ($class) {
+            // Handle AhgNAZ namespace
+            if (strpos($class, 'AhgNAZ\\') === 0) {
+                $relativePath = str_replace('AhgNAZ\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
     public function contextLoadFactories(sfEvent $event): void
     {
         // Load CSS and JS assets
@@ -34,7 +55,11 @@ class ahgNAZPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Register autoloader for AhgNAZ namespace
+        $this->registerAutoloader();
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
 
         // Enable NAZ module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
@@ -142,6 +167,44 @@ class ahgNAZPluginConfiguration extends sfPluginConfiguration
         // Config
         $routing->prependRoute('naz_config', new sfRoute(
             '/admin/naz/config',
+            ['module' => 'naz', 'action' => 'config']
+        ));
+
+        // Also add routes without /admin prefix for direct access
+        $routing->prependRoute('naz_index_direct', new sfRoute(
+            '/naz',
+            ['module' => 'naz', 'action' => 'index']
+        ));
+        $routing->prependRoute('naz_closures_direct', new sfRoute(
+            '/naz/closures',
+            ['module' => 'naz', 'action' => 'closures']
+        ));
+        $routing->prependRoute('naz_permits_direct', new sfRoute(
+            '/naz/permits',
+            ['module' => 'naz', 'action' => 'permits']
+        ));
+        $routing->prependRoute('naz_researchers_direct', new sfRoute(
+            '/naz/researchers',
+            ['module' => 'naz', 'action' => 'researchers']
+        ));
+        $routing->prependRoute('naz_schedules_direct', new sfRoute(
+            '/naz/schedules',
+            ['module' => 'naz', 'action' => 'schedules']
+        ));
+        $routing->prependRoute('naz_transfers_direct', new sfRoute(
+            '/naz/transfers',
+            ['module' => 'naz', 'action' => 'transfers']
+        ));
+        $routing->prependRoute('naz_protected_direct', new sfRoute(
+            '/naz/protected',
+            ['module' => 'naz', 'action' => 'protectedRecords']
+        ));
+        $routing->prependRoute('naz_reports_direct', new sfRoute(
+            '/naz/reports',
+            ['module' => 'naz', 'action' => 'reports']
+        ));
+        $routing->prependRoute('naz_config_direct', new sfRoute(
+            '/naz/config',
             ['module' => 'naz', 'action' => 'config']
         ));
     }

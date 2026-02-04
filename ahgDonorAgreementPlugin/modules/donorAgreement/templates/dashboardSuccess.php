@@ -17,7 +17,7 @@
           <option value=""><?php echo __('All Repositories') ?></option>
           <?php foreach ($repositories as $repo): ?>
             <option value="<?php echo $repo->id ?>" <?php echo $selectedRepository == $repo->id ? 'selected' : '' ?>>
-              <?php echo esc_entities($repo->__toString()) ?>
+              <?php echo esc_entities($repo->getAuthorizedFormOfName(['cultureFallback' => true])) ?>
             </option>
           <?php endforeach ?>
         </select>

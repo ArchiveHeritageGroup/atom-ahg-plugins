@@ -2,6 +2,8 @@
 
 namespace ahgDataMigrationPlugin\Exporters;
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Museum (Spectrum 5.0) CSV exporter for AtoM import.
  */
@@ -10,6 +12,112 @@ class MuseumExporter extends BaseExporter
     public function getSectorCode(): string
     {
         return 'museum';
+    }
+
+    /**
+     * Override to add museum-specific metadata.
+     */
+    protected function loadRecordFromDatabase(int $id): ?array
+    {
+        $record = parent::loadRecordFromDatabase($id);
+
+        if (null === $record) {
+            return null;
+        }
+
+        // Map archives fields to museum fields
+        $record['objectNumber'] = $record['identifier'] ?? null;
+        $record['objectName'] = $record['title'] ?? null;
+        $record['briefDescription'] = $record['scope_and_content'] ?? null;
+        $record['objectProductionDate'] = $record['dateRange'] ?? null;
+        $record['objectProductionPerson'] = $record['creators'] ?? null;
+        $record['objectHistoryNote'] = $record['archival_history'] ?? null;
+        $record['materials'] = $record['extent_and_medium'] ?? null;
+        $record['condition'] = $record['physical_characteristics'] ?? null;
+        $record['comments'] = $record['notes'] ?? null;
+
+        // Load museum-specific metadata if table exists
+        $museumMeta = $this->loadMuseumMetadata($id);
+        if ($museumMeta) {
+            $record = array_merge($record, $museumMeta);
+        }
+
+        // Load physical object properties
+        $properties = $this->loadPhysicalObjectProperties($id);
+        if ($properties) {
+            $record = array_merge($record, $properties);
+        }
+
+        return $record;
+    }
+
+    /**
+     * Load museum-specific metadata from custom table.
+     */
+    protected function loadMuseumMetadata(int $id): ?array
+    {
+        // Check if museum_metadata table exists
+        try {
+            $meta = DB::table('museum_metadata')
+                ->where('information_object_id', $id)
+                ->first();
+
+            if (!$meta) {
+                return null;
+            }
+
+            return [
+                'objectName' => $meta->object_name ?? null,
+                'numberOfObjects' => $meta->number_of_objects ?? null,
+                'technique' => $meta->technique ?? null,
+                'dimensions' => $meta->dimensions ?? null,
+                'inscriptions' => $meta->inscription ?? null,
+                'acquisitionMethod' => $meta->acquisition_method ?? null,
+                'acquisitionDate' => $meta->acquisition_date ?? null,
+                'acquisitionSource' => $meta->acquisition_source ?? null,
+                'currentLocation' => $meta->current_location ?? null,
+                'normalLocation' => $meta->normal_location ?? null,
+                'conditionNote' => $meta->condition_note ?? null,
+            ];
+        } catch (\Exception $e) {
+            // Table doesn't exist, return null
+            return null;
+        }
+    }
+
+    /**
+     * Load physical object properties.
+     */
+    protected function loadPhysicalObjectProperties(int $id): ?array
+    {
+        // Check for physical object information stored as properties
+        $props = DB::table('property as p')
+            ->join('property_i18n as pi', function ($join) {
+                $join->on('p.id', '=', 'pi.id')
+                    ->where('pi.culture', '=', $this->culture);
+            })
+            ->where('p.object_id', $id)
+            ->select('p.name', 'pi.value')
+            ->get();
+
+        if ($props->isEmpty()) {
+            return null;
+        }
+
+        $result = [];
+        foreach ($props as $prop) {
+            // Map property names to museum columns
+            $name = $prop->name;
+            if ('dimensions' === $name) {
+                $result['dimensions'] = $prop->value;
+            } elseif ('materials' === $name || 'material' === $name) {
+                $result['materials'] = $prop->value;
+            } elseif ('technique' === $name) {
+                $result['technique'] = $prop->value;
+            }
+        }
+
+        return !empty($result) ? $result : null;
     }
 
     public function getColumns(): array

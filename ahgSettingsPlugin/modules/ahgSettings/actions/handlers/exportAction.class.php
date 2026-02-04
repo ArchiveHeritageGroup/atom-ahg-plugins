@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class AhgSettingsExportAction extends sfAction
 {
@@ -11,17 +12,17 @@ class AhgSettingsExportAction extends sfAction
         }
 
         // Get all settings
-        $conn = Propel::getConnection();
-        $sql = "SELECT setting_key, setting_value, setting_group FROM ahg_settings ORDER BY setting_group, setting_key";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        
+        $rows = DB::table('ahg_settings')
+            ->orderBy('setting_group')
+            ->orderBy('setting_key')
+            ->get(['setting_key', 'setting_value', 'setting_group']);
+
         $settings = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (!isset($settings[$row['setting_group']])) {
-                $settings[$row['setting_group']] = [];
+        foreach ($rows as $row) {
+            if (!isset($settings[$row->setting_group])) {
+                $settings[$row->setting_group] = [];
             }
-            $settings[$row['setting_group']][$row['setting_key']] = $row['setting_value'];
+            $settings[$row->setting_group][$row->setting_key] = $row->setting_value;
         }
 
         // Export as JSON

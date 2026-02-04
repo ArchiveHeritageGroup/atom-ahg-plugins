@@ -380,9 +380,9 @@ class FormService
         return DB::table('ahg_form_assignment as fa')
             ->join('ahg_form_template as ft', 'ft.id', '=', 'fa.template_id')
             ->leftJoin('repository as r', 'r.id', '=', 'fa.repository_id')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('r.id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('r.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
             ->leftJoin('term_i18n as ti', function ($join) {
                 $join->on('fa.level_of_description_id', '=', 'ti.id')
@@ -392,7 +392,7 @@ class FormService
                 'fa.*',
                 'ft.name as template_name',
                 'ft.form_type',
-                'ri.authorized_form_of_name as repository_name',
+                'ai.authorized_form_of_name as repository_name',
                 'ti.name as level_name',
             ])
             ->orderBy('fa.priority', 'desc')

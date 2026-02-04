@@ -4,15 +4,16 @@
  */
 $isAdmin = $sf_user->isAdministrator();
 
-// Helper function to check if plugin is enabled (uses Propel - safe in web context)
+// Helper function to check if plugin is enabled
 if (!function_exists('ahgIsPluginEnabled')) { function ahgIsPluginEnabled($name) {
     static $enabledPlugins = null;
     if ($enabledPlugins === null) {
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
-            $stmt->execute();
-            $enabledPlugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+            $pluginNames = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+                ->where('is_enabled', 1)
+                ->pluck('name')
+                ->toArray();
+            $enabledPlugins = array_flip($pluginNames);
         } catch (Exception $e) {
             $enabledPlugins = [];
         }
@@ -39,13 +40,12 @@ $pendingResearchers = 0;
 
 if ($isAdmin && $hasResearch) {
     try {
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_booking WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingBookings = (int)$stmt->fetchColumn();
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_researcher WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingResearchers = (int)$stmt->fetchColumn();
+        $pendingBookings = (int) \Illuminate\Database\Capsule\Manager::table('research_booking')
+            ->where('status', 'pending')
+            ->count();
+        $pendingResearchers = (int) \Illuminate\Database\Capsule\Manager::table('research_researcher')
+            ->where('status', 'pending')
+            ->count();
     } catch (Exception $e) {}
 }
 
@@ -53,10 +53,9 @@ if ($isAdmin && $hasResearch) {
 $pendingDuplicates = 0;
 if ($isAdmin && ahgIsPluginEnabled('ahgDedupePlugin')) {
     try {
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM ahg_duplicate_detection WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingDuplicates = (int)$stmt->fetchColumn();
+        $pendingDuplicates = (int) \Illuminate\Database\Capsule\Manager::table('ahg_duplicate_detection')
+            ->where('status', 'pending')
+            ->count();
     } catch (Exception $e) {}
 }
 
@@ -64,10 +63,9 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDedupePlugin')) {
 $pendingDois = 0;
 if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
     try {
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM ahg_doi_queue WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingDois = (int)$stmt->fetchColumn();
+        $pendingDois = (int) \Illuminate\Database\Capsule\Manager::table('ahg_doi_queue')
+            ->where('status', 'pending')
+            ->count();
     } catch (Exception $e) {}
 }
 ?>

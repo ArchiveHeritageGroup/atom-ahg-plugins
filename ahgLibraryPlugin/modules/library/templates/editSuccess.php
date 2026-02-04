@@ -1,4 +1,8 @@
 <?php decorate_with('layout_1col'); ?>
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$creatorRoles = $taxonomyService->getCreatorRoles(false);
+?>
 
 <?php slot('title'); ?>
   <h1><?php echo isset($resource->id) ? __('Edit %1%', ['%1%' => html_entity_decode($resource->title ?? '', ENT_QUOTES, 'UTF-8')]) : __('Add new library item'); ?></h1>
@@ -114,12 +118,9 @@
                   </div>
                   <div class="col-md-3">
                     <select name="creators[<?php echo $i; ?>][role]" class="form-select form-select-sm">
-                      <option value="author" <?php echo ($creator['role'] ?? 'author') === 'author' ? 'selected' : ''; ?>><?php echo __('Author'); ?></option>
-                      <option value="editor" <?php echo ($creator['role'] ?? '') === 'editor' ? 'selected' : ''; ?>><?php echo __('Editor'); ?></option>
-                      <option value="translator" <?php echo ($creator['role'] ?? '') === 'translator' ? 'selected' : ''; ?>><?php echo __('Translator'); ?></option>
-                      <option value="illustrator" <?php echo ($creator['role'] ?? '') === 'illustrator' ? 'selected' : ''; ?>><?php echo __('Illustrator'); ?></option>
-                      <option value="compiler" <?php echo ($creator['role'] ?? '') === 'compiler' ? 'selected' : ''; ?>><?php echo __('Compiler'); ?></option>
-                      <option value="contributor" <?php echo ($creator['role'] ?? '') === 'contributor' ? 'selected' : ''; ?>><?php echo __('Contributor'); ?></option>
+                      <?php foreach ($creatorRoles as $code => $label): ?>
+                      <option value="<?php echo $code ?>" <?php echo ($creator['role'] ?? 'author') === $code ? 'selected' : ''; ?>><?php echo __($label); ?></option>
+                      <?php endforeach; ?>
                     </select>
                   </div>
                   <div class="col-md-3">
@@ -375,9 +376,14 @@
       <section class="card mb-4">
         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="fas fa-tags me-2"></i><?php echo __('Subjects'); ?></h5>
-          <button type="button" class="btn btn-sm btn-light" id="add-subject-btn">
-            <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
-          </button>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-warning" id="suggest-subjects-btn" title="<?php echo __('Get AI-powered subject suggestions'); ?>">
+              <i class="fas fa-magic me-1"></i><?php echo __('Suggest'); ?>
+            </button>
+            <button type="button" class="btn btn-sm btn-light" id="add-subject-btn">
+              <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
+            </button>
+          </div>
         </div>
         <div class="card-body">
           <div id="subjects-container">
@@ -588,8 +594,18 @@
 </form>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Creator role options (from taxonomy)
+var creatorRoleOptions = '<?php
+$roleOptionsHtml = '';
+foreach ($creatorRoles as $code => $label) {
+    $selected = $code === 'author' ? ' selected' : '';
+    $roleOptionsHtml .= '<option value="' . $code . '"' . $selected . '>' . __($label) . '</option>';
+}
+echo addslashes($roleOptionsHtml);
+?>';
+
 document.addEventListener('DOMContentLoaded', function() {
-    
+
     // ISBN Lookup
     var lookupBtn = document.getElementById('isbn-lookup');
     if (lookupBtn) {
@@ -686,7 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 authors.forEach(function(author, i) {
                                     var html = '<div class="row creator-row mb-2 align-items-center" data-index="' + i + '">' +
                                         '<div class="col-md-5"><input type="text" name="creators[' + i + '][name]" class="form-control form-control-sm" value="' + escapeHtml(author.name) + '"></div>' +
-                                        '<div class="col-md-3"><select name="creators[' + i + '][role]" class="form-select form-select-sm"><option value="author" selected><?php echo __('Author'); ?></option><option value="editor"><?php echo __('Editor'); ?></option><option value="translator"><?php echo __('Translator'); ?></option></select></div>' +
+                                        '<div class="col-md-3"><select name="creators[' + i + '][role]" class="form-select form-select-sm">' + creatorRoleOptions + '</select></div>' +
                                         '<div class="col-md-3"><input type="text" name="creators[' + i + '][authority_uri]" class="form-control form-control-sm" value="' + escapeHtml(author.url || '') + '" placeholder="URI"></div>' +
                                         '<div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-creator-btn w-100"><i class="fas fa-times"></i></button></div></div>';
                                     container.insertAdjacentHTML('beforeend', html);
@@ -770,7 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var html = '<div class="row creator-row mb-2 align-items-center" data-index="' + creatorIndex + '">' +
             '<div class="col-md-5"><input type="text" name="creators[' + creatorIndex + '][name]" class="form-control form-control-sm" placeholder="<?php echo __('Name'); ?>"></div>' +
-            '<div class="col-md-3"><select name="creators[' + creatorIndex + '][role]" class="form-select form-select-sm"><option value="author"><?php echo __('Author'); ?></option><option value="editor"><?php echo __('Editor'); ?></option><option value="translator"><?php echo __('Translator'); ?></option></select></div>' +
+            '<div class="col-md-3"><select name="creators[' + creatorIndex + '][role]" class="form-select form-select-sm">' + creatorRoleOptions + '</select></div>' +
             '<div class="col-md-3"><input type="text" name="creators[' + creatorIndex + '][authority_uri]" class="form-control form-control-sm" placeholder="<?php echo __('Authority URI'); ?>"></div>' +
             '<div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-creator-btn w-100"><i class="fas fa-times"></i></button></div></div>';
         container.insertAdjacentHTML('beforeend', html);
@@ -806,6 +822,187 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.closest('.subject-row').remove();
         }
     });
+
+    // Subject suggestion feature (Issue #55)
+    var suggestBtn = document.getElementById('suggest-subjects-btn');
+    if (suggestBtn) {
+        suggestBtn.addEventListener('click', async function() {
+            var btn = this;
+            var originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><?php echo __('Loading...'); ?>';
+
+            try {
+                // Gather current form data
+                var title = document.querySelector('[name="title"]')?.value || '';
+                var description = document.querySelector('[name="summary"]')?.value || '';
+                var objectId = <?php echo isset($resource->id) ? (int)$resource->id : 'null'; ?>;
+
+                // Get existing subjects
+                var existingSubjects = [];
+                document.querySelectorAll('.subject-row input[name*="[heading]"]').forEach(function(input) {
+                    if (input.value.trim()) {
+                        existingSubjects.push(input.value.trim());
+                    }
+                });
+
+                // Call API
+                var params = new URLSearchParams({
+                    title: title,
+                    description: description,
+                    existing_subjects: JSON.stringify(existingSubjects)
+                });
+                if (objectId) {
+                    params.append('object_id', objectId);
+                }
+
+                var response = await fetch('/index.php/library/suggestSubjects?' + params.toString());
+                var result = await response.json();
+
+                if (result.success && result.suggestions.length > 0) {
+                    showSuggestionModal(result.suggestions);
+                } else if (result.success && result.suggestions.length === 0) {
+                    alert('<?php echo __('No suggestions available. Try adding more content to the title or summary.'); ?>');
+                } else {
+                    alert('<?php echo __('Error getting suggestions'); ?>: ' + (result.error || '<?php echo __('Unknown error'); ?>'));
+                }
+            } catch (err) {
+                console.error('Subject suggestion error:', err);
+                alert('<?php echo __('Error getting suggestions'); ?>: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        });
+    }
+
+    // Subject suggestion modal
+    function showSuggestionModal(suggestions) {
+        // Remove existing modal if any
+        var existingModal = document.getElementById('subject-suggest-modal');
+        if (existingModal) existingModal.remove();
+
+        // Heading type labels
+        var typeLabels = {
+            'topical': '<?php echo __('Topical'); ?>',
+            'personal': '<?php echo __('Personal'); ?>',
+            'corporate': '<?php echo __('Corporate'); ?>',
+            'geographic': '<?php echo __('Geographic'); ?>',
+            'genre': '<?php echo __('Genre'); ?>',
+            'meeting': '<?php echo __('Meeting'); ?>'
+        };
+
+        // Build suggestion rows
+        var suggestionRows = suggestions.map(function(s, i) {
+            var scorePercent = Math.round(s.score * 100);
+            var typeLabel = typeLabels[s.heading_type] || s.heading_type;
+            var nerBadge = s.ner_source ? '<span class="badge bg-success ms-1" title="<?php echo __('Matched from NER entities'); ?>"><i class="fas fa-brain"></i></span>' : '';
+
+            return '<div class="form-check mb-2 p-2 border rounded suggestion-item" data-heading="' + escapeHtml(s.heading) + '">' +
+                '<input class="form-check-input" type="checkbox" id="suggest-' + i + '" value="' + escapeHtml(s.heading) + '">' +
+                '<label class="form-check-label w-100" for="suggest-' + i + '">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                        '<div>' +
+                            '<strong>' + escapeHtml(s.heading) + '</strong>' + nerBadge +
+                            '<br><small class="text-muted">' + typeLabel + ' &bull; ' + s.source + '</small>' +
+                        '</div>' +
+                        '<div class="text-end">' +
+                            '<span class="badge bg-primary">' + scorePercent + '%</span><br>' +
+                            '<small class="text-muted"><?php echo __('Used'); ?> ' + s.usage_count + 'x</small>' +
+                        '</div>' +
+                    '</div>' +
+                '</label>' +
+            '</div>';
+        }).join('');
+
+        // Create modal HTML
+        var modalHtml = '<div class="modal fade" id="subject-suggest-modal" tabindex="-1">' +
+            '<div class="modal-dialog modal-lg">' +
+                '<div class="modal-content">' +
+                    '<div class="modal-header bg-warning">' +
+                        '<h5 class="modal-title"><i class="fas fa-magic me-2"></i><?php echo __('Subject Suggestions'); ?></h5>' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+                    '</div>' +
+                    '<div class="modal-body">' +
+                        '<p class="text-muted mb-3"><?php echo __('Select subjects to add. Suggestions are ranked by relevance to your title/description and usage frequency.'); ?></p>' +
+                        '<div class="mb-3">' +
+                            '<div class="form-check">' +
+                                '<input class="form-check-input" type="checkbox" id="select-all-suggestions">' +
+                                '<label class="form-check-label" for="select-all-suggestions"><strong><?php echo __('Select All'); ?></strong></label>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="suggestions-list" style="max-height: 400px; overflow-y: auto;">' +
+                            suggestionRows +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="modal-footer">' +
+                        '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>' +
+                        '<button type="button" class="btn btn-success" id="add-selected-subjects">' +
+                            '<i class="fas fa-plus me-1"></i><?php echo __('Add Selected'); ?>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        var modal = new bootstrap.Modal(document.getElementById('subject-suggest-modal'));
+        modal.show();
+
+        // Select all handler
+        document.getElementById('select-all-suggestions').addEventListener('change', function() {
+            var checked = this.checked;
+            document.querySelectorAll('.suggestions-list input[type="checkbox"]').forEach(function(cb) {
+                cb.checked = checked;
+            });
+        });
+
+        // Add selected handler
+        document.getElementById('add-selected-subjects').addEventListener('click', function() {
+            var container = document.getElementById('subjects-container');
+            var noMsg = document.getElementById('no-subjects-msg');
+            if (noMsg) noMsg.remove();
+
+            var added = 0;
+            document.querySelectorAll('.suggestions-list input[type="checkbox"]:checked').forEach(function(cb) {
+                var heading = cb.value;
+
+                // Check if already exists
+                var exists = false;
+                document.querySelectorAll('.subject-row input[name*="[heading]"]').forEach(function(input) {
+                    if (input.value.trim().toLowerCase() === heading.toLowerCase()) {
+                        exists = true;
+                    }
+                });
+
+                if (!exists) {
+                    var html = '<div class="row subject-row mb-2 align-items-center" data-index="' + subjectIndex + '">' +
+                        '<div class="col-md-11"><input type="text" name="subjects[' + subjectIndex + '][heading]" class="form-control form-control-sm" value="' + escapeHtml(heading) + '"></div>' +
+                        '<div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger remove-subject-btn w-100"><i class="fas fa-times"></i></button></div></div>';
+                    container.insertAdjacentHTML('beforeend', html);
+                    subjectIndex++;
+                    added++;
+                }
+            });
+
+            modal.hide();
+
+            if (added > 0) {
+                // Flash the subjects section to draw attention
+                var subjectsCard = document.querySelector('#subjects-container').closest('.card');
+                subjectsCard.classList.add('border-success');
+                setTimeout(function() {
+                    subjectsCard.classList.remove('border-success');
+                }, 2000);
+            }
+        });
+
+        // Cleanup on modal hide
+        document.getElementById('subject-suggest-modal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
 
 });
 </script>

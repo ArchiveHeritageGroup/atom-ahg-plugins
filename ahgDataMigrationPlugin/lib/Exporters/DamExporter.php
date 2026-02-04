@@ -2,6 +2,8 @@
 
 namespace ahgDataMigrationPlugin\Exporters;
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * DAM (Dublin Core/IPTC) CSV exporter for AtoM import.
  */
@@ -10,6 +12,111 @@ class DamExporter extends BaseExporter
     public function getSectorCode(): string
     {
         return 'dam';
+    }
+
+    /**
+     * Override to add DAM-specific metadata.
+     */
+    protected function loadRecordFromDatabase(int $id): ?array
+    {
+        $record = parent::loadRecordFromDatabase($id);
+
+        if (null === $record) {
+            return null;
+        }
+
+        // Map base fields to DAM fields
+        $record['dateCreated'] = $record['dateRange'] ?? null;
+        $record['creator'] = $record['creators'] ?? null;
+        $record['description'] = $record['scope_and_content'] ?? null;
+        $record['extent'] = $record['extent_and_medium'] ?? null;
+        $record['keywords'] = $record['subjectAccessPoints'] ?? null;
+
+        // Get digital object details
+        $digitalObject = $this->loadDigitalObjectDetails($id);
+        if ($digitalObject) {
+            $record = array_merge($record, $digitalObject);
+        }
+
+        // Load DAM-specific metadata if table exists
+        $damMeta = $this->loadDamMetadata($id);
+        if ($damMeta) {
+            $record = array_merge($record, $damMeta);
+        }
+
+        return $record;
+    }
+
+    /**
+     * Load detailed digital object information.
+     */
+    protected function loadDigitalObjectDetails(int $id): ?array
+    {
+        $do = DB::table('digital_object')
+            ->where('object_id', $id)
+            ->first();
+
+        if (!$do) {
+            return null;
+        }
+
+        $result = [
+            'filename' => $do->name ?? null,
+            'formatMimeType' => $do->mime_type ?? null,
+            'fileSize' => $do->byte_size ?? null,
+        ];
+
+        // Try to extract dimensions from metadata or derive from path
+        if ($do->mime_type && str_starts_with($do->mime_type, 'image/')) {
+            $result['type'] = 'StillImage';
+        } elseif ($do->mime_type && str_starts_with($do->mime_type, 'video/')) {
+            $result['type'] = 'MovingImage';
+        } elseif ($do->mime_type && str_starts_with($do->mime_type, 'audio/')) {
+            $result['type'] = 'Sound';
+        } elseif ($do->mime_type && str_starts_with($do->mime_type, 'application/pdf')) {
+            $result['type'] = 'Text';
+        }
+
+        // Try to get format from mime type
+        if ($do->mime_type) {
+            $parts = explode('/', $do->mime_type);
+            if (count($parts) > 1) {
+                $result['format'] = strtoupper($parts[1]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Load DAM-specific metadata from custom table.
+     */
+    protected function loadDamMetadata(int $id): ?array
+    {
+        try {
+            $meta = DB::table('dam_metadata')
+                ->where('information_object_id', $id)
+                ->first();
+
+            if (!$meta) {
+                return null;
+            }
+
+            return [
+                'dimensions' => $meta->dimensions ?? null,
+                'resolution' => $meta->resolution ?? null,
+                'colorSpace' => $meta->color_space ?? null,
+                'rights' => $meta->rights ?? null,
+                'license' => $meta->license ?? null,
+                'gpsLatitude' => $meta->gps_latitude ?? null,
+                'gpsLongitude' => $meta->gps_longitude ?? null,
+                'cameraModel' => $meta->camera_model ?? null,
+                'cameraMake' => $meta->camera_make ?? null,
+                'caption' => $meta->caption ?? null,
+            ];
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function getColumns(): array

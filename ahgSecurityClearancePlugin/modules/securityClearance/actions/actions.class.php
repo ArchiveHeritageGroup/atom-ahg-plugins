@@ -74,7 +74,8 @@ class securityClearanceActions extends sfActions
             $this->forward404('User not found');
         }
 
-        $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($userId);
+        // Use getUserClearanceRecord to show expired clearances in admin view
+        $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearanceRecord($userId);
         $this->classifications = \AtomExtensions\Services\SecurityClearanceService::getAllClassifications();
         
         // Get clearance history

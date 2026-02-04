@@ -1,0 +1,135 @@
+{
+    "name": "ahgFederationPlugin",
+    "version": "1.0.0",
+    "description": "OAI-PMH Federation plugin for Heritage Platform metadata exchange",
+    "author": "AHG Development Team",
+    "license": "AGPL-3.0",
+    "homepage": "https://github.com/ahg/atom-ahg-plugins",
+
+    "type": "atom-plugin",
+    "category": "integration",
+
+    "keywords": [
+        "oai-pmh",
+        "federation",
+        "harvesting",
+        "metadata",
+        "interoperability"
+    ],
+
+    "require": {
+        "atom": ">=2.7.0",
+        "php": ">=8.0",
+        "ahgCorePlugin": ">=1.0.0"
+    },
+
+    "suggest": {
+        "ahgProvenancePlugin": "Enhanced provenance display for harvested records"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "AhgFederation\\": "lib/"
+        }
+    },
+
+    "config": {
+        "enabled_modules": [
+            "federation"
+        ],
+        "settings": {
+            "oai_heritage_format_enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable Heritage Platform metadata format for OAI-PMH"
+            },
+            "federation_enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable federation harvesting features"
+            }
+        }
+    },
+
+    "database": {
+        "install": "database/install.sql",
+        "tables": [
+            "federation_peer",
+            "federation_harvest_log",
+            "federation_harvest_session"
+        ]
+    },
+
+    "routes": {
+        "federation_index": {
+            "path": "/admin/federation",
+            "module": "federation",
+            "action": "index"
+        },
+        "federation_peers": {
+            "path": "/admin/federation/peers",
+            "module": "federation",
+            "action": "peers"
+        },
+        "federation_harvest": {
+            "path": "/admin/federation/harvest/:peerId",
+            "module": "federation",
+            "action": "harvest"
+        },
+        "federation_log": {
+            "path": "/admin/federation/log",
+            "module": "federation",
+            "action": "log"
+        }
+    },
+
+    "permissions": {
+        "federation_admin": {
+            "description": "Administer federation settings and peers",
+            "default": ["administrator"]
+        },
+        "federation_harvest": {
+            "description": "Run federation harvests",
+            "default": ["administrator", "editor"]
+        }
+    },
+
+    "oai": {
+        "metadata_formats": [
+            {
+                "prefix": "oai_heritage",
+                "namespace": "https://heritage.example.org/oai/heritage/",
+                "schema": "https://heritage.example.org/oai/heritage/heritage.xsd",
+                "description": "Heritage Platform metadata format for archival descriptions"
+            }
+        ],
+        "sets": [
+            {
+                "spec": "heritage:federation",
+                "name": "Heritage Federation Records",
+                "description": "All records suitable for heritage federation harvesting"
+            }
+        ]
+    },
+
+    "features": {
+        "oai_heritage_format": {
+            "name": "Heritage Metadata Format",
+            "description": "Exposes archival descriptions in the Heritage Platform XML format via OAI-PMH"
+        },
+        "harvest_client": {
+            "name": "OAI-PMH Harvesting",
+            "description": "Harvest records from peer OAI-PMH repositories"
+        },
+        "provenance_tracking": {
+            "name": "Federation Provenance",
+            "description": "Track source and history of harvested records"
+        }
+    },
+
+    "extra": {
+        "symfony1": {
+            "plugin_name": "ahgFederationPlugin"
+        }
+    }
+}

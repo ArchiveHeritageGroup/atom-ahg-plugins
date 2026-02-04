@@ -37,11 +37,29 @@ class ahgIPSASPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        $this->registerAutoloader();
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ipsas';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
+    }
+
+    protected function registerAutoloader(): void
+    {
+        spl_autoload_register(function ($class) {
+            if (strpos($class, 'AhgIPSAS\\') === 0) {
+                $relativePath = str_replace('AhgIPSAS\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     public function routingLoadConfiguration(sfEvent $event): void

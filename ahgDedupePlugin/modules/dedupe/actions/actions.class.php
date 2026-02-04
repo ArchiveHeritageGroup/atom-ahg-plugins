@@ -258,13 +258,13 @@ class dedupeActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        // Get repositories for filter
+        // Get repositories for filter (Repository extends Actor, so name is in actor_i18n)
         $this->repositories = DB::table('repository')
-            ->join('repository_i18n', function ($join) {
-                $join->on('repository.id', '=', 'repository_i18n.id')
-                    ->where('repository_i18n.culture', '=', 'en');
+            ->join('actor_i18n', function ($join) {
+                $join->on('repository.id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', 'en');
             })
-            ->select('repository.id', 'repository_i18n.authorized_form_of_name as name')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->orderBy('name')
             ->get();
 
@@ -294,11 +294,11 @@ class dedupeActions extends sfActions
         }
 
         $this->rules = DB::table('ahg_duplicate_rule')
-            ->leftJoin('repository_i18n', function ($join) {
-                $join->on('ahg_duplicate_rule.repository_id', '=', 'repository_i18n.id')
-                    ->where('repository_i18n.culture', '=', 'en');
+            ->leftJoin('actor_i18n', function ($join) {
+                $join->on('ahg_duplicate_rule.repository_id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', 'en');
             })
-            ->select('ahg_duplicate_rule.*', 'repository_i18n.authorized_form_of_name as repository_name')
+            ->select('ahg_duplicate_rule.*', 'actor_i18n.authorized_form_of_name as repository_name')
             ->orderBy('priority', 'desc')
             ->get();
     }
@@ -313,11 +313,11 @@ class dedupeActions extends sfActions
         }
 
         $this->repositories = DB::table('repository')
-            ->join('repository_i18n', function ($join) {
-                $join->on('repository.id', '=', 'repository_i18n.id')
-                    ->where('repository_i18n.culture', '=', 'en');
+            ->join('actor_i18n', function ($join) {
+                $join->on('repository.id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', 'en');
             })
-            ->select('repository.id', 'repository_i18n.authorized_form_of_name as name')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->orderBy('name')
             ->get();
 
@@ -367,11 +367,11 @@ class dedupeActions extends sfActions
         }
 
         $this->repositories = DB::table('repository')
-            ->join('repository_i18n', function ($join) {
-                $join->on('repository.id', '=', 'repository_i18n.id')
-                    ->where('repository_i18n.culture', '=', 'en');
+            ->join('actor_i18n', function ($join) {
+                $join->on('repository.id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', 'en');
             })
-            ->select('repository.id', 'repository_i18n.authorized_form_of_name as name')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->orderBy('name')
             ->get();
 
@@ -534,7 +534,7 @@ class dedupeActions extends sfActions
                     ->where('ioi.culture', '=', 'en');
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
-            ->leftJoin('repository_i18n as ri', function ($join) {
+            ->leftJoin('actor_i18n as ri', function ($join) {
                 $join->on('io.repository_id', '=', 'ri.id')
                     ->where('ri.culture', '=', 'en');
             })

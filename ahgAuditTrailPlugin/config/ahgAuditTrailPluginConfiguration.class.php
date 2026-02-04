@@ -34,6 +34,18 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
     protected function registerAutoloader(): void
     {
         spl_autoload_register(function ($class) {
+            // Handle AhgCore namespace (load interface before service)
+            if (strpos($class, 'AhgCore\\') === 0) {
+                $relativePath = str_replace('AhgCore\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+
             // Handle AhgAuditTrail namespace
             if (strpos($class, 'AhgAuditTrail\\') === 0) {
                 $relativePath = str_replace('AhgAuditTrail\\', '', $class);

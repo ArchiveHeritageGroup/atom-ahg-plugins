@@ -1,9 +1,11 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * API Action for Reports Menu Pending Counts
  * Returns counts for menu badges (pending items that need attention)
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
 class apiReportsPendingCountsAction extends sfAction
@@ -45,14 +47,9 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getPendingAccessRequests()
     {
         try {
-            $sql = "SELECT COUNT(*) as count 
-                    FROM access_request 
-                    WHERE status = 'pending'";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('access_request')
+                ->where('status', 'pending')
+                ->count();
         } catch (Exception $e) {
             return 0;
         }
@@ -64,15 +61,10 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getPendingLoans()
     {
         try {
-            $sql = "SELECT COUNT(*) as count 
-                    FROM spectrum_loan_out 
-                    WHERE status IN ('active', 'overdue')
-                    AND loan_end_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('spectrum_loan_out')
+                ->whereIn('status', ['active', 'overdue'])
+                ->whereRaw('loan_end_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)')
+                ->count();
         } catch (Exception $e) {
             return 0;
         }
@@ -84,15 +76,13 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getConditionAlerts()
     {
         try {
-            $sql = "SELECT COUNT(DISTINCT information_object_id) as count 
-                    FROM spectrum_condition_check 
-                    WHERE overall_condition >= 4
-                    OR (next_check_date IS NOT NULL AND next_check_date <= CURDATE())";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('spectrum_condition_check')
+                ->where(function ($query) {
+                    $query->where('overall_condition', '>=', 4)
+                        ->orWhereRaw('(next_check_date IS NOT NULL AND next_check_date <= CURDATE())');
+                })
+                ->distinct()
+                ->count('information_object_id');
         } catch (Exception $e) {
             return 0;
         }
@@ -104,15 +94,10 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getValuationAlerts()
     {
         try {
-            $sql = "SELECT COUNT(*) as count 
-                    FROM spectrum_valuation 
-                    WHERE is_current = 1
-                    AND next_valuation_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('spectrum_valuation')
+                ->where('is_current', 1)
+                ->whereRaw('next_valuation_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
+                ->count();
         } catch (Exception $e) {
             return 0;
         }
@@ -124,14 +109,9 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getPendingApprovals()
     {
         try {
-            $sql = "SELECT COUNT(*) as count 
-                    FROM workflow_state 
-                    WHERE current_state IN ('pending_approval', 'under_review', 'submitted')";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('workflow_state')
+                ->whereIn('current_state', ['pending_approval', 'under_review', 'submitted'])
+                ->count();
         } catch (Exception $e) {
             return 0;
         }
@@ -143,15 +123,10 @@ class apiReportsPendingCountsAction extends sfAction
     protected function getClearanceExpiryCount()
     {
         try {
-            $sql = "SELECT COUNT(*) as count 
-                    FROM user_security_clearance 
-                    WHERE is_active = 1
-                    AND expiry_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)";
-            
-            $conn = Propel::getConnection();
-            $stmt = $conn->query($sql);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int) $result['count'];
+            return (int) DB::table('user_security_clearance')
+                ->where('is_active', 1)
+                ->whereRaw('expiry_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
+                ->count();
         } catch (Exception $e) {
             return 0;
         }
@@ -164,6 +139,7 @@ class apiReportsPendingCountsAction extends sfAction
     {
         $this->getResponse()->setStatusCode($statusCode);
         echo json_encode($data);
+
         return sfView::NONE;
     }
 }

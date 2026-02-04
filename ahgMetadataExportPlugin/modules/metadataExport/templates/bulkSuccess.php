@@ -1,4 +1,8 @@
 <?php use_helper('Form') ?>
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$rdfFormats = $taxonomyService->getRdfFormats(false);
+?>
 
 <h1>
   <?php echo __('Bulk Export') ?>
@@ -97,10 +101,9 @@
             <div class="mb-3">
               <label for="rdf_format" class="form-label"><?php echo __('Output Format') ?></label>
               <select name="rdf_format" id="rdf_format" class="form-select">
-                <option value="jsonld" selected><?php echo __('JSON-LD') ?></option>
-                <option value="turtle"><?php echo __('Turtle') ?></option>
-                <option value="rdfxml"><?php echo __('RDF/XML') ?></option>
-                <option value="ntriples"><?php echo __('N-Triples') ?></option>
+                <?php foreach ($rdfFormats as $code => $label): ?>
+                <option value="<?php echo $code ?>" <?php echo $code === 'jsonld' ? 'selected' : '' ?>><?php echo __($label) ?></option>
+                <?php endforeach; ?>
               </select>
             </div>
           <?php endif; ?>

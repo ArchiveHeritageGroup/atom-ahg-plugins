@@ -4,7 +4,7 @@
   <?php if (isset($resource)) { ?>
     <h1 class="multiline">
       <?php echo $title; ?>
-      <span class="sub"><?php echo render_title($resource); ?></span>
+      <span class="sub"><?php echo $resource->title ?? $resource->slug ?? ''; ?></span>
     </h1>
   <?php } else { ?>
     <h1><?php echo __('Select Report Type'); ?></h1>
@@ -14,7 +14,7 @@
 <?php slot('content'); ?>
 
   <?php if (isset($resource)) { ?>
-    <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'reports', 'action' => 'reportSelect']), ['enctype' => 'multipart/form-data']); ?>
+    <?php echo $form->renderFormTag(url_for(['module' => 'reports', 'action' => 'reportSelect', 'slug' => $resource->slug]), ['enctype' => 'multipart/form-data']); ?>
   <?php } else { ?>
     <?php echo $form->renderFormTag(url_for(['module' => 'reports', 'action' => 'reportSelect']), ['enctype' => 'multipart/form-data']); ?>
   <?php } ?>

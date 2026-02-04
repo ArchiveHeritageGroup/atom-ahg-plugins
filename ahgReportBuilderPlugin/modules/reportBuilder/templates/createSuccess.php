@@ -43,14 +43,14 @@
                         <label class="form-label"><?php echo __('Data Source'); ?> <span class="text-danger">*</span></label>
                         <div class="form-text mb-3"><?php echo __('Select the type of data you want to report on.'); ?></div>
 
-                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
                             <?php foreach ($dataSources as $key => $source): ?>
                             <div class="col">
                                 <input type="radio" class="btn-check" name="data_source" id="source_<?php echo $key; ?>" value="<?php echo $key; ?>" <?php echo $key === 'information_object' ? 'checked' : ''; ?>>
-                                <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3" for="source_<?php echo $key; ?>">
+                                <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 data-source-btn" for="source_<?php echo $key; ?>" style="min-height: 140px;">
                                     <i class="bi <?php echo $source['icon']; ?> fs-2 mb-2"></i>
-                                    <span class="fw-bold"><?php echo $source['label']; ?></span>
-                                    <small class="text-muted mt-1 text-center px-2" style="font-size: 0.7rem;"><?php echo $source['description']; ?></small>
+                                    <span class="fw-bold text-center" style="word-break: break-word;"><?php echo $source['label']; ?></span>
+                                    <small class="text-muted mt-1 text-center px-1 d-block" style="font-size: 0.65rem; line-height: 1.2; word-break: break-word; overflow-wrap: break-word;"><?php echo $source['description']; ?></small>
                                 </label>
                             </div>
                             <?php endforeach; ?>
@@ -81,6 +81,27 @@
 }
 .btn-check:checked + .btn-outline-primary .text-muted {
     color: rgba(255,255,255,0.8) !important;
+}
+/* Fix text overflow in data source cards - override Bootstrap button white-space */
+.data-source-btn {
+    white-space: normal !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+.data-source-btn span,
+.data-source-btn small {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+}
+.data-source-btn small {
+    line-height: 1.2 !important;
+    font-size: 0.65rem !important;
 }
 </style>
 <?php end_slot() ?>

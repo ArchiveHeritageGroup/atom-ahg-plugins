@@ -11,7 +11,7 @@ class ahgMuseumPlugin implements \Stringable, ArrayAccess
 
     public function __toString()
     {
-        $string = $this->resource->__toString();
+        $string = $this->resource->getTitle(['cultureFallback' => true]) ?? '';
 
         if (0 < strlen($string)) {
             return $string;

@@ -18,7 +18,7 @@ class feedbackEditAction extends sfAction
         'feed_relationship',
         'feed_type_id',
         'remarks',
-        'status_id',
+        'status',
         'admin_notes',
     ];
 
@@ -47,7 +47,7 @@ class feedbackEditAction extends sfAction
                 'feedback_i18n.name',
                 'feedback_i18n.remarks',
                 'feedback_i18n.object_id',
-                'feedback_i18n.status_id',
+                'feedback_i18n.status',
                 'feedback_i18n.created_at',
                 'feedback_i18n.completed_at'
             )
@@ -58,7 +58,11 @@ class feedbackEditAction extends sfAction
         }
 
         // For template compatibility - pass as $resource
-        $this->resource = (object) ['id' => $this->feedback->id];
+        $this->resource = (object) [
+            'id' => $this->feedback->id,
+            'created_at' => $this->feedback->created_at,
+            'completed_at' => $this->feedback->completed_at,
+        ];
 
         // Get linked information object if exists
         $this->informationObject = null;
@@ -82,7 +86,7 @@ class feedbackEditAction extends sfAction
         $this->form->setDefault('feed_relationship', $this->feedback->feed_relationship);
         $this->form->setDefault('feed_type_id', $this->feedback->feed_type_id);
         $this->form->setDefault('remarks', $this->feedback->remarks);
-        $this->form->setDefault('status_id', $this->feedback->status_id);
+        $this->form->setDefault('status', $this->feedback->status);
         $this->form->setDefault('admin_notes', '');
 
         if ($request->isMethod('post')) {
@@ -148,12 +152,12 @@ class feedbackEditAction extends sfAction
                 $this->form->setWidget('remarks', new sfWidgetFormTextarea());
                 break;
 
-            case 'status_id':
-                $this->form->setValidator('status_id', new sfValidatorInteger(['required' => true]));
-                $this->form->setWidget('status_id', new sfWidgetFormSelect([
+            case 'status':
+                $this->form->setValidator('status', new sfValidatorString(['required' => true]));
+                $this->form->setWidget('status', new sfWidgetFormSelect([
                     'choices' => [
-                        QubitTerm::PENDING_ID => $this->context->i18n->__('Pending'),
-                        QubitTerm::COMPLETED_ID => $this->context->i18n->__('Completed'),
+                        'pending' => $this->context->i18n->__('Pending'),
+                        'completed' => $this->context->i18n->__('Completed'),
                     ],
                 ]));
                 break;
@@ -184,7 +188,7 @@ class feedbackEditAction extends sfAction
 
         // Determine completed_at
         $completedAt = null;
-        if ($this->form->getValue('status_id') == QubitTerm::COMPLETED_ID) {
+        if ($this->form->getValue('status') === 'completed') {
             $completedAt = $this->feedback->completed_at ?: $now;
         }
 
@@ -194,7 +198,7 @@ class feedbackEditAction extends sfAction
             ->where('culture', $culture)
             ->update([
                 'remarks' => $this->form->getValue('remarks'),
-                'status_id' => $this->form->getValue('status_id'),
+                'status' => $this->form->getValue('status'),
                 'completed_at' => $completedAt,
             ]);
 

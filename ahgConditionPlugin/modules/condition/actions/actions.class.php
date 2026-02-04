@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__).'/../../../lib/ConditionConstants.php';
-require_once dirname(__FILE__)."/../../../lib/ConditionConstants.php";
 
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -10,6 +9,43 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class conditionActions extends sfActions
 {
+    /**
+     * Initialize AhgDb for Laravel Query Builder.
+     */
+    public function preExecute()
+    {
+        // For AJAX actions, start output buffering to prevent any stray output
+        $ajaxActions = ['upload', 'deletePhoto', 'getAnnotation', 'saveAnnotation', 'listPhotos', 'updatePhotoMeta'];
+        $action = $this->getActionName();
+        if (in_array($action, $ajaxActions)) {
+            ob_start();
+            error_reporting(E_ERROR | E_PARSE); // Suppress notices/warnings for AJAX
+        }
+
+        // Load AhgDb class for Laravel Query Builder
+        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($ahgDbFile)) {
+            require_once $ahgDbFile;
+            \AhgCore\Core\AhgDb::init();
+        }
+    }
+
+    /**
+     * Helper to return clean JSON response for AJAX actions.
+     */
+    protected function jsonResponse(array $data)
+    {
+        // Clear any buffered output
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // Send JSON directly and exit to prevent any framework output
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data);
+        exit;
+    }
+
     /**
      * Display photos for a condition check
      */
@@ -155,44 +191,51 @@ class conditionActions extends sfActions
      */
     public function executeUpload(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
+        try {
+            if (!$this->getUser()->isAuthenticated()) {
+                return $this->jsonResponse(['success' => false, 'error' => 'Not authenticated']);
+            }
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+            $checkId = (int) ($request->getParameter('id') ?: $request->getParameter('condition_check_id'));
+
+            if (!$checkId) {
+                return $this->jsonResponse(['success' => false, 'error' => 'Missing condition check ID']);
+            }
+
+            if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+                $uploadError = isset($_FILES['photo']) ? $_FILES['photo']['error'] : 'No file';
+                return $this->jsonResponse(['success' => false, 'error' => 'Upload error: ' . $uploadError]);
+            }
+
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
+
+            $photoType = $request->getParameter('photo_type', 'general');
+            $caption = $request->getParameter('caption', '');
+            $userId = (int) $this->getUser()->getAttribute('user_id');
+
+            $photoId = $service->uploadPhoto(
+                $checkId,
+                $_FILES['photo'],
+                $photoType,
+                $caption,
+                $userId
+            );
+
+            if ($photoId) {
+                $photo = $service->getPhoto($photoId);
+                return $this->jsonResponse([
+                    'success' => true,
+                    'photo_id' => $photoId,
+                    'filename' => $photo->filename,
+                    'thumbnail' => $photo->thumbnail ?? null
+                ]);
+            }
+
+            return $this->jsonResponse(['success' => false, 'error' => 'Upload failed - check server logs']);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['success' => false, 'error' => 'Exception: ' . $e->getMessage()]);
         }
-
-        $checkId = (int) ($request->getParameter('id') ?: $request->getParameter('condition_check_id'));
-
-        if (!$checkId || !isset($_FILES['photo'])) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Missing parameters']));
-        }
-
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
-        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
-
-        $photoType = $request->getParameter('photo_type', 'general');
-        $caption = $request->getParameter('caption', '');
-        $userId = (int) $this->getUser()->getAttribute('user_id');
-
-        $photoId = $service->uploadPhoto(
-            $checkId,
-            $_FILES['photo'],
-            $photoType,
-            $caption,
-            $userId
-        );
-
-        if ($photoId) {
-            $photo = $service->getPhoto($photoId);
-            return $this->renderText(json_encode([
-                'success' => true,
-                'photo_id' => $photoId,
-                'filename' => $photo->filename,
-                'thumbnail' => $photo->thumbnail
-            ]));
-        }
-
-        return $this->renderText(json_encode(['success' => false, 'error' => 'Upload failed']));
     }
 
     /**
@@ -200,28 +243,30 @@ class conditionActions extends sfActions
      */
     public function executeDeletePhoto(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
+        try {
+            if (!$this->getUser()->isAuthenticated()) {
+                return $this->jsonResponse(['success' => false, 'error' => 'Not authenticated']);
+            }
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+            $photoId = (int) $request->getParameter('id');
+
+            if (!$photoId) {
+                return $this->jsonResponse(['success' => false, 'error' => 'Missing photo_id']);
+            }
+
+            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
+
+            $userId = (int) $this->getUser()->getAttribute('user_id');
+            $result = $service->deletePhoto($photoId, $userId);
+
+            return $this->jsonResponse([
+                'success' => $result,
+                'message' => $result ? 'Photo deleted' : 'Failed to delete photo'
+            ]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['success' => false, 'error' => 'Exception: ' . $e->getMessage()]);
         }
-
-        $photoId = (int) $request->getParameter('id');
-
-        if (!$photoId) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
-        }
-
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
-        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
-
-        $userId = (int) $this->getUser()->getAttribute('user_id');
-        $result = $service->deletePhoto($photoId, $userId);
-
-        return $this->renderText(json_encode([
-            'success' => $result,
-            'message' => $result ? 'Photo deleted' : 'Failed to delete photo'
-        ]));
     }
 
     /**

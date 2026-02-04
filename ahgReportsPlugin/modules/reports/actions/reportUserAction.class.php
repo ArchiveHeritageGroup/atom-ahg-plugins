@@ -437,7 +437,7 @@ class reportsReportUserAction extends BaseReportAction
                 $criteriaUsers->addAscendingOrderByColumn(QubitUser::USERNAME);
 
                 foreach (QubitUser::get($criteriaUsers) as $user) {
-                    $valuesUsers[$user->username] = $user->__toString();
+                    $valuesUsers[$user->username] = $user->username;
                 }
                 $c2 = $criteria->getNewCriterion(QubitAuditObject::USER, $valuesUsers, Criteria::IN);
                 $criteria->addAnd($c2);
@@ -586,7 +586,7 @@ class reportsReportUserAction extends BaseReportAction
             $criteria->addAscendingOrderByColumn(QubitUser::USERNAME);
 
             foreach (QubitUser::get($criteria) as $user) {
-                $values[$user->username] = $user->__toString();
+                $values[$user->username] = $user->username;
             }
 
             if ((!$this->context->user->isAdministrator()) && $this->context->user->isSuperUser()) {

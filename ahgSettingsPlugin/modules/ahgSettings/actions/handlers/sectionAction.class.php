@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class AhgSettingsSectionAction extends sfAction
 {
@@ -130,8 +131,6 @@ class AhgSettingsSectionAction extends sfAction
         error_log("AHG Settings: Received " . count($settings) . " settings");
         error_log("AHG Settings: Keys = " . implode(', ', array_keys($settings)));
 
-        $conn = Propel::getConnection();
-
         // Handle unchecked checkboxes
         if (isset($this->checkboxFields[$this->currentSection])) {
             foreach ($this->checkboxFields[$this->currentSection] as $checkboxField) {
@@ -146,13 +145,16 @@ class AhgSettingsSectionAction extends sfAction
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            
+
             try {
-                $sql = "INSERT INTO ahg_settings (setting_key, setting_value, setting_group, updated_at)
-                        VALUES (?, ?, ?, NOW())
-                        ON DUPLICATE KEY UPDATE setting_value = ?, updated_at = NOW()";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([$key, $value, $this->currentSection, $value]);
+                DB::table('ahg_settings')->updateOrInsert(
+                    ['setting_key' => $key],
+                    [
+                        'setting_value' => $value,
+                        'setting_group' => $this->currentSection,
+                        'updated_at' => DB::raw('NOW()')
+                    ]
+                );
                 $saved++;
             } catch (Exception $e) {
                 error_log("AHG Settings: Error saving $key: " . $e->getMessage());
@@ -174,12 +176,11 @@ class AhgSettingsSectionAction extends sfAction
     {
         $settings = [];
         try {
-            $conn = Propel::getConnection();
-            $sql = "SELECT setting_key, setting_value FROM ahg_settings WHERE setting_group = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$section]);
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $settings[$row['setting_key']] = $row['setting_value'];
+            $rows = DB::table('ahg_settings')
+                ->where('setting_group', $section)
+                ->get(['setting_key', 'setting_value']);
+            foreach ($rows as $row) {
+                $settings[$row->setting_key] = $row->setting_value;
             }
         } catch (Exception $e) {
             error_log("AHG Settings: Error loading: " . $e->getMessage());

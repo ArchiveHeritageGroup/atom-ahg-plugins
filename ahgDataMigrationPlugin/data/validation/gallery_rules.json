@@ -1,0 +1,133 @@
+{
+    "sector": "gallery",
+    "name": "Gallery (CCO)",
+    "version": "1.0.0",
+    "rules": {
+        "required": [
+            "objectNumber",
+            "title"
+        ],
+        "types": {
+            "legacyId": "string",
+            "parentId": "string",
+            "objectNumber": "string",
+            "workType": "string",
+            "title": "string",
+            "creator": "string",
+            "creatorRole": "string",
+            "creationDate": "string",
+            "creationEarliestDate": "integer",
+            "creationLatestDate": "integer",
+            "stylePeriod": "string",
+            "materials": "text",
+            "medium": "text",
+            "support": "string",
+            "technique": "text",
+            "measurements": "text",
+            "subject": "text",
+            "provenance": "text",
+            "exhibitionHistory": "text",
+            "creditLine": "string",
+            "condition": "text",
+            "inscriptions": "text",
+            "editionNumber": "string",
+            "culture": "string"
+        },
+        "patterns": {
+            "culture": "^[a-z]{2}(_[A-Z]{2})?$",
+            "creationEarliestDate": "^-?\\d{1,5}$",
+            "creationLatestDate": "^-?\\d{1,5}$"
+        },
+        "maxLengths": {
+            "objectNumber": 50,
+            "workType": 100,
+            "title": 1024,
+            "creator": 500,
+            "creatorRole": 100,
+            "stylePeriod": 255,
+            "creditLine": 500,
+            "culture": 10
+        },
+        "enums": {
+            "workType": [
+                "painting",
+                "drawing",
+                "print",
+                "photograph",
+                "sculpture",
+                "installation",
+                "video",
+                "mixed media",
+                "textile",
+                "ceramic",
+                "metalwork",
+                "furniture",
+                "jewelry",
+                "manuscript",
+                "book",
+                "poster",
+                "collage",
+                "assemblage",
+                "performance",
+                "digital art"
+            ],
+            "creatorRole": [
+                "artist",
+                "painter",
+                "sculptor",
+                "photographer",
+                "printmaker",
+                "designer",
+                "architect",
+                "illustrator",
+                "ceramicist",
+                "jeweler",
+                "weaver",
+                "attributed to",
+                "workshop of",
+                "circle of",
+                "follower of",
+                "after",
+                "manner of"
+            ]
+        },
+        "referential": {
+            "parentId": "legacyId"
+        }
+    },
+    "warnings": {
+        "recommended": [
+            "creator",
+            "creationDate",
+            "workType",
+            "medium",
+            "measurements"
+        ]
+    },
+    "descriptions": {
+        "legacyId": "Unique identifier from source system for matching during updates",
+        "parentId": "Legacy ID of parent record (for related works)",
+        "objectNumber": "Unique catalog or accession number",
+        "workType": "Classification of work (CCO: Work Type)",
+        "title": "Title of the artwork (CCO: Title/Name)",
+        "creator": "Artist name in 'Surname, Forename' format (CCO: Creator)",
+        "creatorRole": "Role of the creator (e.g., Artist, Painter)",
+        "creationDate": "Date or date expression (e.g., 'c. 1890', '1885-1890')",
+        "creationEarliestDate": "Earliest possible year (negative for BCE)",
+        "creationLatestDate": "Latest possible year (negative for BCE)",
+        "stylePeriod": "Style, period, or movement (CCO: Style/Period)",
+        "materials": "Materials used (CCO: Materials/Techniques)",
+        "medium": "Medium and support (e.g., 'Oil on canvas')",
+        "support": "Support material (e.g., canvas, paper, wood)",
+        "technique": "Techniques used in creation",
+        "measurements": "Dimensions with units (CCO: Measurements)",
+        "subject": "Subject matter or iconography (CCO: Subject Matter)",
+        "provenance": "Ownership history (CCO: Provenance)",
+        "exhibitionHistory": "Exhibition history",
+        "creditLine": "Credit line for display",
+        "condition": "Current condition",
+        "inscriptions": "Signatures, marks, inscriptions",
+        "editionNumber": "Edition number (for prints, multiples)",
+        "culture": "ISO 639-1 language code for metadata"
+    }
+}

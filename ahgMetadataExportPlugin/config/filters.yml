@@ -1,0 +1,14 @@
+# Metadata Export Plugin Filters
+#
+# Content negotiation filter for linked data support
+
+rendering: ~
+security:  ~
+
+# Linked data content negotiation
+# Uncomment to enable automatic content negotiation
+# linked_data_negotiation:
+#   class: LinkedDataContentNegotiationFilter
+
+cache:     ~
+execution: ~

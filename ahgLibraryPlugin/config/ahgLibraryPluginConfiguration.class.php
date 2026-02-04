@@ -98,6 +98,12 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
             ['module' => 'library', 'action' => 'coverProxy']
         ));
 
+        // Subject suggestions API route (Issue #55)
+        $routing->prependRoute('library_suggest_subjects', new sfRoute(
+            '/library/suggestSubjects',
+            ['module' => 'library', 'action' => 'suggestSubjects']
+        ));
+
         // ISBN lookup for information objects
         // IMPORTANT: Use 'isbn' module, NOT 'informationobject' to avoid URL generation conflicts
         // Using 'informationobject' causes url_for(['module'=>'informationobject', 'slug'=>...]) to match this route

@@ -140,7 +140,7 @@ class feedbackSubmitAction extends sfAction
             'name' => $this->informationObject->getTitle(['cultureFallback' => true]),
             'remarks' => $this->form->getValue('remarks'),
             'object_id' => $this->informationObject->id,
-            'status_id' => QubitTerm::PENDING_ID,
+            'status' => 'pending',
             'created_at' => $now,
             'completed_at' => null,
         ]);

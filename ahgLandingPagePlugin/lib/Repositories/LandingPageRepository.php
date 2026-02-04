@@ -81,6 +81,62 @@ class LandingPageRepository
     }
 
     // =========================================================================
+    // USER DASHBOARD QUERIES
+    // =========================================================================
+
+    /**
+     * Get user's personal dashboard
+     */
+    public function getUserDashboard(int $userId): ?object
+    {
+        return DB::table('atom_landing_page')
+            ->where('user_id', $userId)
+            ->where('is_active', 1)
+            ->orderBy('is_default', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get all dashboards owned by a user
+     */
+    public function getUserDashboards(int $userId): Collection
+    {
+        return DB::table('atom_landing_page')
+            ->where('user_id', $userId)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get system pages (admin-created, no user_id)
+     */
+    public function getSystemPages(bool $activeOnly = false): Collection
+    {
+        $query = DB::table('atom_landing_page')
+            ->whereNull('user_id')
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name', 'asc');
+
+        if ($activeOnly) {
+            $query->where('is_active', 1);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Check if user owns a page
+     */
+    public function userOwnsPage(int $pageId, int $userId): bool
+    {
+        return DB::table('atom_landing_page')
+            ->where('id', $pageId)
+            ->where('user_id', $userId)
+            ->exists();
+    }
+
+    // =========================================================================
     // PAGE MUTATIONS
     // =========================================================================
 

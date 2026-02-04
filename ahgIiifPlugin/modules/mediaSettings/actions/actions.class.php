@@ -1,19 +1,20 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Media Processor Settings Actions
- * 
+ *
  * Admin module for configuring media processing settings:
  * - Thumbnail generation settings
  * - Preview clip settings
  * - Waveform settings
  * - Transcription settings
- * 
+ *
  * @package ahgThemeB5Plugin
  * @subpackage ahgMediaSettings
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-
 class mediaSettingsActions extends sfActions
 {
     /**
@@ -22,12 +23,12 @@ class mediaSettingsActions extends sfActions
     public function preExecute()
     {
         parent::preExecute();
-        
+
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }
-    
+
     /**
      * Index - Main settings page
      */
@@ -35,7 +36,7 @@ class mediaSettingsActions extends sfActions
     {
         $this->settings = $this->loadSettings();
         $this->grouped = $this->groupSettings($this->settings);
-        
+
         // Check tool availability
         $this->tools = [
             'ffmpeg' => $this->checkTool('/usr/bin/ffmpeg'),
@@ -45,7 +46,7 @@ class mediaSettingsActions extends sfActions
             'whisper' => $this->checkTool('/usr/local/bin/whisper') || $this->checkTool('/usr/bin/whisper'),
         ];
     }
-    
+
     /**
      * Save settings
      */
@@ -53,56 +54,50 @@ class mediaSettingsActions extends sfActions
     {
         if ($request->isMethod('POST')) {
             $settings = $request->getParameter('settings', []);
-            
-            $pdo = Propel::getConnection();
-            
+
             foreach ($settings as $key => $value) {
                 // Get setting type
-                $stmt = $pdo->prepare("SELECT setting_type FROM media_processor_settings WHERE setting_key = ?");
-                $stmt->execute([$key]);
-                $row = $stmt->fetch(PDO::FETCH_OBJ);
-                
+                $row = DB::table('media_processor_settings')
+                    ->where('setting_key', $key)
+                    ->first(['setting_type']);
+
                 $type = $row ? $row->setting_type : 'string';
-                
+
                 // Convert checkbox values
-                if ($type === 'boolean') {
+                if ('boolean' === $type) {
                     $value = $value ? '1' : '0';
-                } elseif ($type === 'json' && is_array($value)) {
+                } elseif ('json' === $type && is_array($value)) {
                     $value = json_encode($value);
                 }
-                
+
                 // Update or insert
-                $stmt = $pdo->prepare("
-                    INSERT INTO media_processor_settings (setting_key, setting_value, updated_at)
-                    VALUES (?, ?, NOW())
-                    ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()
-                ");
-                $stmt->execute([$key, $value]);
+                DB::table('media_processor_settings')->updateOrInsert(
+                    ['setting_key' => $key],
+                    ['setting_value' => $value, 'updated_at' => DB::raw('NOW()')]
+                );
             }
-            
+
             // Handle unchecked checkboxes (they won't be in POST data)
             $booleanKeys = [
                 'thumbnail_enabled', 'preview_enabled', 'waveform_enabled',
                 'poster_enabled', 'audio_preview_enabled', 'transcription_enabled',
-                'auto_detect_language'
+                'auto_detect_language',
             ];
-            
+
             foreach ($booleanKeys as $key) {
                 if (!isset($settings[$key])) {
-                    $stmt = $pdo->prepare("
-                        UPDATE media_processor_settings SET setting_value = '0', updated_at = NOW()
-                        WHERE setting_key = ?
-                    ");
-                    $stmt->execute([$key]);
+                    DB::table('media_processor_settings')
+                        ->where('setting_key', $key)
+                        ->update(['setting_value' => '0', 'updated_at' => DB::raw('NOW()')]);
                 }
             }
-            
+
             $this->getUser()->setFlash('notice', 'Media processing settings saved successfully.');
         }
-        
+
         $this->redirect(['module' => 'mediaSettings', 'action' => 'index']);
     }
-    
+
     /**
      * Test processing on a specific file
      */
@@ -112,32 +107,28 @@ class mediaSettingsActions extends sfActions
         if (!$slug) {
             $this->forward404('Please select an archival description');
         }
-        
+
         // Find information object by slug
         $informationObject = QubitInformationObject::getBySlug($slug);
         if (!$informationObject) {
             $this->forward404('Archival description not found');
         }
-        
+
         // Get the digital object for this information object
         $digitalObject = $informationObject->getDigitalObject();
         if (!$digitalObject) {
             $this->getUser()->setFlash('error', 'No digital object attached to this archival description');
             $this->redirect(['module' => 'mediaSettings', 'action' => 'index']);
         }
-        
+
         // Load processor
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/MediaUploadHook.php';
+        require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
         $result = MediaUploadHook::processDigitalObject($digitalObject);
-        
+
         $this->result = $result;
         $this->digitalObjectId = $digitalObject->id;
         $this->informationObject = $informationObject;
     }
-    
-    /**
-     * View processing queue
-     */
 
     /**
      * JSON autocomplete for information objects
@@ -145,15 +136,15 @@ class mediaSettingsActions extends sfActions
     public function executeAutocomplete(sfWebRequest $request)
     {
         $this->getResponse()->setContentType('application/json');
-        
+
         $query = $request->getParameter('query', '');
         if (strlen($query) < 2) {
             return $this->renderText(json_encode([]));
         }
-        
+
         \AhgCore\Core\AhgDb::init();
-        
-        $results = \Illuminate\Database\Capsule\Manager::table('information_object')
+
+        $results = DB::table('information_object')
             ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
             ->join('slug', 'information_object.id', '=', 'slug.object_id')
             ->leftJoin('digital_object', 'information_object.id', '=', 'digital_object.object_id')
@@ -162,113 +153,110 @@ class mediaSettingsActions extends sfActions
                 'information_object.identifier',
                 'information_object_i18n.title',
                 'slug.slug',
-                'digital_object.id as digital_object_id'
+                'digital_object.id as digital_object_id',
             ])
             ->where('information_object_i18n.culture', 'en')
-            ->where(function($q) use ($query) {
-                $q->where('information_object_i18n.title', 'LIKE', '%' . $query . '%')
-                  ->orWhere('information_object.identifier', 'LIKE', '%' . $query . '%');
+            ->where(function ($q) use ($query) {
+                $q->where('information_object_i18n.title', 'LIKE', '%'.$query.'%')
+                    ->orWhere('information_object.identifier', 'LIKE', '%'.$query.'%');
             })
             ->whereNotNull('digital_object.id')
             ->orderBy('information_object_i18n.title')
             ->limit(20)
             ->get();
-        
+
         $formatted = [];
         foreach ($results as $row) {
             $formatted[] = [
                 'slug' => $row->slug,
                 'title' => $row->title ?: '(Untitled)',
-                'identifier' => $row->identifier ?: ''
+                'identifier' => $row->identifier ?: '',
             ];
         }
-        
+
         return $this->renderText(json_encode($formatted));
     }
 
     public function executeQueue(sfWebRequest $request)
     {
-        $pdo = Propel::getConnection();
-        
         // Get queue statistics
-        $stmt = $pdo->query("
-            SELECT 
-                status,
-                COUNT(*) as count
-            FROM media_processing_queue
-            GROUP BY status
-        ");
+        $stats = DB::table('media_processing_queue')
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->groupBy('status')
+            ->get();
+
         $this->stats = [];
-        while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+        foreach ($stats as $row) {
             $this->stats[$row->status] = $row->count;
         }
-        
+
         // Get recent items
-        $stmt = $pdo->query("
-            SELECT q.*, d.name as filename
-            FROM media_processing_queue q
-            LEFT JOIN digital_object d ON q.digital_object_id = d.id
-            ORDER BY q.created_at DESC
-            LIMIT 50
-        ");
-        $this->items = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $this->items = DB::table('media_processing_queue as q')
+            ->leftJoin('digital_object as d', 'q.digital_object_id', '=', 'd.id')
+            ->select('q.*', 'd.name as filename')
+            ->orderBy('q.created_at', 'desc')
+            ->limit(50)
+            ->get();
     }
-    
+
     /**
      * Process queue items manually
      */
     public function executeProcessQueue(sfWebRequest $request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/MediaUploadHook.php';
-        
+        require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
+
         $limit = $request->getParameter('limit', 5);
         $results = MediaUploadHook::processQueue($limit);
-        
-        $this->getUser()->setFlash('notice', 'Processed ' . count($results) . ' queue items.');
+
+        $this->getUser()->setFlash('notice', 'Processed '.count($results).' queue items.');
         $this->redirect(['module' => 'mediaSettings', 'action' => 'queue']);
     }
-    
+
     /**
      * Clear completed queue items
      */
     public function executeClearQueue(sfWebRequest $request)
     {
-        $pdo = Propel::getConnection();
-        $stmt = $pdo->exec("DELETE FROM media_processing_queue WHERE status IN ('completed', 'failed')");
-        
+        DB::table('media_processing_queue')
+            ->whereIn('status', ['completed', 'failed'])
+            ->delete();
+
         $this->getUser()->setFlash('notice', 'Queue cleared.');
         $this->redirect(['module' => 'mediaSettings', 'action' => 'queue']);
     }
-    
+
     /**
      * Load settings from database
      */
     private function loadSettings(): array
     {
         $settings = [];
-        
+
         try {
-            $pdo = Propel::getConnection();
-            $stmt = $pdo->query("SELECT * FROM media_processor_settings ORDER BY setting_group, setting_key");
-            
-            while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+            $rows = DB::table('media_processor_settings')
+                ->orderBy('setting_group')
+                ->orderBy('setting_key')
+                ->get();
+
+            foreach ($rows as $row) {
                 $value = $row->setting_value;
-                
+
                 switch ($row->setting_type) {
                     case 'boolean':
                         $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
                         break;
                     case 'integer':
-                        $value = (int)$value;
+                        $value = (int) $value;
                         break;
                     case 'float':
-                        $value = (float)$value;
+                        $value = (float) $value;
                         break;
                     case 'json':
                         $value = json_decode($value, true);
                         break;
                 }
-                
+
                 $settings[$row->setting_key] = [
                     'value' => $value,
                     'type' => $row->setting_type,
@@ -279,17 +267,17 @@ class mediaSettingsActions extends sfActions
         } catch (Exception $e) {
             // Table might not exist
         }
-        
+
         return $settings;
     }
-    
+
     /**
      * Group settings by group name
      */
     private function groupSettings(array $settings): array
     {
         $grouped = [];
-        
+
         foreach ($settings as $key => $setting) {
             $group = $setting['group'] ?? 'general';
             if (!isset($grouped[$group])) {
@@ -297,10 +285,10 @@ class mediaSettingsActions extends sfActions
             }
             $grouped[$group][$key] = $setting;
         }
-        
+
         return $grouped;
     }
-    
+
     /**
      * Check if a tool is available
      */

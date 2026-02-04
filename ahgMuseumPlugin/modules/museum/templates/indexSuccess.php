@@ -146,7 +146,7 @@ $hasProvenance = !empty($museumData['provenance']) || !empty($museumData['curren
   <nav>
     <?php echo get_partial('informationobject/actionIcons', ['resource' => $resource]); ?>
     <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
-    <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
+    <?php $sidebar = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
     <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
     <?php if (check_field_visibility('app_element_visibility_physical_storage')) { ?>
       <?php echo get_component('physicalobject', 'contextMenu', ['resource' => $resource]); ?>
@@ -396,7 +396,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
     <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
   </div>
   <div class="nameAccessPoints">
-    <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'showActorEvents' => true]); ?>
+    <?php $sidebar = false; $showActorEvents = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
   </div>
   <!-- EXTENDED RIGHTS AREA -->
   

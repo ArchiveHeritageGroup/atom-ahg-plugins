@@ -29,6 +29,13 @@ class apiv2DescriptionsDeleteAction extends AhgApiAction
             return $this->error(400, 'Bad Request', 'Cannot delete description with children. Delete children first or use cascade=true');
         }
 
+        // Get title before deletion for webhook payload
+        $i18n = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', 'en')
+            ->first();
+        $title = $i18n->title ?? null;
+
         try {
             DB::beginTransaction();
 
@@ -55,6 +62,21 @@ class apiv2DescriptionsDeleteAction extends AhgApiAction
             DB::table('object')->where('id', $objectId)->delete();
 
             DB::commit();
+
+            // Trigger webhook for item.deleted
+            try {
+                \AhgAPI\Services\WebhookService::trigger(
+                    \AhgAPI\Services\WebhookService::EVENT_DELETED,
+                    \AhgAPI\Services\WebhookService::ENTITY_DESCRIPTION,
+                    $objectId,
+                    [
+                        'slug' => $slug,
+                        'title' => $title,
+                    ]
+                );
+            } catch (\Exception $webhookError) {
+                error_log('Webhook trigger error: ' . $webhookError->getMessage());
+            }
 
             return $this->success([
                 'id' => $objectId,

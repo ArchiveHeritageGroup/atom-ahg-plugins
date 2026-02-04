@@ -1,4 +1,9 @@
 <?php use_helper('Date') ?>
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$equipmentTypes = $taxonomyService->getEquipmentTypes(false);
+$equipmentConditions = $taxonomyService->getEquipmentConditions(false);
+?>
 
 <div class="container-fluid py-4">
     <div class="row">
@@ -189,17 +194,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Type *</label>
                                 <select name="equipment_type" id="eqType" class="form-select" required>
-                                    <option value="microfilm_reader">Microfilm Reader</option>
-                                    <option value="microfiche_reader">Microfiche Reader</option>
-                                    <option value="scanner">Scanner</option>
-                                    <option value="computer">Computer</option>
-                                    <option value="magnifier">Magnifier</option>
-                                    <option value="book_cradle">Book Cradle</option>
-                                    <option value="light_box">Light Box</option>
-                                    <option value="camera_stand">Camera Stand</option>
-                                    <option value="gloves">Gloves</option>
-                                    <option value="weights">Page Weights</option>
-                                    <option value="other">Other</option>
+                                    <?php foreach ($equipmentTypes as $code => $label): ?>
+                                    <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -276,11 +273,9 @@
                     <div class="mb-3">
                         <label class="form-label">New Condition Status</label>
                         <select name="new_condition" class="form-select">
-                            <option value="excellent">Excellent</option>
-                            <option value="good" selected>Good</option>
-                            <option value="fair">Fair</option>
-                            <option value="needs_repair">Needs Repair</option>
-                            <option value="out_of_service">Out of Service</option>
+                            <?php foreach ($equipmentConditions as $code => $label): ?>
+                            <option value="<?php echo $code ?>" <?php echo $code === 'good' ? 'selected' : '' ?>><?php echo __($label) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="mb-3">

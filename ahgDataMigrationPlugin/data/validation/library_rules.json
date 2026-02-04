@@ -1,0 +1,92 @@
+{
+    "sector": "library",
+    "name": "Library (MARC/RDA)",
+    "version": "1.0.0",
+    "rules": {
+        "required": [
+            "identifier",
+            "title"
+        ],
+        "types": {
+            "legacyId": "string",
+            "parentId": "string",
+            "identifier": "string",
+            "callNumber": "string",
+            "isbn": "string",
+            "issn": "string",
+            "lccn": "string",
+            "oclc": "string",
+            "title": "string",
+            "titleProper": "string",
+            "uniformTitle": "string",
+            "author": "string",
+            "corporateAuthor": "string",
+            "publisher": "string",
+            "placeOfPublication": "string",
+            "dateOfPublication": "string",
+            "edition": "string",
+            "extent": "string",
+            "language": "string",
+            "subjects": "text",
+            "summary": "text",
+            "notes": "text",
+            "series": "string",
+            "classification": "string",
+            "culture": "string"
+        },
+        "patterns": {
+            "isbn": "^(97[89])?\\d{9}[\\dxX]$",
+            "issn": "^\\d{4}-?\\d{3}[\\dxX]$",
+            "language": "^[a-z]{2,3}(;[a-z]{2,3})*$",
+            "culture": "^[a-z]{2}(_[A-Z]{2})?$"
+        },
+        "maxLengths": {
+            "identifier": 255,
+            "callNumber": 100,
+            "isbn": 17,
+            "issn": 9,
+            "title": 1024,
+            "author": 500,
+            "publisher": 255,
+            "culture": 10
+        },
+        "enums": {},
+        "referential": {
+            "parentId": "legacyId"
+        }
+    },
+    "warnings": {
+        "recommended": [
+            "author",
+            "publisher",
+            "dateOfPublication",
+            "extent"
+        ]
+    },
+    "descriptions": {
+        "legacyId": "Unique identifier from source system for matching during updates",
+        "parentId": "Legacy ID of parent record (for series/volumes)",
+        "identifier": "Local identifier or control number",
+        "callNumber": "Library call number (e.g., Dewey, LCC)",
+        "isbn": "International Standard Book Number (10 or 13 digits)",
+        "issn": "International Standard Serial Number (8 digits with optional hyphen)",
+        "lccn": "Library of Congress Control Number",
+        "oclc": "OCLC number",
+        "title": "Title of the work (MARC 245)",
+        "titleProper": "Title proper without subtitle",
+        "uniformTitle": "Standardized title for filing (MARC 240)",
+        "author": "Personal author(s) in 'Surname, Forename' format (MARC 100/700)",
+        "corporateAuthor": "Corporate/organizational author (MARC 110/710)",
+        "publisher": "Publisher name (MARC 264/260 $b)",
+        "placeOfPublication": "Place of publication (MARC 264/260 $a)",
+        "dateOfPublication": "Publication date (MARC 264/260 $c)",
+        "edition": "Edition statement (MARC 250)",
+        "extent": "Physical description - pages, volumes, etc. (MARC 300)",
+        "language": "Language code(s), semicolon-separated (MARC 008/041)",
+        "subjects": "Subject headings, pipe-separated (MARC 6XX)",
+        "summary": "Summary or abstract (MARC 520)",
+        "notes": "General notes (MARC 5XX)",
+        "series": "Series statement (MARC 490/8XX)",
+        "culture": "ISO 639-1 language code for metadata"
+    }
+}

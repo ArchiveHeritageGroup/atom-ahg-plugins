@@ -759,9 +759,9 @@ class DoiService
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('repository as r', 'io.repository_id', '=', 'r.id')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('r.id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('r.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
             ->where('io.id', $objectId)
             ->select([
@@ -772,7 +772,7 @@ class DoiService
                 'ioi.access_conditions',
                 'slug.slug',
                 'r.identifier as repository_code',
-                'ri.authorized_form_of_name as repository_name',
+                'ai.authorized_form_of_name as repository_name',
             ])
             ->first();
     }
@@ -1361,9 +1361,9 @@ class DoiService
                     ->where('ioi.culture', '=', 'en');
             })
             ->leftJoin('information_object as io', 'd.information_object_id', '=', 'io.id')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('io.repository_id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('io.repository_id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
             ->select([
                 'd.doi',
@@ -1372,7 +1372,7 @@ class DoiService
                 'd.last_sync_at',
                 'd.information_object_id',
                 'ioi.title',
-                'ri.authorized_form_of_name as repository_name',
+                'ai.authorized_form_of_name as repository_name',
             ]);
 
         // Filter by status

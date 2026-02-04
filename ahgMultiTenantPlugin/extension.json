@@ -1,8 +1,8 @@
 {
     "name": "ahgMultiTenantPlugin",
     "machine_name": "ahgMultiTenantPlugin",
-    "version": "1.0.1",
-    "description": "Repository-based multi-tenancy with user hierarchy (Admin > Super User > User)",
+    "version": "1.2.0",
+    "description": "Multi-tenancy with domain routing, dedicated tenant tables, and user hierarchy",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",
     "license": "proprietary",

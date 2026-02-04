@@ -151,7 +151,22 @@ class AhgSettingsIndexAction extends sfAction
                 'description' => 'Manage REST API keys for external integrations',
                 'url' => 'admin/ahg-settings/api-keys'
             ];
+
+            $this->sections['webhooks'] = [
+                'label' => 'Webhooks',
+                'icon' => 'fa-broadcast-tower',
+                'description' => 'Configure event-based webhooks for external system integration',
+                'url' => 'admin/ahg-settings/webhooks'
+            ];
         }
+
+        // AHG Central Integration - always available
+        $this->sections['ahg_integration'] = [
+            'label' => 'AHG Central',
+            'icon' => 'fa-cloud',
+            'description' => 'Connect to AHG Central cloud services for shared NER training and AI features',
+            'url' => 'ahgSettings/ahgIntegration'
+        ];
 
 
         // AI Services - show when ahgAIPlugin is enabled

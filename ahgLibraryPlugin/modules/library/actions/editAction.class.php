@@ -139,6 +139,10 @@ class libraryEditAction extends sfAction
         $subjects = $request->getParameter('subjects', []);
         if (is_array($subjects)) {
             $repo->saveSubjects($libraryItemId, $subjects);
+
+            // Update subject authority and record NER co-occurrences
+            $this->updateSubjectAuthority($libraryItemId, $subjects);
+            $this->recordEntitySubjectCooccurrences($savedId, $subjects);
         }
         // Save item physical location
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
@@ -422,6 +426,117 @@ class libraryEditAction extends sfAction
         }
     }
 
+
+    /**
+     * Update subject authority records for saved subjects.
+     *
+     * @param int $libraryItemId The library item ID
+     * @param array $subjects Array of subject data
+     */
+    protected function updateSubjectAuthority(int $libraryItemId, array $subjects): void
+    {
+        try {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
+
+            $authorityRepo = new \ahgLibraryPlugin\Repository\SubjectAuthorityRepository();
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+
+            foreach ($subjects as $subject) {
+                if (empty($subject['heading'])) {
+                    continue;
+                }
+
+                // Find or create authority record
+                $authorityId = $authorityRepo->findOrCreate([
+                    'heading' => $subject['heading'],
+                    'heading_type' => $subject['heading_type'] ?? 'topical',
+                    'source' => $subject['source'] ?? 'local',
+                    'authority_id' => $subject['lcsh_id'] ?? null,
+                    'lcsh_uri' => $subject['uri'] ?? null,
+                ]);
+
+                // Update library_item_subject with authority_id if we have it
+                if ($authorityId) {
+                    $db->table('library_item_subject')
+                        ->where('library_item_id', $libraryItemId)
+                        ->where('heading', $subject['heading'])
+                        ->update(['authority_id' => $authorityId]);
+                }
+            }
+        } catch (\Exception $e) {
+            error_log('Library updateSubjectAuthority error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Record co-occurrences between NER entities and subjects.
+     *
+     * @param int $informationObjectId The information object ID
+     * @param array $subjects Array of subject data
+     */
+    protected function recordEntitySubjectCooccurrences(int $informationObjectId, array $subjects): void
+    {
+        try {
+            $db = \Illuminate\Database\Capsule\Manager::connection();
+
+            // Check if NER entity table exists
+            $tableExists = $db->select("SHOW TABLES LIKE 'ahg_ner_entity'");
+            if (empty($tableExists)) {
+                return;
+            }
+
+            // Get NER entities for this object
+            $entities = $db->table('ahg_ner_entity')
+                ->where('information_object_id', $informationObjectId)
+                ->get();
+
+            if ($entities->isEmpty()) {
+                return;
+            }
+
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
+
+            $authorityRepo = new \ahgLibraryPlugin\Repository\SubjectAuthorityRepository();
+
+            foreach ($subjects as $subject) {
+                if (empty($subject['heading'])) {
+                    continue;
+                }
+
+                // Get authority ID for this subject
+                $authority = $db->table('library_subject_authority')
+                    ->where('heading_normalized', $this->normalizeHeading($subject['heading']))
+                    ->first();
+
+                if (!$authority) {
+                    continue;
+                }
+
+                // Record co-occurrence for each entity
+                foreach ($entities as $entity) {
+                    $authorityRepo->recordEntitySubjectLink(
+                        $entity->entity_type,
+                        $entity->entity_value,
+                        (int) $authority->id,
+                        1.0 // Full confidence for explicit user assignment
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            error_log('Library recordEntitySubjectCooccurrences error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Normalize heading for matching.
+     */
+    protected function normalizeHeading(string $heading): string
+    {
+        $normalized = mb_strtolower($heading, 'UTF-8');
+        $normalized = preg_replace('/[^\p{L}\p{N}\s]/u', '', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        return trim($normalized);
+    }
 
     protected function downloadCoverNow($isbn)
     {

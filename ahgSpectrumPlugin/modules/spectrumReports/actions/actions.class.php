@@ -15,6 +15,11 @@ class spectrumReportsActions extends sfActions
         }
     }
 
+    protected function getCulture(): string
+    {
+        return $this->context->user->getCulture();
+    }
+
     public function executeIndex(sfWebRequest $request)
     {
         $this->checkAccess();
@@ -44,20 +49,21 @@ class spectrumReportsActions extends sfActions
     public function executeLoans(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->loansIn = DB::table('spectrum_loan_in as l')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('l.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('l.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'l.object_id', '=', 's.object_id')
             ->select('l.*', 'ioi.title', 's.slug')
             ->orderBy('l.created_at', 'desc')
             ->get()
             ->toArray();
-        
+
         $this->loansOut = DB::table('spectrum_loan_out as l')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('l.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('l.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'l.object_id', '=', 's.object_id')
             ->select('l.*', 'ioi.title', 's.slug')
@@ -74,10 +80,11 @@ class spectrumReportsActions extends sfActions
     public function executeConditions(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->conditions = DB::table('spectrum_condition_check as c')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'c.object_id', '=', 's.object_id')
             ->select('c.*', 'ioi.title', 's.slug')
@@ -100,10 +107,11 @@ class spectrumReportsActions extends sfActions
     public function executeValuations(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->valuations = DB::table('spectrum_valuation as v')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('v.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('v.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'v.object_id', '=', 's.object_id')
             ->select('v.*', 'ioi.title', 's.slug')
@@ -120,10 +128,11 @@ class spectrumReportsActions extends sfActions
     public function executeMovements(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->movements = DB::table('spectrum_movement as m')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
             ->select('m.*', 'ioi.title', 's.slug')
@@ -140,10 +149,11 @@ class spectrumReportsActions extends sfActions
     public function executeAcquisitions(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->acquisitions = DB::table('spectrum_acquisition as a')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'a.object_id', '=', 's.object_id')
             ->select('a.*', 'ioi.title', 's.slug')
@@ -161,10 +171,11 @@ class spectrumReportsActions extends sfActions
     public function executeConservation(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->treatments = DB::table('spectrum_conservation as c')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'c.object_id', '=', 's.object_id')
             ->select('c.*', 'ioi.title', 's.slug')
@@ -176,10 +187,11 @@ class spectrumReportsActions extends sfActions
     public function executeObjectEntry(sfWebRequest $request)
     {
         $this->checkAccess();
-        
+        $culture = $this->getCulture();
+
         $this->entries = DB::table('spectrum_object_entry as e')
-            ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            ->leftJoin('information_object_i18n as ioi', function($join) use ($culture) {
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'e.object_id', '=', 's.object_id')
             ->select('e.*', 'ioi.title', 's.slug')

@@ -56,13 +56,11 @@ if (!$isAdmin && !$isApprover && $spectrumTaskCount === 0) {
 $notifications = [];
 
 try {
-    $conn = Propel::getConnection();
-    
     // Check for pending bookings (admin only for now)
     if ($isAdmin) {
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_booking WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingBookings = (int)$stmt->fetchColumn();
+        $pendingBookings = (int) \Illuminate\Database\Capsule\Manager::table('research_booking')
+            ->where('status', 'pending')
+            ->count();
         if ($pendingBookings > 0) {
             $notifications[] = [
                 'type' => 'warning',
@@ -72,11 +70,11 @@ try {
                 'action' => __('Review')
             ];
         }
-        
+
         // Check for pending researchers (admin only)
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM research_researcher WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingResearchers = (int)$stmt->fetchColumn();
+        $pendingResearchers = (int) \Illuminate\Database\Capsule\Manager::table('research_researcher')
+            ->where('status', 'pending')
+            ->count();
         if ($pendingResearchers > 0) {
             $notifications[] = [
                 'type' => 'info',
@@ -87,12 +85,12 @@ try {
             ];
         }
     }
-    
+
     // Check for pending access requests (admin and approvers)
     if ($isAdmin || $isApprover) {
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM access_request WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingAccess = (int)$stmt->fetchColumn();
+        $pendingAccess = (int) \Illuminate\Database\Capsule\Manager::table('access_request')
+            ->where('status', 'pending')
+            ->count();
         if ($pendingAccess > 0) {
             $notifications[] = [
                 'type' => 'secondary',

@@ -12,10 +12,6 @@
   </div>
   <div class="card-body">
 
-    <?php if ($sf_user->hasFlash('error')): ?>
-      <div class="alert alert-danger"><?php echo $sf_user->getFlash('error') ?></div>
-    <?php endif ?>
-
     <div class="alert alert-info">
       <i class="bi bi-info-circle me-2"></i>
       <?php echo __('Export archival descriptions in EAD 2002 XML format. Select a top-level record (fonds/collection) to export with its hierarchy.'); ?>

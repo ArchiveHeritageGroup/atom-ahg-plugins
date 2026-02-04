@@ -134,7 +134,7 @@ function renderEntities(entities) {
         'PERSON': { icon: 'fa-user', color: 'primary', label: 'People', createAction: 'create_actor' },
         'ORG': { icon: 'fa-building', color: 'success', label: 'Organizations', createAction: 'create_actor' },
         'GPE': { icon: 'fa-map-marker-alt', color: 'info', label: 'Places', createAction: 'create_place' },
-        'DATE': { icon: 'fa-calendar', color: 'warning', label: 'Dates', createAction: 'create_subject' }
+        'DATE': { icon: 'fa-calendar', color: 'warning', label: 'Dates', createAction: 'create_date' }
     };
     
     var totalCount = 0;
@@ -202,6 +202,16 @@ function renderEntities(entities) {
             
             if (hasExact) {
                 html += '<option value="link_' + entity.exact_matches[0].id + '" selected>Link to: ' + entity.exact_matches[0].name + '</option>';
+            } else if (type === 'DATE') {
+                // Check if compound date (contains ; or ,)
+                var isCompound = entity.value && (entity.value.indexOf(';') > -1 || (entity.value.match(/,/g) || []).length > 1);
+                var dateCount = isCompound ? entity.value.split(/[;,]/).filter(function(d) { return d.trim(); }).length : 1;
+                if (isCompound) {
+                    html += '<option value="create_date_split" selected>Create ' + dateCount + ' Date Events (split)</option>';
+                    html += '<option value="create_date_single">Create 1 Date Event (combined)</option>';
+                } else {
+                    html += '<option value="create_date" selected>Create Date Event</option>';
+                }
             } else {
                 var createLabel = type === 'PERSON' || type === 'ORG' ? 'Create Actor' : (type === 'GPE' ? 'Create Place' : 'Create Subject');
                 html += '<option value="create" selected>' + createLabel + ' & Link</option>';
@@ -337,6 +347,12 @@ function saveAllDecisions() {
         if (action.startsWith('link_')) {
             decision.action = 'link';
             decision.target_id = action.replace('link_', '');
+        } else if (action === 'create_date_split') {
+            decision.action = 'create_date';
+            decision.split_dates = true;
+        } else if (action === 'create_date_single' || action === 'create_date') {
+            decision.action = 'create_date';
+            decision.split_dates = false;
         } else if (action === 'create') {
             decision.action = 'create';
             decision.create_type = entityData[entityId] ? entityData[entityId].createAction : 'create_subject';

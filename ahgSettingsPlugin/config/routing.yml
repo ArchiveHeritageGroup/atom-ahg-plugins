@@ -91,6 +91,14 @@ ahg_settings_api_keys:
   url: /ahgSettings/apiKeys
   param: { module: ahgSettings, action: apiKeys }
 
+ahg_settings_webhooks:
+  url: /ahgSettings/webhooks
+  param: { module: ahgSettings, action: webhooks }
+
+admin_ahg_settings_webhooks:
+  url: /admin/ahg-settings/webhooks
+  param: { module: ahgSettings, action: webhooks }
+
 ahg_settings_global:
   url: /ahgSettings/global
   param: { module: ahgSettings, action: global }
@@ -206,3 +214,11 @@ ahg_settings_system_info:
 ahg_settings_icip_settings:
   url: /ahgSettings/icipSettings
   param: { module: ahgSettings, action: icipSettings }
+
+ahg_settings_ahg_integration:
+  url: /ahgSettings/ahgIntegration
+  param: { module: ahgSettings, action: ahgIntegration }
+
+admin_ahg_settings_ahg_integration:
+  url: /admin/ahg-settings/ahg-integration
+  param: { module: ahgSettings, action: ahgIntegration }

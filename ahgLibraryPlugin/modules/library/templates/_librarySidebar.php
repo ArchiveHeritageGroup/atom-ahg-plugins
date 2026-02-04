@@ -78,16 +78,18 @@
 <?php echo get_component('menu', 'staticPagesMenu'); ?>
 
 <?php
+use Illuminate\Database\Capsule\Manager as DB;
 // Collections Management section
 if (!function_exists('isLibraryPluginActive')) {
     function isLibraryPluginActive($pluginName) {
         static $plugins = null;
         if ($plugins === null) {
             try {
-                $conn = Propel::getConnection();
-                $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
-                $stmt->execute();
-                $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+                $pluginNames = DB::table('atom_plugin')
+                    ->where('is_enabled', 1)
+                    ->pluck('name')
+                    ->toArray();
+                $plugins = array_flip($pluginNames);
             } catch (Exception $e) {
                 $plugins = [];
             }

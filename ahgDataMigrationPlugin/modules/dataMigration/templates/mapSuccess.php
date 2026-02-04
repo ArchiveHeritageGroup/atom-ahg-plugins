@@ -1496,7 +1496,7 @@ document.querySelectorAll('.transform-select')?.forEach(function(sel) {
               foreach ($repos as $repo):
                 if ($repo->id == QubitRepository::ROOT_ID) continue;
             ?>
-              <option value="<?php echo $repo->id ?>"><?php echo htmlspecialchars($repo->__toString()) ?></option>
+              <option value="<?php echo $repo->id ?>"><?php echo htmlspecialchars($repo->getAuthorizedFormOfName(['cultureFallback' => true])) ?></option>
             <?php endforeach ?>
           </select>
         </div>

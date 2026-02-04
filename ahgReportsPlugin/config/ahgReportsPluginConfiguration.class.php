@@ -73,5 +73,11 @@ class ahgReportsPluginConfiguration extends sfPluginConfiguration
             'module' => 'reports',
             'action' => 'activity',
         ]));
+
+        // Spatial Analysis Export
+        $routing->prependRoute('reports_spatial_analysis', new sfRoute('/reports/spatial-analysis', [
+            'module' => 'reports',
+            'action' => 'reportSpatialAnalysis',
+        ]));
     }
 }

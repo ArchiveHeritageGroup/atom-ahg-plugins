@@ -1,3 +1,7 @@
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$privacyOptions = $taxonomyService->getWorkspacePrivacyOptions(false);
+?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
@@ -90,9 +94,9 @@
                     <div class="mb-3">
                         <label class="form-label">Visibility</label>
                         <select name="visibility" class="form-select">
-                            <option value="private">Private - Only members can see</option>
-                            <option value="members">Members - Listed but content restricted</option>
-                            <option value="public">Public - Anyone can view</option>
+                            <?php foreach ($privacyOptions as $code => $label): ?>
+                            <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+                            <?php endforeach; ?>
                         </select>
                         <small class="text-muted">Private is recommended for research collaboration</small>
                     </div>

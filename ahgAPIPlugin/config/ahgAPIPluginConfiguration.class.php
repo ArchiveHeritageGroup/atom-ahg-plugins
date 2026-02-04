@@ -2,8 +2,8 @@
 
 class ahgAPIPluginConfiguration extends sfPluginConfiguration
 {
-    public static $summary = 'Enhanced REST API v2';
-    public static $version = '1.1.0';
+    public static $summary = 'Enhanced REST API v2 with webhooks';
+    public static $version = '1.2.0';
 
     protected $routing;
 
@@ -93,6 +93,15 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $this->addRoute('GET', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysBrowse']);
         $this->addRoute('POST', '/api/v2/keys', ['module' => 'apiv2', 'action' => 'keysCreate']);
         $this->addRoute('DELETE', '/api/v2/keys/:id', ['module' => 'apiv2', 'action' => 'keysDelete', 'params' => ['id' => '\d+']]);
+
+        // Webhooks (Issue #82)
+        $this->addRoute('GET', '/api/v2/webhooks', ['module' => 'apiv2', 'action' => 'webhooksBrowse']);
+        $this->addRoute('POST', '/api/v2/webhooks', ['module' => 'apiv2', 'action' => 'webhooksCreate']);
+        $this->addRoute('GET', '/api/v2/webhooks/:id', ['module' => 'apiv2', 'action' => 'webhooksRead', 'params' => ['id' => '\d+']]);
+        $this->addRoute('PUT,PATCH', '/api/v2/webhooks/:id', ['module' => 'apiv2', 'action' => 'webhooksUpdate', 'params' => ['id' => '\d+']]);
+        $this->addRoute('DELETE', '/api/v2/webhooks/:id', ['module' => 'apiv2', 'action' => 'webhooksDelete', 'params' => ['id' => '\d+']]);
+        $this->addRoute('GET', '/api/v2/webhooks/:id/deliveries', ['module' => 'apiv2', 'action' => 'webhookDeliveries', 'params' => ['id' => '\d+']]);
+        $this->addRoute('POST', '/api/v2/webhooks/:id/regenerate-secret', ['module' => 'apiv2', 'action' => 'webhookRegenerateSecret', 'params' => ['id' => '\d+']]);
 
         // Legacy API routes (moved from theme routing.yml)
         $this->routing->prependRoute('api_search_io', new sfRoute(

@@ -49,7 +49,8 @@
     },
 
     "modules": [
-        "metadataExport"
+        "metadataExport",
+        "linkedData"
     ],
 
     "tasks": [
@@ -151,6 +152,26 @@
                 "output": "XML",
                 "description": "Preservation Metadata Implementation Strategies",
                 "schema": "https://www.loc.gov/standards/premis/premis.xsd"
+            },
+            "schema-org": {
+                "name": "Schema.org",
+                "sector": "Web/SEO",
+                "output": "JSON-LD",
+                "description": "Schema.org structured data for linked data and SEO",
+                "context": "https://schema.org"
+            }
+        },
+        "linkedData": {
+            "description": "Linked data publishing endpoints with content negotiation",
+            "endpoints": {
+                "record": "/{slug}.jsonld",
+                "repository": "/repository/{slug}.jsonld",
+                "actor": "/actor/{slug}.jsonld",
+                "sitemap": "/sitemap-ld.xml"
+            },
+            "contentNegotiation": {
+                "accept": "application/ld+json",
+                "enabled": true
             }
         }
     },

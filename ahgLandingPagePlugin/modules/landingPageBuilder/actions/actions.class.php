@@ -14,12 +14,30 @@ class landingPageBuilderActions extends sfActions
     {
         parent::preExecute();
 
-        // Require administrator access for all actions except index (public display)
+        // Public actions (no auth required)
         $publicActions = ['index'];
-        if (!in_array($this->getActionName(), $publicActions)) {
-            if (!$this->context->user->isAdministrator()) {
-                $this->forward('admin', 'secure');
+
+        // User actions (requires authentication, but not admin)
+        $userActions = ['myDashboard', 'myDashboardEdit', 'myDashboardList', 'myDashboardCreate'];
+
+        // Admin actions require administrator role
+        $actionName = $this->getActionName();
+
+        if (in_array($actionName, $publicActions)) {
+            return; // No auth required
+        }
+
+        if (in_array($actionName, $userActions)) {
+            // Require authentication but not admin
+            if (!$this->context->user->isAuthenticated()) {
+                $this->redirect(['module' => 'user', 'action' => 'login']);
             }
+            return;
+        }
+
+        // All other actions require administrator
+        if (!$this->context->user->isAdministrator()) {
+            $this->forward('admin', 'secure');
         }
     }
 
@@ -451,7 +469,7 @@ class landingPageBuilderActions extends sfActions
         }
 
         $repository = new \AtomExtensions\Repositories\LandingPageRepository();
-        
+
         $blockId = (int)$request->getParameter('block_id');
         $parentBlockId = $request->getParameter('parent_block_id');
         $columnSlot = $request->getParameter('column_slot');
@@ -463,5 +481,117 @@ class landingPageBuilderActions extends sfActions
         $result = $repository->moveBlockToColumn($blockId, $parentBlockId, $columnSlot);
 
         return $this->renderText(json_encode(['success' => $result]));
+    }
+
+    // =========================================================================
+    // USER DASHBOARD ACTIONS
+    // =========================================================================
+
+    /**
+     * User - View my dashboard
+     */
+    public function executeMyDashboard(sfWebRequest $request)
+    {
+        $service = new \AtomExtensions\Services\LandingPageService();
+        $userId = $this->context->user->getAttribute('user_id');
+
+        if (!$userId) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        $data = $service->getUserDashboardForDisplay($userId);
+
+        if (!$data) {
+            // User has no dashboard yet, redirect to create
+            $this->redirect(['module' => 'landingPageBuilder', 'action' => 'myDashboardCreate']);
+        }
+
+        $this->page = $data['page'];
+        $this->blocks = $data['blocks'];
+        $this->isUserDashboard = true;
+    }
+
+    /**
+     * User - Edit my dashboard
+     */
+    public function executeMyDashboardEdit(sfWebRequest $request)
+    {
+        $service = new \AtomExtensions\Services\LandingPageService();
+        $userId = $this->context->user->getAttribute('user_id');
+
+        if (!$userId) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        // Get or create user's dashboard
+        $user = $this->context->user->getUserObject();
+        $userName = $user ? $user->username : 'User';
+        $dashboardData = $service->getOrCreateUserDashboard($userId, $userName);
+        $pageId = $dashboardData['page']->id;
+
+        // Get editor data
+        $data = $service->getPageForEditor($pageId);
+
+        if (!$data) {
+            $this->forward404();
+        }
+
+        $this->page = $data['page'];
+        $this->blocks = $data['blocks'];
+        $this->blockTypes = $data['blockTypes'];
+        $this->versions = $data['versions'];
+        $this->isUserDashboard = true;
+
+        $this->setTemplate('edit');
+    }
+
+    /**
+     * User - List my dashboards
+     */
+    public function executeMyDashboardList(sfWebRequest $request)
+    {
+        $service = new \AtomExtensions\Services\LandingPageService();
+        $userId = $this->context->user->getAttribute('user_id');
+
+        if (!$userId) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        $this->pages = $service->getUserDashboards($userId);
+        $this->isUserDashboard = true;
+    }
+
+    /**
+     * User - Create new dashboard
+     */
+    public function executeMyDashboardCreate(sfWebRequest $request)
+    {
+        $service = new \AtomExtensions\Services\LandingPageService();
+        $userId = $this->context->user->getAttribute('user_id');
+
+        if (!$userId) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        if ($request->isMethod('post')) {
+            $result = $service->createUserDashboard($userId, [
+                'name' => $request->getParameter('name', 'My Dashboard'),
+                'slug' => $request->getParameter('slug'),
+                'description' => $request->getParameter('description'),
+                'is_default' => $request->getParameter('is_default', 1),
+                'is_active' => 1,
+            ]);
+
+            if ($result['success']) {
+                $this->redirect(['module' => 'landingPageBuilder', 'action' => 'myDashboardEdit']);
+            }
+
+            $this->error = $result['error'];
+        }
+
+        // Check if user already has dashboards
+        $existingDashboards = $service->getUserDashboards($userId);
+        $this->hasDashboards = $existingDashboards->isNotEmpty();
+        $this->isUserDashboard = true;
     }
 }

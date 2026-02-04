@@ -47,7 +47,7 @@ function pii_filter($objectId, $content) {
 
     <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 
-    <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
+    <?php $sidebar = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
 
     <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 
@@ -117,7 +117,7 @@ function pii_filter($objectId, $content) {
 
   <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource, 'mods' => true]); ?>
 
-  <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'mods' => true, 'showActorEvents' => true]); ?>
+  <?php $sidebar = false; $mods = true; $showActorEvents = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
 
   <?php echo render_show(__('Access condition'), render_value($resource->getAccessConditions(['cultureFallback' => true]))); ?>
 

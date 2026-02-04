@@ -11,13 +11,73 @@ class NerTrainingSync
     private $centralApiUrl;
     private $siteId;
     private $apiKey;
-    
+    private $enabled;
+
     public function __construct()
     {
-        // Load config from settings or environment
-        $this->centralApiUrl = getenv('NER_TRAINING_API_URL') ?: 'https://train.theahg.co.za/api/ner';
-        $this->siteId = getenv('NER_SITE_ID') ?: $this->generateSiteId();
-        $this->apiKey = getenv('NER_API_KEY') ?: '';
+        // Load config from database settings (preferred) or environment (fallback)
+        $this->centralApiUrl = $this->getDbSetting('ahg_central_api_url')
+            ?: getenv('NER_TRAINING_API_URL')
+            ?: 'https://train.theahg.co.za/api';
+
+        // Ensure /ner endpoint for training
+        $this->centralApiUrl = rtrim($this->centralApiUrl, '/') . '/ner';
+
+        $this->siteId = $this->getDbSetting('ahg_central_site_id')
+            ?: getenv('NER_SITE_ID')
+            ?: $this->generateSiteId();
+
+        $this->apiKey = $this->getDbSetting('ahg_central_api_key')
+            ?: getenv('NER_API_KEY')
+            ?: '';
+
+        $this->enabled = $this->getDbSetting('ahg_central_enabled') === '1'
+            || (!empty($this->apiKey) && !$this->hasDbSetting('ahg_central_enabled'));
+    }
+
+    /**
+     * Check if AHG Central integration is enabled
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Get setting from database
+     */
+    private function getDbSetting(string $name): ?string
+    {
+        try {
+            $setting = DB::table('setting')
+                ->where('name', $name)
+                ->first();
+
+            if ($setting) {
+                $value = DB::table('setting_i18n')
+                    ->where('id', $setting->id)
+                    ->value('value');
+                return $value;
+            }
+        } catch (\Exception $e) {
+            // Database might not be available during CLI bootstrap
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a database setting exists
+     */
+    private function hasDbSetting(string $name): bool
+    {
+        try {
+            return DB::table('setting')
+                ->where('name', $name)
+                ->exists();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
     
     /**
@@ -104,8 +164,24 @@ class NerTrainingSync
      */
     public function pushCorrections()
     {
+        // Check if integration is enabled
+        if (!$this->isEnabled()) {
+            return [
+                'status' => 'disabled',
+                'message' => 'AHG Central integration is not enabled. Configure it in Settings > AHG Central.',
+            ];
+        }
+
+        // Check for API key
+        if (empty($this->apiKey)) {
+            return [
+                'status' => 'error',
+                'message' => 'AHG Central API key is not configured.',
+            ];
+        }
+
         $corrections = $this->getUnexportedCorrections();
-        
+
         if ($corrections->isEmpty()) {
             return ['status' => 'no_data', 'message' => 'No new corrections to export'];
         }

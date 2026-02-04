@@ -22,12 +22,12 @@ class dataMigrationBatchExportAction extends sfAction
             return $this->processExport($request, $DB);
         }
 
-        // Get repositories for filter dropdown
+        // Get repositories for filter dropdown (Repository extends Actor, so name is in actor_i18n)
         $this->repositories = $DB::table('repository')
-            ->join('repository_i18n', 'repository.id', '=', 'repository_i18n.id')
-            ->where('repository_i18n.culture', '=', 'en')
-            ->orderBy('repository_i18n.authorized_form_of_name')
-            ->select('repository.id', 'repository_i18n.authorized_form_of_name as name')
+            ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
+            ->where('actor_i18n.culture', '=', 'en')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->get();
 
         // Get levels of description
@@ -180,9 +180,9 @@ class dataMigrationBatchExportAction extends sfAction
                 $row['levelOfDescription'] = $levelName;
             }
 
-            // Get repository name
+            // Get repository name (Repository extends Actor, name is in actor_i18n)
             if ($record->repository_id) {
-                $repoName = $DB::table('repository_i18n')
+                $repoName = $DB::table('actor_i18n')
                     ->where('id', '=', $record->repository_id)
                     ->where('culture', '=', 'en')
                     ->value('authorized_form_of_name');
@@ -240,12 +240,17 @@ class dataMigrationBatchExportAction extends sfAction
                 ->toArray();
             $row['nameAccessPoints'] = implode('|', $names);
 
-            // Get digital object path
+            // Get digital object path (combine path + name for full file path)
             $digitalObject = $DB::table('digital_object')
                 ->where('object_id', '=', $record->id)
                 ->first();
             if ($digitalObject) {
-                $row['digitalObjectPath'] = $digitalObject->path ?? '';
+                // Combine path and name for full file path
+                $fullPath = rtrim($digitalObject->path ?? '', '/');
+                if (!empty($digitalObject->name)) {
+                    $fullPath .= '/' . $digitalObject->name;
+                }
+                $row['digitalObjectPath'] = $fullPath;
                 $row['digitalObjectURI'] = $digitalObject->uri ?? '';
             }
 

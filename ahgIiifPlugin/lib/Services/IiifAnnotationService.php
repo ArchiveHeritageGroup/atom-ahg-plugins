@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * IIIF Annotation Service
  *
@@ -22,6 +24,9 @@ class IiifAnnotationService
 
     public function __construct($baseUrl = null)
     {
+        // Ensure Laravel DB is initialized
+        \AhgCore\Core\AhgDb::init();
+
         if ($baseUrl === null) {
             $host = $_SERVER['HTTP_HOST'] ?? 'psis.theahg.co.za';
             $this->baseUrl = "https://{$host}";
@@ -39,13 +44,19 @@ class IiifAnnotationService
      */
     public function getAnnotationsForObject($objectId)
     {
-        $sql = 'SELECT a.*, b.body_type, b.body_value, b.body_format, b.body_language
-                FROM iiif_annotation a
-                LEFT JOIN iiif_annotation_body b ON a.id = b.annotation_id
-                WHERE a.object_id = ?
-                ORDER BY a.created_at';
-
-        return QubitPdo::fetchAll($sql, [$objectId], ['fetchMode' => PDO::FETCH_OBJ]);
+        return DB::table('iiif_annotation as a')
+            ->leftJoin('iiif_annotation_body as b', 'a.id', '=', 'b.annotation_id')
+            ->where('a.object_id', $objectId)
+            ->orderBy('a.created_at')
+            ->select([
+                'a.*',
+                'b.body_type',
+                'b.body_value',
+                'b.body_format',
+                'b.body_language',
+            ])
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -53,13 +64,19 @@ class IiifAnnotationService
      */
     public function getAnnotationsForCanvas($canvasId)
     {
-        $sql = 'SELECT a.*, b.body_type, b.body_value, b.body_format, b.body_language
-                FROM iiif_annotation a
-                LEFT JOIN iiif_annotation_body b ON a.id = b.annotation_id
-                WHERE a.target_canvas = ?
-                ORDER BY a.created_at';
-
-        return QubitPdo::fetchAll($sql, [$canvasId], ['fetchMode' => PDO::FETCH_OBJ]);
+        return DB::table('iiif_annotation as a')
+            ->leftJoin('iiif_annotation_body as b', 'a.id', '=', 'b.annotation_id')
+            ->where('a.target_canvas', $canvasId)
+            ->orderBy('a.created_at')
+            ->select([
+                'a.*',
+                'b.body_type',
+                'b.body_value',
+                'b.body_format',
+                'b.body_language',
+            ])
+            ->get()
+            ->toArray();
     }
 
     /**
@@ -67,12 +84,15 @@ class IiifAnnotationService
      */
     public function getAnnotation($annotationId)
     {
-        $sql = 'SELECT * FROM iiif_annotation WHERE id = ?';
-        $annotation = QubitPdo::fetchOne($sql, [$annotationId], ['fetchMode' => PDO::FETCH_OBJ]);
+        $annotation = DB::table('iiif_annotation')
+            ->where('id', $annotationId)
+            ->first();
 
         if ($annotation) {
-            $bodySql = 'SELECT * FROM iiif_annotation_body WHERE annotation_id = ?';
-            $annotation->bodies = QubitPdo::fetchAll($bodySql, [$annotationId], ['fetchMode' => PDO::FETCH_OBJ]);
+            $annotation->bodies = DB::table('iiif_annotation_body')
+                ->where('annotation_id', $annotationId)
+                ->get()
+                ->toArray();
         }
 
         return $annotation;
@@ -83,22 +103,16 @@ class IiifAnnotationService
      */
     public function createAnnotation(array $data)
     {
-        $conn = Propel::getConnection();
-
-        $sql = 'INSERT INTO iiif_annotation (object_id, canvas_id, target_canvas, target_selector, motivation, created_by, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            $data['object_id'],
-            $data['canvas_id'] ?? null,
-            $data['target_canvas'],
-            json_encode($data['target_selector'] ?? null),
-            $data['motivation'] ?? self::MOTIVATION_COMMENTING,
-            $data['created_by'] ?? null,
+        $annotationId = DB::table('iiif_annotation')->insertGetId([
+            'object_id' => $data['object_id'],
+            'canvas_id' => $data['canvas_id'] ?? null,
+            'target_canvas' => $data['target_canvas'],
+            'target_selector' => json_encode($data['target_selector'] ?? null),
+            'motivation' => $data['motivation'] ?? self::MOTIVATION_COMMENTING,
+            'created_by' => $data['created_by'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
-
-        $annotationId = $conn->lastInsertId();
 
         // Add annotation body
         if (!empty($data['body'])) {
@@ -113,22 +127,14 @@ class IiifAnnotationService
      */
     public function addAnnotationBody($annotationId, array $body)
     {
-        $conn = Propel::getConnection();
-
-        $sql = 'INSERT INTO iiif_annotation_body (annotation_id, body_type, body_value, body_format, body_language, body_purpose)
-                VALUES (?, ?, ?, ?, ?, ?)';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            $annotationId,
-            $body['type'] ?? 'TextualBody',
-            $body['value'] ?? '',
-            $body['format'] ?? 'text/plain',
-            $body['language'] ?? 'en',
-            $body['purpose'] ?? null,
+        return DB::table('iiif_annotation_body')->insertGetId([
+            'annotation_id' => $annotationId,
+            'body_type' => $body['type'] ?? 'TextualBody',
+            'body_value' => $body['value'] ?? '',
+            'body_format' => $body['format'] ?? 'text/plain',
+            'body_language' => $body['language'] ?? 'en',
+            'body_purpose' => $body['purpose'] ?? null,
         ]);
-
-        return $conn->lastInsertId();
     }
 
     /**
@@ -136,32 +142,25 @@ class IiifAnnotationService
      */
     public function updateAnnotation($annotationId, array $data)
     {
-        $conn = Propel::getConnection();
-
-        $updates = ['updated_at = NOW()'];
-        $params = [];
+        $updates = ['updated_at' => date('Y-m-d H:i:s')];
 
         if (isset($data['target_selector'])) {
-            $updates[] = 'target_selector = ?';
-            $params[] = json_encode($data['target_selector']);
+            $updates['target_selector'] = json_encode($data['target_selector']);
         }
 
         if (isset($data['motivation'])) {
-            $updates[] = 'motivation = ?';
-            $params[] = $data['motivation'];
+            $updates['motivation'] = $data['motivation'];
         }
 
-        $params[] = $annotationId;
-
-        $sql = 'UPDATE iiif_annotation SET ' . implode(', ', $updates) . ' WHERE id = ?';
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
+        DB::table('iiif_annotation')
+            ->where('id', $annotationId)
+            ->update($updates);
 
         // Update body if provided
         if (!empty($data['body'])) {
-            $deleteSql = 'DELETE FROM iiif_annotation_body WHERE annotation_id = ?';
-            $deleteStmt = $conn->prepare($deleteSql);
-            $deleteStmt->execute([$annotationId]);
+            DB::table('iiif_annotation_body')
+                ->where('annotation_id', $annotationId)
+                ->delete();
 
             $this->addAnnotationBody($annotationId, $data['body']);
         }
@@ -174,17 +173,15 @@ class IiifAnnotationService
      */
     public function deleteAnnotation($annotationId)
     {
-        $conn = Propel::getConnection();
-
         // Delete bodies first (foreign key constraint)
-        $deleteBodiesSql = 'DELETE FROM iiif_annotation_body WHERE annotation_id = ?';
-        $stmt = $conn->prepare($deleteBodiesSql);
-        $stmt->execute([$annotationId]);
+        DB::table('iiif_annotation_body')
+            ->where('annotation_id', $annotationId)
+            ->delete();
 
         // Delete annotation
-        $deleteAnnotationSql = 'DELETE FROM iiif_annotation WHERE id = ?';
-        $stmt = $conn->prepare($deleteAnnotationSql);
-        $stmt->execute([$annotationId]);
+        DB::table('iiif_annotation')
+            ->where('id', $annotationId)
+            ->delete();
 
         return true;
     }
@@ -201,6 +198,8 @@ class IiifAnnotationService
         $items = [];
 
         foreach ($annotations as $annotation) {
+            // Handle both array and object formats
+            $annotation = is_array($annotation) ? (object) $annotation : $annotation;
             $items[] = $this->formatAnnotationAsIiif($annotation);
         }
 

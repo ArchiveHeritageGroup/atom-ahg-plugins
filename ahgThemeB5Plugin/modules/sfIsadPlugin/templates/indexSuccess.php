@@ -61,7 +61,10 @@ function pii_filter($objectId, $content) {
 
     <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 
-    <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
+    <?php
+    $sidebar = true;
+    include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php');
+    ?>
 
     <?php echo get_partial('informationobject/genreAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 
@@ -383,7 +386,11 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   </div>
 
   <div class="nameAccessPoints">
-    <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'showActorEvents' => true]); ?>
+    <?php
+    $sidebar = false;
+    $showActorEvents = true;
+    include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php');
+    ?>
   </div>
 
   <div class="genreAccessPoints">

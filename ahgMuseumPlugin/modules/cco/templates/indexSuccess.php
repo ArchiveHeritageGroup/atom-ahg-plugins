@@ -316,7 +316,7 @@ $ancestors = cco_get_ancestors($resource);
 <?php slot('context-menu'); ?>
   <?php echo get_partial('informationobject/actionIcons', ['resource' => $resource]); ?>
   <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
-  <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
+  <?php $sidebar = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
   <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 <?php end_slot(); ?>
 
@@ -1115,7 +1115,7 @@ $ancestors = cco_get_ancestors($resource);
       
       <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource]); ?>
       <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
-      <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource]); ?>
+      <?php $sidebar = false; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
     </section>
 
     <!-- Rights Area -->

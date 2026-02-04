@@ -11,6 +11,11 @@ class provenanceComponents extends sfComponents
      */
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
+        // Load AhgDb class
+        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($ahgDbFile)) {
+            require_once $ahgDbFile;
+        }
         \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';

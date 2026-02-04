@@ -492,7 +492,7 @@ CREATE TABLE IF NOT EXISTS `research_annotation` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `researcher_id` INT NOT NULL,
     `project_id` INT DEFAULT NULL,
-    `object_id` INT NOT NULL,
+    `object_id` INT DEFAULT NULL,
     `digital_object_id` INT DEFAULT NULL,
     `annotation_type` ENUM('note','highlight','bookmark','tag','transcription','correction') DEFAULT 'note',
     `title` VARCHAR(255) DEFAULT NULL,

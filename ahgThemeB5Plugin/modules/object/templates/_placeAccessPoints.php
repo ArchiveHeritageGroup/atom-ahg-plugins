@@ -12,6 +12,9 @@ if (!$resourceId) { return; }
 $places = ahg_get_place_access_points($resourceId);
 if (empty($places)) { return; }
 $isSidebar = isset($sidebar) && $sidebar;
+
+// Get base path for URLs - AtoM uses /:slug routing
+$basePath = sfContext::getInstance()->getRequest()->getScriptName();
 ?>
 <?php if ($isSidebar) { ?>
   <section id="placeAccessPointsSection">
@@ -32,7 +35,7 @@ $isSidebar = isset($sidebar) && $sidebar;
           <?php if ($isMasked): ?>
             <span class="text-danger"><?php echo htmlspecialchars($placeName); ?></span>
           <?php elseif ($place->slug): ?>
-            <a href="<?php echo url_for(['module' => 'term', 'action' => 'index', 'slug' => $place->slug]); ?>"><?php echo htmlspecialchars($placeName); ?></a>
+            <a href="<?php echo $basePath; ?>/<?php echo rawurlencode($place->slug); ?>"><?php echo htmlspecialchars($placeName); ?></a>
           <?php else: ?>
             <?php echo htmlspecialchars($placeName); ?>
           <?php endif; ?>
@@ -62,7 +65,7 @@ $isSidebar = isset($sidebar) && $sidebar;
           <?php if ($isMasked): ?>
             <span class="text-danger"><?php echo htmlspecialchars($placeName); ?></span>
           <?php elseif ($place->slug): ?>
-            <?php echo link_to(htmlspecialchars($placeName), ['module' => 'term', 'action' => 'index', 'slug' => $place->slug]); ?>
+            <a href="<?php echo $basePath; ?>/<?php echo rawurlencode($place->slug); ?>"><?php echo htmlspecialchars($placeName); ?></a>
           <?php else: ?>
             <?php echo htmlspecialchars($placeName); ?>
           <?php endif; ?>

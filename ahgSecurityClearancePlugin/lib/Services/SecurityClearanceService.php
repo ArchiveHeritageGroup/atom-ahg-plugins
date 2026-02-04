@@ -471,10 +471,36 @@ class SecurityClearanceService
 
     /**
      * Classify an object.
+     *
+     * @return array{success: bool, error: string|null} Result with success flag and optional error message
      */
-    public static function classifyObject(int $objectId, int $classificationId, array $data, int $classifiedBy): bool
+    public static function classifyObject(int $objectId, int $classificationId, array $data, int $classifiedBy): array
     {
         try {
+            // Get the new classification level
+            $newClassification = self::getClassification($classificationId);
+            if (!$newClassification) {
+                return ['success' => false, 'error' => 'Invalid classification level'];
+            }
+
+            // ESCALATION CONSTRAINT: Check parent's effective classification
+            // Child records cannot have a LOWER classification than their parent
+            $parentClassification = self::getParentEffectiveClassification($objectId);
+            if ($parentClassification) {
+                if ($newClassification->level < $parentClassification->level) {
+                    return [
+                        'success' => false,
+                        'error' => sprintf(
+                            'Cannot set classification to "%s" (level %d). Parent record has classification "%s" (level %d). Child records can only escalate to a higher classification level, not lower.',
+                            $newClassification->name,
+                            $newClassification->level,
+                            $parentClassification->name,
+                            $parentClassification->level
+                        ),
+                    ];
+                }
+            }
+
             // Remove existing classification
             DB::table('object_security_classification')
                 ->where('object_id', $objectId)
@@ -505,12 +531,31 @@ class SecurityClearanceService
 
             self::logAccess($classifiedBy, $objectId, $classificationId, null, 'classify', true);
 
-            return true;
+            return ['success' => true, 'error' => null];
         } catch (Exception $e) {
             error_log('SecurityClearance: Classification failed - '.$e->getMessage());
 
-            return false;
+            return ['success' => false, 'error' => 'Classification failed: '.$e->getMessage()];
         }
+    }
+
+    /**
+     * Get the effective classification of an object's parent (for escalation validation).
+     * This does NOT include the object's own classification, only its ancestors.
+     */
+    public static function getParentEffectiveClassification(int $objectId): ?object
+    {
+        // Get the parent object ID
+        $parentId = DB::table('information_object')
+            ->where('id', $objectId)
+            ->value('parent_id');
+
+        if (!$parentId || $parentId == SecurityConstants::INFORMATION_OBJECT_ROOT_ID) {
+            return null; // No parent or parent is root
+        }
+
+        // Get parent's effective classification (which may be inherited from grandparent, etc.)
+        return self::getEffectiveClassification($parentId);
     }
 
     /**

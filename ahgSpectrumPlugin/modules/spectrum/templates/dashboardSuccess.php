@@ -42,9 +42,11 @@
                     if ($sf_user->isAuthenticated()) {
                         $userId = $sf_user->getAttribute('user_id');
                         if ($userId) {
+                            // Exclude all final states (completed, resolved, etc.)
+                            $finalStates = ['completed', 'resolved', 'closed', 'cancelled', 'rejected'];
                             $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
                                 ->where('assigned_to', $userId)
-                                ->where('current_state', '!=', 'completed')
+                                ->whereNotIn('current_state', $finalStates)
                                 ->count();
                             if ($taskCount > 0) {
                                 echo '<span class="badge bg-danger ms-1">' . $taskCount . '</span>';
@@ -61,13 +63,14 @@
         
         <div class="card">
             <div class="card-header"><h5 class="mb-0"><?php echo __('Status Legend'); ?></h5></div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-success me-2">&nbsp;</span> <?php echo __('Completed'); ?></li>
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-primary me-2">&nbsp;</span> <?php echo __('In Progress'); ?></li>
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-warning me-2">&nbsp;</span> <?php echo __('Pending Review'); ?></li>
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-secondary me-2">&nbsp;</span> <?php echo __('On Hold'); ?></li>
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-danger me-2">&nbsp;</span> <?php echo __('Overdue'); ?></li>
-                <li class="list-group-item d-flex align-items-center"><span class="badge bg-light text-dark me-2">&nbsp;</span> <?php echo __('Not Started'); ?></li>
+            <ul class="list-group list-group-flush small">
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-light text-dark me-2">&nbsp;</span> <?php echo __('Pending / Proposed / Requested'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-info me-2">&nbsp;</span> <?php echo __('Received / Documented / Reported'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-primary me-2">&nbsp;</span> <?php echo __('In Progress / Examining / Investigating'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-warning text-dark me-2">&nbsp;</span> <?php echo __('Review / Under Review / Assessed'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2" style="background-color: #17a2b8 !important;">&nbsp;</span> <?php echo __('Approved / Scheduled / Quoted'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-success me-2">&nbsp;</span> <?php echo __('Completed / Resolved / Accessioned'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-secondary me-2">&nbsp;</span> <?php echo __('Disposed / Closed'); ?></li>
             </ul>
         </div>
     </div>

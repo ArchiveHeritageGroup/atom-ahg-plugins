@@ -1,86 +1,17 @@
 <?php
 /**
- * Name Access Points Partial - Laravel Version
+ * Name Access Points Partial - Object Module Version
  *
  * Shows actors related to the information object via events and relations.
+ * Uses helper functions from AhgLaravelHelper.php
  *
  * @package    ahgThemeB5Plugin
  * @subpackage templates
  */
 
-use Illuminate\Database\Capsule\Manager as DB;
-
-/**
- * Get actor events for resource (creators, contributors, etc.)
- */
-function ahg_get_actor_events($resourceId): array
-{
-    $culture = sfContext::getInstance()->getUser()->getCulture() ?? 'en';
-    
-    return DB::table('event as e')
-        ->join('actor as a', 'e.actor_id', '=', 'a.id')
-        ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
-            $join->on('a.id', '=', 'ai.id')
-                ->where('ai.culture', '=', $culture);
-        })
-        ->leftJoin('actor_i18n as ai_en', function ($join) {
-            $join->on('a.id', '=', 'ai_en.id')
-                ->where('ai_en.culture', '=', 'en');
-        })
-        ->leftJoin('term_i18n as ti', function ($join) use ($culture) {
-            $join->on('e.type_id', '=', 'ti.id')
-                ->where('ti.culture', '=', $culture);
-        })
-        ->leftJoin('term_i18n as ti_en', function ($join) {
-            $join->on('e.type_id', '=', 'ti_en.id')
-                ->where('ti_en.culture', '=', 'en');
-        })
-        ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
-        ->where('e.object_id', $resourceId)
-        ->whereNotNull('e.actor_id')
-        ->select([
-            'a.id',
-            'e.type_id',
-            'slug.slug',
-            DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name) as name'),
-            DB::raw('COALESCE(ti.name, ti_en.name) as event_type'),
-        ])
-        ->orderBy(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
-        ->get()
-        ->toArray();
-}
-
-/**
- * Get name access points via relation table
- */
-function ahg_get_name_access_relations($resourceId): array
-{
-    $culture = sfContext::getInstance()->getUser()->getCulture() ?? 'en';
-    
-    // Name access point relation type ID = 161
-    $nameAccessRelationTypeId = 161;
-    
-    return DB::table('relation as r')
-        ->join('actor as a', 'r.object_id', '=', 'a.id')
-        ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
-            $join->on('a.id', '=', 'ai.id')
-                ->where('ai.culture', '=', $culture);
-        })
-        ->leftJoin('actor_i18n as ai_en', function ($join) {
-            $join->on('a.id', '=', 'ai_en.id')
-                ->where('ai_en.culture', '=', 'en');
-        })
-        ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
-        ->where('r.subject_id', $resourceId)
-        ->where('r.type_id', $nameAccessRelationTypeId)
-        ->select([
-            'a.id',
-            'slug.slug',
-            DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name) as name'),
-        ])
-        ->orderBy(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
-        ->get()
-        ->toArray();
+// Load helper functions if not already loaded
+if (!function_exists('ahg_get_actor_events')) {
+    require_once sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
 }
 
 // Get resource ID
@@ -90,10 +21,10 @@ if (!$resourceId) {
     return;
 }
 
-// Get actor events (creators, contributors, etc.)
+// Get actor events (creators, contributors, etc.) - uses helper function
 $actorEvents = ahg_get_actor_events($resourceId);
 
-// Get name access points via relations
+// Get name access points via relations - uses helper function
 $nameAccessPoints = ahg_get_name_access_relations($resourceId);
 
 // Combine and deduplicate by actor ID
@@ -123,6 +54,12 @@ if (empty($allActors)) {
 $isSidebar = isset($sidebar) && $sidebar;
 ?>
 
+<?php
+// Get the base path for constructing actor URLs
+// AtoM routing uses QubitMetadataRoute - URLs are just /:slug
+// The route determines module from object class in database
+$basePath = sfContext::getInstance()->getRequest()->getScriptName();
+?>
 <?php if ($isSidebar) { ?>
   <section id="nameAccessPointsSection">
     <h4><?php echo __('Related people and organizations'); ?></h4>
@@ -130,7 +67,7 @@ $isSidebar = isset($sidebar) && $sidebar;
       <?php foreach ($allActors as $actor) { ?>
         <li>
           <?php if ($actor->slug) { ?>
-            <a href="<?php echo url_for(['module' => 'actor', 'action' => 'index', 'slug' => $actor->slug]); ?>">
+            <a href="<?php echo $basePath; ?>/<?php echo rawurlencode($actor->slug); ?>">
               <?php echo htmlspecialchars($actor->name ?? ''); ?>
             </a>
           <?php } else { ?>
@@ -146,14 +83,18 @@ $isSidebar = isset($sidebar) && $sidebar;
 <?php } else { ?>
 <div class="field<?php echo isset($sidebar) ? '' : ' '.render_b5_show_field_css_classes(); ?>">
 
-  <?php echo render_b5_show_label(__('Related people and organizations')); ?>
+  <?php if (isset($mods)) { ?>
+    <?php echo render_b5_show_label(__('Names')); ?>
+  <?php } else { ?>
+    <?php echo render_b5_show_label(__('Name access points')); ?>
+  <?php } ?>
 
   <div<?php echo isset($sidebar) ? '' : ' class="'.render_b5_show_value_css_classes().'"'; ?>>
     <ul class="<?php echo isset($sidebar) ? 'list-unstyled' : render_b5_show_list_css_classes(); ?>">
       <?php foreach ($allActors as $actor) { ?>
         <li>
           <?php if ($actor->slug) { ?>
-            <?php echo link_to(htmlspecialchars($actor->name ?? ''), ['module' => 'actor', 'action' => 'index', 'slug' => $actor->slug]); ?>
+            <a href="<?php echo $basePath; ?>/<?php echo rawurlencode($actor->slug); ?>"><?php echo htmlspecialchars($actor->name ?? ''); ?></a>
           <?php } else { ?>
             <?php echo htmlspecialchars($actor->name ?? ''); ?>
           <?php } ?>

@@ -534,6 +534,58 @@ class formsActions extends sfActions
     }
 
     /**
+     * Browse all form templates.
+     */
+    public function executeBrowse(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        $service = new \ahgFormsPlugin\Services\FormService();
+
+        // Get filter parameters
+        $type = $request->getParameter('type');
+        $search = $request->getParameter('search');
+
+        // Get templates with optional filtering
+        $query = \Illuminate\Database\Capsule\Manager::table('ahg_form_template')
+            ->orderBy('name');
+
+        if ($type) {
+            $query->where('form_type', $type);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        $this->templates = $query->get();
+
+        // Get field counts for each template
+        foreach ($this->templates as $template) {
+            $template->field_count = \Illuminate\Database\Capsule\Manager::table('ahg_form_field')
+                ->where('template_id', $template->id)
+                ->count();
+        }
+
+        // Available form types for filtering
+        $this->formTypes = [
+            'information_object' => 'Information Object',
+            'actor' => 'Authority Record',
+            'repository' => 'Repository',
+            'accession' => 'Accession',
+            'deaccession' => 'Deaccession',
+            'rights' => 'Rights',
+        ];
+
+        $this->currentType = $type;
+        $this->currentSearch = $search;
+    }
+
+    /**
      * Template library.
      */
     public function executeLibrary(sfWebRequest $request)

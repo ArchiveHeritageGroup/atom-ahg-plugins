@@ -1,8 +1,10 @@
 -- ahgMultiTenantPlugin Installation SQL
--- This plugin uses the existing ahg_settings table for storage.
--- No new tables are required.
+-- Version: 1.1.0
+-- This plugin uses both dedicated tenant tables and ahg_settings for storage.
 
--- Ensure ahg_settings table exists (should already exist from ahgCorePlugin)
+-- ============================================================================
+-- Legacy Support: ahg_settings table (for backward compatibility)
+-- ============================================================================
 CREATE TABLE IF NOT EXISTS ahg_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     setting_key VARCHAR(100) NOT NULL UNIQUE,
@@ -18,11 +20,82 @@ CREATE TABLE IF NOT EXISTS ahg_settings (
     FOREIGN KEY (updated_by) REFERENCES user(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Add index for tenant settings lookups
--- CREATE INDEX IF NOT EXISTS idx_tenant_settings ON ahg_settings (setting_key) WHERE setting_key LIKE 'tenant_repo_%';
--- Note: MySQL doesn't support partial indexes, so we rely on the existing UNIQUE index on setting_key
+-- ============================================================================
+-- Table: heritage_tenant
+-- Stores tenant (organization) information for multi-tenancy
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS heritage_tenant (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE COMMENT 'Unique tenant code/slug',
+    name VARCHAR(255) NOT NULL COMMENT 'Display name of the tenant',
+    domain VARCHAR(255) DEFAULT NULL COMMENT 'Custom domain for the tenant',
+    subdomain VARCHAR(100) DEFAULT NULL COMMENT 'Subdomain for the tenant',
+    settings JSON DEFAULT NULL COMMENT 'Tenant-specific settings override',
+    status ENUM('active', 'suspended', 'trial') NOT NULL DEFAULT 'trial' COMMENT 'Tenant status',
+    trial_ends_at DATETIME DEFAULT NULL COMMENT 'Trial expiration date',
+    suspended_at DATETIME DEFAULT NULL COMMENT 'When tenant was suspended',
+    suspended_reason VARCHAR(500) DEFAULT NULL COMMENT 'Reason for suspension',
+    repository_id INT DEFAULT NULL COMMENT 'Link to AtoM repository (optional)',
+    contact_name VARCHAR(255) DEFAULT NULL COMMENT 'Primary contact name',
+    contact_email VARCHAR(255) DEFAULT NULL COMMENT 'Primary contact email',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by INT DEFAULT NULL COMMENT 'User who created the tenant',
 
--- Settings format for multi-tenancy:
+    INDEX idx_tenant_code (code),
+    INDEX idx_tenant_status (status),
+    INDEX idx_tenant_domain (domain),
+    INDEX idx_tenant_subdomain (subdomain),
+    INDEX idx_tenant_repository (repository_id),
+
+    FOREIGN KEY (repository_id) REFERENCES repository(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- Table: heritage_tenant_user
+-- Maps users to tenants with roles
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS heritage_tenant_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role ENUM('owner', 'super_user', 'editor', 'contributor', 'viewer') NOT NULL DEFAULT 'viewer' COMMENT 'User role within tenant',
+    is_primary TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Is this the users primary tenant',
+    assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    assigned_by INT DEFAULT NULL COMMENT 'User who assigned this user',
+
+    UNIQUE KEY uk_tenant_user (tenant_id, user_id),
+    INDEX idx_tenant_user_tenant (tenant_id),
+    INDEX idx_tenant_user_user (user_id),
+    INDEX idx_tenant_user_role (role),
+
+    FOREIGN KEY (tenant_id) REFERENCES heritage_tenant(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_by) REFERENCES user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- Table: heritage_tenant_settings_override
+-- Stores per-tenant settings that override global defaults
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS heritage_tenant_settings_override (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    setting_key VARCHAR(100) NOT NULL,
+    setting_value TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT DEFAULT NULL,
+
+    UNIQUE KEY uk_tenant_setting (tenant_id, setting_key),
+    INDEX idx_tenant_setting_key (setting_key),
+
+    FOREIGN KEY (tenant_id) REFERENCES heritage_tenant(id) ON DELETE CASCADE,
+    FOREIGN KEY (updated_by) REFERENCES user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- Legacy Settings Format (still supported for backward compatibility):
 -- tenant_repo_{repository_id}_super_users = "5,12,18" (comma-separated user IDs)
 -- tenant_repo_{repository_id}_users = "22,25,30" (comma-separated user IDs)
 -- tenant_repo_{repository_id}_primary_color = "#336699"
@@ -33,3 +106,4 @@ CREATE TABLE IF NOT EXISTS ahg_settings (
 -- tenant_repo_{repository_id}_button_color = "#198754"
 -- tenant_repo_{repository_id}_logo = "/uploads/tenants/{repository_id}/logo.png"
 -- tenant_repo_{repository_id}_custom_css = "..."
+-- ============================================================================

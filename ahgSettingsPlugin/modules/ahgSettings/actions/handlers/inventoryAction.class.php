@@ -83,7 +83,7 @@ class SettingsInventoryAction extends DefaultEditAction
 
                 $choices = [];
                 foreach (LevelOfDescriptionService::getAll() as $item) {
-                    $choices[$item->id] = $item->__toString();
+                    $choices[$item->id] = $item->getName(['cultureFallback' => true]);
                 }
 
                 $size = count($choices);

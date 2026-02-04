@@ -22,6 +22,7 @@ use AhgMetadataExport\Exporters\Marc21Exporter;
 use AhgMetadataExport\Exporters\PbcoreExporter;
 use AhgMetadataExport\Exporters\PremisExporter;
 use AhgMetadataExport\Exporters\RicoExporter;
+use AhgMetadataExport\Exporters\SchemaOrgExporter;
 use AhgMetadataExport\Exporters\VraCoreExporter;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -40,6 +41,7 @@ class ExportService
         'pbcore' => PbcoreExporter::class,
         'ebucore' => EbucoreExporter::class,
         'premis' => PremisExporter::class,
+        'schema-org' => SchemaOrgExporter::class,
     ];
 
     /**
@@ -112,6 +114,7 @@ class ExportService
             'pbcore' => 'PbcoreExporter',
             'ebucore' => 'EbucoreExporter',
             'premis' => 'PremisExporter',
+            'schema-org' => 'SchemaOrgExporter',
         ];
 
         if (isset($classMap[$format])) {

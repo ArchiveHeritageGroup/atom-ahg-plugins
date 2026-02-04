@@ -66,6 +66,23 @@ class apiv2DescriptionsUpdateAction extends AhgApiAction
 
             DB::commit();
 
+            // Trigger webhook for item.updated
+            try {
+                \AhgAPI\Services\WebhookService::trigger(
+                    \AhgAPI\Services\WebhookService::EVENT_UPDATED,
+                    \AhgAPI\Services\WebhookService::ENTITY_DESCRIPTION,
+                    $objectId,
+                    [
+                        'slug' => $slug,
+                        'title' => $data['title'] ?? null,
+                        'identifier' => $data['identifier'] ?? null,
+                        'fields_updated' => array_keys(array_merge($ioUpdate, $i18nUpdate)),
+                    ]
+                );
+            } catch (\Exception $webhookError) {
+                error_log('Webhook trigger error: ' . $webhookError->getMessage());
+            }
+
             return $this->success([
                 'id' => $objectId,
                 'slug' => $slug,

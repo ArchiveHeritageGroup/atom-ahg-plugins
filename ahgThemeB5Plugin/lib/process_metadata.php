@@ -21,6 +21,8 @@ sfContext::createInstance($configuration);
 
 require_once SF_ROOT_DIR.'/plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php';
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 // Term/Taxonomy IDs
 define('TERM_CREATION_ID', 111);
 define('TERM_NAME_ACCESS_POINT_ID', 161);
@@ -28,7 +30,7 @@ define('TAXONOMY_SUBJECT_ID', 35);
 define('TAXONOMY_PLACE_ID', 42);
 
 try {
-    $conn = Propel::getConnection();
+    $conn = DB::connection()->getPdo();
 
     // Get digital object path
     $stmt = $conn->prepare("SELECT path, name FROM digital_object WHERE object_id = ?");

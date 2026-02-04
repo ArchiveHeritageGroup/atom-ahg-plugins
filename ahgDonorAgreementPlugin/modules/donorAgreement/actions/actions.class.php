@@ -264,6 +264,52 @@ class donorAgreementActions extends sfActions
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
+            // Handle logo upload
+            if ($request->getParameter('remove_logo')) {
+                // Remove existing logo
+                if ($id) {
+                    $existing = DB::table('donor_agreement')->where('id', $id)->first();
+                    if ($existing && $existing->logo_path) {
+                        $fullPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                        if (file_exists($fullPath)) {
+                            @unlink($fullPath);
+                        }
+                    }
+                }
+                $agreementData['logo_path'] = null;
+                $agreementData['logo_filename'] = null;
+            } elseif (isset($_FILES['agreement_logo']) && $_FILES['agreement_logo']['error'] === UPLOAD_ERR_OK) {
+                // Upload new logo
+                $file = $_FILES['agreement_logo'];
+                $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+                if (in_array($file['type'], $allowedTypes)) {
+                    $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/agreements/logos';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = 'logo_' . uniqid() . '.' . $ext;
+                    $destPath = $uploadDir . '/' . $filename;
+
+                    if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                        // Remove old logo if exists
+                        if ($id) {
+                            $existing = DB::table('donor_agreement')->where('id', $id)->first();
+                            if ($existing && $existing->logo_path) {
+                                $oldPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                                if (file_exists($oldPath)) {
+                                    @unlink($oldPath);
+                                }
+                            }
+                        }
+                        $agreementData['logo_path'] = '/agreements/logos/' . $filename;
+                        $agreementData['logo_filename'] = $file['name'];
+                    }
+                }
+            }
+
             if ($id) {
                 DB::table('donor_agreement')->where('id', $id)->update($agreementData);
                 $agreementId = $id;

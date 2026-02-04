@@ -138,10 +138,42 @@ class IsbnMetadataMapper
 
         if (!empty($metadata['subjects'])) {
             $subjects = is_array($metadata['subjects']) ? $metadata['subjects'] : [$metadata['subjects']];
-            // Extract just the name if subjects are arrays
+            // Handle enhanced subject structure from WorldCat (Issue #55)
+            // Subjects can be: strings, arrays with 'name' key, or enhanced arrays with 'heading' key
             $preview['subjects'] = array_slice(array_map(function($s) {
-                return is_array($s) ? ($s['name'] ?? $s) : $s;
+                if (is_string($s)) {
+                    return $s;
+                }
+                // Enhanced structure from WorldCat MARC parsing
+                if (isset($s['heading'])) {
+                    return $s['heading'];
+                }
+                // Open Library structure
+                if (isset($s['name'])) {
+                    return $s['name'];
+                }
+                return (string) $s;
             }, $subjects), 0, 10);
+
+            // Store full subject data if available (for authority linking)
+            if (isset($subjects[0]) && is_array($subjects[0]) && isset($subjects[0]['heading'])) {
+                $preview['subjects_enhanced'] = array_slice($subjects, 0, 10);
+            }
+        }
+
+        // Handle backward compatible subjects_simple from WorldCat
+        if (!empty($metadata['subjects_simple']) && empty($preview['subjects'])) {
+            $preview['subjects'] = array_slice($metadata['subjects_simple'], 0, 10);
+        }
+
+        // Classifications from WorldCat (Issue #55)
+        if (!empty($metadata['classifications'])) {
+            if (!empty($metadata['classifications']['lcc'])) {
+                $preview['call_number'] = $metadata['classifications']['lcc'];
+            }
+            if (!empty($metadata['classifications']['dewey'])) {
+                $preview['dewey_decimal'] = $metadata['classifications']['dewey'];
+            }
         }
 
         $preview['identifiers'] = [];

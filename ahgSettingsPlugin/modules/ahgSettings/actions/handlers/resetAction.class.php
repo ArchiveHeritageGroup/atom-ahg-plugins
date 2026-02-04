@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class AhgSettingsResetAction extends sfAction
 {
@@ -134,13 +135,15 @@ class AhgSettingsResetAction extends sfAction
         }
 
         // Reset the settings
-        $conn = Propel::getConnection();
         foreach ($defaults[$section] as $key => $value) {
-            $sql = "INSERT INTO ahg_settings (setting_key, setting_value, setting_group, updated_at)
-                    VALUES (?, ?, ?, NOW())
-                    ON DUPLICATE KEY UPDATE setting_value = ?, updated_at = NOW()";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$key, $value, $section, $value]);
+            DB::table('ahg_settings')->updateOrInsert(
+                ['setting_key' => $key],
+                [
+                    'setting_value' => $value,
+                    'setting_group' => $section,
+                    'updated_at' => DB::raw('NOW()')
+                ]
+            );
         }
 
         $this->getUser()->setFlash('notice', 'Settings reset to defaults.');

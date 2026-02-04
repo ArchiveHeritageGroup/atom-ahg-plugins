@@ -21,6 +21,9 @@
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'accessions']); ?>">
                         <i class="fas fa-inbox me-2"></i><?php echo __('Accessions'); ?>
                     </a>
+                    <a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSpatialAnalysis']); ?>">
+                        <i class="fas fa-map-marker-alt me-2"></i><?php echo __('Spatial Analysis Export'); ?>
+                    </a>
                     <div class="dropdown-divider"></div>
                     <h6 class="dropdown-header"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Audit'); ?></h6>
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>">

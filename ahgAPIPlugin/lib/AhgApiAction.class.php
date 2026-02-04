@@ -7,6 +7,7 @@ class AhgApiAction extends sfAction
     protected $repository;
     protected $apiKeyService;
     protected $bootstrapped = false;
+    protected $user = null;
 
     protected function loadBootstrap()
     {
@@ -19,6 +20,20 @@ class AhgApiAction extends sfAction
         }
         require_once dirname(__FILE__) . '/repository/ApiRepository.php';
         require_once dirname(__FILE__) . '/service/ApiKeyService.php';
+
+        // Register Services namespace autoloader
+        spl_autoload_register(function ($class) {
+            if (strpos($class, 'AhgAPI\\Services\\') === 0) {
+                $relativePath = str_replace('AhgAPI\\Services\\', '', $class);
+                $filePath = dirname(__FILE__) . '/Services/' . $relativePath . '.php';
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+            return false;
+        });
+
         $this->bootstrapped = true;
     }
 
@@ -60,13 +75,15 @@ class AhgApiAction extends sfAction
     {
         error_log("AhgApiAction::authenticate called");
         if ($this->context->user->isAuthenticated()) {
+            $userId = $this->context->user->getAttribute('user_id');
             $this->apiKeyInfo = [
                 'type' => 'session',
                 'id' => null,
-                'user_id' => $this->context->user->getAttribute('user_id'),
+                'user_id' => $userId,
                 'scopes' => ['read', 'write', 'delete'],
                 'rate_limit' => 10000
             ];
+            $this->user = (object) ['id' => $userId];
             return true;
         }
         error_log("Calling apiKeyService->authenticate()");
@@ -79,6 +96,7 @@ class AhgApiAction extends sfAction
             error_log("QubitUser result: " . ($user ? "found user " . $user->username : "NULL"));
             if ($user) {
                 $this->context->user->signIn($user);
+                $this->user = (object) ['id' => $this->apiKeyInfo['user_id']];
                 error_log("User signed in successfully");
                 return true;
             }
@@ -139,5 +157,50 @@ class AhgApiAction extends sfAction
             'status_code' => $statusCode,
             'duration_ms' => $duration
         ]);
+    }
+
+    /**
+     * Return 401 Unauthorized response
+     */
+    protected function unauthorized(string $message = 'Unauthorized')
+    {
+        return $this->error(401, 'Unauthorized', $message);
+    }
+
+    /**
+     * Return 403 Forbidden response
+     */
+    protected function forbidden(string $message = 'Forbidden')
+    {
+        return $this->error(403, 'Forbidden', $message);
+    }
+
+    /**
+     * Return 404 Not Found response
+     */
+    protected function notFound(string $message = 'Not Found')
+    {
+        return $this->error(404, 'Not Found', $message);
+    }
+
+    /**
+     * Get JSON body from request
+     */
+    protected function getJsonBody(): array
+    {
+        $content = $this->request->getContent();
+        if (empty($content)) {
+            return [];
+        }
+        $data = json_decode($content, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Check if current user is an administrator
+     */
+    protected function isAdmin(): bool
+    {
+        return $this->context->user->isAdministrator();
     }
 }

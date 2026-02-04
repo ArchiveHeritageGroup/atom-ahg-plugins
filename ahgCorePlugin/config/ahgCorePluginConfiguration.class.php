@@ -23,9 +23,9 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
     protected function registerAutoloader()
     {
         spl_autoload_register(function ($class) {
-            // Handle AhgCore namespace
-            if (strpos($class, 'AhgCore\\') === 0) {
-                $relativePath = str_replace('AhgCore\\', '', $class);
+            // Handle ahgCorePlugin namespace
+            if (strpos($class, 'ahgCorePlugin\\') === 0) {
+                $relativePath = str_replace('ahgCorePlugin\\', '', $class);
                 $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
                 $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
 

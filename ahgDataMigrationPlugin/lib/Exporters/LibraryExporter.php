@@ -2,6 +2,8 @@
 
 namespace ahgDataMigrationPlugin\Exporters;
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Library (MARC/RDA) CSV exporter for AtoM import.
  */
@@ -10,6 +12,93 @@ class LibraryExporter extends BaseExporter
     public function getSectorCode(): string
     {
         return 'library';
+    }
+
+    /**
+     * Override to add library-specific metadata.
+     */
+    protected function loadRecordFromDatabase(int $id): ?array
+    {
+        $record = parent::loadRecordFromDatabase($id);
+
+        if (null === $record) {
+            return null;
+        }
+
+        // Map base fields to library fields
+        $record['titleProper'] = $record['title'] ?? null;
+        $record['extent'] = $record['extent_and_medium'] ?? null;
+        $record['summary'] = $record['scope_and_content'] ?? null;
+        $record['note'] = $record['notes'] ?? null;
+        $record['dateOfPublication'] = $record['dateRange'] ?? null;
+        $record['statementOfResponsibility'] = $record['creators'] ?? null;
+
+        // Load library-specific metadata if table exists
+        $libraryMeta = $this->loadLibraryMetadata($id);
+        if ($libraryMeta) {
+            $record = array_merge($record, $libraryMeta);
+        }
+
+        // Load RAD/bibliographic properties
+        $radProps = $this->loadRadProperties($id);
+        if ($radProps) {
+            $record = array_merge($record, $radProps);
+        }
+
+        return $record;
+    }
+
+    /**
+     * Load library-specific metadata from custom table.
+     */
+    protected function loadLibraryMetadata(int $id): ?array
+    {
+        try {
+            $meta = DB::table('library_metadata')
+                ->where('information_object_id', $id)
+                ->first();
+
+            if (!$meta) {
+                return null;
+            }
+
+            return [
+                'isbn' => $meta->isbn ?? null,
+                'issn' => $meta->issn ?? null,
+                'callNumber' => $meta->call_number ?? null,
+                'publisher' => $meta->publisher ?? null,
+                'placeOfPublication' => $meta->place_of_publication ?? null,
+                'editionStatement' => $meta->edition ?? null,
+                'seriesTitle' => $meta->series ?? null,
+                'language' => $meta->language ?? null,
+            ];
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Load RAD-specific properties.
+     */
+    protected function loadRadProperties(int $id): ?array
+    {
+        // Check for RAD template properties
+        $radInfo = DB::table('information_object as io')
+            ->join('rad_information_object as rad', 'io.id', '=', 'rad.id')
+            ->where('io.id', $id)
+            ->first();
+
+        if (!$radInfo) {
+            return null;
+        }
+
+        return [
+            'titleProper' => $radInfo->title_proper ?? null,
+            'parallelTitle' => $radInfo->parallel_title ?? null,
+            'otherTitleInfo' => $radInfo->other_title_info ?? null,
+            'statementOfResponsibility' => $radInfo->statement_of_responsibility ?? null,
+            'editionStatement' => $radInfo->edition_statement ?? null,
+        ];
     }
 
     public function getColumns(): array

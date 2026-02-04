@@ -31,6 +31,87 @@ class SchemaOrgService
     }
 
     /**
+     * Get JSON-LD URL for an information object
+     *
+     * @param object|string $resource Resource object or slug
+     * @return string JSON-LD endpoint URL
+     */
+    public function getJsonLdUrl($resource): string
+    {
+        $slug = is_object($resource) ? ($resource->slug ?? null) : $resource;
+
+        if (!$slug && is_object($resource) && isset($resource->id)) {
+            $slugRow = DB::table('slug')->where('object_id', $resource->id)->first();
+            $slug = $slugRow ? $slugRow->slug : null;
+        }
+
+        if (!$slug) {
+            return '';
+        }
+
+        return $this->baseUri . '/' . $slug . '.jsonld';
+    }
+
+    /**
+     * Get JSON-LD URL for a repository
+     *
+     * @param object|string $resource Resource object or slug
+     * @return string JSON-LD endpoint URL
+     */
+    public function getRepositoryJsonLdUrl($resource): string
+    {
+        $slug = is_object($resource) ? ($resource->slug ?? null) : $resource;
+
+        if (!$slug && is_object($resource) && isset($resource->id)) {
+            $slugRow = DB::table('slug')->where('object_id', $resource->id)->first();
+            $slug = $slugRow ? $slugRow->slug : null;
+        }
+
+        if (!$slug) {
+            return '';
+        }
+
+        return $this->baseUri . '/repository/' . $slug . '.jsonld';
+    }
+
+    /**
+     * Get JSON-LD URL for an actor
+     *
+     * @param object|string $resource Resource object or slug
+     * @return string JSON-LD endpoint URL
+     */
+    public function getActorJsonLdUrl($resource): string
+    {
+        $slug = is_object($resource) ? ($resource->slug ?? null) : $resource;
+
+        if (!$slug && is_object($resource) && isset($resource->id)) {
+            $slugRow = DB::table('slug')->where('object_id', $resource->id)->first();
+            $slug = $slugRow ? $slugRow->slug : null;
+        }
+
+        if (!$slug) {
+            return '';
+        }
+
+        return $this->baseUri . '/actor/' . $slug . '.jsonld';
+    }
+
+    /**
+     * Generate Link header value for JSON-LD alternate
+     *
+     * @param string $jsonldUrl
+     * @return string Link header value
+     */
+    public function getLinkHeader(string $jsonldUrl): string
+    {
+        if (empty($jsonldUrl)) {
+            return '';
+        }
+
+        return '<' . $jsonldUrl . '>; rel="alternate"; type="application/ld+json"';
+    }
+
+    /**
      * Generate Schema.org JSON-LD for an information object
      *
      * @param object $informationObject The information object

@@ -13,9 +13,9 @@
 <?php slot('sidebar') ?>
 <!-- Status Card -->
 <div class="card mb-3">
-    <div class="card-header bg-<?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? 'warning text-dark' : 'success text-white' ?>">
-        <i class="fas fa-<?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? 'clock' : 'check-circle' ?> me-1"></i>
-        <?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? __('Pending Review') : __('Completed') ?>
+    <div class="card-header bg-<?php echo ($feedback->status === 'pending') ? 'warning text-dark' : 'success text-white' ?>">
+        <i class="fas fa-<?php echo ($feedback->status === 'pending') ? 'clock' : 'check-circle' ?> me-1"></i>
+        <?php echo ($feedback->status === 'pending') ? __('Pending Review') : __('Completed') ?>
     </div>
     <div class="card-body">
         <p class="mb-2"><strong><?php echo __('Created:') ?></strong><br>
@@ -142,7 +142,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label fw-semibold"><?php echo __('Status') ?></label>
-                <?php echo $form->status_id->render(['class' => 'form-select']) ?>
+                <?php echo $form->status->render(['class' => 'form-select']) ?>
                 <small class="text-muted"><?php echo __('Setting to Completed will record the completion date') ?></small>
             </div>
             <div class="col-md-6">

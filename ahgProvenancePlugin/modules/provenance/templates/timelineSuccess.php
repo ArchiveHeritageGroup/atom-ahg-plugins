@@ -4,7 +4,7 @@
   <!-- Breadcrumb -->
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a href="<?php echo url_for([$resource, 'module' => 'informationobject']) ?>"><?php echo $resource->__toString() ?></a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>"><?php echo $resource->title ?? $resource->slug ?></a></li>
       <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>">Provenance</a></li>
       <li class="breadcrumb-item active">Timeline</li>
     </ol>
@@ -14,7 +14,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="mb-1"><i class="bi bi-bar-chart-steps me-2"></i>Provenance Timeline</h4>
-      <p class="text-muted mb-0"><?php echo $resource->__toString() ?></p>
+      <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
     </div>
     <div>
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2">

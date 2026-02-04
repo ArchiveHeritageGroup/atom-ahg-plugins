@@ -2,18 +2,20 @@
 
 namespace AhgMultiTenant\Services;
 
+use AhgMultiTenant\Models\Tenant;
+use AhgMultiTenant\Models\TenantUser;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * TenantContext Service
  *
  * Manages the current tenant (repository) context for multi-tenancy.
- * Handles session-based repository selection and user access.
+ * Handles session-based repository/tenant selection and user access.
  *
  * User Hierarchy:
- * 1. ADMIN - Sees all repositories, assigns super users
- * 2. SUPER USER - Assigned to repos, can assign users to their repos
- * 3. USER - Assigned to repos, sees only assigned repos
+ * 1. ADMIN - Sees all repositories/tenants, assigns super users
+ * 2. SUPER USER/OWNER - Assigned to tenants, can assign users to their tenants
+ * 3. USER - Assigned to tenants, sees only assigned tenants
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
@@ -22,11 +24,20 @@ class TenantContext
     /** @var int|null Current repository ID (null = all repositories for admins) */
     private static ?int $currentRepositoryId = null;
 
+    /** @var int|null Current tenant ID */
+    private static ?int $currentTenantId = null;
+
     /** @var bool Whether "View All" mode is active (admin only) */
     private static bool $viewAllMode = false;
 
     /** @var array Cache for user repositories */
     private static array $userRepositoriesCache = [];
+
+    /** @var array Cache for user tenants */
+    private static array $userTenantsCache = [];
+
+    /** @var bool Whether context was set from domain resolution */
+    private static bool $resolvedFromDomain = false;
 
     /** @var int Administrator group ID in AtoM */
     public const ADMIN_GROUP_ID = 100;
@@ -47,12 +58,243 @@ class TenantContext
 
         // Get from session
         $sessionRepoId = $user->getAttribute('tenant_repository_id');
+        $sessionTenantId = $user->getAttribute('tenant_id');
         $viewAll = $user->getAttribute('tenant_view_all', false);
 
         if ($sessionRepoId !== null) {
             self::$currentRepositoryId = (int) $sessionRepoId;
         }
+        if ($sessionTenantId !== null) {
+            self::$currentTenantId = (int) $sessionTenantId;
+        }
         self::$viewAllMode = (bool) $viewAll;
+    }
+
+    /**
+     * Initialize tenant context from domain resolution
+     *
+     * This method is called BEFORE session initialization to allow
+     * domain-based tenant routing to take precedence.
+     *
+     * @return bool True if tenant was resolved from domain
+     */
+    public static function initializeFromDomain(): bool
+    {
+        try {
+            $tenant = TenantResolver::resolveFromHost();
+
+            if ($tenant) {
+                self::$currentTenantId = $tenant->id;
+                self::$currentRepositoryId = $tenant->repositoryId;
+                self::$viewAllMode = false;
+                self::$resolvedFromDomain = true;
+
+                // Store in session for subsequent requests (optimization)
+                if (\sfContext::hasInstance()) {
+                    $user = \sfContext::getInstance()->getUser();
+                    $user->setAttribute('tenant_id', $tenant->id);
+                    $user->setAttribute('tenant_repository_id', $tenant->repositoryId);
+                    $user->setAttribute('tenant_view_all', false);
+                    $user->setAttribute('tenant_resolved_from_domain', true);
+                }
+
+                return true;
+            }
+        } catch (\Exception $e) {
+            error_log('TenantContext domain resolution error: ' . $e->getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if current context was resolved from domain
+     *
+     * @return bool
+     */
+    public static function wasResolvedFromDomain(): bool
+    {
+        return self::$resolvedFromDomain;
+    }
+
+    /**
+     * Get the current tenant ID
+     *
+     * @return int|null Tenant ID or null if viewing all
+     */
+    public static function getCurrentTenantId(): ?int
+    {
+        return self::$currentTenantId;
+    }
+
+    /**
+     * Get the current tenant object
+     *
+     * @return Tenant|null
+     */
+    public static function getCurrentTenant(): ?Tenant
+    {
+        if (self::$currentTenantId === null) {
+            return null;
+        }
+        return Tenant::find(self::$currentTenantId);
+    }
+
+    /**
+     * Set the current tenant
+     *
+     * @param int|null $tenantId Tenant ID or null for "all"
+     * @return bool Success
+     */
+    public static function setCurrentTenant(?int $tenantId): bool
+    {
+        if (!\sfContext::hasInstance()) {
+            return false;
+        }
+
+        $user = \sfContext::getInstance()->getUser();
+        if (!$user->isAuthenticated()) {
+            return false;
+        }
+
+        $userId = $user->getAttribute('user_id');
+
+        // If null, only admins can view all
+        if ($tenantId === null) {
+            if (!self::isAdmin($userId)) {
+                return false;
+            }
+            self::$currentTenantId = null;
+            self::$currentRepositoryId = null;
+            self::$viewAllMode = true;
+            $user->setAttribute('tenant_id', null);
+            $user->setAttribute('tenant_repository_id', null);
+            $user->setAttribute('tenant_view_all', true);
+            return true;
+        }
+
+        // Check tenant exists and is accessible
+        $tenant = Tenant::find($tenantId);
+        if (!$tenant) {
+            return false;
+        }
+
+        // Check tenant status
+        if (!$tenant->canAccess() && !self::isAdmin($userId)) {
+            return false;
+        }
+
+        // Check user can access this tenant
+        if (!self::canAccessTenant($userId, $tenantId)) {
+            return false;
+        }
+
+        self::$currentTenantId = $tenantId;
+        self::$currentRepositoryId = $tenant->repositoryId;
+        self::$viewAllMode = false;
+
+        $user->setAttribute('tenant_id', $tenantId);
+        $user->setAttribute('tenant_repository_id', $tenant->repositoryId);
+        $user->setAttribute('tenant_view_all', false);
+
+        return true;
+    }
+
+    /**
+     * Check if user can access a tenant
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return bool
+     */
+    public static function canAccessTenant(int $userId, int $tenantId): bool
+    {
+        // Admins can access all tenants
+        if (self::isAdmin($userId)) {
+            return true;
+        }
+
+        // Check if user is assigned to this tenant
+        return TenantUser::findByTenantAndUser($tenantId, $userId) !== null;
+    }
+
+    /**
+     * Get user's role in a tenant
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return string|null Role or null if not assigned
+     */
+    public static function getUserTenantRole(int $userId, int $tenantId): ?string
+    {
+        if (self::isAdmin($userId)) {
+            return TenantUser::ROLE_OWNER; // Admins have full access
+        }
+
+        $assignment = TenantUser::findByTenantAndUser($tenantId, $userId);
+        return $assignment ? $assignment->role : null;
+    }
+
+    /**
+     * Get list of tenants the user can access
+     *
+     * @param int $userId User ID
+     * @return array Array of tenant objects with role info
+     */
+    public static function getUserTenants(int $userId): array
+    {
+        if (isset(self::$userTenantsCache[$userId])) {
+            return self::$userTenantsCache[$userId];
+        }
+
+        // Admin sees all active tenants
+        if (self::isAdmin($userId)) {
+            $tenants = DB::table('heritage_tenant as t')
+                ->whereIn('t.status', [Tenant::STATUS_ACTIVE, Tenant::STATUS_TRIAL])
+                ->select('t.*')
+                ->selectRaw("'owner' as role")
+                ->selectRaw('0 as is_primary')
+                ->orderBy('t.name')
+                ->get()
+                ->toArray();
+
+            self::$userTenantsCache[$userId] = $tenants;
+            return $tenants;
+        }
+
+        // Get tenants user is assigned to (only active/trial tenants)
+        $tenants = DB::table('heritage_tenant_user as tu')
+            ->join('heritage_tenant as t', 'tu.tenant_id', '=', 't.id')
+            ->where('tu.user_id', $userId)
+            ->whereIn('t.status', [Tenant::STATUS_ACTIVE, Tenant::STATUS_TRIAL])
+            ->select('t.*', 'tu.role', 'tu.is_primary', 'tu.assigned_at')
+            ->orderBy('tu.is_primary', 'desc')
+            ->orderBy('t.name')
+            ->get()
+            ->toArray();
+
+        self::$userTenantsCache[$userId] = $tenants;
+        return $tenants;
+    }
+
+    /**
+     * Check if user has minimum role in current tenant
+     *
+     * @param int $userId
+     * @param string $minimumRole
+     * @return bool
+     */
+    public static function hasMinimumRoleInCurrentTenant(int $userId, string $minimumRole): bool
+    {
+        if (self::isAdmin($userId)) {
+            return true;
+        }
+
+        if (self::$currentTenantId === null) {
+            return false;
+        }
+
+        return TenantUser::hasMinimumRole($userId, self::$currentTenantId, $minimumRole);
     }
 
     /**
@@ -336,11 +578,12 @@ class TenantContext
     }
 
     /**
-     * Clear the repositories cache
+     * Clear the repositories and tenants cache
      */
     public static function clearCache(): void
     {
         self::$userRepositoriesCache = [];
+        self::$userTenantsCache = [];
     }
 
     /**

@@ -1,40 +1,41 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
- * Minimal DB helper using Propel connection available in AtoM/Symfony 1.
+ * DB helper using Laravel Query Builder.
  */
 class AhgTranslationDb
 {
     public static function conn()
     {
-        // Propel is used by AtoM (Qubit). This returns a PDO-like connection.
-        return Propel::getConnection();
+        // Return PDO connection from Laravel's DB
+        return DB::connection()->getPdo();
     }
 
-    public static function fetchOne(string $sql, array $params = array())
+    public static function fetchOne(string $sql, array $params = [])
     {
-        $stmt = self::conn()->prepare($sql);
-        $stmt->execute($params);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $results = DB::select($sql, $params);
+
+        return $results[0] ?? null;
     }
 
-    public static function fetchAll(string $sql, array $params = array())
+    public static function fetchAll(string $sql, array $params = [])
     {
-        $stmt = self::conn()->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = DB::select($sql, $params);
+
+        return array_map(function ($row) {
+            return (array) $row;
+        }, $results);
     }
 
-    public static function exec(string $sql, array $params = array()): int
+    public static function exec(string $sql, array $params = []): int
     {
-        $stmt = self::conn()->prepare($sql);
-        $stmt->execute($params);
-        return (int)$stmt->rowCount();
+        return DB::affectingStatement($sql, $params);
     }
 
     public static function lastInsertId(): string
     {
-        return (string)self::conn()->lastInsertId();
+        return (string) DB::connection()->getPdo()->lastInsertId();
     }
 }

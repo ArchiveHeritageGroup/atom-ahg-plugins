@@ -225,6 +225,156 @@ class ipsasActions extends sfActions
     {
         $this->checkAdmin();
         $this->year = $request->getParameter('year', date('Y'));
+
+        $report = $request->getParameter('report');
+        $format = $request->getParameter('format', 'csv');
+
+        if ($report) {
+            return $this->generateReport($report, $format, $this->year);
+        }
+    }
+
+    /**
+     * Generate and download report
+     */
+    protected function generateReport(string $report, string $format, string $year)
+    {
+        $service = $this->getService();
+        $data = [];
+        $headers = [];
+        $filename = '';
+
+        switch ($report) {
+            case 'asset_register':
+                $filename = "asset_register_{$year}";
+                $headers = ['Asset #', 'Title', 'Category', 'Location', 'Valuation Basis', 'Current Value', 'Currency', 'Status', 'Condition', 'Acquisition Date', 'Acquisition Method'];
+                $assets = $service->getAssets([]);
+                foreach ($assets as $a) {
+                    $data[] = [
+                        $a->asset_number,
+                        $a->title,
+                        $a->category_name ?? '',
+                        $a->location ?? '',
+                        ucfirst(str_replace('_', ' ', $a->valuation_basis ?? '')),
+                        $a->current_value ?? 0,
+                        $a->current_value_currency ?? 'USD',
+                        ucfirst(str_replace('_', ' ', $a->status ?? '')),
+                        ucfirst($a->condition_rating ?? ''),
+                        $a->acquisition_date ?? '',
+                        ucfirst($a->acquisition_method ?? ''),
+                    ];
+                }
+                break;
+
+            case 'valuation_summary':
+                $filename = "valuation_summary_{$year}";
+                $headers = ['Date', 'Asset #', 'Asset Title', 'Type', 'Basis', 'Previous Value', 'New Value', 'Change', 'Valuer'];
+                $valuations = $service->getValuations(['year' => $year]);
+                foreach ($valuations as $v) {
+                    $data[] = [
+                        $v->valuation_date,
+                        $v->asset_number,
+                        $v->asset_title,
+                        ucfirst($v->valuation_type),
+                        ucfirst(str_replace('_', ' ', $v->valuation_basis ?? '')),
+                        $v->previous_value ?? 0,
+                        $v->new_value ?? 0,
+                        ($v->new_value ?? 0) - ($v->previous_value ?? 0),
+                        $v->valuer_name ?? '',
+                    ];
+                }
+                break;
+
+            case 'impairments':
+                $filename = "impairments_{$year}";
+                $headers = ['Date', 'Asset #', 'Asset Title', 'Carrying Value', 'Recoverable Amount', 'Impairment Loss', 'Recognized'];
+                $impairments = $service->getImpairments([]);
+                foreach ($impairments as $i) {
+                    $data[] = [
+                        $i->assessment_date,
+                        $i->asset_number,
+                        $i->asset_title,
+                        $i->carrying_amount ?? 0,
+                        $i->recoverable_amount ?? 0,
+                        $i->impairment_loss ?? 0,
+                        $i->impairment_recognized ? 'Yes' : 'No',
+                    ];
+                }
+                break;
+
+            case 'insurance':
+                $filename = "insurance_coverage_{$year}";
+                $headers = ['Policy #', 'Asset #', 'Asset Title', 'Insurer', 'Type', 'Sum Insured', 'Currency', 'Coverage Start', 'Coverage End', 'Status'];
+                $policies = $service->getInsurancePolicies([]);
+                foreach ($policies as $p) {
+                    $data[] = [
+                        $p->policy_number,
+                        $p->asset_number ?? 'Blanket',
+                        $p->asset_title ?? '-',
+                        $p->insurer,
+                        ucfirst(str_replace('_', ' ', $p->policy_type ?? '')),
+                        $p->sum_insured ?? 0,
+                        $p->currency ?? 'USD',
+                        $p->coverage_start,
+                        $p->coverage_end,
+                        ucfirst($p->status ?? ''),
+                    ];
+                }
+                break;
+
+            case 'compliance':
+                $filename = "compliance_report_{$year}";
+                $headers = ['Check', 'Status', 'Count', 'Details'];
+                $compliance = $service->getComplianceStatus();
+                $stats = $service->getDashboardStats();
+
+                $data[] = ['Total Assets', 'Info', $stats['assets']['total'], 'Total heritage assets in register'];
+                $data[] = ['Active Assets', 'Info', $stats['assets']['active'], 'Assets currently active'];
+                $data[] = ['Total Value', 'Info', number_format($stats['values']['total'] ?? 0, 2), 'Combined current value'];
+                $data[] = ['Insured Value', 'Info', number_format($stats['values']['insured'] ?? 0, 2), 'Combined insured value'];
+
+                foreach ($compliance['issues'] as $issue) {
+                    $data[] = ['Issue', 'Non-Compliant', '-', $issue];
+                }
+                foreach ($compliance['warnings'] as $warning) {
+                    $data[] = ['Warning', 'Warning', '-', $warning];
+                }
+                if (empty($compliance['issues']) && empty($compliance['warnings'])) {
+                    $data[] = ['Overall Status', 'Compliant', '-', 'No issues or warnings found'];
+                }
+                break;
+
+            default:
+                $this->getUser()->setFlash('error', 'Unknown report type');
+                $this->redirect(['module' => 'ipsas', 'action' => 'reports']);
+                return;
+        }
+
+        // Generate CSV
+        $this->getResponse()->clearHttpHeaders();
+        $this->getResponse()->setHttpHeader('Content-Type', 'text/csv; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Content-Disposition', "attachment; filename=\"{$filename}.csv\"");
+        $this->getResponse()->setHttpHeader('Pragma', 'no-cache');
+        $this->getResponse()->setHttpHeader('Expires', '0');
+
+        $this->getResponse()->sendHttpHeaders();
+
+        $output = fopen('php://output', 'w');
+
+        // Add BOM for Excel UTF-8 compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        // Write headers
+        fputcsv($output, $headers);
+
+        // Write data
+        foreach ($data as $row) {
+            fputcsv($output, $row);
+        }
+
+        fclose($output);
+
+        return sfView::NONE;
     }
 
     /**

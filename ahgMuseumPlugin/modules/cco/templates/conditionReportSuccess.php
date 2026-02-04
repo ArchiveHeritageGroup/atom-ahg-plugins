@@ -83,9 +83,9 @@
   <section class="actions">
     <ul class="nav gap-2">
       <?php if ($canEdit): ?>
-        <li><?php echo link_to(__('Add Condition Report'), [$resource, 'module' => 'spectrum', 'action' => 'conditionReportAdd'], ['class' => 'btn atom-btn-outline-success']); ?></li>
+        <li><?php echo link_to(__('Add Condition Report'), ['module' => 'spectrum', 'action' => 'conditionReportAdd', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-success']); ?></li>
       <?php endif; ?>
-      <li><?php echo link_to(__('Back to record'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light']); ?></li>
+      <li><?php echo link_to(__('Back to record'), ['module' => 'informationobject', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-light']); ?></li>
     </ul>
   </section>
 <?php end_slot(); ?>

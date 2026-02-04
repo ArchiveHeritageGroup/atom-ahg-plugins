@@ -136,7 +136,7 @@ function showAuditCompare(auditId) {
   modal.show();
 
   // Fetch audit record data
-  fetch('/index.php/ahgAuditTrailPlugin/compareData?id=' + auditId)
+  fetch('/index.php/admin/audit/compare/' + auditId)
     .then(response => response.json())
     .then(data => {
       if (data.error) {

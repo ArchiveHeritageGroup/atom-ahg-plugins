@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class AhgSettingsPluginsAction extends sfAction
 {
@@ -23,12 +24,12 @@ class AhgSettingsPluginsAction extends sfAction
     {
         $plugins = [];
         try {
-            $conn = Propel::getConnection();
-            $sql = "SELECT * FROM atom_plugin ORDER BY category, name";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $plugins[] = $row;
+            $rows = DB::table('atom_plugin')
+                ->orderBy('category')
+                ->orderBy('name')
+                ->get();
+            foreach ($rows as $row) {
+                $plugins[] = (array) $row;
             }
         } catch (Exception $e) {
             error_log("Plugin Manager: Error loading plugins: " . $e->getMessage());
@@ -58,38 +59,37 @@ class AhgSettingsPluginsAction extends sfAction
         }
 
         try {
-            $conn = Propel::getConnection();
             $userId = $this->context->user->getAttribute('user_id');
 
             if ($action === 'enable') {
-                $sql = "UPDATE atom_plugin SET is_enabled = 1, updated_at = NOW() WHERE name = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([$pluginName]);
+                DB::table('atom_plugin')
+                    ->where('name', $pluginName)
+                    ->update(['is_enabled' => 1, 'updated_at' => DB::raw('NOW()')]);
 
                 // Sync to setting_i18n (legacy support)
-                $this->syncToSettingI18n($conn, $pluginName, true);
+                $this->syncToSettingI18n($pluginName, true);
 
                 // Audit log
-                $this->logAudit($conn, $pluginName, 'enabled', $userId);
+                $this->logAudit($pluginName, 'enabled', $userId);
                 $this->getUser()->setFlash('notice', "Plugin '$pluginName' enabled successfully.");
 
             } elseif ($action === 'disable') {
                 // Check dependencies first
-                $deps = $this->checkDependencies($conn, $pluginName);
+                $deps = $this->checkDependencies($pluginName);
                 if (!empty($deps)) {
                     $this->getUser()->setFlash('error', "Cannot disable '$pluginName'. Required by: " . implode(', ', $deps));
                     return;
                 }
 
-                $sql = "UPDATE atom_plugin SET is_enabled = 0, updated_at = NOW() WHERE name = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([$pluginName]);
+                DB::table('atom_plugin')
+                    ->where('name', $pluginName)
+                    ->update(['is_enabled' => 0, 'updated_at' => DB::raw('NOW()')]);
 
                 // Sync to setting_i18n (legacy support)
-                $this->syncToSettingI18n($conn, $pluginName, false);
+                $this->syncToSettingI18n($pluginName, false);
 
                 // Audit log
-                $this->logAudit($conn, $pluginName, 'disabled', $userId);
+                $this->logAudit($pluginName, 'disabled', $userId);
                 $this->getUser()->setFlash('notice', "Plugin '$pluginName' disabled successfully.");
             }
 
@@ -111,19 +111,19 @@ class AhgSettingsPluginsAction extends sfAction
     /**
      * Sync plugin enable/disable to setting_i18n (legacy Symfony plugin loading)
      */
-    protected function syncToSettingI18n($conn, $pluginName, $enable)
+    protected function syncToSettingI18n($pluginName, $enable)
     {
         try {
-            $sql = "SELECT value FROM setting_i18n WHERE id = 1 AND culture = 'en'";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = DB::table('setting_i18n')
+                ->where('id', 1)
+                ->where('culture', 'en')
+                ->first(['value']);
 
-            if (!$row || empty($row['value'])) {
+            if (!$row || empty($row->value)) {
                 return;
             }
 
-            $plugins = @unserialize($row['value']);
+            $plugins = @unserialize($row->value);
             if (!is_array($plugins)) {
                 $plugins = [];
             }
@@ -139,9 +139,10 @@ class AhgSettingsPluginsAction extends sfAction
                 $plugins = array_values($plugins); // Re-index
             }
 
-            $sql = "UPDATE setting_i18n SET value = ? WHERE id = 1 AND culture = 'en'";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([serialize($plugins)]);
+            DB::table('setting_i18n')
+                ->where('id', 1)
+                ->where('culture', 'en')
+                ->update(['value' => serialize($plugins)]);
 
         } catch (Exception $e) {
             error_log("Plugin Manager: Error syncing to setting_i18n: " . $e->getMessage());
@@ -164,28 +165,32 @@ class AhgSettingsPluginsAction extends sfAction
         }
     }
 
-    protected function checkDependencies($conn, $pluginName)
+    protected function checkDependencies($pluginName)
     {
         $dependents = [];
         try {
-            $sql = "SELECT name FROM atom_plugin WHERE is_enabled = 1 AND dependencies LIKE ? AND name != ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute(['%' . $pluginName . '%', $pluginName]);
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $dependents[] = $row['name'];
-            }
+            $rows = DB::table('atom_plugin')
+                ->where('is_enabled', 1)
+                ->where('dependencies', 'like', '%' . $pluginName . '%')
+                ->where('name', '!=', $pluginName)
+                ->pluck('name')
+                ->toArray();
+            $dependents = $rows;
         } catch (Exception $e) {
             // Ignore if dependencies column doesn't exist
         }
         return $dependents;
     }
 
-    protected function logAudit($conn, $pluginName, $action, $userId)
+    protected function logAudit($pluginName, $action, $userId)
     {
         try {
-            $sql = "INSERT INTO atom_plugin_audit (plugin_name, action, user_id, created_at) VALUES (?, ?, ?, NOW())";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$pluginName, $action, $userId]);
+            DB::table('atom_plugin_audit')->insert([
+                'plugin_name' => $pluginName,
+                'action' => $action,
+                'user_id' => $userId,
+                'created_at' => DB::raw('NOW()')
+            ]);
         } catch (Exception $e) {
             error_log("Plugin Audit: " . $e->getMessage());
         }

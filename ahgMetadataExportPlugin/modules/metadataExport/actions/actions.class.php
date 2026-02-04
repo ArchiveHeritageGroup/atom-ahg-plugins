@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Metadata Export Actions
  *
@@ -305,17 +307,14 @@ class metadataExportActions extends sfActions
     protected function getRecentExports(int $limit = 10): array
     {
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare("
-                SELECT format_code, resource_type, resource_id, created_at
-                FROM metadata_export_log
-                ORDER BY created_at DESC
-                LIMIT :limit
-            ");
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
+            $rows = DB::table('metadata_export_log')
+                ->orderBy('created_at', 'desc')
+                ->limit($limit)
+                ->get(['format_code', 'resource_type', 'resource_id', 'created_at']);
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $rows->map(function ($row) {
+                return (array) $row;
+            })->toArray();
         } catch (\Exception $e) {
             return [];
         }

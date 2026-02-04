@@ -103,3 +103,115 @@ SELECT @doc_id, 'en', 'Document' FROM DUAL WHERE @doc_exists IS NULL;
 INSERT IGNORE INTO slug (object_id, slug) VALUES (@doc_id, 'level-document');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@doc_id, 'library', 60);
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@doc_id, 'dam', 50);
+
+-- =====================================================
+-- Subject Authority Tables (Issue #55)
+-- =====================================================
+
+-- Subject Authority - stores controlled subject headings with usage tracking
+CREATE TABLE IF NOT EXISTS library_subject_authority (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    heading VARCHAR(500) NOT NULL COMMENT 'The subject heading text',
+    heading_normalized VARCHAR(500) NOT NULL COMMENT 'Normalized form for matching',
+    heading_type ENUM('topical','personal','corporate','geographic','genre','meeting') DEFAULT 'topical',
+    source VARCHAR(50) DEFAULT 'lcsh' COMMENT 'Source vocabulary (lcsh, mesh, local, etc.)',
+    lcsh_id VARCHAR(100) COMMENT 'Authority record ID (e.g., sh85034652)',
+    lcsh_uri VARCHAR(500) COMMENT 'Full URI to authority record',
+    suggested_dewey VARCHAR(50) COMMENT 'Suggested Dewey classification for this subject',
+    suggested_lcc VARCHAR(50) COMMENT 'Suggested LCC classification for this subject',
+    broader_terms JSON COMMENT 'Parent/broader subject terms',
+    narrower_terms JSON COMMENT 'Child/narrower subject terms',
+    related_terms JSON COMMENT 'Related subject terms',
+    usage_count INT UNSIGNED DEFAULT 1 COMMENT 'Number of times used in catalog',
+    first_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_heading (heading_normalized, heading_type, source),
+    INDEX idx_usage (usage_count DESC),
+    INDEX idx_type (heading_type),
+    INDEX idx_source (source),
+    FULLTEXT INDEX ft_heading (heading)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Entity-Subject Map - bridges NER entities to subject authorities
+CREATE TABLE IF NOT EXISTS library_entity_subject_map (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(50) NOT NULL COMMENT 'NER entity type (PERSON, ORG, GPE, etc.)',
+    entity_value VARCHAR(500) NOT NULL COMMENT 'Original entity value',
+    entity_normalized VARCHAR(500) NOT NULL COMMENT 'Normalized entity value for matching',
+    subject_authority_id BIGINT UNSIGNED NOT NULL COMMENT 'FK to subject authority',
+    co_occurrence_count INT UNSIGNED DEFAULT 1 COMMENT 'Times this entity appeared with this subject',
+    confidence DECIMAL(5,4) DEFAULT 1.0000 COMMENT 'Confidence score for the mapping',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_entity (entity_type, entity_normalized),
+    INDEX idx_authority (subject_authority_id),
+    INDEX idx_confidence (confidence DESC),
+    FOREIGN KEY (subject_authority_id) REFERENCES library_subject_authority(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Alter existing library_item_subject table to add authority link fields
+-- Note: These ALTER statements are idempotent (safe to run multiple times)
+-- Check if columns exist before adding to avoid errors on re-run
+
+-- Add lcsh_id column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'lcsh_id');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item_subject ADD COLUMN lcsh_id VARCHAR(100) AFTER uri',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add authority_id column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'authority_id');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item_subject ADD COLUMN authority_id BIGINT UNSIGNED AFTER lcsh_id',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add dewey_number column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'dewey_number');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item_subject ADD COLUMN dewey_number VARCHAR(50) AFTER authority_id',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add lcc_number column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'lcc_number');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item_subject ADD COLUMN lcc_number VARCHAR(50) AFTER dewey_number',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add subdivisions JSON column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'subdivisions');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item_subject ADD COLUMN subdivisions JSON AFTER lcc_number',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add FK constraint to authority table (only if column exists and constraint doesn't)
+SET @fk_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND CONSTRAINT_NAME = 'fk_item_subject_authority');
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item_subject' AND COLUMN_NAME = 'authority_id');
+SET @sql = IF(@fk_exists = 0 AND @col_exists > 0,
+    'ALTER TABLE library_item_subject ADD CONSTRAINT fk_item_subject_authority FOREIGN KEY (authority_id) REFERENCES library_subject_authority(id) ON DELETE SET NULL',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

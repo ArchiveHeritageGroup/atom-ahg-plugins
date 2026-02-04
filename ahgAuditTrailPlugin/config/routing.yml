@@ -30,3 +30,8 @@ auditTrail_userActivity:
 auditTrail_entityHistory:
   url: /admin/audit/entity/:entity_type/:entity_id
   param: { module: auditTrail, action: entityHistory }
+
+auditTrail_compareData:
+  url: /admin/audit/compare/:id
+  param: { module: auditTrail, action: compareData }
+  requirements: { id: \d+ }

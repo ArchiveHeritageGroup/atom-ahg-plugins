@@ -1,4 +1,8 @@
 <?php use_helper('Date') ?>
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$idTypes = $taxonomyService->getIdTypes(true);
+?>
 
 <div class="container-fluid py-4">
     <div class="row">
@@ -72,12 +76,9 @@
                                 <div class="mb-3">
                                     <label class="form-label">ID Type</label>
                                     <select name="id_type" class="form-select">
-                                        <option value="">-- Select --</option>
-                                        <option value="passport">Passport</option>
-                                        <option value="national_id">National ID</option>
-                                        <option value="drivers_license">Driver's License</option>
-                                        <option value="student_card">Student Card</option>
-                                        <option value="other">Other</option>
+                                        <?php foreach ($idTypes as $code => $label): ?>
+                                        <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>

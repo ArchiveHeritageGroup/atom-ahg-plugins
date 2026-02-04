@@ -121,8 +121,9 @@ class InformationObjectEditFeedbackAction extends DefaultEditAction
 
         $mail->From = $feed_email;
         $mail->FromName = $feed_name.' '.$feed_surname; // To address and name
-        $mail->addAddress(trim($to), 'Rock Art Research Institute (RARI)'); // Recipient name is optional
-        $mail->addAddress('johan@theahg.co.za', 'Johan-AHG'); // Address to which recipient will reply
+        // Get recipient name from settings, fallback to generic name
+        $recipientName = SettingService::getByNameAndScope('recipient_name', 'email') ?: 'Archive';
+        $mail->addAddress(trim($to), $recipientName);
         $mail->addReplyTo($reply_to, 'Reply'); // CC and BCC
         $mail->addCC($cc);
         $mail->Subject = 'Feedback:'.$id; // $subject;

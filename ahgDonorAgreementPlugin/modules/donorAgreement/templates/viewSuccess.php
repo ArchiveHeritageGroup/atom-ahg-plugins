@@ -34,6 +34,11 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
           <h5 class="mb-0"><?php echo __('Agreement Details') ?></h5>
         </div>
         <div class="card-body">
+          <?php if (!empty($agreement->logo_path)): ?>
+          <div class="text-center mb-4 pb-3 border-bottom">
+            <img src="/uploads<?php echo esc_entities($agreement->logo_path) ?>" alt="Agreement Logo" class="img-fluid" style="max-height: 120px;">
+          </div>
+          <?php endif ?>
           <dl class="row mb-0">
             <dt class="col-sm-4"><?php echo __('Agreement Number') ?></dt>
             <dd class="col-sm-8"><strong><?php echo esc_entities($agreement->agreement_number) ?></strong></dd>

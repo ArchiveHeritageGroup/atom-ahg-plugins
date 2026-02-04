@@ -62,6 +62,16 @@ access_request_approvers:
   url: /security/approvers
   param: { module: accessRequest, action: approvers }
 
+access_request_add_approver:
+  url: /security/approvers/add
+  param: { module: accessRequest, action: addApprover }
+  requirements: { sf_method: post }
+
+access_request_remove_approver:
+  url: /security/approvers/:id/remove
+  param: { module: accessRequest, action: removeApprover }
+  requirements: { id: \d+ }
+
 access_request_requests:
   url: /security/requests
   param: { module: accessRequest, action: pending }

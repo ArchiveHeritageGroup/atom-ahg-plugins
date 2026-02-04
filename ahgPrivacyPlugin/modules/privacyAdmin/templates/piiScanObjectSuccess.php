@@ -1,0 +1,250 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="fas fa-user-shield me-2"></i>PII Scan Results</h1>
+            <p class="text-muted mb-0"><?php echo esc_entities($object->title ?? 'Untitled'); ?></p>
+        </div>
+        <div>
+            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScan']); ?>" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Scanner
+            </a>
+            <?php
+            $slug = \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', $object->id)->value('slug');
+            if ($slug):
+            ?>
+            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $slug]); ?>" class="btn btn-outline-primary" target="_blank">
+                <i class="fas fa-external-link-alt me-1"></i>View Record
+            </a>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php if ($sf_user->hasFlash('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <?php echo $sf_user->getFlash('success'); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($sf_user->hasFlash('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <?php echo $sf_user->getFlash('error'); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card <?php echo ($scanResult['summary']['total'] ?? 0) > 0 ? 'bg-warning text-dark' : 'bg-success text-white'; ?>">
+                <div class="card-body text-center">
+                    <h2 class="display-5"><?php echo $scanResult['summary']['total'] ?? 0; ?></h2>
+                    <p class="mb-0">Total Entities</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card <?php echo ($scanResult['summary']['high_risk'] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-light'; ?>">
+                <div class="card-body text-center">
+                    <h2 class="display-5"><?php echo $scanResult['summary']['high_risk'] ?? 0; ?></h2>
+                    <p class="mb-0">High Risk</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h2 class="display-5"><?php echo $scanResult['summary']['medium_risk'] ?? 0; ?></h2>
+                    <p class="mb-0">Medium Risk</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h2 class="display-5"><?php echo $scanResult['summary']['low_risk'] ?? 0; ?></h2>
+                    <p class="mb-0">Low Risk</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Score -->
+    <?php if (isset($scanResult['risk_score'])): ?>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Overall Risk Score</h5>
+                <span class="badge <?php
+                    if ($scanResult['risk_score'] >= 70) echo 'bg-danger';
+                    elseif ($scanResult['risk_score'] >= 40) echo 'bg-warning text-dark';
+                    else echo 'bg-success';
+                ?> fs-5"><?php echo $scanResult['risk_score']; ?>/100</span>
+            </div>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar <?php
+                    if ($scanResult['risk_score'] >= 70) echo 'bg-danger';
+                    elseif ($scanResult['risk_score'] >= 40) echo 'bg-warning';
+                    else echo 'bg-success';
+                ?>" role="progressbar" style="width: <?php echo $scanResult['risk_score']; ?>%"></div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div class="row">
+        <!-- Entities Found -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detected Entities</h5>
+                    <?php if (!empty($scanResult['entities'])): ?>
+                    <span class="badge bg-light text-dark"><?php echo count($scanResult['entities']); ?> found</span>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($scanResult['entities'])): ?>
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                            <p class="mb-0">No PII detected in this record</p>
+                        </div>
+                    <?php else: ?>
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                    <th class="text-center">Confidence</th>
+                                    <th class="text-center">Risk</th>
+                                    <th>Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($scanResult['entities'] as $entity): ?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                        $typeColors = [
+                                            'SA_ID' => 'bg-danger',
+                                            'NG_NIN' => 'bg-danger',
+                                            'PASSPORT' => 'bg-danger',
+                                            'BANK_ACCOUNT' => 'bg-danger',
+                                            'TAX_NUMBER' => 'bg-danger',
+                                            'PERSON' => 'bg-warning text-dark',
+                                            'EMAIL' => 'bg-warning text-dark',
+                                            'PHONE_SA' => 'bg-warning text-dark',
+                                            'PHONE_INTL' => 'bg-warning text-dark',
+                                            'ORG' => 'bg-secondary',
+                                            'GPE' => 'bg-secondary',
+                                            'DATE' => 'bg-light text-dark',
+                                        ];
+                                        $color = $typeColors[$entity['type']] ?? 'bg-primary';
+                                        ?>
+                                        <span class="badge <?php echo $color; ?>"><?php echo esc_entities($entity['type']); ?></span>
+                                    </td>
+                                    <td>
+                                        <code><?php echo esc_entities($entity['value']); ?></code>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php
+                                        $conf = round(($entity['confidence'] ?? 0) * 100);
+                                        $confClass = $conf >= 80 ? 'text-success' : ($conf >= 50 ? 'text-warning' : 'text-muted');
+                                        ?>
+                                        <span class="<?php echo $confClass; ?>"><?php echo $conf; ?>%</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php
+                                        $risk = $entity['risk_level'] ?? 'low';
+                                        $riskColors = ['high' => 'danger', 'medium' => 'warning', 'low' => 'secondary'];
+                                        ?>
+                                        <span class="badge bg-<?php echo $riskColors[$risk] ?? 'secondary'; ?>"><?php echo ucfirst($risk); ?></span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted"><?php echo esc_entities($entity['source'] ?? 'text'); ?></small>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions & Summary by Type -->
+        <div class="col-md-4">
+            <!-- Save Results -->
+            <?php if (!empty($scanResult['entities'])): ?>
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-save me-2"></i>Save Results</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Save detected PII to the review queue for manual verification and redaction decisions.</p>
+                    <form method="post" action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScanObject', 'id' => $object->id]); ?>">
+                        <input type="hidden" name="save" value="1">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-1"></i>Save to Review Queue
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Summary by Type -->
+            <?php if (!empty($scanResult['summary']['by_type'])): ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>By Type</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <?php foreach ($scanResult['summary']['by_type'] as $type => $count): ?>
+                            <tr>
+                                <td><?php echo esc_entities($type); ?></td>
+                                <td class="text-end"><strong><?php echo $count; ?></strong></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Scanned Fields -->
+            <?php if (!empty($scanResult['fields_scanned'])): ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Fields Scanned</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <?php foreach ($scanResult['fields_scanned'] as $field): ?>
+                        <li><i class="fas fa-check text-success me-1"></i><?php echo esc_entities($field); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiReview']); ?>" class="btn btn-outline-warning w-100 mb-2">
+                        <i class="fas fa-tasks me-1"></i>Review Queue
+                    </a>
+                    <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $object->id]); ?>" class="btn btn-outline-danger w-100 mb-2">
+                        <i class="fas fa-eraser me-1"></i>Visual Redaction Editor
+                    </a>
+                    <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'piiScan']); ?>" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-search me-1"></i>Scan More Objects
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

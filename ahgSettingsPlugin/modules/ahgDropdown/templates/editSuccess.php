@@ -43,6 +43,7 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
+<?php $termsRaw = $sf_data->getRaw('terms'); ?>
 <div class="taxonomy-editor">
     <?php if (empty($terms)): ?>
     <div class="alert alert-info">
@@ -75,13 +76,13 @@
                     </tr>
                 </thead>
                 <tbody id="termsTable">
-                    <?php foreach ($terms as $term): ?>
+                    <?php foreach ($termsRaw as $term): ?>
                     <tr data-id="<?php echo $term->id ?>" class="term-row <?php echo !$term->is_active ? 'table-secondary inactive-row d-none' : '' ?>">
                         <td class="drag-handle text-center text-muted"><i class="fas fa-grip-vertical"></i></td>
                         <td>
-                            <input type="text" class="form-control form-control-sm border-0 bg-transparent" value="<?php echo esc_entities($term->label) ?>" onchange="updateTerm(<?php echo $term->id ?>, 'label', this.value)">
+                            <input type="text" class="form-control form-control-sm border-0 bg-transparent" value="<?php echo htmlspecialchars($term->label, ENT_QUOTES, 'UTF-8', false) ?>" onchange="updateTerm(<?php echo $term->id ?>, 'label', this.value)">
                         </td>
-                        <td><code class="small"><?php echo esc_entities($term->code) ?></code></td>
+                        <td><code class="small"><?php echo htmlspecialchars($term->code, ENT_QUOTES, 'UTF-8', false) ?></code></td>
                         <td>
                             <input type="color" class="form-control form-control-color form-control-sm" value="<?php echo $term->color ?: '#6c757d' ?>" onchange="updateTerm(<?php echo $term->id ?>, 'color', this.value)" title="<?php echo __('Choose color') ?>">
                         </td>

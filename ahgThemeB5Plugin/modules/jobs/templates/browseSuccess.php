@@ -86,7 +86,7 @@
           <!-- Job notes -->
           <td>
             <?php foreach ($job->getNotes() as $note) { ?>
-              <p class="mb-2"><?php echo $note->__toString(); ?></p>
+              <p class="mb-2"><?php echo $note->getContent(['cultureFallback' => true]); ?></p>
             <?php } ?>
             <?php if (isset($job->downloadPath)) { ?>
               <p class="mb-2">

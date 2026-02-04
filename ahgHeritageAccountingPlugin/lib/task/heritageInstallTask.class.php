@@ -57,13 +57,13 @@ EOF;
 
         try {
             $sql = file_get_contents($coreFile);
-            $conn = Propel::getConnection();
+            $pdo = \Illuminate\Database\Capsule\Manager::connection()->getPdo();
 
             // Split SQL into statements and execute each
             $statements = array_filter(array_map('trim', explode(';', $sql)));
             foreach ($statements as $statement) {
                 if (!empty($statement) && !preg_match('/^--/', $statement)) {
-                    $conn->exec($statement);
+                    $pdo->exec($statement);
                 }
             }
             $this->logSection('install', 'Core schema installed successfully', null, 'INFO');

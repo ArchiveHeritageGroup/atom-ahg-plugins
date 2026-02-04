@@ -1,0 +1,6 @@
+all:
+  # ORCID OAuth Configuration
+  orcid_client_id: 'APP-Z6LBJZPYUFPL5YKD'
+  orcid_client_secret: '7c5ba99c-b683-4500-a12b-57927f61074e'
+  orcid_redirect_uri: 'https://psis.theahg.co.za/index.php/research/orcid/callback'
+  orcid_sandbox: false

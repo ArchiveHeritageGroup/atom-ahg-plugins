@@ -567,6 +567,15 @@ class aiActions extends sfActions
 
     private function linkPlaceToObject($objectId, $termId)
     {
+        // Verify the term exists in the term table before linking
+        $termExists = Illuminate\Database\Capsule\Manager::table('term')
+            ->where('id', $termId)
+            ->exists();
+
+        if (!$termExists) {
+            throw new \Exception("Term ID {$termId} does not exist in term table");
+        }
+
         $exists = Illuminate\Database\Capsule\Manager::table('object_term_relation')
             ->where('object_id', $objectId)
             ->where('term_id', $termId)
@@ -663,7 +672,146 @@ class aiActions extends sfActions
         if (preg_match('/^(\d{4})-(\d{4})$/', $dateString, $m)) {
             return ['start' => "{$m[1]}-01-01", 'end' => "{$m[2]}-12-31"];
         }
+        // ISO date format YYYY-MM-DD
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dateString, $m)) {
+            return ['start' => $dateString, 'end' => $dateString];
+        }
         return null;
+    }
+
+    /**
+     * Split compound dates (semicolon, comma, or "and" separated) into individual dates.
+     * Examples: "1843-08-12; 1847-03-04; 1856" or "1909, 1910, 1911"
+     */
+    private function splitCompoundDates($dateString)
+    {
+        $dateString = trim($dateString);
+
+        // Split by semicolon, comma, or " and "
+        $parts = preg_split('/\s*[;,]\s*|\s+and\s+/i', $dateString);
+
+        $dates = [];
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (!empty($part)) {
+                $dates[] = $part;
+            }
+        }
+
+        return count($dates) > 1 ? $dates : [$dateString];
+    }
+
+    /**
+     * Create date events from a compound date string.
+     * Returns array of created event IDs.
+     */
+    private function createDatesFromCompound($objectId, $compoundDateString, $eventTypeId = 111)
+    {
+        $dates = $this->splitCompoundDates($compoundDateString);
+        $createdIds = [];
+
+        foreach ($dates as $dateString) {
+            $eventId = $this->linkDateToObject($objectId, $dateString, $eventTypeId);
+            if ($eventId) {
+                $createdIds[] = $eventId;
+            }
+        }
+
+        return $createdIds;
+    }
+
+    /**
+     * Create date event(s) from NER entity - handles compound dates.
+     */
+    public function executeCreateDate(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $entityId = $request->getParameter('entity_id');
+        $splitDates = $request->getParameter('split_dates', true); // Default to splitting
+
+        $entity = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+            ->where('id', $entityId)
+            ->first();
+
+        if (!$entity) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Entity not found']));
+        }
+
+        if ($entity->entity_type !== 'DATE') {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Entity is not a DATE type']));
+        }
+
+        $createdIds = [];
+        $dateString = $entity->entity_value;
+
+        if ($splitDates) {
+            // Split compound dates and create individual events
+            $createdIds = $this->createDatesFromCompound($entity->object_id, $dateString);
+        } else {
+            // Create single event with original string
+            $eventId = $this->linkDateToObject($entity->object_id, $dateString);
+            if ($eventId) {
+                $createdIds[] = $eventId;
+            }
+        }
+
+        if (count($createdIds) > 0) {
+            // Update entity status
+            Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+                ->where('id', $entityId)
+                ->update([
+                    'status' => 'linked',
+                    'linked_actor_id' => $createdIds[0], // Store first event ID
+                    'reviewed_by' => $this->getUser()->getAttribute('user_id'),
+                    'reviewed_at' => date('Y-m-d H:i:s')
+                ]);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'action' => 'created',
+                'event_ids' => $createdIds,
+                'count' => count($createdIds),
+                'message' => count($createdIds) . ' date event(s) created'
+            ]));
+        }
+
+        return $this->renderText(json_encode([
+            'success' => false,
+            'error' => 'Could not parse date(s): ' . $dateString
+        ]));
+    }
+
+    /**
+     * Preview compound date splitting without creating events.
+     */
+    public function executePreviewDateSplit(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $dateString = $request->getParameter('date_string');
+        if (!$dateString) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No date string provided']));
+        }
+
+        $dates = $this->splitCompoundDates($dateString);
+        $parsed = [];
+
+        foreach ($dates as $date) {
+            $result = $this->parseDateString($date);
+            $parsed[] = [
+                'original' => $date,
+                'parsed' => $result,
+                'valid' => $result !== null
+            ];
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'original' => $dateString,
+            'split_count' => count($dates),
+            'dates' => $parsed
+        ]));
     }
 
     public function executeBulkSave(sfWebRequest $request)
@@ -727,6 +875,10 @@ class aiActions extends sfActions
                 if ($action === 'create') {
                     $createType = $decision['create_type'] ?? 'create_subject';
                     $this->processCreate($entity, $createType);
+                } elseif ($action === 'create_date') {
+                    // Handle date creation with optional splitting
+                    $splitDates = isset($decision['split_dates']) ? (bool)$decision['split_dates'] : true;
+                    $this->processDateCreate($entity, $splitDates);
                 } elseif ($action === 'link') {
                     $targetId = $decision['target_id'];
                     $this->processLink($entity, $targetId);
@@ -928,6 +1080,35 @@ class aiActions extends sfActions
             ->where('id', $entity->id)
             ->update(['status' => 'linked', 'linked_actor_id' => $targetId, 'reviewed_at' => date('Y-m-d H:i:s')]);
     }
+
+    /**
+     * Process date entity creation - handles compound dates.
+     */
+    private function processDateCreate($entity, $splitDates = true)
+    {
+        $dateString = $entity->entity_value;
+
+        if ($splitDates) {
+            // Split compound dates and create individual events
+            $createdIds = $this->createDatesFromCompound($entity->object_id, $dateString);
+        } else {
+            // Create single event with original string
+            $eventId = $this->linkDateToObject($entity->object_id, $dateString);
+            $createdIds = $eventId ? [$eventId] : [];
+        }
+
+        if (count($createdIds) > 0) {
+            Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+                ->where('id', $entity->id)
+                ->update([
+                    'status' => 'linked',
+                    'linked_actor_id' => $createdIds[0],
+                    'reviewed_by' => $this->getUser()->getAttribute('user_id'),
+                    'reviewed_at' => date('Y-m-d H:i:s')
+                ]);
+        }
+    }
+
     /**
      * Generate summary and save to Scope & Content field
      */

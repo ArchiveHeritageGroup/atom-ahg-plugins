@@ -1,15 +1,18 @@
 <?php decorate_with('layout_2col'); ?>
 
 <?php
+use Illuminate\Database\Capsule\Manager as DB;
+
 // Check which sector plugins are enabled
 function isPluginActive($pluginName) {
     static $plugins = null;
     if ($plugins === null) {
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
-            $stmt->execute();
-            $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+            $pluginNames = DB::table('atom_plugin')
+                ->where('is_enabled', 1)
+                ->pluck('name')
+                ->toArray();
+            $plugins = array_flip($pluginNames);
         } catch (Exception $e) {
             $plugins = [];
         }
@@ -52,17 +55,26 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
 ?>
 
 <?php slot('sidebar'); ?>
+<?php
+$isAdmin = $sf_user->isAdministrator();
+$isEditor = $sf_user->hasCredential('editor');
+$canManage = $isAdmin || $isEditor;
+?>
 <div class="sidebar-content">
     <h4><?php echo __('Quick Links'); ?></h4>
     <ul class="list-unstyled">
+        <?php if ($canManage && $hasReportBuilder): ?>
         <li><a href="/admin/report-builder"><i class="fas fa-tools me-2"></i><?php echo __('Report Builder'); ?></a></li>
+        <?php endif; ?>
+        <?php if ($canManage): ?>
         <li><a href="<?php echo url_for('export/index'); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
-        <?php if ($hasPreservation): ?>
+        <?php endif; ?>
+        <?php if ($hasPreservation && $canManage): ?>
         <li><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-shield-alt me-2"></i><?php echo __('Preservation'); ?></a></li>
         <?php endif; ?>
     </ul>
 
-    <?php if ($hasVendor): ?>
+    <?php if ($hasVendor && $canManage): ?>
     <h4 class="mt-4"><?php echo __('Vendors'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>"><i class="fas fa-building me-2"></i><?php echo __('Vendor Dashboard'); ?></a></li>
@@ -70,7 +82,7 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
     </ul>
     <?php endif; ?>
 
-    <?php if (isPluginActive('ahgResearchPlugin')): ?>
+    <?php if (isPluginActive('ahgResearchPlugin') && $canManage): ?>
     <h4 class="mt-4"><?php echo __('Research'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research Dashboard'); ?></a></li>
@@ -78,7 +90,7 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
     </ul>
     <?php endif; ?>
 
-    <?php if (isPluginActive('ahgAuditTrailPlugin')): ?>
+    <?php if (isPluginActive('ahgAuditTrailPlugin') && $canManage): ?>
     <h4 class="mt-4"><?php echo __('Audit'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line me-2"></i><?php echo __('Statistics'); ?></a></li>
@@ -86,6 +98,7 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
     </ul>
     <?php endif; ?>
 
+    <?php if ($isAdmin): ?>
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs me-2"></i><?php echo __('AHG Settings'); ?></a></li>
@@ -107,8 +120,9 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
         <li><a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'dashboard']); ?>"><i class="fas fa-gavel me-2"></i><?php echo __('Rights'); ?></a></li>
         <?php endif; ?>
     </ul>
+    <?php endif; ?>
 
-    <?php if ($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ): ?>
+    <?php if (($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ) && $isAdmin): ?>
     <h4 class="mt-4"><?php echo __('Zimbabwe Compliance'); ?></h4>
     <ul class="list-unstyled">
         <?php if ($hasCDPA): ?>
@@ -187,6 +201,7 @@ $hasNMMZ = isPluginActive('ahgNMMZPlugin');
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'browse']); ?>"><i class="fas fa-handshake me-2 text-muted"></i><?php echo __('Donor Agreements'); ?></a></li>
                     <?php endif; ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'reports', 'action' => 'storage']); ?>"><i class="fas fa-boxes me-2 text-muted"></i><?php echo __('Physical Storage'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSpatialAnalysis']); ?>"><i class="fas fa-map-marker-alt me-2 text-muted"></i><?php echo __('Spatial Analysis Export'); ?></a></li>
                     <?php if ($hasGallery || $hasLibrary || $hasDam || $hasMuseum || $has3D || $hasSpectrum): ?>
                     <li class="list-group-item border-top mt-2 pt-2"><small class="text-muted fw-bold"><?php echo __("Sector Reports"); ?></small></li>
                     <?php endif; ?>

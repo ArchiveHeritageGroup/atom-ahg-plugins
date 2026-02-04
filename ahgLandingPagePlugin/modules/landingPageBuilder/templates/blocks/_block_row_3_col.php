@@ -36,10 +36,12 @@ if (!$isEditorMode && empty($col1Blocks) && empty($col2Blocks) && empty($col3Blo
         <?php foreach ($colBlocks as $childBlock):
           $childConfig = is_object($childBlock) ? ($childBlock->config ?? []) : ($childBlock['config'] ?? []);
           $childMachineName = is_object($childBlock) ? ($childBlock->machine_name ?? '') : ($childBlock['machine_name'] ?? '');
+          $childData = is_object($childBlock) ? ($childBlock->computed_data ?? null) : ($childBlock['computed_data'] ?? null);
           if (!is_array($childConfig)) $childConfig = json_decode($childConfig, true) ?? [];
           $templateFile = dirname(__FILE__) . '/_block_' . $childMachineName . '.php';
           if (file_exists($templateFile)) {
               $config = $childConfig;
+              $data = $childData;
               $block = $childBlock;
               include $templateFile;
           }

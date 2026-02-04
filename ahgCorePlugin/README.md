@@ -1,13 +1,21 @@
 # ahgCorePlugin
 
+**Version:** 1.1.0
+**Category:** Core
+**Status:** Core Plugin (Locked)
+
 Core utilities and shared services for AHG plugins. This plugin provides the foundation layer that all other AHG plugins depend on.
 
 ## Features
 
 - **AhgDb**: Centralized database bootstrap using Laravel Query Builder
 - **AhgConfig**: Configuration resolver (no more hardcoded paths/URLs)
-- **AhgTaxonomy**: Taxonomy and term ID resolution (no more hardcoded IDs)
+- **AhgTaxonomy**: AtoM taxonomy and term ID resolution (no more hardcoded IDs)
+- **AhgTaxonomyService**: Custom dropdown vocabularies (database-driven dropdowns)
 - **AhgStorage**: File storage utilities with proper permissions
+- **AhgHooks**: Hook/event dispatcher for plugin extensibility
+- **AhgPanels**: Panel registry for display pages
+- **AhgCapabilities**: Feature registry for dependency-free detection
 - **Contracts**: Interfaces for cross-plugin communication
 
 ## Installation
@@ -50,7 +58,7 @@ $uploadPath = AhgConfig::getUploadPath('documents');
 $culture = AhgConfig::getCulture();
 ```
 
-### Taxonomy Resolution
+### Taxonomy Resolution (AtoM Standard)
 
 ```php
 use AhgCore\Core\AhgTaxonomy;
@@ -64,6 +72,70 @@ $termId = AhgTaxonomy::getTermId('EVENT_TYPE', 'Creation');
 // Or use the constants (for known standard IDs)
 $id = AhgTaxonomy::TERM_CREATION; // 111
 ```
+
+### Custom Dropdown Vocabularies (AhgTaxonomyService)
+
+Database-driven dropdowns stored in `ahg_dropdown` table. Replaces hardcoded dropdown values with admin-manageable terms.
+
+```php
+use ahgCorePlugin\Services\AhgTaxonomyService;
+
+$taxonomyService = new AhgTaxonomyService();
+
+// Get dropdown choices (code => label)
+$statuses = $taxonomyService->getLoanStatuses();
+// Returns: ['' => '', 'draft' => 'Draft', 'active' => 'Active', ...]
+
+// Without empty option
+$statuses = $taxonomyService->getLoanStatuses(false);
+// Returns: ['draft' => 'Draft', 'active' => 'Active', ...]
+
+// Get full term data with colors/icons
+$statusesWithColors = $taxonomyService->getLoanStatusesWithColors();
+// Returns: ['draft' => {code, name, color, icon, sort_order, ...}, ...]
+
+// Get single term attributes
+$label = $taxonomyService->getTermName('loan_status', 'active');
+$color = $taxonomyService->getTermColor('loan_status', 'active');
+
+// Generic methods
+$choices = $taxonomyService->getTermsAsChoices('my_taxonomy');
+$terms = $taxonomyService->getTermsWithAttributes('my_taxonomy');
+```
+
+**Available Taxonomies (35):**
+
+| Category | Taxonomies |
+|----------|------------|
+| Exhibition | `exhibition_type`, `exhibition_status`, `exhibition_object_status` |
+| Loans | `loan_status`, `loan_type` |
+| Workflow | `workflow_status`, `rtp_status` |
+| Rights | `rights_basis`, `copyright_status`, `act_type`, `restriction_type` |
+| Embargo | `embargo_type`, `embargo_reason`, `embargo_status` |
+| Condition | `condition_grade`, `damage_type`, `report_type`, `image_type` |
+| Shipping | `shipment_type`, `shipment_status`, `cost_type` |
+| Research | `id_type`, `organization_type`, `equipment_type`, `equipment_condition`, `workspace_privacy` |
+| Library | `creator_role` |
+| Documents | `document_type`, `reminder_type` |
+| Export | `rdf_format` |
+| Agreements | `agreement_status` |
+| Links | `link_status` |
+| Other | `work_type`, `source_type` |
+
+**In Templates:**
+```php
+<?php
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$statuses = $taxonomyService->getLoanStatuses(false);
+?>
+<select name="status" class="form-select">
+  <?php foreach ($statuses as $code => $label): ?>
+    <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+  <?php endforeach; ?>
+</select>
+```
+
+**Admin UI:** Managed via `/admin/dropdowns`
 
 ### File Storage
 
@@ -157,6 +229,26 @@ CSS:
 - select2-bootstrap-5-theme.min.css
 - tom-select.bootstrap5.min.css
 
+## Database Tables
+
+### ahg_dropdown
+
+Custom controlled vocabulary terms for plugin dropdowns.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT | Primary key |
+| taxonomy | VARCHAR(100) | Taxonomy code (e.g., 'loan_status') |
+| taxonomy_label | VARCHAR(255) | Display name (e.g., 'Loan Status') |
+| code | VARCHAR(100) | Term code (e.g., 'draft') |
+| label | VARCHAR(255) | Term display label |
+| color | VARCHAR(7) | Hex color (e.g., '#4caf50') |
+| icon | VARCHAR(50) | Icon class (e.g., 'fa-check') |
+| sort_order | INT | Display order |
+| is_default | TINYINT | Default selection flag |
+| is_active | TINYINT | Soft delete flag |
+| metadata | JSON | Extended attributes |
+
 ## Requirements
 
 - PHP 8.1+
@@ -165,4 +257,8 @@ CSS:
 
 ## License
 
-GPL-3.0
+Proprietary - The Archive and Heritage Group (Pty) Ltd
+
+## Author
+
+Johan Pieterse <johan@theahg.co.za>

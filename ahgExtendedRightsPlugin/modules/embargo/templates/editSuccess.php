@@ -7,6 +7,12 @@
 <?php
 // Get object ID for propagation count
 $objectId = $embargo->object_id ?? $resource->id ?? 0;
+
+// Get taxonomy options
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$embargoTypes = $taxonomyService->getEmbargoTypes(false);
+$embargoReasons = $taxonomyService->getEmbargoReasons(true);
+$embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
 ?>
 
 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'id' => $embargo->id]); ?>">
@@ -19,25 +25,17 @@ $objectId = $embargo->object_id ?? $resource->id ?? 0;
         <div class="col-md-6 mb-3">
           <label for="embargo_type" class="form-label"><?php echo __('Embargo Type'); ?> <span class="text-danger">*</span></label>
           <select name="embargo_type" id="embargo_type" class="form-select" required>
-            <option value="full" <?php echo ($embargo->embargo_type ?? '') === 'full' ? 'selected' : ''; ?>><?php echo __('Full - Hide completely'); ?></option>
-            <option value="metadata_only" <?php echo ($embargo->embargo_type ?? '') === 'metadata_only' ? 'selected' : ''; ?>><?php echo __('Metadata Only - Hide digital objects'); ?></option>
-            <option value="digital_only" <?php echo ($embargo->embargo_type ?? '') === 'digital_only' ? 'selected' : ''; ?>><?php echo __('Digital Object - Restrict downloads'); ?></option>
-            <option value="partial" <?php echo ($embargo->embargo_type ?? '') === 'partial' ? 'selected' : ''; ?>><?php echo __('Partial'); ?></option>
+            <?php foreach ($embargoTypes as $code => $label): ?>
+              <option value="<?php echo $code; ?>" <?php echo ($embargo->embargo_type ?? '') === $code ? 'selected' : ''; ?>><?php echo __($label); ?></option>
+            <?php endforeach; ?>
           </select>
         </div>
         <div class="col-md-6 mb-3">
           <label for="reason" class="form-label"><?php echo __('Reason'); ?></label>
           <select name="reason" id="reason" class="form-select">
-            <option value="">-- <?php echo __('Select'); ?> --</option>
-            <option value="donor_restriction" <?php echo ($embargo->reason ?? '') === 'donor_restriction' ? 'selected' : ''; ?>><?php echo __('Donor Restriction'); ?></option>
-            <option value="copyright" <?php echo ($embargo->reason ?? '') === 'copyright' ? 'selected' : ''; ?>><?php echo __('Copyright'); ?></option>
-            <option value="privacy" <?php echo ($embargo->reason ?? '') === 'privacy' ? 'selected' : ''; ?>><?php echo __('Privacy'); ?></option>
-            <option value="legal" <?php echo ($embargo->reason ?? '') === 'legal' ? 'selected' : ''; ?>><?php echo __('Legal'); ?></option>
-            <option value="commercial" <?php echo ($embargo->reason ?? '') === 'commercial' ? 'selected' : ''; ?>><?php echo __('Commercial'); ?></option>
-            <option value="research" <?php echo ($embargo->reason ?? '') === 'research' ? 'selected' : ''; ?>><?php echo __('Research'); ?></option>
-            <option value="cultural" <?php echo ($embargo->reason ?? '') === 'cultural' ? 'selected' : ''; ?>><?php echo __('Cultural'); ?></option>
-            <option value="security" <?php echo ($embargo->reason ?? '') === 'security' ? 'selected' : ''; ?>><?php echo __('Security'); ?></option>
-            <option value="other" <?php echo ($embargo->reason ?? '') === 'other' ? 'selected' : ''; ?>><?php echo __('Other'); ?></option>
+            <?php foreach ($embargoReasons as $code => $label): ?>
+              <option value="<?php echo $code; ?>" <?php echo ($embargo->reason ?? '') === $code ? 'selected' : ''; ?>><?php echo __($label); ?></option>
+            <?php endforeach; ?>
           </select>
         </div>
       </div>
@@ -64,9 +62,9 @@ $objectId = $embargo->object_id ?? $resource->id ?? 0;
         <div class="col-md-6 mb-3">
           <label for="status" class="form-label"><?php echo __('Status'); ?></label>
           <select name="status" id="status" class="form-select">
-            <option value="active" <?php echo ($embargo->status ?? '') === 'active' ? 'selected' : ''; ?>><?php echo __('Active'); ?></option>
-            <option value="pending" <?php echo ($embargo->status ?? '') === 'pending' ? 'selected' : ''; ?>><?php echo __('Pending'); ?></option>
-            <option value="extended" <?php echo ($embargo->status ?? '') === 'extended' ? 'selected' : ''; ?>><?php echo __('Extended'); ?></option>
+            <?php foreach ($embargoStatuses as $code => $label): ?>
+              <option value="<?php echo $code; ?>" <?php echo ($embargo->status ?? '') === $code ? 'selected' : ''; ?>><?php echo __($label); ?></option>
+            <?php endforeach; ?>
           </select>
         </div>
         <div class="col-md-6 mb-3">

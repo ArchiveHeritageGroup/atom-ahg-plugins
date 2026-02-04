@@ -569,7 +569,7 @@
       <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource]); ?>
       <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
       <?php echo get_partial('informationobject/genreAccessPoints', ['resource' => $resource]); ?>
-      <?php echo get_partial('informationobject/nameAccessPoints', ['resource' => $resource]); ?>
+      <?php $sidebar = false; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
     </div>
   </section>
   <?php endif; ?>

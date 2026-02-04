@@ -1,9 +1,11 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * API Action for Export Preview
  * Returns statistics and hierarchy for export preview
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
 class apiExportPreviewAction extends sfAction
@@ -38,7 +40,7 @@ class apiExportPreviewAction extends sfAction
             'totalDescriptions' => $stats['totalDescriptions'],
             'digitalObjects' => $stats['digitalObjects'],
             'estimatedSize' => $stats['estimatedSize'],
-            'hierarchy' => $hierarchy
+            'hierarchy' => $hierarchy,
         ]);
     }
 
@@ -48,37 +50,24 @@ class apiExportPreviewAction extends sfAction
     protected function getCollectionStats($collection)
     {
         // Count descendants
-        $sql = "SELECT COUNT(*) as count 
-                FROM information_object 
-                WHERE lft >= ? AND rgt <= ?";
-        
-        $conn = Propel::getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$collection->lft, $collection->rgt]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $totalDescriptions = $result['count'];
+        $totalDescriptions = DB::table('information_object')
+            ->where('lft', '>=', $collection->lft)
+            ->where('rgt', '<=', $collection->rgt)
+            ->count();
 
         // Count digital objects
-        $sql = "SELECT COUNT(*) as count 
-                FROM digital_object do
-                JOIN information_object io ON do.object_id = io.id
-                WHERE io.lft >= ? AND io.rgt <= ?";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$collection->lft, $collection->rgt]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $digitalObjects = $result['count'];
+        $digitalObjects = DB::table('digital_object as do')
+            ->join('information_object as io', 'do.object_id', '=', 'io.id')
+            ->where('io.lft', '>=', $collection->lft)
+            ->where('io.rgt', '<=', $collection->rgt)
+            ->count();
 
         // Estimate size
-        $sql = "SELECT SUM(do.byte_size) as total_size 
-                FROM digital_object do
-                JOIN information_object io ON do.object_id = io.id
-                WHERE io.lft >= ? AND io.rgt <= ?";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$collection->lft, $collection->rgt]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $totalSize = $result['total_size'] ?? 0;
+        $totalSize = DB::table('digital_object as do')
+            ->join('information_object as io', 'do.object_id', '=', 'io.id')
+            ->where('io.lft', '>=', $collection->lft)
+            ->where('io.rgt', '<=', $collection->rgt)
+            ->sum('do.byte_size') ?? 0;
 
         // Estimate CSV size (rough: 500 bytes per record)
         $csvSize = $totalDescriptions * 500;
@@ -87,7 +76,7 @@ class apiExportPreviewAction extends sfAction
         return [
             'totalDescriptions' => number_format($totalDescriptions),
             'digitalObjects' => number_format($digitalObjects),
-            'estimatedSize' => AhgCentralHelpers::formatBytes($estimatedSize)
+            'estimatedSize' => AhgCentralHelpers::formatBytes($estimatedSize),
         ];
     }
 
@@ -105,15 +94,15 @@ class apiExportPreviewAction extends sfAction
 
         foreach ($children as $child) {
             $childCount = $this->getChildCount($child);
-            
+
             $item = [
                 'title' => $child->getTitle(['cultureFallback' => true]),
                 'identifier' => $child->identifier,
-                'level' => $child->getLevelOfDescription() ? 
+                'level' => $child->getLevelOfDescription() ?
                     $child->getLevelOfDescription()->getName(['cultureFallback' => true]) : '',
                 'count' => $childCount > 0 ? $childCount : null,
-                'children' => $childCount > 0 ? 
-                    $this->getHierarchy($child, $maxDepth, $currentDepth + 1) : []
+                'children' => $childCount > 0 ?
+                    $this->getHierarchy($child, $maxDepth, $currentDepth + 1) : [],
             ];
 
             $hierarchy[] = $item;
@@ -124,7 +113,7 @@ class apiExportPreviewAction extends sfAction
                     $hierarchy[] = [
                         'title' => sprintf('... and %d more', count($children) - 10),
                         'count' => null,
-                        'children' => []
+                        'children' => [],
                     ];
                 }
                 break;
@@ -141,13 +130,15 @@ class apiExportPreviewAction extends sfAction
     {
         return (($item->rgt - $item->lft) - 1) / 2;
     }
-/**
+
+    /**
      * Render JSON response
      */
     protected function renderJson($data, $statusCode = 200)
     {
         $this->getResponse()->setStatusCode($statusCode);
         echo json_encode($data);
+
         return sfView::NONE;
     }
 }

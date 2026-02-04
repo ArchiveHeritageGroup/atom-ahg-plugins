@@ -1,0 +1,134 @@
+{
+    "sector": "dam",
+    "name": "Digital Assets (Dublin Core/IPTC)",
+    "version": "1.0.0",
+    "rules": {
+        "required": [
+            "identifier",
+            "title"
+        ],
+        "types": {
+            "legacyId": "string",
+            "parentId": "string",
+            "identifier": "string",
+            "filename": "string",
+            "title": "string",
+            "creator": "string",
+            "description": "text",
+            "dateCreated": "date",
+            "type": "string",
+            "format": "string",
+            "formatMimeType": "string",
+            "fileSize": "integer",
+            "dimensions": "string",
+            "resolution": "string",
+            "colorSpace": "string",
+            "rights": "text",
+            "keywords": "text",
+            "gpsLatitude": "decimal",
+            "gpsLongitude": "decimal",
+            "cameraModel": "string",
+            "caption": "text",
+            "iptcByline": "string",
+            "iptcCity": "string",
+            "iptcCountry": "string",
+            "exifData": "text",
+            "culture": "string"
+        },
+        "patterns": {
+            "formatMimeType": "^[a-z]+\\/[a-z0-9.+-]+$",
+            "dimensions": "^\\d+\\s*[x\u00d7]\\s*\\d+$",
+            "culture": "^[a-z]{2}(_[A-Z]{2})?$",
+            "gpsLatitude": "^-?\\d{1,2}(\\.\\d+)?$",
+            "gpsLongitude": "^-?\\d{1,3}(\\.\\d+)?$"
+        },
+        "maxLengths": {
+            "identifier": 255,
+            "filename": 255,
+            "title": 1024,
+            "creator": 500,
+            "format": 100,
+            "formatMimeType": 100,
+            "resolution": 50,
+            "colorSpace": 50,
+            "cameraModel": 255,
+            "iptcByline": 255,
+            "iptcCity": 255,
+            "iptcCountry": 255,
+            "culture": 10
+        },
+        "enums": {
+            "type": [
+                "Collection",
+                "Dataset",
+                "Event",
+                "Image",
+                "InteractiveResource",
+                "MovingImage",
+                "PhysicalObject",
+                "Service",
+                "Software",
+                "Sound",
+                "StillImage",
+                "Text"
+            ],
+            "colorSpace": [
+                "sRGB",
+                "Adobe RGB",
+                "ProPhoto RGB",
+                "CMYK",
+                "Grayscale",
+                "Lab"
+            ]
+        },
+        "ranges": {
+            "gpsLatitude": {
+                "min": -90,
+                "max": 90
+            },
+            "gpsLongitude": {
+                "min": -180,
+                "max": 180
+            }
+        },
+        "referential": {
+            "parentId": "legacyId"
+        }
+    },
+    "warnings": {
+        "recommended": [
+            "creator",
+            "description",
+            "rights",
+            "dateCreated"
+        ]
+    },
+    "descriptions": {
+        "legacyId": "Unique identifier from source system for matching during updates",
+        "parentId": "Legacy ID of parent record (for collections)",
+        "identifier": "Unique identifier for the asset",
+        "filename": "Original filename with extension",
+        "title": "Title or name of the asset (dc:title)",
+        "creator": "Creator/author name (dc:creator, IPTC:By-line)",
+        "description": "Description or abstract (dc:description, IPTC:Caption)",
+        "dateCreated": "Creation date in YYYY-MM-DD format (dc:date)",
+        "type": "Dublin Core Type Vocabulary value (dc:type)",
+        "format": "File format (e.g., JPEG, PDF)",
+        "formatMimeType": "MIME type (e.g., image/jpeg)",
+        "fileSize": "File size in bytes",
+        "dimensions": "Pixel dimensions as 'Width x Height'",
+        "resolution": "Resolution in DPI (e.g., '300 dpi')",
+        "colorSpace": "Color space (e.g., sRGB, Adobe RGB)",
+        "rights": "Rights statement (dc:rights)",
+        "keywords": "Keywords or tags, pipe-separated (dc:subject, IPTC:Keywords)",
+        "gpsLatitude": "GPS latitude (-90 to 90)",
+        "gpsLongitude": "GPS longitude (-180 to 180)",
+        "cameraModel": "Camera/device model from EXIF",
+        "caption": "Caption or title for display (IPTC:Caption)",
+        "iptcByline": "IPTC By-line (photographer credit)",
+        "iptcCity": "IPTC City where image was taken",
+        "iptcCountry": "IPTC Country where image was taken",
+        "exifData": "Additional EXIF metadata as JSON",
+        "culture": "ISO 639-1 language code for metadata"
+    }
+}

@@ -12,9 +12,9 @@
 
 <?php slot('sidebar') ?>
 <div class="card mb-3">
-    <div class="card-header bg-<?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? 'warning text-dark' : 'success text-white' ?>">
-        <i class="fas fa-<?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? 'clock' : 'check-circle' ?> me-1"></i>
-        <?php echo ($resource->status_id == QubitTerm::PENDING_ID) ? __('Pending') : __('Completed') ?>
+    <div class="card-header bg-<?php echo ($resource->status === 'pending') ? 'warning text-dark' : 'success text-white' ?>">
+        <i class="fas fa-<?php echo ($resource->status === 'pending') ? 'clock' : 'check-circle' ?> me-1"></i>
+        <?php echo ($resource->status === 'pending') ? __('Pending') : __('Completed') ?>
     </div>
     <div class="card-body">
         <p class="mb-2"><strong><?php echo __('Submitted:') ?></strong><br>

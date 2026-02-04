@@ -91,7 +91,7 @@ class dataMigrationPreviewAction extends sfAction
             $rows = [];
             
             if (in_array($ext, ['xls', 'xlsx'])) {
-                require_once sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
+                require_once sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
                 
                 $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file['tmp_name']);
                 $sheet = $spreadsheet->getSheet($sheetIndex);

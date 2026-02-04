@@ -432,7 +432,7 @@ class extendedRightsActions extends sfActions
         $this->initDb();
         $days = (int) $request->getParameter('days', 30);
         $this->days = $days;
-        
+
         $this->embargoes = Capsule::table('rights_embargo')
             ->join('slug', 'slug.object_id', '=', 'rights_embargo.object_id')
             ->leftJoin('information_object_i18n', function ($j) {
@@ -453,5 +453,39 @@ class extendedRightsActions extends sfActions
                 'information_object_i18n.title',
                 'slug.slug',
             ])->get();
+    }
+
+    /**
+     * Clear all extended rights from an information object
+     */
+    public function executeClear(sfWebRequest $request)
+    {
+        $slug = $request->getParameter('slug');
+        $this->initDb();
+
+        // Get the object ID from slug
+        $object = Capsule::table('slug')
+            ->where('slug', $slug)
+            ->first();
+
+        if (!$object) {
+            $this->forward404('Resource not found');
+        }
+
+        $oid = (int) $object->object_id;
+
+        // Clear all extended rights
+        Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->delete();
+        Capsule::table('extended_rights')->where('object_id', '=', $oid)->delete();
+        Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->delete();
+        Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->delete();
+        // Lift any active embargoes
+        Capsule::table('rights_embargo')
+            ->where('object_id', '=', $oid)
+            ->where('status', '=', 'active')
+            ->update(['status' => 'lifted', 'lifted_at' => date('Y-m-d H:i:s')]);
+
+        $this->getUser()->setFlash('notice', 'All extended rights have been cleared.');
+        $this->redirect('/' . $slug);
     }
 }

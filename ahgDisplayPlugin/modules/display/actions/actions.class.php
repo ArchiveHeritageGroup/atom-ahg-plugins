@@ -1,16 +1,23 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 use AhgDisplay\Services\DisplayService;
+use AhgDisplay\Services\DisplayModeService;
 
 class displayActions extends sfActions
 {
     protected $service;
+    protected $modeService;
 
     public function preExecute()
     {
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayModeService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/DisplayPreferenceRepository.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/GlobalDisplaySettingsRepository.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/UserBrowseSettingsRepository.php';
         $this->service = new DisplayService();
+        $this->modeService = new DisplayModeService();
     }
 
     public function executeIndex(sfWebRequest $request)
@@ -85,134 +92,17 @@ class displayActions extends sfActions
         $this->genreSearchFilter = $request->getParameter("genreSearch");
         $this->repoFilter = $request->getParameter('repo');
 
-        // GLAM Type facet - filter by published status for guests
-        $glamQuery = DB::table('display_object_config as doc')
-            ->join('information_object as io', 'doc.object_id', '=', 'io.id')
-            ->select('doc.object_type', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $glamQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = io.id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->types = $glamQuery->groupBy('doc.object_type')->orderBy('count', 'desc')->get()->toArray();
-
-        // Level of description facet - filter by published status for guests
-        $levelQuery = DB::table('information_object as io')
-            ->join('term as t', 'io.level_of_description_id', '=', 't.id')
-            ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
-            })
-            ->where('io.id', '>', 1)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $levelQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = io.id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->levels = $levelQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Repository facet - filter by published status for guests
-        $repoQuery = DB::table('information_object as io')
-            ->join('repository as r', 'io.repository_id', '=', 'r.id')
-            ->join('actor_i18n as ai', function($j) {
-                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
-            })
-            ->where('io.id', '>', 1)
-            ->select('r.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $repoQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = io.id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->repositories = $repoQuery->groupBy('r.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Creator facet - filter by published status for guests
-        $creatorQuery = DB::table('event as e')
-            ->join('actor as a', 'e.actor_id', '=', 'a.id')
-            ->join('actor_i18n as ai', function($j) {
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
-            })
-            ->whereNotNull('e.actor_id')
-            ->select('a.id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT e.object_id) as count'));
-        if (!$this->isAuthenticated) {
-            $creatorQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = e.object_id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->creators = $creatorQuery->groupBy('a.id', 'ai.authorized_form_of_name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Subject facet (taxonomy_id = 35) - filter by published status for guests
-        $subjectQuery = DB::table('object_term_relation as otr')
-            ->join('term as t', 'otr.term_id', '=', 't.id')
-            ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
-            })
-            ->where('t.taxonomy_id', 35)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $subjectQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = otr.object_id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->subjects = $subjectQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Place facet (taxonomy_id = 42) - filter by published status for guests
-        $placeQuery = DB::table('object_term_relation as otr')
-            ->join('term as t', 'otr.term_id', '=', 't.id')
-            ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
-            })
-            ->where('t.taxonomy_id', 42)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $placeQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = otr.object_id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->places = $placeQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Genre facet (taxonomy_id = 78) - filter by published status for guests
-        $genreQuery = DB::table('object_term_relation as otr')
-            ->join('term as t', 'otr.term_id', '=', 't.id')
-            ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
-            })
-            ->where('t.taxonomy_id', 78)
-            ->select('t.id', 'ti.name', DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $genreQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = otr.object_id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->genres = $genreQuery->groupBy('t.id', 'ti.name')->orderBy('count', 'desc')->limit(10)->get()->toArray();
-
-        // Media type facet - filter by published status for guests
-        $mediaQuery = DB::table('digital_object as do')
-            ->whereNull('do.parent_id')
-            ->whereNotNull('do.mime_type')
-            ->select(DB::raw('SUBSTRING_INDEX(mime_type, "/", 1) as media_type'), DB::raw('COUNT(*) as count'));
-        if (!$this->isAuthenticated) {
-            $mediaQuery->whereExists(function($q) {
-                $q->select(DB::raw(1))->from('status')
-                  ->whereRaw('status.object_id = do.object_id')
-                  ->where('status.type_id', 158)->where('status.status_id', 160);
-            });
-        }
-        $this->mediaTypes = $mediaQuery->groupBy('media_type')->orderBy('count', 'desc')->limit(10)->get()->toArray();
+        // Load facets from pre-computed cache for ALL users (performance optimization)
+        // Note: Facet counts show published items only. Authenticated users can still
+        // search/view unpublished items, but facet counts come from cache.
+        $this->types = $this->getCachedFacet('glam_type', 'object_type');
+        $this->levels = $this->getCachedFacet('level');
+        $this->repositories = $this->getCachedFacet('repository');
+        $this->creators = $this->getCachedFacet('creator');
+        $this->subjects = $this->getCachedFacet('subject');
+        $this->places = $this->getCachedFacet('place');
+        $this->genres = $this->getCachedFacet('genre');
+        $this->mediaTypes = $this->getCachedFacet('media_type', 'media_type');
 
         // Build count query
         $countQuery = DB::table('information_object as io')
@@ -380,12 +270,10 @@ class displayActions extends sfActions
         // Filter by publication status - only show Published items (status_id = 160) for guests
         // Authenticated users (editors/admins) can see all items
         if (!sfContext::getInstance()->getUser()->isAuthenticated()) {
-            $query->whereExists(function($q) {
-                $q->select(DB::raw(1))
-                  ->from('status')
-                  ->whereRaw('status.object_id = io.id')
-                  ->where('status.type_id', 158)  // publication status type
-                  ->where('status.status_id', 160); // Published
+            $query->join('status as pub_st', function($j) {
+                $j->on('pub_st.object_id', '=', 'io.id')
+                  ->where('pub_st.type_id', '=', 158)  // publication status type
+                  ->where('pub_st.status_id', '=', 160); // Published
             });
         }
 
@@ -928,5 +816,173 @@ class displayActions extends sfActions
                 })->orWhere("io.identifier", "like", $q);
             });
         }
+    }
+
+    /**
+     * AJAX endpoint for embedded GLAM browser (landing page block)
+     * Returns just the browse content without full page layout
+     */
+    public function executeBrowseAjax(sfWebRequest $request)
+    {
+        // Reuse browse logic
+        $this->executeBrowse($request);
+
+        // Check if sidebar should be shown
+        $this->showSidebar = $request->getParameter('showSidebar', '1') === '1';
+        $this->embedded = true;
+
+        // Disable layout - return partial only
+        $this->setLayout(false);
+
+        // Use embedded template
+        $this->setTemplate('browseEmbedded');
+    }
+
+    /**
+     * Get cached facet data for guest users.
+     *
+     * @param string $facetType The facet type (subject, place, genre, level, repository, creator, glam_type, media_type)
+     * @param string|null $nameField Override for the name field in returned objects (default: 'name')
+     * @return array Array of facet objects with id, name, and count
+     */
+    protected function getCachedFacet(string $facetType, ?string $nameField = null): array
+    {
+        $results = DB::table('display_facet_cache')
+            ->where('facet_type', $facetType)
+            ->orderBy('count', 'desc')
+            ->limit(10)
+            ->get();
+
+        if ($results->isEmpty()) {
+            return [];
+        }
+
+        // Convert to array format matching live query results
+        $nameField = $nameField ?? 'name';
+        return $results->map(function($row) use ($nameField, $facetType) {
+            $obj = new \stdClass();
+            // For glam_type and media_type, use term_name as the primary field
+            if (in_array($facetType, ['glam_type', 'media_type'])) {
+                $obj->$nameField = $row->term_name;
+            } else {
+                $obj->id = $row->term_id;
+                $obj->$nameField = $row->term_name;
+            }
+            $obj->count = $row->count;
+            return $obj;
+        })->toArray();
+    }
+
+    // =========================================================================
+    // USER BROWSE SETTINGS
+    // =========================================================================
+
+    /**
+     * User browse settings page
+     */
+    public function executeBrowseSettings(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $this->settings = $this->modeService->getBrowseSettings();
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'use_glam_browse' => $request->getParameter('use_glam_browse') ? 1 : 0,
+                'default_sort_field' => $request->getParameter('default_sort_field', 'updated_at'),
+                'default_sort_direction' => $request->getParameter('default_sort_direction', 'desc'),
+                'default_view' => $request->getParameter('default_view', 'list'),
+                'items_per_page' => max(10, min(100, (int) $request->getParameter('items_per_page', 30))),
+                'show_facets' => $request->getParameter('show_facets') ? 1 : 0,
+                'remember_filters' => $request->getParameter('remember_filters') ? 1 : 0,
+            ];
+
+            if ($this->modeService->saveBrowseSettings($data)) {
+                $this->getUser()->setFlash('success', 'Browse settings saved');
+            } else {
+                $this->getUser()->setFlash('error', 'Failed to save settings');
+            }
+
+            $this->redirect('display/browseSettings');
+        }
+    }
+
+    /**
+     * Toggle GLAM browse via AJAX
+     */
+    public function executeToggleGlamBrowse(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $enabled = $request->getParameter('enabled') === '1';
+        $success = $this->modeService->setGlamBrowse($enabled);
+
+        return $this->renderText(json_encode([
+            'success' => $success,
+            'enabled' => $enabled,
+        ]));
+    }
+
+    /**
+     * Save browse settings via AJAX
+     */
+    public function executeSaveBrowseSettings(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid method']));
+        }
+
+        $data = json_decode($request->getContent(), true) ?: $request->getParameterHolder()->getAll();
+
+        $success = $this->modeService->saveBrowseSettings($data);
+
+        return $this->renderText(json_encode(['success' => $success]));
+    }
+
+    /**
+     * Get browse settings via AJAX
+     */
+    public function executeGetBrowseSettings(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $settings = $this->modeService->getBrowseSettings();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'settings' => $settings,
+        ]));
+    }
+
+    /**
+     * Reset browse settings to defaults
+     */
+    public function executeResetBrowseSettings(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $success = $this->modeService->resetBrowseSettings();
+
+        return $this->renderText(json_encode(['success' => $success]));
     }
 }

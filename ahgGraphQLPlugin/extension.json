@@ -1,0 +1,37 @@
+{
+    "name": "AHG GraphQL Plugin",
+    "machine_name": "ahgGraphQLPlugin",
+    "version": "1.0.0",
+    "description": "GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "integration",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1",
+        "ahgAPIPlugin": ">=1.0.0"
+    },
+    "dependencies": [
+        "webonyx/graphql-php"
+    ],
+    "tables": [
+        "ahg_graphql_log"
+    ],
+    "features": [
+        "GraphQL API endpoint at /api/graphql",
+        "Query depth limiting (max 10 levels)",
+        "Complexity analysis (max 1000 per query)",
+        "Introspection control (enabled in dev, disabled in prod)",
+        "Cursor-based pagination (Relay-style connections)",
+        "Reuses existing API key authentication"
+    ],
+    "endpoints": {
+        "graphql": "/api/graphql",
+        "playground": "/api/graphql/playground"
+    },
+    "schema": {
+        "types": ["Item", "Actor", "Repository", "Term", "Taxonomy", "User", "DigitalObject", "Event"],
+        "queries": ["item", "items", "actor", "actors", "repositories", "taxonomies", "taxonomy", "search", "me"]
+    }
+}

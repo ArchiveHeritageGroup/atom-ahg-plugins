@@ -43,12 +43,13 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     }
 }
 
-// Get Spectrum task count for current user (exclude completed tasks)
+// Get Spectrum task count for current user (exclude terminal states)
 if ($isAuthenticated && $hasSpectrum) {
     try {
+        $terminalStates = ['completed', 'resolved', 'disposed', 'reported'];
         $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
             ->where('assigned_to', $userId)
-            ->where('current_state', '!=', 'completed')
+            ->whereNotIn('current_state', $terminalStates)
             ->count();
     } catch (Exception $e) {
         // Table may not exist
@@ -139,7 +140,7 @@ if ($isAuthenticated && $hasSpectrum) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><i class="fas fa-book-reader me-1"></i><?php echo __('Research'); ?></h6></li>
     <li>
-      <a class="dropdown-item" href="<?php echo url_for('@research_workspace'); ?>">
+      <a class="dropdown-item" href="<?php echo url_for('@research_dashboard'); ?>">
         <i class="fas fa-folder-open me-2"></i><?php echo __('My Workspace'); ?>
       </a>
     </li>

@@ -416,6 +416,12 @@ class WorldCatService
         // MARC 520 is Summary/Abstract
         $summary = $getField('520', 'a');
 
+        // Extract enhanced subject headings
+        $subjects = $this->extractSubjectHeadings($doc);
+
+        // Extract classifications
+        $classifications = $this->extractClassifications($doc);
+
         return [
             'success' => true,
             'data' => [
@@ -427,7 +433,9 @@ class WorldCatService
                 'publish_date' => $getField('260', 'c') ?? $getField('264', 'c'),
                 'publish_places' => [$getField('260', 'a') ?? $getField('264', 'a')],
                 'physical_description' => $getField('300', 'a'),
-                'subjects' => $getAllSubfields('650', 'a'),
+                'subjects' => $subjects,
+                'subjects_simple' => array_map(fn($s) => $s['heading'], $subjects), // Backward compatibility
+                'classifications' => $classifications,
                 'isbn_10' => $this->extractIsbn($getAllSubfields('020', 'a'), 10),
                 'isbn_13' => $this->extractIsbn($getAllSubfields('020', 'a'), 13),
                 'oclc_number' => $getField('001'),
@@ -441,6 +449,168 @@ class WorldCatService
                 'description_source' => $summary ? 'WorldCat MARC 520' : null,
             ],
         ];
+    }
+
+    /**
+     * Extract enhanced subject headings from MARC 6XX fields.
+     *
+     * Parses:
+     * - 600 (Personal name) → heading_type: personal
+     * - 610 (Corporate name) → heading_type: corporate
+     * - 611 (Meeting name) → heading_type: meeting
+     * - 650 (Topical) → heading_type: topical
+     * - 651 (Geographic) → heading_type: geographic
+     * - 655 (Genre/form) → heading_type: genre
+     *
+     * @return array Array of subject heading data
+     */
+    private function extractSubjectHeadings(\SimpleXMLElement $doc): array
+    {
+        $subjects = [];
+
+        // Map MARC tags to heading types
+        $tagTypeMap = [
+            '600' => 'personal',
+            '610' => 'corporate',
+            '611' => 'meeting',
+            '650' => 'topical',
+            '651' => 'geographic',
+            '655' => 'genre',
+        ];
+
+        // Map second indicator to thesaurus source
+        $thesaurusMap = [
+            '0' => 'lcsh',      // Library of Congress Subject Headings
+            '1' => 'lc_child',  // LC subject headings for children's literature
+            '2' => 'mesh',      // Medical Subject Headings
+            '3' => 'nal',       // National Agricultural Library subject authority
+            '4' => 'source_na', // Source not specified
+            '5' => 'csh',       // Canadian Subject Headings
+            '6' => 'rvm',       // Répertoire de vedettes-matière
+            '7' => 'other',     // Source specified in $2
+        ];
+
+        foreach ($tagTypeMap as $tag => $headingType) {
+            $datafields = $doc->xpath("//marc:datafield[@tag='{$tag}']");
+
+            foreach ($datafields as $field) {
+                $heading = '';
+                $subdivisions = [];
+                $authorityId = null;
+                $lcshUri = null;
+                $source = null;
+
+                // Get second indicator for thesaurus
+                $ind2 = (string) $field['ind2'];
+                $source = $thesaurusMap[$ind2] ?? 'unknown';
+
+                // Get all subfields
+                foreach ($field->xpath('marc:subfield') as $subfield) {
+                    $code = (string) $subfield['code'];
+                    $value = trim((string) $subfield);
+
+                    switch ($code) {
+                        case 'a': // Main heading
+                            $heading = rtrim($value, '.,;:');
+                            break;
+                        case 'b': // Numeration (for personal names) or subordinate unit
+                        case 'c': // Titles and other words
+                        case 'd': // Dates
+                            // Append to main heading for personal/corporate names
+                            if (in_array($headingType, ['personal', 'corporate', 'meeting'])) {
+                                $heading .= ' ' . rtrim($value, '.,;:');
+                            }
+                            break;
+                        case 'x': // General subdivision
+                            $subdivisions['x'][] = rtrim($value, '.,;:');
+                            break;
+                        case 'y': // Chronological subdivision
+                            $subdivisions['y'][] = rtrim($value, '.,;:');
+                            break;
+                        case 'z': // Geographic subdivision
+                            $subdivisions['z'][] = rtrim($value, '.,;:');
+                            break;
+                        case 'v': // Form subdivision
+                            $subdivisions['v'][] = rtrim($value, '.,;:');
+                            break;
+                        case '0': // Authority record control number or standard number
+                            // Can be LCSH URI like (DLC)sh85034652
+                            $authorityId = $value;
+                            // If it looks like an LCSH ID, construct URI
+                            if (preg_match('/sh\d+/', $value, $matches)) {
+                                $lcshUri = 'http://id.loc.gov/authorities/subjects/' . $matches[0];
+                            }
+                            break;
+                        case '2': // Source of heading or term
+                            if ($source === 'other') {
+                                $source = strtolower($value);
+                            }
+                            break;
+                    }
+                }
+
+                if (!empty($heading)) {
+                    $subjects[] = [
+                        'heading' => trim($heading),
+                        'heading_type' => $headingType,
+                        'source' => $source,
+                        'authority_id' => $authorityId,
+                        'lcsh_uri' => $lcshUri,
+                        'subdivisions' => !empty($subdivisions) ? $subdivisions : null,
+                    ];
+                }
+            }
+        }
+
+        return $subjects;
+    }
+
+    /**
+     * Extract classification numbers from MARC record.
+     *
+     * @return array Classification data with LCC and Dewey numbers
+     */
+    private function extractClassifications(\SimpleXMLElement $doc): array
+    {
+        $classifications = [
+            'lcc' => null,
+            'dewey' => null,
+        ];
+
+        // MARC 050 - Library of Congress Call Number
+        $lcc = $doc->xpath("//marc:datafield[@tag='050']/marc:subfield[@code='a']");
+        if (!empty($lcc)) {
+            $classifications['lcc'] = (string) $lcc[0];
+            // Check for $b (item number) and append
+            $lccB = $doc->xpath("//marc:datafield[@tag='050']/marc:subfield[@code='b']");
+            if (!empty($lccB)) {
+                $classifications['lcc'] .= ' ' . (string) $lccB[0];
+            }
+        }
+
+        // MARC 082 - Dewey Decimal Classification Number
+        $dewey = $doc->xpath("//marc:datafield[@tag='082']/marc:subfield[@code='a']");
+        if (!empty($dewey)) {
+            $classifications['dewey'] = (string) $dewey[0];
+        }
+
+        // MARC 090 - Local LCC (if 050 not present)
+        if (empty($classifications['lcc'])) {
+            $localLcc = $doc->xpath("//marc:datafield[@tag='090']/marc:subfield[@code='a']");
+            if (!empty($localLcc)) {
+                $classifications['lcc'] = (string) $localLcc[0];
+            }
+        }
+
+        // MARC 092 - Local Dewey (if 082 not present)
+        if (empty($classifications['dewey'])) {
+            $localDewey = $doc->xpath("//marc:datafield[@tag='092']/marc:subfield[@code='a']");
+            if (!empty($localDewey)) {
+                $classifications['dewey'] = (string) $localDewey[0];
+            }
+        }
+
+        return $classifications;
     }
 
     /**

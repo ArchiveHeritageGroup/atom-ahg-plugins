@@ -643,39 +643,44 @@ class ObjectAddDigitalObjectAction extends sfAction
             $ioId = $data['io_id'];
             $summary = $data['summary'];
             $keyFields = $data['key_fields'] ?? [];
-            
-            // Now safe to use PDO - transaction is complete
-            $conn = Propel::getConnection();
-            
+
             // Update physical_characteristics
             if (!empty($summary)) {
-                $stmt = $conn->prepare("UPDATE information_object_i18n SET physical_characteristics = ? WHERE id = ? AND culture = ?");
-                $stmt->execute([$summary, $ioId, 'en']);
+                DB::table('information_object_i18n')
+                    ->where('id', $ioId)
+                    ->where('culture', 'en')
+                    ->update(['physical_characteristics' => $summary]);
                 error_log("Updated physical_characteristics for IO $ioId");
             }
-            
+
             // Update title if empty
             if (!empty($keyFields['title'])) {
-                $stmt = $conn->prepare("SELECT title FROM information_object_i18n WHERE id = ? AND culture = ?");
-                $stmt->execute([$ioId, 'en']);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if (empty($row['title'])) {
-                    $stmt = $conn->prepare("UPDATE information_object_i18n SET title = ? WHERE id = ? AND culture = ?");
-                    $stmt->execute([$keyFields['title'], $ioId, 'en']);
+                $row = DB::table('information_object_i18n')
+                    ->where('id', $ioId)
+                    ->where('culture', 'en')
+                    ->first(['title']);
+                if ($row && empty($row->title)) {
+                    DB::table('information_object_i18n')
+                        ->where('id', $ioId)
+                        ->where('culture', 'en')
+                        ->update(['title' => $keyFields['title']]);
                 }
             }
-            
+
             // Update scope_and_content if empty
             if (!empty($keyFields['description'])) {
-                $stmt = $conn->prepare("SELECT scope_and_content FROM information_object_i18n WHERE id = ? AND culture = ?");
-                $stmt->execute([$ioId, 'en']);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if (empty($row['scope_and_content'])) {
-                    $stmt = $conn->prepare("UPDATE information_object_i18n SET scope_and_content = ? WHERE id = ? AND culture = ?");
-                    $stmt->execute([$keyFields['description'], $ioId, 'en']);
+                $row = DB::table('information_object_i18n')
+                    ->where('id', $ioId)
+                    ->where('culture', 'en')
+                    ->first(['scope_and_content']);
+                if ($row && empty($row->scope_and_content)) {
+                    DB::table('information_object_i18n')
+                        ->where('id', $ioId)
+                        ->where('culture', 'en')
+                        ->update(['scope_and_content' => $keyFields['description']]);
                 }
             }
-            
+
             error_log("Metadata applied for IO $ioId");
             
         } catch (\Throwable $e) {

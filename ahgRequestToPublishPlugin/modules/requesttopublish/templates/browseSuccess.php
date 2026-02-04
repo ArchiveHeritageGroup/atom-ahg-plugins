@@ -97,7 +97,7 @@
                   <?php $informationObjectsRequestToPublish = QubitInformationObject::getById($item->object_id); ?>
                   <?php if ($informationObjectsRequestToPublish && isset($informationObjectsRequestToPublish->identifier)): ?>
                     <i class="fas fa-file-alt me-1 text-muted"></i>
-                    <?php echo link_to(render_title($informationObjectsRequestToPublish), [$informationObjectsRequestToPublish, 'module' => 'informationobject']); ?>
+                    <?php echo link_to($informationObjectsRequestToPublish->title ?? $informationObjectsRequestToPublish->slug, ['module' => 'informationobject', 'slug' => $informationObjectsRequestToPublish->slug]); ?>
                   <?php endif; ?>
                 </td>
                 <td>

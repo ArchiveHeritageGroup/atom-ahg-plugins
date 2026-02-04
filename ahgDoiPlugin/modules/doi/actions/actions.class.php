@@ -47,7 +47,15 @@ class doiActions extends sfActions
             $query->where('d.status', $status);
         }
 
-        $this->dois = $query->orderByDesc('d.minted_at')->paginate(50);
+        // Manual pagination
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+
+        $this->totalCount = (clone $query)->count();
+        $this->dois = $query->orderByDesc('d.minted_at')->offset($offset)->limit($limit)->get();
+        $this->currentPage = $page;
+        $this->totalPages = ceil($this->totalCount / $limit);
         $this->currentStatus = $status;
     }
 
@@ -238,11 +246,11 @@ class doiActions extends sfActions
 
         $this->config = $service->getConfig();
         $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository as r')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('r.id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('r.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
-            ->select(['r.id', 'ri.authorized_form_of_name as name'])
+            ->select(['r.id', 'ai.authorized_form_of_name as name'])
             ->get();
     }
 
@@ -319,12 +327,12 @@ class doiActions extends sfActions
         // By repository
         $this->byRepository = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
             ->join('information_object as io', 'd.information_object_id', '=', 'io.id')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('io.repository_id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('io.repository_id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
-            ->selectRaw('ri.authorized_form_of_name as repository, COUNT(*) as count')
-            ->groupBy('io.repository_id', 'ri.authorized_form_of_name')
+            ->selectRaw('ai.authorized_form_of_name as repository, COUNT(*) as count')
+            ->groupBy('io.repository_id', 'ai.authorized_form_of_name')
             ->orderByDesc('count')
             ->get();
     }
@@ -467,11 +475,11 @@ class doiActions extends sfActions
         // Show sync form
         $this->stats = $service->getStatistics();
         $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository as r')
-            ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('r.id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('r.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', 'en');
             })
-            ->select(['r.id', 'ri.authorized_form_of_name as name'])
+            ->select(['r.id', 'ai.authorized_form_of_name as name'])
             ->get();
     }
 

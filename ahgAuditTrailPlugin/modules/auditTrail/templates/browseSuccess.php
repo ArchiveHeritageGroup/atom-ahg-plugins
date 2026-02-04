@@ -34,7 +34,13 @@
       </div>
       <div class="mb-3">
         <label class="form-label"><?php echo __('Username') ?></label>
-        <input type="text" name="username" class="form-control form-control-sm" value="<?php echo htmlspecialchars($currentFiltersRaw['username'] ?? '') ?>">
+        <?php $usernamesRaw = $sf_data->getRaw('usernames'); ?>
+        <select name="username" class="form-select form-select-sm">
+          <option value=""><?php echo __('All Users') ?></option>
+          <?php foreach ($usernamesRaw as $username): ?>
+            <option value="<?php echo htmlspecialchars($username) ?>" <?php echo ($currentFiltersRaw['username'] ?? '') === $username ? 'selected' : '' ?>><?php echo htmlspecialchars($username) ?></option>
+          <?php endforeach; ?>
+        </select>
       </div>
       <div class="mb-3">
         <label class="form-label"><?php echo __('From Date') ?></label>

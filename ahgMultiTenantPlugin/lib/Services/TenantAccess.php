@@ -2,6 +2,8 @@
 
 namespace AhgMultiTenant\Services;
 
+use AhgMultiTenant\Models\Tenant;
+use AhgMultiTenant\Models\TenantUser;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -10,10 +12,316 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Manages user access to repositories (tenants).
  * Handles user assignment, access checks, and permission management.
  *
+ * Now supports both legacy repository-based access (ahg_settings)
+ * and new tenant-based access (heritage_tenant tables).
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
 class TenantAccess
 {
+    /**
+     * Check if tenant tables exist (for migration compatibility)
+     *
+     * @return bool
+     */
+    private static function tenantTablesExist(): bool
+    {
+        static $exists = null;
+        if ($exists === null) {
+            try {
+                $exists = DB::getSchemaBuilder()->hasTable('heritage_tenant');
+            } catch (\Exception $e) {
+                $exists = false;
+            }
+        }
+        return $exists;
+    }
+
+    /**
+     * Check if user can access a tenant (new table structure)
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return bool
+     */
+    public static function canAccessTenant(int $userId, int $tenantId): bool
+    {
+        // Admins can access all
+        if (TenantContext::isAdmin($userId)) {
+            return true;
+        }
+
+        // Check tenant exists and is accessible
+        $tenant = Tenant::find($tenantId);
+        if (!$tenant || !$tenant->canAccess()) {
+            return false;
+        }
+
+        // Check if user is assigned to this tenant
+        return TenantUser::findByTenantAndUser($tenantId, $userId) !== null;
+    }
+
+    /**
+     * Check if user can manage users in a tenant
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return bool
+     */
+    public static function canManageTenantUsers(int $userId, int $tenantId): bool
+    {
+        if (TenantContext::isAdmin($userId)) {
+            return true;
+        }
+
+        return TenantUser::hasMinimumRole($userId, $tenantId, TenantUser::ROLE_SUPER_USER);
+    }
+
+    /**
+     * Check if user can manage tenant settings
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @return bool
+     */
+    public static function canManageTenantSettings(int $userId, int $tenantId): bool
+    {
+        if (TenantContext::isAdmin($userId)) {
+            return true;
+        }
+
+        return TenantUser::hasMinimumRole($userId, $tenantId, TenantUser::ROLE_SUPER_USER);
+    }
+
+    /**
+     * Check if user can manage tenant status (activate, suspend)
+     * Only admins can manage tenant status
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public static function canManageTenantStatus(int $userId): bool
+    {
+        return TenantContext::isAdmin($userId);
+    }
+
+    /**
+     * Assign user to tenant with role
+     *
+     * @param int $userId User to assign
+     * @param int $tenantId Tenant ID
+     * @param string $role Role to assign
+     * @param int $assignedBy User performing the assignment
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public static function assignUserToTenant(
+        int $userId,
+        int $tenantId,
+        string $role,
+        int $assignedBy
+    ): array {
+        // Check permission
+        if (!self::canManageTenantUsers($assignedBy, $tenantId)) {
+            return [
+                'success' => false,
+                'message' => 'You do not have permission to assign users to this tenant.'
+            ];
+        }
+
+        // Check if assigner can assign this role
+        if (!TenantContext::isAdmin($assignedBy)) {
+            // Non-admins cannot assign owner role
+            if ($role === TenantUser::ROLE_OWNER) {
+                return [
+                    'success' => false,
+                    'message' => 'Only administrators can assign the owner role.'
+                ];
+            }
+        }
+
+        // Verify user exists
+        $userExists = DB::table('user')->where('id', $userId)->exists();
+        if (!$userExists) {
+            return [
+                'success' => false,
+                'message' => 'User not found.'
+            ];
+        }
+
+        // Verify tenant exists
+        $tenant = Tenant::find($tenantId);
+        if (!$tenant) {
+            return [
+                'success' => false,
+                'message' => 'Tenant not found.'
+            ];
+        }
+
+        // Assign user
+        $assignment = TenantUser::assign($tenantId, $userId, $role, $assignedBy);
+
+        if (!$assignment) {
+            return [
+                'success' => false,
+                'message' => 'Failed to assign user to tenant.'
+            ];
+        }
+
+        // Log the action
+        self::logAction('assign_user_to_tenant', $tenantId, $userId, $assignedBy, [
+            'role' => $role,
+        ]);
+
+        // Clear cache
+        TenantContext::clearCache();
+
+        return [
+            'success' => true,
+            'message' => 'User successfully assigned to tenant.'
+        ];
+    }
+
+    /**
+     * Remove user from tenant
+     *
+     * @param int $userId User to remove
+     * @param int $tenantId Tenant ID
+     * @param int $removedBy User performing the removal
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public static function removeUserFromTenant(int $userId, int $tenantId, int $removedBy): array
+    {
+        // Check permission
+        if (!self::canManageTenantUsers($removedBy, $tenantId)) {
+            return [
+                'success' => false,
+                'message' => 'You do not have permission to remove users from this tenant.'
+            ];
+        }
+
+        $assignment = TenantUser::findByTenantAndUser($tenantId, $userId);
+
+        if (!$assignment) {
+            return [
+                'success' => false,
+                'message' => 'User is not assigned to this tenant.'
+            ];
+        }
+
+        // Prevent removing the last owner
+        if ($assignment->role === TenantUser::ROLE_OWNER) {
+            $ownerCount = count(TenantUser::getUsersForTenant($tenantId, TenantUser::ROLE_OWNER));
+            if ($ownerCount <= 1) {
+                return [
+                    'success' => false,
+                    'message' => 'Cannot remove the last owner from tenant.'
+                ];
+            }
+        }
+
+        // Non-admins cannot remove owners
+        if (!TenantContext::isAdmin($removedBy) && $assignment->role === TenantUser::ROLE_OWNER) {
+            return [
+                'success' => false,
+                'message' => 'Only administrators can remove owners.'
+            ];
+        }
+
+        if (!TenantUser::remove($tenantId, $userId)) {
+            return [
+                'success' => false,
+                'message' => 'Failed to remove user from tenant.'
+            ];
+        }
+
+        // Log the action
+        self::logAction('remove_user_from_tenant', $tenantId, $userId, $removedBy, [
+            'previous_role' => $assignment->role,
+        ]);
+
+        // Clear cache
+        TenantContext::clearCache();
+
+        return [
+            'success' => true,
+            'message' => 'User successfully removed from tenant.'
+        ];
+    }
+
+    /**
+     * Update user role in tenant
+     *
+     * @param int $userId
+     * @param int $tenantId
+     * @param string $newRole
+     * @param int $updatedBy
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public static function updateUserTenantRole(
+        int $userId,
+        int $tenantId,
+        string $newRole,
+        int $updatedBy
+    ): array {
+        // Check permission
+        if (!self::canManageTenantUsers($updatedBy, $tenantId)) {
+            return [
+                'success' => false,
+                'message' => 'You do not have permission to manage users in this tenant.'
+            ];
+        }
+
+        $assignment = TenantUser::findByTenantAndUser($tenantId, $userId);
+
+        if (!$assignment) {
+            return [
+                'success' => false,
+                'message' => 'User is not assigned to this tenant.'
+            ];
+        }
+
+        // Non-admins cannot promote to or demote from owner
+        if (!TenantContext::isAdmin($updatedBy)) {
+            if ($newRole === TenantUser::ROLE_OWNER || $assignment->role === TenantUser::ROLE_OWNER) {
+                return [
+                    'success' => false,
+                    'message' => 'Only administrators can change owner roles.'
+                ];
+            }
+        }
+
+        // Prevent demoting the last owner
+        if ($assignment->role === TenantUser::ROLE_OWNER && $newRole !== TenantUser::ROLE_OWNER) {
+            $ownerCount = count(TenantUser::getUsersForTenant($tenantId, TenantUser::ROLE_OWNER));
+            if ($ownerCount <= 1) {
+                return [
+                    'success' => false,
+                    'message' => 'Cannot demote the last owner.'
+                ];
+            }
+        }
+
+        $previousRole = $assignment->role;
+
+        if (!TenantUser::updateRole($tenantId, $userId, $newRole)) {
+            return [
+                'success' => false,
+                'message' => 'Failed to update user role.'
+            ];
+        }
+
+        // Log the action
+        self::logAction('update_user_tenant_role', $tenantId, $userId, $updatedBy, [
+            'previous_role' => $previousRole,
+            'new_role' => $newRole,
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'User role updated successfully.'
+        ];
+    }
+
     /**
      * Check if user can access a specific repository
      *
@@ -408,24 +716,30 @@ class TenantAccess
      * Log tenant access action
      *
      * @param string $action Action type
-     * @param int $repositoryId Repository ID
+     * @param int $objectId Object ID (repository or tenant)
      * @param int $targetUserId Target user ID
      * @param int $actorUserId Actor user ID
+     * @param array $additionalData Additional data to log
      */
-    private static function logAction(string $action, int $repositoryId, int $targetUserId, int $actorUserId): void
-    {
+    private static function logAction(
+        string $action,
+        int $objectId,
+        int $targetUserId,
+        int $actorUserId,
+        array $additionalData = []
+    ): void {
         try {
             // Use AhgAuditService if available
             if (class_exists('AhgAuditTrail\\Services\\AhgAuditService')) {
                 \AhgAuditTrail\Services\AhgAuditService::logAction(
                     $action,
                     'TenantAccess',
-                    $repositoryId,
-                    [
+                    $objectId,
+                    array_merge([
                         'user_id' => $actorUserId,
                         'target_user_id' => $targetUserId,
-                        'repository_id' => $repositoryId,
-                    ]
+                        'object_id' => $objectId,
+                    ], $additionalData)
                 );
             }
         } catch (\Exception $e) {

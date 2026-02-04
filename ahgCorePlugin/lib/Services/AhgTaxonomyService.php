@@ -64,6 +64,35 @@ class AhgTaxonomyService
     public const SHIPMENT_STATUS = 'shipment_status';
     public const COST_TYPE = 'cost_type';
 
+    // Embargo
+    public const EMBARGO_STATUS = 'embargo_status';
+
+    // Research/Visitors
+    public const ID_TYPE = 'id_type';
+    public const ORGANIZATION_TYPE = 'organization_type';
+    public const EQUIPMENT_TYPE = 'equipment_type';
+    public const EQUIPMENT_CONDITION = 'equipment_condition';
+    public const WORKSPACE_PRIVACY = 'workspace_privacy';
+
+    // Library/Bibliographic
+    public const CREATOR_ROLE = 'creator_role';
+
+    // Documents/Agreements
+    public const DOCUMENT_TYPE = 'document_type';
+    public const REMINDER_TYPE = 'reminder_type';
+
+    // Export Formats
+    public const RDF_FORMAT = 'rdf_format';
+
+    // Federation
+    public const FEDERATION_SYNC_DIRECTION = 'federation_sync_direction';
+    public const FEDERATION_CONFLICT_RESOLUTION = 'federation_conflict_resolution';
+    public const FEDERATION_HARVEST_ACTION = 'federation_harvest_action';
+    public const FEDERATION_SESSION_STATUS = 'federation_session_status';
+    public const FEDERATION_MAPPING_STATUS = 'federation_mapping_status';
+    public const FEDERATION_CHANGE_TYPE = 'federation_change_type';
+    public const FEDERATION_SEARCH_STATUS = 'federation_search_status';
+
     // ========================================================================
     // PROPERTIES
     // ========================================================================
@@ -425,6 +454,140 @@ class AhgTaxonomyService
     public function getCostTypes(bool $includeEmpty = true): array
     {
         return $this->getTermsAsChoices(self::COST_TYPE, $includeEmpty);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - EMBARGO
+    // ========================================================================
+
+    public function getEmbargoStatuses(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::EMBARGO_STATUS, $includeEmpty);
+    }
+
+    public function getEmbargoStatusesWithColors(): array
+    {
+        return $this->getTermsWithAttributes(self::EMBARGO_STATUS);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - RESEARCH/VISITORS
+    // ========================================================================
+
+    public function getIdTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::ID_TYPE, $includeEmpty);
+    }
+
+    public function getOrganizationTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::ORGANIZATION_TYPE, $includeEmpty);
+    }
+
+    public function getEquipmentTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::EQUIPMENT_TYPE, $includeEmpty);
+    }
+
+    public function getEquipmentConditions(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::EQUIPMENT_CONDITION, $includeEmpty);
+    }
+
+    public function getEquipmentConditionsWithColors(): array
+    {
+        return $this->getTermsWithAttributes(self::EQUIPMENT_CONDITION);
+    }
+
+    public function getWorkspacePrivacyOptions(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::WORKSPACE_PRIVACY, $includeEmpty);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - LIBRARY/BIBLIOGRAPHIC
+    // ========================================================================
+
+    public function getCreatorRoles(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::CREATOR_ROLE, $includeEmpty);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - DOCUMENTS/AGREEMENTS
+    // ========================================================================
+
+    public function getDocumentTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::DOCUMENT_TYPE, $includeEmpty);
+    }
+
+    public function getReminderTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::REMINDER_TYPE, $includeEmpty);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - EXPORT FORMATS
+    // ========================================================================
+
+    public function getRdfFormats(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::RDF_FORMAT, $includeEmpty);
+    }
+
+    // ========================================================================
+    // CONVENIENCE METHODS - FEDERATION
+    // ========================================================================
+
+    public function getFederationSyncDirections(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_SYNC_DIRECTION, $includeEmpty);
+    }
+
+    public function getFederationConflictResolutions(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_CONFLICT_RESOLUTION, $includeEmpty);
+    }
+
+    public function getFederationHarvestActions(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_HARVEST_ACTION, $includeEmpty);
+    }
+
+    public function getFederationSessionStatuses(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_SESSION_STATUS, $includeEmpty);
+    }
+
+    public function getFederationSessionStatusesWithColors(): array
+    {
+        return $this->getTermsWithAttributes(self::FEDERATION_SESSION_STATUS);
+    }
+
+    public function getFederationMappingStatuses(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_MAPPING_STATUS, $includeEmpty);
+    }
+
+    public function getFederationMappingStatusesWithColors(): array
+    {
+        return $this->getTermsWithAttributes(self::FEDERATION_MAPPING_STATUS);
+    }
+
+    public function getFederationChangeTypes(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_CHANGE_TYPE, $includeEmpty);
+    }
+
+    public function getFederationSearchStatuses(bool $includeEmpty = true): array
+    {
+        return $this->getTermsAsChoices(self::FEDERATION_SEARCH_STATUS, $includeEmpty);
+    }
+
+    public function getFederationSearchStatusesWithColors(): array
+    {
+        return $this->getTermsWithAttributes(self::FEDERATION_SEARCH_STATUS);
     }
 
     // ========================================================================

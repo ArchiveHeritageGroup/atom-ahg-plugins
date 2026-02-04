@@ -6,6 +6,7 @@ namespace AhgDisplay\Services;
 
 use AhgDisplay\Repositories\DisplayPreferenceRepository;
 use AhgDisplay\Repositories\GlobalDisplaySettingsRepository;
+use AhgDisplay\Repositories\UserBrowseSettingsRepository;
 
 /**
  * Service for managing display modes across the application.
@@ -14,14 +15,17 @@ class DisplayModeService
 {
     protected DisplayPreferenceRepository $userRepo;
     protected GlobalDisplaySettingsRepository $globalRepo;
+    protected UserBrowseSettingsRepository $browseRepo;
     protected ?int $currentUserId = null;
 
     public function __construct(
         ?DisplayPreferenceRepository $userRepo = null,
-        ?GlobalDisplaySettingsRepository $globalRepo = null
+        ?GlobalDisplaySettingsRepository $globalRepo = null,
+        ?UserBrowseSettingsRepository $browseRepo = null
     ) {
         $this->userRepo = $userRepo ?? new DisplayPreferenceRepository();
         $this->globalRepo = $globalRepo ?? new GlobalDisplaySettingsRepository();
+        $this->browseRepo = $browseRepo ?? new UserBrowseSettingsRepository();
     }
 
     public function setCurrentUser(?int $userId): self
@@ -203,5 +207,93 @@ class DisplayModeService
     public function getAuditLog(array $filters = [], int $limit = 100): \Illuminate\Support\Collection
     {
         return $this->globalRepo->getAuditLog($filters, $limit);
+    }
+
+    // =========================================================================
+    // USER BROWSE SETTINGS
+    // =========================================================================
+
+    /**
+     * Get user's browse settings
+     */
+    public function getBrowseSettings(): array
+    {
+        return $this->browseRepo->getSettings($this->getCurrentUserId());
+    }
+
+    /**
+     * Check if user has GLAM browse enabled
+     */
+    public function useGlamBrowse(): bool
+    {
+        $userId = $this->getCurrentUserId();
+        if ($userId === 0) {
+            return false; // Guest users use default browse
+        }
+        return $this->browseRepo->useGlamBrowse($userId);
+    }
+
+    /**
+     * Toggle GLAM browse for current user
+     */
+    public function setGlamBrowse(bool $enabled): bool
+    {
+        $userId = $this->getCurrentUserId();
+        if ($userId === 0) {
+            return false;
+        }
+        return $this->browseRepo->setGlamBrowse($userId, $enabled);
+    }
+
+    /**
+     * Save browse settings for current user
+     */
+    public function saveBrowseSettings(array $data): bool
+    {
+        $userId = $this->getCurrentUserId();
+        if ($userId === 0) {
+            return false;
+        }
+        return $this->browseRepo->saveSettings($userId, $data);
+    }
+
+    /**
+     * Save last used filters
+     */
+    public function saveLastFilters(array $filters): bool
+    {
+        $userId = $this->getCurrentUserId();
+        if ($userId === 0) {
+            return false;
+        }
+        return $this->browseRepo->saveLastFilters($userId, $filters);
+    }
+
+    /**
+     * Get last used filters
+     */
+    public function getLastFilters(): array
+    {
+        return $this->browseRepo->getLastFilters($this->getCurrentUserId());
+    }
+
+    /**
+     * Check if should redirect to GLAM browse
+     */
+    public function shouldRedirectToGlam(): bool
+    {
+        return $this->useGlamBrowse();
+    }
+
+    /**
+     * Reset browse settings for current user
+     */
+    public function resetBrowseSettings(): bool
+    {
+        $userId = $this->getCurrentUserId();
+        if ($userId === 0) {
+            return false;
+        }
+        return $this->browseRepo->resetSettings($userId);
     }
 }

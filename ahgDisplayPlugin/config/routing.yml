@@ -40,6 +40,10 @@ glam_browse:
   url: /glam/browse
   param: { module: display, action: browse }
 
+glam_browse_ajax:
+  url: /glam/browseAjax
+  param: { module: display, action: browseAjax }
+
 glam_print:
   url: /glam/print
   param: { module: display, action: print }
@@ -51,3 +55,24 @@ glam_export_csv:
 glam_change_type:
   url: /glam/changeType
   param: { module: display, action: changeType }
+
+# User browse settings
+glam_browse_settings:
+  url: /glam/settings
+  param: { module: display, action: browseSettings }
+
+glam_toggle_glam_browse:
+  url: /glam/toggleGlamBrowse
+  param: { module: display, action: toggleGlamBrowse }
+
+glam_save_browse_settings:
+  url: /glam/saveBrowseSettings
+  param: { module: display, action: saveBrowseSettings }
+
+glam_get_browse_settings:
+  url: /glam/getBrowseSettings
+  param: { module: display, action: getBrowseSettings }
+
+glam_reset_browse_settings:
+  url: /glam/resetBrowseSettings
+  param: { module: display, action: resetBrowseSettings }

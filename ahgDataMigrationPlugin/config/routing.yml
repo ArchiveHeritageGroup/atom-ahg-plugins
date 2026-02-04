@@ -97,3 +97,28 @@ dataMigration_loadMapping:
 dataMigration_execute:
   url: /dataMigration/execute
   param: { module: dataMigration, action: execute }
+
+# Validation routes
+dataMigration_validate:
+  url: /dataMigration/validate
+  param: { module: dataMigration, action: validate }
+
+dataMigration_previewValidation:
+  url: /dataMigration/previewValidation
+  param: { module: dataMigration, action: previewValidation }
+
+# Mapping profile export/import
+dataMigration_exportMapping:
+  url: /dataMigration/exportMapping/:id
+  param: { module: dataMigration, action: exportMapping }
+  requirements: { id: \d+ }
+
+dataMigration_importMapping:
+  url: /dataMigration/importMapping
+  param: { module: dataMigration, action: importMapping }
+
+# Sector-specific export
+dataMigration_sectorExport:
+  url: /dataMigration/export/:sector
+  param: { module: dataMigration, action: sectorExport }
+  requirements: { sector: archive|museum|library|gallery|dam }

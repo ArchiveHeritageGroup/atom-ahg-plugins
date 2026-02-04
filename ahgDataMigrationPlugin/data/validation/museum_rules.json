@@ -1,0 +1,107 @@
+{
+    "sector": "museum",
+    "name": "Museum (Spectrum 5.0)",
+    "version": "1.0.0",
+    "rules": {
+        "required": [
+            "objectNumber",
+            "objectName"
+        ],
+        "types": {
+            "legacyId": "string",
+            "parentId": "string",
+            "objectNumber": "string",
+            "objectName": "string",
+            "title": "string",
+            "briefDescription": "text",
+            "numberOfObjects": "integer",
+            "materials": "text",
+            "techniques": "text",
+            "dimensions": "text",
+            "inscription": "text",
+            "productionDate": "string",
+            "productionPlace": "string",
+            "maker": "string",
+            "acquisitionDate": "date",
+            "acquisitionMethod": "string",
+            "currentLocation": "string",
+            "normalLocation": "string",
+            "condition": "text",
+            "conservationNote": "text",
+            "provenance": "text",
+            "valuation": "decimal",
+            "valuationDate": "date",
+            "hazards": "text",
+            "objectClassification": "string",
+            "collector": "string",
+            "culture": "string"
+        },
+        "patterns": {
+            "objectNumber": "^[A-Z0-9][A-Z0-9\\-\\.\\s]*$",
+            "culture": "^[a-z]{2}(_[A-Z]{2})?$"
+        },
+        "maxLengths": {
+            "objectNumber": 50,
+            "objectName": 255,
+            "title": 1024,
+            "maker": 500,
+            "currentLocation": 255,
+            "culture": 10
+        },
+        "enums": {
+            "acquisitionMethod": [
+                "purchase",
+                "gift",
+                "donation",
+                "bequest",
+                "transfer",
+                "exchange",
+                "field collection",
+                "excavation",
+                "loan",
+                "found",
+                "conversion",
+                "unknown"
+            ],
+            "condition": [
+                "excellent",
+                "good",
+                "fair",
+                "poor",
+                "unacceptable"
+            ]
+        },
+        "referential": {
+            "parentId": "legacyId"
+        }
+    },
+    "warnings": {
+        "recommended": [
+            "briefDescription",
+            "acquisitionDate",
+            "currentLocation"
+        ]
+    },
+    "descriptions": {
+        "legacyId": "Unique identifier from source system for matching during updates",
+        "parentId": "Legacy ID of parent record (for grouped objects)",
+        "objectNumber": "Unique accession or catalog number (Spectrum: Object identification)",
+        "objectName": "Common name or type of object (Spectrum: Object identification)",
+        "title": "Title or name given to the object",
+        "briefDescription": "Short description of the object",
+        "numberOfObjects": "Count of items if this is a group",
+        "materials": "Materials the object is made from (Spectrum: Technical description)",
+        "techniques": "Manufacturing techniques used",
+        "dimensions": "Physical dimensions with units (e.g., H: 30 cm; W: 20 cm)",
+        "inscription": "Any text, marks, or inscriptions on the object",
+        "productionDate": "Date or date range of production",
+        "productionPlace": "Place where the object was made",
+        "maker": "Name of creator/manufacturer",
+        "acquisitionDate": "Date object was acquired (YYYY-MM-DD)",
+        "acquisitionMethod": "How the object was acquired",
+        "currentLocation": "Current storage/display location",
+        "condition": "Current condition assessment",
+        "provenance": "Ownership history",
+        "culture": "ISO 639-1 language code"
+    }
+}

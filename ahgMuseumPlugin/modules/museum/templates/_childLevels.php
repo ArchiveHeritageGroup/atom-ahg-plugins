@@ -24,7 +24,7 @@
           <select name="updateChildLevels[0][levelOfDescription]" id="updateChildLevels_0_levelOfDescription">
             <option value="">&nbsp;</option>
             <?php foreach (DB::table("term")->join("term_i18n", "term_i18n.id", "=", "term.id")->where("term.taxonomy_id", 34)->where("term_i18n.culture", sfContext::getInstance()->getUser()->getCulture())->select("term.id", "term_i18n.name")->get() as $item) { ?>
-              <option value="<?php echo $item->id; ?>"><?php echo $item->__toString(); ?></option>
+              <option value="<?php echo $item->id; ?>"><?php echo $item->name; ?></option>
             <?php } ?>
           </select>
         </td><td>

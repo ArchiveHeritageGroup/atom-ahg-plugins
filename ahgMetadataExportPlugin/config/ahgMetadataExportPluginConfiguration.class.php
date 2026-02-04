@@ -82,6 +82,12 @@ class ahgMetadataExportPluginConfiguration extends sfPluginConfiguration
             'output' => 'XML',
             'description' => 'Preservation Metadata Implementation Strategies',
         ],
+        'schema-org' => [
+            'name' => 'Schema.org',
+            'sector' => 'Web/SEO',
+            'output' => 'JSON-LD',
+            'description' => 'Schema.org structured data for linked data and SEO',
+        ],
     ];
 
     /**
@@ -94,6 +100,22 @@ class ahgMetadataExportPluginConfiguration extends sfPluginConfiguration
 
         // Enable routing
         $this->dispatcher->connect('routing.load_configuration', [$this, 'configureRouting']);
+
+        // Register content negotiation filter
+        $this->dispatcher->connect('context.load_factories', [$this, 'registerFilter']);
+    }
+
+    /**
+     * Register content negotiation filter
+     *
+     * @param sfEvent $event
+     */
+    public function registerFilter(sfEvent $event)
+    {
+        $filterFile = dirname(__DIR__) . '/lib/Filters/LinkedDataContentNegotiationFilter.php';
+        if (file_exists($filterFile)) {
+            require_once $filterFile;
+        }
     }
 
     /**
@@ -164,6 +186,59 @@ class ahgMetadataExportPluginConfiguration extends sfPluginConfiguration
             new sfRoute(
                 '/metadataexport/bulk/:format',
                 ['module' => 'metadataExport', 'action' => 'bulk']
+            )
+        );
+
+        // ===========================================
+        // Linked Data / JSON-LD Routes
+        // ===========================================
+
+        // Linked data sitemap
+        $routing->prependRoute(
+            'linked_data_sitemap',
+            new sfRoute(
+                '/sitemap-ld.xml',
+                ['module' => 'linkedData', 'action' => 'sitemap']
+            )
+        );
+
+        // JSON-LD endpoint for records (with .jsonld extension)
+        $routing->prependRoute(
+            'linked_data_record_jsonld',
+            new sfRoute(
+                '/:slug.jsonld',
+                ['module' => 'linkedData', 'action' => 'record'],
+                ['slug' => '[a-z0-9-]+']
+            )
+        );
+
+        // JSON-LD endpoint for repositories
+        $routing->prependRoute(
+            'linked_data_repository_jsonld',
+            new sfRoute(
+                '/repository/:slug.jsonld',
+                ['module' => 'linkedData', 'action' => 'repository'],
+                ['slug' => '[a-z0-9-]+']
+            )
+        );
+
+        // JSON-LD endpoint for actors
+        $routing->prependRoute(
+            'linked_data_actor_jsonld',
+            new sfRoute(
+                '/actor/:slug.jsonld',
+                ['module' => 'linkedData', 'action' => 'actor'],
+                ['slug' => '[a-z0-9-]+']
+            )
+        );
+
+        // Content negotiation endpoint
+        $routing->prependRoute(
+            'linked_data_negotiate',
+            new sfRoute(
+                '/linkeddata/:type/:slug',
+                ['module' => 'linkedData', 'action' => 'negotiate'],
+                ['type' => 'record|repository|actor', 'slug' => '[a-z0-9-]+']
             )
         );
     }

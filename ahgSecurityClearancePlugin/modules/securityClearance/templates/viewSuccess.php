@@ -43,10 +43,14 @@
                 if ($clearance->level >= 4) $levelClass = 'danger';
                 elseif ($clearance->level >= 2) $levelClass = 'warning';
                 else $levelClass = 'success';
+                $isExpired = !empty($clearance->is_expired);
                 ?>
-                <span class="badge bg-<?php echo $levelClass; ?> fs-5 mb-2">
+                <span class="badge bg-<?php echo $isExpired ? 'secondary' : $levelClass; ?> fs-5 mb-2">
                   <?php echo htmlspecialchars($clearance->classification_name); ?>
                 </span>
+                <?php if ($isExpired): ?>
+                  <br><span class="badge bg-danger fs-6 mb-2">EXPIRED</span>
+                <?php endif; ?>
                 <p class="small text-muted mb-0">Level <?php echo $clearance->level; ?></p>
               <?php else: ?>
                 <span class="badge bg-secondary fs-5">No Clearance</span>
@@ -73,7 +77,10 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>Expires:</span>
-                  <strong><?php echo $clearance->expires_at ? date('M j, Y', strtotime($clearance->expires_at)) : 'Never'; ?></strong>
+                  <strong class="<?php echo !empty($clearance->is_expired) ? 'text-danger' : ''; ?>">
+                    <?php echo $clearance->expires_at ? date('M j, Y', strtotime($clearance->expires_at)) : 'Never'; ?>
+                    <?php if (!empty($clearance->is_expired)): ?> (Expired)<?php endif; ?>
+                  </strong>
                 </li>
                 <?php if ($clearance->notes): ?>
                   <li class="list-group-item">

@@ -111,6 +111,37 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
 
 <!-- Tom Select CSS & JS -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* Fix Tom Select dropdown text visibility */
+.ts-dropdown { background: #fff !important; color: #212529 !important; }
+.ts-dropdown .option { color: #212529 !important; }
+.ts-dropdown .option.active { background: #0d6efd !important; color: #fff !important; }
+.ts-control { background: #fff !important; color: #212529 !important; }
+.ts-control input { color: #212529 !important; }
+.ts-control .item { color: #212529 !important; }
+/* Fix annotation card text visibility */
+.card { background-color: #fff !important; }
+.card .card-header { color: #212529 !important; }
+.card .card-header strong { color: #212529 !important; }
+.card .card-body { color: #212529 !important; }
+.card .card-body .card-text { color: #212529 !important; }
+.card .card-footer { color: #6c757d !important; }
+.card .card-footer a { color: #0d6efd !important; }
+.dropdown-menu { background-color: #fff !important; border: 1px solid rgba(0,0,0,.15) !important; }
+.dropdown-menu .dropdown-item { color: #212529 !important; background-color: transparent !important; }
+.dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus { background-color: #e9ecef !important; color: #212529 !important; }
+.dropdown-menu .dropdown-item.text-danger { color: #dc3545 !important; }
+.dropdown-menu .dropdown-item.text-danger:hover { background-color: #f8d7da !important; }
+.dropdown-menu .dropdown-divider { border-color: #dee2e6 !important; }
+.dropdown-menu a.dropdown-item { color: #212529 !important; }
+.dropdown-menu a.edit-annotation { color: #212529 !important; }
+/* Fix modal text visibility */
+.modal-content { background-color: #fff !important; color: #212529 !important; }
+.modal-header { color: #212529 !important; }
+.modal-body { color: #212529 !important; }
+.modal-body .form-label { color: #212529 !important; }
+.modal-body .form-control { background-color: #fff !important; color: #212529 !important; }
+</style>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

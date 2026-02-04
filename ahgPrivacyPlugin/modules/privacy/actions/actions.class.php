@@ -19,6 +19,16 @@ class privacyActions extends sfActions
     }
 
     /**
+     * Privacy Dashboard (public-facing landing page)
+     */
+    public function executeDashboard(sfWebRequest $request)
+    {
+        $service = $this->getService();
+        $this->config = $service->getConfig('popia');
+        $this->officers = $service->getOfficers('popia');
+    }
+
+    /**
      * Submit DSAR Request (public form)
      */
     public function executeDsarRequest(sfWebRequest $request)

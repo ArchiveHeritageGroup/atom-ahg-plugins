@@ -131,6 +131,11 @@ class ahgSettingsActions extends sfActions
         return $this->executeSettingsAction('apiKeysAction', $request);
     }
 
+    public function executeWebhooks(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('webhooksAction', $request);
+    }
+
     public function executeGlobal(sfWebRequest $request)
     {
         return $this->executeSettingsAction('globalAction', $request);
@@ -199,6 +204,11 @@ class ahgSettingsActions extends sfActions
     public function executeIcipSettings(sfWebRequest $request)
     {
         return $this->executeSettingsAction('icipSettingsAction', $request);
+    }
+
+    public function executeAhgIntegration(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('ahgIntegrationAction', $request);
     }
 
     public function executeSectorNumbering(sfWebRequest $request)

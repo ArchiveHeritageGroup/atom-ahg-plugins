@@ -5,7 +5,7 @@
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb mb-0">
       <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) ?>">Browse</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo url_for([$resource, 'module' => 'informationobject']) ?>"><?php echo $resource->__toString() ?></a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>"><?php echo $resource->title ?? $resource->slug ?></a></li>
       <li class="breadcrumb-item active">Provenance</li>
     </ol>
   </nav>
@@ -14,10 +14,10 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="mb-1"><i class="bi bi-clock-history me-2"></i>Provenance & Chain of Custody</h4>
-      <p class="text-muted mb-0"><?php echo $resource->__toString() ?></p>
+      <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
     </div>
     <?php if ($sf_user->isAuthenticated()): ?>
-    <a href="<?php echo url_for([$resource, 'module' => 'informationobject']) ?>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
+    <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-primary">
       <i class="bi bi-pencil me-1"></i> Edit Provenance
     </a>

@@ -118,11 +118,7 @@ heritage_custodian_dashboard:
   url: /heritage/custodian
   param: { module: heritage, action: custodianDashboard }
 
-heritage_custodian_item:
-  url: /heritage/custodian/:slug
-  param: { module: heritage, action: custodianItem }
-  requirements: { sf_method: [get, post] }
-
+# Specific routes MUST come before the wildcard :slug route
 heritage_custodian_batch:
   url: /heritage/custodian/batch
   param: { module: heritage, action: custodianBatch }
@@ -130,6 +126,11 @@ heritage_custodian_batch:
 heritage_custodian_history:
   url: /heritage/custodian/history
   param: { module: heritage, action: custodianHistory }
+
+heritage_custodian_item:
+  url: /heritage/custodian/:slug
+  param: { module: heritage, action: custodianItem }
+  requirements: { sf_method: [get, post] }
 
 # =============================================================================
 # Session 9: Analytics & Learning

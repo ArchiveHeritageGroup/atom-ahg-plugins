@@ -1,7 +1,7 @@
 <?php
 $title = 'Merge Images to PDF';
 if ($informationObject) {
-    $title .= ' - ' . render_title($informationObject);
+    $title .= ' - ' . ($informationObject->title ?? $informationObject->slug ?? '');
 }
 ?>
 
@@ -18,7 +18,7 @@ if ($informationObject) {
                     <?php if ($informationObject): ?>
                     <p class="text-muted mb-0">
                         <i class="fas fa-link me-1"></i>
-                        Attaching to: <a href="<?php echo url_for([$informationObject, 'module' => 'informationobject']); ?>"><?php echo render_title($informationObject); ?></a>
+                        Attaching to: <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $informationObject->slug]); ?>"><?php echo $informationObject->title ?? $informationObject->slug; ?></a>
                     </p>
                     <?php endif; ?>
                 </div>
@@ -124,7 +124,7 @@ if ($informationObject) {
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <?php if ($informationObject): ?>
-                            <a href="<?php echo url_for([$informationObject, 'module' => 'informationobject']); ?>" class="btn btn-outline-secondary">
+                            <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $informationObject->slug]); ?>" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>Back to Record
                             </a>
                             <?php else: ?>

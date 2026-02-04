@@ -32,7 +32,8 @@ INSERT IGNORE INTO agreement_type (name, slug, prefix, description, is_active, s
 ('Reproduction Agreement', 'reproduction-agreement', 'REP', 'Agreement for reproduction rights', 1, 10, '#007bff'),
 ('Access Agreement', 'access-agreement', 'ACC', 'Special access arrangements', 1, 11, '#ffc107'),
 ('Memorandum of Understanding', 'mou', 'MOU', 'Non-binding agreement outlining intentions', 1, 12, '#6c757d'),
-('Service Level Agreement', 'sla', 'SLA', 'Agreement defining service levels', 1, 13, '#343a40');
+('Service Level Agreement', 'sla', 'SLA', 'Agreement defining service levels', 1, 13, '#343a40'),
+('Collaboration Agreement', 'collaboration-agreement', 'COL', 'Partnership for joint projects, digitization, research', 1, 14, '#17a2b8');
 
 -- Main Donor Agreement Table
 CREATE TABLE IF NOT EXISTS `donor_agreement` (
@@ -80,6 +81,8 @@ CREATE TABLE IF NOT EXISTS `donor_agreement` (
   `witness_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `witness_date` date DEFAULT NULL,
   `internal_notes` text COLLATE utf8mb4_unicode_ci,
+  `logo_path` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo_filename` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_template` tinyint(1) DEFAULT '0',
   `parent_agreement_id` int DEFAULT NULL,
   `supersedes_agreement_id` int DEFAULT NULL,

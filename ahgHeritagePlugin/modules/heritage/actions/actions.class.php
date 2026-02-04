@@ -1137,9 +1137,11 @@ class heritageActions extends sfActions
         $slug = $request->getParameter('slug');
         $culture = $this->context->user->getCulture();
 
-        // Get object by slug
-        $object = \Illuminate\Database\Capsule\Manager::table('information_object')
-            ->where('slug', $slug)
+        // Get object by slug (slug is in the slug table, not information_object)
+        $object = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->join('slug as s', 'io.id', '=', 's.object_id')
+            ->where('s.slug', $slug)
+            ->select('io.*')
             ->first();
 
         if (!$object) {

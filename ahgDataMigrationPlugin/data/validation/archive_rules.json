@@ -1,0 +1,90 @@
+{
+    "sector": "archive",
+    "name": "Archives (ISAD-G)",
+    "version": "1.0.0",
+    "rules": {
+        "required": [
+            "identifier",
+            "title"
+        ],
+        "types": {
+            "legacyId": "string",
+            "parentId": "string",
+            "identifier": "string",
+            "title": "string",
+            "levelOfDescription": "string",
+            "extentAndMedium": "text",
+            "repository": "string",
+            "archivalHistory": "text",
+            "scopeAndContent": "text",
+            "appraisal": "text",
+            "accruals": "text",
+            "arrangement": "text",
+            "accessConditions": "text",
+            "reproductionConditions": "text",
+            "language": "string",
+            "script": "string",
+            "physicalCharacteristics": "text",
+            "findingAids": "text",
+            "locationOfOriginals": "text",
+            "locationOfCopies": "text",
+            "relatedUnitsOfDescription": "text",
+            "publicationNote": "text",
+            "generalNote": "text",
+            "archivistNote": "text",
+            "rules": "text",
+            "sources": "text",
+            "revisionHistory": "text",
+            "culture": "string"
+        },
+        "patterns": {
+            "culture": "^[a-z]{2}(_[A-Z]{2})?$"
+        },
+        "maxLengths": {
+            "identifier": 255,
+            "title": 1024,
+            "repository": 255,
+            "culture": 10
+        },
+        "enums": {
+            "levelOfDescription": [
+                "fonds",
+                "subfonds",
+                "collection",
+                "series",
+                "subseries",
+                "file",
+                "item",
+                "part"
+            ]
+        },
+        "referential": {
+            "parentId": "legacyId"
+        }
+    },
+    "warnings": {
+        "recommended": [
+            "levelOfDescription",
+            "extentAndMedium",
+            "scopeAndContent"
+        ],
+        "hierarchyRules": {
+            "topLevels": ["fonds", "collection"],
+            "childLevels": ["subfonds", "subseries", "file", "item", "part"]
+        }
+    },
+    "descriptions": {
+        "legacyId": "Unique identifier from source system for matching during updates",
+        "parentId": "Legacy ID of parent record for establishing hierarchy",
+        "identifier": "Reference code or unique identifier (ISAD 3.1.1)",
+        "title": "Name of the unit of description (ISAD 3.1.2)",
+        "levelOfDescription": "Position in fonds hierarchy (ISAD 3.1.4)",
+        "extentAndMedium": "Physical extent and medium (ISAD 3.1.5)",
+        "repository": "Name of repository holding the materials",
+        "archivalHistory": "Custodial history (ISAD 3.2.3)",
+        "scopeAndContent": "Scope and content note (ISAD 3.3.1)",
+        "accessConditions": "Conditions governing access (ISAD 3.4.1)",
+        "reproductionConditions": "Conditions governing reproduction (ISAD 3.4.2)",
+        "culture": "ISO 639-1 language code (e.g., en, af, zu)"
+    }
+}

@@ -1,4 +1,7 @@
 <?php
+
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Media streaming actions - Handles on-the-fly transcoding of legacy formats
  *
@@ -308,10 +311,14 @@ class mediaActions extends sfActions
         }
 
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('SELECT * FROM media_snippets WHERE digital_object_id = ? ORDER BY start_time');
-            $stmt->execute([$id]);
-            $snippets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $snippets = DB::table('media_snippets')
+                ->where('digital_object_id', $id)
+                ->orderBy('start_time')
+                ->get()
+                ->map(function ($row) {
+                    return (array) $row;
+                })
+                ->toArray();
 
             echo json_encode(['snippets' => $snippets]);
         } catch (Exception $e) {
@@ -355,10 +362,13 @@ class mediaActions extends sfActions
         }
 
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('INSERT INTO media_snippets (digital_object_id, title, start_time, end_time, notes) VALUES (?, ?, ?, ?, ?)');
-            $stmt->execute([$digitalObjectId, $title, $startTime, $endTime, $notes]);
-            $id = $conn->lastInsertId();
+            $id = DB::table('media_snippets')->insertGetId([
+                'digital_object_id' => $digitalObjectId,
+                'title' => $title,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'notes' => $notes,
+            ]);
 
             echo json_encode(['success' => true, 'id' => $id]);
         } catch (Exception $e) {
@@ -385,9 +395,7 @@ class mediaActions extends sfActions
         }
 
         try {
-            $conn = Propel::getConnection();
-            $stmt = $conn->prepare('DELETE FROM media_snippets WHERE id = ?');
-            $stmt->execute([$id]);
+            DB::table('media_snippets')->where('id', $id)->delete();
 
             echo json_encode(['success' => true]);
         } catch (Exception $e) {

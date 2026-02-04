@@ -12,10 +12,11 @@ if (!function_exists('isPluginActive')) {
         static $plugins = null;
         if ($plugins === null) {
             try {
-                $conn = Propel::getConnection();
-                $stmt = $conn->prepare('SELECT name FROM atom_plugin WHERE is_enabled = 1');
-                $stmt->execute();
-                $plugins = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+                $pluginNames = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+                    ->where('is_enabled', 1)
+                    ->pluck('name')
+                    ->toArray();
+                $plugins = array_flip($pluginNames);
             } catch (Exception $e) {
                 $plugins = [];
             }

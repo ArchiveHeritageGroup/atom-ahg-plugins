@@ -488,3 +488,27 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 18:05:06
+
+-- ============================================================
+-- User Browse Settings Table
+-- Per-user settings for browse interface preferences
+-- ============================================================
+
+DROP TABLE IF EXISTS `user_browse_settings`;
+CREATE TABLE IF NOT EXISTS `user_browse_settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `use_glam_browse` tinyint(1) DEFAULT '0' COMMENT 'Use GLAM browse as default browse interface',
+  `default_sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
+  `default_sort_direction` enum('asc','desc') COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
+  `default_view` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'list',
+  `items_per_page` int DEFAULT '30',
+  `show_facets` tinyint(1) DEFAULT '1',
+  `remember_filters` tinyint(1) DEFAULT '1' COMMENT 'Remember last used filters',
+  `last_filters` json DEFAULT NULL COMMENT 'JSON of last used filter values',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_id` (`user_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

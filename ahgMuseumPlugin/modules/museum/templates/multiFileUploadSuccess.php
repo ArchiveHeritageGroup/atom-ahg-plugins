@@ -20,7 +20,7 @@
     </div>
 
     <section class="actions mb-3">
-      <?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light']); ?>
+      <?php echo link_to(__('Cancel'), ['module' => 'informationobject', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-light']); ?>
     </section>
   </noscript>
 
@@ -55,7 +55,7 @@
       </div>
 
       <section class="actions mb-3">
-        <?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light']); ?>
+        <?php echo link_to(__('Cancel'), ['module' => 'informationobject', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-light']); ?>
       </section>
     </div>
 
@@ -104,7 +104,7 @@
 
       <?php echo $form->renderGlobalErrors(); ?>
 
-      <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'informationobject', 'action' => 'multiFileUpload']), ['id' => 'multiFileUploadForm', 'class' => 'd-inline']); ?>
+      <?php echo $form->renderFormTag(url_for(['module' => 'informationobject', 'action' => 'multiFileUpload', 'slug' => $resource->slug]), ['id' => 'multiFileUploadForm', 'class' => 'd-inline']); ?>
 
         <?php echo $form->renderHiddenFields(); ?>
 
@@ -149,7 +149,7 @@
         </div>
 
         <ul class="actions mb-3 nav gap-2">
-          <li><?php echo link_to(__('Cancel'), [$resource, 'module' => 'informationobject'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
+          <li><?php echo link_to(__('Cancel'), ['module' => 'informationobject', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
           <li><input class="btn atom-btn-outline-success" type="submit" value="<?php echo __('Upload'); ?>"></li>
         </ul>
 

@@ -4,6 +4,9 @@
  * Variables: $agreement, $types, $statuses, $donor, $donorId, $title, $action, $documents
  */
 $isEdit = isset($agreement) && $agreement && isset($agreement->id);
+$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+$documentTypes = $taxonomyService->getDocumentTypes(false);
+$reminderTypes = $taxonomyService->getReminderTypes(false);
 ?>
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 
@@ -54,7 +57,21 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
                 <textarea name="agreement[description]" class="form-control" rows="3"><?php echo esc_entities($agreement->description ?? '') ?></textarea>
               </div>
               <div class="col-md-6">
-                <div class="form-check">
+                <label class="form-label"><?php echo __('Agreement Logo') ?></label>
+                <?php if (!empty($agreement->logo_path)): ?>
+                <div class="mb-2">
+                  <img src="<?php echo esc_entities($agreement->logo_path) ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+                  <div class="form-check mt-1">
+                    <input type="checkbox" name="remove_logo" id="remove_logo" class="form-check-input" value="1">
+                    <label class="form-check-label text-danger" for="remove_logo"><?php echo __('Remove logo') ?></label>
+                  </div>
+                </div>
+                <?php endif; ?>
+                <input type="file" name="agreement_logo" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp">
+                <small class="text-muted"><?php echo __('Upload organization logo for contract header (JPG, PNG, GIF, WebP)') ?></small>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check mt-4">
                   <input type="checkbox" name="agreement[is_template]" id="is_template" class="form-check-input" value="1"
                          <?php echo ($agreement->is_template ?? 0) ? 'checked' : '' ?>>
                   <label class="form-check-label" for="is_template"><?php echo __('Save as Template') ?></label>
@@ -197,14 +214,9 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
                       <div class="col-md-3">
                         <label class="form-label small"><?php echo __('Document Type') ?></label>
                         <select name="document_types[]" class="form-select form-select-sm">
-                          <option value="signed_agreement"><?php echo __('Signed Agreement') ?></option>
-                          <option value="draft"><?php echo __('Draft') ?></option>
-                          <option value="amendment"><?php echo __('Amendment') ?></option>
-                          <option value="addendum"><?php echo __('Addendum') ?></option>
-                          <option value="correspondence"><?php echo __('Correspondence') ?></option>
-                          <option value="inventory"><?php echo __('Inventory List') ?></option>
-                          <option value="provenance_evidence"><?php echo __('Provenance Evidence') ?></option>
-                          <option value="other"><?php echo __('Other') ?></option>
+                          <?php foreach ($documentTypes as $code => $label): ?>
+                          <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+                          <?php endforeach; ?>
                         </select>
                       </div>
                       <div class="col-md-5">
@@ -597,11 +609,9 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
                   <div class="col-md-2">
                     <label class="form-label small"><?php echo __('Type') ?></label>
                     <select name="reminders[0][reminder_type]" class="form-select form-select-sm">
-                      <option value="review_due"><?php echo __('Review Due') ?></option>
-                      <option value="expiry_warning"><?php echo __('Expiry Warning') ?></option>
-                      <option value="renewal_required"><?php echo __('Renewal') ?></option>
-                      <option value="donor_contact"><?php echo __('Follow-up') ?></option>
-                      <option value="custom"><?php echo __('Custom') ?></option>
+                      <?php foreach ($reminderTypes as $code => $label): ?>
+                      <option value="<?php echo $code ?>"><?php echo __($label) ?></option>
+                      <?php endforeach; ?>
                     </select>
                   </div>
                   <div class="col-md-2">
@@ -682,13 +692,25 @@ $isEdit = isset($agreement) && $agreement && isset($agreement->id);
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Taxonomy options for dynamic form elements
+var documentTypeOptions = '<?php
+$opts = '';
+foreach ($documentTypes as $code => $label) { $opts .= '<option value="' . $code . '">' . __($label) . '</option>'; }
+echo addslashes($opts);
+?>';
+var reminderTypeOptions = '<?php
+$opts = '';
+foreach ($reminderTypes as $code => $label) { $opts .= '<option value="' . $code . '">' . __($label) . '</option>'; }
+echo addslashes($opts);
+?>';
+
 document.addEventListener('DOMContentLoaded', function() {
     // Document Upload Management
     var docContainer = document.getElementById('document-entries');
     document.getElementById('add-document-btn').addEventListener('click', function() {
         var newEntry = document.createElement('div');
         newEntry.className = 'document-entry mb-3';
-        newEntry.innerHTML = '<div class="card bg-light border"><div class="card-body py-3"><div class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label small"><?php echo __('Document Type') ?></label><select name="document_types[]" class="form-select form-select-sm"><option value="signed_agreement"><?php echo __('Signed Agreement') ?></option><option value="draft"><?php echo __('Draft') ?></option><option value="amendment"><?php echo __('Amendment') ?></option><option value="addendum"><?php echo __('Addendum') ?></option><option value="correspondence"><?php echo __('Correspondence') ?></option><option value="inventory"><?php echo __('Inventory List') ?></option><option value="provenance_evidence"><?php echo __('Provenance Evidence') ?></option><option value="other"><?php echo __('Other') ?></option></select></div><div class="col-md-5"><label class="form-label small"><?php echo __('Select File') ?></label><input type="file" name="documents[]" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.tif,.tiff"></div><div class="col-md-3"><label class="form-label small"><?php echo __('Description') ?></label><input type="text" name="document_descriptions[]" class="form-control form-control-sm"></div><div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-document-btn"><i class="fas fa-times"></i></button></div></div></div></div>';
+        newEntry.innerHTML = '<div class="card bg-light border"><div class="card-body py-3"><div class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label small"><?php echo __('Document Type') ?></label><select name="document_types[]" class="form-select form-select-sm">' + documentTypeOptions + '</select></div><div class="col-md-5"><label class="form-label small"><?php echo __('Select File') ?></label><input type="file" name="documents[]" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.tif,.tiff"></div><div class="col-md-3"><label class="form-label small"><?php echo __('Description') ?></label><input type="text" name="document_descriptions[]" class="form-control form-control-sm"></div><div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-document-btn"><i class="fas fa-times"></i></button></div></div></div></div>';
         docContainer.appendChild(newEntry);
     });
     docContainer.addEventListener('click', function(e) {
@@ -704,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-reminder-btn').addEventListener('click', function() {
         var newReminder = document.createElement('div');
         newReminder.className = 'reminder-entry mb-3';
-        newReminder.innerHTML = '<div class="row g-2 align-items-end"><div class="col-md-2"><select name="reminders['+reminderIndex+'][reminder_type]" class="form-select form-select-sm"><option value="review_due"><?php echo __('Review Due') ?></option><option value="expiry_warning"><?php echo __('Expiry Warning') ?></option><option value="renewal_required"><?php echo __('Renewal') ?></option><option value="donor_contact"><?php echo __('Follow-up') ?></option><option value="custom"><?php echo __('Custom') ?></option></select></div><div class="col-md-2"><input type="date" name="reminders['+reminderIndex+'][reminder_date]" class="form-control form-control-sm"></div><div class="col-md-3"><input type="email" name="reminders['+reminderIndex+'][notify_email]" class="form-control form-control-sm"></div><div class="col-md-4"><input type="text" name="reminders['+reminderIndex+'][message]" class="form-control form-control-sm"></div><div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-reminder-btn"><i class="fas fa-times"></i></button></div></div>';
+        newReminder.innerHTML = '<div class="row g-2 align-items-end"><div class="col-md-2"><select name="reminders['+reminderIndex+'][reminder_type]" class="form-select form-select-sm">' + reminderTypeOptions + '</select></div><div class="col-md-2"><input type="date" name="reminders['+reminderIndex+'][reminder_date]" class="form-control form-control-sm"></div><div class="col-md-3"><input type="email" name="reminders['+reminderIndex+'][notify_email]" class="form-control form-control-sm"></div><div class="col-md-4"><input type="text" name="reminders['+reminderIndex+'][message]" class="form-control form-control-sm"></div><div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger w-100 remove-reminder-btn"><i class="fas fa-times"></i></button></div></div>';
         reminderContainer.appendChild(newReminder);
         reminderIndex++;
     });

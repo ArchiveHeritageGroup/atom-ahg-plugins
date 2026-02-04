@@ -23,12 +23,22 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
 
         $routing->prependRoute('ahg_ai_ner_review', new sfRoute(
             '/ai/ner/review',
-            ['module' => 'ai', 'action' => 'nerReview']
+            ['module' => 'ai', 'action' => 'review']
         ));
 
         $routing->prependRoute('ahg_ai_ner_bulk_save', new sfRoute(
             '/ai/ner/bulk-save',
-            ['module' => 'ai', 'action' => 'nerBulkSave']
+            ['module' => 'ai', 'action' => 'bulkSave']
+        ));
+
+        $routing->prependRoute('ahg_ai_create_date', new sfRoute(
+            '/ai/ner/create-date',
+            ['module' => 'ai', 'action' => 'createDate']
+        ));
+
+        $routing->prependRoute('ahg_ai_preview_date_split', new sfRoute(
+            '/ai/ner/preview-date-split',
+            ['module' => 'ai', 'action' => 'previewDateSplit']
         ));
 
         // Summarization routes

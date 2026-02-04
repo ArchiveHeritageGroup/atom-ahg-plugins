@@ -1,0 +1,6 @@
+objectNumber,workType,title,creator,creatorRole,creationDate,creationEarliestDate,creationLatestDate,stylePeriod,materials,technique,measurements,subject,provenance,creditLine
+GAL-001,Painting,Woman with Parasol,Monet; Claude,Artist,1875,1875,1875,Impressionism,Oil on canvas,Oil painting,100 x 81 cm,Portrait|Woman|Garden|Summer,Private collection 1875-1920; Museum purchase 1920,Gift of the Artist's Estate
+GAL-002,Sculpture,The Thinker,Rodin; Auguste,Sculptor,1880,1880,1882,Realism,Bronze,Lost-wax casting,Height: 186 cm,Male figure|Contemplation|Philosophy,Commissioned 1880; Artist's estate 1917; Museum acquisition 1950,Museum Purchase Fund
+GAL-003,Drawing,Study of Hands,da Vinci; Leonardo,Draftsman,c. 1490,1485,1495,Renaissance,Chalk on paper,Drawing,25 x 18 cm,Anatomical study|Hands|Human body,Royal Collection until 1800; Private sale 1850; Museum acquisition 1920,Anonymous Gift
+GAL-004,Print,The Great Wave,Hokusai; Katsushika,Printmaker,1831,1829,1833,Ukiyo-e,Woodblock print,Woodcut,25 x 37 cm,Wave|Mount Fuji|Boats|Nature,Original printing; Collector purchase 1900; Donated 1960,Bequest of J. Smith
+GAL-005,Photograph,Migrant Mother,Lange; Dorothea,Photographer,1936,1936,1936,Documentary,Gelatin silver print,Photography,35 x 28 cm,Portrait|Great Depression|Mother|Children,Farm Security Administration 1936; Museum transfer 1965,Government Transfer

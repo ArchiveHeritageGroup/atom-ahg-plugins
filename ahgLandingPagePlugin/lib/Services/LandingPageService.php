@@ -740,8 +740,7 @@ class LandingPageService
                 'i18n.authorized_form_of_name as name',
                 'i18n.history as description',
                 'slug.slug',
-                'ci.city',
-                'ci.region',
+                'ci.street_address',
             ])
             ->first();
 
@@ -797,7 +796,6 @@ class LandingPageService
                 'ci.latitude',
                 'ci.longitude',
                 'ci.street_address',
-                'ci.city',
             ]);
 
         if (!($config['show_all_repositories'] ?? true) && !empty($config['repository_ids'])) {
@@ -845,6 +843,118 @@ class LandingPageService
     public function getAllPages(bool $activeOnly = false): Collection
     {
         return $this->repository->getAllPages($activeOnly);
+    }
+
+    // =========================================================================
+    // USER DASHBOARD MANAGEMENT
+    // =========================================================================
+
+    /**
+     * Get user's personal dashboard for display
+     */
+    public function getUserDashboardForDisplay(int $userId): ?array
+    {
+        $page = $this->repository->getUserDashboard($userId);
+
+        if (!$page) {
+            return null;
+        }
+
+        $blocks = $this->repository->getPageBlocks($page->id, true);
+
+        // Enrich blocks with dynamic data
+        $enrichedBlocks = $blocks->map(function ($block) {
+            return $this->enrichBlockData($block);
+        });
+
+        return [
+            'page' => $page,
+            'blocks' => $enrichedBlocks,
+        ];
+    }
+
+    /**
+     * Get or create user's personal dashboard
+     */
+    public function getOrCreateUserDashboard(int $userId, string $userName = 'User'): array
+    {
+        $page = $this->repository->getUserDashboard($userId);
+
+        if ($page) {
+            return ['page' => $page, 'created' => false];
+        }
+
+        // Create default dashboard for user
+        $pageId = $this->repository->createPage([
+            'name' => $userName . "'s Dashboard",
+            'slug' => 'user-dashboard-' . $userId,
+            'description' => 'Personal dashboard',
+            'is_default' => 1,
+            'is_active' => 1,
+            'user_id' => $userId,
+        ]);
+
+        // Add default welcome block
+        $blockType = DB::table('atom_landing_page_block_type')
+            ->where('machine_name', 'text_content')
+            ->first();
+
+        if ($blockType) {
+            $this->repository->createBlock([
+                'page_id' => $pageId,
+                'block_type_id' => $blockType->id,
+                'config' => [
+                    'content' => '<h2>Welcome to your Dashboard</h2><p>Use the editor to customize your personal dashboard by adding blocks.</p>',
+                ],
+            ]);
+        }
+
+        $this->repository->logAudit('user_dashboard_created', $pageId, null, ['user_id' => $userId], $userId);
+
+        return ['page' => $this->repository->getPageById($pageId), 'created' => true];
+    }
+
+    /**
+     * Get all dashboards for a user
+     */
+    public function getUserDashboards(int $userId): Collection
+    {
+        return $this->repository->getUserDashboards($userId);
+    }
+
+    /**
+     * Get system pages (admin-managed)
+     */
+    public function getSystemPages(bool $activeOnly = false): Collection
+    {
+        return $this->repository->getSystemPages($activeOnly);
+    }
+
+    /**
+     * Check if user can edit a page
+     */
+    public function userCanEditPage(int $pageId, int $userId, bool $isAdmin = false): bool
+    {
+        if ($isAdmin) {
+            return true;
+        }
+
+        return $this->repository->userOwnsPage($pageId, $userId);
+    }
+
+    /**
+     * Create a new dashboard for a user
+     */
+    public function createUserDashboard(int $userId, array $data): array
+    {
+        $data['user_id'] = $userId;
+
+        // Ensure slug is unique for this user
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateSlug($data['name'] . '-' . $userId);
+        }
+
+        return $this->createPage($data, $userId);
     }
 
     /**

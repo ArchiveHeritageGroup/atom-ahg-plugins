@@ -149,7 +149,7 @@
 
         <?php if ($researcher->status === 'approved'): ?>
         <form method="post" class="mb-2">
-          <input type="hidden" name="action" value="suspend">
+          <input type="hidden" name="booking_action" value="suspend">
           <button type="submit" class="btn btn-warning w-100">
             <i class="fas fa-ban me-2"></i><?php echo __('Suspend Account'); ?>
           </button>

@@ -140,7 +140,7 @@ class feedbackGeneralAction extends sfAction
             'name' => $this->form->getValue('subject'),
             'remarks' => $this->form->getValue('remarks'),
             'object_id' => null,
-            'status_id' => QubitTerm::PENDING_ID,
+            'status' => 'pending',
             'created_at' => $now,
             'completed_at' => null,
         ]);

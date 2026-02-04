@@ -5,42 +5,63 @@ use Illuminate\Database\Capsule\Manager as DB;
 class spectrumActions extends sfActions
 {
     /**
+     * Initialize AhgDb for Laravel Query Builder.
+     */
+    public function preExecute()
+    {
+        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        if (file_exists($ahgDbFile)) {
+            require_once $ahgDbFile;
+            \AhgCore\Core\AhgDb::init();
+        }
+    }
+
+    /**
+     * Get current user culture
+     */
+    protected function getCulture(): string
+    {
+        return $this->context->user->getCulture();
+    }
+
+    /**
      * Get resource by slug using Laravel
      */
     protected function getResourceBySlug($slug)
     {
+        $culture = $this->getCulture();
         $slugRecord = DB::table('slug')
             ->where('slug', $slug)
             ->first();
-            
+
         if (!$slugRecord) {
             return null;
         }
-        
+
         $resource = DB::table('information_object')
             ->where('id', $slugRecord->object_id)
             ->first();
-            
+
         if ($resource) {
             $resource->slug = $slug;
-            
+
             // Get i18n data
             $i18n = DB::table('information_object_i18n')
                 ->where('id', $resource->id)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->first();
             $resource->title = $i18n ? $i18n->title : null;
-            
+
             // Get repository info
             if ($resource->repository_id) {
                 $repoI18n = DB::table('actor_i18n')
                     ->where('id', $resource->repository_id)
-                    ->where('culture', 'en')
+                    ->where('culture', $culture)
                     ->first();
                 $resource->repositoryName = $repoI18n ? $repoI18n->authorized_form_of_name : null;
             }
         }
-        
+
         return $resource;
     }
     
@@ -400,6 +421,7 @@ class spectrumActions extends sfActions
         }
 
         $userId = $this->getUser()->getAttribute('user_id');
+        $culture = $this->context->user->getCulture();
         $procedureTypeFilter = $request->getParameter('procedure_type');
 
         // Get workflow configs for state labels and final states
@@ -429,9 +451,9 @@ class spectrumActions extends sfActions
                 'assigner.username as assigned_by_name'
             ])
             ->leftJoin('information_object as io', 'sws.record_id', '=', 'io.id')
-            ->leftJoin('information_object_i18n as ioi18n', function($join) {
+            ->leftJoin('information_object_i18n as ioi18n', function($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi18n.id')
-                     ->where('ioi18n.culture', '=', 'en');
+                     ->where('ioi18n.culture', '=', $culture);
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('user as assigner', 'sws.assigned_by', '=', 'assigner.id')
@@ -1371,7 +1393,7 @@ class spectrumActions extends sfActions
         $this->recentEvents = DB::table('spectrum_condition_check as c')
             ->leftJoin('information_object as io', 'c.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as i18n', function($j) {
-                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->select('c.*', 'i18n.title', 's.slug')
@@ -1397,7 +1419,7 @@ class spectrumActions extends sfActions
         }
         $this->riskItems = DB::table('spectrum_condition_check as c')
             ->leftJoin('information_object_i18n as i18n', function($j) {
-                $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'c.object_id', '=', 's.object_id')
             ->whereIn('c.overall_condition', ['critical', 'poor'])
@@ -1632,7 +1654,7 @@ class spectrumActions extends sfActions
                 $objectId = $slugRecord->object_id;
                 $object = DB::table('information_object as io')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->where('io.id', $objectId)
                     ->select('io.identifier', 'i18n.title')
@@ -1673,7 +1695,7 @@ class spectrumActions extends sfActions
             case 'condition':
                 $data = DB::table('spectrum_condition_check as c')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('c.*', 'i18n.title as object_title')
                     ->orderBy('c.check_date', 'desc')
@@ -1682,7 +1704,7 @@ class spectrumActions extends sfActions
             case 'valuation':
                 $data = DB::table('spectrum_valuation as v')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('v.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('v.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('v.*', 'i18n.title as object_title')
                     ->orderBy('v.valuation_date', 'desc')
@@ -1691,7 +1713,7 @@ class spectrumActions extends sfActions
             case 'movement':
                 $data = DB::table('spectrum_movement as m')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('m.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('m.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('m.*', 'i18n.title as object_title')
                     ->orderBy('m.movement_date', 'desc')
@@ -1700,13 +1722,13 @@ class spectrumActions extends sfActions
             case 'loan':
                 $loansIn = DB::table('spectrum_loan_in as l')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('l.*', 'i18n.title as object_title', DB::raw("'IN' as direction"))
                     ->get()->toArray();
                 $loansOut = DB::table('spectrum_loan_out as l')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('l.*', 'i18n.title as object_title', DB::raw("'OUT' as direction"))
                     ->get()->toArray();
@@ -1715,7 +1737,7 @@ class spectrumActions extends sfActions
             case 'workflow':
                 $data = DB::table('spectrum_workflow_history as w')
                     ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('w.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                        $j->on('w.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('w.*', 'i18n.title as object_title')
                     ->orderBy('w.created_at', 'desc')

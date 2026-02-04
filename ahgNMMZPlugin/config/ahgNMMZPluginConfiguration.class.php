@@ -19,6 +19,27 @@ class ahgNMMZPluginConfiguration extends sfPluginConfiguration
     public static $summary = 'National Museums and Monuments of Zimbabwe Act [Chapter 25:11] compliance';
     public static $version = '1.0.0';
 
+    /**
+     * Register PSR-4 autoloader for plugin classes
+     */
+    protected function registerAutoloader(): void
+    {
+        spl_autoload_register(function ($class) {
+            // Handle AhgNMMZ namespace
+            if (strpos($class, 'AhgNMMZ\\') === 0) {
+                $relativePath = str_replace('AhgNMMZ\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
     public function contextLoadFactories(sfEvent $event): void
     {
         $context = $event->getSubject();
@@ -32,6 +53,9 @@ class ahgNMMZPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Register autoloader for AhgNMMZ namespace
+        $this->registerAutoloader();
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);

@@ -263,7 +263,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     
                     <div id="labelRepo" class="small text-muted mb-2">
                         <?php if ($resource->repository): ?>
-                            <?php echo esc_entities($resource->repository->__toString()); ?>
+                            <?php echo esc_entities($resource->repository->getAuthorizedFormOfName(['cultureFallback' => true])); ?>
                         <?php endif; ?>
                     </div>
                     

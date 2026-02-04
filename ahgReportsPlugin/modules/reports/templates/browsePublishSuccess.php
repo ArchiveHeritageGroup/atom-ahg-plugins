@@ -66,7 +66,7 @@
                     $this->informationObj = QubitInformationObject::getById($item2->objectId);
                 }
             ?>
-         <?php echo link_to(render_title($this->informationObj), [$this->informationObj, 'module' => 'informationobject']); ?>
+         <?php echo link_to($this->informationObj->title ?? $this->informationObj->slug ?? $this->informationObj->identifier, ['module' => 'informationobject', 'slug' => $this->informationObj->slug]); ?>
         </td><td>
 		     <?php echo $this->informationObj->identifier; ?>
         </td><td>
@@ -143,7 +143,7 @@ function updateYesNo(eElement,eId,eCount)
 </script>
 <section class="actions">
 	<ul class="clearfix links">
-		<li><?php echo link_to(__('Return'), [$resource, 'module' => 'informationobject', 'action' => 'browse'], ['class' => 'c-btn']); ?></li>
+		<li><?php echo link_to(__('Return'), ['module' => 'informationobject', 'action' => 'browse'], ['class' => 'c-btn']); ?></li>
 	  	<li><input class="form-submit c-btn c-btn-submit" type="submit" value="<?php echo __('Continue'); ?>"/></li>
 	</ul>
 </section>
