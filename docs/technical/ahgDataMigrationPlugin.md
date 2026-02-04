@@ -1,7 +1,7 @@
 # ahgDataMigrationPlugin - Technical Documentation
 
-**Plugin Version:** 1.2.0  
-**Last Updated:** 2026-01-17  
+**Plugin Version:** 1.4.0
+**Last Updated:** 2026-02-03
 **Framework:** AtoM AHG Framework (Laravel Query Builder + Symfony 1.x)
 
 ---
@@ -12,12 +12,15 @@
 2. [Directory Structure](#2-directory-structure)
 3. [Database Schema](#3-database-schema)
 4. [Core Components](#4-core-components)
-5. [Parsers](#5-parsers)
-6. [Preservica Integration](#6-preservica-integration)
-7. [Sector Definitions](#7-sector-definitions)
-8. [CLI Tasks](#8-cli-tasks)
-9. [Gearman Jobs](#9-gearman-jobs)
-10. [Extending the Plugin](#10-extending-the-plugin)
+5. [Validation Framework](#5-validation-framework)
+6. [Parsers](#6-parsers)
+7. [Exporters](#7-exporters)
+8. [Preservica Integration](#8-preservica-integration)
+9. [Sector Definitions](#9-sector-definitions)
+10. [CLI Tasks](#10-cli-tasks)
+11. [Gearman Jobs](#11-gearman-jobs)
+12. [Extending the Plugin](#12-extending-the-plugin)
+13. [Digital Object Import](#13-digital-object-import)
 
 ---
 
@@ -27,9 +30,15 @@
 │                        Web UI / CLI                             │
 ├─────────────────────────────────────────────────────────────────┤
 │                   ahgDataMigrationActions                       │
-│              (Upload, Map, Preview, Import)                     │
+│       (Upload, Map, Preview, Validate, Import, Export)          │
 ├─────────────────────────────────────────────────────────────────┤
-│  MigrationService  │  PreservicaImportService  │  RightsImportService  │
+│  MigrationService │ ValidationService │ PreservicaImportService │
+├─────────────────────────────────────────────────────────────────┤
+│              Validation Framework (NEW in 1.4.0)                │
+│  ┌──────────────┬──────────────┬─────────────┬───────────────┐  │
+│  │ SchemaValid. │ Referential  │ Duplicate   │ SectorValid.  │  │
+│  │              │ Validator    │ Detector    │ (5 sectors)   │  │
+│  └──────────────┴──────────────┴─────────────┴───────────────┘  │
 ├─────────────────────────────────────────────────────────────────┤
 │  ParserFactory  │  Parsers (CSV, Excel, OPEX, PAX)              │
 ├─────────────────────────────────────────────────────────────────┤
@@ -58,19 +67,66 @@
 ## 2. Directory Structure
 ```
 atom-ahg-plugins/ahgDataMigrationPlugin/
+├── bin/
+│   └── setup-gearman.sh          # Gearman installation script
 ├── config/
 │   ├── ahgDataMigrationPluginConfiguration.class.php
 │   └── routing.yml
 ├── data/
 │   ├── install.sql
+│   ├── samples/                   # NEW: Sample CSV files
+│   │   ├── archives_sample.csv   # ISAD-G hierarchy example
+│   │   ├── museum_sample.csv     # Spectrum objects
+│   │   ├── library_sample.csv    # MARC/RDA records
+│   │   ├── gallery_sample.csv    # CCO artworks
+│   │   └── dam_sample.csv        # Dublin Core assets
+│   ├── validation/               # NEW: Validation rules
+│   │   ├── archive_rules.json
+│   │   ├── museum_rules.json
+│   │   ├── library_rules.json
+│   │   ├── gallery_rules.json
+│   │   └── dam_rules.json
 │   └── mappings/
 │       └── defaults/
-│           ├── archivesspace_resources.json
-│           ├── archivesspace_agents.json
-│           ├── vernon_museum.json
+│           ├── information_object.json
+│           ├── museum.json
+│           ├── library.json          # MARC/RDA fields
+│           ├── gallery.json          # CCO/VRA fields
+│           ├── dam.json              # Dublin Core/IPTC fields
 │           ├── preservica_opex.json
-│           └── preservica_xip.json
+│           ├── preservica_xip.json
+│           └── ...
+├── docs/
+│   └── GEARMAN.md                # Gearman setup documentation
 ├── lib/
+│   ├── Validation/               # NEW: Validation framework
+│   │   ├── AhgBaseValidator.class.php
+│   │   ├── AhgValidatorCollection.class.php
+│   │   ├── AhgValidationReport.class.php
+│   │   ├── AhgSchemaValidator.class.php
+│   │   ├── AhgReferentialValidator.class.php
+│   │   ├── AhgDuplicateDetector.class.php
+│   │   └── Sectors/
+│   │       ├── ArchivesValidator.class.php
+│   │       ├── MuseumValidator.class.php
+│   │       ├── LibraryValidator.class.php
+│   │       ├── GalleryValidator.class.php
+│   │       └── DamValidator.class.php
+│   ├── Services/
+│   │   ├── MigrationService.php
+│   │   ├── ValidationService.php   # NEW: Validation orchestration
+│   │   ├── PreservicaImportService.php
+│   │   ├── PreservicaExportService.php
+│   │   ├── PathTransformer.php
+│   │   └── RightsImportService.php
+│   ├── Exporters/                # Sector-specific CSV exporters
+│   │   ├── BaseExporter.php
+│   │   ├── ExporterFactory.php
+│   │   ├── ArchivesExporter.php
+│   │   ├── MuseumExporter.php
+│   │   ├── LibraryExporter.php
+│   │   ├── GalleryExporter.php
+│   │   └── DamExporter.php
 │   ├── Mappings/
 │   │   └── PreservicaMapping.php
 │   ├── Parsers/
@@ -86,25 +142,41 @@ atom-ahg-plugins/ahgDataMigrationPlugin/
 │   │   ├── LibrarySector.php
 │   │   ├── GallerySector.php
 │   │   └── DamSector.php
-│   ├── Services/
-│   │   ├── MigrationService.php
-│   │   ├── PreservicaImportService.php
-│   │   ├── PreservicaExportService.php
-│   │   └── RightsImportService.php
 │   ├── SourceDetector.php
 │   └── task/
 │       ├── migrationImportTask.class.php
+│       ├── sectorImportTask.class.php         # NEW: Base sector import
+│       ├── archivesCsvImportTask.class.php    # NEW: ISAD-G import
+│       ├── museumCsvImportTask.class.php      # NEW: Spectrum import
+│       ├── libraryCsvImportTask.class.php     # NEW: MARC/RDA import
+│       ├── galleryCsvImportTask.class.php     # NEW: CCO import
+│       ├── damCsvImportTask.class.php         # NEW: Dublin Core import
 │       ├── preservicaImportTask.class.php
 │       ├── preservicaExportTask.class.php
 │       └── preservicaInfoTask.class.php
 ├── modules/
-│   └── ahgDataMigration/
+│   └── dataMigration/
 │       ├── actions/
-│       │   └── actions.class.php
+│       │   ├── indexAction.class.php
+│       │   ├── uploadAction.class.php
+│       │   ├── mapAction.class.php
+│       │   ├── previewAction.class.php
+│       │   ├── executeAction.class.php
+│       │   ├── validateAction.class.php       # NEW: Validation-only
+│       │   ├── previewValidationAction.class.php # NEW: AJAX validation
+│       │   ├── exportMappingAction.class.php  # NEW: Profile export
+│       │   ├── importMappingAction.class.php  # NEW: Profile import
+│       │   ├── sectorExportAction.class.php   # NEW: DB export
+│       │   ├── batchExportAction.class.php    # Batch export UI
+│       │   ├── exportCsvAction.class.php
+│       │   ├── jobsAction.class.php
+│       │   └── ...
 │       └── templates/
 │           ├── indexSuccess.php
 │           ├── mapSuccess.php
 │           ├── previewSuccess.php
+│           ├── validateSuccess.php            # NEW: Validation UI
+│           ├── batchExportSuccess.php
 │           └── jobsSuccess.php
 └── css/
     └── data-migration.css
@@ -183,6 +255,55 @@ CREATE TABLE IF NOT EXISTS atom_data_migration_log (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (job_id) REFERENCES atom_data_migration_job(id) ON DELETE CASCADE
 );
+```
+
+### atom_validation_rule (NEW in 1.4.0)
+
+Stores configurable validation rules per sector.
+```sql
+CREATE TABLE IF NOT EXISTS atom_validation_rule (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    sector_code VARCHAR(50) NOT NULL,
+    rule_type ENUM('required', 'type', 'pattern', 'enum', 'range', 'length', 'referential', 'custom') NOT NULL,
+    field_name VARCHAR(255) NOT NULL,
+    rule_config JSON NOT NULL,
+    error_message VARCHAR(500),
+    severity ENUM('error', 'warning', 'info') DEFAULT 'error',
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_sector (sector_code),
+    INDEX idx_field (field_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+**Rule Types:**
+- `required` - Field must not be empty
+- `type` - Data type validation (string, integer, float, date, boolean)
+- `pattern` - Regex pattern matching
+- `enum` - Value must be in allowed list
+- `range` - Numeric range validation
+- `length` - String length validation
+- `referential` - Parent/child relationship validation
+- `custom` - Custom PHP validation callback
+
+### atom_validation_log (NEW in 1.4.0)
+
+Logs validation errors per job.
+```sql
+CREATE TABLE IF NOT EXISTS atom_validation_log (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    job_id BIGINT UNSIGNED,
+    row_number INT,
+    column_name VARCHAR(255),
+    rule_type VARCHAR(50),
+    severity ENUM('error', 'warning', 'info'),
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_job (job_id),
+    INDEX idx_row (row_number),
+    FOREIGN KEY (job_id) REFERENCES atom_data_migration_job(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 ---
@@ -348,7 +469,394 @@ class MigrationService
 
 ---
 
-## 5. Parsers
+## 5. Validation Framework
+
+The validation framework (new in 1.4.0) provides comprehensive data quality checks before import.
+
+### AhgValidationReport.class.php
+
+Tracks errors by row and column with severity levels.
+```php
+class AhgValidationReport
+{
+    const SEVERITY_ERROR = 'error';
+    const SEVERITY_WARNING = 'warning';
+    const SEVERITY_INFO = 'info';
+
+    protected array $errors = [];      // [row => [column => [errors]]]
+    protected array $summary = [];     // Counts by severity
+    protected int $totalRows = 0;
+
+    public function addError(int $row, string $column, string $message, string $severity = 'error'): void
+    {
+        $this->errors[$row][$column][] = [
+            'message' => $message,
+            'severity' => $severity
+        ];
+        $this->summary[$severity] = ($this->summary[$severity] ?? 0) + 1;
+    }
+
+    public function hasErrors(): bool
+    {
+        return ($this->summary['error'] ?? 0) > 0;
+    }
+
+    public function getRowErrors(int $row): array
+    {
+        return $this->errors[$row] ?? [];
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'total_rows' => $this->totalRows,
+            'error_count' => $this->summary['error'] ?? 0,
+            'warning_count' => $this->summary['warning'] ?? 0,
+            'info_count' => $this->summary['info'] ?? 0,
+            'errors' => $this->errors
+        ];
+    }
+}
+```
+
+### AhgSchemaValidator.class.php
+
+Validates required fields, data types, patterns, and max lengths.
+```php
+class AhgSchemaValidator extends AhgBaseValidator
+{
+    protected array $rules = [];
+
+    public function loadRulesFromJson(string $path): void
+    {
+        $json = file_get_contents($path);
+        $config = json_decode($json, true);
+        $this->rules = $config['rules'] ?? [];
+    }
+
+    public function validate(array $row, int $rowNumber): void
+    {
+        // Required fields
+        foreach ($this->rules['required'] ?? [] as $field) {
+            if (empty($row[$field])) {
+                $this->report->addError($rowNumber, $field, "Required field is empty");
+            }
+        }
+
+        // Data types
+        foreach ($this->rules['types'] ?? [] as $field => $type) {
+            if (!empty($row[$field]) && !$this->validateType($row[$field], $type)) {
+                $this->report->addError($rowNumber, $field, "Invalid type: expected $type");
+            }
+        }
+
+        // Patterns (regex)
+        foreach ($this->rules['patterns'] ?? [] as $field => $pattern) {
+            if (!empty($row[$field]) && !preg_match("/$pattern/", $row[$field])) {
+                $this->report->addError($rowNumber, $field, "Value does not match pattern");
+            }
+        }
+
+        // Max lengths
+        foreach ($this->rules['maxLengths'] ?? [] as $field => $maxLen) {
+            if (!empty($row[$field]) && strlen($row[$field]) > $maxLen) {
+                $this->report->addError($rowNumber, $field, "Exceeds max length of $maxLen");
+            }
+        }
+
+        // Enums (allowed values)
+        foreach ($this->rules['enums'] ?? [] as $field => $allowed) {
+            if (!empty($row[$field]) && !in_array($row[$field], $allowed)) {
+                $this->report->addError($rowNumber, $field,
+                    "Invalid value: must be one of " . implode(', ', $allowed));
+            }
+        }
+    }
+}
+```
+
+### AhgReferentialValidator.class.php
+
+Validates parent-child relationships and detects circular references.
+```php
+class AhgReferentialValidator extends AhgBaseValidator
+{
+    protected array $idIndex = [];     // legacyId => row number
+    protected array $parentIndex = []; // legacyId => parentId
+    protected array $existingIds = []; // IDs from database
+
+    public function buildIndex(array $rows): void
+    {
+        foreach ($rows as $rowNum => $row) {
+            $legacyId = $row['legacyId'] ?? $row['identifier'] ?? null;
+            if ($legacyId) {
+                $this->idIndex[$legacyId] = $rowNum;
+                $this->parentIndex[$legacyId] = $row['parentId'] ?? null;
+            }
+        }
+    }
+
+    public function validate(array $row, int $rowNumber): void
+    {
+        $parentId = $row['parentId'] ?? null;
+        $legacyId = $row['legacyId'] ?? $row['identifier'] ?? null;
+
+        if (empty($parentId)) {
+            return; // Root record, no parent to validate
+        }
+
+        // Check parent exists in file or database
+        if (!isset($this->idIndex[$parentId]) && !$this->existsInDatabase($parentId)) {
+            $this->report->addError($rowNumber, 'parentId',
+                "Parent '$parentId' not found in file or database");
+        }
+
+        // Check for circular reference
+        if ($this->detectCycle($legacyId)) {
+            $this->report->addError($rowNumber, 'parentId',
+                "Circular reference detected in hierarchy");
+        }
+    }
+
+    protected function detectCycle(string $id): bool
+    {
+        $visited = [];
+        $current = $id;
+
+        while ($current && isset($this->parentIndex[$current])) {
+            if (isset($visited[$current])) {
+                return true; // Cycle detected
+            }
+            $visited[$current] = true;
+            $current = $this->parentIndex[$current];
+        }
+
+        return false;
+    }
+}
+```
+
+### AhgDuplicateDetector.class.php
+
+Configurable duplicate detection with multiple strategies.
+```php
+class AhgDuplicateDetector extends AhgBaseValidator
+{
+    const STRATEGY_IDENTIFIER = 'identifier';
+    const STRATEGY_LEGACY_ID = 'legacyId';
+    const STRATEGY_TITLE_DATE = 'title_date';
+    const STRATEGY_COMPOSITE = 'composite';
+
+    protected string $strategy = self::STRATEGY_IDENTIFIER;
+    protected array $compositeFields = [];
+    protected array $seenValues = [];
+
+    public function setStrategy(string $strategy, array $fields = []): void
+    {
+        $this->strategy = $strategy;
+        $this->compositeFields = $fields;
+    }
+
+    public function validate(array $row, int $rowNumber): void
+    {
+        $key = $this->buildKey($row);
+
+        if (isset($this->seenValues[$key])) {
+            $firstRow = $this->seenValues[$key];
+            $this->report->addError($rowNumber, $this->getKeyField(),
+                "Duplicate of row $firstRow", self::SEVERITY_WARNING);
+        } else {
+            $this->seenValues[$key] = $rowNumber;
+        }
+
+        // Check against database
+        if ($this->checkDatabase && $this->existsInDatabase($key)) {
+            $this->report->addError($rowNumber, $this->getKeyField(),
+                "Record already exists in database", self::SEVERITY_WARNING);
+        }
+    }
+
+    protected function buildKey(array $row): string
+    {
+        return match($this->strategy) {
+            self::STRATEGY_IDENTIFIER => $row['identifier'] ?? '',
+            self::STRATEGY_LEGACY_ID => $row['legacyId'] ?? '',
+            self::STRATEGY_TITLE_DATE => ($row['title'] ?? '') . '|' . ($row['dateRange'] ?? ''),
+            self::STRATEGY_COMPOSITE => implode('|', array_map(
+                fn($f) => $row[$f] ?? '',
+                $this->compositeFields
+            )),
+        };
+    }
+}
+```
+
+### Sector-Specific Validators
+
+Each sector has specialized validation rules:
+
+| Validator | Sector | Key Validations |
+|-----------|--------|-----------------|
+| `ArchivesValidator` | ISAD-G | Level hierarchy, fonds→series→file→item flow |
+| `MuseumValidator` | Spectrum | Object number format, acquisition date |
+| `LibraryValidator` | MARC/RDA | ISBN-10/13 checksum, ISSN format |
+| `GalleryValidator` | CCO | Work type vocabulary, creator format |
+| `DamValidator` | Dublin Core | DC type, MIME type, GPS coordinates |
+
+#### LibraryValidator ISBN Validation
+```php
+protected function validateIsbn(string $isbn, int $row): void
+{
+    $clean = preg_replace('/[^0-9X]/', '', strtoupper($isbn));
+
+    if (strlen($clean) === 10) {
+        // ISBN-10 checksum
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (int)$clean[$i] * (10 - $i);
+        }
+        $check = (11 - ($sum % 11)) % 11;
+        $expected = $check === 10 ? 'X' : (string)$check;
+
+        if ($clean[9] !== $expected) {
+            $this->report->addError($row, 'isbn', "Invalid ISBN-10 checksum");
+        }
+    } elseif (strlen($clean) === 13) {
+        // ISBN-13 checksum
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $sum += (int)$clean[$i] * ($i % 2 === 0 ? 1 : 3);
+        }
+        $check = (10 - ($sum % 10)) % 10;
+
+        if ((int)$clean[12] !== $check) {
+            $this->report->addError($row, 'isbn', "Invalid ISBN-13 checksum");
+        }
+    } else {
+        $this->report->addError($row, 'isbn', "ISBN must be 10 or 13 digits");
+    }
+}
+```
+
+### ValidationService.php
+
+Orchestrates all validators.
+```php
+namespace ahgDataMigrationPlugin\Services;
+
+class ValidationService
+{
+    protected AhgValidatorCollection $validators;
+    protected string $sectorCode;
+
+    public function validate(string $filepath, array $mapping = [], array $rows = []): AhgValidationReport
+    {
+        $report = new AhgValidationReport();
+
+        // Parse file if rows not provided
+        if (empty($rows)) {
+            $parser = ParserFactory::create($this->detectFormat($filepath));
+            $rows = $parser->parse($filepath);
+        }
+
+        $report->setTotalRows(count($rows));
+
+        // Initialize validators
+        $this->validators = new AhgValidatorCollection($report);
+        $this->validators->add(new AhgSchemaValidator($report, $this->sectorCode));
+        $this->validators->add(new AhgReferentialValidator($report));
+        $this->validators->add(new AhgDuplicateDetector($report));
+        $this->validators->add($this->getSectorValidator($report));
+
+        // Build index for referential validation
+        $this->validators->buildIndex($rows);
+
+        // Validate each row
+        foreach ($rows as $rowNum => $row) {
+            $mapped = $this->applyMapping($row, $mapping);
+            $this->validators->validateRow($mapped, $rowNum + 1);
+        }
+
+        return $report;
+    }
+
+    public function validateOnly(string $filepath, array $mapping = []): AhgValidationReport
+    {
+        return $this->validate($filepath, $mapping);
+    }
+
+    protected function getSectorValidator(AhgValidationReport $report): AhgBaseValidator
+    {
+        return match($this->sectorCode) {
+            'archive', 'archives' => new ArchivesValidator($report),
+            'museum', 'spectrum' => new MuseumValidator($report),
+            'library', 'marc' => new LibraryValidator($report),
+            'gallery', 'cco' => new GalleryValidator($report),
+            'dam', 'dc' => new DamValidator($report),
+            default => new AhgBaseValidator($report),
+        };
+    }
+}
+```
+
+### Validation Rules JSON Format
+
+Located in `data/validation/{sector}_rules.json`:
+```json
+{
+    "sector": "archive",
+    "rules": {
+        "required": ["identifier", "title", "levelOfDescription"],
+        "types": {
+            "legacyId": "string",
+            "dateRange": "string"
+        },
+        "patterns": {
+            "identifier": "^[A-Za-z0-9/-]+$"
+        },
+        "maxLengths": {
+            "title": 1024,
+            "identifier": 255
+        },
+        "enums": {
+            "levelOfDescription": ["fonds", "collection", "series", "subseries", "file", "item"]
+        },
+        "referential": {
+            "parentId": "legacyId"
+        }
+    }
+}
+```
+
+### New Routes
+
+```yaml
+# config/routing.yml
+
+dataMigration_validate:
+  url: /dataMigration/validate
+  param: { module: dataMigration, action: validate }
+
+dataMigration_previewValidation:
+  url: /dataMigration/previewValidation
+  param: { module: dataMigration, action: previewValidation }
+
+dataMigration_exportMapping:
+  url: /dataMigration/exportMapping/:id
+  param: { module: dataMigration, action: exportMapping }
+
+dataMigration_importMapping:
+  url: /dataMigration/importMapping
+  param: { module: dataMigration, action: importMapping }
+
+dataMigration_sectorExport:
+  url: /dataMigration/export/:sector
+  param: { module: dataMigration, action: sectorExport }
+```
+
+---
+
+## 6. Parsers
 
 ### ParserFactory.php
 ```php
@@ -503,7 +1011,210 @@ class OpexParser implements ParserInterface
 
 ---
 
-## 6. Preservica Integration
+## 7. Exporters
+
+The plugin includes sector-specific CSV exporters for both transformation (during import) and batch export of existing AtoM records.
+
+### ExporterFactory.php
+
+Creates the appropriate exporter based on sector code.
+```php
+namespace ahgDataMigrationPlugin\Exporters;
+
+class ExporterFactory
+{
+    private static array $exporters = [
+        'archive' => ArchivesExporter::class,
+        'archives' => ArchivesExporter::class,
+        'museum' => MuseumExporter::class,
+        'spectrum' => MuseumExporter::class,
+        'library' => LibraryExporter::class,
+        'marc' => LibraryExporter::class,
+        'gallery' => GalleryExporter::class,
+        'cco' => GalleryExporter::class,
+        'dam' => DamExporter::class,
+        'dc' => DamExporter::class,
+    ];
+
+    public static function create(string $sector): BaseExporter
+    {
+        $sector = strtolower(trim($sector));
+        if (!isset(self::$exporters[$sector])) {
+            throw new \InvalidArgumentException("Unknown sector: $sector");
+        }
+        return new (self::$exporters[$sector])();
+    }
+
+    public static function getAvailableSectors(): array
+    {
+        return ['archives', 'museum', 'library', 'gallery', 'dam'];
+    }
+}
+```
+
+### BaseExporter.php
+
+Abstract base class for all exporters.
+```php
+abstract class BaseExporter
+{
+    protected array $data = [];
+
+    abstract public function getSectorCode(): string;
+    abstract public function getColumns(): array;
+    abstract public function mapRecord(array $record): array;
+
+    public function setData(array $data): self
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    public function export(): string
+    {
+        $columns = $this->getColumns();
+        $output = fopen('php://temp', 'r+');
+        fputcsv($output, $columns);
+
+        foreach ($this->data as $record) {
+            $mapped = $this->mapRecord($record);
+            $row = [];
+            foreach ($columns as $col) {
+                $row[] = $mapped[$col] ?? '';
+            }
+            fputcsv($output, $row);
+        }
+
+        rewind($output);
+        return stream_get_contents($output);
+    }
+
+    public function getFilename(string $baseName): string
+    {
+        return pathinfo($baseName, PATHINFO_FILENAME) . '_' . $this->getSectorCode() . '_import.csv';
+    }
+}
+```
+
+### Sector Exporters
+
+| Exporter | Columns | Standard |
+|----------|---------|----------|
+| `ArchivesExporter` | 45 | ISAD(G) |
+| `MuseumExporter` | 38 | Spectrum 5.1 |
+| `LibraryExporter` | 32 | MARC/RDA |
+| `GalleryExporter` | 35 | CCO/VRA |
+| `DamExporter` | 52 | Dublin Core/IPTC |
+
+### Default Mapping Files
+
+Located in `data/mappings/defaults/`:
+
+| File | Description |
+|------|-------------|
+| `library.json` | Maps MARC/RDA fields (ISBN, call number, publisher, etc.) |
+| `gallery.json` | Maps CCO/VRA fields (creator, provenance, exhibition history, etc.) |
+| `dam.json` | Maps Dublin Core/IPTC fields (camera metadata, GPS, keywords, etc.) |
+| `museum.json` | Maps Spectrum 5.1 fields |
+| `information_object.json` | Generic ISAD(G) mapping |
+
+### Database Export (NEW in 1.4.0)
+
+The `exportFromDatabase()` method allows exporting directly from AtoM database:
+```php
+abstract class BaseExporter
+{
+    // ... existing methods
+
+    /**
+     * Export records from database
+     * @param array $objectIds Array of information_object IDs to export
+     * @return string CSV content
+     */
+    public function exportFromDatabase(array $objectIds): string
+    {
+        $columns = $this->getColumns();
+        $output = fopen('php://temp', 'r+');
+        fputcsv($output, $columns);
+
+        foreach ($objectIds as $id) {
+            $record = $this->loadRecordFromDatabase($id);
+            if ($record) {
+                $mapped = $this->mapRecord($record);
+                $row = [];
+                foreach ($columns as $col) {
+                    $row[] = $mapped[$col] ?? '';
+                }
+                fputcsv($output, $row);
+            }
+        }
+
+        rewind($output);
+        return stream_get_contents($output);
+    }
+
+    /**
+     * Load a single record from database
+     */
+    protected function loadRecordFromDatabase(int $id): ?array
+    {
+        $record = DB::table('information_object as io')
+            ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->leftJoin('term_i18n as ti', 'io.level_of_description_id', '=', 'ti.id')
+            ->leftJoin('repository_i18n as ri', 'io.repository_id', '=', 'ri.id')
+            ->where('io.id', $id)
+            ->where('ioi.culture', 'en')
+            ->first();
+
+        if (!$record) {
+            return null;
+        }
+
+        return (array)$record;
+    }
+}
+```
+
+### Batch Export Action
+
+The `batchExportAction` allows exporting existing AtoM records:
+
+```php
+class dataMigrationBatchExportAction extends sfAction
+{
+    public function execute($request)
+    {
+        // Filter options
+        $sector = $request->getParameter('sector', 'archives');
+        $repositoryId = $request->getParameter('repository_id');
+        $levelIds = $request->getParameter('level_ids', []);
+        $parentSlug = $request->getParameter('parent_slug', '');
+        $includeDescendants = $request->getParameter('include_descendants', false);
+
+        // Build query with filters
+        $query = $DB::table('information_object')
+            ->join('information_object_i18n', ...)
+            ->where(...);
+
+        $count = $query->count();
+
+        // Direct download for small exports
+        if ($count <= 500) {
+            return $this->directExport($query, $sector, $DB);
+        }
+
+        // Queue background job for large exports
+        return $this->queueBackgroundExport($request, $DB, $count);
+    }
+}
+```
+
+**Route:** `GET/POST /dataMigration/batchExport`
+
+---
+
+## 8. Preservica Integration
 
 ### PreservicaImportService.php
 
@@ -608,7 +1319,7 @@ class PreservicaExportService
 
 ---
 
-## 7. Sector Definitions
+## 9. Sector Definitions
 
 Each sector defines its target fields.
 
@@ -686,7 +1397,7 @@ class MuseumSector implements SectorInterface
 
 ---
 
-## 8. CLI Tasks
+## 10. CLI Tasks
 
 ### migrationImportTask.class.php
 ```php
@@ -738,6 +1449,141 @@ class migrationImportTask extends arBaseTask
 }
 ```
 
+### sectorImportTask.class.php (NEW in 1.4.0)
+
+Abstract base class for sector-specific imports with integrated validation.
+```php
+abstract class sectorImportTask extends arBaseTask
+{
+    abstract protected function getSectorCode(): string;
+    abstract protected function getColumnMap(): array;
+    abstract protected function getRequiredColumns(): array;
+    abstract protected function saveSectorMetadata(int $objectId, array $row): void;
+
+    protected function configure()
+    {
+        $this->addArguments([
+            new sfCommandArgument('file', sfCommandArgument::REQUIRED, 'CSV file to import'),
+        ]);
+
+        $this->addOptions([
+            new sfCommandOption('validate-only', null, sfCommandOption::PARAMETER_NONE,
+                'Validate without importing'),
+            new sfCommandOption('mapping', null, sfCommandOption::PARAMETER_OPTIONAL,
+                'Mapping profile ID'),
+            new sfCommandOption('repository', null, sfCommandOption::PARAMETER_OPTIONAL,
+                'Target repository slug'),
+            new sfCommandOption('update', null, sfCommandOption::PARAMETER_OPTIONAL,
+                'Match field for updates'),
+        ]);
+    }
+
+    protected function execute($arguments = [], $options = [])
+    {
+        $filepath = $arguments['file'];
+
+        // Parse CSV
+        $parser = new CsvParser();
+        $rows = $parser->parse($filepath);
+
+        $this->logSection('import', sprintf('Parsed %d rows from %s', count($rows), basename($filepath)));
+
+        // Validate
+        $validationService = new ValidationService();
+        $validationService->setSector($this->getSectorCode());
+        $report = $validationService->validate($filepath, [], $rows);
+
+        // Output validation results
+        $this->outputValidationReport($report);
+
+        if ($options['validate-only']) {
+            $this->logSection('validate', 'Validation-only mode - no records imported');
+            return $report->hasErrors() ? 1 : 0;
+        }
+
+        if ($report->hasErrors()) {
+            $this->logSection('error', 'Validation failed - fix errors and retry');
+            return 1;
+        }
+
+        // Process import
+        foreach ($rows as $rowNum => $row) {
+            try {
+                $objectId = $this->processRow($row, $options);
+                $this->stats['created']++;
+            } catch (\Exception $e) {
+                $this->stats['errors']++;
+                $this->log(sprintf('Row %d: %s', $rowNum + 1, $e->getMessage()));
+            }
+        }
+
+        $this->logSection('import', sprintf(
+            'Complete: %d created, %d updated, %d errors',
+            $this->stats['created'],
+            $this->stats['updated'],
+            $this->stats['errors']
+        ));
+    }
+}
+```
+
+### Sector-Specific Import Tasks
+
+| Task Class | Command | Sector |
+|------------|---------|--------|
+| `archivesCsvImportTask` | `php symfony sector:archives-csv-import` | ISAD-G |
+| `museumCsvImportTask` | `php symfony sector:museum-csv-import` | Spectrum |
+| `libraryCsvImportTask` | `php symfony sector:library-csv-import` | MARC/RDA |
+| `galleryCsvImportTask` | `php symfony sector:gallery-csv-import` | CCO |
+| `damCsvImportTask` | `php symfony sector:dam-csv-import` | Dublin Core |
+
+**Example: archivesCsvImportTask**
+```php
+class archivesCsvImportTask extends sectorImportTask
+{
+    protected function configure()
+    {
+        parent::configure();
+        $this->namespace = 'sector';
+        $this->name = 'archives-csv-import';
+        $this->briefDescription = 'Import archival records from CSV (ISAD-G)';
+    }
+
+    protected function getSectorCode(): string
+    {
+        return 'archive';
+    }
+
+    protected function getColumnMap(): array
+    {
+        return [
+            'legacyId' => 'legacyId',
+            'parentId' => 'parentId',
+            'identifier' => 'identifier',
+            'title' => 'title',
+            'levelOfDescription' => 'levelOfDescription',
+            'repository' => 'repository',
+            'scopeAndContent' => 'scopeAndContent',
+            'arrangement' => 'arrangement',
+            'extentAndMedium' => 'extentAndMedium',
+            'dateRange' => 'dateRange',
+            'creators' => 'creators',
+            // ... more fields
+        ];
+    }
+
+    protected function getRequiredColumns(): array
+    {
+        return ['identifier', 'title', 'levelOfDescription'];
+    }
+
+    protected function saveSectorMetadata(int $objectId, array $row): void
+    {
+        // Archives don't have separate metadata table - all data in information_object
+    }
+}
+```
+
 ### preservicaImportTask.class.php
 ```php
 class preservicaImportTask extends arBaseTask
@@ -747,7 +1593,7 @@ class preservicaImportTask extends arBaseTask
         $this->addArguments([
             new sfCommandArgument('source', sfCommandArgument::REQUIRED, 'OPEX file or PAX package'),
         ]);
-        
+
         $this->addOptions([
             new sfCommandOption('format', null, sfCommandOption::PARAMETER_OPTIONAL, 'Format: opex or xip', 'opex'),
             new sfCommandOption('repository', null, sfCommandOption::PARAMETER_OPTIONAL, 'Repository ID'),
@@ -756,7 +1602,7 @@ class preservicaImportTask extends arBaseTask
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Preview without importing'),
             new sfCommandOption('batch', null, sfCommandOption::PARAMETER_NONE, 'Batch import directory'),
         ]);
-        
+
         $this->namespace = 'preservica';
         $this->name = 'import';
         $this->briefDescription = 'Import from Preservica OPEX or PAX format';
@@ -766,7 +1612,22 @@ class preservicaImportTask extends arBaseTask
 
 ---
 
-## 9. Gearman Jobs
+## 11. Gearman Jobs
+
+For detailed Gearman setup instructions, see: `atom-ahg-plugins/ahgDataMigrationPlugin/docs/GEARMAN.md`
+
+### Quick Setup
+
+```bash
+# Automated setup
+cd /usr/share/nginx/archive/atom-ahg-plugins/ahgDataMigrationPlugin
+sudo ./bin/setup-gearman.sh
+
+# Or manual
+sudo apt-get install -y gearman-job-server php8.3-gearman
+sudo systemctl enable gearman-job-server atom-worker
+sudo systemctl start gearman-job-server atom-worker
+```
 
 ### DataMigrationJob.class.php
 
@@ -822,7 +1683,7 @@ class DataMigrationJob extends arBaseJob
 
 ---
 
-## 10. Extending the Plugin
+## 12. Extending the Plugin
 
 ### Adding a New Source System
 
@@ -890,6 +1751,8 @@ return match($format) {
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4.0 | 2026-02-03 | Universal validation framework, sector-specific validators (Archives/Museum/Library/Gallery/DAM), sector CLI import tasks with --validate-only, validation-only mode, sample CSV files, mapping profile export/import, validation rules JSON |
+| 1.3.0 | 2026-02-01 | Batch Export UI, Library/Gallery/DAM default mappings, Gearman setup script and docs |
 | 1.2.0 | 2026-01-17 | Preservica OPEX/PAX, rights import, provenance, Gearman jobs |
 | 1.1.0 | 2026-01-10 | Sector-specific CSV exporters |
 | 1.0.0 | 2025-12-15 | Initial release |
@@ -912,7 +1775,7 @@ return match($format) {
 
 ---
 
-## 11. Digital Object Import
+## 13. Digital Object Import
 
 ### How It Works
 

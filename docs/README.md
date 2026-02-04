@@ -1,31 +1,44 @@
-# AtoM AHG Data Migration Tool - Documentation
+# AtoM AHG Framework - User Documentation
 
-## Documentation Structure
-```
-docs/
-├── README.md                           # This file
-├── DATA_MIGRATION_USER_MANUAL.md       # User guide
-├── technical/
-│   └── TECHNICAL_DOCUMENTATION.md      # Developer documentation
-└── images/                             # Diagrams and screenshots
-```
+**Version:** 2.1.17
+**Last Updated:** February 2026
 
-## Quick Links
+## Documentation Index
 
-- [User Manual](DATA_MIGRATION_USER_MANUAL.md) - How to use the tool
-- [Technical Documentation](technical/TECHNICAL_DOCUMENTATION.md) - Architecture and API
+### User Guides
 
-## Getting Started
+| Guide | Plugin | Description |
+|-------|--------|-------------|
+| [Data Migration User Guide](data-migration-user-guide.md) | ahgDataMigrationPlugin | GLAM/DAM import/export, sector mappings, validation |
+| [Donor Agreement User Guide](donor-agreement-user-guide.md) | ahgDonorAgreementPlugin | Donations, gifts, bequests, deposits |
+| [Contract Management User Guide](contract-management-user-guide.md) | ahgVendorPlugin | Vendor contracts, SLAs, collaborations, NDAs |
+| [Spectrum User Guide](spectrum-user-guide.md) | ahgSpectrumPlugin | Museum workflows, procedures |
+| [Privacy & POPIA Guide](privacy-user-guide.md) | ahgPrivacyPlugin | Data protection compliance |
+| [Research Portal Guide](research-portal-guide.md) | ahgResearchPlugin | Researcher registration, booking |
+| [GRAP 103 Guide](grap-user-guide.md) | ahgGrapPlugin | Heritage asset accounting |
 
-1. Log in as administrator
-2. Navigate to Admin → Data Migration
-3. Upload your file (CSV, Excel, XML, JSON, OPEX, PAX)
-4. Configure field mapping
-5. Preview and import
+### Technical Documentation
+
+For developers and system administrators:
+
+| Document | Description |
+|----------|-------------|
+| [Technical README](technical/README.md) | Index of all technical documentation |
+| [Plugin Architecture](technical/PLUGIN_ARCHITECTURE.md) | System design and API reference |
+| [Database ERD](technical/DATABASE_ERD.md) | Entity-relationship diagrams |
+
+### Quick Start
+
+1. **Data Migration**: Admin > Data Migration > Upload CSV/Excel
+2. **Donor Agreements**: Admin > Donor Management > New Agreement
+3. **Spectrum Workflows**: Record > Spectrum > Start Workflow
 
 ## Support
 
-For issues or questions, please contact The Archive and Heritage Group.
+For issues or questions, contact The Archive and Heritage Group.
+- Email: support@theahg.co.za
+- Website: https://theahg.co.za
 
 ---
-*Version 1.0.0 - January 2026*
+
+*Part of the AtoM AHG Framework*

@@ -1,6 +1,6 @@
 # ahgSecurityClearancePlugin - Technical Documentation
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Category:** Security (REQUIRED - LOCKED)  
 **Dependencies:** atom-framework
 
@@ -201,6 +201,107 @@ public static function check($object, $action, $options = array())
     return $result;
 }
 ```
+
+---
+
+## Scheduled Tasks
+
+### securityProcessTask
+
+The scheduled task (`php symfony security:process`) handles automated security operations:
+
+1. **Automatic Declassification** - Processes due declassifications
+2. **Expired Clearances** - Marks expired clearances as inactive
+3. **Expiry Warnings** - Sends email notifications 30 days before clearance expiry
+4. **2FA Session Cleanup** - Removes expired two-factor authentication sessions
+5. **Audit Log Retention** - Enforces retention policy on access logs
+
+### Email Notifications
+
+Expiry warning emails are sent using sfMail or PHP mail() fallback:
+
+```php
+protected function sendExpiryWarningEmail($clearance): void
+{
+    $subject = 'Security Clearance Expiry Warning';
+    $body = sprintf(
+        "Dear %s,\n\n"
+        . "Your %s security clearance will expire on %s (%d days remaining).\n\n"
+        . "Please contact your security administrator to request a renewal.\n\n"
+        . "Regards,\nSecurity Administration",
+        $clearance->username,
+        $clearance->clearance_name,
+        $clearance->expiry_date,
+        $clearance->days_remaining
+    );
+
+    // Try Symfony mailer first if available
+    if (class_exists('sfMail')) {
+        $mail = new sfMail();
+        $mail->setFrom($fromEmail, $siteName);
+        $mail->addAddress($clearance->email);
+        $mail->setSubject($subject);
+        $mail->setBody($body);
+        $mail->send();
+    } else {
+        // Fallback to PHP mail
+        mail($clearance->email, $subject, $body, implode("\r\n", $headers));
+    }
+}
+```
+
+### Cron Configuration
+
+```bash
+# Run daily at 1:00 AM
+0 1 * * * /usr/bin/php /var/www/atom/symfony security:process
+```
+
+---
+
+## Compliance Reporting
+
+### PDF Export
+
+Compliance reports support PDF export using TCPDF with HTML fallback:
+
+```php
+protected function exportPdf($filename)
+{
+    $tcpdfPath = sfConfig::get('sf_root_dir') . '/vendor/tecnickcom/tcpdf/tcpdf.php';
+
+    if (file_exists($tcpdfPath)) {
+        require_once $tcpdfPath;
+        return $this->exportPdfWithTcpdf($filename);
+    }
+
+    return $this->exportPdfAsHtml($filename);
+}
+```
+
+**PDF Features:**
+- Security classification summaries
+- User clearance listings
+- Access audit reports
+- Compliance status dashboards
+
+---
+
+## Changelog
+
+### v1.1.0 (February 2026)
+- Fixed scheduled task email sending implementation
+- Replaced broken job queue code with direct email functionality
+- Added sfMail integration with PHP mail() fallback
+- Added PDF export with TCPDF and HTML fallback
+- Improved error handling and logging
+
+### v1.0.0 (Initial)
+- Security classification system
+- User clearance management
+- Object classification
+- ACL integration
+- Audit logging
 
 ---
 

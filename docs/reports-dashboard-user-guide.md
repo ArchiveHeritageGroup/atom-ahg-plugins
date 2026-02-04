@@ -205,9 +205,26 @@ Results appear on screen in a table format.
 │  [📄 CSV]     - For spreadsheets (Excel, Google Sheets)     │
 │  [📑 PDF]     - For printing and sharing                    │
 │  [📊 Excel]   - Formatted spreadsheet with charts           │
+│  [🔗 JSON]    - For technical/API integration               │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### PDF Export
+
+PDF export creates professional, printable reports:
+
+- **TCPDF Support**: If TCPDF is installed, generates native PDF with:
+  - Proper headers and footers
+  - Auto-sized table columns
+  - Report title and date
+  - UTF-8 character support
+
+- **HTML Fallback**: If TCPDF is not available:
+  - Print-optimized HTML page opens
+  - Use browser Print → Save as PDF
+  - Bootstrap-compatible formatting
+  - Proper page break handling
 
 ---
 

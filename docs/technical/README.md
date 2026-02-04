@@ -27,6 +27,7 @@ Detailed technical reference for all AHG plugins including architecture diagrams
 | [ahgAPIPlugin](ahgAPIPlugin.md) | Integration | REST API v2 - Full CRUD, batch, webhooks |
 | [ahgAuditTrailPlugin](ahgAuditTrailPlugin.md) | Compliance | Comprehensive audit logging |
 | [ahgBackupPlugin](ahgBackupPlugin.md) | Administration | Backup and restore |
+| [ahgDataMigrationPlugin](ahgDataMigrationPlugin.md) | Data Management | GLAM/DAM sector-specific import/export, validation |
 
 ### Security & Compliance
 
@@ -43,7 +44,7 @@ Detailed technical reference for all AHG plugins including architecture diagrams
 | [ahgConditionPlugin](ahgConditionPlugin.md) | Conservation | Condition assessment |
 | [ahgSpectrumPlugin](ahgSpectrumPlugin.md) | Museum | Spectrum 5.0 procedures |
 | [ahgGrapPlugin](ahgGrapPlugin.md) | Financial | GRAP 103 heritage accounting |
-| [ahgDonorPlugin](ahgDonorPlugin.md) | Acquisitions | Donor and agreement management |
+| [ahgDonorAgreementPlugin](ahgDonorAgreementPlugin.md) | Acquisitions & Contracts | Donor agreements, contracts, collaboration partnerships |
 | [ahgVendorPlugin](ahgVendorPlugin.md) | Administration | Vendor/supplier management |
 
 ### Media & Viewing

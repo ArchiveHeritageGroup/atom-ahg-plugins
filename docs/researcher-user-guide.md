@@ -287,6 +287,17 @@ Research accounts may require periodic renewal:
 | Update Profile | My Workspace → Profile |
 | Change Password | My Workspace → Profile → Change Password |
 
+### Staff Operations (Admin)
+
+| Action | How to Access |
+|--------|---------------|
+| Manage Seats | Research → Seats |
+| Manage Equipment | Research → Equipment |
+| View Retrieval Queue | Research → Retrieval Queue |
+| Print Call Slips | Research → Retrieval Queue → Print |
+| Register Walk-In | Research → Walk-In Visitors |
+| View Activity Log | Research → Activities |
+
 ---
 
 ## Tips for Researchers
@@ -314,6 +325,254 @@ If you need access to restricted materials, contact the archive staff with your 
 
 ---
 
+---
+
+## Reading Room Operations (Staff)
+
+The following features are available to staff administrators for managing reading room operations.
+
+### 6. 🪑 Seat Management
+
+Manage reading room seats and track occupancy in real-time.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SEAT MANAGEMENT                                             │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  📍 Room: [Main Reading Room ▼]                             │
+│                                                              │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
+│  │ Total   │ │Available│ │Occupied │ │Occupancy│           │
+│  │   20    │ │   15    │ │    5    │ │   25%   │           │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘           │
+│                                                              │
+│  SEATS                                                       │
+│  ────────────────────────────────────────────────────────   │
+│  Seat #  │ Label      │ Type      │ Zone    │ Status       │
+│  ────────────────────────────────────────────────────────   │
+│  A1      │ Window     │ Standard  │ Main    │ 🟢 Available │
+│  A2      │ -          │ Computer  │ Main    │ 🔴 Occupied  │
+│  A3      │ Accessible │ Accessible│ Main    │ 🟢 Available │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Seat Types:**
+| Type | Description |
+|------|-------------|
+| Standard | Regular desk/table |
+| Accessible | Wheelchair accessible |
+| Computer | With workstation |
+| Microfilm | Microfilm reader station |
+| Oversize | For large format materials |
+| Quiet | Silent study zone |
+| Group | Collaborative table |
+
+**Features:**
+- **Bulk Create:** Generate multiple seats using patterns (e.g., A1-A10, 1-20)
+- **Amenities Tracking:** Power outlets, lamps, computers, magnifiers
+- **Zone Assignment:** Organize seats by room zones
+- **Real-time Occupancy:** Dashboard showing current availability
+
+**To assign a seat:**
+1. Navigate to **Research → Seats**
+2. Select the reading room
+3. Click **Assign** on an available seat
+4. Select the researcher from current bookings
+5. Confirm assignment
+
+---
+
+### 7. 🔧 Equipment Management
+
+Track and manage reading room equipment including microfilm readers, scanners, and computers.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EQUIPMENT - Main Reading Room                               │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  Equipment by Type:                                          │
+│  [Microfilm: 3] [Scanner: 2] [Computer: 5] [Magnifier: 4]   │
+│                                                              │
+│  NAME           │ TYPE      │ LOCATION │ CONDITION │ STATUS │
+│  ─────────────────────────────────────────────────────────  │
+│  MF-001 Canon   │ Microfilm │ Table A  │ 🟢 Good   │ Avail  │
+│  SC-001 Epson   │ Scanner   │ Table B  │ 🟡 Fair   │ In Use │
+│  PC-003 Dell    │ Computer  │ Desk C   │ 🔴 Repair │ N/A    │
+│                                                              │
+│  [+ Add Equipment]                                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Equipment Types:**
+- Microfilm Reader
+- Microfiche Reader
+- Scanner
+- Computer
+- Magnifier
+- Book Cradle
+- Light Box
+- Camera Stand
+- Cotton Gloves
+- Page Weights
+
+**Condition Tracking:**
+| Status | Badge Color |
+|--------|-------------|
+| Excellent | 🟢 Green |
+| Good | 🔵 Blue |
+| Fair | 🟡 Yellow |
+| Needs Repair | 🔴 Red |
+| Out of Service | ⚫ Dark |
+
+**Maintenance Logging:**
+1. Click the wrench icon on any equipment
+2. Describe the maintenance performed
+3. Update condition status
+4. Set next maintenance date
+5. Log entry is saved with timestamp
+
+---
+
+### 8. 📦 Retrieval Queue
+
+Manage material retrieval workflow with queue-based processing.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  RETRIEVAL QUEUE                                             │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐  │
+│  │ New │ │Rush │ │Retr.│ │Trans│ │Deliv│ │Curat│ │Retrn│  │
+│  │  8  │ │  2  │ │  5  │ │  3  │ │  4  │ │  1  │ │  6  │  │
+│  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘  │
+│                                                              │
+│  REQUEST │ ITEM                  │ LOCATION   │ PRIORITY    │
+│  ─────────────────────────────────────────────────────────  │
+│  ☐ #123  │ Mueller Papers Box 1  │ Shelf A-12 │ 🔴 Rush     │
+│  ☐ #124  │ Mining Records 1952   │ Shelf B-03 │ 🟡 High     │
+│  ☐ #125  │ Photographs Album 3   │ Vault 2    │ ⚪ Normal   │
+│                                                              │
+│  Batch Actions: [Status ▼] [Notes: ____] [Update Selected]  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Queue Stages:**
+| Queue | Icon | Description |
+|-------|------|-------------|
+| New | 🔵 | New requests awaiting processing |
+| Rush | 🔴 | Priority requests needing immediate attention |
+| Retrieval | 🟠 | Ready for retrieval from storage |
+| Transit | 🟣 | Materials in transit to reading room |
+| Delivery | 🟢 | Ready for delivery to researcher |
+| Curatorial | 🟤 | Requires curatorial review |
+| Return | 🔷 | Pending return to storage |
+
+**Batch Processing:**
+1. Select multiple requests using checkboxes
+2. Choose new status from dropdown
+3. Add optional notes
+4. Click **Update Selected**
+5. All selected items move to new queue
+
+---
+
+### 9. 🖨️ Call Slips (Paging Slips)
+
+Generate and print call slips for material retrieval.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       CALL SLIP                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  Request #: 123                  Date: 2026-01-31           │
+│                                                              │
+│  MATERIAL INFORMATION                                        │
+│  ────────────────────                                       │
+│  Title: Mueller Family Papers - Correspondence 1950-1955    │
+│  Location: Shelf A-12, Box 1, Folder 3                      │
+│  Reference: MUE/1/3/12                                      │
+│                                                              │
+│  RESEARCHER                                                  │
+│  ──────────                                                 │
+│  Name: Dr. Johan Pieterse                                   │
+│  Institution: University of Cape Town                       │
+│  Booking: 2026-01-31, 10:00 - 12:00                        │
+│  Room: Main Reading Room                                    │
+│                                                              │
+│  ═══════════════════════════════════════════════════════    │
+│                    [BARCODE: REQ-123]                        │
+│  ═══════════════════════════════════════════════════════    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Printing Call Slips:**
+1. Go to **Research → Retrieval Queue**
+2. Select requests to print
+3. Click **Print Selected** or individual print icon
+4. Call slips open in print-friendly format
+5. Use browser print function
+
+---
+
+### 10. 🚶 Walk-In Visitor Registration
+
+Register and track visitors without researcher accounts.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  WALK-IN VISITOR REGISTRATION                                │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  📍 Room: [Main Reading Room ▼]                             │
+│                                                              │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐   │
+│  │ REGISTER NEW VISITOR    │  │ CURRENT VISITORS (3)    │   │
+│  │                         │  │                         │   │
+│  │ First Name: [________]  │  │ • John Smith   10:15    │   │
+│  │ Last Name:  [________]  │  │   UCT - Seat A2         │   │
+│  │ Email:      [________]  │  │   [Check Out]           │   │
+│  │ ID Type:    [Passport▼] │  │                         │   │
+│  │ ID Number:  [________]  │  │ • Mary Jones   11:30    │   │
+│  │ Organization: [______]  │  │   Independent           │   │
+│  │ Purpose:    [________]  │  │   [Check Out]           │   │
+│  │                         │  │                         │   │
+│  │ ☑ Rules acknowledged    │  │                         │   │
+│  │                         │  │                         │   │
+│  │ [Register & Check In]   │  │                         │   │
+│  └─────────────────────────┘  └─────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Walk-In vs Registered Researchers:**
+| Feature | Walk-In | Registered |
+|---------|---------|------------|
+| Account Required | No | Yes |
+| Pre-request Materials | No | Yes |
+| Access Level | Open-access only | Full access |
+| Booking Required | No | Yes |
+| Can be Converted | Yes → Registered | - |
+
+**Registration Process:**
+1. Select the reading room
+2. Enter visitor details (name, ID, organization)
+3. Record purpose of visit and research topic
+4. Optionally assign a seat
+5. Visitor acknowledges reading room rules
+6. Click **Register & Check In**
+
+**Checking Out:**
+1. Find visitor in current list
+2. Click **Check Out**
+3. Confirm checkout
+4. Visit is recorded with timestamps
+
+---
+
 ## Need Help?
 
 - **Technical Issues:** Contact system administrator
@@ -322,5 +581,5 @@ If you need access to restricted materials, contact the archive staff with your 
 
 ---
 
-*Last updated: January 2026*
+*Last updated: February 2026*
 *Part of the AHG Extensions for AtoM 2.10*

@@ -11,8 +11,9 @@ Connect your applications to AtoM and access your archival collections programma
 3. [Making Your First Request](#making-your-first-request)
 4. [Finding Records](#finding-records)
 5. [Searching](#searching)
-6. [Common Tasks](#common-tasks)
-7. [Troubleshooting](#troubleshooting)
+6. [Webhooks](#webhooks)
+7. [Common Tasks](#common-tasks)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -215,6 +216,128 @@ Content-Type: application/json
 
 ---
 
+## Webhooks
+
+Webhooks notify your applications in real-time when records change in AtoM. Instead of repeatedly checking for updates, AtoM will automatically send notifications to your URL.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      HOW WEBHOOKS WORK                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   AtoM System                      Your Application             │
+│       │                                   │                     │
+│       │   Record Created!                 │                     │
+│       │ ─────────────────────────────────▶│                     │
+│       │   (automatic notification)        │                     │
+│       │                                   │                     │
+│       │   Record Updated!                 ▼                     │
+│       │ ─────────────────────────────────▶│  Update display     │
+│       │                                   │  Send alerts        │
+│       │   Record Deleted!                 │  Sync systems       │
+│       │ ─────────────────────────────────▶│                     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Setting Up a Webhook
+
+1. **Create the webhook** using the API:
+
+```bash
+curl -X POST "https://your-site.com/api/v2/webhooks" \
+  -H "X-API-Key: your-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Website Updates",
+    "url": "https://mysite.com/webhook-receiver",
+    "events": ["item.created", "item.updated"],
+    "entity_types": ["informationobject"]
+  }'
+```
+
+2. **Store the secret** from the response - you'll need it to verify notifications
+
+### Available Events
+
+| Event | When It Triggers |
+|-------|------------------|
+| `item.created` | A new record is created |
+| `item.updated` | An existing record is modified |
+| `item.deleted` | A record is deleted |
+| `item.published` | A record is published |
+| `item.unpublished` | A record is unpublished |
+
+### Entity Types
+
+| Entity Type | Records |
+|-------------|---------|
+| `informationobject` | Archival descriptions |
+| `actor` | Authority records (people, organizations) |
+| `repository` | Repositories |
+| `accession` | Accessions |
+| `term` | Taxonomy terms |
+
+### What You Receive
+
+When an event occurs, your URL receives a POST request:
+
+```json
+{
+  "event": "item.created",
+  "entity_type": "informationobject",
+  "entity_id": 12345,
+  "timestamp": "2024-01-15T10:30:00+00:00",
+  "data": {
+    "slug": "new-record",
+    "title": "New Record Title"
+  }
+}
+```
+
+### Verifying Notifications
+
+Each notification includes a signature header (`X-Webhook-Signature`) to verify it came from AtoM. Always verify this in your receiving application to prevent fake notifications.
+
+### Managing Webhooks via API
+
+| Action | Endpoint |
+|--------|----------|
+| List all webhooks | `GET /api/v2/webhooks` |
+| View webhook details | `GET /api/v2/webhooks/123` |
+| Update webhook | `PUT /api/v2/webhooks/123` |
+| Delete webhook | `DELETE /api/v2/webhooks/123` |
+| View delivery history | `GET /api/v2/webhooks/123/deliveries` |
+| Regenerate secret | `POST /api/v2/webhooks/123/regenerate-secret` |
+
+### Managing Webhooks via Web Interface
+
+Administrators can also manage webhooks through the AtoM web interface:
+
+1. Navigate to **Admin > AHG Plugin Settings > Webhooks**
+2. Or go directly to: `/admin/ahg-settings/webhooks`
+
+The web interface allows you to:
+- Create webhooks with a form (no code required)
+- View all webhooks with their delivery statistics
+- Enable/disable webhooks with one click
+- View delivery logs for troubleshooting
+- Regenerate webhook secrets
+- Delete webhooks
+
+### If Delivery Fails
+
+AtoM automatically retries failed deliveries with increasing delays:
+- 1st retry: 1 minute
+- 2nd retry: 2 minutes
+- 3rd retry: 4 minutes
+- 4th retry: 8 minutes
+- 5th retry: 16 minutes
+
+After 5 failed attempts, the delivery is marked as failed. Check your webhook's delivery history to troubleshoot issues.
+
+---
+
 ## Common Tasks
 
 ### Task 1: Display Fonds on Your Website
@@ -303,6 +426,7 @@ GET /api/v2/taxonomies/42/terms
 │  /authorities          People and organisations                │
 │  /repositories         Repositories                            │
 │  /taxonomies           Browse terms                            │
+│  /webhooks             Your webhook subscriptions              │
 │                                                                 │
 │  COMMON FILTERS                                                 │
 │  ──────────────                                                │

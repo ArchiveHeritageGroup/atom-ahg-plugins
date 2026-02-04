@@ -65,6 +65,50 @@ You might need to export data from your system to:
 
 ---
 
+## Export Dashboard
+
+### Accessing the Export Dashboard
+
+Navigate to `/export` to access the export dashboard with format options.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    EXPORT DASHBOARD                           │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│   ┌────────────────┐   ┌────────────────┐                   │
+│   │  CSV Export    │   │  EAD Export    │                   │
+│   │  Spreadsheet   │   │  Finding Aid   │                   │
+│   └────────────────┘   └────────────────┘                   │
+│                                                              │
+│   Export archival descriptions in standard formats           │
+│   with filtering by repository, level, and scope.           │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### CSV Export
+
+Export archival descriptions as ISAD-G compliant CSV:
+
+1. Go to **Export** → **CSV Export**
+2. Select **Repository** (optional) to filter records
+3. Choose **Level of Description** (optional)
+4. Enter **Parent Record Slug** to export a specific branch
+5. Check **Include descendants** for hierarchical export
+6. Click **Export CSV**
+
+### EAD Export
+
+Export finding aids in EAD 2002 XML format:
+
+1. Go to **Export** → **EAD Export**
+2. Select a **top-level record** (fonds or collection)
+3. Check **Include all descendants** for complete hierarchy
+4. Click **Export EAD XML**
+
+---
+
 ## Bulk Export: Multiple Records
 
 ### Using the Clipboard

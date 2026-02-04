@@ -6,119 +6,45 @@
 
 ## What is This For?
 
-When someone donates materials to your archive, you need a formal agreement. This system helps you:
+When someone **donates materials** to your archive, you need a formal agreement. This system helps you:
 - Keep track of all donors
-- Create and store agreements
+- Create and store donation agreements
 - Remember important follow-ups
 - Connect donations to the actual records
+
+**Note:** For vendor contracts, service agreements, and institutional partnerships, see [Contract Management](contract-management-user-guide.md).
 
 ---
 
 ## The Dashboard
 
-Find it at: **Admin → Donor Management**
+Find it at: **Admin > Donor Management**
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                   DONOR DASHBOARD                            │
-├───────────────┬───────────────┬──────────────────────────────┤
-│ 👤 Donors     │ 📄 Agreements │ ⏰ Reminders Due             │
-│     45        │      62       │      5                       │
-├───────────────┴───────────────┴──────────────────────────────┤
-│                                                              │
-│  RECENT AGREEMENTS                                           │
-│  ────────────────────────────────────────────────────────    │
-│  📄 Smith Family Papers      Deed of Gift      Active        │
-│  📄 Johnson Photographs      Deposit           Pending       │
-│  📄 Municipal Records        Transfer          Draft         │
-│                                                              │
-│  REMINDERS DUE THIS WEEK                                     │
-│  ────────────────────────────────────────────────────────    │
-│  ⏰ Contact Mrs Smith about additional papers    15 Jan      │
-│  ⏰ Review Johnson agreement terms               20 Jan      │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## The Donation Process
-
-```
-┌──────────────────┐
-│ Donor contacts   │
-│ your archive     │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Create donor     │
-│ record           │
-│ (name, contact)  │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Discuss what     │
-│ they're donating │
-│ and any terms    │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Create agreement │
-│ in the system    │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Generate the     │
-│ agreement        │
-│ document         │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Print two        │
-│ copies           │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Get signatures   │
-│ (donor & witness │
-│ if required)     │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Scan and upload  │
-│ signed copy      │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Process the      │
-│ materials        │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Link agreement   │
-│ to the records   │
-│ you created      │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Set any          │
-│ reminders        │
-└──────────────────┘
++-------------------------------------------------------------+
+|                   DONOR DASHBOARD                            |
++---------------+---------------+------------------------------+
+| Donors        | Agreements    | Reminders Due                |
+|     45        |      62       |      5                       |
++---------------+---------------+------------------------------+
+|                                                              |
+|  RECENT AGREEMENTS                                           |
+|  --------------------------------------------------------    |
+|  Smith Family Papers      Deed of Gift      Active           |
+|  Johnson Photographs      Deposit           Pending          |
+|  Municipal Records        Transfer          Draft            |
+|                                                              |
+|  REMINDERS DUE THIS WEEK                                     |
+|  --------------------------------------------------------    |
+|  Contact Mrs Smith about additional papers    15 Jan         |
+|  Review Johnson agreement terms               20 Jan         |
+|                                                              |
++--------------------------------------------------------------+
 ```
 
 ---
 
-## Types of Agreements
+## Types of Donor Agreements
 
 | Type | When to Use | Witness Needed? |
 |------|-------------|-----------------|
@@ -128,12 +54,137 @@ Find it at: **Admin → Donor Management**
 | **Loan** | Temporary - for exhibition or research | No |
 | **Purchase** | You are buying the materials | No |
 | **Bequest** | Received through someone's will | Yes |
+| **Transfer** | Materials transferred from another institution | No |
+| **Custody** | Temporary custody pending decision | No |
+| **Access Agreement** | Special access arrangements for sensitive materials | No |
+| **Reproduction Agreement** | Rights for reproduction of donated materials | No |
+
+---
+
+## The Donation Process
+
+```
++------------------+
+| Donor contacts   |
+| your archive     |
++--------+---------+
+         |
+         v
++------------------+
+| Create donor     |
+| record           |
+| (name, contact)  |
++--------+---------+
+         |
+         v
++------------------+
+| Discuss what     |
+| they're donating |
+| and any terms    |
++--------+---------+
+         |
+         v
++------------------+
+| Create agreement |
+| in the system    |
++--------+---------+
+         |
+         v
++------------------+
+| Generate the     |
+| agreement        |
+| document         |
++--------+---------+
+         |
+         v
++------------------+
+| Print two        |
+| copies           |
++--------+---------+
+         |
+         v
++------------------+
+| Get signatures   |
+| (donor & witness |
+| if required)     |
++--------+---------+
+         |
+         v
++------------------+
+| Scan and upload  |
+| signed copy      |
++--------+---------+
+         |
+         v
++------------------+
+| Process the      |
+| materials        |
++--------+---------+
+         |
+         v
++------------------+
+| Link agreement   |
+| to the records   |
+| you created      |
++--------+---------+
+         |
+         v
++------------------+
+| Set any          |
+| reminders        |
++------------------+
+```
+
+---
+
+## Adding a Logo to Agreements
+
+You can add your organization's logo to any agreement for professional presentation.
+
+### How to Add a Logo
+
+1. Go to the agreement (Add or Edit)
+2. In the **Agreement Details** section, find **Agreement Logo**
+3. Click **Choose File** and select your logo
+4. Supported formats: JPG, PNG, GIF, WebP
+5. Save the agreement
+
+### Logo Display
+
+- The logo appears at the top of the agreement when viewing
+- Useful for printed/PDF versions
+- Recommended size: Max height 120px
+
+### Removing a Logo
+
+1. Edit the agreement
+2. Check the **Remove logo** checkbox
+3. Save the agreement
+
+---
+
+## Using Templates
+
+Save time by creating template agreements:
+
+### Creating a Template
+
+1. Create an agreement with all standard terms filled in
+2. Check the **Save as Template** checkbox
+3. Save
+
+### Using a Template
+
+1. When creating a new agreement, find a suitable template
+2. Clone the template
+3. Modify details for the specific situation
+4. Uncheck **Save as Template** for the new agreement
 
 ---
 
 ## Creating a New Donor
 
-1. Go to **Admin → Donor Management**
+1. Go to **Admin > Donor Management**
 2. Click **New Donor**
 3. Fill in their details:
 
@@ -188,14 +239,14 @@ Find it at: **Admin → Donor Management**
 After you've processed the donated materials:
 
 ```
-┌──────────────────┐     ┌──────────────────┐
-│    AGREEMENT     │     │    ARCHIVAL      │
-│                  │     │    RECORDS       │
-│  Smith Family    │────▶│                  │
-│  Papers 2026     │     │  • Letters       │
-│                  │     │  • Photos        │
-│                  │     │  • Diaries       │
-└──────────────────┘     └──────────────────┘
++------------------+     +------------------+
+|    AGREEMENT     |     |    ARCHIVAL      |
+|                  |     |    RECORDS       |
+|  Smith Family    |---->|                  |
+|  Papers 2026     |     |  - Letters       |
+|                  |     |  - Photos        |
+|                  |     |  - Diaries       |
++------------------+     +------------------+
 ```
 
 1. Go to the agreement
@@ -286,6 +337,18 @@ These restrictions automatically apply to all linked records.
 - Thank you letters
 - Follow-up conversations
 - Restriction expiry dates
+
+---
+
+## Donor vs Contract Management
+
+| Use Donor Agreements for: | Use Contract Management for: |
+|---------------------------|------------------------------|
+| Donations from individuals | Vendor service agreements |
+| Gifts and bequests | Collaboration partnerships |
+| Deposits and loans TO you | SLAs with service providers |
+| Access restrictions on donated materials | NDAs and data processing agreements |
+| Reproduction rights from donors | Maintenance and lease contracts |
 
 ---
 

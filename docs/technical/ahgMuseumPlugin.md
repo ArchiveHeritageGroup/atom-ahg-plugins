@@ -6,7 +6,7 @@ The Museum Plugin provides comprehensive museum object cataloguing following CCO
 
 ## Version
 
-- **Current Version:** 1.1.0
+- **Current Version:** 1.2.0
 - **Last Updated:** January 2026
 - **Compatibility:** AtoM 2.10+, PHP 8.3+
 
@@ -584,6 +584,10 @@ php symfony cc
    - Verify user has required permissions
 
 ## Changelog
+
+### v1.2.0 (February 2026)
+- Fixed multi-file upload limit check using RecursiveDirectoryIterator
+- Upload form now correctly validates against configured file count limits
 
 ### v1.1.0 (January 2026)
 - Added Exhibition Management module

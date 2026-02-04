@@ -296,6 +296,62 @@ All classification changes are logged:
 
 ---
 
+## Automated Security Tasks
+
+The system automatically performs security maintenance tasks:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SCHEDULED SECURITY TASKS                                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ⏰ Daily at 1:00 AM                                        │
+│                                                             │
+│  1. 📋 Process Declassifications                            │
+│     Records scheduled for automatic declassification        │
+│                                                             │
+│  2. ⏳ Expire Clearances                                    │
+│     Deactivate clearances past their expiry date           │
+│                                                             │
+│  3. 📧 Send Expiry Warnings                                 │
+│     Email users 30 days before clearance expires           │
+│                                                             │
+│  4. 🔐 Cleanup 2FA Sessions                                 │
+│     Remove expired two-factor authentication sessions      │
+│                                                             │
+│  5. 📝 Audit Log Retention                                  │
+│     Remove access logs older than retention period         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Clearance Expiry Notifications
+
+When your clearance is about to expire, you'll receive an email:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Subject: Security Clearance Expiry Warning                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Dear Jane Smith,                                           │
+│                                                             │
+│  Your SECRET security clearance will expire on              │
+│  15 March 2026 (30 days remaining).                         │
+│                                                             │
+│  Please contact your security administrator to request      │
+│  a renewal.                                                 │
+│                                                             │
+│  Regards,                                                   │
+│  Security Administration                                    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Note**: Warnings are sent once per week until the clearance expires or is renewed.
+
+---
+
 ## Best Practices
 ```
 ┌────────────────────────────────┬────────────────────────────┐
@@ -306,6 +362,7 @@ All classification changes are logged:
 │  Set review dates              │  Forget to review          │
 │  Downgrade when appropriate    │  Keep things secret forever│
 │  Report security concerns      │  Ignore policy violations  │
+│  Respond to expiry notices     │  Ignore email warnings     │
 └────────────────────────────────┴────────────────────────────┘
 ```
 
