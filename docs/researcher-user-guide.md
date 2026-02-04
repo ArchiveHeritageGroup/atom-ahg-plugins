@@ -23,7 +23,7 @@ The Researcher Portal provides tools for researchers to interact with archival m
 
 ### Accessing the Researcher Dashboard
 
-After logging in, click on **"My Research"** or navigate to your researcher dashboard to access all features.
+After logging in, click on **"My Workspace"** or navigate to your researcher dashboard to access all features.
 
 ---
 
@@ -277,15 +277,15 @@ Research accounts may require periodic renewal:
 
 | Action | How to Access |
 |--------|---------------|
-| View Dashboard | My Research → Dashboard |
-| Create Collection | My Research → Collections → New |
+| View Dashboard | My Workspace → Dashboard |
+| Create Collection | My Workspace → Collections → New |
 | Add to Collection | Record page → "Add to Collection" |
-| Book Visit | My Research → Book a Visit |
-| View Bookings | My Research → My Bookings |
+| Book Visit | My Workspace → Book a Visit |
+| View Bookings | My Workspace → My Bookings |
 | Add Annotation | Record page → "Add Annotation" |
 | Generate Citation | Record page → "Cite this Record" |
-| Update Profile | My Research → Profile |
-| Change Password | My Research → Profile → Change Password |
+| Update Profile | My Workspace → Profile |
+| Change Password | My Workspace → Profile → Change Password |
 
 ---
 
