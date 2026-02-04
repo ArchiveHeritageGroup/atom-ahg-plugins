@@ -859,6 +859,20 @@ class SettingsCronJobsAction extends sfAction
                 'category' => 'ahg',
             ],
             [
+                'name' => 'AI Process Pending Queue',
+                'command' => 'php symfony ai:process-pending',
+                'description' => 'Processes pending AI extraction queue for auto-triggered NER jobs when Gearman is unavailable. Handles records queued from document uploads with automatic retry on failure.',
+                'options' => [
+                    '--limit=N' => 'Maximum items to process (default: 50)',
+                    '--task-type=TYPE' => 'Task type to process: ner, summarize (default: ner)',
+                    '--dry-run' => 'Preview without processing',
+                ],
+                'schedule' => 'Every 5 minutes',
+                'example' => '*/5 * * * * cd {root} && php symfony ai:process-pending --limit=20 >> /var/log/atom/ai-pending.log 2>&1',
+                'duration' => 'Short to Medium',
+                'category' => 'ahg',
+            ],
+            [
                 'name' => 'AI Description Suggestion',
                 'command' => 'php symfony ai:suggest-description',
                 'description' => 'Generates AI-powered scope_and_content suggestions using LLM (Ollama, OpenAI, or Anthropic). Analyzes OCR text and metadata to draft descriptions for custodian review. Suggestions are saved for approval before being applied to records.',

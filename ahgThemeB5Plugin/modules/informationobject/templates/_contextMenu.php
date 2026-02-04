@@ -77,6 +77,21 @@ if (isset($resource)) {
 
 <!-- AI Tools Section (NER, Summarize, Translate, Handwriting) -->
 <?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgAIPlugin')): ?>
+<?php
+  // Check for PDF and approved entities for PDF overlay feature
+  $hasPdfForOverlay = false;
+  $approvedEntityCount = 0;
+  try {
+      $hasPdfForOverlay = Illuminate\Database\Capsule\Manager::table('digital_object')
+          ->where('object_id', $resource->id)
+          ->where('mime_type', 'LIKE', '%pdf%')
+          ->exists();
+      $approvedEntityCount = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+          ->where('object_id', $resource->id)
+          ->whereIn('status', ['approved', 'linked'])
+          ->count();
+  } catch (Exception $e) {}
+?>
 <section class="sidebar-widget">
   <h4><?php echo __('AI Tools'); ?></h4>
   <ul>
@@ -85,6 +100,14 @@ if (isset($resource)) {
         <i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities (NER)'); ?>
       </a>
     </li>
+    <?php if ($hasPdfForOverlay && $approvedEntityCount > 0): ?>
+    <li>
+      <a href="<?php echo url_for(['module' => 'ai', 'action' => 'pdfOverlay', 'id' => $resource->id]); ?>">
+        <i class="bi bi-file-earmark-pdf me-1"></i><?php echo __('View PDF Entities'); ?>
+        <span class="badge bg-success rounded-pill ms-1"><?php echo $approvedEntityCount; ?></span>
+      </a>
+    </li>
+    <?php endif; ?>
     <li>
       <a href="#" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>); return false;">
         <i class="bi bi-file-text me-1"></i><?php echo __('Generate Summary'); ?>

@@ -57,7 +57,20 @@ decorate_with('layout_2col');
     </a>
 </div>
 
-<div class="list-group">
+<div class="list-group mb-4">
+    <span class="list-group-item bg-light fw-bold">Content</span>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminHeroSlides']); ?>" class="list-group-item list-group-item-action">
+        <i class="fas fa-images me-2"></i>Hero Slides
+    </a>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminFeaturedCollections']); ?>" class="list-group-item list-group-item-action">
+        <i class="fas fa-star me-2"></i>Featured Collections
+    </a>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'graph']); ?>" class="list-group-item list-group-item-action">
+        <i class="fas fa-project-diagram me-2"></i>Knowledge Graph
+    </a>
+</div>
+
+<div class="list-group mb-4">
     <span class="list-group-item bg-light fw-bold">Analytics</span>
     <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>" class="list-group-item list-group-item-action">
         <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
@@ -67,6 +80,16 @@ decorate_with('layout_2col');
     </a>
     <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsAlerts']); ?>" class="list-group-item list-group-item-action">
         <i class="fas fa-bell me-2"></i>Alerts
+    </a>
+</div>
+
+<div class="list-group">
+    <span class="list-group-item bg-light fw-bold">Public Pages</span>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'landing']); ?>" class="list-group-item list-group-item-action" target="_blank">
+        <i class="fas fa-external-link-alt me-2"></i>Heritage Landing
+    </a>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" class="list-group-item list-group-item-action" target="_blank">
+        <i class="fas fa-external-link-alt me-2"></i>Heritage Search
     </a>
 </div>
 <?php end_slot(); ?>

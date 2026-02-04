@@ -165,3 +165,19 @@ ahg_ai_job_view:
   url: /ai/job/:id
   param: { module: ai, action: jobView }
   requirements: { id: \d+ }
+
+# ============================================================================
+# NER PDF Overlay Display Routes (Issue #20)
+# ============================================================================
+
+# PDF overlay viewer
+ahg_ai_ner_pdf_overlay:
+  url: /ai/ner/pdf-overlay/:id
+  param: { module: ai, action: pdfOverlay }
+  requirements: { id: \d+ }
+
+# Get approved/linked entities for overlay
+ahg_ai_ner_approved_entities:
+  url: /ai/ner/approved-entities/:id
+  param: { module: ai, action: getApprovedEntities }
+  requirements: { id: \d+ }

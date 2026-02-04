@@ -69,7 +69,7 @@
       </div>
 
       <?php if (!empty($items)): ?>
-        <?php if ($currentCategory['display_style'] === 'grid'): ?>
+        <?php if ($currentCategory['display_style'] === 'grid' || $currentCategory['display_style'] === 'map'): ?>
           <!-- Grid display -->
           <div class="row g-3">
             <?php foreach ($items as $item): ?>

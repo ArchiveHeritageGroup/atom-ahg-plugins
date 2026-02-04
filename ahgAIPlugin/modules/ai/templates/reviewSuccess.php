@@ -32,12 +32,26 @@
                     <tr>
                         <th>Object</th>
                         <th class="text-center" style="width: 120px">Pending</th>
-                        <th style="width: 150px">Actions</th>
+                        <th class="text-center" style="width: 120px">Approved</th>
+                        <th style="width: 220px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($pendingObjects)): ?>
                         <?php foreach ($pendingObjects as $obj): ?>
+                        <?php
+                            // Check for approved entities count
+                            $approvedCount = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+                                ->where('object_id', $obj->id)
+                                ->whereIn('status', ['approved', 'linked'])
+                                ->count();
+
+                            // Check if object has a PDF digital object
+                            $hasPdf = Illuminate\Database\Capsule\Manager::table('digital_object')
+                                ->where('object_id', $obj->id)
+                                ->where('mime_type', 'LIKE', '%pdf%')
+                                ->exists();
+                        ?>
                         <tr>
                             <td>
                                 <a href="/index.php/<?php echo $obj->slug; ?>">
@@ -47,16 +61,31 @@
                             <td class="text-center">
                                 <span class="badge bg-warning text-dark"><?php echo $obj->pending_count; ?></span>
                             </td>
+                            <td class="text-center">
+                                <?php if ($approvedCount > 0): ?>
+                                    <span class="badge bg-success"><?php echo $approvedCount; ?></span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">0</span>
+                                <?php endif; ?>
+                            </td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="reviewObject(<?php echo $obj->id; ?>)">
-                                    <i class="fas fa-eye me-1"></i>Review
-                                </button>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-primary" onclick="reviewObject(<?php echo $obj->id; ?>)" title="Review pending entities">
+                                        <i class="fas fa-eye me-1"></i>Review
+                                    </button>
+                                    <?php if ($hasPdf && $approvedCount > 0): ?>
+                                        <a href="<?php echo url_for(['module' => 'ai', 'action' => 'pdfOverlay', 'id' => $obj->id]); ?>"
+                                           class="btn btn-outline-info" title="View PDF with entity highlights">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                     <tr>
-                        <td colspan="3" class="text-center text-muted py-4">
+                        <td colspan="4" class="text-center text-muted py-4">
                             No pending entities to review
                         </td>
                     </tr>

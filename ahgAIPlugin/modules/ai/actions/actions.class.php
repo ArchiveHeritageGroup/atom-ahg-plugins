@@ -179,7 +179,33 @@ class aiActions extends sfActions
             }
         }
 
+        // Dispatch event for entity approval (for entity cache sync)
+        if (in_array($action, ['link', 'approved'])) {
+            $this->dispatchEntityApproved($entity, $targetId);
+        }
+
         return $this->renderText(json_encode(['success' => true]));
+    }
+
+    /**
+     * Dispatch event when NER entity is approved/linked.
+     * Used by heritage entity cache sync service.
+     */
+    protected function dispatchEntityApproved($entity, $targetId = null)
+    {
+        try {
+            $this->dispatcher->notify(new sfEvent($this, 'ner.entity_approved', [
+                'entity_id' => $entity->id,
+                'object_id' => $entity->object_id,
+                'entity_type' => $entity->entity_type,
+                'entity_value' => $entity->entity_value,
+                'confidence' => $entity->confidence ?? 1.0,
+                'linked_id' => $targetId,
+            ]));
+        } catch (Exception $e) {
+            // Log but don't fail the main operation
+            error_log('NER entity approved event dispatch error: ' . $e->getMessage());
+        }
     }
 
     public function executeCreateActor(sfWebRequest $request)
@@ -872,16 +898,22 @@ class aiActions extends sfActions
                         ->update($updateData);
                 }
                 
+                $shouldDispatchEvent = false;
+                $linkedTargetId = null;
+
                 if ($action === 'create') {
                     $createType = $decision['create_type'] ?? 'create_subject';
                     $this->processCreate($entity, $createType);
+                    $shouldDispatchEvent = true;
                 } elseif ($action === 'create_date') {
                     // Handle date creation with optional splitting
                     $splitDates = isset($decision['split_dates']) ? (bool)$decision['split_dates'] : true;
                     $this->processDateCreate($entity, $splitDates);
+                    $shouldDispatchEvent = true;
                 } elseif ($action === 'link') {
-                    $targetId = $decision['target_id'];
-                    $this->processLink($entity, $targetId);
+                    $linkedTargetId = $decision['target_id'];
+                    $this->processLink($entity, $linkedTargetId);
+                    $shouldDispatchEvent = true;
                 } elseif ($action === 'reject' || $action === 'approved') {
                     $correctionType = $action === 'reject' ? 'rejected' : 'approved';
                     Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
@@ -891,8 +923,15 @@ class aiActions extends sfActions
                             'correction_type' => $correctionType,
                             'reviewed_at' => date('Y-m-d H:i:s')
                         ]);
+                    // Dispatch event for approved entities (not rejected)
+                    $shouldDispatchEvent = ($action === 'approved');
                 }
-                
+
+                // Dispatch entity approval event for cache sync
+                if ($shouldDispatchEvent) {
+                    $this->dispatchEntityApproved($entity, $linkedTargetId);
+                }
+
                 $results['success']++;
                 
             } catch (Exception $e) {
@@ -2186,5 +2225,198 @@ class aiActions extends sfActions
             'job' => $job,
             'object' => $object,
         ]));
+    }
+
+    // =========================================================================
+    // NER PDF OVERLAY DISPLAY ACTIONS (Issue #20)
+    // =========================================================================
+
+    /**
+     * Get approved/linked NER entities for an object
+     * Used by the PDF overlay viewer to highlight entities on documents
+     *
+     * GET /ai/ner/approved-entities/:id
+     */
+    public function executeGetApprovedEntities(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $objectId = $request->getParameter('id');
+        if (!$objectId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object ID required']));
+        }
+
+        // Get approved and linked entities only
+        $entities = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+            ->where('object_id', $objectId)
+            ->whereIn('status', ['approved', 'linked'])
+            ->select(
+                'id',
+                'entity_type',
+                'entity_value',
+                'confidence',
+                'status',
+                'linked_actor_id'
+            )
+            ->orderBy('entity_type')
+            ->orderBy('entity_value')
+            ->get()
+            ->toArray();
+
+        // Group by entity type for easier frontend processing
+        $grouped = [];
+        $typeConfig = [
+            'PERSON' => ['color' => 'rgba(78, 121, 167, 0.35)', 'border' => '#4e79a7', 'label' => 'Person'],
+            'PER' => ['color' => 'rgba(78, 121, 167, 0.35)', 'border' => '#4e79a7', 'label' => 'Person'],
+            'ORG' => ['color' => 'rgba(89, 161, 79, 0.35)', 'border' => '#59a14f', 'label' => 'Organization'],
+            'GPE' => ['color' => 'rgba(225, 87, 89, 0.35)', 'border' => '#e15759', 'label' => 'Place'],
+            'LOC' => ['color' => 'rgba(225, 87, 89, 0.35)', 'border' => '#e15759', 'label' => 'Location'],
+            'DATE' => ['color' => 'rgba(176, 122, 161, 0.35)', 'border' => '#b07aa1', 'label' => 'Date'],
+            'TIME' => ['color' => 'rgba(176, 122, 161, 0.35)', 'border' => '#b07aa1', 'label' => 'Time'],
+            'EVENT' => ['color' => 'rgba(118, 183, 178, 0.35)', 'border' => '#76b7b2', 'label' => 'Event'],
+            'WORK_OF_ART' => ['color' => 'rgba(255, 157, 167, 0.35)', 'border' => '#ff9da7', 'label' => 'Work'],
+        ];
+
+        foreach ($entities as $entity) {
+            $type = $entity->entity_type;
+            if (!isset($grouped[$type])) {
+                $config = $typeConfig[$type] ?? ['color' => 'rgba(186, 186, 186, 0.35)', 'border' => '#bababa', 'label' => $type];
+                $grouped[$type] = [
+                    'type' => $type,
+                    'label' => $config['label'],
+                    'color' => $config['color'],
+                    'borderColor' => $config['border'],
+                    'entities' => [],
+                ];
+            }
+            $grouped[$type]['entities'][] = [
+                'id' => $entity->id,
+                'value' => $entity->entity_value,
+                'confidence' => (float) $entity->confidence,
+                'status' => $entity->status,
+                'linkedActorId' => $entity->linked_actor_id,
+            ];
+        }
+
+        // Get linked actor/term names for entities with linked_actor_id
+        foreach ($grouped as $type => &$group) {
+            foreach ($group['entities'] as &$entity) {
+                if ($entity['linkedActorId']) {
+                    $linkedName = $this->getLinkedEntityName($entity['linkedActorId'], $type);
+                    if ($linkedName) {
+                        $entity['linkedName'] = $linkedName;
+                    }
+                }
+            }
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'object_id' => (int) $objectId,
+            'entity_count' => count($entities),
+            'entity_types' => array_values($grouped),
+        ]));
+    }
+
+    /**
+     * Get linked entity name (actor or term)
+     */
+    private function getLinkedEntityName($linkedId, $entityType)
+    {
+        if (!$linkedId) {
+            return null;
+        }
+
+        // Try actor first
+        if (in_array($entityType, ['PERSON', 'PER', 'ORG'])) {
+            $actor = Illuminate\Database\Capsule\Manager::table('actor_i18n')
+                ->where('id', $linkedId)
+                ->where('culture', 'en')
+                ->first();
+            if ($actor) {
+                return $actor->authorized_form_of_name;
+            }
+        }
+
+        // Try term (for places, subjects)
+        $term = Illuminate\Database\Capsule\Manager::table('term_i18n')
+            ->where('id', $linkedId)
+            ->where('culture', 'en')
+            ->first();
+        if ($term) {
+            return $term->name;
+        }
+
+        return null;
+    }
+
+    /**
+     * PDF Overlay Viewer - Display PDF with NER entity highlights
+     *
+     * GET /ai/ner/pdf-overlay/:id
+     */
+    public function executePdfOverlay(sfWebRequest $request)
+    {
+        $objectId = $request->getParameter('id');
+
+        // Get information object
+        $object = QubitInformationObject::getById($objectId);
+        if (!$object) {
+            $this->forward404('Object not found');
+        }
+
+        $this->object = $object;
+        $this->objectId = $objectId;
+
+        // Get digital object info
+        $digitalObject = $object->getDigitalObject();
+        $this->docInfo = null;
+
+        if ($digitalObject) {
+            $mimeType = $digitalObject->mimeType ?? '';
+            $isPdf = strpos($mimeType, 'pdf') !== false;
+
+            // Get file path and name from digital object
+            $doPath = $digitalObject->path ?? '';
+            $doName = $digitalObject->name ?? '';
+
+            // Build full path - path contains directory, name contains filename
+            $webPath = rtrim($doPath, '/') . '/' . $doName;
+
+            // Get absolute path for page count
+            $absolutePath = sfConfig::get('sf_web_dir', '') . $webPath;
+
+            // Get page count for PDFs
+            $pageCount = 1;
+            if ($isPdf && $absolutePath && file_exists($absolutePath)) {
+                // Try to get page count using pdfinfo
+                $output = [];
+                exec("pdfinfo " . escapeshellarg($absolutePath) . " 2>/dev/null | grep Pages", $output);
+                if (!empty($output[0])) {
+                    $pageCount = (int) preg_replace('/[^0-9]/', '', $output[0]);
+                }
+            }
+
+            $this->docInfo = [
+                'is_pdf' => $isPdf,
+                'mime_type' => $mimeType,
+                'url' => $webPath,
+                'page_count' => $pageCount,
+                'filename' => $doName,
+            ];
+        }
+
+        // Get entity counts
+        $entityCounts = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+            ->where('object_id', $objectId)
+            ->whereIn('status', ['approved', 'linked'])
+            ->select('entity_type', Illuminate\Database\Capsule\Manager::raw('COUNT(*) as count'))
+            ->groupBy('entity_type')
+            ->get()
+            ->pluck('count', 'entity_type')
+            ->toArray();
+
+        $this->entityCounts = $entityCounts;
+        $this->totalEntities = array_sum($entityCounts);
     }
 }

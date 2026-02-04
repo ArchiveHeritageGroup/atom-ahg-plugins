@@ -270,7 +270,7 @@ class tiffpdfmergeActions extends sfActions
     public function executeProcess(sfWebRequest $request)
     {
         sfConfig::set('sf_web_debug', false);
-        
+
         if (!$this->context->user->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
@@ -282,8 +282,12 @@ class tiffpdfmergeActions extends sfActions
             return $this->renderJson(['success' => false, 'error' => 'Job not found']);
         }
 
-        if ($job->status !== 'pending') {
-            return $this->renderJson(['success' => false, 'error' => 'Job already processed or processing']);
+        if ($job->status === 'processing') {
+            return $this->renderJson(['success' => false, 'error' => 'Job is already being processed']);
+        }
+
+        if ($job->status === 'completed') {
+            return $this->renderJson(['success' => true, 'message' => 'Job already completed', 'output_path' => $job->output_path]);
         }
 
         $files = $this->getRepository()->getJobFiles($mergeJobId);
@@ -291,19 +295,51 @@ class tiffpdfmergeActions extends sfActions
             return $this->renderJson(['success' => false, 'error' => 'No files to process']);
         }
 
-        // Mark job as queued for the worker to pick up
-        $db = $this->getDB();
-        $db::table('tiff_pdf_merge_job')
-            ->where('id', $mergeJobId)
-            ->update([
-                'status' => 'queued',
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
+        // Process the job synchronously using TiffPdfMergeJob
+        try {
+            // Load the job class if not already loaded
+            if (!class_exists('AtomFramework\Jobs\TiffPdfMergeJob')) {
+                require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Jobs/TiffPdfMergeJob.php';
+            }
 
-        return $this->renderJson([
-            'success' => true,
-            'message' => 'Job queued for processing. Refresh this page to check status.',
-        ]);
+            $jobProcessor = new \AtomFramework\Jobs\TiffPdfMergeJob($mergeJobId);
+            $success = $jobProcessor->handle();
+
+            if ($success) {
+                // Refresh job data to get output info
+                $updatedJob = $this->getRepository()->getJob($mergeJobId);
+
+                return $this->renderJson([
+                    'success' => true,
+                    'message' => 'PDF created successfully!',
+                    'output_filename' => $updatedJob->output_filename ?? null,
+                    'output_path' => $updatedJob->output_path ?? null,
+                    'digital_object_id' => $updatedJob->output_digital_object_id ?? null,
+                    'processed_files' => $updatedJob->processed_files ?? $files->count(),
+                ]);
+            } else {
+                $updatedJob = $this->getRepository()->getJob($mergeJobId);
+                return $this->renderJson([
+                    'success' => false,
+                    'error' => $updatedJob->error_message ?? 'Processing failed',
+                ]);
+            }
+        } catch (Exception $e) {
+            // Mark job as failed
+            $db = $this->getDB();
+            $db::table('tiff_pdf_merge_job')
+                ->where('id', $mergeJobId)
+                ->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
+            return $this->renderJson([
+                'success' => false,
+                'error' => 'Processing error: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     public function executeDownload(sfWebRequest $request)

@@ -3,24 +3,61 @@
  * AI Tools Section - Combined NER + Summarization
  * Usage: include_component('ahgNer', 'aiTools', ['resource' => $resource])
  */
+
+// Check if object has a PDF and approved NER entities
+$hasPdf = false;
+$approvedEntityCount = 0;
+
+try {
+    $hasPdf = Illuminate\Database\Capsule\Manager::table('digital_object')
+        ->where('object_id', $resource->id)
+        ->where('mime_type', 'LIKE', '%pdf%')
+        ->exists();
+
+    $approvedEntityCount = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
+        ->where('object_id', $resource->id)
+        ->whereIn('status', ['approved', 'linked'])
+        ->count();
+} catch (Exception $e) {
+    // Silently fail if tables don't exist
+}
 ?>
 <div class="ai-tools-section">
     <h5 class="mb-3"><i class="bi bi-cpu me-1"></i>AI Tools</h5>
-    
+
     <!-- Generate Summary Button -->
     <div class="mb-2">
         <button type="button" class="btn btn-outline-info btn-sm w-100" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>)">
             <i class="bi bi-file-text me-1"></i>Generate Summary
         </button>
     </div>
-    
+
     <!-- Extract Entities Button -->
     <div class="mb-2">
         <button type="button" class="btn btn-outline-primary btn-sm w-100" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>)">
             <i class="bi bi-diagram-3 me-1"></i>Extract Entities
         </button>
     </div>
-    
+
+    <?php if ($hasPdf && $approvedEntityCount > 0): ?>
+    <!-- View PDF with Entity Highlights Button -->
+    <div class="mb-2">
+        <a href="<?php echo url_for(['module' => 'ai', 'action' => 'pdfOverlay', 'id' => $resource->id]); ?>"
+           class="btn btn-outline-success btn-sm w-100">
+            <i class="bi bi-file-earmark-pdf me-1"></i>View PDF Entities
+            <span class="badge bg-success ms-1"><?php echo $approvedEntityCount; ?></span>
+        </a>
+    </div>
+    <?php elseif ($hasPdf): ?>
+    <!-- Disabled button when no approved entities -->
+    <div class="mb-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm w-100" disabled title="Extract and approve entities first">
+            <i class="bi bi-file-earmark-pdf me-1"></i>View PDF Entities
+            <span class="badge bg-secondary ms-1">0</span>
+        </button>
+    </div>
+    <?php endif; ?>
+
     <!-- Results Area -->
     <div id="aiResultsArea" class="mt-2" style="display: none;"></div>
 </div>

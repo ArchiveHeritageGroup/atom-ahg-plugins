@@ -7,8 +7,8 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Modified by The AHG to include Universal Metadata Extraction
  */
 
-// Include the metadata extraction trait (from lib/ - autoloaded by Symfony)
-require_once sfConfig::get('sf_root_dir') . '/lib/arMetadataExtractionTrait.php';
+// Include the metadata extraction trait from ahgMetadataExtractionPlugin
+require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgMetadataExtractionTrait.php';
 
 /**
  * Digital Object add component with metadata extraction.

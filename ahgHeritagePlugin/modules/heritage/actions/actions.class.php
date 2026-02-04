@@ -2263,4 +2263,229 @@ EMAIL;
             return false;
         }
     }
+
+    // =========================================================================
+    // KNOWLEDGE GRAPH ACTIONS (Session 13: NER Integration)
+    // =========================================================================
+
+    /**
+     * Knowledge Graph visualization page.
+     */
+    public function executeGraph(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        // Get entity types for filter dropdown
+        $this->entityTypes = ['person', 'organization', 'place', 'date', 'event', 'work'];
+
+        // Get basic stats
+        $this->stats = $graphService->getStats();
+
+        return sfView::SUCCESS;
+    }
+
+    /**
+     * Knowledge Graph data API (JSON for D3.js).
+     */
+    public function executeGraphData(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        $filters = [
+            'entity_type' => $request->getParameter('entity_type'),
+            'search' => $request->getParameter('search'),
+            'min_occurrences' => $request->getParameter('min_occurrences', 1),
+        ];
+
+        $limit = min(200, max(10, (int) $request->getParameter('limit', 100)));
+
+        try {
+            $graphData = $graphService->getGraphData($filters, $limit);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'nodes' => $graphData['nodes'],
+                'links' => $graphData['links'],
+                'stats' => $graphData['stats'],
+            ]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    /**
+     * Entity detail page.
+     */
+    public function executeEntity(sfWebRequest $request)
+    {
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $type = $request->getParameter('type');
+        $value = urldecode($request->getParameter('value'));
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        // Find the entity node
+        $entity = $graphService->findNode($type, $value);
+
+        if (!$entity) {
+            $this->forward404('Entity not found');
+        }
+
+        $this->entity = $entity;
+        $this->relatedEntities = $graphService->getRelatedEntities((int) $entity->id, 1, 20);
+        $this->objects = $graphService->getObjectsForEntity((int) $entity->id, 20);
+
+        return sfView::SUCCESS;
+    }
+
+    /**
+     * Entity API (JSON).
+     */
+    public function executeApiEntity(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $type = $request->getParameter('type');
+        $value = urldecode($request->getParameter('value'));
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        $entity = $graphService->findNode($type, $value);
+
+        if (!$entity) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Entity not found',
+            ]));
+        }
+
+        $relatedEntities = $graphService->getRelatedEntities((int) $entity->id, 1, 20);
+        $objects = $graphService->getObjectsForEntity((int) $entity->id, 20);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'entity' => $entity,
+            'related_entities' => $relatedEntities,
+            'objects' => $objects,
+        ]));
+    }
+
+    /**
+     * Related entities API.
+     */
+    public function executeApiEntityRelated(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $nodeId = (int) $request->getParameter('id');
+        $depth = min(3, max(1, (int) $request->getParameter('depth', 1)));
+        $limit = min(50, max(5, (int) $request->getParameter('limit', 20)));
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        try {
+            $related = $graphService->getRelatedEntities($nodeId, $depth, $limit);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'related_entities' => $related,
+            ]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    /**
+     * Entity search/autocomplete API.
+     */
+    public function executeApiEntitySearch(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+
+        $query = $request->getParameter('q', '');
+        $type = $request->getParameter('type');
+        $limit = min(20, max(5, (int) $request->getParameter('limit', 10)));
+
+        if (strlen($query) < 2) {
+            return $this->renderText(json_encode([
+                'success' => true,
+                'results' => [],
+            ]));
+        }
+
+        $queryBuilder = \Illuminate\Database\Capsule\Manager::table('heritage_entity_graph_node')
+            ->where('canonical_value', 'LIKE', '%' . $query . '%')
+            ->orderByDesc('occurrence_count')
+            ->limit($limit);
+
+        if ($type) {
+            $queryBuilder->where('entity_type', $type);
+        }
+
+        $results = $queryBuilder->select(
+            'id',
+            'entity_type',
+            'canonical_value as value',
+            'display_label as label',
+            'occurrence_count'
+        )->get()->toArray();
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'results' => $results,
+        ]));
+    }
+
+    /**
+     * Graph statistics API.
+     */
+    public function executeApiGraphStats(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+
+        $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
+
+        try {
+            $stats = $graphService->getStats();
+            $topEntities = $graphService->getTopConnectedEntities(null, 10);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'stats' => $stats,
+                'top_entities' => $topEntities,
+            ]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
 }

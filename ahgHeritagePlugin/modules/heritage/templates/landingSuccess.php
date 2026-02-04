@@ -153,6 +153,9 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'trending']); ?>" class="heritage-explore-btn">
                 <i class="fas fa-chart-line"></i> Trending
             </a>
+            <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'graph']); ?>" class="heritage-explore-btn">
+                <i class="fas fa-project-diagram"></i> Knowledge Graph
+            </a>
         </div>
     </section>
 

@@ -1161,6 +1161,13 @@ INSERT IGNORE INTO heritage_filter_type (code, name, icon, source_type, source_r
 ('language', 'Language', 'bi-translate', 'taxonomy', 'language', 1),
 ('glam_sector', 'Type', 'bi-building', 'taxonomy', 'glamSector', 1);
 
+-- NER entity filter types (AI-extracted)
+INSERT IGNORE INTO heritage_filter_type (code, name, icon, source_type, source_reference, is_system) VALUES
+('ner_person', 'People (AI)', 'bi-person-badge', 'entity_cache', 'person', 0),
+('ner_organization', 'Organizations (AI)', 'bi-building', 'entity_cache', 'organization', 0),
+('ner_place', 'Places (AI)', 'bi-geo-alt-fill', 'entity_cache', 'place', 0),
+('ner_date', 'Dates (AI)', 'bi-calendar-date', 'entity_cache', 'date', 0);
+
 -- Default landing config
 INSERT IGNORE INTO heritage_landing_config (id, institution_id, hero_tagline, hero_subtext, hero_search_placeholder, suggested_searches, stats_config) VALUES
 (1, NULL, 'Discover Our Heritage', 'Explore collections spanning centuries of history, culture, and human achievement', 'Search photographs, documents, artifacts...', '["photographs", "maps", "letters", "newspapers"]', '{"show_items": true, "show_collections": true, "show_contributors": false}');

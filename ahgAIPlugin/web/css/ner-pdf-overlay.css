@@ -1,0 +1,262 @@
+/**
+ * NER PDF Overlay Display Styles (Issue #20)
+ *
+ * Styles for PDF viewer with NER entity highlighting.
+ */
+
+/* PDF Page Wrapper */
+#pdf-page-wrapper {
+    position: relative;
+}
+
+/* PDF Canvas */
+#pdf-canvas {
+    display: block;
+}
+
+/* Text Layer - follows PDF.js conventions */
+.textLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 0.2;
+    line-height: 1.0;
+    user-select: text;
+    pointer-events: auto;
+}
+
+.textLayer span,
+.textLayer br {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    transform-origin: 0% 0%;
+}
+
+.textLayer ::selection {
+    background: rgba(0, 0, 255, 0.3);
+}
+
+/* Highlight Layer */
+.ner-highlight-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Entity Highlights */
+.ner-highlight {
+    transition: opacity 0.2s, box-shadow 0.2s;
+    border-radius: 2px;
+}
+
+.ner-highlight:hover {
+    opacity: 0.9;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.ner-highlight-flash {
+    animation: highlight-flash 1.5s ease-out;
+}
+
+@keyframes highlight-flash {
+    0% {
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.8);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+/* Entity Type Specific Colors */
+.ner-highlight-person,
+.ner-highlight-per {
+    background: rgba(78, 121, 167, 0.35) !important;
+    border-bottom-color: #4e79a7 !important;
+}
+
+.ner-highlight-org {
+    background: rgba(89, 161, 79, 0.35) !important;
+    border-bottom-color: #59a14f !important;
+}
+
+.ner-highlight-gpe,
+.ner-highlight-loc {
+    background: rgba(225, 87, 89, 0.35) !important;
+    border-bottom-color: #e15759 !important;
+}
+
+.ner-highlight-date,
+.ner-highlight-time {
+    background: rgba(176, 122, 161, 0.35) !important;
+    border-bottom-color: #b07aa1 !important;
+}
+
+.ner-highlight-event {
+    background: rgba(118, 183, 178, 0.35) !important;
+    border-bottom-color: #76b7b2 !important;
+}
+
+.ner-highlight-work_of_art {
+    background: rgba(255, 157, 167, 0.35) !important;
+    border-bottom-color: #ff9da7 !important;
+}
+
+/* PDF Toolbar */
+.pdf-overlay-toolbar {
+    border-bottom: 1px solid #333;
+}
+
+/* Entity Toggle Labels */
+.entity-toggle-label {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.entity-toggle-label:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.entity-toggle-label .form-check-input {
+    margin-top: 0.3rem;
+}
+
+.entity-toggle-label .badge {
+    font-weight: normal;
+    transition: opacity 0.2s;
+}
+
+.entity-toggle-label .form-check-input:not(:checked) + .badge {
+    opacity: 0.4;
+}
+
+/* Entity Panel */
+.entity-type-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.entity-type-group:last-child {
+    border-bottom: none;
+}
+
+.entity-type-header {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.entity-type-items {
+    padding: 0;
+}
+
+.entity-panel-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.entity-panel-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.entity-panel-item:last-child {
+    border-bottom: none;
+}
+
+.entity-panel-item.active {
+    background: rgba(13, 110, 253, 0.3);
+    border-left: 3px solid #0d6efd;
+    padding-left: 9px;
+}
+
+.entity-panel-item .entity-value {
+    font-weight: 500;
+    color: #fff;
+    word-break: break-word;
+}
+
+.entity-panel-item small {
+    font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    #entity-toggles {
+        justify-content: center;
+    }
+
+    #pdf-viewer-area {
+        height: 500px !important;
+    }
+}
+
+/* Loading state */
+#entity-list .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Viewer area scrollbar styling */
+#pdf-viewer-area::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+#pdf-viewer-area::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+#pdf-viewer-area::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 5px;
+}
+
+#pdf-viewer-area::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Entity count badge animation */
+#entity-count {
+    transition: transform 0.2s;
+}
+
+#entity-count.updated {
+    animation: count-pulse 0.3s ease-out;
+}
+
+@keyframes count-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Print styles - hide highlights when printing */
+@media print {
+    .ner-highlight-layer {
+        display: none;
+    }
+
+    .pdf-overlay-toolbar,
+    #entity-toggles,
+    .entity-panel-item {
+        display: none;
+    }
+}

@@ -290,3 +290,42 @@ heritage_api_timeline_periods:
 heritage_api_timeline_items:
   url: /heritage/api/timeline/:period_id/items
   param: { module: heritage, action: apiTimelinePeriodItems }
+
+# =============================================================================
+# Session 13: Knowledge Graph (NER Integration)
+# =============================================================================
+
+# Knowledge Graph visualization
+heritage_graph:
+  url: /heritage/graph
+  param: { module: heritage, action: graph }
+
+# Knowledge Graph API (JSON data for D3.js)
+heritage_graph_data:
+  url: /heritage/graph/data
+  param: { module: heritage, action: graphData }
+
+# Entity detail page
+heritage_entity:
+  url: /heritage/entity/:type/:value
+  param: { module: heritage, action: entity }
+
+# Entity API (JSON)
+heritage_api_entity:
+  url: /heritage/api/entity/:type/:value
+  param: { module: heritage, action: apiEntity }
+
+# Related entities API
+heritage_api_entity_related:
+  url: /heritage/api/entity/:id/related
+  param: { module: heritage, action: apiEntityRelated }
+
+# Entity search/autocomplete
+heritage_api_entity_search:
+  url: /heritage/api/entity/search
+  param: { module: heritage, action: apiEntitySearch }
+
+# Graph statistics
+heritage_api_graph_stats:
+  url: /heritage/api/graph/stats
+  param: { module: heritage, action: apiGraphStats }

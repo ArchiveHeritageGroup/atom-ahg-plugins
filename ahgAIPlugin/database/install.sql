@@ -487,6 +487,46 @@ INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
 ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 
 -- ============================================================================
+-- AUTO-TRIGGER ON UPLOAD (Issue #19)
+-- ============================================================================
+
+-- Pending extraction queue (fallback when Gearman unavailable)
+CREATE TABLE IF NOT EXISTS ahg_ai_pending_extraction (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    digital_object_id INT DEFAULT NULL,
+    task_type VARCHAR(50) NOT NULL DEFAULT 'ner',
+    status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+    attempt_count INT DEFAULT 0,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP NULL,
+    INDEX idx_pending_status (status),
+    INDEX idx_pending_object (object_id),
+    INDEX idx_pending_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Auto-trigger log for tracking and debugging
+CREATE TABLE IF NOT EXISTS ahg_ai_auto_trigger_log (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    digital_object_id INT DEFAULT NULL,
+    task_type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_auto_trigger_object (object_id),
+    INDEX idx_auto_trigger_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- NER auto-trigger settings
+INSERT INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
+    ('ner', 'auto_trigger_on_upload', '0'),
+    ('ner', 'auto_trigger_mime_types', '["application/pdf","text/plain"]'),
+    ('ner', 'auto_trigger_min_file_size', '100'),
+    ('ner', 'auto_trigger_max_file_size', '52428800')
+ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================================
 -- MIGRATION: Move data from old ahg_ner_settings if exists
 -- ============================================================================
 
