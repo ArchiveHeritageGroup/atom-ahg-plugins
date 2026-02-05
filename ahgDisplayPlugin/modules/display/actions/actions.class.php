@@ -454,8 +454,9 @@ class displayActions extends sfActions
                 $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
             })
             ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', '>', 1)
-            ->select('io.id', 'io.identifier', 'i18n.title', 'i18n.scope_and_content', 'level.name as level_name', 'doc.object_type');
+            ->select('io.id', 'io.identifier', 'i18n.title', 'i18n.scope_and_content', 'level.name as level_name', 'doc.object_type', 'slug.slug');
 
         if ($this->parentId) {
             $query->where('io.parent_id', $this->parentId);

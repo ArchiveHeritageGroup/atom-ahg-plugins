@@ -7,6 +7,9 @@
  * @author Johan Pieterse <johan@theahg.co.za>
  */
 
+// Load custom component that fixes the sf_method error
+require_once dirname(__FILE__).'/relatedAuthorityRecordComponent.class.php';
+
 class sfIsaarPluginEditAction extends ActorEditAction
 {
     // Arrays not allowed in class constants
@@ -61,7 +64,8 @@ class sfIsaarPluginEditAction extends ActorEditAction
         $this->eventComponent->resource = $this->resource;
         $this->eventComponent->execute($this->request);
 
-        $this->relatedAuthorityRecordComponent = new sfIsaarPluginRelatedAuthorityRecordComponent($this->context, 'sfIsaarPlugin', 'relatedAuthorityRecord');
+        // Use AHG component that fixes sf_method error (avoids __isset on actor during URL generation)
+        $this->relatedAuthorityRecordComponent = new AhgRelatedAuthorityRecordComponent($this->context, 'sfIsaarPlugin', 'relatedAuthorityRecord');
         $this->relatedAuthorityRecordComponent->resource = $this->resource;
         $this->relatedAuthorityRecordComponent->execute($this->request);
 
@@ -99,6 +103,12 @@ class sfIsaarPluginEditAction extends ActorEditAction
 
     protected function processField($field)
     {
+        // Skip Symfony internal form fields to prevent "Unknown record property" errors
+        $internalFields = ['sf_method', '_csrf_token', '_token'];
+        if (in_array($field->getName(), $internalFields)) {
+            return;
+        }
+
         switch ($field->getName()) {
             case 'maintenanceNotes':
                 $this->isaar->maintenanceNotes = $this->form->getValue('maintenanceNotes');

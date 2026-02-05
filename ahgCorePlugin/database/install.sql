@@ -871,3 +871,29 @@ INSERT IGNORE INTO ahg_dropdown (taxonomy, taxonomy_label, code, label, color, s
 -- - enum_to_dropdown_migration_phase2e.sql (Research plugin types)
 -- Run these separately for full ENUM coverage.
 -- ============================================================
+
+-- ============================================================
+-- TTS (Text-to-Speech) Settings
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `ahg_tts_settings` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `sector` VARCHAR(50) NOT NULL DEFAULT 'all' COMMENT 'all, archive, library, museum, gallery, dam',
+    `setting_key` VARCHAR(100) NOT NULL,
+    `setting_value` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_sector_key` (`sector`, `setting_key`),
+    INDEX `idx_sector` (`sector`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default TTS settings
+INSERT IGNORE INTO `ahg_tts_settings` (`sector`, `setting_key`, `setting_value`) VALUES
+('all', 'enabled', '1'),
+('all', 'default_rate', '1.0'),
+('all', 'read_labels', '1'),
+('all', 'keyboard_shortcuts', '1'),
+('archive', 'fields_to_read', '["title","scopeAndContent","arrangement"]'),
+('library', 'fields_to_read', '["title","scopeAndContent","abstract"]'),
+('museum', 'fields_to_read', '["title","scopeAndContent","physicalDescription"]'),
+('gallery', 'fields_to_read', '["title","scopeAndContent","medium"]'),
+('dam', 'fields_to_read', '["title","scopeAndContent","technicalNotes"]');

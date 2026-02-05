@@ -12,7 +12,7 @@ class ahgNerService
     {
         $this->apiUrl = 'http://192.168.0.112:5004/ai/v1';
         $this->apiKey = 'ahg_ai_demo_internal_2026';
-        $this->timeout = 60;
+        $this->timeout = 300;  // 5 minutes for OCR processing
     }
 
     /**
