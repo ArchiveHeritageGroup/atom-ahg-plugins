@@ -198,7 +198,7 @@
       </div>
     </template>
 
-    <script>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     (function() {
       var currency = 'R';
       var vatRate = <?php echo $settings->vat_rate ?? 15; ?>;

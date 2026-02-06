@@ -189,7 +189,7 @@ foreach ($reports as $report) {
     <?php endforeach; ?>
 <?php endif; ?>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchReports');
     const tableRows = document.querySelectorAll('.report-row');

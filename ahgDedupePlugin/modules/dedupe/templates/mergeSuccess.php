@@ -189,7 +189,7 @@
     </form>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .primary-option {
     cursor: pointer;
     transition: all 0.2s;
@@ -203,7 +203,7 @@
 }
 </style>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var confirmCheck = document.getElementById('confirmMerge');
     var mergeBtn = document.getElementById('mergeBtn');

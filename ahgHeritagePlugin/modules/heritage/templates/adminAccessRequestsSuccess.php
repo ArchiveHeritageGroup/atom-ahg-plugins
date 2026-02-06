@@ -152,7 +152,7 @@ $pages = $requestData['pages'] ?? 1;
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('approveModal').addEventListener('show.bs.modal', function(event) {
     document.getElementById('approve_request_id').value = event.relatedTarget.getAttribute('data-request-id');
 });

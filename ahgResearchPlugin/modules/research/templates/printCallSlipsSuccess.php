@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Call Slips - Print</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         @media print {
             body { margin: 0; padding: 0; }
             .no-print { display: none !important; }

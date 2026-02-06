@@ -526,7 +526,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var loadModal = new bootstrap.Modal(document.getElementById('loadMappingModal'));
   var saveModal = new bootstrap.Modal(document.getElementById('saveMappingModal'));
@@ -1230,7 +1230,7 @@ function showToast(message, type) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Path transformation logic
 document.getElementById('transformType')?.addEventListener('change', function() {
   var opts = document.getElementById('transformOptions');
@@ -1382,7 +1382,7 @@ document.querySelectorAll('.transform-select')?.forEach(function(sel) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Path transformation logic
 document.getElementById('transformType')?.addEventListener('change', function() {
   var opts = document.getElementById('transformOptions');
@@ -1544,7 +1544,7 @@ document.querySelectorAll('.transform-select')?.forEach(function(sel) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Background Job handling
 document.getElementById('backgroundJobBtn')?.addEventListener('click', function() {
   // Auto-load mapping if load_mapping parameter is set

@@ -608,7 +608,7 @@ CREATE TABLE IF NOT EXISTS preservation_package_object (
     INDEX idx_digital_object (digital_object_id),
     INDEX idx_role (object_role),
 
-    UNIQUE KEY uk_package_path (package_id, relative_path),
+    UNIQUE KEY uk_package_path (package_id, relative_path(500)),
     FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE,
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

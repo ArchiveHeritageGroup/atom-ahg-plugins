@@ -231,7 +231,7 @@
     </form>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .autocomplete-dropdown {
     position: absolute;
     top: 100%;
@@ -259,7 +259,7 @@
 }
 </style>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('donorSearch');
     var resultsDiv = document.getElementById('donorResults');

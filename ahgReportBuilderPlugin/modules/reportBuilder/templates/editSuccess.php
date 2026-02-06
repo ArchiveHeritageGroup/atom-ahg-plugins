@@ -328,7 +328,7 @@ $rawLayout = is_array($rawReport->layout) ? $rawReport->layout : ['blocks' => []
 </div>
 
 <!-- Hidden data for JavaScript -->
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 window.reportBuilder = {
     reportId: <?php echo $report->id; ?>,
     dataSource: <?php echo json_encode($report->data_source); ?>,
@@ -344,7 +344,7 @@ window.reportBuilder = {
 };
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .cursor-move { cursor: move; }
 .layout-block { transition: all 0.2s ease; }
 .layout-block:hover { box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -364,7 +364,7 @@ window.reportBuilder = {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <!-- Inline initialization as backup -->
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
     function initDragDrop() {
         if (typeof Sortable === 'undefined') {

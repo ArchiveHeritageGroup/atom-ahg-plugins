@@ -319,7 +319,7 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Edit modal population
 document.getElementById('editStopModal').addEventListener('show.bs.modal', function(event) {
   const button = event.relatedTarget;
@@ -355,7 +355,7 @@ function deleteStop(id, title) {
 <!-- TOM Select -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize TOM Select for add modal
   document.querySelectorAll('.tom-select').forEach(function(el) {
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 @media print {
   .btn, .breadcrumb, .card-header h5, nav, .btn-group {
     display: none !important;

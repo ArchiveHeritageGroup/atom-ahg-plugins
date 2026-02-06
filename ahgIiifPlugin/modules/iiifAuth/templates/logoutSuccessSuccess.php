@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logged Out</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
@@ -38,7 +38,7 @@
         <p>Your IIIF access token has been revoked.</p>
         <p>You may close this window.</p>
     </div>
-    <script>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         if (window.opener) {
             window.opener.postMessage({type: 'iiif-auth-logout'}, '*');
         }

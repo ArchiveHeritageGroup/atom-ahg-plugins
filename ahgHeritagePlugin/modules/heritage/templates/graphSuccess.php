@@ -161,7 +161,7 @@ use_helper('Heritage');
 <!-- D3.js -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
     'use strict';
 
@@ -398,7 +398,7 @@ use_helper('Heritage');
 })();
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .heritage-graph-page .node:hover circle {
     stroke: #333;
     stroke-width: 3px;

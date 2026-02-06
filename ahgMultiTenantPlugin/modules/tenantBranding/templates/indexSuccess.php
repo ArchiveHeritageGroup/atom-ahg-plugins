@@ -220,7 +220,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Sync color pickers with text inputs
 document.querySelectorAll('input[type="color"]').forEach(function(picker) {
   var textInput = document.getElementById(picker.name.replace('_picker', ''));

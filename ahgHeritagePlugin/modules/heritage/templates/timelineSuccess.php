@@ -142,7 +142,7 @@
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .timeline-container {
   padding-left: 50%;
 }

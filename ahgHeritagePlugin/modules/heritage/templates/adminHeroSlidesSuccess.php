@@ -370,7 +370,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
 
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('overlay_opacity').addEventListener('input', function() {
     document.getElementById('opacity_value').textContent = Math.round(this.value * 100) + '%';
 });

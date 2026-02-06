@@ -68,7 +68,7 @@ $isAdmin = sfContext::getInstance()->getUser()->isAuthenticated()
         </div>
     </div>
 
-    <script>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     document.addEventListener('DOMContentLoaded', function() {
         var mintBtn = document.querySelector('.doi-mint-btn[data-object-id="<?php echo $objectId ?>"]');
         if (mintBtn) {

@@ -23,7 +23,7 @@ $exportFormats = $sf_data->getRaw('exportFormats');
 $doiStats = $sf_data->getRaw('doiStats');
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .software-card {
   border-left: 4px solid #0d6efd;
   transition: all 0.2s ease;

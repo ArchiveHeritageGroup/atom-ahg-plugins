@@ -214,7 +214,7 @@
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .field-palette {
     display: flex;
     flex-direction: column;
@@ -304,7 +304,7 @@
 }
 </style>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById('form-canvas');
     var templateId = canvas.dataset.templateId;

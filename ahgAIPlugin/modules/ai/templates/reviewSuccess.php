@@ -123,7 +123,7 @@
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .entity-row { padding: 12px; border-bottom: 1px solid #eee; }
 .entity-row:hover { background: #f8f9fa; }
 .entity-row:last-child { border-bottom: none; }
@@ -132,7 +132,7 @@
 .badge-type { font-size: 0.7rem; }
 </style>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var currentObjectId = null;
 var entityData = {};
 
@@ -473,7 +473,7 @@ function processBatch(batches, batchIndex, results, total) {
 }
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .entity-row { padding: 10px; border-bottom: 1px solid #eee; }
 .entity-row:hover { background: #f8f9fa; }
 .entity-value { font-weight: 500; }

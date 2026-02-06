@@ -35,7 +35,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('isbn-lookup-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var isbn = document.getElementById('isbn-input').value.replace(/[^0-9Xx]/g, '');

@@ -165,7 +165,7 @@ $pages = $userData['pages'] ?? 1;
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('trustModal').addEventListener('show.bs.modal', function(event) {
     var button = event.relatedTarget;
     document.getElementById('modal_user_id').value = button.getAttribute('data-user-id');

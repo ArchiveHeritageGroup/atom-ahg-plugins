@@ -104,7 +104,7 @@ if (count($repositories) <= 1 && !$isAdmin) {
   </ul>
 </li>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .tenant-switcher .dropdown-menu {
   max-height: 400px;
   overflow-y: auto;

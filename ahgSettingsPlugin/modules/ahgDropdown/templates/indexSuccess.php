@@ -123,7 +123,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function createTaxonomy() {
     var label = document.getElementById('newTaxonomyLabel').value.trim();
     var code = document.getElementById('newTaxonomyCode').value.trim();

@@ -264,7 +264,7 @@ Khoi</textarea>
     <?php endif ?>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function togglePropertyFields() {
     const source = document.getElementById('coordinate_source').value;
     const propertyFields = document.getElementById('propertyFields');

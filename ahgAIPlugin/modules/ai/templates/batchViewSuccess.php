@@ -65,7 +65,7 @@
 
 <?php slot('content'); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .progress-lg { height: 24px; }
 .job-row:hover { background: #f8f9fa; }
 .status-badge { font-size: 0.75rem; }
@@ -307,7 +307,7 @@
 </div>
 <?php endif; ?>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const batchId = <?php echo $batch->id; ?>;
 let autoRefresh = <?php echo $batch->status === 'running' ? 'true' : 'false'; ?>;
 let refreshInterval;

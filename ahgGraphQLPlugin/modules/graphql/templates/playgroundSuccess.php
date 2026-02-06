@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>GraphQL Playground - Archive</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphiql@3.0.10/graphiql.min.css" crossorigin="anonymous">
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         html, body, #graphiql {
             height: 100%;
             margin: 0;
@@ -22,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/graphiql@3.0.10/graphiql.min.js" crossorigin="anonymous"></script>
 
-    <script>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         const fetcher = GraphiQL.createFetcher({
             url: '/api/graphql',
             headers: {

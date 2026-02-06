@@ -167,7 +167,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Edit button handler
     document.querySelectorAll('.edit-type-btn').forEach(function(btn) {
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener("DOMContentLoaded", function() {
     const table = document.querySelector(".table tbody");
     const headers = document.querySelectorAll("th.sortable");

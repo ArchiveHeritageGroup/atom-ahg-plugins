@@ -300,7 +300,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const peerId = <?php echo $peer->id ?>;
 let harvestRunning = false;
 

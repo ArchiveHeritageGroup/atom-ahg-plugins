@@ -42,7 +42,7 @@ $statIcons = [
     </div>
 </section>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Animate counters when they come into view
 document.addEventListener('DOMContentLoaded', function() {
     const counters = document.querySelectorAll('.heritage-stat-number');

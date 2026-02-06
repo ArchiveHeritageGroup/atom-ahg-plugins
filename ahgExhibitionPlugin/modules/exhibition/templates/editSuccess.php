@@ -223,7 +223,7 @@ $data = $isEdit ? $exhibition : ($formData ?? []);
 <!-- TOM Select -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.tom-select').forEach(function(el) {
     new TomSelect(el, {

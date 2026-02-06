@@ -371,7 +371,7 @@ $filters = $toArray($filters ?? []);
 
 <!-- Initialize click tracking -->
 <?php if ($searchId > 0): ?>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof HeritageApp !== 'undefined' && HeritageApp.setSearchContext) {
         HeritageApp.setSearchContext(<?php echo (int) $searchId; ?>);

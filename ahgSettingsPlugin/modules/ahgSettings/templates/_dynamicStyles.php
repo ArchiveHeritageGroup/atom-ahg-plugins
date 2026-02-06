@@ -60,7 +60,7 @@ if (!function_exists('ahgHexToRgba')) {
     }
 }
 ?>
-<style id="ahg-theme-variables">
+<style id="ahg-theme-variables" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 :root {
     /* Primary theme colors */
     --ahg-primary: <?= $primary ?>;

@@ -56,7 +56,7 @@ if (!isset($expansionInfo) || !$expansionInfo['expanded']) {
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close'); ?>"></button>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .semantic-expansion-info {
   background-color: #e8f4f8;
   border-color: #bee5eb;

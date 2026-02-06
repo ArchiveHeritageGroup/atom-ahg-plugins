@@ -119,7 +119,7 @@
 
 <!-- D3.js Timeline -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const timelineData = <?php echo $sf_data->getRaw('timelineData') ?>;
   
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .event-bar {
   transition: opacity 0.2s;
 }

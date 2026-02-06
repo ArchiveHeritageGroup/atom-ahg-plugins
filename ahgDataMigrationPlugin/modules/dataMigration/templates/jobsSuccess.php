@@ -133,7 +133,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function cancelJob(jobId) {
   if (!confirm('Are you sure you want to cancel this job?')) return;
 

@@ -262,7 +262,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function copyApiKey() {
   var input = document.getElementById('newApiKey');
   input.select();

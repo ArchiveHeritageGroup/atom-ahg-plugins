@@ -21,7 +21,7 @@ $notificationSettings = $sf_data->getRaw('notificationSettings');
 $serviceHistory = $sf_data->getRaw('serviceHistory');
 ?>
 
-  <style>
+  <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     .service-card {
       transition: all 0.3s ease;
     }
@@ -304,7 +304,7 @@ $serviceHistory = $sf_data->getRaw('serviceHistory');
     </div>
   </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const refreshBtn = document.getElementById('refresh-btn');
 

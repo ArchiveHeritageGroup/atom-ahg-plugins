@@ -75,6 +75,11 @@ if (isset($resource)) {
 ?>
 <!-- EXTENDED RIGHTS CONTEXT MENU (Only if plugin enabled) -->
 
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+.ctx-hidden { display: none; }
+.ctx-zone-scroll { max-height: 250px; overflow-y: auto; }
+.ctx-prewrap { white-space: pre-wrap; }
+</style>
 <!-- AI Tools Section (NER, Summarize, Translate, Handwriting) -->
 <?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgAIPlugin')): ?>
 <?php
@@ -145,8 +150,8 @@ if (isset($resource)) {
     </li>
     */ ?>
   </ul>
-  <div id="summaryResult" class="mt-2" style="display: none;"></div>
-  <div id="htrResult" class="mt-2" style="display: none;"></div>
+  <div id="summaryResult" class="mt-2 ctx-hidden"></div>
+  <div id="htrResult" class="mt-2 ctx-hidden"></div>
 </section>
 
 <!-- NER Results Modal -->
@@ -160,7 +165,7 @@ if (isset($resource)) {
       <div class="modal-body" id="nerModalBody"></div>
       <div class="modal-footer">
         <span id="nerProcessingTime" class="text-muted small me-auto"></span>
-        <a href="/ner/review" class="btn btn-success" id="nerReviewBtn" style="display:none;">Review & Link</a>
+        <a href="/ner/review" class="btn btn-success ctx-hidden" id="nerReviewBtn">Review & Link</a>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -183,12 +188,12 @@ if (isset($resource)) {
     </div>
   </div>
 </div>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function extractEntities(objectId) {
   var modal = new bootstrap.Modal(document.getElementById('nerModal'));
   modal.show();
   document.getElementById('nerModalBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Extracting...</p></div>';
-  document.getElementById('nerReviewBtn').style.display = 'none';
+  document.getElementById('nerReviewBtn').classList.add('ctx-hidden');
 
   fetch('/ner/extract/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
@@ -211,7 +216,7 @@ function extractEntities(objectId) {
         }
       }
       if (total === 0) { html = '<div class="alert alert-info">No entities found</div>'; }
-      else { document.getElementById('nerReviewBtn').style.display = 'inline-block'; }
+      else { document.getElementById('nerReviewBtn').classList.remove('ctx-hidden'); }
       document.getElementById('nerModalBody').innerHTML = html;
       document.getElementById('nerProcessingTime').textContent = 'Found ' + total + ' entities in ' + (data.processing_time_ms||0) + 'ms';
     })
@@ -225,7 +230,7 @@ function generateSummary(objectId) {
   var resultDiv = document.getElementById('summaryResult');
 
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating...';
-  resultDiv.style.display = 'none';
+  resultDiv.classList.add('ctx-hidden');
 
   fetch('/ner/summarize/' + objectId, { method: 'POST' })
     .then(function(r) { return r.json(); })
@@ -234,7 +239,7 @@ function generateSummary(objectId) {
 
       if (!data.success) {
         resultDiv.innerHTML = '<div class="alert alert-danger py-2 small"><i class="bi bi-exclamation-circle me-1"></i>' + (data.error || 'Failed') + '</div>';
-        resultDiv.style.display = 'block';
+        resultDiv.classList.remove('ctx-hidden');
         return;
       }
 
@@ -242,12 +247,12 @@ function generateSummary(objectId) {
       resultDiv.innerHTML = '<div class="alert alert-success py-2 small"><i class="bi bi-check-circle me-1"></i>' + savedMsg + '</div>' +
         '<div class="card"><div class="card-body py-2 small">' + data.summary + '</div></div>' +
         '<button class="btn btn-sm btn-outline-secondary mt-2" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>';
-      resultDiv.style.display = 'block';
+      resultDiv.classList.remove('ctx-hidden');
     })
     .catch(function(err) {
       btn.innerHTML = '<i class="bi bi-file-text me-1"></i>Generate Summary';
       resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + err.message + '</div>';
-      resultDiv.style.display = 'block';
+      resultDiv.classList.remove('ctx-hidden');
     });
 }
 
@@ -316,7 +321,7 @@ function extractHandwriting(objectId, mode) {
       if (data.zones && data.zones.length > 0) {
         html += '<div class="mb-3">';
         html += '<h6 class="text-info"><i class="bi bi-bounding-box me-1"></i>Detected Zones:</h6>';
-        html += '<div class="border rounded p-2 bg-light" style="max-height:250px;overflow-y:auto;">';
+        html += '<div class="border rounded p-2 bg-light ctx-zone-scroll">';
         html += '<table class="table table-sm table-striped mb-0">';
         html += '<thead><tr><th>#</th><th>Text</th><th>Position</th></tr></thead><tbody>';
         for (var i = 0; i < data.zones.length; i++) {
@@ -346,7 +351,7 @@ function extractHandwriting(objectId, mode) {
       if (data.text) {
         html += '<div class="mb-3">';
         html += '<h6 class="text-secondary"><i class="bi bi-file-text me-1"></i>Combined Text:</h6>';
-        html += '<div class="border rounded p-2 bg-light"><pre class="mb-0" style="white-space:pre-wrap;">' + data.text + '</pre></div>';
+        html += '<div class="border rounded p-2 bg-light"><pre class="mb-0 ctx-prewrap">' + data.text + '</pre></div>';
         html += '</div>';
       }
 
@@ -371,7 +376,7 @@ function scanForPii(objectId) {
   var resultDiv = document.getElementById('piiResult');
 
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Scanning...';
-  resultDiv.style.display = 'none';
+  resultDiv.classList.add('ctx-hidden');
 
   // Use NER extract endpoint - PII entities are PERSON type
   fetch('/ner/extract/' + objectId, { method: 'POST' })
@@ -381,7 +386,7 @@ function scanForPii(objectId) {
 
       if (!data.success) {
         resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + (data.error || 'Scan failed') + '</div>';
-        resultDiv.style.display = 'block';
+        resultDiv.classList.remove('ctx-hidden');
         return;
       }
 
@@ -412,12 +417,12 @@ function scanForPii(objectId) {
         html += '<a href="/admin/privacy/redaction/' + objectId + '" class="btn btn-sm btn-warning mt-2"><i class="bi bi-eraser me-1"></i>Review & Redact</a>';
         resultDiv.innerHTML = html;
       }
-      resultDiv.style.display = 'block';
+      resultDiv.classList.remove('ctx-hidden');
     })
     .catch(function(err) {
       btn.innerHTML = '<i class="bi bi-shield-exclamation me-1"></i>Scan for PII';
       resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + err.message + '</div>';
-      resultDiv.style.display = 'block';
+      resultDiv.classList.remove('ctx-hidden');
     });
 }
 
@@ -445,7 +450,7 @@ function scanForPii(objectId) {
       </a>
     </li>
   </ul>
-  <div id="piiResult" class="mt-2" style="display: none;"></div>
+  <div id="piiResult" class="mt-2 ctx-hidden"></div>
 </section>
 <?php endif; ?>
 

@@ -325,7 +325,7 @@ php symfony preservation:verify-backup --status</code></pre>
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function toggleFields() {
     var type = document.getElementById('targetType').value;
     var remoteFields = document.querySelectorAll('.remote-field');

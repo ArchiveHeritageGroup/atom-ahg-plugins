@@ -113,7 +113,7 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
                     <div class="form-text mt-2"><?php echo __('Select which AHG plugins to include in plugin backups. Found %1% plugins.', ['%1%' => count($availablePlugins)]) ?></div>
                 </div>
             </div>
-            <script>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
             function selectAllPlugins() {
                 document.querySelectorAll('.plugin-checkbox').forEach(cb => cb.checked = true);
             }

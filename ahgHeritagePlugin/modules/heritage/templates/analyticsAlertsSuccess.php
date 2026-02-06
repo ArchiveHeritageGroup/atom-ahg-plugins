@@ -174,7 +174,7 @@ $stats = $alertData['stats'] ?? [];
 </div>
 <?php endif; ?>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function dismissAlert(alertId) {
     fetch('/heritage/api/analytics/alerts/' + alertId + '/dismiss', {
         method: 'POST',

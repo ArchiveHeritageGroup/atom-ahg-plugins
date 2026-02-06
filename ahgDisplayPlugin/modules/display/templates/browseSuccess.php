@@ -1,75 +1,5 @@
 <?php decorate_with($sf_request->getParameter('view') === 'full' ? 'layout_1col' : 'layout_2col'); ?>
 <?php use_helper('Date') ?>
-<style>
-/* Resizable table columns */
-.table-resizable th {
-  position: relative;
-  min-width: 50px;
-}
-.table-resizable th .resize-handle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  cursor: col-resize;
-  background: transparent;
-  z-index: 10;
-}
-.table-resizable th .resize-handle:hover,
-.table-resizable th .resize-handle.resizing {
-  background: rgba(29, 106, 82, 0.3);
-}
-.table-resizable th.resizing {
-  user-select: none;
-}
-/* Remove fixed widths to allow resizing */
-.table-resizable th[style*="width"] {
-  width: auto !important;
-}
-</style>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tables = document.querySelectorAll('.table-resizable');
-  
-  tables.forEach(function(table) {
-    const headers = table.querySelectorAll('th');
-    
-    headers.forEach(function(th) {
-      // Create resize handle
-      const handle = document.createElement('div');
-      handle.className = 'resize-handle';
-      th.appendChild(handle);
-      
-      let startX, startWidth;
-      
-      handle.addEventListener('mousedown', function(e) {
-        startX = e.pageX;
-        startWidth = th.offsetWidth;
-        th.classList.add('resizing');
-        handle.classList.add('resizing');
-        
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        e.preventDefault();
-      });
-      
-      function onMouseMove(e) {
-        const diff = e.pageX - startX;
-        th.style.width = (startWidth + diff) + 'px';
-        th.style.minWidth = (startWidth + diff) + 'px';
-      }
-      
-      function onMouseUp() {
-        th.classList.remove('resizing');
-        handle.classList.remove('resizing');
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      }
-    });
-  });
-});
-</script>
 <?php
 // Get values from Symfony request object
 $limit = (int) $sf_request->getParameter('limit', 10);
@@ -176,13 +106,13 @@ function getItemUrl($obj) {
       <span class="d-md-none"><?php echo __('Search'); ?></span>
     </button>
   </div>
-  <script>
+  <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   function openSemanticModal() {
     var modal = document.getElementById('semanticSearchModal');
     var backdrop = document.getElementById('semanticSearchBackdrop');
     if (!modal || !backdrop) { console.error('Modal not found'); return; }
-    modal.style.display = 'block';
-    backdrop.style.display = 'block';
+    modal.classList.remove('browse-hidden');
+    backdrop.classList.remove('browse-hidden');
     setTimeout(function() {
       modal.classList.add('show');
       backdrop.classList.add('show');
@@ -198,8 +128,8 @@ function getItemUrl($obj) {
     modal.classList.remove('show');
     backdrop.classList.remove('show');
     setTimeout(function() {
-      modal.style.display = 'none';
-      backdrop.style.display = 'none';
+      modal.classList.add('browse-hidden');
+      backdrop.classList.add('browse-hidden');
     }, 150);
     document.body.classList.remove('modal-open');
   }
@@ -207,7 +137,7 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('sidebar'); ?>
-  <div class="card mb-3" style="background-color: #1d6a52;">
+  <div class="card mb-3 glam-filter-header">
     <div class="card-body py-2 text-white text-center">
       <i class="fas fa-filter"></i> <?php echo __('Narrow your results by:'); ?>
     </div>
@@ -216,7 +146,7 @@ function getItemUrl($obj) {
   <!-- GLAM Type Facet - OPEN by default -->
   <?php if (!empty($types)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetType" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetType">
       <strong><?php echo __('GLAM Type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse show" id="facetType">
@@ -245,7 +175,7 @@ function getItemUrl($obj) {
   <!-- Creator Facet - CLOSED by default -->
   <?php if (!empty($creators)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetCreator" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetCreator">
       <strong><?php echo __('Creator'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetCreator">
@@ -258,7 +188,7 @@ function getItemUrl($obj) {
         <?php foreach ($creators as $creator): ?>
           <?php $isActive = $creatorFilter == $creator->id; ?>
           <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-            <a href="<?php echo $isActive ? buildUrl($fp, [], ['creator']) : buildUrl($fp, ['creator' => $creator->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['creator']) : buildUrl($fp, ['creator' => $creator->id]) ?>" class="text-decoration-none small text-truncate facet-link <?php echo $isActive ? 'text-white' : '' ?>">
               <?php echo esc_entities($creator->name) ?>
             </a>
             <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $creator->count ?></span>
@@ -272,7 +202,7 @@ function getItemUrl($obj) {
   <!-- Place Facet - CLOSED by default -->
   <?php if (!empty($places)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetPlace" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetPlace">
       <strong><?php echo __('Place'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetPlace">
@@ -285,7 +215,7 @@ function getItemUrl($obj) {
         <?php foreach ($places as $place): ?>
           <?php $isActive = $placeFilter == $place->id; ?>
           <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-            <a href="<?php echo $isActive ? buildUrl($fp, [], ['place']) : buildUrl($fp, ['place' => $place->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['place']) : buildUrl($fp, ['place' => $place->id]) ?>" class="text-decoration-none small text-truncate facet-link <?php echo $isActive ? 'text-white' : '' ?>">
               <?php echo esc_entities($place->name) ?>
             </a>
             <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $place->count ?></span>
@@ -299,7 +229,7 @@ function getItemUrl($obj) {
   <!-- Subject Facet - CLOSED by default -->
   <?php if (!empty($subjects)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetSubject" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetSubject">
       <strong><?php echo __('Subject'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetSubject">
@@ -312,7 +242,7 @@ function getItemUrl($obj) {
         <?php foreach ($subjects as $subject): ?>
           <?php $isActive = $subjectFilter == $subject->id; ?>
           <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-            <a href="<?php echo $isActive ? buildUrl($fp, [], ['subject']) : buildUrl($fp, ['subject' => $subject->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['subject']) : buildUrl($fp, ['subject' => $subject->id]) ?>" class="text-decoration-none small text-truncate facet-link <?php echo $isActive ? 'text-white' : '' ?>">
               <?php echo esc_entities($subject->name) ?>
             </a>
             <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $subject->count ?></span>
@@ -326,7 +256,7 @@ function getItemUrl($obj) {
   <!-- Genre Facet - CLOSED by default -->
   <?php if (!empty($genres)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetGenre" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetGenre">
       <strong><?php echo __('Genre'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetGenre">
@@ -339,7 +269,7 @@ function getItemUrl($obj) {
         <?php foreach ($genres as $genre): ?>
           <?php $isActive = $genreFilter == $genre->id; ?>
           <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-            <a href="<?php echo $isActive ? buildUrl($fp, [], ['genre']) : buildUrl($fp, ['genre' => $genre->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['genre']) : buildUrl($fp, ['genre' => $genre->id]) ?>" class="text-decoration-none small text-truncate facet-link <?php echo $isActive ? 'text-white' : '' ?>">
               <?php echo esc_entities($genre->name) ?>
             </a>
             <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $genre->count ?></span>
@@ -353,7 +283,7 @@ function getItemUrl($obj) {
   <!-- Level Facet - CLOSED by default -->
   <?php if (!empty($levels)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetLevel" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetLevel">
       <strong><?php echo __('Level of description'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetLevel">
@@ -380,7 +310,7 @@ function getItemUrl($obj) {
   <!-- Media Type Facet - CLOSED by default -->
   <?php if (!empty($mediaTypes)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetMedia" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetMedia">
       <strong><?php echo __('Media type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetMedia">
@@ -408,7 +338,7 @@ function getItemUrl($obj) {
   <!-- Repository Facet - CLOSED by default -->
   <?php if (!empty($repositories)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#facetRepo" style="cursor:pointer">
+    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetRepo">
       <strong><?php echo __('Repository'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetRepo">
@@ -421,7 +351,7 @@ function getItemUrl($obj) {
         <?php foreach ($repositories as $repo): ?>
           <?php $isActive = $repoFilter == $repo->id; ?>
           <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-            <a href="<?php echo $isActive ? buildUrl($fp, [], ['repo']) : buildUrl($fp, ['repo' => $repo->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['repo']) : buildUrl($fp, ['repo' => $repo->id]) ?>" class="text-decoration-none small text-truncate facet-link <?php echo $isActive ? 'text-white' : '' ?>">
               <?php echo esc_entities($repo->name) ?>
             </a>
             <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $repo->count ?></span>
@@ -434,6 +364,30 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('before-content'); ?>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* Resizable table columns */
+.table-resizable th { position: relative; min-width: 50px; }
+.table-resizable th .resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: col-resize; background: transparent; z-index: 10; }
+.table-resizable th .resize-handle:hover, .table-resizable th .resize-handle.resizing { background: rgba(29, 106, 82, 0.3); }
+.table-resizable th.resizing { user-select: none; }
+/* GLAM Browse utilities */
+.glam-filter-header { background-color: #1d6a52; }
+.cursor-pointer { cursor: pointer; }
+.facet-link { max-width: 180px; }
+.browse-table { font-size: 0.95rem; }
+.col-thumb { width: 420px; }
+.col-identifier { width: 120px; }
+.col-level { width: 140px; }
+.col-actions { width: 80px; }
+.browse-thumb-lg { width: 400px; height: 400px; object-fit: cover; }
+.browse-placeholder-lg { width: 400px; height: 400px; }
+.grid-img-wrapper { height: 120px; overflow: hidden; }
+.grid-img { max-height: 120px; object-fit: cover; }
+.full-img-bg { background: #f8f9fa; min-height: 400px; }
+.full-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; }
+.card-img-browse { max-height: 150px; object-fit: contain; }
+.browse-hidden { display: none; }
+</style>
   <!-- Active Filters -->
   <div class="d-flex flex-wrap gap-2 mb-3">
     <?php if ($topLevelOnly): ?>
@@ -529,15 +483,15 @@ function getItemUrl($obj) {
   <!-- Results -->
   <?php if ($viewMode === 'table'): ?>
     <div class="table-responsive">
-      <table class="table table-hover table-resizable "style="font-size: 0.95rem;">
+      <table class="table table-hover table-resizable browse-table">
         <thead class="table-light">
           <tr>
-            <th style="width:420px"><?php echo __('Image'); ?></th>
+            <th class="col-thumb"><?php echo __('Image'); ?></th>
             <th><?php echo __('Title'); ?></th>
-            <th style="width:120px"><?php echo __('Identifier'); ?></th>
-            <th style="width:140px"><?php echo __('Level'); ?></th>
-            <th style="width:140px"><?php echo __('Type'); ?></th>
-            <th style="width:80px"><?php echo __('Actions'); ?></th>
+            <th class="col-identifier"><?php echo __('Identifier'); ?></th>
+            <th class="col-level"><?php echo __('Level'); ?></th>
+            <th class="col-level"><?php echo __('Type'); ?></th>
+            <th class="col-actions"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -548,9 +502,9 @@ function getItemUrl($obj) {
               <tr>
                 <td class="text-center p-2">
                   <?php if ($obj->thumbnail): ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded img-thumbnail" style="width:400px;height:400px;object-fit:cover;"></a>
+                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded img-thumbnail browse-thumb-lg"></a>
                   <?php else: ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:400px;height:400px;"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></div></a>
+                    <a href="<?php echo getItemUrl($obj) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center browse-placeholder-lg"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></div></a>
                   <?php endif ?>
                 </td>
                 <td class="align-middle">
@@ -586,9 +540,9 @@ function getItemUrl($obj) {
         <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
           <div class="col">
             <div class="card h-100 shadow-sm">
-              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:120px;overflow:hidden;">
+              <div class="card-img-top bg-light d-flex align-items-center justify-content-center grid-img-wrapper">
                 <?php if ($obj->thumbnail): ?>
-                  <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid" style="max-height:120px;object-fit:cover;"></a>
+                  <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid grid-img"></a>
                 <?php else: ?>
                   <a href="<?php echo getItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-3x text-<?php echo $cfg['color'] ?>"></i></a>
                 <?php endif ?>
@@ -609,9 +563,9 @@ function getItemUrl($obj) {
       <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
         <div class="card mb-3 shadow-sm">
           <div class="row g-0">
-            <div class="col-12 col-md-6 position-relative overflow-hidden" style="background:#f8f9fa;min-height:400px;">
+            <div class="col-12 col-md-6 position-relative overflow-hidden full-img-bg">
               <?php if ($obj->thumbnail): ?>
-                <a href="<?php echo getItemUrl($obj) ?>" class="d-block w-100 h-100"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded" style="width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;"></a>
+                <a href="<?php echo getItemUrl($obj) ?>" class="d-block w-100 h-100"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded full-img"></a>
               <?php else: ?>
                 <a href="<?php echo getItemUrl($obj) ?>" class="d-flex align-items-center justify-content-center w-100 h-100"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></a>
               <?php endif ?>
@@ -637,9 +591,9 @@ function getItemUrl($obj) {
       <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
         <div class="card mb-2 shadow-sm">
           <div class="row g-0">
-            <div class="col-md-2 d-flex align-items-center justify-content-center p-2" style="background:#f8f9fa;">
+            <div class="col-md-2 d-flex align-items-center justify-content-center p-2 bg-light">
               <?php if ($obj->thumbnail): ?>
-                <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid rounded" style="max-height:150px;object-fit:contain;"></a>
+                <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid rounded card-img-browse"></a>
               <?php else: ?>
                 <a href="<?php echo getItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-4x text-<?php echo $cfg['color'] ?>"></i></a>
               <?php endif ?>
@@ -686,8 +640,8 @@ function getItemUrl($obj) {
   <?php endif ?>
 
   <!-- Semantic Search Modal -->
-  <div class="modal-backdrop fade" id="semanticSearchBackdrop" style="display:none;"></div>
-<div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true" style="display:none;">
+  <div class="modal-backdrop fade browse-hidden" id="semanticSearchBackdrop"></div>
+<div class="modal fade browse-hidden" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
@@ -739,13 +693,13 @@ function getItemUrl($obj) {
           </div>
 
           <!-- Query Expansion Preview -->
-          <div id="expansion-preview" class="card bg-light" style="display: none;">
+          <div id="expansion-preview" class="card bg-light browse-hidden">
             <div class="card-header">
               <i class="fas fa-expand-arrows-alt me-1"></i>
               <?php echo __('Query Expansion Preview'); ?>
             </div>
             <div class="card-body">
-              <div id="expansion-loading" style="display: none;">
+              <div id="expansion-loading" class="browse-hidden">
                 <i class="fas fa-spinner fa-spin me-1"></i>
                 <?php echo __('Loading expansions...'); ?>
               </div>
@@ -773,7 +727,7 @@ function getItemUrl($obj) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var queryInput = document.getElementById('semantic-query-input');
   var semanticToggle = document.getElementById('modal-semantic-toggle');
@@ -787,18 +741,18 @@ document.addEventListener('DOMContentLoaded', function() {
     var semanticEnabled = semanticToggle.checked;
 
     if (!query || !semanticEnabled) {
-      expansionPreview.style.display = 'none';
+      expansionPreview.classList.add('browse-hidden');
       return;
     }
 
-    expansionPreview.style.display = 'block';
-    expansionLoading.style.display = 'block';
+    expansionPreview.classList.remove('browse-hidden');
+    expansionLoading.classList.remove('browse-hidden');
     expansionContent.innerHTML = '';
 
     fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
       .then(function(response) { return response.json(); })
       .then(function(data) {
-        expansionLoading.style.display = 'none';
+        expansionLoading.classList.add('browse-hidden');
         if (data.success && Object.keys(data.expansions).length > 0) {
           var html = '';
           for (var term in data.expansions) {
@@ -814,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .catch(function(error) {
-        expansionLoading.style.display = 'none';
+        expansionLoading.classList.add('browse-hidden');
         expansionContent.innerHTML = '<span class="text-danger"><?php echo __('Error loading expansions'); ?></span>';
       });
   }
@@ -842,18 +796,18 @@ document.addEventListener('DOMContentLoaded', function() {
     var semanticEnabled = semanticToggle.checked;
 
     if (!query || !semanticEnabled) {
-      expansionPreview.style.display = 'none';
+      expansionPreview.classList.add('browse-hidden');
       return;
     }
 
-    expansionPreview.style.display = 'block';
-    expansionLoading.style.display = 'block';
+    expansionPreview.classList.remove('browse-hidden');
+    expansionLoading.classList.remove('browse-hidden');
     expansionContent.innerHTML = '';
 
     fetch('<?php echo url_for(['module' => 'semanticSearchAdmin', 'action' => 'testExpand']); ?>?query=' + encodeURIComponent(query))
       .then(function(response) { return response.json(); })
       .then(function(data) {
-        expansionLoading.style.display = 'none';
+        expansionLoading.classList.add('browse-hidden');
         if (data.success && Object.keys(data.expansions).length > 0) {
           // Cache the expansions
           cachedExpansions[query] = data.expansions;
@@ -873,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .catch(function(error) {
-        expansionLoading.style.display = 'none';
+        expansionLoading.classList.add('browse-hidden');
         expansionContent.innerHTML = '<span class="text-danger"><?php echo __('Error loading expansions'); ?></span>';
       });
   };
@@ -943,6 +897,40 @@ document.addEventListener('DOMContentLoaded', function() {
     if (queryInput.value) {
       updateExpansionPreview();
     }
+  });
+});
+</script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+  var tables = document.querySelectorAll('.table-resizable');
+  tables.forEach(function(table) {
+    var headers = table.querySelectorAll('th');
+    headers.forEach(function(th) {
+      var handle = document.createElement('div');
+      handle.className = 'resize-handle';
+      th.appendChild(handle);
+      var startX, startWidth;
+      handle.addEventListener('mousedown', function(e) {
+        startX = e.pageX;
+        startWidth = th.offsetWidth;
+        th.classList.add('resizing');
+        handle.classList.add('resizing');
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        e.preventDefault();
+      });
+      function onMouseMove(e) {
+        var diff = e.pageX - startX;
+        th.style.width = (startWidth + diff) + 'px';
+        th.style.minWidth = (startWidth + diff) + 'px';
+      }
+      function onMouseUp() {
+        th.classList.remove('resizing');
+        handle.classList.remove('resizing');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+    });
   });
 });
 </script>

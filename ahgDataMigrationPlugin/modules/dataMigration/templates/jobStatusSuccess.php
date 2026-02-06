@@ -170,7 +170,7 @@
 </div>
 
 <?php if (in_array($job->status, ['pending', 'running'])): ?>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
   const jobId = <?php echo $job->id ?>;
   let pollInterval;

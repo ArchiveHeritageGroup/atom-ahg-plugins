@@ -150,7 +150,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var form = document.getElementById('batchExportForm');
   var exportBtn = document.getElementById('exportBtn');

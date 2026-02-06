@@ -177,7 +177,7 @@
     <?php endif; ?>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Select all checkbox
     document.getElementById('selectAll')?.addEventListener('change', function() {

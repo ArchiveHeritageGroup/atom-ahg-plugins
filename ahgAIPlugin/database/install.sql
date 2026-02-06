@@ -530,17 +530,13 @@ ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 -- MIGRATION: Move data from old ahg_ner_settings if exists
 -- ============================================================================
 
-INSERT IGNORE INTO ahg_ai_settings (feature, setting_key, setting_value)
-SELECT
-    CASE
-        WHEN setting_key LIKE 'summarizer_%' THEN 'summarize'
-        ELSE 'ner'
-    END as feature,
-    CASE
-        WHEN setting_key = 'summarizer_max_length' THEN 'max_length'
-        WHEN setting_key = 'summarizer_min_length' THEN 'min_length'
-        ELSE setting_key
-    END as setting_key,
-    setting_value
-FROM ahg_ner_settings
-WHERE setting_key NOT IN ('api_url', 'api_key', 'api_timeout');
+SET @ner_settings_exists = (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'ahg_ner_settings');
+
+SET @migration_sql = IF(@ner_settings_exists > 0,
+    'INSERT IGNORE INTO ahg_ai_settings (feature, setting_key, setting_value) SELECT CASE WHEN setting_key LIKE ''summarizer_%'' THEN ''summarize'' ELSE ''ner'' END, CASE WHEN setting_key = ''summarizer_max_length'' THEN ''max_length'' WHEN setting_key = ''summarizer_min_length'' THEN ''min_length'' ELSE setting_key END, setting_value FROM ahg_ner_settings WHERE setting_key NOT IN (''api_url'', ''api_key'', ''api_timeout'')',
+    'SELECT 1'
+);
+
+PREPARE migration_stmt FROM @migration_sql;
+EXECUTE migration_stmt;
+DEALLOCATE PREPARE migration_stmt;

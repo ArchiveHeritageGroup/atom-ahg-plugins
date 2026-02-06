@@ -18,7 +18,7 @@ $categories = $sf_data->getRaw('categories');
 $atomRoot = $sf_data->getRaw('atomRoot');
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .cron-card {
   transition: all 0.2s ease;
 }
@@ -162,7 +162,7 @@ $atomRoot = $sf_data->getRaw('atomRoot');
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(function() {
     // Show brief feedback

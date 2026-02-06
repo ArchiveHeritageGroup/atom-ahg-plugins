@@ -13,7 +13,7 @@ use_stylesheet('/plugins/ahgSpectrumPlugin/web/css/condition-photos.css?v=' . ti
 use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Inline styles for photo grid - compact thumbnails */
 .photo-grid {
     display: grid !important;

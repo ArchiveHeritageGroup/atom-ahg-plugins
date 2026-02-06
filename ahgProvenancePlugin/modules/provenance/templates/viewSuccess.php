@@ -243,7 +243,7 @@
   <?php endif ?>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .timeline {
   position: relative;
   padding-left: 30px;

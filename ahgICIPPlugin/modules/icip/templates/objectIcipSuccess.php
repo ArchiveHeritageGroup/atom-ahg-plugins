@@ -311,7 +311,7 @@
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .icip-notice-critical {
     background-color: #f8d7da;
     border-left: 4px solid #dc3545;

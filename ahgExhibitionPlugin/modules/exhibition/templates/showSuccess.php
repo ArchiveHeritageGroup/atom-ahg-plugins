@@ -413,7 +413,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const modal = new bootstrap.Modal(document.getElementById('statusModal'));
   let selectedStatus = '';

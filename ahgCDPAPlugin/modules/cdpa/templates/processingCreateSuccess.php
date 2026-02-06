@@ -143,7 +143,7 @@
     </form>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('cross_border').addEventListener('change', function() {
     document.getElementById('cross_border_safeguards_container').style.display = this.checked ? 'block' : 'none';
 });

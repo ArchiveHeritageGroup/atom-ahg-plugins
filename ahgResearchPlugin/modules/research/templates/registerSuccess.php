@@ -137,7 +137,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var affiliationType = document.querySelector('[name="affiliation_type"]');
     var studentWrapper = document.getElementById('student_id_wrapper');

@@ -39,7 +39,7 @@ $config = json_decode($widget->config, true) ?: [];
         <?php elseif ($widget->widget_type === 'chart'): ?>
             <!-- Chart Widget -->
             <canvas id="widget-chart-<?php echo $widget->id; ?>" height="150"></canvas>
-            <script>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
             (function() {
                 const ctx = document.getElementById('widget-chart-<?php echo $widget->id; ?>');
                 if (ctx && typeof Chart !== 'undefined') {

@@ -236,7 +236,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Edit modal population
 document.getElementById('editSectionModal').addEventListener('show.bs.modal', function(event) {
   const button = event.relatedTarget;
@@ -270,7 +270,7 @@ function deleteSection(id, name) {
 <!-- TOM Select -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.tom-select').forEach(function(el) {
     new TomSelect(el, {

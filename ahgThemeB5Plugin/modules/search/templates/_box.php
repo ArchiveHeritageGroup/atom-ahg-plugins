@@ -104,7 +104,7 @@
   </div>
 </form>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
   var searchBox = document.getElementById('search-box');
   var queryInput = document.getElementById('search-box-input');

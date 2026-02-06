@@ -280,7 +280,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Object search
 let searchTimeout;
 document.getElementById('objectSearch').addEventListener('input', function() {
@@ -362,7 +362,7 @@ function removeObject(id, title) {
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <!-- Sortable for drag and drop -->
 <script src="/plugins/ahgCorePlugin/web/js/vendor/Sortable.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize TOM Select for add modal
   document.querySelectorAll('.tom-select').forEach(function(el) {

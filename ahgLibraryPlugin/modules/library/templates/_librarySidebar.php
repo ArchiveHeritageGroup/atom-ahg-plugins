@@ -53,7 +53,7 @@
   <?php endif; ?>
   <?php endif; ?>
 </section>
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .holdings-scroll-container.has-scroll {
   border: 1px solid #dee2e6;
   border-radius: 0.25rem;

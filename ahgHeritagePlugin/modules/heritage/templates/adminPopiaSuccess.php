@@ -148,7 +148,7 @@ $total = $flagData['total'] ?? 0;
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('resolveModal').addEventListener('show.bs.modal', function(event) {
     document.getElementById('resolve_flag_id').value = event.relatedTarget.getAttribute('data-flag-id');
 });

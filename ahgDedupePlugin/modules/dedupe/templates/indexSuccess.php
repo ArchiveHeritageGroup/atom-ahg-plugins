@@ -232,7 +232,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Dismiss button handlers
     document.querySelectorAll('.btn-dismiss').forEach(function(btn) {

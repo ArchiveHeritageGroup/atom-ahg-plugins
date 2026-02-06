@@ -165,7 +165,7 @@
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .icip-tk-label { background-color: #8B4513; color: white; }
 .icip-bc-label { background-color: #228B22; color: white; }
 </style>

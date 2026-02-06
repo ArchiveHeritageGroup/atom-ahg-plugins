@@ -88,7 +88,7 @@
     </div>
 </section>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function removeProtection(objectId) {
     if (!confirm('Remove protection from this resource?')) return;
 

@@ -57,7 +57,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 
 <?php slot('pre'); ?>
 <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/heritage-landing.css">
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 :root {
     --heritage-primary: <?php echo $primaryColor; ?>;
 }
@@ -483,7 +483,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 </div>
 
 <?php slot('after-content'); ?>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Add body class for CSS targeting
 document.body.classList.add('heritage-landing-page');
 

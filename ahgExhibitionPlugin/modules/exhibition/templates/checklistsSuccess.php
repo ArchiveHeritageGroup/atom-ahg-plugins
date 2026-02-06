@@ -290,7 +290,7 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Populate add item modal
 document.getElementById('addItemModal').addEventListener('show.bs.modal', function(event) {
   const button = event.relatedTarget;

@@ -292,7 +292,7 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function editEquipment(item) {
     document.getElementById('equipmentModalTitle').textContent = 'Edit Equipment';
     document.getElementById('equipmentAction').value = 'update';

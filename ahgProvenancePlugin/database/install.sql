@@ -240,9 +240,14 @@ CREATE TABLE IF NOT EXISTS provenance_document (
 -- Insert default event types as taxonomy terms (optional, for dropdowns)
 -- These would integrate with AtoM's taxonomy system
 
--- Add foreign key for cascade delete when information_object is deleted
-ALTER TABLE provenance_record 
-ADD CONSTRAINT fk_provenance_record_info_object 
-FOREIGN KEY (information_object_id) 
-REFERENCES information_object(id) 
-ON DELETE CASCADE;
+-- Add foreign key for cascade delete when information_object is deleted (skip if already exists)
+SET @fk_exists = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'fk_provenance_record_info_object' AND TABLE_NAME = 'provenance_record');
+
+SET @fk_sql = IF(@fk_exists = 0,
+    'ALTER TABLE provenance_record ADD CONSTRAINT fk_provenance_record_info_object FOREIGN KEY (information_object_id) REFERENCES information_object(id) ON DELETE CASCADE',
+    'SELECT 1'
+);
+
+PREPARE fk_stmt FROM @fk_sql;
+EXECUTE fk_stmt;
+DEALLOCATE PREPARE fk_stmt;

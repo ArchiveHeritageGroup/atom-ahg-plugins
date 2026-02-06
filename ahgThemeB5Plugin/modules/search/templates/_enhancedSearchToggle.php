@@ -24,7 +24,7 @@ $userPref = $sf_user->getAttribute('enhanced_search', $isEnabled ? '1' : '0');
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('enhancedSearchToggle')?.addEventListener('change', function() {
     sessionStorage.setItem('enhancedSearch', this.checked ? '1' : '0');
 });

@@ -56,7 +56,7 @@ if (!$resourceId) return;
 <script src="https://unpkg.com/three-spritetext@1.8.2/dist/three-spritetext.min.js"></script>
 <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
   var resourceId = <?php echo (int)$resourceId; ?>;
   var graphData = null;

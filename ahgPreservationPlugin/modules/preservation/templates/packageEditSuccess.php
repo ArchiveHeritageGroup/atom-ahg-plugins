@@ -330,7 +330,7 @@ function formatBytes($bytes) {
 ?>
 
 <?php if ($package): ?>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 const packageId = <?php echo $package->id; ?>;
 
 function addObject() {

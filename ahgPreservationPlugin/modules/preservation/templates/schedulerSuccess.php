@@ -310,7 +310,7 @@ php symfony preservation:virus-scan --limit=200</code></pre>
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle schedule enabled/disabled
     document.querySelectorAll('.schedule-toggle').forEach(function(toggle) {

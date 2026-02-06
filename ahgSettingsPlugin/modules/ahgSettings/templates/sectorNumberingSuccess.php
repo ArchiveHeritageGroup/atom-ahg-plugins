@@ -154,7 +154,7 @@ endforeach; ?>
 
 </form>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.use-default-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {

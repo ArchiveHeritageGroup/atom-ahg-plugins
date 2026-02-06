@@ -78,7 +78,7 @@
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .collection-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

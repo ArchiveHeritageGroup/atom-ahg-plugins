@@ -542,7 +542,7 @@
     <?php echo __('After creating the asset, you can attach digital files (images, videos, documents) through the standard AtoM interface.'); ?>
   </div>
 
-  <script>
+  <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   (function() {
     const fieldGroups = {
       photo: ['field-photo'],

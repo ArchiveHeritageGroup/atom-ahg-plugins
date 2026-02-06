@@ -278,7 +278,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var fileInput = document.getElementById('importFile');
   var dropZone = document.getElementById('dropZone');
@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Digital object source handling
 document.getElementById("digitalObjectSource")?.addEventListener("change", function() {
   const serverPathDiv = document.getElementById("serverPathDiv");

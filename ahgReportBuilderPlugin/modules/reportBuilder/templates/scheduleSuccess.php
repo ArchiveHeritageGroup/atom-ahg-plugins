@@ -184,7 +184,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('frequency').addEventListener('change', function() {
     document.getElementById('weeklyOptions').style.display = this.value === 'weekly' ? 'block' : 'none';
     document.getElementById('monthlyOptions').style.display = this.value === 'monthly' ? 'block' : 'none';

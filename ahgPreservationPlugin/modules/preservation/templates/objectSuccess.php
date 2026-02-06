@@ -218,7 +218,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function generateChecksums(id) {
     if (!confirm('Generate new checksums for this object?')) return;
 

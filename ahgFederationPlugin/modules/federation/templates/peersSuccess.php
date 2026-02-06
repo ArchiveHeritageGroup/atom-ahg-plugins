@@ -147,7 +147,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function testConnection(peerId, baseUrl) {
   const modal = new bootstrap.Modal(document.getElementById('testModal'));
   document.getElementById('testLoading').style.display = 'block';

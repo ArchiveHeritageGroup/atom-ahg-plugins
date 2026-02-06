@@ -258,7 +258,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var repoSelect = document.getElementById('repo-select');
     if (repoSelect) {

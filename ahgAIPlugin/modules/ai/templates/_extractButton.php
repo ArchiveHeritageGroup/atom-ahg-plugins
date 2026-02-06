@@ -20,7 +20,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function extractEntities(objectId) {
     const btn = document.getElementById('nerExtractBtn');
     btn.disabled = true;

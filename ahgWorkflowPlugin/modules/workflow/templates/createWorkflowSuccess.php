@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('scope_type').addEventListener('change', function() {
     var container = document.getElementById('scope_id_container');
     container.style.display = this.value === 'global' ? 'none' : '';

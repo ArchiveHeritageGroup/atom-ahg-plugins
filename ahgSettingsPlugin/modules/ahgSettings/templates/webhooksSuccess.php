@@ -391,7 +391,7 @@ if (!hash_equals($expected, $signature)) {
 </div>
 <?php endforeach; ?>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function copySecret() {
   var input = document.getElementById('newWebhookSecret');
   input.select();

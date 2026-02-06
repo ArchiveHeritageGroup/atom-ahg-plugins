@@ -397,7 +397,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Toggle price field based on free checkbox
 document.getElementById('addIsFree').addEventListener('change', function() {
   document.getElementById('addPriceRow').style.display = this.checked ? 'none' : 'block';
@@ -447,7 +447,7 @@ function deleteEvent(id, title) {
 <!-- TOM Select -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize TOM Select for add modal
   document.querySelectorAll('.tom-select').forEach(function(el) {

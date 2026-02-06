@@ -149,7 +149,7 @@
     </div>
 </form>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function togglePasswordVisibility() {
     const input = document.getElementById('ahg_central_api_key');
     const icon = document.getElementById('toggleIcon');

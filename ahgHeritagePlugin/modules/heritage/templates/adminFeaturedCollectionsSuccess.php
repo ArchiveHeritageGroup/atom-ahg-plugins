@@ -169,7 +169,7 @@ $archivalCollections = (array) $archivalCollections;
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function toggleSourceOptions(type) {
     document.getElementById('archival_select_wrapper').style.display = type === 'archival' ? 'block' : 'none';
     document.getElementById('iiif_select_wrapper').style.display = type === 'iiif' ? 'block' : 'none';

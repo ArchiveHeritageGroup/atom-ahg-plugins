@@ -11,7 +11,7 @@
     <div id="summaryResult" class="mt-2" style="display: none;"></div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function generateSummary(objectId) {
     const btn = document.getElementById('aiSummarizeBtn');
     const resultDiv = document.getElementById('summaryResult');

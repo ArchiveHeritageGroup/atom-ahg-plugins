@@ -166,7 +166,7 @@ $filters = $historyData['filters'] ?? [];
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('detailModal').addEventListener('show.bs.modal', function(event) {
     const logId = event.relatedTarget.dataset.logId;
     const content = document.getElementById('logDetailContent');

@@ -10,7 +10,7 @@
 -- Block Types - Defines available block components
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atom_landing_page_block_type (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     machine_name VARCHAR(50) NOT NULL UNIQUE,
     label VARCHAR(100) NOT NULL,
     description TEXT,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS atom_landing_page_block_type (
 -- Landing Pages - Main page entities
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atom_landing_page (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
@@ -56,10 +56,10 @@ CREATE TABLE IF NOT EXISTS atom_landing_page (
 -- Page Blocks - Block instances on pages
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atom_landing_page_block (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    page_id INT UNSIGNED NOT NULL,
-    block_type_id INT UNSIGNED NOT NULL,
-    parent_block_id INT UNSIGNED NULL COMMENT 'For nested blocks in columns',
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    page_id INT NOT NULL,
+    block_type_id INT NOT NULL,
+    parent_block_id INT NULL COMMENT 'For nested blocks in columns',
     column_slot VARCHAR(20) NULL COMMENT 'Column position (left, center, right)',
     title VARCHAR(255),
     position INT DEFAULT 0,
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS atom_landing_page_block (
 -- Page Versions - Version history for rollback
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atom_landing_page_version (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    page_id INT UNSIGNED NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    page_id INT NOT NULL,
     version_number INT NOT NULL,
     status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
     snapshot JSON NOT NULL COMMENT 'Complete page state snapshot',
@@ -103,10 +103,10 @@ CREATE TABLE IF NOT EXISTS atom_landing_page_version (
 -- Audit Log - Track all changes
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS atom_landing_page_audit_log (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     action VARCHAR(50) NOT NULL,
-    page_id INT UNSIGNED,
-    block_id INT UNSIGNED,
+    page_id INT,
+    block_id INT,
     data JSON,
     user_id INT,
     ip_address VARCHAR(45),
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS atom_landing_page_audit_log (
 -- DEFAULT BLOCK TYPES
 -- ============================================================================
 
-INSERT INTO atom_landing_page_block_type
+INSERT IGNORE INTO atom_landing_page_block_type
     (machine_name, label, description, icon, category, config_schema, default_config, is_container, load_order)
 VALUES
 -- Layout Blocks
@@ -212,28 +212,29 @@ VALUES
 -- DEFAULT LANDING PAGE (Optional Sample)
 -- ============================================================================
 
-INSERT INTO atom_landing_page (name, slug, description, is_default, is_active)
+INSERT IGNORE INTO atom_landing_page (name, slug, description, is_default, is_active)
 VALUES ('Home', 'home', 'Default homepage', 1, 1);
 
--- Add default blocks to homepage
+-- Add default blocks to homepage (only if page was just created)
 SET @page_id = LAST_INSERT_ID();
+SET @has_blocks = (SELECT COUNT(*) FROM atom_landing_page_block WHERE page_id = @page_id);
 
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 1, '{"title":"Welcome to the Archive","subtitle":"Explore our collections","height":"350px","text_align":"center"}'
-FROM atom_landing_page_block_type WHERE machine_name = 'hero_banner';
+FROM atom_landing_page_block_type WHERE machine_name = 'hero_banner' AND @page_id > 0 AND @has_blocks = 0;
 
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 2, '{"placeholder":"Search our collections..."}'
-FROM atom_landing_page_block_type WHERE machine_name = 'search_box';
+FROM atom_landing_page_block_type WHERE machine_name = 'search_box' AND @page_id > 0 AND @has_blocks = 0;
 
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 3, default_config
-FROM atom_landing_page_block_type WHERE machine_name = 'statistics';
+FROM atom_landing_page_block_type WHERE machine_name = 'statistics' AND @page_id > 0 AND @has_blocks = 0;
 
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 4, default_config
-FROM atom_landing_page_block_type WHERE machine_name = 'browse_panels';
+FROM atom_landing_page_block_type WHERE machine_name = 'browse_panels' AND @page_id > 0 AND @has_blocks = 0;
 
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 5, '{"entity_type":"informationobject","limit":6,"columns":3}'
-FROM atom_landing_page_block_type WHERE machine_name = 'recent_items';
+FROM atom_landing_page_block_type WHERE machine_name = 'recent_items' AND @page_id > 0 AND @has_blocks = 0;

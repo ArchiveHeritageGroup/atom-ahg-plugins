@@ -39,7 +39,7 @@
 
 <?php slot('content'); ?>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .batch-card {
     border-left: 4px solid #6c757d;
     transition: all 0.2s ease;
@@ -332,7 +332,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function batchAction(batchId, action) {
     fetch('/ai/batch/' + batchId + '/action', {
         method: 'POST',

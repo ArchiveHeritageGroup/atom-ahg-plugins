@@ -73,7 +73,7 @@
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .btn-check:checked + .btn-outline-primary {
     background-color: var(--bs-primary);
     color: white;

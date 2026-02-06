@@ -232,7 +232,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   const exportTypes = document.querySelectorAll('input[name="export_type"]');
   const singleOptions = document.getElementById('single_options');

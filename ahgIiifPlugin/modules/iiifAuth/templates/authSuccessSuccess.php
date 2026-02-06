@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Access Granted</title>
-    <style>
+    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
@@ -43,7 +43,7 @@
         <h1>Access Granted</h1>
         <p>You may now close this window.</p>
     </div>
-    <script>
+    <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
         // Notify parent window of success
         if (window.opener) {
             window.opener.postMessage({type: 'iiif-auth-success'}, '*');

@@ -136,7 +136,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('queue_all').addEventListener('change', function() {
     document.getElementById('limit-field').style.display = this.checked ? 'none' : 'block';
 });

@@ -148,7 +148,7 @@
 </div>
 
 <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var taxonomy = '<?php echo esc_entities($taxonomy) ?>';
 var taxonomyLabel = '<?php echo esc_entities($taxonomyLabel) ?>';
 
@@ -255,7 +255,7 @@ document.getElementById('newTermLabel').addEventListener('input', function() {
 });
 </script>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .drag-handle { cursor: grab; }
 .drag-handle:active { cursor: grabbing; }
 .sortable-ghost { opacity: 0.4; background: #f8f9fa; }

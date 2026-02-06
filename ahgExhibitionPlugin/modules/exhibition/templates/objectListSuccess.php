@@ -284,7 +284,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
   </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 @media print {
   .d-print-none {
     display: none !important;

@@ -624,7 +624,7 @@ $settings = $rawSettings;
 <!-- Test Connection Result -->
 <div id="connectionResult" class="alert d-none mb-4"></div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Initialize sector fields on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateFieldsForSector();
