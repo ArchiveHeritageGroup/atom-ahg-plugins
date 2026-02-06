@@ -487,7 +487,7 @@ class libraryEditAction extends sfAction
 
             // Get NER entities for this object
             $entities = $db->table('ahg_ner_entity')
-                ->where('information_object_id', $informationObjectId)
+                ->where('object_id', $informationObjectId)
                 ->get();
 
             if ($entities->isEmpty()) {

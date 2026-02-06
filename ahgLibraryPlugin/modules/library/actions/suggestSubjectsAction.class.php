@@ -91,7 +91,7 @@ class librarySuggestSubjectsAction extends sfAction
             }
 
             return $db->table('ahg_ner_entity')
-                ->where('information_object_id', $objectId)
+                ->where('object_id', $objectId)
                 ->select('entity_type as type', 'entity_value as value')
                 ->get()
                 ->map(fn($row) => ['type' => $row->type, 'value' => $row->value])
