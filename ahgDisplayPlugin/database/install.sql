@@ -512,3 +512,22 @@ CREATE TABLE IF NOT EXISTS `user_browse_settings` (
   UNIQUE KEY `uk_user_id` (`user_id`),
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Display Facet Cache Table
+-- Caches facet counts for fast guest user browse
+-- Refreshed by: php symfony ahg:refresh-facet-cache
+-- ============================================================
+
+DROP TABLE IF EXISTS `display_facet_cache`;
+CREATE TABLE IF NOT EXISTS `display_facet_cache` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `facet_type` varchar(50) NOT NULL COMMENT 'Type: subject, place, genre, level, repository, creator, glam_type, media_type',
+  `term_id` int NOT NULL DEFAULT '0' COMMENT 'Term ID or 0 for non-term facets',
+  `term_name` varchar(255) NOT NULL COMMENT 'Display name for the facet value',
+  `count` int NOT NULL DEFAULT '0' COMMENT 'Number of published items',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_facet_type` (`facet_type`),
+  KEY `idx_facet_count` (`facet_type`, `count` DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
