@@ -160,17 +160,19 @@ class AhgSettingsIndexAction extends sfAction
             ];
         }
 
-        // AHG Central Integration - always available
-        $this->sections['ahg_integration'] = [
-            'label' => 'AHG Central',
-            'icon' => 'fa-cloud',
-            'description' => 'Connect to AHG Central cloud services for shared NER training and AI features',
-            'url' => 'ahgSettings/ahgIntegration'
-        ];
+        // AHG Central Integration - show when ahgAIPlugin is enabled
+        $hasAI = in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasAI) {
+            $this->sections['ahg_integration'] = [
+                'label' => 'AHG Central',
+                'icon' => 'fa-cloud',
+                'description' => 'Connect to AHG Central cloud services for shared NER training and AI features',
+                'url' => 'ahgSettings/ahgIntegration'
+            ];
+        }
 
 
         // AI Services - show when ahgAIPlugin is enabled
-        $hasAI = in_array('ahgAIPlugin', sfProjectConfiguration::getActive()->getPlugins());
         if ($hasAI) {
             $this->sections['ai'] = [
                 'label' => 'AI Services',

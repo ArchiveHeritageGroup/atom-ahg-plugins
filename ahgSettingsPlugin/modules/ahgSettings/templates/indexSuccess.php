@@ -43,16 +43,19 @@ if ($damEnabled) {
     ];
 }
 
-$allCards['Heritage Platform'] = [
-    'label' => 'Heritage Platform',
-    'icon' => 'fa-landmark',
-    'icon_prefix' => 'fas',
-    'description' => 'Access control, analytics, branding, custodian tools, and community features',
-    'url' => url_for(['module' => 'heritage', 'action' => 'adminDashboard']),
-    'color' => 'warning',
-    'btn_text' => 'Admin',
-    'btn_icon' => 'fa-tools'
-];
+$hasHeritagePlugin = in_array('ahgHeritagePlugin', sfProjectConfiguration::getActive()->getPlugins());
+if ($hasHeritagePlugin) {
+    $allCards['Heritage Platform'] = [
+        'label' => 'Heritage Platform',
+        'icon' => 'fa-landmark',
+        'icon_prefix' => 'fas',
+        'description' => 'Access control, analytics, branding, custodian tools, and community features',
+        'url' => url_for(['module' => 'heritage', 'action' => 'adminDashboard']),
+        'color' => 'warning',
+        'btn_text' => 'Admin',
+        'btn_icon' => 'fa-tools'
+    ];
+}
 
 $allCards['Preservation & Backup'] = [
     'label' => 'Preservation & Backup',

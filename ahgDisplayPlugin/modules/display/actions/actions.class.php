@@ -233,14 +233,19 @@ class displayActions extends sfActions
             }
 
             // Fallback to library_item cover_url for library items
+            // Wrapped in try/catch: library_item table only exists when ahgLibraryPlugin is installed
             if (!$obj->thumbnail) {
-                $libraryItem = DB::table('library_item')
-                    ->where('information_object_id', $obj->id)
-                    ->select('cover_url')
-                    ->first();
-                if ($libraryItem && $libraryItem->cover_url) {
-                    $obj->thumbnail = $libraryItem->cover_url;
-                    $obj->has_digital = true;
+                try {
+                    $libraryItem = DB::table('library_item')
+                        ->where('information_object_id', $obj->id)
+                        ->select('cover_url')
+                        ->first();
+                    if ($libraryItem && $libraryItem->cover_url) {
+                        $obj->thumbnail = $libraryItem->cover_url;
+                        $obj->has_digital = true;
+                    }
+                } catch (\Exception $e) {
+                    // table does not exist - ahgLibraryPlugin not installed
                 }
             }
         }
