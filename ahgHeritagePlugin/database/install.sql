@@ -1039,24 +1039,7 @@ CREATE TABLE IF NOT EXISTS heritage_hero_slide (
     INDEX idx_dates (start_date, end_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table: heritage_featured_collection
--- Curated collections to display on landing page
-CREATE TABLE IF NOT EXISTS heritage_featured_collection (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    institution_id INT DEFAULT NULL,
-    source_type ENUM('iiif', 'archival') NOT NULL DEFAULT 'archival',
-    source_id INT NOT NULL COMMENT 'iiif_collection.id or information_object.id',
-    title VARCHAR(255) DEFAULT NULL COMMENT 'Override title',
-    description TEXT DEFAULT NULL COMMENT 'Override description',
-    thumbnail_path VARCHAR(500) DEFAULT NULL COMMENT 'Override thumbnail',
-    display_order INT DEFAULT 100,
-    is_enabled TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_enabled (is_enabled),
-    INDEX idx_order (display_order),
-    UNIQUE KEY uk_source (source_type, source_id, institution_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Note: heritage_featured_collection already defined above (line 940)
 
 -- Table: heritage_explore_category
 -- Visual browse categories (Time, Place, People, Theme, Format, Trending)

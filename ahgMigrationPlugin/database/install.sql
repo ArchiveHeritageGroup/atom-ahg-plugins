@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS atom_migration_template (
 CREATE TABLE IF NOT EXISTS atom_migration_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id BIGINT UNSIGNED NOT NULL,
-    row_number INT UNSIGNED,
+    `row_number` INT UNSIGNED,
     source_id VARCHAR(255) COMMENT 'Original system identifier',
     
     -- What was created/updated
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS atom_migration_log (
 CREATE TABLE IF NOT EXISTS atom_migration_staged (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id BIGINT UNSIGNED NOT NULL,
-    row_number INT UNSIGNED NOT NULL,
+    `row_number` INT UNSIGNED NOT NULL,
     source_id VARCHAR(255),
     
     -- Record classification

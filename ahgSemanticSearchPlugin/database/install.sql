@@ -127,10 +127,5 @@ INSERT INTO ahg_semantic_search_settings (setting_key, setting_value, setting_ty
 ('last_cron_sync', '0', 'integer')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
--- =====================================================
--- REGISTER PLUGIN
--- =====================================================
-
-INSERT INTO atom_plugin (name, class_name, version, description, category, is_enabled, is_core, is_locked, load_order)
-VALUES ('ahgSemanticSearchPlugin', 'ahgSemanticSearchPluginConfiguration', '1.0.0', 'Semantic search with thesaurus, WordNet/Wikidata sync, and vector embeddings', 'search', 1, 0, 0, 60)
-ON DUPLICATE KEY UPDATE version = VALUES(version), description = VALUES(description);
+-- Plugin registration removed - plugins are enabled manually via:
+-- php bin/atom extension:enable ahgSemanticSearchPlugin

@@ -526,9 +526,5 @@ VALUES
 ('The Courier Guy', 'info@thecourierguy.co.za', 0, 0, 1, 'General courier', 1)
 ON DUPLICATE KEY UPDATE company_name = VALUES(company_name);
 
--- =====================================================
--- Register plugin
--- =====================================================
-INSERT INTO atom_plugin (name, class_name, version, description, category, is_enabled, is_core, is_locked, load_order)
-VALUES ('ahgLoanPlugin', 'ahgLoanPluginConfiguration', '1.0.0', 'Shared loan management for GLAM institutions', 'loans', 1, 0, 0, 50)
-ON DUPLICATE KEY UPDATE version = VALUES(version), description = VALUES(description);
+-- Plugin registration removed - plugins are enabled manually via:
+-- php bin/atom extension:enable ahgLoanPlugin

@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS atom_migration_job (
 CREATE TABLE IF NOT EXISTS atom_migration_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id BIGINT UNSIGNED NOT NULL,
-    row_number INT,
+    `row_number` INT,
     source_identifier VARCHAR(255),
     target_type VARCHAR(100),
     target_id INT COMMENT 'AtoM object ID',
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS atom_validation_rule (
 CREATE TABLE IF NOT EXISTS atom_validation_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id BIGINT UNSIGNED,
-    row_number INT,
+    `row_number` INT,
     column_name VARCHAR(255),
     rule_type VARCHAR(50),
     severity ENUM('error', 'warning', 'info'),
@@ -98,12 +98,23 @@ CREATE TABLE IF NOT EXISTS atom_validation_log (
 
     INDEX idx_job (job_id),
     INDEX idx_severity (severity),
-    INDEX idx_row (row_number),
+    INDEX idx_row (`row_number`),
     FOREIGN KEY (job_id) REFERENCES atom_migration_job(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Add columns to atom_data_mapping for sharing profiles
-ALTER TABLE atom_data_mapping
-ADD COLUMN IF NOT EXISTS is_shared TINYINT(1) DEFAULT 0 COMMENT 'Whether profile is shared with other users',
-ADD COLUMN IF NOT EXISTS shared_by INT UNSIGNED COMMENT 'User ID who shared the profile',
-ADD COLUMN IF NOT EXISTS sector_code VARCHAR(50) COMMENT 'Sector this mapping is designed for';
+-- Uses procedure to safely add columns (MySQL 8 does not support ADD COLUMN IF NOT EXISTS)
+SET @dbname = DATABASE();
+SET @tablename = 'atom_data_mapping';
+
+SELECT COUNT(*) INTO @col_exists FROM information_schema.columns WHERE table_schema = @dbname AND table_name = @tablename AND column_name = 'is_shared';
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE atom_data_mapping ADD COLUMN is_shared TINYINT(1) DEFAULT 0', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SELECT COUNT(*) INTO @col_exists FROM information_schema.columns WHERE table_schema = @dbname AND table_name = @tablename AND column_name = 'shared_by';
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE atom_data_mapping ADD COLUMN shared_by INT UNSIGNED', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SELECT COUNT(*) INTO @col_exists FROM information_schema.columns WHERE table_schema = @dbname AND table_name = @tablename AND column_name = 'sector_code';
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE atom_data_mapping ADD COLUMN sector_code VARCHAR(50)', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
