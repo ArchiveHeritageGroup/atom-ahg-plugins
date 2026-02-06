@@ -1,13 +1,13 @@
 <?php decorate_with('layout_3col'); ?>
 <?php
-use Illuminate\Database\Capsule\Manager as DB;
+
 // Check if a plugin is enabled
 if (!function_exists('checkPluginEnabled')) {
     function checkPluginEnabled($pluginName) {
         static $plugins = null;
         if ($plugins === null) {
             try {
-                $pluginNames = DB::table('atom_plugin')
+                $pluginNames = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
                     ->where('is_enabled', 1)
                     ->pluck('name')
                     ->toArray();
@@ -399,20 +399,20 @@ $rawResource = sfOutputEscaper::unescape($resource);
 
     <!-- User Actions (compact with tooltips) -->
     <?php
-    use Illuminate\Database\Capsule\Manager as DB;
+    
     $userId = $sf_user->getAttribute('user_id');
     $sessionId = session_id();
     if (empty($sessionId) && !$userId) { @session_start(); $sessionId = session_id(); }
     $favoriteId = null;
     $cartId = null;
     if ($userId) {
-        $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
-        $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
+        $favoriteId = \Illuminate\Database\Capsule\Manager::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
+        $cartId = \Illuminate\Database\Capsule\Manager::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
     } elseif ($sessionId) {
-        $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
+        $cartId = \Illuminate\Database\Capsule\Manager::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
     }
-    $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
-    $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
+    $hasDigitalObject = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists();
+    $pdfDigitalObject = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->where('mime_type', 'application/pdf')->first();
     ?>
     <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
       <!-- TTS Button -->
@@ -478,7 +478,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'object', 'action' => 'editPhysicalObjects']); ?>"><i class="fas fa-box me-2"></i><?php echo __('Link physical storage'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <?php if ($hasDigitalObject): ?>
-            <?php $doRecord = DB::table('digital_object')->where('object_id', $resource->id)->first(); ?>
+            <?php $doRecord = \Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->first(); ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'digitalobject', 'action' => 'edit', 'id' => $doRecord->id]); ?>"><i class="fas fa-edit me-2"></i><?php echo __('Edit digital object'); ?></a></li>
             <?php else: ?>
             <li><a class="dropdown-item" href="<?php echo url_for([$resource, 'module' => 'object', 'action' => 'addDigitalObject']); ?>"><i class="fas fa-file-upload me-2"></i><?php echo __('Link digital object'); ?></a></li>

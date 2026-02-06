@@ -57,7 +57,7 @@ class ArchivesExporter extends BaseExporter
         ];
     }
 
-    public function mapRecord(array $record): array
+    public function mapRecord(array $record, bool $includeCustom = false): array
     {
         // Map common field names to AtoM column names
         $mapping = [
@@ -147,9 +147,13 @@ class ArchivesExporter extends BaseExporter
         ];
 
         $result = [];
+        $columns = $this->getColumns();
+
         foreach ($record as $key => $value) {
             $targetKey = $mapping[$key] ?? $key;
-            if (in_array($targetKey, $this->getColumns())) {
+
+            // Include if it's a standard column OR if includeCustom is true
+            if (in_array($targetKey, $columns) || $includeCustom) {
                 $result[$targetKey] = $value;
             }
         }

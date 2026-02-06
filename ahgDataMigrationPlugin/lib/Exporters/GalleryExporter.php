@@ -118,7 +118,7 @@ class GalleryExporter extends BaseExporter
         ];
     }
 
-    public function mapRecord(array $record): array
+    public function mapRecord(array $record, bool $includeCustom = false): array
     {
         $mapping = [
             'legacy_id' => 'legacyId',
@@ -216,9 +216,11 @@ class GalleryExporter extends BaseExporter
         ];
 
         $result = [];
+        $columns = $this->getColumns();
+
         foreach ($record as $key => $value) {
             $targetKey = $mapping[$key] ?? $key;
-            if (in_array($targetKey, $this->getColumns())) {
+            if (in_array($targetKey, $columns) || $includeCustom) {
                 $result[$targetKey] = $value;
             }
         }

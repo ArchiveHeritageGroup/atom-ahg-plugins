@@ -26,8 +26,10 @@ abstract class BaseExporter
 
     /**
      * Map a transformed record to the sector-specific CSV format.
+     *
+     * @param bool $includeCustom When true, include fields not in getColumns()
      */
-    abstract public function mapRecord(array $record): array;
+    abstract public function mapRecord(array $record, bool $includeCustom = false): array;
 
     /**
      * Set the data to export.
@@ -54,17 +56,33 @@ abstract class BaseExporter
      */
     public function export(): string
     {
+        // Start with standard columns
         $columns = $this->getColumns();
+
+        // Collect any additional custom fields from the data
+        $customFields = [];
+        foreach ($this->data as $record) {
+            $mapped = $this->mapRecord($record, true); // Pass flag to include custom
+            foreach (array_keys($mapped) as $key) {
+                if (!in_array($key, $columns) && !in_array($key, $customFields)) {
+                    $customFields[] = $key;
+                }
+            }
+        }
+
+        // Merge standard columns with custom fields
+        $allColumns = array_merge($columns, $customFields);
+
         $output = fopen('php://temp', 'r+');
 
-        // Write header
-        fputcsv($output, $columns);
+        // Write header with all columns
+        fputcsv($output, $allColumns);
 
         // Write data rows
         foreach ($this->data as $record) {
-            $mapped = $this->mapRecord($record);
+            $mapped = $this->mapRecord($record, true);
             $row = [];
-            foreach ($columns as $col) {
+            foreach ($allColumns as $col) {
                 $row[] = $mapped[$col] ?? '';
             }
             fputcsv($output, $row);

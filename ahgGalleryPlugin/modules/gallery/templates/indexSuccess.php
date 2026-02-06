@@ -283,9 +283,43 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
 <?php // Digital Object Viewer with zoom ?>
 <?php if (0 < count($qubitResource->digitalObjectsRelatedByobjectId)): ?>
   <?php if (EmbargoHelper::canViewDigitalObject($rawResource->id)): ?>
-    <?php foreach ($qubitResource->digitalObjectsRelatedByobjectId as $obj): ?>
-      <?php echo render_digital_object_viewer($qubitResource, $obj); ?>
-    <?php endforeach; ?>
+    <?php $digitalObjects = iterator_to_array($qubitResource->digitalObjectsRelatedByobjectId); ?>
+    <?php if (count($digitalObjects) > 1): ?>
+      <!-- Multiple images - use Bootstrap carousel -->
+      <div id="galleryImageCarousel" class="carousel slide mb-3" data-bs-ride="false">
+        <div class="carousel-indicators">
+          <?php foreach ($digitalObjects as $idx => $obj): ?>
+            <button type="button" data-bs-target="#galleryImageCarousel" data-bs-slide-to="<?php echo $idx; ?>" <?php echo $idx === 0 ? 'class="active" aria-current="true"' : ''; ?> aria-label="Slide <?php echo $idx + 1; ?>"></button>
+          <?php endforeach; ?>
+        </div>
+        <div class="carousel-inner">
+          <?php foreach ($digitalObjects as $idx => $obj): ?>
+            <div class="carousel-item <?php echo $idx === 0 ? 'active' : ''; ?>">
+              <?php echo render_digital_object_viewer($qubitResource, $obj); ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#galleryImageCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden"><?php echo __('Previous'); ?></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#galleryImageCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden"><?php echo __('Next'); ?></span>
+        </button>
+        <div class="text-center mt-2 text-muted small">
+          <?php echo __('Image %1% of %2%', ['%1%' => '<span id="currentSlide">1</span>', '%2%' => count($digitalObjects)]); ?>
+        </div>
+      </div>
+      <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+      document.getElementById('galleryImageCarousel').addEventListener('slid.bs.carousel', function(e) {
+        document.getElementById('currentSlide').textContent = e.to + 1;
+      });
+      </script>
+    <?php else: ?>
+      <!-- Single image -->
+      <?php echo render_digital_object_viewer($qubitResource, $digitalObjects[0]); ?>
+    <?php endif; ?>
   <?php elseif (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
     <div class="digital-object-restricted text-center p-4 bg-light rounded mb-3">
       <i class="fas fa-image fa-3x text-muted mb-2"></i>
