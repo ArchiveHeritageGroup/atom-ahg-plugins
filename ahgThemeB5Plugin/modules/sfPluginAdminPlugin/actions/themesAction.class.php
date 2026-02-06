@@ -48,11 +48,18 @@ class sfPluginAdminPluginThemesAction extends sfAction
 
         $configuration = ProjectConfiguration::getActive();
         $pluginPaths = $configuration->getAllPluginPaths();
+
+        // Don't exclude theme plugins - they should still appear in the list
+        // even if they're already enabled (original code excluded ALL enabled plugins)
         foreach (sfPluginAdminPluginConfiguration::$pluginNames as $name) {
-            unset($pluginPaths[$name]);
+            // Keep plugins that might be themes (check if they have "Theme" in name)
+            if (stripos($name, 'Theme') === false) {
+                unset($pluginPaths[$name]);
+            }
         }
 
         $this->plugins = [];
+
         foreach ($pluginPaths as $name => $path) {
             $className = $name.'Configuration';
 
