@@ -101,7 +101,7 @@ if (isset($resource)) {
   <h4><?php echo __('AI Tools'); ?></h4>
   <ul>
     <li>
-      <a href="#" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>); return false;">
+      <a href="#" id="nerExtractBtn" data-object-id="<?php echo $resource->id; ?>">
         <i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities (NER)'); ?>
       </a>
     </li>
@@ -114,7 +114,7 @@ if (isset($resource)) {
     </li>
     <?php endif; ?>
     <li>
-      <a href="#" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>); return false;">
+      <a href="#" id="aiSummarizeBtn" data-object-id="<?php echo $resource->id; ?>">
         <i class="bi bi-file-text me-1"></i><?php echo __('Generate Summary'); ?>
       </a>
     </li>
@@ -246,7 +246,9 @@ function generateSummary(objectId) {
       var savedMsg = data.saved ? 'Saved to Scope & Content' : 'Generated (not saved)';
       resultDiv.innerHTML = '<div class="alert alert-success py-2 small"><i class="bi bi-check-circle me-1"></i>' + savedMsg + '</div>' +
         '<div class="card"><div class="card-body py-2 small">' + data.summary + '</div></div>' +
-        '<button class="btn btn-sm btn-outline-secondary mt-2" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>';
+        '<button class="btn btn-sm btn-outline-secondary mt-2" id="summaryRefreshBtn"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>';
+      var rb = document.getElementById('summaryRefreshBtn');
+      if (rb) rb.addEventListener('click', function() { location.reload(); });
       resultDiv.classList.remove('ctx-hidden');
     })
     .catch(function(err) {
@@ -255,6 +257,31 @@ function generateSummary(objectId) {
       resultDiv.classList.remove('ctx-hidden');
     });
 }
+
+// Attach event listeners (CSP-safe, no inline onclick)
+document.addEventListener('DOMContentLoaded', function() {
+  var nerBtn = document.getElementById('nerExtractBtn');
+  if (nerBtn) {
+    nerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      extractEntities(nerBtn.getAttribute('data-object-id'));
+    });
+  }
+  var sumBtn = document.getElementById('aiSummarizeBtn');
+  if (sumBtn) {
+    sumBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      generateSummary(sumBtn.getAttribute('data-object-id'));
+    });
+  }
+  var piiBtn = document.getElementById('piiScanBtn');
+  if (piiBtn) {
+    piiBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      scanForPii(piiBtn.getAttribute('data-object-id'));
+    });
+  }
+});
 
 // Show alert at top of page
 function showTopAlert(message, type) {
@@ -435,7 +462,7 @@ function scanForPii(objectId) {
   <h4><?php echo __('Privacy & PII'); ?></h4>
   <ul>
     <li>
-      <a href="#" id="piiScanBtn" onclick="scanForPii(<?php echo $resource->id ?>); return false;">
+      <a href="#" id="piiScanBtn" data-object-id="<?php echo $resource->id; ?>">
         <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Scan for PII'); ?>
       </a>
     </li>
