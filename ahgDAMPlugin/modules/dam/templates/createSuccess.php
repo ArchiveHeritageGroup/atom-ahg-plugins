@@ -25,6 +25,12 @@
         <i class="fas fa-id-card"></i> <?php echo __('Identification'); ?>
       </div>
       <div class="card-body">
+        <?php echo get_component('informationobject', 'identifierGenerator', [
+          'sector' => 'dam',
+          'current_identifier' => '',
+          'field_name' => 'identifier',
+          'repository_id' => null,
+        ]); ?>
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="title" class="form-label"><?php echo __('Title'); ?> <span class="text-danger">*</span></label>
