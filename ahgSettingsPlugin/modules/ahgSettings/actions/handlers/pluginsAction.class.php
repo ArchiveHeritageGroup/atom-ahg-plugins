@@ -25,11 +25,15 @@ class AhgSettingsPluginsAction extends sfAction
         $plugins = [];
         try {
             $rows = DB::table('atom_plugin')
-                ->orderBy('category')
                 ->orderBy('name')
                 ->get();
             foreach ($rows as $row) {
-                $plugins[] = (array) $row;
+                $plugin = (array) $row;
+                // Normalize: all ahg* plugins are AHG Extensions
+                if (strpos($plugin['name'], 'ahg') === 0 && !in_array($plugin['category'], ['core', 'theme'])) {
+                    $plugin['category'] = 'ahg';
+                }
+                $plugins[] = $plugin;
             }
         } catch (Exception $e) {
             error_log("Plugin Manager: Error loading plugins: " . $e->getMessage());

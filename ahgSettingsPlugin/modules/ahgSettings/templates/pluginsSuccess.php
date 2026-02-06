@@ -12,11 +12,9 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white">
         <div class="row align-items-center">
-            <div class="col">
-                <strong><i class="fas fa-filter me-2"></i>Filter by Category</strong>
-            </div>
             <div class="col-auto">
-                <div class="btn-group btn-group-sm" role="group">
+                <strong><i class="fas fa-filter me-2"></i>Category</strong>
+                <div class="btn-group btn-group-sm ms-2" role="group">
                     <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
                     <?php foreach ($categories as $key => $cat): ?>
                     <button type="button" class="btn btn-outline-<?php echo $cat['class']; ?>" data-filter="<?php echo $key; ?>">
@@ -24,6 +22,30 @@
                     </button>
                     <?php endforeach; ?>
                 </div>
+            </div>
+            <div class="col-auto">
+                <strong><i class="fas fa-toggle-on me-2"></i>Status</strong>
+                <div class="btn-group btn-group-sm ms-2" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-status="all">All</button>
+                    <button type="button" class="btn btn-outline-success" data-status="enabled">
+                        <i class="fas fa-check me-1"></i>Enabled
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-status="disabled">
+                        <i class="fas fa-times me-1"></i>Disabled
+                    </button>
+                </div>
+            </div>
+            <div class="col-auto ms-auto">
+                <?php
+                    $enabledCount = 0;
+                    $disabledCount = 0;
+                    foreach ($plugins as $p) {
+                        if (!empty($p['is_enabled'])) { $enabledCount++; } else { $disabledCount++; }
+                    }
+                ?>
+                <span class="badge bg-success"><?php echo $enabledCount; ?> Enabled</span>
+                <span class="badge bg-secondary"><?php echo $disabledCount; ?> Disabled</span>
+                <span class="badge bg-primary"><?php echo count($plugins); ?> Total</span>
             </div>
         </div>
     </div>
@@ -33,18 +55,20 @@
     <?php if (empty($plugins)): ?>
     <div class="col-12">
         <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>No plugins found in database. 
-            Run <code>php symfony plugin:manage sync</code> to synchronize plugins.
+            <i class="fas fa-info-circle me-2"></i>No plugins found in database.
+            Run <code>php bin/atom extension:discover</code> to see available plugins.
         </div>
     </div>
     <?php else: ?>
     <?php foreach ($plugins as $plugin): ?>
-    <?php 
+    <?php
         $isEnabled = !empty($plugin['is_enabled']);
         $category = $plugin['category'] ?? 'other';
         $catInfo = $categories[$category] ?? $categories['other'];
     ?>
-    <div class="col-lg-4 col-md-6 mb-4 plugin-card" data-category="<?php echo $category; ?>">
+    <div class="col-lg-4 col-md-6 mb-4 plugin-card"
+         data-category="<?php echo $category; ?>"
+         data-status="<?php echo $isEnabled ? 'enabled' : 'disabled'; ?>">
         <div class="card h-100 <?php echo $isEnabled ? '' : 'border-secondary opacity-75'; ?>">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="badge bg-<?php echo $catInfo['class']; ?>">
@@ -94,4 +118,38 @@
     <?php endif; ?>
 </div>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/plugin-filter.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var activeCategory = 'all';
+    var activeStatus = 'all';
+    var cards = document.querySelectorAll('.plugin-card');
+
+    function filterCards() {
+        cards.forEach(function(card) {
+            var catMatch = (activeCategory === 'all' || card.dataset.category === activeCategory);
+            var statusMatch = (activeStatus === 'all' || card.dataset.status === activeStatus);
+            card.style.display = (catMatch && statusMatch) ? '' : 'none';
+        });
+    }
+
+    // Category filter buttons
+    document.querySelectorAll('[data-filter]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-filter]').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            activeCategory = btn.dataset.filter;
+            filterCards();
+        });
+    });
+
+    // Status filter buttons
+    document.querySelectorAll('[data-status]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-status]').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            activeStatus = btn.dataset.status;
+            filterCards();
+        });
+    });
+});
+</script>
