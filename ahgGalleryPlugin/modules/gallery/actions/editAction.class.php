@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomExtensions\Services\NumberingService;
 
 class galleryEditAction extends sfAction
 {
@@ -363,9 +364,24 @@ class galleryEditAction extends sfAction
                 ->where('lft', '>', $parent->rgt)
                 ->increment('lft', 2);
             
+            // Auto-generate identifier if empty
+            $identifier = $request->getParameter('object_number');
+            $generatedIdentifier = null;
+            if (empty($identifier)) {
+                try {
+                    $numberingService = NumberingService::getInstance();
+                    $generatedIdentifier = $numberingService->generateForNewRecord('gallery');
+                    if ($generatedIdentifier) {
+                        $identifier = $generatedIdentifier;
+                    }
+                } catch (\Exception $e) {
+                    // Numbering service unavailable, proceed without
+                }
+            }
+
             DB::table('information_object')->insert([
                 'id' => $objectId,
-                'identifier' => $request->getParameter('object_number'),
+                'identifier' => $identifier,
                 'level_of_description_id' => null,
                 'repository_id' => $request->getParameter('repository') ?: null,
                 'parent_id' => $parentId,
@@ -391,6 +407,16 @@ class galleryEditAction extends sfAction
                 'type_id' => 158,
                 'status_id' => 159,
             ]);
+
+            // Link generated identifier to object
+            if ($generatedIdentifier) {
+                try {
+                    $numberingService = NumberingService::getInstance();
+                    $numberingService->linkReferenceToObject($generatedIdentifier, $objectId);
+                } catch (\Exception $e) {
+                    // Non-fatal
+                }
+            }
 
             $resourceId = $objectId;
             $this->resource = (object)['id' => $objectId, 'slug' => $slug];

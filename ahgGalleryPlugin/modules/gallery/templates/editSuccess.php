@@ -577,6 +577,14 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             <div class="field-input">
               <?php echo $form[$fieldName]->render(); ?>
+              <?php if ($fieldName === 'object_number'): ?>
+                <div class="d-flex gap-2 mt-1">
+                  <button type="button" id="btn-generate-identifier" class="btn btn-sm atom-btn-white">
+                    <i class="fa fa-cog me-1"></i> <?php echo __('Generate identifier'); ?>
+                  </button>
+                  <small id="identifier-scheme-info" class="text-muted align-self-center"></small>
+                </div>
+              <?php endif; ?>
             </div>
             <div class="field-help" id="help-<?php echo $fieldName; ?>" style="display: none;">
               <div class="help-content">
@@ -770,6 +778,45 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   // Initialize on DOM ready
   initGalleryAutocomplete();
+
+  // Identifier generation
+  var genBtn = document.getElementById('btn-generate-identifier');
+  var schemeInfo = document.getElementById('identifier-scheme-info');
+  if (genBtn) {
+    // Preview on load for new records
+    var objNumInput = document.querySelector('input[name="object_number"]');
+    if (objNumInput && !objNumInput.value) {
+      fetch('/index.php/ahgSettings/generateIdentifier?sector=gallery&preview=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && schemeInfo) {
+            schemeInfo.textContent = 'Next: ' + data.identifier + ' (' + data.scheme + ')';
+          }
+        });
+    }
+
+    genBtn.addEventListener('click', function() {
+      genBtn.disabled = true;
+      genBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Generating...';
+      fetch('/index.php/ahgSettings/generateIdentifier?sector=gallery', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && data.identifier) {
+            if (objNumInput) objNumInput.value = data.identifier;
+            if (schemeInfo) schemeInfo.textContent = 'Generated: ' + data.identifier;
+          } else {
+            if (schemeInfo) schemeInfo.textContent = 'Error: ' + (data.error || 'Unknown error');
+          }
+        })
+        .catch(function(err) {
+          if (schemeInfo) schemeInfo.textContent = 'Error: ' + err.message;
+        })
+        .finally(function() {
+          genBtn.disabled = false;
+          genBtn.innerHTML = '<i class="fa fa-cog me-1"></i> Generate identifier';
+        });
+    });
+  }
 })();
 </script>
 <?php end_slot(); ?>

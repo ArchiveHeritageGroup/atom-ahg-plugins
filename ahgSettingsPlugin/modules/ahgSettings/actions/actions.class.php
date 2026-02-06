@@ -386,6 +386,21 @@ class ahgSettingsActions extends sfActions
         return $this->executeSettingsAction('numberingSchemesAction', $request);
     }
 
+    public function executeNumberingSchemeEdit(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('numberingSchemeEditAction', $request);
+    }
+
+    public function executeGenerateIdentifier(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('generateIdentifierAction', $request);
+    }
+
+    public function executeValidateIdentifier(sfWebRequest $request)
+    {
+        return $this->executeSettingsAction('validateIdentifierAction', $request);
+    }
+
     // Aliases for legacy URLs
     public function executeAhgSettings(sfWebRequest $request)
     {

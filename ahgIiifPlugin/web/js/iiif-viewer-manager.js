@@ -268,7 +268,7 @@ export class IiifViewerManager {
 
             const config = {
                 id: containerId,
-                prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/',
+                prefixUrl: '/plugins/ahgIiifPlugin/web/images/',
                 tileSources: validTileSources,
                 showNavigator: true,
                 navigatorPosition: 'BOTTOM_RIGHT',
