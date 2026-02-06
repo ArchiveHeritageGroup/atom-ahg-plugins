@@ -93,15 +93,15 @@
                 <?php endif; ?>
             </div>
             <div class="card-footer bg-white">
-                <form method="post" class="d-inline">
+                <form method="post" action="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'plugins']); ?>" class="d-inline">
                     <input type="hidden" name="plugin_name" value="<?php echo htmlspecialchars($plugin['name']); ?>">
                     <?php $isLocked = !empty($plugin['is_locked']); ?>
                     <?php if ($isLocked): ?>
                     <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Locked</span>
                     <?php elseif ($isEnabled): ?>
                     <button type="submit" name="plugin_action" value="disable"
-                            class="btn btn-sm btn-outline-danger"
-                            onclick="return confirm('Disable <?php echo htmlspecialchars($plugin['name']); ?>?');">
+                            class="btn btn-sm btn-outline-danger btn-plugin-disable"
+                            data-plugin-name="<?php echo htmlspecialchars($plugin['name']); ?>">
                         <i class="fas fa-power-off me-1"></i>Disable
                     </button>
                     <?php else: ?>
@@ -118,7 +118,7 @@
     <?php endif; ?>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var activeCategory = 'all';
     var activeStatus = 'all';
@@ -133,22 +133,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Category filter buttons
-    document.querySelectorAll('[data-filter]').forEach(function(btn) {
+    document.querySelectorAll('.card-header [data-filter]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('[data-filter]').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.card-header [data-filter]').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             activeCategory = btn.dataset.filter;
             filterCards();
         });
     });
 
-    // Status filter buttons
-    document.querySelectorAll('[data-status]').forEach(function(btn) {
+    // Status filter buttons (only target filter bar buttons, not card data-status attributes)
+    document.querySelectorAll('.card-header [data-status]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('[data-status]').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.card-header [data-status]').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             activeStatus = btn.dataset.status;
             filterCards();
+        });
+    });
+
+    // Disable button confirmation (avoid inline onclick which CSP blocks)
+    document.querySelectorAll('.btn-plugin-disable').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Disable ' + btn.dataset.pluginName + '?')) {
+                e.preventDefault();
+            }
         });
     });
 });
