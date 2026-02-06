@@ -6,7 +6,28 @@
     <?php include_title(); ?>
     <?php echo get_component('default', 'tagManager', ['code' => 'script']); ?>
     <link rel="shortcut icon" href="<?php echo public_path('favicon.ico'); ?>">
-    <script defer src="/dist/js/vendor.bundle.51cf3c3989802bda6211.js"></script><script defer src="/dist/js/ahgThemeB5Plugin.bundle.a07a663dfb3d64ed5ae7.js"></script><link href="/dist/css/ahgThemeB5Plugin.bundle.6890beb6f83030ec23b3.css" rel="stylesheet">
+    <?php
+    // Dynamically find webpack bundles (no hardcoded hashes)
+    $distPath = sfConfig::get('sf_web_dir').'/dist';
+
+    // Vendor JS bundle
+    $vendorJs = glob($distPath.'/js/vendor.bundle.*.js');
+    if (!empty($vendorJs)) {
+        echo '<script defer src="/dist/js/'.basename($vendorJs[0]).'"></script>';
+    }
+
+    // Theme JS bundle
+    $themeJs = glob($distPath.'/js/ahgThemeB5Plugin.bundle.*.js');
+    if (!empty($themeJs)) {
+        echo '<script defer src="/dist/js/'.basename($themeJs[0]).'"></script>';
+    }
+
+    // Theme CSS bundle
+    $themeCss = glob($distPath.'/css/ahgThemeB5Plugin.bundle.*.css');
+    if (!empty($themeCss)) {
+        echo '<link href="/dist/css/'.basename($themeCss[0]).'" rel="stylesheet">';
+    }
+    ?>
     <?php echo get_component_slot('css'); ?>
   </head>
   <body class="d-flex flex-column min-vh-100 <?php echo $sf_context->getModuleName(); ?> <?php echo $sf_context->getActionName(); ?><?php echo sfConfig::get('app_show_tooltips') ? ' show-edit-tooltips' : ''; ?>">
