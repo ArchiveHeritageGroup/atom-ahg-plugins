@@ -1,5 +1,10 @@
 # ahgDisplayPlugin routes - using /glam prefix to avoid conflicts
 
+# Override default informationobject browse to use GLAM browse
+informationobject_browse_override:
+  url: /informationobject/browse
+  param: { module: display, action: browse }
+
 glam_index:
   url: /glam
   param: { module: display, action: index }
