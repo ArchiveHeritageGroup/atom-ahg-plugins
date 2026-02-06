@@ -196,12 +196,32 @@ EOF;
 
         // Check 5: Bundle assets
         $this->log('[5] Checking bundle assets...');
-        $distDir = sfConfig::get('sf_root_dir').'/dist';
+        $webDir = sfConfig::get('sf_web_dir');
+        $rootDir = sfConfig::get('sf_root_dir');
+        $this->log("    sf_web_dir: $webDir");
+        $this->log("    sf_root_dir: $rootDir");
+
+        // Check both possible dist locations
+        $distDir = $webDir.'/dist';
+        if (!is_dir($distDir)) {
+            $distDir = $rootDir.'/dist';
+        }
+        $this->log("    Using dist dir: $distDir");
+
         $cssPattern = $distDir.'/css/ahgThemeB5Plugin.bundle.*.css';
         $jsPattern = $distDir.'/js/ahgThemeB5Plugin.bundle.*.js';
+        $vendorPattern = $distDir.'/js/vendor.bundle.*.js';
 
         $cssFiles = glob($cssPattern);
         $jsFiles = glob($jsPattern);
+        $vendorFiles = glob($vendorPattern);
+
+        if (empty($vendorFiles)) {
+            $warnings[] = "Vendor JS bundle not found: $vendorPattern";
+            $this->log("    WARNING: Vendor JS bundle not found");
+        } else {
+            $this->log("    OK: Vendor JS bundle found: ".basename($vendorFiles[0]));
+        }
 
         if (empty($cssFiles)) {
             $issues[] = "CSS bundle not found: $cssPattern";

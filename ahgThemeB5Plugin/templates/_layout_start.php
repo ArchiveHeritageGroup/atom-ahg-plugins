@@ -9,23 +9,35 @@
     <?php
     // Dynamically find webpack bundles (no hardcoded hashes)
     $distPath = sfConfig::get('sf_web_dir').'/dist';
+    $bundleErrors = [];
 
     // Vendor JS bundle
     $vendorJs = glob($distPath.'/js/vendor.bundle.*.js');
     if (!empty($vendorJs)) {
         echo '<script defer src="/dist/js/'.basename($vendorJs[0]).'"></script>';
+    } else {
+        $bundleErrors[] = 'vendor.bundle.*.js not found in '.$distPath.'/js/';
     }
 
     // Theme JS bundle
     $themeJs = glob($distPath.'/js/ahgThemeB5Plugin.bundle.*.js');
     if (!empty($themeJs)) {
         echo '<script defer src="/dist/js/'.basename($themeJs[0]).'"></script>';
+    } else {
+        $bundleErrors[] = 'ahgThemeB5Plugin.bundle.*.js not found in '.$distPath.'/js/';
     }
 
     // Theme CSS bundle
     $themeCss = glob($distPath.'/css/ahgThemeB5Plugin.bundle.*.css');
     if (!empty($themeCss)) {
         echo '<link href="/dist/css/'.basename($themeCss[0]).'" rel="stylesheet">';
+    } else {
+        $bundleErrors[] = 'ahgThemeB5Plugin.bundle.*.css not found in '.$distPath.'/css/';
+    }
+
+    // Log errors if any bundles are missing
+    if (!empty($bundleErrors)) {
+        error_log('ahgThemeB5Plugin: Bundle loading errors - '.implode('; ', $bundleErrors));
     }
     ?>
     <?php echo get_component_slot('css'); ?>
