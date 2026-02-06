@@ -1,52 +1,102 @@
 <?php
+
 use Illuminate\Database\Capsule\Manager as DB;
 
-class displayAutoDetectTask extends arBaseTask
+class displayAutoDetectTask extends sfBaseTask
 {
     protected function configure()
     {
         $this->addOptions([
             new sfCommandOption('application', null, sfCommandOption::PARAMETER_OPTIONAL, 'Application', 'qubit'),
             new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'Environment', 'cli'),
+            new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
+            new sfCommandOption('force', null, sfCommandOption::PARAMETER_NONE, 'Re-detect all records (overwrite existing types)'),
+            new sfCommandOption('refresh-cache', null, sfCommandOption::PARAMETER_NONE, 'Refresh facet cache after detection'),
         ]);
 
         $this->namespace = 'display';
         $this->name = 'auto-detect';
         $this->briefDescription = 'Auto-detect GLAM types for all information objects';
-        $this->detailedDescription = 'Scans all information objects and auto-detects Archive/Museum/Gallery/Library/DAM type.';
+        $this->detailedDescription = <<<EOF
+The [display:auto-detect|INFO] task scans all information objects and
+auto-detects their GLAM type (Archive, Museum, Gallery, Library, DAM).
+
+ISAD levels (fonds, series, file, item) default to Archive.
+
+Call it with:
+
+  [php symfony display:auto-detect|INFO]
+
+Options:
+  [--force|INFO]          Re-detect all records, overwriting existing types
+  [--refresh-cache|INFO]  Refresh facet cache after detection
+EOF;
     }
 
     protected function execute($arguments = [], $options = [])
     {
-        parent::execute($arguments, $options);
+        $databaseManager = new sfDatabaseManager($this->configuration);
 
-        require_once __DIR__ . '/../lib/Services/DisplayTypeDetector.php';
+        require_once __DIR__ . '/../Services/DisplayTypeDetector.php';
 
-        $this->logSection('display', 'Starting auto-detection...');
+        $force = !empty($options['force']);
+        $startTime = microtime(true);
 
-        // Get all information objects not yet configured
-        $objects = DB::table("information_object")->where("id", ">", 1)->get();
-        
-        $stats = ['archive' => 0, 'museum' => 0, 'gallery' => 0, 'library' => 0, 'dam' => 0, 'universal' => 0];
+        $this->logSection('display', 'Starting GLAM type auto-detection...');
+
+        if ($force) {
+            $this->logSection('display', 'Force mode: re-detecting all records');
+            $query = DB::table('information_object')->where('id', '>', 1);
+        } else {
+            // Only detect records without a type
+            $query = DB::table('information_object as io')
+                ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+                ->whereNull('doc.object_id')
+                ->where('io.id', '>', 1)
+                ->select('io.id', 'io.parent_id', 'io.lft');
+        }
+
+        // Order by lft (nested set left value) to process parents before children
+        $objects = $query->orderBy('lft', 'asc')->get();
+
+        $total = count($objects);
+        if ($total === 0) {
+            $this->logSection('display', 'No records to process. Use --force to re-detect all.');
+
+            return 0;
+        }
+
+        $this->logSection('display', "Processing {$total} records...");
+
+        $stats = [];
         $count = 0;
 
         foreach ($objects as $object) {
-            if ($object->id <= 1) continue;
-            
-            $type = DisplayTypeDetector::detect((int) $object->id);
+            $type = DisplayTypeDetector::detectAndSave((int) $object->id, $force);
             $stats[$type] = ($stats[$type] ?? 0) + 1;
             $count++;
 
-            if ($count % 100 === 0) {
-                $this->logSection('display', "Processed $count objects...");
+            if ($count % 500 === 0) {
+                $pct = round(($count / $total) * 100, 1);
+                $this->logSection('display', "Processed {$count}/{$total} ({$pct}%)...");
             }
         }
 
-        $this->logSection('display', "Complete! Processed $count objects:");
+        $elapsed = round(microtime(true) - $startTime, 2);
+        $this->logSection('display', "Complete! Processed {$count} records in {$elapsed}s:");
         foreach ($stats as $type => $num) {
             if ($num > 0) {
-                $this->logSection('display', "  $type: $num");
+                $this->logSection('display', "  " . ucfirst($type) . ": {$num}");
             }
         }
+
+        // Refresh facet cache if requested
+        if (!empty($options['refresh-cache'])) {
+            $this->logSection('display', 'Refreshing facet cache...');
+            $task = new ahgRefreshFacetCacheTask($this->dispatcher, $this->formatter);
+            $task->run([], ['application' => 'qubit', 'env' => 'prod', 'connection' => 'propel']);
+        }
+
+        return 0;
     }
 }
