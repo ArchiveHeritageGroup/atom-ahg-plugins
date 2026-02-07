@@ -237,6 +237,7 @@ function cco_get_repository($resource): ?object
                 <?php echo __('Edit GRAP data'); ?>
             </a>
                     
+            <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <hr class="dropdown-divider">
             <a class="dropdown-item" href="<?php echo cco_url($resource, 'spectrum', 'index'); ?>">
                 <?php echo __('View Spectrum data'); ?>
@@ -244,7 +245,7 @@ function cco_get_repository($resource): ?object
             <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'barcode', 'slug' => $resource->slug, 'type' => 'label']); ?>">
                 <?php echo __('Generate label'); ?>
             </a>
-          <?php 
+          <?php
           // Check for active loans for this object
           $loanOut = DB::table('spectrum_loan_out')
               ->where('object_id', $resource->id)
@@ -258,6 +259,7 @@ function cco_get_repository($resource): ?object
             <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'procedure_type' => 'acquisition', 'record_id' => $resource->id]); ?>">
                 <?php echo __('Workflow Status'); ?>
             </a>
+            <?php endif; ?>
             
             <!-- Provenance -->
             <a class="dropdown-item" href="<?php echo cco_url($resource, 'cco', 'provenance'); ?>">

@@ -35,11 +35,11 @@ if (isset($resource)) {
   }
   
   // Check which plugins are enabled
-  $hasCco = isPluginActive('ahgCcoPlugin');
+  $hasCco = isPluginActive('ahgProvenancePlugin');
   $hasCondition = isPluginActive('ahgConditionPlugin');
-  $hasSpectrum = isPluginActive('ahgSpectrumPlugin') || isPluginActive('sfMuseumPlugin');
-  $hasGrap = isPluginActive('ahgGrapPlugin');
-  $hasOais = isPluginActive('ahgOaisPlugin');
+  $hasSpectrum = isPluginActive('ahgSpectrumPlugin');
+  $hasGrap = isPluginActive('ahgHeritageAccountingPlugin');
+  $hasOais = isPluginActive('ahgPreservationPlugin');
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
   

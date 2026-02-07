@@ -245,12 +245,24 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
       <h5 class="mb-0"><?php echo __('Collections Management'); ?></h5>
     </div>
     <ul class="list-group list-group-flush">
+      <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
+      <?php endif; ?>
+      <?php if (ahg_is_plugin_enabled('ahgConditionPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
+      <?php endif; ?>
+      <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+      <?php endif; ?>
+      <?php if (ahg_is_plugin_enabled('ahgHeritageAccountingPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('GRAP data'); ?></a></li>
+      <?php endif; ?>
+      <?php if (ahg_is_plugin_enabled('ahgPreservationPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'oais', 'action' => 'createSip', 'slug' => $resource->slug]); ?>"><i class="fas fa-archive me-2"></i><?php echo __('Digital Preservation (OAIS)'); ?></a></li>
+      <?php endif; ?>
+      <?php if (ahg_is_plugin_enabled('ahgResearchPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'cite', 'slug' => $resource->slug]); ?>"><i class="fas fa-quote-left me-2"></i><?php echo __('Cite this Record'); ?></a></li>
+      <?php endif; ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>"><i class="fas fa-th me-2"></i><?php echo __('GLAM browser'); ?></a></li>
     </ul>
   </div>
@@ -732,15 +744,23 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for([$qubitResource, 'sf_route' => 'slug/default', 'module' => 'right', 'action' => 'edit']); ?>"><i class="fas fa-balance-scale me-2"></i><?php echo __('Create new rights'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-copyright me-2"></i><?php echo __('Extended Rights'); ?></a></li>
+            <?php if (ahg_is_plugin_enabled('ahgHeritageAccountingPlugin')): ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('View GRAP data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-edit me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
+            <?php endif; ?>
+            <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-barcode me-2"></i><?php echo __('Generate label'); ?></a></li>
+            <?php endif; ?>
+            <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
+            <?php endif; ?>
+            <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
+            <?php endif; ?>
           </ul>
         </li>
       </ul>

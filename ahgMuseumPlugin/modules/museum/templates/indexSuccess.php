@@ -516,7 +516,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $rawResource
 <?php endif; ?>
 
 <!-- GRAP Financial Section -->
-<?php if (!empty($grapData)) { ?>
+<?php if (!empty($grapData) && ahg_is_plugin_enabled('ahgHeritageAccountingPlugin')) { ?>
 <section id="grapArea" class="border-bottom">
   <?php echo render_b5_section_heading(__('GRAP Financial Compliance'), $headingsCondition, ['module' => 'grap', 'action' => 'edit', 'slug' => $rawResource->slug], ['anchor' => 'grap-collapse']); ?>
   

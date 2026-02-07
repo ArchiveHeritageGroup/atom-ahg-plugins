@@ -35,6 +35,7 @@
     </a>
   </div>
 
+  <?php if (ahg_is_plugin_enabled('ahgLoanPlugin')): ?>
   <div class="card mb-3" style="background-color: #ffc107;">
     <div class="card-body py-2 text-dark text-center">
       <i class="fas fa-exchange-alt"></i> <?php echo __('Licensing'); ?>
@@ -49,6 +50,7 @@
       <i class="fas fa-plus text-success me-2"></i><?php echo __('New Loan Out'); ?>
     </a>
   </div>
+  <?php endif; ?>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>

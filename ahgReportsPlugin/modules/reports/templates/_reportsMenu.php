@@ -37,12 +37,14 @@
                     <a class="dropdown-item" href="/admin/dashboard">
                         <i class="fas fa-tachometer-alt me-2"></i><?php echo __('Central Dashboard'); ?>
                     </a>
+                    <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>">
                         <i class="fas fa-layer-group me-2"></i><?php echo __('Collections Management'); ?>
                     </a>
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'grapDashboard']); ?>">
                         <i class="fas fa-balance-scale me-2"></i><?php echo __('GRAP 103'); ?>
                     </a>
+                    <?php endif; ?>
                     <a class="dropdown-item" href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>">
                         <i class="fas fa-chart-bar me-2"></i><?php echo __('Data Quality'); ?>
                     </a>

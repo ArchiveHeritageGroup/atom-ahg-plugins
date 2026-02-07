@@ -135,3 +135,20 @@ function ahg_resource_url($resource, string $module, string $action): string
     return $slug ? url_for(['module' => $module, 'action' => $action, 'slug' => $slug])
                  : url_for(['module' => $module, 'action' => $action, 'id' => is_object($resource) ? ($resource->id ?? null) : $resource]);
 }
+
+function ahg_is_plugin_enabled(string $pluginName): bool
+{
+    static $cache = [];
+    if (isset($cache[$pluginName])) {
+        return $cache[$pluginName];
+    }
+    try {
+        $cache[$pluginName] = DB::table('atom_plugin')
+            ->where('name', $pluginName)
+            ->where('is_enabled', 1)
+            ->exists();
+    } catch (\Exception $e) {
+        $cache[$pluginName] = false;
+    }
+    return $cache[$pluginName];
+}

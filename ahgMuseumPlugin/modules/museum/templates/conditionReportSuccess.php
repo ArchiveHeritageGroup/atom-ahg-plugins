@@ -82,7 +82,7 @@
 <?php slot('after-content'); ?>
   <section class="actions">
     <ul class="nav gap-2">
-      <?php if ($canEdit): ?>
+      <?php if ($canEdit && ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
         <li><?php echo link_to(__('Add Condition Report'), ['module' => 'spectrum', 'action' => 'conditionReportAdd', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-success']); ?></li>
       <?php endif; ?>
       <li><?php echo link_to(__('Back to record'), ['module' => 'informationobject', 'slug' => $resource->slug], ['class' => 'btn atom-btn-outline-light']); ?></li>
