@@ -337,6 +337,32 @@ class mediaActions extends sfActions
     {
         $this->getResponse()->setContentType('application/json');
 
+        // GET /media/snippets?digital_object_id=X → list snippets
+        if ($request->isMethod('get')) {
+            $doId = (int) $request->getParameter('digital_object_id');
+            if (!$doId) {
+                echo json_encode(['error' => 'digital_object_id required']);
+
+                return sfView::NONE;
+            }
+
+            try {
+                $snippets = DB::table('media_snippets')
+                    ->where('digital_object_id', $doId)
+                    ->orderBy('start_time')
+                    ->get()
+                    ->map(function ($row) {
+                        return (array) $row;
+                    })
+                    ->toArray();
+                echo json_encode(['snippets' => $snippets]);
+            } catch (Exception $e) {
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+
+            return sfView::NONE;
+        }
+
         if (!$request->isMethod('post')) {
             echo json_encode(['error' => 'POST method required']);
             return sfView::NONE;
@@ -403,5 +429,335 @@ class mediaActions extends sfActions
         }
 
         return sfView::NONE;
+    }
+
+    /**
+     * Extract media metadata (AJAX POST)
+     */
+    public function executeExtract(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id');
+        if (!$id) {
+            echo json_encode(['error' => 'Digital object ID required']);
+
+            return sfView::NONE;
+        }
+
+        $digitalObject = QubitDigitalObject::getById($id);
+        if (!$digitalObject) {
+            echo json_encode(['error' => 'Digital object not found']);
+
+            return sfView::NONE;
+        }
+
+        $filePath = $this->getFilePath($digitalObject);
+        if (!$filePath || !file_exists($filePath)) {
+            echo json_encode(['error' => 'Media file not found']);
+
+            return sfView::NONE;
+        }
+
+        // Use ffprobe for metadata extraction
+        $escaped = escapeshellarg($filePath);
+        $cmd = "ffprobe -v quiet -print_format json -show_format -show_streams {$escaped} 2>/dev/null";
+        $output = shell_exec($cmd);
+        $probe = json_decode($output ?: '{}', true);
+
+        if (empty($probe)) {
+            echo json_encode(['error' => 'Could not extract metadata (ffprobe failed)']);
+
+            return sfView::NONE;
+        }
+
+        $format = $probe['format'] ?? [];
+        $streams = $probe['streams'] ?? [];
+
+        $audioStream = null;
+        $videoStream = null;
+        foreach ($streams as $s) {
+            if ($s['codec_type'] === 'audio' && !$audioStream) {
+                $audioStream = $s;
+            }
+            if ($s['codec_type'] === 'video' && !$videoStream) {
+                $videoStream = $s;
+            }
+        }
+
+        $isVideo = ($digitalObject->mediaTypeId == QubitTerm::VIDEO_ID) || strpos($digitalObject->mimeType, 'video') !== false;
+
+        $meta = [
+            'digital_object_id' => $id,
+            'media_type' => $isVideo ? 'video' : 'audio',
+            'format' => pathinfo($digitalObject->name, PATHINFO_EXTENSION),
+            'duration' => (float) ($format['duration'] ?? 0),
+            'file_size' => (int) ($format['size'] ?? filesize($filePath)),
+            'bitrate' => (int) ($format['bit_rate'] ?? 0),
+            'title' => $format['tags']['title'] ?? null,
+            'artist' => $format['tags']['artist'] ?? null,
+            'album' => $format['tags']['album'] ?? null,
+            'genre' => $format['tags']['genre'] ?? null,
+            'year' => $format['tags']['date'] ?? null,
+            'copyright' => $format['tags']['copyright'] ?? null,
+            'audio_codec' => $audioStream['codec_name'] ?? null,
+            'audio_sample_rate' => (int) ($audioStream['sample_rate'] ?? 0),
+            'audio_channels' => (int) ($audioStream['channels'] ?? 0),
+            'audio_bits_per_sample' => (int) ($audioStream['bits_per_raw_sample'] ?? 0),
+            'video_codec' => $videoStream['codec_name'] ?? null,
+            'video_width' => (int) ($videoStream['width'] ?? 0),
+            'video_height' => (int) ($videoStream['height'] ?? 0),
+            'video_frame_rate' => $this->parseFrameRate($videoStream['r_frame_rate'] ?? '0/1'),
+        ];
+
+        try {
+            DB::table('media_metadata')->updateOrInsert(
+                ['digital_object_id' => $id],
+                $meta
+            );
+
+            echo json_encode(['success' => true, 'metadata' => $meta]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Start transcription as background job (AJAX POST)
+     * Returns immediately with status=processing, client polls /media/transcription/:id
+     */
+    public function executeTranscribe(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id');
+        $lang = $request->getParameter('lang', 'en');
+        $model = $request->getParameter('model', 'tiny');
+
+        if (!$id) {
+            echo json_encode(['error' => 'Digital object ID required']);
+
+            return sfView::NONE;
+        }
+
+        $digitalObject = QubitDigitalObject::getById($id);
+        if (!$digitalObject) {
+            echo json_encode(['error' => 'Digital object not found']);
+
+            return sfView::NONE;
+        }
+
+        $filePath = $this->getFilePath($digitalObject);
+        if (!$filePath || !file_exists($filePath)) {
+            echo json_encode(['error' => 'Media file not found']);
+
+            return sfView::NONE;
+        }
+
+        // Check if already processing
+        $lockFile = sys_get_temp_dir() . '/transcribe_' . $id . '.lock';
+        if (file_exists($lockFile) && (time() - filemtime($lockFile)) < 600) {
+            echo json_encode(['success' => true, 'status' => 'processing', 'message' => 'Transcription already in progress']);
+
+            return sfView::NONE;
+        }
+
+        // Create lock file
+        file_put_contents($lockFile, json_encode(['started' => date('Y-m-d H:i:s'), 'pid' => getmypid()]));
+
+        // Build background transcription script
+        $rootDir = sfConfig::get('sf_root_dir');
+        $script = <<<PHP
+<?php
+// Background transcription worker
+define('SF_ROOT_DIR', '{$rootDir}');
+require_once SF_ROOT_DIR . '/config/ProjectConfiguration.class.php';
+\$configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
+sfContext::createInstance(\$configuration);
+
+require_once SF_ROOT_DIR . '/atom-ahg-plugins/ahgIiifPlugin/lib/Extensions/IiifViewer/Services/TranscriptionService.php';
+
+\$service = new \\AtomFramework\\Extensions\\IiifViewer\\Services\\TranscriptionService(['whisper_model' => '{$model}']);
+\$result = \$service->transcribe({$id}, ['language' => '{$lang}', 'force' => true]);
+
+// Remove lock file
+@unlink('{$lockFile}');
+
+// Write result status
+\$statusFile = sys_get_temp_dir() . '/transcribe_{$id}.status';
+file_put_contents(\$statusFile, json_encode([
+    'completed' => date('Y-m-d H:i:s'),
+    'success' => \$result !== null,
+    'segments' => count(\$result['segments'] ?? []),
+]));
+PHP;
+
+        $scriptFile = sys_get_temp_dir() . '/transcribe_' . $id . '.php';
+        file_put_contents($scriptFile, $script);
+
+        // Launch background process
+        $logFile = sfConfig::get('sf_log_dir', '/var/log/atom') . '/transcription-bg.log';
+        $cmd = sprintf('php %s >> %s 2>&1 &', escapeshellarg($scriptFile), escapeshellarg($logFile));
+        exec($cmd);
+
+        echo json_encode([
+            'success' => true,
+            'status' => 'processing',
+            'message' => 'Transcription started in background. The page will update when complete.',
+        ]);
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Get transcription data (AJAX GET) or download in format (vtt/srt/txt)
+     */
+    public function executeTranscription(sfWebRequest $request)
+    {
+        $id = (int) $request->getParameter('id');
+        $format = $request->getParameter('format', 'json');
+
+        if (!$id) {
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['error' => 'Digital object ID required']);
+
+            return sfView::NONE;
+        }
+
+        // Handle DELETE — remove transcription
+        if ($request->isMethod('delete') || $request->isMethod('post') && $request->getParameter('_method') === 'delete') {
+            $this->getResponse()->setContentType('application/json');
+
+            try {
+                DB::table('media_transcription')->where('digital_object_id', $id)->delete();
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+
+            return sfView::NONE;
+        }
+
+        try {
+            $transcription = DB::table('media_transcription')
+                ->where('digital_object_id', $id)
+                ->first();
+
+            if (!$transcription) {
+                $this->getResponse()->setStatusCode(404);
+                $this->getResponse()->setContentType('application/json');
+                echo json_encode(['error' => 'No transcription found']);
+
+                return sfView::NONE;
+            }
+
+            $segments = json_decode($transcription->segments ?? '[]', true);
+            $data = json_decode($transcription->transcription_data ?? '{}', true);
+
+            if ($format === 'json') {
+                $this->getResponse()->setContentType('application/json');
+                echo json_encode([
+                    'full_text' => $transcription->full_text ?? '',
+                    'language' => $transcription->language ?? 'en',
+                    'confidence' => $transcription->confidence ?? null,
+                    'segments' => !empty($data['segments']) ? $data['segments'] : $segments,
+                    'segment_count' => $transcription->segment_count ?? count($segments),
+                    'duration' => $transcription->duration ?? null,
+                ]);
+            } elseif ($format === 'vtt') {
+                $this->getResponse()->setContentType('text/vtt');
+                header('Content-Disposition: attachment; filename="transcription-' . $id . '.vtt"');
+                echo "WEBVTT\n\n";
+                foreach ($segments as $i => $seg) {
+                    echo ($i + 1) . "\n";
+                    echo $this->formatVttTime($seg['start'] ?? 0) . ' --> ' . $this->formatVttTime($seg['end'] ?? 0) . "\n";
+                    echo trim($seg['text'] ?? '') . "\n\n";
+                }
+            } elseif ($format === 'srt') {
+                $this->getResponse()->setContentType('text/srt');
+                header('Content-Disposition: attachment; filename="transcription-' . $id . '.srt"');
+                foreach ($segments as $i => $seg) {
+                    echo ($i + 1) . "\n";
+                    echo $this->formatSrtTime($seg['start'] ?? 0) . ' --> ' . $this->formatSrtTime($seg['end'] ?? 0) . "\n";
+                    echo trim($seg['text'] ?? '') . "\n\n";
+                }
+            } elseif ($format === 'txt') {
+                $this->getResponse()->setContentType('text/plain');
+                header('Content-Disposition: attachment; filename="transcription-' . $id . '.txt"');
+                echo $transcription->full_text ?? '';
+            }
+        } catch (Exception $e) {
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Get media metadata (AJAX GET)
+     */
+    public function executeMetadata(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id');
+        if (!$id) {
+            echo json_encode(['error' => 'Digital object ID required']);
+
+            return sfView::NONE;
+        }
+
+        try {
+            $meta = DB::table('media_metadata')
+                ->where('digital_object_id', $id)
+                ->first();
+
+            if ($meta) {
+                echo json_encode((array) $meta);
+            } else {
+                echo json_encode(['error' => 'No metadata found']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Parse frame rate string (e.g., "24000/1001") to float
+     */
+    protected function parseFrameRate(string $rate): float
+    {
+        if (strpos($rate, '/') !== false) {
+            [$num, $den] = explode('/', $rate);
+
+            return $den > 0 ? round((float) $num / (float) $den, 2) : 0;
+        }
+
+        return (float) $rate;
+    }
+
+    protected function formatVttTime(float $seconds): string
+    {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        $s = floor($seconds % 60);
+        $ms = round(($seconds - floor($seconds)) * 1000);
+
+        return sprintf('%02d:%02d:%02d.%03d', $h, $m, $s, $ms);
+    }
+
+    protected function formatSrtTime(float $seconds): string
+    {
+        $h = floor($seconds / 3600);
+        $m = floor(($seconds % 3600) / 60);
+        $s = floor($seconds % 60);
+        $ms = round(($seconds - floor($seconds)) * 1000);
+
+        return sprintf('%02d:%02d:%02d,%03d', $h, $m, $s, $ms);
     }
 }

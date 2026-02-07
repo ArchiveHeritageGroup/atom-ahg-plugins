@@ -335,6 +335,42 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
             ['module' => 'media', 'action' => 'saveSnippet']
         ));
 
+        $routing->prependRoute('media_snippets_delete', new sfRoute(
+            '/media/snippets/:id/delete',
+            ['module' => 'media', 'action' => 'deleteSnippet'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_extract', new sfRoute(
+            '/media/extract/:id',
+            ['module' => 'media', 'action' => 'extract'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_transcribe', new sfRoute(
+            '/media/transcribe/:id',
+            ['module' => 'media', 'action' => 'transcribe'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_transcription', new sfRoute(
+            '/media/transcription/:id',
+            ['module' => 'media', 'action' => 'transcription'],
+            ['id' => '\d+']
+        ));
+
+        $routing->prependRoute('media_transcription_format', new sfRoute(
+            '/media/transcription/:id/:format',
+            ['module' => 'media', 'action' => 'transcription', 'format' => 'json'],
+            ['id' => '\d+', 'format' => '(json|vtt|srt|txt)']
+        ));
+
+        $routing->prependRoute('media_metadata', new sfRoute(
+            '/media/metadata/:id',
+            ['module' => 'media', 'action' => 'metadata'],
+            ['id' => '\d+']
+        ));
+
         // ===================
         // MEDIA SETTINGS ROUTES
         // ===================
