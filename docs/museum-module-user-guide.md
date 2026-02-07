@@ -698,11 +698,24 @@ php symfony museum:exhibition --install-schema
 
 ---
 
+## Optional Features
+
+Some menu items and sections only appear when the corresponding plugins are enabled. If you don't see a feature listed below, ask your administrator to enable the plugin.
+
+| Feature | Requires Plugin |
+|---------|----------------|
+| SPECTRUM Procedures | ahgSpectrumPlugin |
+| Condition Reports (Add link) | ahgSpectrumPlugin |
+| Heritage Accounting (GRAP) section | ahgHeritageAccountingPlugin |
+| Provenance (CCO) | ahgProvenancePlugin |
+
+---
+
 ## Need Help?
 
 Contact your system administrator or collections manager if you need assistance.
 
 ---
 
-*Part of the AtoM AHG Framework - Museum Module v1.1*
-*Last updated: January 2026*
+*Part of the AtoM AHG Framework - Museum Module v1.2*
+*Last updated: February 2026*

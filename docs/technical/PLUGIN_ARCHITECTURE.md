@@ -1,7 +1,7 @@
 # AtoM AHG Plugin Architecture
 
-**Version:** 2.1.17
-**Last Updated:** January 2026
+**Version:** 2.1.18
+**Last Updated:** February 2026
 
 ---
 
@@ -328,9 +328,115 @@ plugin-name/
 
 ---
 
-## 6. CI Architecture Checks
+## 6. Cross-Plugin Link Guards
+
+### 6.1 The Problem
+
+Sector plugins (Gallery, Museum, DAM) and shared menus (theme, reports) contain links to features provided by optional capability plugins (Spectrum, Provenance, GRAP, etc.). When those plugins are disabled, the links become broken (404 errors or blank pages).
+
+### 6.2 The `ahg_is_plugin_enabled()` Helper
+
+A cached helper function checks whether a plugin is enabled at runtime:
+
+```php
+// Located in: ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php
+
+function ahg_is_plugin_enabled(string $pluginName): bool
+{
+    static $cache = [];
+    if (isset($cache[$pluginName])) {
+        return $cache[$pluginName];
+    }
+    try {
+        $cache[$pluginName] = DB::table('atom_plugin')
+            ->where('name', $pluginName)
+            ->where('is_enabled', 1)
+            ->exists();
+    } catch (\Exception $e) {
+        $cache[$pluginName] = false;
+    }
+    return $cache[$pluginName];
+}
+```
+
+**Performance:** Uses a static cache. Each plugin name is queried only once per request.
+
+### 6.3 Template Usage Pattern
+
+Every template that uses `ahg_is_plugin_enabled()` must include the helper:
+
+```php
+<?php require_once sfConfig::get('sf_plugins_dir')
+    . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php'; ?>
+```
+
+Then wrap optional plugin links:
+
+```php
+<?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
+    <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index']); ?>">
+        SPECTRUM Procedures
+    </a>
+<?php endif; ?>
+```
+
+### 6.4 Plugin Name Reference
+
+Templates use module names for routing but plugin names for enable checks:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         MODULE → PLUGIN MAPPING                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  Module Name     │ Plugin Name               │ Check Expression                 │
+│  ─────────────────┼───────────────────────────┼──────────────────────────────── │
+│  spectrum        │ ahgSpectrumPlugin          │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgSpectrumPlugin')           │
+│  cco             │ ahgProvenancePlugin        │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgProvenancePlugin')         │
+│  grap            │ ahgHeritageAccountingPlugin│ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgHeritageAccountingPlugin') │
+│  oais            │ ahgPreservationPlugin      │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgPreservationPlugin')       │
+│  condition       │ ahgConditionPlugin         │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgConditionPlugin')          │
+│  loan            │ ahgLoanPlugin              │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgLoanPlugin')               │
+│  research        │ ahgResearchPlugin          │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahgResearchPlugin')           │
+│  3dmodel         │ ahg3DModelPlugin           │ ahg_is_plugin_enabled(           │
+│                  │                            │   'ahg3DModelPlugin')            │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.5 Guarded Templates
+
+| Plugin | Templates with Guards |
+|--------|----------------------|
+| ahgGalleryPlugin | `gallery/templates/indexSuccess.php` (sidebar + admin dropdown) |
+| ahgMuseumPlugin | `museum/templates/indexSuccess.php`, `museum/templates/conditionReportSuccess.php`, `cco/templates/conditionReportSuccess.php`, `cco/templates/_actions.php` |
+| ahgDAMPlugin | `dam/templates/dashboardSuccess.php` |
+| ahgThemeB5Plugin | `templates/_glamDamMenu.php` |
+| ahgReportsPlugin | `reports/templates/_reportsMenu.php` |
+
+### 6.6 Rules for Developers
+
+1. **Always guard cross-plugin links** - If a template links to a module owned by another optional plugin, wrap the link with `ahg_is_plugin_enabled()`.
+2. **Use the correct plugin name** - Module names differ from plugin names (see mapping above).
+3. **Include the helper** - Every template using the function must `require_once` the AhgLaravelHelper.
+4. **Never guard links to core/infrastructure plugins** - ahgDisplayPlugin, ahgThemeB5Plugin, ahgSettingsPlugin, and ahgSecurityClearancePlugin are always enabled.
+
+---
+
+## 7. CI Architecture Checks
 
 The `bin/check-architecture.sh` script enforces:
+
+| Check | Rule | Severity |
+|-------|------|----------|
+| Cross-Plugin Guards | Links to optional plugins use `ahg_is_plugin_enabled()` | WARNING |
 
 | Check | Rule | Severity |
 |-------|------|----------|
@@ -344,4 +450,4 @@ The `bin/check-architecture.sh` script enforces:
 
 ---
 
-*Part of the AtoM AHG Framework - v2.1.17*
+*Part of the AtoM AHG Framework - v2.1.18*

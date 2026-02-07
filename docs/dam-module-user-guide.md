@@ -530,6 +530,16 @@ The DAM module integrates with the Loan plugin for managing loans:
 
 ---
 
+## Optional Features
+
+Some dashboard sections only appear when the corresponding plugins are enabled. If you don't see a feature listed below, ask your administrator to enable the plugin.
+
+| Feature | Requires Plugin |
+|---------|----------------|
+| Loan Management (Manage Loans, New Loan Out) | ahgLoanPlugin |
+
+---
+
 ## Need Help?
 
 Contact your system administrator or digital archivist if you need assistance.
@@ -537,4 +547,4 @@ Contact your system administrator or digital archivist if you need assistance.
 ---
 
 *Part of the AtoM AHG Framework*
-*Last Updated: 2026-01-20*
+*Last Updated: 2026-02-07*

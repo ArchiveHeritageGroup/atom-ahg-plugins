@@ -383,6 +383,21 @@ Link to related artworks:
 
 ---
 
+## Optional Features
+
+Some sidebar and admin menu items only appear when the corresponding plugins are enabled on your system. If you don't see a feature listed below, ask your administrator to enable the plugin.
+
+| Feature | Requires Plugin |
+|---------|----------------|
+| Provenance (CCO) | ahgProvenancePlugin |
+| Condition Assessment | ahgConditionPlugin |
+| SPECTRUM Procedures | ahgSpectrumPlugin |
+| Heritage Accounting (GRAP) | ahgHeritageAccountingPlugin |
+| Digital Preservation (OAIS) | ahgPreservationPlugin |
+| Research Requests | ahgResearchPlugin |
+
+---
+
 ## Need Help?
 
 Contact your system administrator or curator if you need assistance.
@@ -390,3 +405,4 @@ Contact your system administrator or curator if you need assistance.
 ---
 
 *Part of the AtoM AHG Framework*
+*Last Updated: February 2026*

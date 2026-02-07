@@ -289,6 +289,17 @@ Charts not displaying         →  Refresh the page
 
 ---
 
+## Optional Features
+
+Some menu items only appear when the corresponding plugins are enabled. If you don't see a feature listed below, ask your administrator to enable the plugin.
+
+| Feature | Requires Plugin |
+|---------|----------------|
+| Collections Management Dashboard | ahgSpectrumPlugin |
+| GRAP 103 Dashboard | ahgSpectrumPlugin |
+
+---
+
 ## Need Help?
 
 Contact your system administrator if you experience issues.
@@ -296,3 +307,4 @@ Contact your system administrator if you experience issues.
 ---
 
 *Part of the AtoM AHG Framework*
+*Last Updated: February 2026*
