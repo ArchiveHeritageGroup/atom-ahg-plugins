@@ -51,8 +51,8 @@
           $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
         ?>
         <?php if ($isVideo || $isAudio): ?>
-          <!-- Video/Audio player with transcription support -->
-          <?php include_partial('digitalobject/showVideo', ['resource' => $digitalObject]); ?>
+          <!-- Enhanced Video/Audio player -->
+          <?php include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]); ?>
         <?php elseif (strpos($mimeType, 'image') !== false && $displayPath): ?>
           <a href="<?php echo $masterPath; ?>" target="_blank">
             <img src="<?php echo $displayPath; ?>" alt="<?php echo esc_entities($resource->title ?? $resource->slug); ?>" class="img-fluid rounded shadow-sm" style="max-height: 400px;">

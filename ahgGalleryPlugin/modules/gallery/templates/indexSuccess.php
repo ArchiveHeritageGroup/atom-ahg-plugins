@@ -185,10 +185,10 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
         <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Digital object'); ?></h5>
       </div>
       <div class="card-body">
-        <table class="table table-sm mb-3">
+        <table class="table table-sm mb-3" style="table-layout:fixed;width:100%;">
           <tr>
-            <td class="text-muted"><?php echo __('Filename'); ?></td>
-            <td><?php echo esc_entities($digitalObject->name); ?></td>
+            <td class="text-muted" style="width:100px;"><?php echo __('Filename'); ?></td>
+            <td class="text-break"><?php echo esc_entities($digitalObject->name); ?></td>
           </tr>
           <tr>
             <td class="text-muted"><?php echo __('Media type'); ?></td>

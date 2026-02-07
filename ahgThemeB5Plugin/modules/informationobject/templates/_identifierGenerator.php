@@ -42,15 +42,27 @@ echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
   var useBtn = document.getElementById('use-generated-btn');
   var generatedId = document.getElementById('generated-identifier');
 
+  // Find the identifier input field
+  var input = document.querySelector('input[name="<?php echo $fieldName; ?>"]') ||
+              document.getElementById('<?php echo $fieldName; ?>') ||
+              document.querySelector('[name="identifier"]');
+
+  // Auto-fill for new records
+  <?php if ($isNew): ?>
+  if (input && !input.value && generatedId) {
+    input.value = generatedId.textContent.trim();
+    if (useBtn) {
+      useBtn.innerHTML = '<i class="fas fa-check me-1"></i><?php echo __('Applied'); ?>';
+      useBtn.classList.remove('btn-outline-primary');
+      useBtn.classList.add('btn-success');
+    }
+  }
+  <?php endif; ?>
+
   if (useBtn && generatedId) {
     useBtn.addEventListener('click', function() {
-      // Find the identifier input field
-      var input = document.querySelector('input[name="<?php echo $fieldName; ?>"]') ||
-                  document.getElementById('<?php echo $fieldName; ?>') ||
-                  document.querySelector('[name="identifier"]');
-
       if (input) {
-        input.value = generatedId.textContent;
+        input.value = generatedId.textContent.trim();
         input.focus();
 
         // Visual feedback

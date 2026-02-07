@@ -38,24 +38,23 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
 
         if ($isVideo || $isAudio) {
-            // Use MediaHelper's enhanced player directly
-            if (function_exists('render_enhanced_media_player')) {
-                $digitalObjectData = [
+            // Use AhgMediaPlayer JS player when ahgIiifPlugin is enabled
+            if (function_exists('render_media_player')) {
+                return render_media_player([
                     'id' => $digitalObject->id,
                     'name' => $digitalObject->name,
                     'path' => $digitalObject->path,
                     'mimeType' => $digitalObject->mimeType,
                     'mediaTypeId' => $digitalObject->mediaTypeId ?? null,
                     'object_id' => $digitalObject->objectId ?? 0,
-                ];
-                return render_enhanced_media_player($digitalObjectData, ['type' => $isVideo ? 'video' : 'audio']);
+                ]);
             }
-            // Fallback to simple HTML5 player
+            // Fallback to native HTML5 player (no ahgIiifPlugin)
             $url = get_digital_object_url($digitalObject);
             if ($isAudio) {
-                return '<audio controls class="w-100"><source src="' . $url . '" type="' . $mimeType . '">Your browser does not support audio.</audio>';
+                return '<audio controls class="w-100"><source src="' . htmlspecialchars($url) . '" type="' . htmlspecialchars($mimeType) . '">Your browser does not support audio.</audio>';
             }
-            return '<video controls class="w-100" style="max-height:500px"><source src="' . $url . '" type="' . $mimeType . '">Your browser does not support video.</video>';
+            return '<video controls class="w-100" style="max-height:500px;"><source src="' . htmlspecialchars($url) . '" type="' . htmlspecialchars($mimeType) . '">Your browser does not support video.</video>';
         }
     }
 

@@ -52,7 +52,8 @@ class ahgGalleryPluginConfiguration extends sfPluginConfiguration
         ));
         $routing->prependRoute('gallery_view_loan', new sfRoute(
             '/gallery/loans/:id',
-            ['module' => 'gallery', 'action' => 'viewLoan']
+            ['module' => 'gallery', 'action' => 'viewLoan'],
+            ['id' => '\d+']
         ));
         $routing->prependRoute('gallery_facility_report', new sfRoute(
             '/gallery/loans/:loan_id/facility-report',
@@ -80,7 +81,8 @@ class ahgGalleryPluginConfiguration extends sfPluginConfiguration
         ));
         $routing->prependRoute('gallery_view_artist', new sfRoute(
             '/gallery/artists/:id',
-            ['module' => 'gallery', 'action' => 'viewArtist']
+            ['module' => 'gallery', 'action' => 'viewArtist'],
+            ['id' => '\d+']
         ));
 
         // Venues
@@ -94,7 +96,8 @@ class ahgGalleryPluginConfiguration extends sfPluginConfiguration
         ));
         $routing->prependRoute('gallery_view_venue', new sfRoute(
             '/gallery/venues/:id',
-            ['module' => 'gallery', 'action' => 'viewVenue']
+            ['module' => 'gallery', 'action' => 'viewVenue'],
+            ['id' => '\d+']
         ));
     }
 }
