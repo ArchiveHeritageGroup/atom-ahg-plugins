@@ -36,6 +36,12 @@ $levels = $sf_data->getRaw('levels') ?: [];
 $mediaTypes = $sf_data->getRaw('mediaTypes') ?: [];
 $repositories = $sf_data->getRaw('repositories') ?: [];
 
+// Fuzzy search data from action
+$didYouMean = $sf_data->getRaw('didYouMean');
+$correctedQuery = $sf_data->getRaw('correctedQuery');
+$originalQuery = $sf_data->getRaw('originalQuery');
+$esAssistedSearch = $sf_data->getRaw('esAssistedSearch');
+
 // Build filter params for URLs
 $fp = [
     'type' => $typeFilter,
@@ -426,6 +432,40 @@ function getItemUrl($obj) {
       </a>
     <?php endif ?>
   </div>
+
+  <?php // Fuzzy search alerts ?>
+  <?php if ($correctedQuery && $originalQuery !== $correctedQuery): ?>
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+      <i class="fas fa-spell-check me-2"></i>
+      <div>
+        <?php echo __('Showing results for'); ?> <strong><?php echo esc_entities($correctedQuery); ?></strong>.
+        <a href="<?php echo buildUrl($fp, ['query' => $originalQuery, 'noCorrect' => 1]); ?>" class="alert-link ms-1">
+          <?php echo __('Search instead for'); ?> <em><?php echo esc_entities($originalQuery); ?></em>
+        </a>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($didYouMean): ?>
+    <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+      <i class="fas fa-lightbulb me-2"></i>
+      <div>
+        <?php echo __('Did you mean:'); ?>
+        <a href="<?php echo buildUrl($fp, ['query' => $didYouMean]); ?>" class="alert-link fw-bold">
+          <?php echo esc_entities($didYouMean); ?>
+        </a>?
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($esAssistedSearch): ?>
+    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+      <i class="fas fa-search me-2"></i>
+      <div>
+        <?php echo __('Showing fuzzy matches from search index. Results may be approximate.'); ?>
+      </div>
+    </div>
+  <?php endif; ?>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>

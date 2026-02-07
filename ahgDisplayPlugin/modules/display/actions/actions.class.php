@@ -13,6 +13,7 @@ class displayActions extends sfActions
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayModeService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/FuzzySearchService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/DisplayPreferenceRepository.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/GlobalDisplaySettingsRepository.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/UserBrowseSettingsRepository.php';
@@ -74,6 +75,32 @@ class displayActions extends sfActions
         $this->queryFilter = $request->getParameter("query");
         $this->semanticEnabled = $request->getParameter("semantic") == "1";
 
+        // Fuzzy search correction
+        $this->didYouMean = null;
+        $this->correctedQuery = null;
+        $this->originalQuery = $this->queryFilter;
+        $this->esAssistedSearch = false;
+
+        $noCorrect = $request->getParameter('noCorrect');
+        if ($this->queryFilter && !$noCorrect) {
+            try {
+                $fuzzyService = new \AhgDisplay\Services\FuzzySearchService();
+                $correction = $fuzzyService->correctQuery($this->queryFilter);
+                if ($correction['corrected'] !== null) {
+                    if ($correction['confidence'] >= 0.9) {
+                        // High confidence: auto-correct
+                        $this->correctedQuery = $correction['corrected'];
+                        $this->queryFilter = $correction['corrected'];
+                    } else {
+                        // Lower confidence: suggest only
+                        $this->didYouMean = $correction['corrected'];
+                    }
+                }
+            } catch (\Exception $e) {
+                error_log('FuzzySearch: ' . $e->getMessage());
+            }
+        }
+
         // Expand query with synonyms if semantic search is enabled
         // Store as array for OR-based search
         if ($this->queryFilter && $this->semanticEnabled) {
@@ -92,17 +119,17 @@ class displayActions extends sfActions
         $this->genreSearchFilter = $request->getParameter("genreSearch");
         $this->repoFilter = $request->getParameter('repo');
 
-        // Load facets from pre-computed cache for ALL users (performance optimization)
-        // Note: Facet counts show published items only. Authenticated users can still
-        // search/view unpublished items, but facet counts come from cache.
-        $this->types = $this->getCachedFacet('glam_type', 'object_type');
-        $this->levels = $this->getCachedFacet('level');
-        $this->repositories = $this->getCachedFacet('repository');
-        $this->creators = $this->getCachedFacet('creator');
-        $this->subjects = $this->getCachedFacet('subject');
-        $this->places = $this->getCachedFacet('place');
-        $this->genres = $this->getCachedFacet('genre');
-        $this->mediaTypes = $this->getCachedFacet('media_type', 'media_type');
+        // Load facets from pre-computed cache
+        // Guest users see published-only counts; authenticated users see all-records counts
+        $sfx = $this->isAuthenticated ? '_all' : '';
+        $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
+        $this->levels = $this->getCachedFacet('level' . $sfx);
+        $this->repositories = $this->getCachedFacet('repository' . $sfx);
+        $this->creators = $this->getCachedFacet('creator' . $sfx);
+        $this->subjects = $this->getCachedFacet('subject' . $sfx);
+        $this->places = $this->getCachedFacet('place' . $sfx);
+        $this->genres = $this->getCachedFacet('genre' . $sfx);
+        $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
 
         // Build count query
         $countQuery = DB::table('information_object as io')
@@ -113,6 +140,22 @@ class displayActions extends sfActions
         $this->applyFilters($countQuery);
 
         $this->total = $countQuery->count();
+
+        // ES fuzzy fallback: when SQL search yields 0 results, try Elasticsearch
+        $this->esIds = null;
+        if ($this->total === 0 && $this->queryFilter) {
+            try {
+                $esIds = $this->tryElasticsearchFuzzy($this->queryFilter);
+                if (!empty($esIds)) {
+                    $this->esIds = $esIds;
+                    $this->esAssistedSearch = true;
+                    $this->total = count($esIds);
+                }
+            } catch (\Exception $e) {
+                error_log('FuzzySearch ES fallback: ' . $e->getMessage());
+            }
+        }
+
         $this->totalPages = (int) ceil($this->total / $this->limit);
 
         // Build main query
@@ -134,7 +177,12 @@ class displayActions extends sfActions
             );
 
         // Apply all filters to main query
-        $this->applyFilters($query);
+        if ($this->esIds) {
+            // ES fallback: override filters with ES-matched IDs
+            $query->whereIn('io.id', $this->esIds);
+        } else {
+            $this->applyFilters($query);
+        }
 
         // Handle parent/breadcrumb
         if ($this->parentId) {
@@ -782,46 +830,183 @@ class displayActions extends sfActions
     }
 
     /**
-     * Apply text search filter with proper OR logic for semantic search
+     * Apply text search filter with FULLTEXT (if available) or LIKE fallback.
+     * Supports both single-term and semantic (multi-term OR) search.
      *
      * @param \Illuminate\Database\Query\Builder $query
      * @param array|string $searchTerms Search terms (array for semantic, string for normal)
      */
     protected function applyTextSearchFilter($query, $searchTerms): void
     {
+        $useFulltext = $this->isFulltextAvailable();
+
         if (is_array($searchTerms)) {
             // Semantic search: OR between all terms
-            $query->where(function($qb) use ($searchTerms) {
+            $query->where(function($qb) use ($searchTerms, $useFulltext) {
                 foreach ($searchTerms as $term) {
                     $q = "%" . $term . "%";
-                    $qb->orWhere(function($inner) use ($q) {
-                        $inner->whereExists(function($sub) use ($q) {
-                            $sub->select(DB::raw(1))
-                                ->from("information_object_i18n as ioi")
-                                ->whereRaw("ioi.id = io.id")
-                                ->where(function($w) use ($q) {
-                                    $w->where("ioi.title", "like", $q)
-                                      ->orWhere("ioi.scope_and_content", "like", $q);
-                                });
-                        })->orWhere("io.identifier", "like", $q);
+                    $qb->orWhere(function($inner) use ($q, $term, $useFulltext) {
+                        if ($useFulltext) {
+                            $inner->whereExists(function($sub) use ($term, $q) {
+                                $sub->select(DB::raw(1))
+                                    ->from("information_object_i18n as ioi")
+                                    ->whereRaw("ioi.id = io.id")
+                                    ->where(function($w) use ($term, $q) {
+                                        $w->whereRaw("MATCH(ioi.title) AGAINST(? IN NATURAL LANGUAGE MODE)", [$term])
+                                          ->orWhereRaw("MATCH(ioi.scope_and_content) AGAINST(? IN NATURAL LANGUAGE MODE)", [$term])
+                                          ->orWhere("ioi.title", "like", $q)
+                                          ->orWhere("ioi.scope_and_content", "like", $q);
+                                    });
+                            })->orWhere("io.identifier", "like", $q);
+                        } else {
+                            $inner->whereExists(function($sub) use ($q) {
+                                $sub->select(DB::raw(1))
+                                    ->from("information_object_i18n as ioi")
+                                    ->whereRaw("ioi.id = io.id")
+                                    ->where(function($w) use ($q) {
+                                        $w->where("ioi.title", "like", $q)
+                                          ->orWhere("ioi.scope_and_content", "like", $q);
+                                    });
+                            })->orWhere("io.identifier", "like", $q);
+                        }
                     });
                 }
             });
         } else {
             // Normal search: single term
             $q = "%" . $searchTerms . "%";
-            $query->where(function($qb) use ($q) {
-                $qb->whereExists(function($sub) use ($q) {
-                    $sub->select(DB::raw(1))
-                        ->from("information_object_i18n as ioi")
-                        ->whereRaw("ioi.id = io.id")
-                        ->where(function($w) use ($q) {
-                            $w->where("ioi.title", "like", $q)
-                              ->orWhere("ioi.scope_and_content", "like", $q);
-                        });
-                })->orWhere("io.identifier", "like", $q);
-            });
+            if ($useFulltext) {
+                $query->where(function($qb) use ($q, $searchTerms) {
+                    $qb->whereExists(function($sub) use ($searchTerms, $q) {
+                        $sub->select(DB::raw(1))
+                            ->from("information_object_i18n as ioi")
+                            ->whereRaw("ioi.id = io.id")
+                            ->where(function($w) use ($searchTerms, $q) {
+                                $w->whereRaw("MATCH(ioi.title) AGAINST(? IN NATURAL LANGUAGE MODE)", [$searchTerms])
+                                  ->orWhereRaw("MATCH(ioi.scope_and_content) AGAINST(? IN NATURAL LANGUAGE MODE)", [$searchTerms])
+                                  ->orWhere("ioi.title", "like", $q)
+                                  ->orWhere("ioi.scope_and_content", "like", $q);
+                            });
+                    })->orWhere("io.identifier", "like", $q);
+                });
+            } else {
+                $query->where(function($qb) use ($q) {
+                    $qb->whereExists(function($sub) use ($q) {
+                        $sub->select(DB::raw(1))
+                            ->from("information_object_i18n as ioi")
+                            ->whereRaw("ioi.id = io.id")
+                            ->where(function($w) use ($q) {
+                                $w->where("ioi.title", "like", $q)
+                                  ->orWhere("ioi.scope_and_content", "like", $q);
+                            });
+                    })->orWhere("io.identifier", "like", $q);
+                });
+            }
         }
+    }
+
+    /**
+     * Check if FULLTEXT indexes are available on information_object_i18n.
+     * Cached per request (static property).
+     */
+    protected static $fulltextAvailable = null;
+
+    protected function isFulltextAvailable(): bool
+    {
+        if (self::$fulltextAvailable !== null) {
+            return self::$fulltextAvailable;
+        }
+
+        try {
+            $result = DB::select("SHOW INDEX FROM information_object_i18n WHERE Key_name = 'ft_ioi_title'");
+            self::$fulltextAvailable = !empty($result);
+        } catch (\Exception $e) {
+            self::$fulltextAvailable = false;
+        }
+
+        return self::$fulltextAvailable;
+    }
+
+    /**
+     * Try Elasticsearch/OpenSearch fuzzy search as last-resort fallback.
+     * Returns matching information_object IDs or empty array.
+     *
+     * @param string $query Search query
+     * @return array Array of matching IDs (max 200)
+     */
+    protected function tryElasticsearchFuzzy(string $query): array
+    {
+        // Guard: ES must be available
+        if (!class_exists('SearchEngineFactory') || !SearchEngineFactory::isAvailable()) {
+            return [];
+        }
+
+        // Determine index name from sfConfig or default pattern
+        $indexName = sfConfig::get('app_opensearch_index_name', '');
+        if (empty($indexName)) {
+            // Convention: {database}_qubitinformationobject
+            try {
+                $dbName = DB::connection()->getDatabaseName();
+                $indexName = $dbName . '_qubitinformationobject';
+            } catch (\Exception $e) {
+                $indexName = 'atom_qubitinformationobject';
+            }
+        }
+
+        // Build multi_match fuzzy query via direct curl (avoids client dependencies)
+        $esHost = sfConfig::get('app_opensearch_host', 'localhost');
+        $esPort = (int) sfConfig::get('app_opensearch_port', 9200);
+
+        $body = [
+            'size' => 200,
+            '_source' => false,
+            'query' => [
+                'multi_match' => [
+                    'query' => $query,
+                    'fields' => [
+                        'i18n.en.title^3',
+                        'i18n.en.scopeAndContent',
+                        'creators.i18n.en.authorizedFormOfName^2',
+                        'i18n.en.alternateTitle^2',
+                    ],
+                    'fuzziness' => 'AUTO',
+                    'prefix_length' => 1,
+                    'max_expansions' => 50,
+                ],
+            ],
+        ];
+
+        $url = sprintf('http://%s:%d/%s/_search', $esHost, $esPort, $indexName);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($body),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response === false || $httpCode !== 200) {
+            return [];
+        }
+
+        $data = json_decode($response, true);
+        if (!isset($data['hits']['hits'])) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($data['hits']['hits'] as $hit) {
+            $ids[] = (int) $hit['_id'];
+        }
+
+        return $ids;
     }
 
     /**
@@ -845,9 +1030,9 @@ class displayActions extends sfActions
     }
 
     /**
-     * Get cached facet data for guest users.
+     * Get cached facet data.
      *
-     * @param string $facetType The facet type (subject, place, genre, level, repository, creator, glam_type, media_type)
+     * @param string $facetType The facet type, e.g. 'subject', 'subject_all', 'glam_type', 'glam_type_all'
      * @param string|null $nameField Override for the name field in returned objects (default: 'name')
      * @return array Array of facet objects with id, name, and count
      */
@@ -863,12 +1048,13 @@ class displayActions extends sfActions
             return [];
         }
 
-        // Convert to array format matching live query results
+        // Strip _all suffix to determine base type for field mapping
+        $baseType = str_replace('_all', '', $facetType);
         $nameField = $nameField ?? 'name';
-        return $results->map(function($row) use ($nameField, $facetType) {
+        return $results->map(function($row) use ($nameField, $baseType) {
             $obj = new \stdClass();
-            // For glam_type and media_type, use term_name as the primary field
-            if (in_array($facetType, ['glam_type', 'media_type'])) {
+            // For glam_type and media_type, use term_name as the primary field (no id)
+            if (in_array($baseType, ['glam_type', 'media_type'])) {
                 $obj->$nameField = $row->term_name;
             } else {
                 $obj->id = $row->term_id;
