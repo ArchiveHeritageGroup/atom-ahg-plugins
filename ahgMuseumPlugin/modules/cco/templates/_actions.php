@@ -6,6 +6,8 @@
  * @subpackage templates
  */
 
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
+
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**

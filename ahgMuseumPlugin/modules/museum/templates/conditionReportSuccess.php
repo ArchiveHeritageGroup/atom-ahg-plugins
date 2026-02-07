@@ -1,3 +1,6 @@
+<?php
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
+?>
 <?php decorate_with('layout_1col.php'); ?>
 
 <?php slot('title'); ?>

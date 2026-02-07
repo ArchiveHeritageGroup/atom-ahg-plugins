@@ -3,6 +3,7 @@
  * GLAM/DAM Menu - Galleries, Libraries, Archives, Museums & Digital Asset Management
  * Provides access to sector-specific tools and features
  */
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
 $isAuthenticated = $sf_user->isAuthenticated();
 $isAdmin = $sf_user->isAdministrator();
 ?>

@@ -2,6 +2,7 @@
 <?php
 // Load viewer helper from ahgUiOverridesPlugin
 require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
+require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
 // Get raw resource for embargo checks
 $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource) : (isset($resource) ? sfOutputEscaper::unescape($resource) : null);
 ?>
