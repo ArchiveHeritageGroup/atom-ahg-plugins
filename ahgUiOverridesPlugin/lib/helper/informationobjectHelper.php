@@ -111,7 +111,20 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         }
     }
 
-    // Use render_iiif_viewer from IiifViewerHelper for images
+    // For image formats not supported by Cantaloupe, render as simple <img>
+    if (is_object($digitalObject)) {
+        $imgExt = strtolower(pathinfo($digitalObject->name ?? '', PATHINFO_EXTENSION));
+        if (in_array($imgExt, ['webp', 'bmp', 'gif'])) {
+            $imgUrl = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
+            $html = '<div class="text-center">';
+            $html .= '<img src="' . htmlspecialchars($imgUrl) . '" alt="" class="img-fluid" style="max-height:600px;">';
+            $html .= '</div>';
+
+            return $html;
+        }
+    }
+
+    // Use render_iiif_viewer from IiifViewerHelper for images (JPG, PNG, TIFF, etc.)
     if (function_exists('render_iiif_viewer') && is_object($resource)) {
         return render_iiif_viewer($resource, $options);
     }
