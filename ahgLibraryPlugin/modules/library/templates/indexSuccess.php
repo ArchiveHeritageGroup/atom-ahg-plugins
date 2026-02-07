@@ -359,8 +359,9 @@ $rawResource = sfOutputEscaper::unescape($resource);
         <div class="card-body text-center">
           <?php
             // Use unified viewer dispatch for all format support
+            // Pass $rawResource (unescaped) so render_iiif_viewer can access digitalObjectsRelatedByobjectId
             if (function_exists('render_digital_object_viewer')) {
-                echo render_digital_object_viewer($resource, $digitalObject);
+                echo render_digital_object_viewer($rawResource, $digitalObject);
             } else {
                 // Fallback: basic rendering
                 $mimeType = $digitalObject->mimeType ?? '';
