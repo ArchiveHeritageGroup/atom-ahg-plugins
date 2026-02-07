@@ -3,13 +3,13 @@
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Refresh the display facet cache for guest users.
+ * Refresh the display facet cache.
  *
- * This task pre-computes facet counts for published items only,
- * storing results in display_facet_cache table for fast retrieval.
+ * Stores two sets of counts:
+ * - Published only (facet_type = 'subject', 'place', etc.) for guest users
+ * - All records (facet_type = 'subject_all', 'place_all', etc.) for authenticated users
  *
  * Run via: php symfony ahg:refresh-facet-cache
- * Schedule via cron: 0 * * * * cd /usr/share/nginx/archive && php symfony ahg:refresh-facet-cache --env=prod
  */
 class ahgRefreshFacetCacheTask extends sfBaseTask
 {
@@ -23,16 +23,14 @@ class ahgRefreshFacetCacheTask extends sfBaseTask
 
         $this->namespace = 'ahg';
         $this->name = 'refresh-facet-cache';
-        $this->briefDescription = 'Refresh display facet cache for guest users';
+        $this->briefDescription = 'Refresh display facet cache';
         $this->detailedDescription = <<<EOF
 The [ahg:refresh-facet-cache|INFO] task refreshes the cached facet counts
-for the display browse page. This improves performance for guest users.
+for the display browse page — both guest (published) and authenticated (all) sets.
 
 Call it with:
 
   [php symfony ahg:refresh-facet-cache|INFO]
-
-Schedule it to run hourly via cron for best results.
 EOF;
     }
 
@@ -52,200 +50,226 @@ EOF;
         $conn->exec('TRUNCATE TABLE display_facet_cache');
         $this->logSection('facet-cache', 'Cleared existing cache');
 
-        // 1. Subject facet (taxonomy_id = 35)
-        $this->refreshTaxonomyFacet($conn, 'subject', 35, $pubTypeId, $pubStatusId);
+        // Refresh both published-only and all-records facets
+        $facetSets = [
+            ['suffix' => '', 'label' => 'published', 'publishedOnly' => true],
+            ['suffix' => '_all', 'label' => 'all', 'publishedOnly' => false],
+        ];
 
-        // 2. Place facet (taxonomy_id = 42)
-        $this->refreshTaxonomyFacet($conn, 'place', 42, $pubTypeId, $pubStatusId);
+        foreach ($facetSets as $set) {
+            $s = $set['suffix'];
+            $pub = $set['publishedOnly'];
+            $lbl = $set['label'];
 
-        // 3. Genre facet (taxonomy_id = 78)
-        $this->refreshTaxonomyFacet($conn, 'genre', 78, $pubTypeId, $pubStatusId);
+            $this->logSection('facet-cache', "--- Refreshing {$lbl} facets ---");
 
-        // 4. Level of description facet
-        $this->refreshLevelFacet($conn, $pubTypeId, $pubStatusId);
-
-        // 5. Repository facet
-        $this->refreshRepositoryFacet($conn, $pubTypeId, $pubStatusId);
-
-        // 6. Creator facet
-        $this->refreshCreatorFacet($conn, $pubTypeId, $pubStatusId);
-
-        // 7. GLAM type facet
-        $this->refreshGlamTypeFacet($conn, $pubTypeId, $pubStatusId);
-
-        // 8. Media type facet
-        $this->refreshMediaTypeFacet($conn, $pubTypeId, $pubStatusId);
+            $this->refreshTaxonomyFacet($conn, 'subject' . $s, 35, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshTaxonomyFacet($conn, 'place' . $s, 42, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshTaxonomyFacet($conn, 'genre' . $s, 78, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshLevelFacet($conn, 'level' . $s, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshRepositoryFacet($conn, 'repository' . $s, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshCreatorFacet($conn, 'creator' . $s, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshGlamTypeFacet($conn, 'glam_type' . $s, $pubTypeId, $pubStatusId, $pub);
+            $this->refreshMediaTypeFacet($conn, 'media_type' . $s, $pubTypeId, $pubStatusId, $pub);
+        }
 
         $elapsed = round(microtime(true) - $startTime, 2);
         $count = $conn->query('SELECT COUNT(*) FROM display_facet_cache')->fetchColumn();
         $this->logSection('facet-cache', "Cache refresh complete: {$count} entries in {$elapsed}s");
     }
 
-    protected function refreshTaxonomyFacet($conn, $facetType, $taxonomyId, $pubTypeId, $pubStatusId)
+    protected function refreshTaxonomyFacet($conn, $facetType, $taxonomyId, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', "Refreshing {$facetType} facet (taxonomy {$taxonomyId})...");
+        $baseName = str_replace('_all', '', $facetType);
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet (taxonomy {$taxonomyId})...");
+
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = otr.object_id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
             SELECT :facet_type, t.id, COALESCE(ti.name, 'Unknown'), COUNT(DISTINCT otr.object_id)
             FROM term t
             INNER JOIN object_term_relation otr ON otr.term_id = t.id
-            INNER JOIN status s ON s.object_id = otr.object_id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             LEFT JOIN term_i18n ti ON t.id = ti.id AND ti.culture = 'en'
             WHERE t.taxonomy_id = :taxonomy_id
             GROUP BY t.id, ti.name
             HAVING COUNT(DISTINCT otr.object_id) > 0
         ";
 
+        $params = [':facet_type' => $facetType, ':taxonomy_id' => $taxonomyId];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':facet_type' => $facetType,
-            ':taxonomy_id' => $taxonomyId,
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} {$facetType} entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
-    protected function refreshLevelFacet($conn, $pubTypeId, $pubStatusId)
+    protected function refreshLevelFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', 'Refreshing level facet...');
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
+
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = io.id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
-            SELECT 'level', t.id, COALESCE(ti.name, 'Unknown'), COUNT(*)
+            SELECT :facet_type, t.id, COALESCE(ti.name, 'Unknown'), COUNT(*)
             FROM information_object io
             INNER JOIN term t ON io.level_of_description_id = t.id
-            INNER JOIN status s ON s.object_id = io.id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             LEFT JOIN term_i18n ti ON t.id = ti.id AND ti.culture = 'en'
             WHERE io.id > 1
             GROUP BY t.id, ti.name
             HAVING COUNT(*) > 0
         ";
 
+        $params = [':facet_type' => $facetType];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} level entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
-    protected function refreshRepositoryFacet($conn, $pubTypeId, $pubStatusId)
+    protected function refreshRepositoryFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', 'Refreshing repository facet...');
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
+
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = io.id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
-            SELECT 'repository', r.id, COALESCE(ai.authorized_form_of_name, 'Unknown'), COUNT(*)
+            SELECT :facet_type, r.id, COALESCE(ai.authorized_form_of_name, 'Unknown'), COUNT(*)
             FROM information_object io
             INNER JOIN repository r ON io.repository_id = r.id
-            INNER JOIN status s ON s.object_id = io.id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             LEFT JOIN actor_i18n ai ON r.id = ai.id AND ai.culture = 'en'
             WHERE io.id > 1
             GROUP BY r.id, ai.authorized_form_of_name
             HAVING COUNT(*) > 0
         ";
 
+        $params = [':facet_type' => $facetType];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} repository entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
-    protected function refreshCreatorFacet($conn, $pubTypeId, $pubStatusId)
+    protected function refreshCreatorFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', 'Refreshing creator facet...');
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
+
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = e.object_id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
-            SELECT 'creator', a.id, COALESCE(ai.authorized_form_of_name, 'Unknown'), COUNT(DISTINCT e.object_id)
+            SELECT :facet_type, a.id, COALESCE(ai.authorized_form_of_name, 'Unknown'), COUNT(DISTINCT e.object_id)
             FROM event e
             INNER JOIN actor a ON e.actor_id = a.id
-            INNER JOIN status s ON s.object_id = e.object_id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             LEFT JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
             WHERE e.actor_id IS NOT NULL
             GROUP BY a.id, ai.authorized_form_of_name
             HAVING COUNT(DISTINCT e.object_id) > 0
         ";
 
+        $params = [':facet_type' => $facetType];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} creator entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
-    protected function refreshGlamTypeFacet($conn, $pubTypeId, $pubStatusId)
+    protected function refreshGlamTypeFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', 'Refreshing GLAM type facet...');
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
 
-        // For GLAM type, we use term_id=0 and store the type name in term_name
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = io.id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
+
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
-            SELECT 'glam_type', 0, doc.object_type, COUNT(*)
+            SELECT :facet_type, 0, doc.object_type, COUNT(*)
             FROM display_object_config doc
             INNER JOIN information_object io ON doc.object_id = io.id
-            INNER JOIN status s ON s.object_id = io.id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             GROUP BY doc.object_type
             HAVING COUNT(*) > 0
         ";
 
+        $params = [':facet_type' => $facetType];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} GLAM type entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
-    protected function refreshMediaTypeFacet($conn, $pubTypeId, $pubStatusId)
+    protected function refreshMediaTypeFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
-        $this->logSection('facet-cache', 'Refreshing media type facet...');
+        $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
 
-        // For media type, we use term_id=0 and store the type in term_name
+        $statusJoin = $publishedOnly
+            ? "INNER JOIN status s ON s.object_id = do.object_id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
+            : "";
+
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
-            SELECT 'media_type', 0, SUBSTRING_INDEX(do.mime_type, '/', 1), COUNT(*)
+            SELECT :facet_type, 0, SUBSTRING_INDEX(do.mime_type, '/', 1), COUNT(*)
             FROM digital_object do
-            INNER JOIN status s ON s.object_id = do.object_id
-                AND s.type_id = :pub_type_id
-                AND s.status_id = :pub_status_id
+            {$statusJoin}
             WHERE do.parent_id IS NULL AND do.mime_type IS NOT NULL
             GROUP BY SUBSTRING_INDEX(do.mime_type, '/', 1)
             HAVING COUNT(*) > 0
         ";
 
+        $params = [':facet_type' => $facetType];
+        if ($publishedOnly) {
+            $params[':pub_type_id'] = $pubTypeId;
+            $params[':pub_status_id'] = $pubStatusId;
+        }
+
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':pub_type_id' => $pubTypeId,
-            ':pub_status_id' => $pubStatusId,
-        ]);
+        $stmt->execute($params);
 
         $count = $stmt->rowCount();
-        $this->logSection('facet-cache', "  Added {$count} media type entries");
+        $this->logSection('facet-cache', "    Added {$count} entries");
     }
 }
