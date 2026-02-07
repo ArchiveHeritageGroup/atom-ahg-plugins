@@ -522,6 +522,24 @@ View sync history to diagnose issues:
 
 ---
 
+## Semantic Search and Fuzzy Search
+
+Semantic Search works alongside Fuzzy Search (typo-tolerant search) to maximize search coverage. They are complementary:
+
+| Feature | Semantic Search | Fuzzy Search |
+|---------|----------------|--------------|
+| **Purpose** | Expand vocabulary with synonyms | Correct misspellings and typos |
+| **How** | Synonym dictionary relationships | Character/sound similarity |
+| **Example** | "photo" finds "photograph", "picture" | "photograps" corrects to "photographs" |
+| **Activation** | User toggles on/off | Always active on GLAM Browse |
+| **Admin setup** | Import terms, configure sources | No configuration needed |
+
+**Best together:** Fuzzy Search corrects your typos first, then Semantic Search expands the corrected query with related terms. For example, "archieves" is corrected to "archives", which is then expanded to include "repository", "record office", and "holdings".
+
+For full details on fuzzy search, see the [Fuzzy Search User Guide](fuzzy-search-user-guide.md).
+
+---
+
 ## Support
 
 For assistance with Semantic Search:
@@ -532,6 +550,6 @@ For assistance with Semantic Search:
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: January 2026*
+*Document Version: 1.1*
+*Last Updated: February 2026*
 *Author: The Archive and Heritage Group (Pty) Ltd*

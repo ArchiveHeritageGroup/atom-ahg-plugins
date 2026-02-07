@@ -397,6 +397,44 @@ After searching, click **Save Search**:
 
 ---
 
+## Fuzzy Search (Typo Tolerance)
+
+The GLAM Browse page includes automatic typo detection and correction. When you misspell a search term, the system will suggest or auto-correct your query.
+
+### What You'll See
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FUZZY SEARCH ALERTS                                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  "Did you mean: archives?"                                  │
+│     Appears when the system detects a likely typo.          │
+│     Click the suggestion to search with the corrected term. │
+│                                                             │
+│  "Showing results for archives"                             │
+│     Appears when the system is confident and auto-corrects. │
+│     Click "Search instead for" to use your original term.   │
+│                                                             │
+│  "Showing fuzzy matches from search index"                  │
+│     Appears when no exact results found, but approximate    │
+│     matches were found via the search index.                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### How It Works
+
+Fuzzy search combines four techniques:
+
+1. **Levenshtein distance** - Detects character-level typos ("musem" → "museum")
+2. **Phonetic matching** - Finds words that sound alike ("Jonson" → "Johnson")
+3. **FULLTEXT search** - Matches word variations ("mining" finds "mine", "miner")
+4. **Search index fallback** - Finds approximate matches when SQL returns nothing
+
+For full details, see the [Fuzzy Search User Guide](fuzzy-search-user-guide.md).
+
+---
+
 ## Troubleshooting
 ```
 Problem                          Solution
@@ -409,6 +447,7 @@ No results found              →  Remove some filters
                                  Try broader terms
                                  Check spelling
                                  Use wildcards (*)
+                                 Check "Did you mean?" suggestion
                                  
 Results not relevant          →  Use exact phrase (" ")
                                  Search specific fields
