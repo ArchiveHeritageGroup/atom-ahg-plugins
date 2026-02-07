@@ -38,11 +38,11 @@ $isNew = empty($currentIdentifier);
 
 <script <?php $n = sfConfig::get('csp_nonce', '');
 echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   var useBtn = document.getElementById('use-generated-btn');
   var generatedId = document.getElementById('generated-identifier');
 
-  // Find the identifier input field
+  // Find the identifier input field (rendered later in the form)
   var input = document.querySelector('input[name="<?php echo $fieldName; ?>"]') ||
               document.getElementById('<?php echo $fieldName; ?>') ||
               document.querySelector('[name="identifier"]');
@@ -78,7 +78,7 @@ echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
       }
     });
   }
-})();
+});
 </script>
 <?php endif; ?>
 
