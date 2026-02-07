@@ -183,6 +183,9 @@ function render_media_player($digitalObject, array $options = []): string
     $html .= '});';
     $html .= '</script>';
 
+    // Render metadata panel below the player (if extracted)
+    $html .= render_media_metadata($digitalObject);
+
     return $html;
 }
 
