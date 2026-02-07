@@ -142,6 +142,10 @@ class mediaActions extends sfActions
             'application/vnd.rn-realmedia', // RM
             'video/x-ms-vob',       // VOB
             'application/mxf',      // MXF
+            'video/x-f4v',          // F4V
+            'video/mpeg',           // MPEG
+            'video/x-m2ts',         // M2TS
+            'video/ogg',            // OGV
             // Audio
             'audio/aiff',           // AIFF
             'audio/x-aiff',         // AIFF (alt)
@@ -165,6 +169,7 @@ class mediaActions extends sfActions
                 // Video
                 'asf', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'ts', 'm2ts', 'mts',
                 'wtv', 'hevc', '3gp', '3g2', 'rm', 'rmvb', 'vob', 'mxf', 'divx',
+                'f4v', 'ogv', 'mpeg', 'mpg', 'm2ts', 'mts',
                 // Audio
                 'aiff', 'aif', 'aifc', 'au', 'snd', 'ac3', '8svx', 'amb',
                 'wma', 'ra', 'ram',
@@ -723,6 +728,192 @@ PHP;
         } catch (Exception $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
+
+        return sfView::NONE;
+    }
+
+    /**
+     * On-demand file conversion endpoint
+     *
+     * Converts non-viewable formats to browser-friendly formats:
+     * - PSD/CR2 -> JPEG (via ImageMagick)
+     * - DOCX/XLSX/XLS/PPT/PPTX/ODT/ODS/ODP/RTF -> PDF (via LibreOffice)
+     * - ZIP/RAR/TGZ/TAR.GZ -> JSON file listing
+     * - TXT/CSV/LOG/MD/XML/JSON -> Plain text content
+     * - JPS -> Serve as JPEG (stereo JPEG is valid JPEG)
+     *
+     * Results are cached in uploads/conversions/
+     */
+    public function executeConvert(sfWebRequest $request)
+    {
+        $id = (int) $request->getParameter('id');
+
+        if (!$id) {
+            $this->forward404('Digital object not found');
+        }
+
+        $digitalObject = QubitDigitalObject::getById($id);
+        if (!$digitalObject) {
+            $this->forward404('Digital object not found');
+        }
+
+        $filePath = $this->getFilePath($digitalObject);
+        if (!$filePath || !file_exists($filePath)) {
+            $this->forward404('File not found');
+        }
+
+        $ext = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));
+        $cacheDir = sfConfig::get('sf_web_dir') . '/uploads/conversions';
+
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0755, true);
+        }
+
+        // PSD / CR2 -> JPEG via ImageMagick
+        if (in_array($ext, ['psd', 'cr2', 'nef', 'arw', 'dng'])) {
+            $cacheFile = $cacheDir . '/' . $id . '_' . $ext . '.jpg';
+
+            if (!file_exists($cacheFile)) {
+                $escaped = escapeshellarg($filePath . ($ext === 'psd' ? '[0]' : ''));
+                $escapedOut = escapeshellarg($cacheFile);
+                $cmd = "convert {$escaped} -resize 2048x2048 -quality 92 {$escapedOut} 2>&1";
+                $output = shell_exec($cmd);
+
+                if (!file_exists($cacheFile)) {
+                    $this->getResponse()->setContentType('application/json');
+                    echo json_encode(['error' => 'Conversion failed', 'detail' => $output]);
+
+                    return sfView::NONE;
+                }
+            }
+
+            header('Content-Type: image/jpeg');
+            header('Content-Length: ' . filesize($cacheFile));
+            header('Cache-Control: public, max-age=86400');
+            readfile($cacheFile);
+
+            return sfView::NONE;
+        }
+
+        // JPS -> serve as JPEG (stereo JPEG is valid JPEG)
+        if ($ext === 'jps') {
+            header('Content-Type: image/jpeg');
+            header('Content-Length: ' . filesize($filePath));
+            header('Cache-Control: public, max-age=86400');
+            readfile($filePath);
+
+            return sfView::NONE;
+        }
+
+        // SVG -> serve directly with proper content type
+        if ($ext === 'svg') {
+            header('Content-Type: image/svg+xml');
+            header('Content-Length: ' . filesize($filePath));
+            header('Cache-Control: public, max-age=86400');
+            readfile($filePath);
+
+            return sfView::NONE;
+        }
+
+        // Office documents -> PDF via LibreOffice
+        if (in_array($ext, ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf'])) {
+            $cacheFile = $cacheDir . '/' . $id . '_doc.pdf';
+
+            if (!file_exists($cacheFile)) {
+                $escaped = escapeshellarg($filePath);
+                $escapedDir = escapeshellarg($cacheDir);
+                // Convert to PDF in temp dir, then rename to cache path
+                $tmpDir = sys_get_temp_dir() . '/lo_convert_' . $id;
+                @mkdir($tmpDir, 0755, true);
+                $cmd = sprintf(
+                    'timeout 60 libreoffice --headless --norestore --convert-to pdf --outdir %s %s 2>&1',
+                    escapeshellarg($tmpDir),
+                    $escaped
+                );
+                $output = shell_exec($cmd);
+
+                // Find the generated PDF
+                $baseName = pathinfo($digitalObject->name, PATHINFO_FILENAME);
+                $tmpPdf = $tmpDir . '/' . $baseName . '.pdf';
+                if (file_exists($tmpPdf)) {
+                    rename($tmpPdf, $cacheFile);
+                }
+                @rmdir($tmpDir);
+
+                if (!file_exists($cacheFile)) {
+                    $this->getResponse()->setContentType('application/json');
+                    echo json_encode(['error' => 'PDF conversion failed', 'detail' => $output]);
+
+                    return sfView::NONE;
+                }
+            }
+
+            header('Content-Type: application/pdf');
+            header('Content-Length: ' . filesize($cacheFile));
+            header('Cache-Control: public, max-age=86400');
+            readfile($cacheFile);
+
+            return sfView::NONE;
+        }
+
+        // Plain text files -> serve as text
+        if (in_array($ext, ['txt', 'csv', 'log', 'md', 'xml', 'json', 'yml', 'yaml', 'ini', 'cfg', 'conf'])) {
+            $content = file_get_contents($filePath, false, null, 0, 512000); // Max 500KB
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Cache-Control: public, max-age=86400');
+            echo $content;
+
+            return sfView::NONE;
+        }
+
+        // ZIP archive -> JSON file listing
+        if ($ext === 'zip') {
+            $this->getResponse()->setContentType('application/json');
+            $files = [];
+            $zip = new ZipArchive();
+            if ($zip->open($filePath) === true) {
+                for ($i = 0; $i < min($zip->numFiles, 500); $i++) {
+                    $stat = $zip->statIndex($i);
+                    $files[] = [
+                        'name' => $stat['name'],
+                        'size' => $stat['size'],
+                        'compressed' => $stat['comp_size'],
+                    ];
+                }
+                $zip->close();
+                echo json_encode(['type' => 'zip', 'count' => count($files), 'files' => $files]);
+            } else {
+                echo json_encode(['error' => 'Could not open ZIP file']);
+            }
+
+            return sfView::NONE;
+        }
+
+        // RAR archive -> JSON file listing
+        if ($ext === 'rar') {
+            $this->getResponse()->setContentType('application/json');
+            $escaped = escapeshellarg($filePath);
+            $output = shell_exec("unrar l {$escaped} 2>&1");
+            echo json_encode(['type' => 'rar', 'listing' => $output]);
+
+            return sfView::NONE;
+        }
+
+        // TGZ/TAR.GZ archive -> JSON file listing
+        if (in_array($ext, ['tgz', 'gz', 'tar'])) {
+            $this->getResponse()->setContentType('application/json');
+            $escaped = escapeshellarg($filePath);
+            $cmd = ($ext === 'tar') ? "tar -tf {$escaped}" : "tar -tzf {$escaped}";
+            $output = shell_exec($cmd . ' 2>&1');
+            $files = array_filter(explode("\n", trim($output ?: '')));
+            echo json_encode(['type' => $ext, 'count' => count($files), 'files' => array_slice($files, 0, 500)]);
+
+            return sfView::NONE;
+        }
+
+        // Unsupported format
+        $this->getResponse()->setContentType('application/json');
+        echo json_encode(['error' => 'Unsupported format: ' . $ext]);
 
         return sfView::NONE;
     }

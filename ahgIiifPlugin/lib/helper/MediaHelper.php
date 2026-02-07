@@ -573,8 +573,10 @@ function is_media_file($digitalObject): bool
 
     // Fallback to extension
     $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-    $audioFormats = ['wav', 'mp3', 'flac', 'ogg', 'oga', 'm4a', 'aac', 'wma', 'aiff', 'aif'];
-    $videoFormats = ['mov', 'mp4', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v', 'mpeg', 'mpg', '3gp'];
+    $audioFormats = ['wav', 'mp3', 'flac', 'ogg', 'oga', 'm4a', 'aac', 'wma', 'aiff', 'aif',
+        'au', 'ac3', '8svx', 'amb'];
+    $videoFormats = ['mov', 'mp4', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v', 'mpeg', 'mpg', '3gp',
+        'f4v', 'm2ts', 'mts', 'ts', 'wtv', 'vob', 'ogv', 'hevc', 'mxf', 'asf', 'rm'];
 
     return in_array($ext, $audioFormats) || in_array($ext, $videoFormats);
 }

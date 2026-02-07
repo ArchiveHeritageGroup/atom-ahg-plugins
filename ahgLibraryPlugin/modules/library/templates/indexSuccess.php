@@ -358,30 +358,36 @@ $rawResource = sfOutputEscaper::unescape($resource);
         </div>
         <div class="card-body text-center">
           <?php
-            $mimeType = $digitalObject->mimeType ?? '';
-            $mediaTypeId = $digitalObject->mediaTypeId ?? null;
-            $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-            $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-            $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-            $refPath = $refObj ? $refObj->getFullPath() : null;
-            $masterPath = $digitalObject->getFullPath();
-            $displayPath = $refPath ?: $thumbPath ?: $masterPath;
+            // Use unified viewer dispatch for all format support
+            if (function_exists('render_digital_object_viewer')) {
+                echo render_digital_object_viewer($resource, $digitalObject);
+            } else {
+                // Fallback: basic rendering
+                $mimeType = $digitalObject->mimeType ?? '';
+                $mediaTypeId = $digitalObject->mediaTypeId ?? null;
+                $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
+                $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
+                $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
+                $refPath = $refObj ? $refObj->getFullPath() : null;
+                $masterPath = $digitalObject->getFullPath();
+                $displayPath = $refPath ?: $thumbPath ?: $masterPath;
 
-            $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
-            $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
+                $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
+                $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
+
+                if ($isVideo || $isAudio) {
+                    include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]);
+                } elseif (strpos($mimeType, 'image') !== false && $displayPath) {
+                    echo '<a href="' . $masterPath . '" target="_blank">';
+                    echo '<img src="' . $displayPath . '" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 300px;">';
+                    echo '</a>';
+                } else {
+                    echo '<a href="' . $masterPath . '" target="_blank" class="btn btn-outline-primary">';
+                    echo '<i class="fas fa-file me-2"></i>' . __('View file');
+                    echo '</a>';
+                }
+            }
           ?>
-          <?php if ($isVideo || $isAudio): ?>
-            <!-- Enhanced Video/Audio player -->
-            <?php include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]); ?>
-          <?php elseif (strpos($mimeType, 'image') !== false && $displayPath): ?>
-            <a href="<?php echo $masterPath; ?>" target="_blank">
-              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
-            </a>
-          <?php else: ?>
-            <a href="<?php echo $masterPath; ?>" target="_blank" class="btn btn-outline-primary">
-              <i class="fas fa-file me-2"></i><?php echo __('View file'); ?>
-            </a>
-          <?php endif; ?>
         </div>
       </section>
       <?php else: ?>

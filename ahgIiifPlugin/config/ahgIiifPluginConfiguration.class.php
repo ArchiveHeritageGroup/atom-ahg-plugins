@@ -365,6 +365,12 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
             ['id' => '\d+', 'format' => '(json|vtt|srt|txt)']
         ));
 
+        $routing->prependRoute('media_convert', new sfRoute(
+            '/media/convert/:id',
+            ['module' => 'media', 'action' => 'convert'],
+            ['id' => '\d+']
+        ));
+
         $routing->prependRoute('media_metadata', new sfRoute(
             '/media/metadata/:id',
             ['module' => 'media', 'action' => 'metadata'],

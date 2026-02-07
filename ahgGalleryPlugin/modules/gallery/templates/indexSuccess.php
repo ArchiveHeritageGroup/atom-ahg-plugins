@@ -118,6 +118,9 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
           <small class="text-muted d-block mt-2">
             <i class="fas fa-mouse me-1"></i><?php echo __('Drag to rotate'); ?> | <?php echo esc_entities($digitalObject->name); ?>
           </small>
+        <?php elseif (function_exists('render_digital_object_viewer')): ?>
+          <?php // Use unified viewer dispatch for PSD, CR2, SVG, office docs, text, archives, etc. ?>
+          <?php echo render_digital_object_viewer($qubitResource, $qubitResource->digitalObjectsRelatedByobjectId[0] ?? null); ?>
         <?php else: ?>
           <div class="p-4">
             <i class="fas fa-file fa-5x text-muted"></i><br>
