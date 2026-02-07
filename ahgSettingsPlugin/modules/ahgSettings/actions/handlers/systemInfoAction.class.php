@@ -259,9 +259,13 @@ class SettingsSystemInfoAction extends sfAction
             $esHost = sfConfig::get('app_elasticsearch_host', 'localhost');
             $esPort = sfConfig::get('app_elasticsearch_port', 9200);
 
-            // Use factory for auto-detection
-            $engineName = SearchEngineFactory::getEngineName($esHost, (int) $esPort);
-            $engineVersion = SearchEngineFactory::getEngineVersion($esHost, (int) $esPort);
+            // Use factory for auto-detection (may not exist on older installs)
+            $engineName = 'Search Engine';
+            $engineVersion = '';
+            if (class_exists('SearchEngineFactory')) {
+                $engineName = SearchEngineFactory::getEngineName($esHost, (int) $esPort);
+                $engineVersion = SearchEngineFactory::getEngineVersion($esHost, (int) $esPort);
+            }
 
             if ($engineVersion) {
                 $versions[] = [

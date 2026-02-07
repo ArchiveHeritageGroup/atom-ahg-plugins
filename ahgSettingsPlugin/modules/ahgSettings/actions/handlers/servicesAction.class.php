@@ -146,8 +146,12 @@ class SettingsServicesAction extends sfAction
             $port = sfConfig::get('app_elasticsearch_port', '9200');
 
             // Auto-detect engine type (Elasticsearch or OpenSearch)
-            $engineName = SearchEngineFactory::getEngineName($host, (int) $port);
-            $engineVersion = SearchEngineFactory::getEngineVersion($host, (int) $port);
+            $engineName = 'Search Engine';
+            $engineVersion = '';
+            if (class_exists('SearchEngineFactory')) {
+                $engineName = SearchEngineFactory::getEngineName($host, (int) $port);
+                $engineVersion = SearchEngineFactory::getEngineVersion($host, (int) $port);
+            }
 
             $ch = curl_init("http://{$host}:{$port}/_cluster/health");
             curl_setopt_array($ch, [

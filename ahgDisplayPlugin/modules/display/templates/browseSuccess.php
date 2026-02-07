@@ -111,15 +111,15 @@ function getItemUrl($obj) {
     var modal = document.getElementById('semanticSearchModal');
     var backdrop = document.getElementById('semanticSearchBackdrop');
     if (!modal || !backdrop) { console.error('Modal not found'); return; }
-    modal.classList.remove('browse-hidden');
-    backdrop.classList.remove('browse-hidden');
+    modal.style.display = 'block';
+    backdrop.style.display = 'block';
     setTimeout(function() {
       modal.classList.add('show');
       backdrop.classList.add('show');
     }, 10);
     document.body.classList.add('modal-open');
     var input = document.getElementById('semantic-query-input');
-    if (input) input.focus();
+    if (input) setTimeout(function() { input.focus(); }, 100);
   }
   function closeSemanticModal() {
     var modal = document.getElementById('semanticSearchModal');
@@ -128,8 +128,8 @@ function getItemUrl($obj) {
     modal.classList.remove('show');
     backdrop.classList.remove('show');
     setTimeout(function() {
-      modal.classList.add('browse-hidden');
-      backdrop.classList.add('browse-hidden');
+      modal.style.display = 'none';
+      backdrop.style.display = 'none';
     }, 150);
     document.body.classList.remove('modal-open');
   }
@@ -640,8 +640,8 @@ function getItemUrl($obj) {
   <?php endif ?>
 
   <!-- Semantic Search Modal -->
-  <div class="modal-backdrop fade browse-hidden" id="semanticSearchBackdrop"></div>
-<div class="modal fade browse-hidden" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true">
+  <div class="modal-backdrop fade" id="semanticSearchBackdrop" style="display:none;"></div>
+<div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
