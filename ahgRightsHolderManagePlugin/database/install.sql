@@ -1,0 +1,2 @@
+-- ahgRightsHolderManagePlugin
+-- No custom tables required - uses core rights_holder, actor_i18n, object, slug tables

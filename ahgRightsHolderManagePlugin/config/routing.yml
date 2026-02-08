@@ -1,0 +1,3 @@
+rightsholder_browse_override:
+  url: /rightsholder/browse
+  param: { module: rightsHolderManage, action: browse }
