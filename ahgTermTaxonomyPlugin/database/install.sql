@@ -1,0 +1,1 @@
+-- ahgTermTaxonomyPlugin: No custom tables needed

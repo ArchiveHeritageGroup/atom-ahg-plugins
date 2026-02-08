@@ -1,0 +1,23 @@
+{
+    "name": "ahgTermTaxonomyPlugin",
+    "version": "1.0.0",
+    "description": "High-performance term and taxonomy browse (subjects, places, genres) using Laravel Query Builder and direct ES queries",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["term", "taxonomy", "subject", "place", "genre", "browse", "performance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Term browse via direct ES HTTP queries",
+        "Taxonomy browse with batch count optimization",
+        "Batch facet population via Laravel Query Builder",
+        "Theme-compatible templates (SearchHit + SimplePager)"
+    ]
+}
