@@ -1,0 +1,1 @@
+-- ahgAccessionManagePlugin: No custom tables required

@@ -1,0 +1,23 @@
+{
+    "name": "ahgAccessionManagePlugin",
+    "version": "1.0.0",
+    "description": "High-performance accession browse and management using Laravel Query Builder and direct ES queries",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["accession", "browse", "manage", "performance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Accession browse via direct ES HTTP queries",
+        "Sort by accession number, title, acquisition date, last updated",
+        "Inline search with relevance ranking",
+        "Theme-compatible templates (SimplePager)"
+    ]
+}
