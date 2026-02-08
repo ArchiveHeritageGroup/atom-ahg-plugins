@@ -1,0 +1,1 @@
+-- ahgRepositoryBrowsePlugin: No custom tables needed
