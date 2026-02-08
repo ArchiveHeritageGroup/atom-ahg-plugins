@@ -96,7 +96,10 @@
                 <form method="post" action="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'plugins']); ?>" class="d-inline">
                     <input type="hidden" name="plugin_name" value="<?php echo htmlspecialchars($plugin['name']); ?>">
                     <?php $isLocked = !empty($plugin['is_locked']); ?>
-                    <?php if ($isLocked): ?>
+                    <?php $isCore = !empty($plugin['is_core']); ?>
+                    <?php if ($isCore): ?>
+                    <span class="badge bg-primary"><i class="fas fa-shield-alt me-1"></i>Core</span>
+                    <?php elseif ($isLocked): ?>
                     <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Locked</span>
                     <?php elseif ($isEnabled): ?>
                     <button type="submit" name="plugin_action" value="disable"
@@ -109,6 +112,9 @@
                             class="btn btn-sm btn-success">
                         <i class="fas fa-check me-1"></i>Enable
                     </button>
+                    <?php endif; ?>
+                    <?php if (!empty($plugin['record_check_query']) && $isEnabled): ?>
+                    <span class="badge bg-info ms-1" title="This plugin has a record check query — cannot be disabled if records exist"><i class="fas fa-database me-1"></i>Record-linked</span>
                     <?php endif; ?>
                 </form>
             </div>

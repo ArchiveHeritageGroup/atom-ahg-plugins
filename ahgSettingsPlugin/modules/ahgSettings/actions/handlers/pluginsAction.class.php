@@ -78,7 +78,14 @@ class AhgSettingsPluginsAction extends sfAction
                 $this->getUser()->setFlash('notice', "Plugin '$pluginName' enabled successfully.");
 
             } elseif ($action === 'disable') {
-                // Check dependencies first
+                // Check protection status (core, locked, linked records)
+                $protection = $this->checkProtection($pluginName);
+                if (!$protection['can_disable']) {
+                    $this->getUser()->setFlash('error', "Cannot disable '$pluginName': " . $protection['reason']);
+                    return;
+                }
+
+                // Check dependencies (other plugins that require this one)
                 $deps = $this->checkDependencies($pluginName);
                 if (!empty($deps)) {
                     $this->getUser()->setFlash('error', "Cannot disable '$pluginName'. Required by: " . implode(', ', $deps));
@@ -166,6 +173,56 @@ class AhgSettingsPluginsAction extends sfAction
             }
         } catch (Exception $e) {
             error_log("Plugin Manager: Cache clear failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if plugin can be disabled (core, locked, linked records).
+     */
+    protected function checkProtection(string $pluginName): array
+    {
+        try {
+            $plugin = DB::table('atom_plugin')->where('name', $pluginName)->first();
+
+            if (!$plugin) {
+                return ['can_disable' => false, 'reason' => 'Plugin not found'];
+            }
+
+            if (!empty($plugin->is_core)) {
+                return ['can_disable' => false, 'reason' => 'Core plugin cannot be disabled'];
+            }
+
+            if (!empty($plugin->is_locked)) {
+                return ['can_disable' => false, 'reason' => 'Plugin is locked and cannot be disabled'];
+            }
+
+            // Check for linked records using record_check_query
+            if (!empty($plugin->record_check_query)) {
+                $query = trim($plugin->record_check_query);
+                // Validate it's a safe SELECT COUNT query
+                if (stripos($query, 'SELECT COUNT') === 0 && stripos($query, ';') === false) {
+                    $result = DB::select($query);
+                    $count = 0;
+                    if (!empty($result)) {
+                        $row = (array) $result[0];
+                        $count = (int) reset($row);
+                    }
+                    if ($count > 0) {
+                        return [
+                            'can_disable' => false,
+                            'reason' => sprintf(
+                                'Plugin has %s linked record(s). Migrate or delete records first.',
+                                number_format($count)
+                            ),
+                        ];
+                    }
+                }
+            }
+
+            return ['can_disable' => true, 'reason' => null];
+        } catch (Exception $e) {
+            error_log("Plugin Protection check error: " . $e->getMessage());
+            return ['can_disable' => true, 'reason' => null];
         }
     }
 
