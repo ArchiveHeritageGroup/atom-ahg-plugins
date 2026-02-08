@@ -13,6 +13,7 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'accessionManage';
+        $enabledModules[] = 'accession';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 

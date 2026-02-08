@@ -13,6 +13,7 @@ class ahgRightsHolderManagePluginConfiguration extends sfPluginConfiguration
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'rightsHolderManage';
+        $enabledModules[] = 'rightsholder';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 

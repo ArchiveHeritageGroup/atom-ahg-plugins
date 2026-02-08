@@ -13,6 +13,7 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'repositoryManage';
+        $enabledModules[] = 'sfIsdiahPlugin';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 

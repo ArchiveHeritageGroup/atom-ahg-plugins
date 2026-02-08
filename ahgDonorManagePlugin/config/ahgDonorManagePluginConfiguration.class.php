@@ -13,6 +13,7 @@ class ahgDonorManagePluginConfiguration extends sfPluginConfiguration
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'donorManage';
+        $enabledModules[] = 'donor';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 

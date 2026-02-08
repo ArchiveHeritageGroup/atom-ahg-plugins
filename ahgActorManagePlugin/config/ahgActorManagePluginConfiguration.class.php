@@ -13,6 +13,7 @@ class ahgActorManagePluginConfiguration extends sfPluginConfiguration
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'actorManage';
+        $enabledModules[] = 'sfIsaarPlugin';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
