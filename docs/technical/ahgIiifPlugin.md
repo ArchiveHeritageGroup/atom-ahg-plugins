@@ -2,17 +2,18 @@
 
 ## Overview
 
-The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperability Framework) capabilities for AtoM, including manifest generation, deep zoom viewing, collection management, and authentication (IIIF Auth API 1.0). The plugin supports images, PDFs, multi-page TIFFs, 3D models, and audio/video content.
+The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperability Framework) capabilities for AtoM, including manifest generation, deep zoom viewing, media streaming with on-the-fly transcoding, annotation support, collection management, and authentication (IIIF Auth API 1.0). The plugin supports images, PDFs, multi-page TIFFs, 3D models, and audio/video content.
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Category:** Media/Viewing
 **Dependencies:** atom >= 2.8.0, PHP >= 8.1, atom-framework
 
 **Optional Dependencies:**
-- Cantaloupe (IIIF Image Server for deep zoom)
-- OpenSeadragon (JavaScript viewer)
-- Mirador (Multi-window viewer)
-- model-viewer (3D model rendering)
+- Cantaloupe (IIIF Image Server for deep zoom tiling)
+- FFmpeg (media transcoding and metadata extraction)
+- Whisper (audio/video transcription)
+- ImageMagick (PSD/RAW conversion)
+- LibreOffice (Office document → PDF conversion)
 
 ---
 
@@ -21,234 +22,392 @@ The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperabil
 ### Component Diagram
 
 ```
-+-------------------------------------------------------------------------+
-|                           ahgIiifPlugin                                  |
-+-------------------------------------------------------------------------+
-|                                                                          |
-|  +-------------------------------------------------------------------+  |
-|  |                      PRESENTATION LAYER                            |  |
-|  +-------------------------------------------------------------------+  |
-|  |  +----------+ +----------+ +----------+ +----------+ +----------+ |  |
-|  |  | Settings | |Collection| |  Auth    | |Clickthru | |  Logout  | |  |
-|  |  | Template | | Template | |  Admin   | | Template | | Template | |  |
-|  |  +----------+ +----------+ +----------+ +----------+ +----------+ |  |
-|  +-------------------------------------------------------------------+  |
-|                                    |                                     |
-|                                    v                                     |
-|  +-------------------------------------------------------------------+  |
-|  |                      CONTROLLER LAYER                              |  |
-|  +-------------------------------------------------------------------+  |
-|  |  +-------------------+  +-------------------+  +-----------------+ |  |
-|  |  | ahgIiifActions    |  |ahgIiifCollection  |  |ahgIiifAuthActions| |  |
-|  |  |-------------------|  |Actions            |  |-----------------| |  |
-|  |  | manifest()        |  |-------------------|  | login()         | |  |
-|  |  | manifestById()    |  | index()           |  | token()         | |  |
-|  |  | settings()        |  | create()          |  | logout()        | |  |
-|  |  |                   |  | edit()            |  | confirm()       | |  |
-|  |  |                   |  | delete()          |  | check()         | |  |
-|  |  |                   |  | manifest()        |  | protect()       | |  |
-|  |  +-------------------+  +-------------------+  +-----------------+ |  |
-|  +-------------------------------------------------------------------+  |
-|                                    |                                     |
-|                                    v                                     |
-|  +-------------------------------------------------------------------+  |
-|  |                       SERVICE LAYER                                |  |
-|  +-------------------------------------------------------------------+  |
-|  |  +---------------------------+  +---------------------------+      |  |
-|  |  | IiifManifestService       |  | IiifAuthService           |      |  |
-|  |  | (atom-framework)          |  | (ahgIiifPlugin)           |      |  |
-|  |  |---------------------------|  |---------------------------|      |  |
-|  |  | generateObjectManifest()  |  | checkAccess()             |      |  |
-|  |  | generateImageManifest()   |  | requestToken()            |      |  |
-|  |  | generateCollectionManifest|  | validateCurrentToken()    |      |  |
-|  |  | getImageDimensions()      |  | logout()                  |      |  |
-|  |  | createImageCanvas()       |  | setObjectAuth()           |      |  |
-|  |  | createPdfCanvases()       |  | removeObjectAuth()        |      |  |
-|  |  | create3DCanvas()          |  | getServiceDescription()   |      |  |
-|  |  | createAVCanvas()          |  | cleanupExpiredTokens()    |      |  |
-|  |  +---------------------------+  +---------------------------+      |  |
-|  +-------------------------------------------------------------------+  |
-|                                    |                                     |
-|                                    v                                     |
-|  +-------------------------------------------------------------------+  |
-|  |                       HELPER LAYER                                 |  |
-|  +-------------------------------------------------------------------+  |
-|  |                     IiifViewerHelper.php                           |  |
-|  |  +---------------------------------------------------------------+ |  |
-|  |  | renderIiifViewer()    | getManifestUrl()     | getViewerType()| |  |
-|  |  | render3DViewer()      | getCantaloupeUrl()   | getViewerHeight| |  |
-|  |  +---------------------------------------------------------------+ |  |
-|  +-------------------------------------------------------------------+  |
-|                                    |                                     |
-|                                    v                                     |
-|  +-------------------------------------------------------------------+  |
-|  |                       DATA LAYER                                   |  |
-|  +-------------------------------------------------------------------+  |
-|  |         Illuminate\Database\Capsule\Manager (Laravel QB)          |  |
-|  +-------------------------------------------------------------------+  |
-|                                                                          |
-+-------------------------------------------------------------------------+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           ahgIiifPlugin                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                       PRESENTATION LAYER                                   │ │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐ │ │
+│  │  │ IiifViewer   │ │ Collection   │ │ Auth Admin   │ │ Viewer Settings  │ │ │
+│  │  │ Manager (JS) │ │ Templates    │ │ Templates    │ │ Templates        │ │ │
+│  │  │ (ES6 module) │ │              │ │              │ │                  │ │ │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────────┘ │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                           │
+│                                      ▼                                           │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                      CONTROLLER LAYER                                      │ │
+│  │  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ │ │
+│  │  │ iiif/actions   │ │ iiifCollection│ │ iiifAuth      │ │ media/actions  │ │ │
+│  │  │               │ │ /actions      │ │ /actions      │ │               │ │ │
+│  │  │ manifest()    │ │ index()       │ │ login()       │ │ stream()      │ │ │
+│  │  │ manifestById()│ │ create()      │ │ token()       │ │ download()    │ │ │
+│  │  │ annotations() │ │ edit()        │ │ logout()      │ │ transcribe()  │ │ │
+│  │  │ settings()    │ │ manifest()    │ │ confirm()     │ │ convert()     │ │ │
+│  │  │               │ │ addItems()    │ │ check()       │ │ extract()     │ │ │
+│  │  │               │ │ reorder()     │ │ protect()     │ │ snippets()    │ │ │
+│  │  └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘ │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                           │
+│                                      ▼                                           │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                       SERVICE LAYER                                        │ │
+│  │  ┌──────────────────────┐ ┌──────────────────────┐ ┌────────────────────┐ │ │
+│  │  │ IiifAnnotationService│ │ IiifCollectionService │ │ IiifAuthService    │ │ │
+│  │  │ (CRUD + W3C format)  │ │ (CRUD + hierarchy)   │ │ (tokens + access)  │ │ │
+│  │  └──────────────────────┘ └──────────────────────┘ └────────────────────┘ │ │
+│  │  ┌──────────────────────┐ ┌──────────────────────┐                        │ │
+│  │  │ TranscriptionService │ │ MediaConversionService│                        │ │
+│  │  │ (Whisper integration)│ │ (FFmpeg/IM/LO)       │                        │ │
+│  │  └──────────────────────┘ └──────────────────────┘                        │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                           │
+│                                      ▼                                           │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                       HELPER LAYER                                         │ │
+│  │                    IiifViewerHelper.php                                     │ │
+│  │  ┌───────────────────────────────────────────────────────────────────────┐ │ │
+│  │  │ render_iiif_viewer()  │ get_iiif_base_url() │ get_preferred_viewer() │ │ │
+│  │  │ render_3d_viewer()    │ get_cantaloupe_url() │ has_3d_models()       │ │ │
+│  │  │ render_av_viewer()    │ get_digital_obj_url() │ render_controls()    │ │ │
+│  │  │ render_pdf_viewer()   │ render_thumbnail_strip() │ render_toggle()  │ │ │
+│  │  └───────────────────────────────────────────────────────────────────────┘ │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                           │
+│                                      ▼                                           │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                       DATA LAYER                                           │ │
+│  │         Illuminate\Database\Capsule\Manager (Laravel Query Builder)        │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Database Schema
 
-### Entity Relationship Diagram
+### Tables
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `iiif_collection` | Collection hierarchy | name, slug, parent_id, attribution, viewing_hint |
+| `iiif_collection_i18n` | Collection translations | collection_id, culture, name, description |
+| `iiif_collection_item` | Items in collections | collection_id, object_id, manifest_uri, item_type, sort_order |
+| `iiif_annotation` | W3C annotations | object_id, canvas_id, target_selector (JSON), motivation |
+| `iiif_annotation_body` | Annotation content | annotation_id, body_type, body_value, body_format |
+| `iiif_ocr_text` | OCR full text | digital_object_id, full_text (FULLTEXT), format, confidence |
+| `iiif_ocr_block` | OCR block coordinates | ocr_id, page_number, text, x, y, width, height |
+| `iiif_viewer_settings` | Viewer config (key-value) | setting_key, setting_value |
+| `iiif_auth_service` | Auth service profiles | name, profile, label, token_ttl, is_active |
+| `iiif_auth_token` | Access tokens | token_hash (SHA-256), user_id, expires_at, is_revoked |
+| `iiif_auth_resource` | Per-object access control | object_id, service_id, apply_to_children, degraded_access |
+| `iiif_auth_access_log` | Audit trail | object_id, user_id, action, details (JSON) |
+
+### Entity Relationships
 
 ```
-+-------------------------------------------------------------------------+
-|                    IIIF PLUGIN DATABASE SCHEMA                           |
-+-------------------------------------------------------------------------+
+information_object (AtoM core)
+    │
+    ├──► iiif_collection_item.object_id
+    ├──► iiif_annotation.object_id
+    ├──► iiif_auth_resource.object_id
+    └──► iiif_auth_access_log.object_id
 
-                    +------------------------+
-                    |   information_object   |
-                    |    (AtoM Core Table)   |
-                    +------------------------+
-                    | PK id                  |
-                    |    repository_id       |
-                    |    ...                 |
-                    +------------------------+
-                              ^
-                              |
-         +--------------------+--------------------+
-         |                    |                    |
-         v                    v                    v
-+-------------------+  +-------------------+  +-------------------+
-| iiif_collection_  |  | iiif_annotation   |  | iiif_auth_        |
-|       item        |  +-------------------+  |     resource      |
-+-------------------+  | PK id             |  +-------------------+
-| PK id             |  | FK object_id -----+->| PK id             |
-| FK collection_id  |  |    canvas_id      |  | FK object_id -----+
-| FK object_id -----+  |    target_canvas  |  | FK service_id     |
-|    manifest_uri   |  |    target_selector|  |    apply_to_      |
-|    item_type      |  |    motivation     |  |      children     |
-|    label          |  |    created_by     |  |    degraded_      |
-|    sort_order     |  |    created_at     |  |      access       |
-+-------------------+  +-------------------+  |    degraded_width |
-         |                    |              |    notes           |
-         v                    v              +-------------------+
-+-------------------+  +-------------------+          |
-| iiif_collection   |  |iiif_annotation_   |          v
-+-------------------+  |       body        |  +-------------------+
-| PK id             |  +-------------------+  | iiif_auth_service |
-|    name           |  | PK id             |  +-------------------+
-|    slug           |  | FK annotation_id  |  | PK id             |
-|    description    |  |    body_type      |  |    name           |
-|    attribution    |  |    body_value     |  |    profile        |
-|    logo_url       |  |    body_format    |  |    label          |
-|    thumbnail_url  |  |    body_language  |  |    description    |
-|    viewing_hint   |  +-------------------+  |    confirm_label  |
-|    parent_id      |                         |    failure_header |
-|    is_public      |                         |    failure_desc   |
-+-------------------+                         |    login_url      |
-         |                                    |    logout_url     |
-         v                                    |    token_ttl      |
-+-------------------+                         |    is_active      |
-|iiif_collection_   |                         +-------------------+
-|       i18n        |                                  |
-+-------------------+                                  |
-| PK id             |                                  v
-| FK collection_id  |                         +-------------------+
-|    culture        |                         | iiif_auth_token   |
-|    name           |                         +-------------------+
-|    description    |                         | PK id             |
-+-------------------+                         |    token_hash     |
-                                              | FK user_id        |
-                                              | FK service_id     |
-+-------------------+                         |    session_id     |
-|  iiif_ocr_text    |                         |    ip_address     |
-+-------------------+                         |    user_agent     |
-| PK id             |                         |    issued_at      |
-| FK digital_object_|                         |    expires_at     |
-|       id          |                         |    last_used_at   |
-| FK object_id      |                         |    is_revoked     |
-|    full_text      |                         +-------------------+
-|    format         |
-|    language       |                         +-------------------+
-|    confidence     |                         |iiif_auth_access_  |
-+-------------------+                         |       log         |
-         |                                    +-------------------+
-         v                                    | PK id             |
-+-------------------+                         | FK object_id      |
-|  iiif_ocr_block   |                         | FK user_id        |
-+-------------------+                         | FK token_id       |
-| PK id             |                         |    action         |
-| FK ocr_id         |                         |    ip_address     |
-|    page_number    |                         |    user_agent     |
-|    block_type     |                         |    details (JSON) |
-|    text           |                         |    created_at     |
-|    x, y, w, h     |                         +-------------------+
-|    confidence     |
-+-------------------+                         +-------------------+
-                                              |iiif_auth_         |
-+-------------------+                         |   repository      |
-|iiif_viewer_       |                         +-------------------+
-|   settings        |                         | PK id             |
-+-------------------+                         | FK repository_id  |
-| PK id             |                         | FK service_id     |
-|    setting_key    |                         |    degraded_access|
-|    setting_value  |                         |    degraded_width |
-|    description    |                         +-------------------+
-+-------------------+
+iiif_collection ──► iiif_collection_i18n (1:N)
+                ──► iiif_collection_item (1:N, CASCADE)
+                ──► iiif_collection (self-ref parent_id)
+
+iiif_annotation ──► iiif_annotation_body (1:N, CASCADE)
+
+iiif_auth_service ──► iiif_auth_token (1:N)
+                  ──► iiif_auth_resource (1:N)
+
+iiif_ocr_text ──► iiif_ocr_block (1:N)
 ```
 
 ---
 
-## IIIF Auth API 1.0 Implementation
+## Routing
 
-### Authentication Flow Diagram
+Routes are registered in `ahgIiifPluginConfiguration.class.php` via the `routing.load_configuration` event.
+
+### Manifest Routes
+
+| Method | Route | Action | Description |
+|--------|-------|--------|-------------|
+| GET | `/iiif/manifest/:slug` | manifest | IIIF 2.1 manifest by slug |
+| GET | `/iiif/manifest/id/:id` | manifestById | IIIF 2.1 manifest by ID |
+
+### Annotation Routes
+
+| Method | Route | Action | Description |
+|--------|-------|--------|-------------|
+| GET | `/iiif/annotations/object/:id` | listAnnotations | Annotations for object |
+| POST | `/iiif/annotations` | createAnnotation | Create annotation |
+| PUT | `/iiif/annotations/:id` | updateAnnotation | Update annotation |
+| DELETE | `/iiif/annotations/:id` | deleteAnnotation | Delete annotation |
+
+### Collection Routes
+
+| Method | Route | Action | Description |
+|--------|-------|--------|-------------|
+| GET | `/manifest-collections` | index | List all collections |
+| GET | `/manifest-collection/new` | new | Create form |
+| POST | `/manifest-collection/create` | create | Create collection |
+| GET | `/manifest-collection/:id/view` | view | View collection |
+| GET | `/manifest-collection/:id/edit` | edit | Edit form |
+| PUT | `/manifest-collection/:id/update` | update | Update collection |
+| DELETE | `/manifest-collection/:id/delete` | delete | Delete collection |
+| POST | `/manifest-collection/:id/items/add` | addItems | Add items |
+| GET | `/manifest-collection/:slug/manifest.json` | manifest | IIIF Collection manifest |
+
+### Media Routes
+
+| Method | Route | Action | Description |
+|--------|-------|--------|-------------|
+| GET | `/media/stream/:id` | stream | Stream with transcoding |
+| GET | `/media/download/:id` | download | Download original |
+| GET | `/media/snippets/:id` | snippets | Get/manage snippets |
+| GET | `/media/extract/:id` | extract | Extract metadata (FFprobe) |
+| POST | `/media/transcribe/:id` | transcribe | Start transcription |
+| GET | `/media/transcription/:id/:format` | transcription | Get transcription (json/vtt/srt/txt) |
+| GET | `/media/convert/:id` | convert | On-demand format conversion |
+| GET | `/media/metadata/:id` | metadata | Get extracted metadata |
+
+### Auth Routes (IIIF Auth API 1.0)
+
+| Method | Route | Action | Description |
+|--------|-------|--------|-------------|
+| GET | `/iiif/auth/login/:service` | login | Interactive login |
+| GET | `/iiif/auth/token/:service` | token | Request access token |
+| GET | `/iiif/auth/logout/:service` | logout | Revoke token |
+| POST | `/iiif/auth/confirm/:service` | confirm | Clickthrough confirmation |
+| GET | `/iiif/auth/check/:id` | check | Check access for object |
+
+---
+
+## Manifest Generation
+
+### Process
+
+1. Query `information_object` by slug or ID (Laravel Query Builder)
+2. Get all `digital_object` records for the object
+3. Build IIIF identifier: `str_replace('/', '_SL_', $path . $name)`
+4. Check for multi-page TIFF (probe Cantaloupe for pages 2-100)
+5. Generate canvases (one per digital object, or one per page for multi-page TIFFs)
+6. Return IIIF Presentation API 2.1 manifest with CORS headers
+
+### Multi-Page TIFF Detection
+
+```php
+// Probe Cantaloupe for page 2
+$page2InfoUrl = "{$cantaloupeBaseUrl}/iiif/2/{$cantaloupeId};2/info.json";
+$page2Info = @file_get_contents($page2InfoUrl);
+if ($page2Info !== false) {
+    $isMultiPageTiff = true;
+    // Continue probing up to page 100
+}
+```
+
+### Manifest Structure (IIIF 2.1)
+
+```json
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@type": "sc:Manifest",
+  "@id": "https://host/iiif/manifest/slug",
+  "label": "Object Title",
+  "sequences": [{
+    "@type": "sc:Sequence",
+    "canvases": [{
+      "@type": "sc:Canvas",
+      "label": "Page 1",
+      "width": 4000,
+      "height": 3000,
+      "images": [{
+        "@type": "oa:Annotation",
+        "resource": {
+          "@type": "dctypes:Image",
+          "service": {
+            "@context": "http://iiif.io/api/image/2/context.json",
+            "@id": "https://host/iiif/2/identifier",
+            "profile": "http://iiif.io/api/image/2/level2.json"
+          }
+        }
+      }]
+    }]
+  }]
+}
+```
+
+---
+
+## Viewer Manager (JavaScript)
+
+### File: `web/js/iiif-viewer-manager.js`
+
+ES6 module that manages all viewer types with lazy-loading and preference persistence.
+
+### Supported Viewers
+
+| Viewer | Content | Source | Library |
+|--------|---------|--------|---------|
+| OpenSeadragon | Images (deep zoom) | CDN + bundled | openseadragon@3.1.0 |
+| Mirador 3 | Rich IIIF workspace | Bundled | mirador.min.js |
+| PDF.js | PDF documents | CDN | pdf.js@3.11.174 |
+| model-viewer | 3D models | CDN | model-viewer@3.3.0 |
+| Annotorious | Annotations on OSD | Bundled | annotorious-openseadragon |
+
+### Viewer Selection Logic
 
 ```
-+----------+                                              +----------+
-|  IIIF    |                                              |   AtoM   |
-|  Client  |                                              |  Server  |
-| (Mirador)|                                              |          |
-+----+-----+                                              +----+-----+
-     |                                                         |
-     |  1. Request Manifest                                    |
-     |-------------------------------------------------------->|
-     |                                                         |
-     |  2. Manifest with Auth Service Description              |
-     |<--------------------------------------------------------|
-     |                                                         |
-     |  3. Open Login Window (popup)                           |
-     |  +-----------------+                                    |
-     |  | /iiif/auth/     |                                    |
-     |  | login/:service  |----------------------------------->|
-     |  +-----------------+                                    |
-     |                                                         |
-     |                         4a. Clickthrough: Show Terms    |
-     |                    <------------------------------------|
-     |                                                         |
-     |                         4b. Login: Redirect to AtoM     |
-     |                    <------------------------------------|
-     |                                                         |
-     |  5. User Authenticates/Agrees                           |
-     |  +-----------------+                                    |
-     |  | POST /iiif/auth/|                                    |
-     |  | confirm/:service|----------------------------------->|
-     |  +-----------------+                                    |
-     |                                                         |
-     |                         6. Set Cookie, Close Window     |
-     |                    <------------------------------------|
-     |                                                         |
-     |  7. Token Request (JSONP)                               |
-     |  +-----------------+                                    |
-     |  | /iiif/auth/     |                                    |
-     |  | token/:service  |----------------------------------->|
-     |  +-----------------+                                    |
-     |                                                         |
-     |                         8. Access Token Response        |
-     |                    <------------------------------------|
-     |                                                         |
-     |  9. Request Image with Token                            |
-     |-------------------------------------------------------->|
-     |                                                         |
-     |                         10. Full Resolution Image       |
-     |<--------------------------------------------------------|
-     |                                                         |
+Content type detected
+    │
+    ├─ PDF → PDF.js (override user preference)
+    ├─ Audio/Video → HTML5 player (override user preference)
+    ├─ 3D model → model-viewer (override user preference)
+    └─ Image → User preference (OpenSeadragon or Mirador)
+                Saved in localStorage
 ```
+
+### Key Methods
+
+```javascript
+class IiifViewerManager {
+    constructor(containerId, options)
+    initOpenSeadragon(manifestUrl)
+    initMirador(manifestUrl)
+    initPdfViewer(pdfUrl)
+    init3DViewer(modelUrl)
+    switchViewer(viewerType)
+    toggleFullscreen()
+    toggleAnnotations()
+    showError(message)
+    destroy()
+}
+```
+
+---
+
+## Media Streaming
+
+### Transcoding (FFmpeg)
+
+When a file's MIME type is not browser-native, FFmpeg transcodes in real-time:
+
+**Video → MP4:**
+```bash
+ffmpeg -y -i INPUT \
+  -c:v libx264 -preset ultrafast -tune zerolatency -crf 23 \
+  -c:a aac -b:a 128k \
+  -movflags frag_keyframe+empty_moov+faststart \
+  -f mp4 pipe:1
+```
+
+**Audio → MP3:**
+```bash
+ffmpeg -y -i INPUT \
+  -c:a libmp3lame -b:a 192k \
+  -f mp3 pipe:1
+```
+
+### Formats Requiring Transcoding
+
+| Type | Formats |
+|------|---------|
+| Video | ASF, AVI, MOV, WMV, FLV, MKV, TS, WTV, HEVC, 3GP, VOB, MXF, MPEG |
+| Audio | AIFF, AU, AC3, 8SVX, WMA, RA, FLAC |
+
+### Range Request Support
+
+For native formats, HTTP Range requests enable seeking:
+
+```php
+if (isset($_SERVER['HTTP_RANGE'])) {
+    preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $matches);
+    http_response_code(206);
+    header("Content-Range: bytes {$start}-{$end}/{$fileSize}");
+}
+```
+
+### Format Conversion (non-streaming)
+
+| Source | Output | Tool |
+|--------|--------|------|
+| PSD, CR2 (RAW) | JPEG | ImageMagick |
+| DOCX, XLSX, PPTX | PDF | LibreOffice headless |
+| ZIP, RAR, TGZ | JSON file listing | Built-in |
+| TXT, CSV, XML | Plain text (500KB limit) | Built-in |
+| SVG | Served with correct MIME | Pass-through |
+
+Conversions cached in `/uploads/conversions/`.
+
+---
+
+## Transcription (Whisper)
+
+### Background Job Pattern
+
+1. Create lock file to prevent duplicate jobs
+2. Generate temporary PHP script in `/tmp`
+3. Launch as background process: `php script.php >> log 2>&1 &`
+4. Client polls `/media/transcription/:id` every 5 seconds
+5. Status file written on completion
+
+### TranscriptionService
+
+- Python/Whisper integration
+- Models: tiny, base, small, medium, large
+- Language auto-detection or manually specified
+- Output: segments (timestamped), full_text, confidence
+
+### Export Formats
+
+| Format | Route | Use |
+|--------|-------|-----|
+| JSON | `/media/transcription/:id/json` | Full data with timestamps |
+| WebVTT | `/media/transcription/:id/vtt` | Browser captions |
+| SRT | `/media/transcription/:id/srt` | Subtitle editors |
+| TXT | `/media/transcription/:id/txt` | Plain text |
+
+---
+
+## Annotation Service
+
+### IiifAnnotationService Methods
+
+```php
+getAnnotationsForObject(int $objectId): array
+getAnnotationsForCanvas(string $canvasId): array
+createAnnotation(array $data): int
+updateAnnotation(int $annotationId, array $data): bool
+deleteAnnotation(int $annotationId): bool
+formatAsAnnotationPage(array $annotations, int $objectId): array
+formatAnnotationAsIiif(object $annotation): array
+parseAnnotoriousAnnotation(array $annoData, int $objectId): array
+```
+
+### Motivations
+
+| Motivation | Purpose |
+|------------|---------|
+| commenting | General comments on a region |
+| tagging | Tag with a keyword |
+| describing | Detailed description |
+| linking | Link to external resource |
+| transcribing | Transcribe text in image |
+| identifying | Identify a person/object |
+
+### Selectors (JSON stored in `target_selector`)
+
+- **FragmentSelector:** `xywh=x,y,w,h` (rectangle)
+- **SvgSelector:** `<svg>...</svg>` (polygon, freehand)
+
+---
+
+## IIIF Auth API 1.0
 
 ### Auth Profiles
 
@@ -256,265 +415,261 @@ The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperabil
 |---------|-------------|----------|
 | `login` | Requires AtoM authentication | Registered users only |
 | `clickthrough` | User agrees to terms | Public with acknowledgment |
-| `kiosk` | Location-based access | On-premises terminals |
+| `kiosk` | Location-based cookie | On-premises terminals |
 | `external` | External auth provider | SSO integration |
 
-### Manifest with Auth Service
+### Authentication Flow
 
-```json
-{
-  "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://example.org/iiif/manifest/abc123",
-  "type": "Manifest",
-  "label": {"en": ["Protected Resource"]},
-  "service": [
-    {
-      "@context": "http://iiif.io/api/auth/1/context.json",
-      "@id": "https://example.org/iiif/auth/login/login",
-      "profile": "http://iiif.io/api/auth/1/login",
-      "label": "Login Required",
-      "header": "Authentication Required",
-      "description": "Please log in to access this resource.",
-      "confirmLabel": "Login",
-      "failureHeader": "Authentication Failed",
-      "failureDescription": "You must be logged in to view this content.",
-      "service": [
-        {
-          "@id": "https://example.org/iiif/auth/token/login",
-          "profile": "http://iiif.io/api/auth/1/token"
-        },
-        {
-          "@id": "https://example.org/iiif/auth/logout/login",
-          "profile": "http://iiif.io/api/auth/1/logout",
-          "label": "Logout"
-        }
-      ]
-    }
-  ]
-}
+```
+Client                                              Server
+  │                                                    │
+  │  1. Request manifest                               │
+  │───────────────────────────────────────────────────►│
+  │                                                    │
+  │  2. Manifest with service block                    │
+  │◄───────────────────────────────────────────────────│
+  │                                                    │
+  │  3. Open popup: /iiif/auth/login/:service          │
+  │───────────────────────────────────────────────────►│
+  │                                                    │
+  │  4. Login page / Clickthrough terms                │
+  │◄───────────────────────────────────────────────────│
+  │                                                    │
+  │  5. User authenticates/agrees                      │
+  │───────────────────────────────────────────────────►│
+  │                                                    │
+  │  6. Set cookie, close popup                        │
+  │◄───────────────────────────────────────────────────│
+  │                                                    │
+  │  7. Token request: /iiif/auth/token/:service       │
+  │───────────────────────────────────────────────────►│
+  │                                                    │
+  │  8. Access token response                          │
+  │◄───────────────────────────────────────────────────│
+  │                                                    │
+  │  9. Request image with token                       │
+  │───────────────────────────────────────────────────►│
+  │                                                    │
+  │  10. Full resolution image                         │
+  │◄───────────────────────────────────────────────────│
 ```
 
----
-
-## API Reference
-
-### Routes
-
-#### Manifest Routes
-
-| Method | Route | Action | Description |
-|--------|-------|--------|-------------|
-| GET | `/iiif/manifest/:slug` | manifest | Get IIIF manifest by slug |
-| GET | `/iiif/manifest/id/:id` | manifestById | Get IIIF manifest by ID |
-
-#### Collection Routes
-
-| Method | Route | Action | Description |
-|--------|-------|--------|-------------|
-| GET | `/manifest-collections` | index | List all collections |
-| GET | `/manifest-collection/new` | new | Create collection form |
-| POST | `/manifest-collection/create` | create | Create collection |
-| GET | `/manifest-collection/:id/edit` | edit | Edit collection form |
-| PUT | `/manifest-collection/:id/update` | update | Update collection |
-| DELETE | `/manifest-collection/:id/delete` | delete | Delete collection |
-| GET | `/manifest-collection/:slug/manifest.json` | manifest | Get collection manifest |
-
-#### Auth Routes (IIIF Auth API 1.0)
-
-| Method | Route | Action | Description |
-|--------|-------|--------|-------------|
-| GET | `/iiif/auth/login/:service` | login | Interactive login |
-| GET | `/iiif/auth/token/:service` | token | Request access token |
-| GET | `/iiif/auth/logout/:service` | logout | Revoke token |
-| POST | `/iiif/auth/confirm/:service` | confirm | Confirm clickthrough |
-| GET | `/iiif/auth/check/:id` | check | Check access for object |
-
-#### Admin Routes
-
-| Method | Route | Action | Description |
-|--------|-------|--------|-------------|
-| GET | `/admin/iiif-settings` | settings | Viewer settings |
-| GET | `/admin/iiif-auth` | index | Auth admin panel |
-| POST | `/admin/iiif-auth/protect` | protect | Protect resource |
-| POST | `/admin/iiif-auth/unprotect` | unprotect | Remove protection |
-
----
-
-## IiifAuthService Methods
-
-### Access Control
+### IiifAuthService Methods
 
 ```php
-/**
- * Check if access is allowed for an object.
- *
- * @param int $objectId Information object ID
- * @param int|null $userId Current user ID (null for anonymous)
- * @return array ['allowed' => bool, 'degraded' => bool, 'service' => ?array]
- */
-public function checkAccess(int $objectId, ?int $userId = null): array
+checkAccess(int $objectId, ?int $userId = null): array
+// Returns: ['allowed' => bool, 'degraded' => bool, 'service' => ?array]
 
-/**
- * Get auth resource configuration for an object.
- * Checks: direct assignment → repository level → parent hierarchy
- */
-protected function getAuthResourceForObject(int $objectId): ?object
+requestToken(string $serviceName, ?int $userId, ?string $messageId): array
+validateCurrentToken(?int $serviceId = null): ?object
+logout(): bool
+cleanupExpiredTokens(): int
+
+setObjectAuth(int $objectId, string $serviceName, array $options = []): bool
+// Options: apply_to_children, degraded_access, degraded_width, notes
+
+removeObjectAuth(int $objectId, ?string $serviceName = null): bool
 ```
-
-### Token Management
-
-```php
-/**
- * Request access token.
- *
- * @param string $serviceName Service identifier
- * @param int|null $userId Authenticated user ID
- * @param string|null $messageId Client message ID for CORS
- * @return array Token response or error
- */
-public function requestToken(string $serviceName, ?int $userId = null, ?string $messageId = null): array
-
-/**
- * Validate current request's token.
- * Checks cookie and Authorization header.
- */
-public function validateCurrentToken(?int $serviceId = null): ?object
-
-/**
- * Revoke token and clear cookie.
- */
-public function logout(): bool
-
-/**
- * Cleanup expired and revoked tokens.
- */
-public function cleanupExpiredTokens(): int
-```
-
-### Resource Protection
-
-```php
-/**
- * Set auth requirement for an object.
- *
- * @param int $objectId Information object ID
- * @param string $serviceName Service name (login, public, restricted)
- * @param array $options [apply_to_children, degraded_access, degraded_width, notes]
- */
-public function setObjectAuth(int $objectId, string $serviceName, array $options = []): bool
-
-/**
- * Remove auth requirement from an object.
- */
-public function removeObjectAuth(int $objectId, ?string $serviceName = null): bool
-```
-
----
-
-## Viewer Settings
-
-Settings are stored in `iiif_viewer_settings` table:
-
-| Key | Default | Description |
-|-----|---------|-------------|
-| `viewer_type` | mirador | openseadragon, mirador, carousel, single |
-| `viewer_height` | 500px | Viewer container height |
-| `background_color` | #b1aaaa | Viewer background |
-| `enable_fullscreen` | 1 | Show fullscreen button |
-| `show_zoom_controls` | 1 | Show zoom buttons |
-| `carousel_autoplay` | 1 | Auto-rotate carousel |
-| `carousel_interval` | 5000 | Rotation interval (ms) |
-| `homepage_collection_enabled` | 1 | Show on homepage |
-| `homepage_collection_id` | null | Featured collection ID |
-
----
-
-## Integration with atom-framework
-
-The plugin uses services from atom-framework for manifest generation:
-
-```
-atom-framework/src/Extensions/IiifViewer/
-├── Services/
-│   ├── IiifManifestService.php    # IIIF 3.0 manifest generation
-│   ├── AnnotationService.php       # W3C Web Annotations
-│   ├── OcrService.php              # OCR text overlays
-│   ├── TranscriptionService.php    # Transcription management
-│   └── ViewerService.php           # Viewer configuration
-├── Controllers/
-│   └── IiifController.php          # Direct API access
-└── Helpers/
-    └── IiifViewerHelper.php        # Template helpers
-```
-
----
-
-## Security Considerations
 
 ### Token Security
 
-- Tokens are hashed with SHA-256 before storage
-- Cookies use `HttpOnly`, `Secure`, and `SameSite=None` flags
-- Token TTL configurable per service (default: 1 hour)
-- Expired tokens automatically cleaned up
+- Tokens hashed with SHA-256 before storage
+- Cookies: `HttpOnly`, `Secure`, `SameSite=None`
+- Configurable TTL per service (default: 1 hour)
+- Automatic cleanup of expired tokens
 
 ### Access Inheritance
 
 ```
 Repository Level
-    └── Fonds/Collection (apply_to_children=true)
-        └── Series (inherits protection)
-            └── File (inherits protection)
-                └── Item (inherits protection)
+    └── Fonds (apply_to_children=true)
+        └── Series (inherits)
+            └── File (inherits)
+                └── Item (inherits)
 ```
-
-### Degraded Access
-
-When `degraded_access=true`:
-- Thumbnails accessible without authentication
-- Full resolution requires valid token
-- Configurable max width for degraded images
 
 ---
 
-## CLI Commands
+## Nginx Integration
 
-Currently, auth management is via admin UI. Future CLI commands planned:
+### extensions.conf
 
-```bash
-# Protect a resource
-php symfony iiif:protect --object=12345 --service=login
+```nginx
+# Media streaming - buffering off for real-time transcoding
+location ~ ^/media/stream/ {
+    fastcgi_buffering off;
+    fastcgi_read_timeout 600;
+    # → PHP-FPM
+}
 
-# List protected resources
-php symfony iiif:list-protected
+# Format conversion - 120s timeout for LibreOffice/ImageMagick
+location ~ ^/media/convert/ {
+    fastcgi_read_timeout 120;
+    # → PHP-FPM
+}
 
-# Cleanup expired tokens
-php symfony iiif:cleanup-tokens
+# Transcription - 600s timeout for Whisper
+location ~ ^/media/transcribe/ {
+    fastcgi_read_timeout 600;
+    # → PHP-FPM
+}
+
+# Static viewer assets - 7 day cache
+location /atom-framework/src/Extensions/IiifViewer/public/ {
+    expires 7d;
+}
+
+# Optional: Cantaloupe IIIF Image API proxy
+# location /iiif/ {
+#     proxy_pass http://127.0.0.1:8182/iiif/;
+# }
 ```
+
+---
+
+## Helper Functions (IiifViewerHelper.php)
+
+### Main Entry Point
+
+```php
+render_iiif_viewer($resource, $options = [])
+```
+
+Detects content type, selects viewer, builds HTML with container + controls + JavaScript initialization. Returns complete HTML string.
+
+### Content-Specific Renderers
+
+| Function | Purpose |
+|----------|---------|
+| `ahg_iiif_render_pdf_viewer_html()` | iframe with browser PDF viewer |
+| `ahg_iiif_render_3d_viewer_html()` | `<model-viewer>` custom element |
+| `ahg_iiif_render_av_viewer_html()` | `<video>` or `<audio>` element with streaming URL |
+
+### UI Components
+
+| Function | Purpose |
+|----------|---------|
+| `ahg_iiif_render_viewer_toggle()` | Viewer type switch buttons |
+| `ahg_iiif_render_viewer_controls()` | IIIF badge, fullscreen, download, annotations |
+| `ahg_iiif_render_thumbnail_strip()` | Multi-image thumbnail navigation |
+| `ahg_iiif_render_viewer_javascript()` | ES6 module initialization script |
+
+### URL Helpers
+
+| Function | Purpose |
+|----------|---------|
+| `get_iiif_base_url()` | Auto-detects from request or sfConfig |
+| `get_iiif_cantaloupe_url()` | Handles relative URLs to Cantaloupe |
+| `is_iiif_available()` | Checks if IIIF is enabled |
+| `get_digital_object_url()` | Checks for PDF redactions (ahgPrivacyPlugin) |
+| `has_3d_models()` | Uses ahg3DModelPlugin or extension check |
+
+---
+
+## Plugin Integration Points
+
+| Plugin | Integration | Pattern |
+|--------|-------------|---------|
+| ahgCorePlugin | Database bootstrap | `DatabaseBootstrap::initializeFromAtom()` |
+| ahgUiOverridesPlugin | Viewer dispatch | Determines which component to render |
+| ahgThemeB5Plugin | Bootstrap 5 UI | Digital object display templates |
+| ahg3DModelPlugin | 3D model detection | `has_3d_model()`, try/catch if absent |
+| ahgPrivacyPlugin | PDF redactions | `get_digital_object_url()`, try/catch if absent |
+
+All integration is guarded with try/catch or `class_exists()` — the plugin degrades gracefully when optional plugins are missing.
+
+---
+
+## CSP Compliance
+
+All inline `<script>` and `<style>` tags use the CSP nonce:
+
+```php
+$n = sfConfig::get('csp_nonce', '');
+$nonceAttr = $n ? preg_replace('/^nonce=/', ' nonce="', $n) . '"' : '';
+echo '<script type="module"' . $nonceAttr . '>';
+```
+
+CDN domains must be whitelisted in `config/app.yml`:
+- `script-src`: `https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com`
+- `style-src`: Same + `'unsafe-hashes'` for inline style attributes
+
+---
+
+## Configuration (sfConfig)
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `app_iiif_enabled` | true | Master on/off |
+| `app_iiif_base_url` | (auto) | Public base URL |
+| `app_iiif_cantaloupe_url` | `/iiif/2` | Public Cantaloupe URL |
+| `app_iiif_cantaloupe_internal_url` | `http://127.0.0.1:8182` | Internal Cantaloupe URL |
+| `app_iiif_plugin_path` | `/plugins/ahgIiifPlugin/web` | Plugin web path |
+| `app_iiif_default_viewer` | openseadragon | Default viewer |
+| `app_iiif_viewer_height` | 600px | Viewer CSS height |
+| `app_iiif_enable_annotations` | true | Enable annotation UI |
+
+### Viewer Settings (iiif_viewer_settings table)
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `viewer_type` | mirador | openseadragon, mirador, carousel, single |
+| `carousel_autoplay` | 1 | Auto-rotate carousel |
+| `carousel_interval` | 5000 | Rotation interval (ms) |
+| `background_color` | #b1aaaa | Viewer background |
+| `homepage_collection_enabled` | 1 | Show collection on homepage |
+| `homepage_collection_id` | null | Featured collection ID |
+
+---
+
+## Static Assets
+
+### Bundled Libraries
+
+| Path | Library |
+|------|---------|
+| `web/public/mirador/` | Mirador 3 (CSS + JS) |
+| `web/public/openseadragon/` | OpenSeadragon |
+| `web/public/viewers/annotorious/` | Annotorious for OSD |
+| `web/images/` | OSD button icons (PNG) |
+| `web/js/iiif-viewer-manager.js` | Main viewer manager (ES6) |
+| `web/js/atom-media-player.js` | Enhanced media player |
+
+### CDN Dependencies (lazy-loaded)
+
+| Library | CDN URL |
+|---------|---------|
+| OpenSeadragon 3.1.0 | cdn.jsdelivr.net (fallback if bundled fails) |
+| PDF.js 3.11.174 | cdnjs.cloudflare.com |
+| model-viewer 3.3.0 | ajax.googleapis.com |
+
+---
+
+## Error Handling
+
+| Layer | Strategy |
+|-------|----------|
+| Manifest generation | Returns 404 if object not found or no digital objects |
+| Viewer JS | Catches errors, falls back to OpenSeadragon, shows error in container |
+| Media streaming | Falls back to transcoding if direct playback fails; 500 on FFmpeg failure |
+| Transcription | Background job with status file; polls for completion |
+| Auth | Logs all access attempts; degraded access on failure |
+| All services | Wrapped in try/catch; failures logged to PHP error log |
 
 ---
 
 ## Troubleshooting
-
-### Common Issues
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
 | Token not accepted | Cookie blocked by browser | Check SameSite settings |
 | Auth popup blocked | Browser popup blocker | Whitelist domain |
 | 403 on images | Missing Cantaloupe config | Check nginx proxy |
-| Manifest returns 404 | Missing digital object | Verify object has media |
-
-### Debug Logging
-
-```php
-// Enable in IiifAuthService
-error_log('IIIF Auth: ' . json_encode([
-    'action' => 'checkAccess',
-    'object_id' => $objectId,
-    'result' => $result
-]));
-```
+| Manifest returns 404 | No digital objects | Verify object has media |
+| Video won't play | FFmpeg not installed | `apt install ffmpeg` |
+| Transcription stuck | Whisper process failed | Check lock file in /tmp |
+| 3D model not rendering | WebGL not available | Check browser support |
+| Page frozen | CSP blocking scripts | Add nonce to all script tags |
 
 ---
 
@@ -522,6 +677,7 @@ error_log('IIIF Auth: ' . json_encode([
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2.0 | 2026-02 | Added media streaming, transcription, format conversion, snippets, annotations REST API, 3D viewer, viewer manager JS |
 | 1.1.0 | 2025-01-24 | Added IIIF Auth API 1.0 support |
 | 1.0.0 | 2025-01-15 | Initial release with manifests and collections |
 

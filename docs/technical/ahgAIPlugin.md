@@ -740,6 +740,32 @@ Options:
   --stats            Show training statistics only
 ```
 
+### ai:process-pending
+
+Process pending AI extraction queue (fallback for Gearman).
+
+```bash
+php symfony ai:process-pending [options]
+
+Options:
+  --limit=N          Maximum items to process (default: 50)
+  --task-type=TYPE   Task type to process: ner, summarize (default: ner)
+  --dry-run          Preview without processing
+```
+
+**Examples:**
+
+```bash
+# Process up to 50 pending NER extractions
+php symfony ai:process-pending --limit=50
+
+# Preview what would be processed
+php symfony ai:process-pending --dry-run
+
+# Process pending summarization tasks
+php symfony ai:process-pending --task-type=summarize
+```
+
 ### ai:suggest-description
 
 Generate AI-powered description suggestions using LLM providers.
@@ -1194,6 +1220,139 @@ class arNerExtractJob extends arBaseJob
      *   runSpellCheck - Run spell check (default: false)
      */
     public function runJob($parameters)
+}
+```
+
+---
+
+## Auto-trigger NER on Document Upload
+
+### Overview
+
+The plugin can automatically trigger NER extraction when digital objects are uploaded. This feature listens to the `QubitDigitalObject::insert` event and queues NER extraction jobs for processable document types.
+
+### How It Works
+
+```
+1. User uploads digital object (PDF, DOCX, etc.)
+         ↓
+2. Symfony event dispatcher fires QubitDigitalObject::insert
+         ↓
+3. Plugin checks if auto-trigger is enabled
+         ↓
+4. Plugin checks if MIME type is processable
+         ↓
+5a. If Gearman available → Queue job to arNerExtractJob
+5b. If Gearman unavailable → Add to ahg_ai_pending_extraction table
+         ↓
+6. Job processed (immediately by Gearman or later by cron)
+```
+
+### Processable MIME Types
+
+| MIME Type | Description |
+|-----------|-------------|
+| application/pdf | PDF documents |
+| text/plain | Plain text files |
+| text/html | HTML documents |
+| application/msword | Word documents (.doc) |
+| application/vnd.openxmlformats-officedocument.wordprocessingml.document | Word documents (.docx) |
+| application/rtf | Rich text format |
+
+### Configuration
+
+Auto-trigger is controlled by the setting `auto_extract_on_upload` in `ahg_ner_settings`:
+
+| Setting Key | Value | Description |
+|-------------|-------|-------------|
+| auto_extract_on_upload | 1 | Enable auto-trigger on document upload |
+| auto_extract_on_upload | 0 | Disable auto-trigger (default) |
+
+**To enable via SQL:**
+
+```sql
+INSERT INTO ahg_ner_settings (setting_key, setting_value)
+VALUES ('auto_extract_on_upload', '1')
+ON DUPLICATE KEY UPDATE setting_value = '1';
+```
+
+**To enable via UI:**
+
+Navigate to **Admin > AHG Settings > AI Services > NER** and enable "Auto-extract on upload".
+
+### Fallback Queue Tables
+
+When Gearman is unavailable, jobs are queued in the database:
+
+#### ahg_ai_pending_extraction
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | BIGINT | Primary key |
+| object_id | INT | Information object ID |
+| digital_object_id | INT | Digital object that triggered extraction |
+| task_type | VARCHAR(50) | Task type (ner, summarize) |
+| status | ENUM | pending, processing, completed, failed |
+| attempt_count | INT | Retry attempt counter |
+| error_message | TEXT | Last error message |
+| created_at | TIMESTAMP | Queue time |
+| processed_at | TIMESTAMP | Completion time |
+
+#### ahg_ai_auto_trigger_log
+
+Audit log for auto-triggered extractions:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | BIGINT | Primary key |
+| object_id | INT | Information object ID |
+| digital_object_id | INT | Digital object ID |
+| task_type | VARCHAR(50) | Task type |
+| status | VARCHAR(50) | queued or pending |
+| created_at | TIMESTAMP | Event time |
+
+### Cron Job for Pending Queue
+
+If Gearman is not available, run the pending queue processor via cron:
+
+```bash
+# Process pending NER extractions every 5 minutes
+*/5 * * * * cd /usr/share/nginx/atom && php symfony ai:process-pending --limit=20 >> /var/log/atom/ai-pending.log 2>&1
+```
+
+The `ai:process-pending` command:
+- Fetches pending items from `ahg_ai_pending_extraction`
+- Processes each item using the appropriate service
+- Automatically retries failed items up to 3 times
+- Marks items as completed or failed after processing
+
+### Implementation Details
+
+**Event Hook (in ahgAIPluginConfiguration.class.php):**
+
+```php
+public function initialize()
+{
+    // ... other initialization ...
+
+    // Auto-trigger NER on digital object upload (Issue #19)
+    $this->dispatcher->connect('QubitDigitalObject::insert', [$this, 'onDigitalObjectInsert']);
+}
+
+public function onDigitalObjectInsert(sfEvent $event)
+{
+    $digitalObject = $event->getSubject();
+    $objectId = $digitalObject->objectId;
+
+    if (!$this->isAutoTriggerEnabled()) {
+        return;
+    }
+
+    if (!$this->isProcessableMimeType($digitalObject->mimeType ?? '')) {
+        return;
+    }
+
+    $this->queueNerExtraction($objectId, $digitalObject->id);
 }
 ```
 

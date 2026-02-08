@@ -159,6 +159,70 @@ Navigate to: **Admin** -> **AI Tools** -> **NER Review**
 +------------------------------------------------------------+
 ```
 
+### Auto-trigger NER on Document Upload
+
+NER extraction can be automatically triggered when documents are uploaded, saving time and ensuring all uploaded content is processed.
+
+#### Enabling Auto-trigger
+
+Navigate to: **Admin > AHG Settings > AI Services > NER**
+
+Enable the **"Auto-extract on upload"** setting.
+
+#### How It Works
+```
++------------------------------------------------------------------+
+|                  AUTO-TRIGGER WORKFLOW                            |
++------------------------------------------------------------------+
+|                                                                   |
+|   1. USER UPLOADS DOCUMENT                                        |
+|      (PDF, Word, RTF, or text file)                               |
+|                |                                                  |
+|                v                                                  |
+|   2. SYSTEM CHECKS                                                |
+|      - Is auto-trigger enabled?                                   |
+|      - Is file type processable?                                  |
+|                |                                                  |
+|                v                                                  |
+|   3. NER EXTRACTION QUEUED                                        |
+|      - Background processing via Gearman                          |
+|      - Or pending queue if Gearman unavailable                    |
+|                |                                                  |
+|                v                                                  |
+|   4. ENTITIES EXTRACTED                                           |
+|      - Results available in NER Review Dashboard                  |
+|                                                                   |
++------------------------------------------------------------------+
+```
+
+#### Supported Document Types for Auto-trigger
+```
++----------------------------------------------------------------+
+|                PROCESSABLE DOCUMENT TYPES                       |
++----------------------------------------------------------------+
+|  Type                              | Description                |
++------------------------------------+----------------------------+
+|  application/pdf                   | PDF documents              |
+|  text/plain                        | Plain text files           |
+|  text/html                         | HTML documents             |
+|  application/msword                | Word documents (.doc)      |
+|  application/vnd.openxmlformats-   | Word documents (.docx)     |
+|    officedocument.wordprocessingml.document                     |
+|  application/rtf                   | Rich text format           |
++----------------------------------------------------------------+
+```
+
+#### Processing Pending Queue
+
+If the background job system (Gearman) is unavailable, uploaded documents are queued for later processing. Run the pending queue processor via cron:
+
+```bash
+# Process pending NER extractions every 5 minutes
+*/5 * * * * cd /usr/share/nginx/atom && php symfony ai:process-pending --limit=20 >> /var/log/atom/ai-pending.log 2>&1
+```
+
+This cron job is available in the **Admin > AHG Settings > Cron Jobs** page.
+
 ---
 
 ## Translation
@@ -745,6 +809,20 @@ php symfony ai:ner-sync --stats
 ```
 
 **Note:** Training sync requires AHG Central integration to be configured. Go to **Admin > AHG Plugin Settings > AHG Central** to set up the API URL and key.
+
+### Pending Queue Processing
+```bash
+# Process pending NER extractions (fallback for Gearman)
+php symfony ai:process-pending --limit=50
+
+# Process pending summarization tasks
+php symfony ai:process-pending --task-type=summarize --limit=20
+
+# Preview what would be processed (dry run)
+php symfony ai:process-pending --dry-run
+```
+
+**Note:** This command is needed when Gearman is unavailable. Auto-triggered NER jobs from document uploads are queued to the database and processed by this command.
 
 ### Translation Commands
 ```bash
