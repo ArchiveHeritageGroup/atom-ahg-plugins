@@ -1,0 +1,25 @@
+{
+    "name": "AHG Actor Browse",
+    "machine_name": "ahgActorBrowsePlugin",
+    "version": "1.0.0",
+    "description": "High-performance actor browse and autocomplete using Laravel Query Builder and direct ES queries. Replaces base AtoM actor browse that causes N+1 query hangs.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["actor", "browse", "performance", "elasticsearch"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Actor browse via direct ES HTTP queries (no Elastica)",
+        "Batch facet population (2 queries instead of N+1)",
+        "Actor autocomplete via ES prefix search with DB fallback",
+        "Advanced search with boolean criteria",
+        "Multiple display modes (list, grid, card)"
+    ]
+}

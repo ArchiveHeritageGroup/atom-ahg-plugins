@@ -1,0 +1,7 @@
+actor_browse_override:
+  url: /actor/browse
+  param: { module: actorBrowse, action: browse }
+
+actor_autocomplete_override:
+  url: /actor/autocomplete
+  param: { module: actorBrowse, action: autocomplete }

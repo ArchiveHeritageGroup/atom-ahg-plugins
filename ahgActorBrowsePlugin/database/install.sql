@@ -1,0 +1,2 @@
+-- ahgActorBrowsePlugin: No custom tables needed
+-- This plugin overrides actor browse/autocomplete only
