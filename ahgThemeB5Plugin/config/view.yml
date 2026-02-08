@@ -30,11 +30,11 @@ informationobjectBrowse:
   stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
   javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
-actorBrowse:
+actorManage:
   stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
   javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 
-repositoryBrowse:
+repositoryManage:
   stylesheets: [/ahgThemeB5Plugin/css/display-modes.css]
   javascripts: [/ahgThemeB5Plugin/js/display-mode.js]
 

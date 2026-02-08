@@ -1,0 +1,23 @@
+{
+    "name": "ahgDonorManagePlugin",
+    "version": "1.0.0",
+    "description": "Donor browse and management using Laravel Query Builder",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["donor", "browse", "manage", "performance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Donor browse via Laravel Query Builder",
+        "Sort by name, identifier, last updated",
+        "Inline search by authorized form of name",
+        "Theme-compatible templates (SimplePager)"
+    ]
+}

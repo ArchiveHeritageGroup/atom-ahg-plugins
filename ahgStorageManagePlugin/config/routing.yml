@@ -1,0 +1,3 @@
+physicalobject_browse_override:
+  url: /physicalobject/browse
+  param: { module: storageManage, action: browse }

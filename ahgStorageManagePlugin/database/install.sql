@@ -1,0 +1,1 @@
+-- ahgStorageManagePlugin: No custom tables required

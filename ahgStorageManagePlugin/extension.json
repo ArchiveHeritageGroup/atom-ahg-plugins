@@ -1,0 +1,24 @@
+{
+    "name": "ahgStorageManagePlugin",
+    "version": "1.0.0",
+    "description": "Physical storage browse and management using Laravel Query Builder",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["physical-storage", "browse", "manage", "performance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Physical storage browse via Laravel Query Builder",
+        "Sort by name and location with direction toggle",
+        "Inline search across name, location, and type",
+        "Export storage report link",
+        "Theme-compatible templates (SimplePager)"
+    ]
+}

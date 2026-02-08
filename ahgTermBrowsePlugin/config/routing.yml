@@ -1,5 +1,0 @@
-term_browse_override:
-  class: QubitResourceRoute
-  url: /term/:slug
-  param: { module: termBrowse, action: index }
-  requirements: { slug: "[a-zA-Z0-9_-]+" }

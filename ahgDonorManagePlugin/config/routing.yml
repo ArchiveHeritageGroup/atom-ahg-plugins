@@ -1,0 +1,3 @@
+donor_browse_override:
+  url: /donor/browse
+  param: { module: donorManage, action: browse }

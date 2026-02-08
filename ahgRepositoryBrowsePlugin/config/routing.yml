@@ -1,3 +1,0 @@
-repository_browse_override:
-  url: /repository/browse
-  param: { module: repositoryBrowse, action: browse }

@@ -1,0 +1,1 @@
+-- ahgDonorManagePlugin: No custom tables required

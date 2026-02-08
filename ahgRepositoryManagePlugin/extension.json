@@ -1,0 +1,24 @@
+{
+    "name": "ahgRepositoryManagePlugin",
+    "version": "1.0.0",
+    "description": "High-performance archival institution browse using Laravel Query Builder and direct ES queries",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "browse",
+    "keywords": ["repository", "institution", "browse", "performance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [],
+    "features": [
+        "Repository browse via direct ES HTTP queries",
+        "Batch aggregation population via Laravel Query Builder",
+        "Advanced filters (thematic area, archive type, region)",
+        "Card and table view modes with DisplayModeService",
+        "Theme-compatible templates (SimplePager)"
+    ]
+}
