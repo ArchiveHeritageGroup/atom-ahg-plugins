@@ -113,11 +113,17 @@ class displayActions extends sfActions
         $this->identifierFilter = $request->getParameter("identifier");
         $this->referenceCodeFilter = $request->getParameter("referenceCode");
         $this->scopeAndContentFilter = $request->getParameter("scopeAndContent");
+        $this->extentAndMediumFilter = $request->getParameter("extentAndMedium");
+        $this->archivalHistoryFilter = $request->getParameter("archivalHistory");
+        $this->acquisitionFilter = $request->getParameter("acquisition");
         $this->creatorSearchFilter = $request->getParameter("creatorSearch");
         $this->subjectSearchFilter = $request->getParameter("subjectSearch");
         $this->placeSearchFilter = $request->getParameter("placeSearch");
         $this->genreSearchFilter = $request->getParameter("genreSearch");
         $this->repoFilter = $request->getParameter('repo');
+        $this->startDateFilter = $request->getParameter('startDate');
+        $this->endDateFilter = $request->getParameter('endDate');
+        $this->rangeTypeFilter = $request->getParameter('rangeType', 'inclusive');
 
         // Load facets from pre-computed cache
         // Guest users see published-only counts; authenticated users see all-records counts
@@ -487,6 +493,72 @@ class displayActions extends sfActions
                     ->whereRaw("otr.object_id = io.id")
                     ->where("t.taxonomy_id", 78)
                     ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
+        }
+
+        if ($this->referenceCodeFilter) {
+            $query->where("io.identifier", "like", "%".$this->referenceCodeFilter."%");
+        }
+
+        if ($this->extentAndMediumFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.extent_and_medium", "like", "%".$this->extentAndMediumFilter."%");
+            });
+        }
+
+        if ($this->archivalHistoryFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.archival_history", "like", "%".$this->archivalHistoryFilter."%");
+            });
+        }
+
+        if ($this->acquisitionFilter) {
+            $query->whereExists(function($sub) {
+                $sub->select(DB::raw(1))
+                    ->from("information_object_i18n as ioi")
+                    ->whereRaw("ioi.id = io.id")
+                    ->where("ioi.acquisition", "like", "%".$this->acquisitionFilter."%");
+            });
+        }
+
+        if ($this->startDateFilter || $this->endDateFilter) {
+            $startDate = $this->startDateFilter;
+            $endDate = $this->endDateFilter;
+            $rangeType = $this->rangeTypeFilter ?? 'inclusive';
+
+            $query->whereExists(function($sub) use ($startDate, $endDate, $rangeType) {
+                $sub->select(DB::raw(1))
+                    ->from("event as evt_date")
+                    ->whereRaw("evt_date.object_id = io.id");
+
+                if ($rangeType === 'exact') {
+                    if ($startDate) {
+                        $sub->where("evt_date.start_date", ">=", $startDate);
+                    }
+                    if ($endDate) {
+                        $sub->where("evt_date.end_date", "<=", $endDate);
+                    }
+                } else {
+                    // Inclusive/overlapping: event overlaps with search range
+                    if ($startDate) {
+                        $sub->where(function($q) use ($startDate) {
+                            $q->where("evt_date.end_date", ">=", $startDate)
+                              ->orWhereNull("evt_date.end_date");
+                        });
+                    }
+                    if ($endDate) {
+                        $sub->where(function($q) use ($endDate) {
+                            $q->where("evt_date.start_date", "<=", $endDate)
+                              ->orWhereNull("evt_date.start_date");
+                        });
+                    }
+                }
             });
         }
     }

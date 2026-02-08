@@ -1,0 +1,1 @@
+-- ahgTermBrowsePlugin: No custom tables needed

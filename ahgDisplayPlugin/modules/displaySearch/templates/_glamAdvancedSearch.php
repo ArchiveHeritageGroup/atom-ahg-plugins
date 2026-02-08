@@ -101,7 +101,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
             </div>
           </div>
 
-          <input type="hidden" name="type" value="<?php echo htmlspecialchars($currentType); ?>">
+          <!-- type is now in the Filters tab sector dropdown -->
 
           <!-- Nav Tabs -->
           <ul class="nav nav-tabs mb-3" id="advSearchTabs" role="tablist">
@@ -202,12 +202,71 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
             
             <!-- Filters Tab -->
             <div class="tab-pane fade" id="filters-search">
+              <!-- Search specific field -->
+              <div class="mb-3 p-3 bg-light rounded">
+                <label class="form-label small fw-bold"><i class="fas fa-search me-1"></i><?php echo __('Search specific field'); ?></label>
+                <div id="field-search-rows">
+                  <?php
+                  // Detect existing field search params
+                  $fieldSearchOptions = [
+                      '' => __('-- Select field --'),
+                      'title' => __('Title'),
+                      'identifier' => __('Identifier'),
+                      'referenceCode' => __('Reference code'),
+                      'scopeAndContent' => __('Scope and content'),
+                      'extentAndMedium' => __('Extent and medium'),
+                      'archivalHistory' => __('Archival history'),
+                      'acquisition' => __('Acquisition'),
+                      'creatorSearch' => __('Creator'),
+                      'subjectSearch' => __('Subject'),
+                      'placeSearch' => __('Place'),
+                      'genreSearch' => __('Genre'),
+                  ];
+                  $activeFieldSearches = [];
+                  foreach ($fieldSearchOptions as $key => $label) {
+                      if ($key && !empty($params[$key])) {
+                          $activeFieldSearches[] = ['field' => $key, 'value' => $params[$key]];
+                      }
+                  }
+                  if (empty($activeFieldSearches)) {
+                      $activeFieldSearches[] = ['field' => '', 'value' => ''];
+                  }
+                  foreach ($activeFieldSearches as $idx => $fs): ?>
+                  <div class="input-group mb-2 field-search-row">
+                    <select class="form-select field-select" style="max-width: 200px;" onchange="this.nextElementSibling.name = this.value">
+                      <?php foreach ($fieldSearchOptions as $key => $label): ?>
+                        <option value="<?php echo $key; ?>" <?php echo $fs['field'] === $key ? 'selected' : ''; ?>><?php echo $label; ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                    <input type="text" name="<?php echo $fs['field']; ?>" class="form-control" value="<?php echo htmlspecialchars($fs['value']); ?>" placeholder="<?php echo __('Enter search term...'); ?>">
+                    <?php if ($idx > 0): ?>
+                    <button type="button" class="btn btn-outline-danger" onclick="this.closest('.field-search-row').remove()"><i class="fas fa-times"></i></button>
+                    <?php endif; ?>
+                  </div>
+                  <?php endforeach; ?>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="add-field-search-btn">
+                  <i class="fas fa-plus me-1"></i><?php echo __('Add criterion'); ?>
+                </button>
+              </div>
+
               <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold"><?php echo __('Sector'); ?></label>
+                  <select name="type" class="form-select" id="sector-filter-select">
+                    <option value="" <?php echo empty($currentType) ? 'selected' : ''; ?>><?php echo __('All sectors'); ?></option>
+                    <option value="archive" <?php echo $currentType === 'archive' ? 'selected' : ''; ?>><?php echo __('Archive'); ?></option>
+                    <option value="library" <?php echo $currentType === 'library' ? 'selected' : ''; ?>><?php echo __('Library'); ?></option>
+                    <option value="museum" <?php echo $currentType === 'museum' ? 'selected' : ''; ?>><?php echo __('Museum'); ?></option>
+                    <option value="gallery" <?php echo $currentType === 'gallery' ? 'selected' : ''; ?>><?php echo __('Gallery'); ?></option>
+                    <option value="dam" <?php echo $currentType === 'dam' ? 'selected' : ''; ?>><?php echo __('Photos'); ?></option>
+                  </select>
+                </div>
                 <div class="col-md-4">
                   <label class="form-label small fw-bold"><?php echo __('Level of description'); ?>
                     <?php if ($currentType): ?><span class="badge bg-secondary"><?php echo ucfirst($currentType); ?></span><?php endif; ?>
                   </label>
-                  <select name="level" class="form-select">
+                  <select name="level" class="form-select" id="level-filter-select">
                     <option value=""><?php echo __('Any level'); ?></option>
                     <?php foreach ($currentLevels as $level): ?>
                       <option value="<?php echo $level->id; ?>" <?php echo ($params['level'] ?? '') == $level->id ? 'selected' : ''; ?>><?php echo htmlspecialchars($level->name); ?></option>
@@ -267,6 +326,78 @@ document.addEventListener('DOMContentLoaded', function() {
             sortField: { field: "text", direction: "asc" },
             placeholder: '<?php echo __('Type to search...'); ?>',
             allowEmptyOption: true
+        });
+    }
+
+    // Field search: add criterion
+    var addBtn = document.getElementById('add-field-search-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            var container = document.getElementById('field-search-rows');
+            var firstRow = container.querySelector('.field-search-row');
+            var newRow = firstRow.cloneNode(true);
+            var select = newRow.querySelector('select');
+            var input = newRow.querySelector('input');
+            select.selectedIndex = 0;
+            input.name = '';
+            input.value = '';
+            // Add remove button if not present
+            if (!newRow.querySelector('.btn-outline-danger')) {
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-outline-danger';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.onclick = function() { this.closest('.field-search-row').remove(); };
+                newRow.appendChild(removeBtn);
+            }
+            container.appendChild(newRow);
+        });
+    }
+
+    // Field search: sync dropdown to input name
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('field-select')) {
+            var input = e.target.closest('.field-search-row').querySelector('input[type="text"]');
+            if (input) {
+                input.name = e.target.value;
+            }
+        }
+    });
+
+    // Before submit: remove unnamed field inputs to keep URL clean
+    var form = document.getElementById('glam-advanced-search-form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            form.querySelectorAll('.field-search-row input[type="text"]').forEach(function(input) {
+                if (!input.name || !input.value.trim()) {
+                    input.removeAttribute('name');
+                }
+            });
+        });
+    }
+
+    // Sync sector quick filter buttons with the dropdown
+    var sectorSelect = document.getElementById('sector-filter-select');
+    if (sectorSelect) {
+        // Update levels dropdown when sector changes
+        var levelsBySector = <?php echo json_encode(array_map(function($levels) {
+            return array_map(function($l) { return ['id' => $l->id, 'name' => $l->name]; }, $levels);
+        }, $levelsBySector)); ?>;
+
+        sectorSelect.addEventListener('change', function() {
+            var sector = this.value;
+            var levelSelect = document.getElementById('level-filter-select');
+            if (!levelSelect) return;
+            var currentLevel = levelSelect.value;
+            levelSelect.innerHTML = '<option value=""><?php echo __('Any level'); ?></option>';
+            var levels = levelsBySector[sector] || levelsBySector[''] || [];
+            levels.forEach(function(l) {
+                var opt = document.createElement('option');
+                opt.value = l.id;
+                opt.textContent = l.name;
+                if (String(l.id) === currentLevel) opt.selected = true;
+                levelSelect.appendChild(opt);
+            });
         });
     }
 });
