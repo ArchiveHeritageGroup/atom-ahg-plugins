@@ -1,0 +1,3 @@
+-- ahgInformationObjectManagePlugin
+-- No new tables required — uses existing information_object, event, note, relation,
+-- object_term_relation, status, property, and their i18n counterparts.

@@ -1,0 +1,18 @@
+# Routes are loaded via prependRoute() — last entry in this file
+# gets prepended last (checked first). Put catch-all slug FIRST
+# so it ends up checked LAST after prepending.
+#
+# We do NOT override /:slug (view) — base AtoM + ahgUiOverridesPlugin handles that.
+# We only intercept /informationobject/ prefixed edit/add/delete routes.
+
+io_delete_override:
+  url: /informationobject/:slug/delete
+  param: { module: ioManage, action: delete }
+
+io_edit_override:
+  url: /informationobject/:slug/edit
+  param: { module: ioManage, action: edit }
+
+io_add_override:
+  url: /informationobject/add
+  param: { module: ioManage, action: edit }
