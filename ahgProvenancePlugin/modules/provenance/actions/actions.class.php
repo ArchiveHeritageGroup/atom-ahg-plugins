@@ -1,22 +1,16 @@
 <?php
 
-class provenanceActions extends sfActions
+class provenanceActions extends AhgActions
 {
     /**
      * Dashboard / List view
      */
     public function executeIndex(sfWebRequest $request)
     {
-        if (!$this->context->user->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
-
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
+        $this->requireAuth();
 
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        
+
         $this->stats = $service->getStatistics();
         $this->acquisitionTypes = $service->getAcquisitionTypes();
         $this->certaintyLevels = $service->getCertaintyLevels();
@@ -27,36 +21,24 @@ class provenanceActions extends sfActions
      */
     public function executeView(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
-
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
-        
+
         if (!$this->resource) {
             $this->forward404('Record not found');
         }
 
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        $culture = $this->context->user->getCulture();
-        
-        $this->provenance = $service->getProvenanceForObject($this->resource->id, $culture);
+
+        $this->provenance = $service->getProvenanceForObject($this->resource->id, $this->culture());
         $this->eventTypes = $service->getEventTypes();
     }
 
     /**
      * Display visual D3.js timeline
      */
-    /**
-     * Display visual D3.js timeline
-     */
     public function executeTimeline(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
-
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
 
@@ -65,40 +47,33 @@ class provenanceActions extends sfActions
         }
 
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        $culture = $this->context->user->getCulture();
-        
+
         // Load provenance data first
-        $this->provenance = $service->getProvenanceForObject($this->resource->id, $culture);
-        
+        $this->provenance = $service->getProvenanceForObject($this->resource->id, $this->culture());
+
         // Then prepare timeline data for D3.js
         $this->timelineData = $this->prepareTimelineData();
     }
 
     public function executeEdit(sfWebRequest $request)
     {
-        if (!$this->context->user->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
-
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
+        $this->requireAuth();
 
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
-        
+
         if (!$this->resource) {
             $this->forward404('Record not found');
         }
 
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        $culture = $this->context->user->getCulture();
-        
+        $culture = $this->culture();
+
         $this->provenance = $service->getProvenanceForObject($this->resource->id, $culture);
         $this->eventTypes = $service->getEventTypes();
         $this->acquisitionTypes = $service->getAcquisitionTypes();
         $this->certaintyLevels = $service->getCertaintyLevels();
-        
+
         // Get agents for autocomplete
         $repo = new \AhgProvenancePlugin\Repository\ProvenanceRepository();
         // Get existing documents
@@ -118,8 +93,8 @@ class provenanceActions extends sfActions
      */
     protected function processForm(sfWebRequest $request, $service, string $culture)
     {
-        $userId = $this->context->user->getAttribute('user_id');
-        
+        $userId = $this->userId();
+
         $data = [
             'acquisition_type' => $request->getParameter('acquisition_type'),
             'acquisition_date' => $request->getParameter('acquisition_date') ?: null,
@@ -142,7 +117,7 @@ class provenanceActions extends sfActions
             'research_notes' => $request->getParameter('research_notes'),
             'nazi_era_notes' => $request->getParameter('nazi_era_notes'),
             'cultural_property_notes' => $request->getParameter('cultural_property_notes'),
-            'created_by' => $userId
+            'created_by' => $userId,
         ];
 
         // Handle current agent
@@ -185,7 +160,9 @@ class provenanceActions extends sfActions
         $eventNotes = $request->getParameter('event_notes', []);
 
         foreach ($eventTypes as $i => $type) {
-            if (empty($type)) continue;
+            if (empty($type)) {
+                continue;
+            }
 
             $eventData = [
                 'event_type' => $type,
@@ -193,7 +170,7 @@ class provenanceActions extends sfActions
                 'event_date_text' => $eventDateTexts[$i] ?? null,
                 'event_location' => $eventLocations[$i] ?? null,
                 'certainty' => $eventCertainties[$i] ?? 'uncertain',
-                'created_by' => $userId
+                'created_by' => $userId,
             ];
 
             // Handle agents
@@ -211,6 +188,64 @@ class provenanceActions extends sfActions
     /**
      * Process document uploads from form
      */
+    protected function processDocuments(sfWebRequest $request, int $recordId, ?int $userId)
+    {
+        $docTypes = $request->getParameter('doc_type', []);
+        $docTitles = $request->getParameter('doc_title', []);
+        $docDates = $request->getParameter('doc_date', []);
+        $docUrls = $request->getParameter('doc_url', []);
+        $docDescriptions = $request->getParameter('doc_description', []);
+
+        $uploadDir = sfConfig::get('sf_upload_dir') . '/provenance';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        foreach ($docTypes as $i => $type) {
+            if (empty($type)) {
+                continue;
+            }
+
+            $filePath = null;
+            $originalFilename = null;
+            $mimeType = null;
+            $fileSize = null;
+            $filename = null;
+
+            // Handle file upload
+            if (isset($_FILES['doc_file']['tmp_name'][$i]) && $_FILES['doc_file']['error'][$i] === UPLOAD_ERR_OK) {
+                $originalFilename = $_FILES['doc_file']['name'][$i];
+                $mimeType = $_FILES['doc_file']['type'][$i];
+                $fileSize = $_FILES['doc_file']['size'][$i];
+
+                $ext = pathinfo($originalFilename, PATHINFO_EXTENSION);
+                $filename = uniqid('prov_') . '.' . $ext;
+                $filePath = '/uploads/provenance/' . $filename;
+
+                move_uploaded_file($_FILES['doc_file']['tmp_name'][$i], $uploadDir . '/' . $filename);
+            }
+
+            $docData = [
+                'provenance_record_id' => $recordId,
+                'document_type' => $type,
+                'title' => $docTitles[$i] ?? null,
+                'description' => $docDescriptions[$i] ?? null,
+                'document_date' => !empty($docDates[$i]) ? $docDates[$i] : null,
+                'filename' => $filename,
+                'original_filename' => $originalFilename,
+                'file_path' => $filePath,
+                'mime_type' => $mimeType,
+                'file_size' => $fileSize,
+                'external_url' => $docUrls[$i] ?? null,
+                'is_public' => 0,
+                'created_by' => $userId,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            \Illuminate\Database\Capsule\Manager::table('provenance_document')->insert($docData);
+        }
+    }
 
     /**
      * Prepare timeline data for D3.js visualization
@@ -218,7 +253,7 @@ class provenanceActions extends sfActions
     protected function prepareTimelineData()
     {
         $timelineItems = [];
-        
+
         // Get raw timeline from provenance
         $timeline = $this->provenance['timeline'] ?? [];
         if (empty($timeline)) {
@@ -227,30 +262,28 @@ class provenanceActions extends sfActions
         if ($timeline instanceof sfOutputEscaperArrayDecorator) {
             $timeline = $timeline->getRawValue();
         }
-        
+
         foreach ($timeline as $event) {
             $startDate = $event['date'] ?? null;
-            if (true) { // Include all events
-                $timelineItems[] = [
-                    'type' => $event['type_label'] ?? $event['event_type'] ?? 'Event',
-                    'label' => $event['from'] ?? $event['to'] ?? $event['type_label'] ?? 'Unknown',
-                    'startDate' => $startDate,
-                    'endDate' => null,
-                    'description' => $event['description'] ?? null,
-                    'category' => $this->categorizeEventType($event['event_type'] ?? ''),
-                    'certainty' => $event['certainty'] ?? 'unknown',
-                    'from' => $event['from'] ?? null,
-                    'to' => $event['to'] ?? null,
-                    'location' => $event['location'] ?? null
-                ];
-            }
+            $timelineItems[] = [
+                'type' => $event['type_label'] ?? $event['event_type'] ?? 'Event',
+                'label' => $event['from'] ?? $event['to'] ?? $event['type_label'] ?? 'Unknown',
+                'startDate' => $startDate,
+                'endDate' => null,
+                'description' => $event['description'] ?? null,
+                'category' => $this->categorizeEventType($event['event_type'] ?? ''),
+                'certainty' => $event['certainty'] ?? 'unknown',
+                'from' => $event['from'] ?? null,
+                'to' => $event['to'] ?? null,
+                'location' => $event['location'] ?? null,
+            ];
         }
-        
+
         // Sort by date
-        usort($timelineItems, function($a, $b) {
+        usort($timelineItems, function ($a, $b) {
             return strcmp($a['startDate'] ?? '', $b['startDate'] ?? '');
         });
-        
+
         return json_encode($timelineItems);
     }
 
@@ -260,73 +293,35 @@ class provenanceActions extends sfActions
     protected function categorizeEventType($type)
     {
         $type = strtolower($type ?? '');
-        if (strpos($type, 'creat') !== false) return 'creation';
-        if (strpos($type, 'sale') !== false || strpos($type, 'purchase') !== false) return 'sale';
-        if (strpos($type, 'gift') !== false || strpos($type, 'donat') !== false) return 'gift';
-        if (strpos($type, 'inherit') !== false || strpos($type, 'bequest') !== false) return 'inheritance';
-        if (strpos($type, 'auction') !== false) return 'auction';
-        if (strpos($type, 'transfer') !== false) return 'transfer';
-        if (strpos($type, 'loan') !== false) return 'loan';
-        if (strpos($type, 'theft') !== false || strpos($type, 'confisca') !== false) return 'theft';
-        if (strpos($type, 'recov') !== false || strpos($type, 'restit') !== false) return 'recovery';
+        if (strpos($type, 'creat') !== false) {
+            return 'creation';
+        }
+        if (strpos($type, 'sale') !== false || strpos($type, 'purchase') !== false) {
+            return 'sale';
+        }
+        if (strpos($type, 'gift') !== false || strpos($type, 'donat') !== false) {
+            return 'gift';
+        }
+        if (strpos($type, 'inherit') !== false || strpos($type, 'bequest') !== false) {
+            return 'inheritance';
+        }
+        if (strpos($type, 'auction') !== false) {
+            return 'auction';
+        }
+        if (strpos($type, 'transfer') !== false) {
+            return 'transfer';
+        }
+        if (strpos($type, 'loan') !== false) {
+            return 'loan';
+        }
+        if (strpos($type, 'theft') !== false || strpos($type, 'confisca') !== false) {
+            return 'theft';
+        }
+        if (strpos($type, 'recov') !== false || strpos($type, 'restit') !== false) {
+            return 'recovery';
+        }
+
         return 'event';
-    }
-    protected function processDocuments(sfWebRequest $request, int $recordId, ?int $userId)
-    {
-        \AhgCore\Core\AhgDb::init();
-        
-        $docTypes = $request->getParameter('doc_type', []);
-        $docTitles = $request->getParameter('doc_title', []);
-        $docDates = $request->getParameter('doc_date', []);
-        $docUrls = $request->getParameter('doc_url', []);
-        $docDescriptions = $request->getParameter('doc_description', []);
-        
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/provenance';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        
-        foreach ($docTypes as $i => $type) {
-            if (empty($type)) continue;
-            
-            $filePath = null;
-            $originalFilename = null;
-            $mimeType = null;
-            $fileSize = null;
-            
-            // Handle file upload
-            if (isset($_FILES['doc_file']['tmp_name'][$i]) && $_FILES['doc_file']['error'][$i] === UPLOAD_ERR_OK) {
-                $originalFilename = $_FILES['doc_file']['name'][$i];
-                $mimeType = $_FILES['doc_file']['type'][$i];
-                $fileSize = $_FILES['doc_file']['size'][$i];
-                
-                $ext = pathinfo($originalFilename, PATHINFO_EXTENSION);
-                $filename = uniqid('prov_') . '.' . $ext;
-                $filePath = '/uploads/provenance/' . $filename;
-                
-                move_uploaded_file($_FILES['doc_file']['tmp_name'][$i], $uploadDir . '/' . $filename);
-            }
-            
-            $docData = [
-                'provenance_record_id' => $recordId,
-                'document_type' => $type,
-                'title' => $docTitles[$i] ?? null,
-                'description' => $docDescriptions[$i] ?? null,
-                'document_date' => !empty($docDates[$i]) ? $docDates[$i] : null,
-                'filename' => $filename ?? null,
-                'original_filename' => $originalFilename,
-                'file_path' => $filePath,
-                'mime_type' => $mimeType,
-                'file_size' => $fileSize,
-                'external_url' => $docUrls[$i] ?? null,
-                'is_public' => 0,
-                'created_by' => $userId,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            \Illuminate\Database\Capsule\Manager::table('provenance_document')->insert($docData);
-        }
     }
 
     /**
@@ -334,24 +329,21 @@ class provenanceActions extends sfActions
      */
     public function executeDeleteDocument(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-        \AhgCore\Core\AhgDb::init();
-        
         $docId = $request->getParameter('id');
-        
+
         // Get document to delete file
         $doc = \Illuminate\Database\Capsule\Manager::table('provenance_document')->where('id', $docId)->first();
-        
+
         if ($doc && $doc->file_path) {
             $fullPath = sfConfig::get('sf_web_dir') . $doc->file_path;
             if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
         }
-        
+
         \Illuminate\Database\Capsule\Manager::table('provenance_document')->where('id', $docId)->delete();
-        
-        return $this->renderText(json_encode(['success' => true]));
+
+        return $this->renderJsonSuccess();
     }
 
     /**
@@ -359,18 +351,12 @@ class provenanceActions extends sfActions
      */
     public function executeSearchAgents(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
-
         $term = $request->getParameter('term', '');
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        
+
         $results = $service->searchAgents($term);
-        
-        return $this->renderText(json_encode($results));
+
+        return $this->renderJson($results);
     }
 
     /**
@@ -378,19 +364,10 @@ class provenanceActions extends sfActions
      */
     public function executeAddEvent(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
-        if (!$this->context->user->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
-        }
-
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
+        $this->requireAuth();
 
         $recordId = $request->getParameter('record_id');
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        $userId = $this->context->user->getAttribute('user_id');
 
         $data = [
             'event_type' => $request->getParameter('event_type'),
@@ -398,7 +375,7 @@ class provenanceActions extends sfActions
             'event_date_text' => $request->getParameter('event_date_text'),
             'event_location' => $request->getParameter('event_location'),
             'certainty' => $request->getParameter('certainty', 'uncertain'),
-            'created_by' => $userId
+            'created_by' => $this->userId(),
         ];
 
         // Handle agents
@@ -411,9 +388,10 @@ class provenanceActions extends sfActions
 
         try {
             $eventId = $service->addEvent($recordId, $data);
-            return $this->renderText(json_encode(['success' => true, 'event_id' => $eventId]));
+
+            return $this->renderJsonSuccess(['event_id' => $eventId]);
         } catch (\Exception $e) {
-            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+            return $this->renderJsonError($e->getMessage());
         }
     }
 
@@ -422,23 +400,17 @@ class provenanceActions extends sfActions
      */
     public function executeDeleteEvent(sfWebRequest $request)
     {
-        $this->getResponse()->setContentType('application/json');
-
-        if (!$this->context->user->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
-        }
-
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
+        $this->requireAuth();
 
         $eventId = $request->getParameter('event_id');
         $repo = new \AhgProvenancePlugin\Repository\ProvenanceRepository();
 
         try {
             $repo->deleteEvent($eventId);
-            return $this->renderText(json_encode(['success' => true]));
+
+            return $this->renderJsonSuccess();
         } catch (\Exception $e) {
-            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+            return $this->renderJsonError($e->getMessage());
         }
     }
 
@@ -447,15 +419,10 @@ class provenanceActions extends sfActions
      */
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Service/ProvenanceService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgProvenancePlugin/lib/Repository/ProvenanceRepository.php';
-
         $objectId = $request->getParameter('objectId');
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
-        $culture = $this->context->user->getCulture();
-        
-        $this->provenance = $service->getProvenanceForObject($objectId, $culture);
+
+        $this->provenance = $service->getProvenanceForObject($objectId, $this->culture());
         $this->objectId = $objectId;
     }
 }
