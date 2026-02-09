@@ -125,7 +125,10 @@ class ioManageActions extends sfActions
         }
 
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($bootstrap)) {
+                require_once $bootstrap;
+            }
         }
 
         $results = \Illuminate\Database\Capsule\Manager::table('actor')
@@ -164,7 +167,10 @@ class ioManageActions extends sfActions
         }
 
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($bootstrap)) {
+                require_once $bootstrap;
+            }
         }
 
         $results = \Illuminate\Database\Capsule\Manager::table('repository')
@@ -204,7 +210,10 @@ class ioManageActions extends sfActions
         }
 
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($bootstrap)) {
+                require_once $bootstrap;
+            }
         }
 
         $results = \Illuminate\Database\Capsule\Manager::table('term')
@@ -242,7 +251,10 @@ class ioManageActions extends sfActions
         $parentId = (int) $request->getParameter('parentId', 0);
 
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            if (file_exists($bootstrap)) {
+                require_once $bootstrap;
+            }
         }
 
         $DB = \Illuminate\Database\Capsule\Manager::class;

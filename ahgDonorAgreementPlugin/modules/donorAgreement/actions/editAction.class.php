@@ -100,7 +100,10 @@ class donorAgreementEditAction extends sfAction
 
     protected function initDatabase()
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
     }
 
     protected function getAgreementTypes()

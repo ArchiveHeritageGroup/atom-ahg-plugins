@@ -1020,7 +1020,11 @@ class reportsreportAction extends sfAction
         $response = $this->getResponse();
 
         // Try to use TCPDF if available
-        $tcpdfPath = \AtomFramework\Helpers\PathResolver::getLibraryPath('tecnickcom/tcpdf/tcpdf.php');
+        $tcpdfPath = class_exists('\AtomFramework\Helpers\PathResolver')
+            ? \AtomFramework\Helpers\PathResolver::getLibraryPath('tecnickcom/tcpdf/tcpdf.php')
+            : (file_exists(sfConfig::get('sf_root_dir') . '/vendor/tecnickcom/tcpdf/tcpdf.php')
+                ? sfConfig::get('sf_root_dir') . '/vendor/tecnickcom/tcpdf/tcpdf.php'
+                : null);
         if ($tcpdfPath) {
             require_once $tcpdfPath;
             return $this->exportPdfWithTcpdf($filename);

@@ -34,7 +34,10 @@ EOF;
     protected function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
 
         $query = DB::table('cdpa_data_subject_request')
             ->orderBy('due_date', 'asc');

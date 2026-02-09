@@ -1252,7 +1252,16 @@ class ahgUniversalMetadataExtractor
     {
         if (!class_exists('getID3')) {
             // Try to load getID3
-            $getId3Path = \AtomFramework\Helpers\PathResolver::getLibraryPath('james-heinrich/getid3/getid3/getid3.php');
+            $getId3Path = class_exists('\AtomFramework\Helpers\PathResolver')
+                ? \AtomFramework\Helpers\PathResolver::getLibraryPath('james-heinrich/getid3/getid3/getid3.php')
+                : null;
+            if (!$getId3Path) {
+                // Fallback: check standard vendor locations
+                foreach ([sfConfig::get('sf_lib_dir') . '/vendor', sfConfig::get('sf_root_dir') . '/vendor'] as $vendorDir) {
+                    $candidate = $vendorDir . '/james-heinrich/getid3/getid3/getid3.php';
+                    if (file_exists($candidate)) { $getId3Path = $candidate; break; }
+                }
+            }
             if ($getId3Path) {
                 require_once $getId3Path;
             }

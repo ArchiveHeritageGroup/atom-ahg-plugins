@@ -55,7 +55,10 @@ EOF;
     {
         parent::execute($arguments, $options);
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
         require_once dirname(__DIR__).'/PreservationService.php';
 
         $service = new PreservationService();

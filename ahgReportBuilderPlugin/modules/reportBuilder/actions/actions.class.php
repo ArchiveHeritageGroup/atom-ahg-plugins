@@ -9,10 +9,15 @@ class reportBuilderActions extends sfActions
     public function preExecute()
     {
         // Load framework bootstrap (Illuminate DB + PathResolver)
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
 
         // Load root Composer autoloader for Dompdf, PhpSpreadsheet, etc.
-        $rootAutoload = \AtomFramework\Helpers\PathResolver::getRootAutoloadPath();
+        $rootAutoload = class_exists('\AtomFramework\Helpers\PathResolver')
+            ? \AtomFramework\Helpers\PathResolver::getRootAutoloadPath()
+            : sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
         if (file_exists($rootAutoload)) {
             require_once $rootAutoload;
         }

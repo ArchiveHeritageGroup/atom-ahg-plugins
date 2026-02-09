@@ -12,7 +12,10 @@ class extendedRightsComponents extends sfComponents
             return self::$capsule;
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
         self::$capsule = Capsule::getInstance();
 
         return self::$capsule;

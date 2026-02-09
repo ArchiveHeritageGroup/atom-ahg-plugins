@@ -255,7 +255,8 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
         <div class="heritage-creators-track" id="creators-track">
             <?php
             // Get top creators from database
-            require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+            $bootstrap = sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+            if (file_exists($bootstrap)) { require_once $bootstrap; }
             $creators = \Illuminate\Database\Capsule\Manager::table('actor')
                 ->leftJoin('actor_i18n', function($join) {
                     $join->on('actor.id', '=', 'actor_i18n.id')

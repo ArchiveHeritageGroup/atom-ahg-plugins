@@ -19,8 +19,14 @@ class ahgDropdownActions extends sfActions
         }
 
         // Initialize database and services
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
+        $taxonomyService = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+        if (file_exists($taxonomyService)) {
+            require_once $taxonomyService;
+        }
     }
 
     /**

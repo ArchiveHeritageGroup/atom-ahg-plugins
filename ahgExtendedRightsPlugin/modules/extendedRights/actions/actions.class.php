@@ -11,7 +11,10 @@ class extendedRightsActions extends sfActions
         if (self::$dbInit) {
             return;
         }
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
         self::$dbInit = true;
     }
 

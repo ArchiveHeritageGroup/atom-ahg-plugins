@@ -39,7 +39,10 @@ EOF;
     protected function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
+        }
         require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
 
         $service = new \ahgCDPAPlugin\Services\CDPAService();
