@@ -8,10 +8,13 @@ class reportBuilderActions extends sfActions
 
     public function preExecute()
     {
-        // Load Composer autoloader for Dompdf, PhpSpreadsheet, etc.
-        $composerAutoload = sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
-        if (file_exists($composerAutoload)) {
-            require_once $composerAutoload;
+        // Load framework bootstrap (Illuminate DB + PathResolver)
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+
+        // Load root Composer autoloader for Dompdf, PhpSpreadsheet, etc.
+        $rootAutoload = \AtomFramework\Helpers\PathResolver::getRootAutoloadPath();
+        if (file_exists($rootAutoload)) {
+            require_once $rootAutoload;
         }
 
         $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgReportBuilderPlugin/lib';

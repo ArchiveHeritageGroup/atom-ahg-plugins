@@ -241,7 +241,7 @@ EOF;
 
         // Excel
         if (in_array($ext, ['xls', 'xlsx'])) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
 
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filepath);
             $sheet = $spreadsheet->getSheet($sheetIndex);

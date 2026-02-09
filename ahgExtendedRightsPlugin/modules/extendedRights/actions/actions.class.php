@@ -11,37 +11,7 @@ class extendedRightsActions extends sfActions
         if (self::$dbInit) {
             return;
         }
-        $frameworkPath = sfConfig::get('sf_root_dir').'/atom-framework';
-        require_once $frameworkPath.'/vendor/autoload.php';
-        $configFile = sfConfig::get('sf_root_dir').'/config/config.php';
-        $config = include $configFile;
-        $dsn = $config['all']['propel']['param']['dsn'] ?? '';
-        $dbname = 'archive';
-        $host = 'localhost';
-        $port = 3306;
-        if (preg_match('/dbname=([^;]+)/', $dsn, $m)) {
-            $dbname = $m[1];
-        }
-        if (preg_match('/host=([^;]+)/', $dsn, $m)) {
-            $host = $m[1];
-        }
-        if (preg_match('/port=([^;]+)/', $dsn, $m)) {
-            $port = (int) $m[1];
-        }
-        $capsule = new Capsule();
-        $capsule->addConnection([
-            'driver' => 'mysql',
-            'host' => $host,
-            'port' => $port,
-            'database' => $dbname,
-            'username' => $config['all']['propel']['param']['username'] ?? 'root',
-            'password' => $config['all']['propel']['param']['password'] ?? '',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-        ]);
-        $capsule->setAsGlobal();
-        $capsule->bootEloquent();
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
         self::$dbInit = true;
     }
 

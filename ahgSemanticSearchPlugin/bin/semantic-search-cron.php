@@ -36,11 +36,11 @@ declare(strict_types=1);
 
 // Determine paths - detect plugin root from script location
 $pluginRoot = dirname(__DIR__); // Parent of bin/ directory
-$atomRoot = getenv('ATOM_ROOT') ?: sfConfig::get('sf_root_dir');
+$atomRoot = getenv('ATOM_ROOT') ?: dirname(__DIR__, 3); // atom-ahg-plugins/<plugin>/bin → root
 $frameworkRoot = $atomRoot . '/atom-framework';
 
 // Bootstrap
-require_once $frameworkRoot . '/vendor/autoload.php';
+require_once $frameworkRoot . '/bootstrap.php';
 require_once $pluginRoot . '/lib/Services/ThesaurusService.php';
 require_once $pluginRoot . '/lib/Services/WordNetSyncService.php';
 require_once $pluginRoot . '/lib/Services/WikidataSyncService.php';
@@ -107,52 +107,8 @@ function parseOptions(array $args): array
  */
 function initDatabase(string $atomRoot): void
 {
-    $configFile = $atomRoot . '/config/config.php';
-
-    // Default database config
-    $dbConfig = [
-        'host' => 'localhost',
-        'database' => 'archive',
-        'username' => 'root',
-        'password' => '',
-    ];
-
-    // Load from AtoM config.php (Propel format)
-    if (file_exists($configFile)) {
-        $config = include $configFile;
-
-        if (isset($config['all']['propel']['param'])) {
-            $param = $config['all']['propel']['param'];
-
-            // Parse DSN for host and database
-            $dsn = $param['dsn'] ?? '';
-            if (preg_match('/host=([^;]+)/', $dsn, $hostMatches)) {
-                $dbConfig['host'] = $hostMatches[1];
-            }
-            if (preg_match('/dbname=([^;]+)/', $dsn, $dbMatches)) {
-                $dbConfig['database'] = $dbMatches[1];
-            }
-
-            // Get username and password
-            $dbConfig['username'] = $param['username'] ?? 'root';
-            $dbConfig['password'] = $param['password'] ?? '';
-        }
-    }
-
-    // Initialize Eloquent
-    $capsule = new DB;
-    $capsule->addConnection([
-        'driver' => 'mysql',
-        'host' => $dbConfig['host'],
-        'database' => $dbConfig['database'],
-        'username' => $dbConfig['username'],
-        'password' => $dbConfig['password'],
-        'charset' => 'utf8mb4',
-        'collation' => 'utf8mb4_unicode_ci',
-        'prefix' => '',
-    ]);
-    $capsule->setAsGlobal();
-    $capsule->bootEloquent();
+    // Database is already initialized by bootstrap.php (loaded above)
+    // This function kept for backward compatibility
 }
 
 /**
@@ -160,7 +116,10 @@ function initDatabase(string $atomRoot): void
  */
 function logError(string $message): void
 {
-    error_log(date('[Y-m-d H:i:s] ') . $message . "\n", 3, '/var/log/atom/semantic-search-cron.log');
+    $logDir = class_exists('\AtomFramework\Helpers\PathResolver')
+        ? \AtomFramework\Helpers\PathResolver::getLogDir()
+        : (is_dir('/var/log/atom') ? '/var/log/atom' : $GLOBALS['atomRoot'] . '/log');
+    error_log(date('[Y-m-d H:i:s] ') . $message . "\n", 3, $logDir . '/semantic-search-cron.log');
     fwrite(STDERR, $message . "\n");
 }
 

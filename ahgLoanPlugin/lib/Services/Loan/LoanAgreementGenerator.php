@@ -285,7 +285,7 @@ HTML;
     {
         if (self::FORMAT_PDF === $format) {
             // Ensure composer autoloader is loaded for Dompdf
-            $autoloader = \sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
+            $autoloader = \AtomFramework\Helpers\PathResolver::getRootAutoloadPath();
             if (file_exists($autoloader)) {
                 require_once $autoloader;
             }

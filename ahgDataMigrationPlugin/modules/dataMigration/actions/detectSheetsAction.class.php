@@ -24,7 +24,7 @@ class dataMigrationDetectSheetsAction extends sfAction
         
         try {
             // Load PhpSpreadsheet
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
             
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file['tmp_name']);
             $sheetNames = $spreadsheet->getSheetNames();
