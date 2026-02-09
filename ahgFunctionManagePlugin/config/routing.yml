@@ -1,0 +1,23 @@
+# Routes are loaded via prependRoute() — last entry in this file
+# gets prepended last (checked first). Put catch-all /:slug FIRST
+# so it ends up checked LAST after prepending.
+
+function_view_override:
+  url: /function/:slug
+  param: { module: functionManage, action: view }
+
+function_delete_override:
+  url: /function/:slug/delete
+  param: { module: functionManage, action: delete }
+
+function_edit_override:
+  url: /function/:slug/edit
+  param: { module: functionManage, action: edit }
+
+function_add_override:
+  url: /function/add
+  param: { module: functionManage, action: edit }
+
+function_browse_override:
+  url: /function/browse
+  param: { module: functionManage, action: browse }

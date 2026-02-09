@@ -1,0 +1,64 @@
+<?php decorate_with('layout_1col'); ?>
+<?php use_helper('Date'); ?>
+
+<?php slot('title'); ?>
+  <h1><?php echo __('Browse functions'); ?></h1>
+<?php end_slot(); ?>
+
+<?php slot('before-content'); ?>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <?php echo get_component('search', 'inlineSearch', [
+        'label' => __('Search functions'),
+        'landmarkLabel' => __('Function'),
+    ]); ?>
+
+    <div class="d-flex flex-wrap gap-2 ms-auto">
+      <?php echo get_partial('default/sortPickers', ['options' => $sortOptions]); ?>
+    </div>
+  </div>
+<?php end_slot(); ?>
+
+<?php slot('content'); ?>
+  <div class="table-responsive mb-3">
+    <table class="table table-bordered mb-0">
+      <thead>
+        <tr>
+          <th><?php echo __('Name'); ?></th>
+          <th><?php echo __('Type'); ?></th>
+          <?php if ('alphabetic' != $sf_request->sort) { ?>
+            <th><?php echo __('Updated'); ?></th>
+          <?php } ?>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($sf_data->getRaw('pager')->getResults() as $doc) { ?>
+          <tr>
+            <td>
+              <?php echo link_to(render_title($doc['name']), '@function_view_override?slug=' . $doc['slug']); ?>
+            </td>
+            <td>
+              <?php echo esc_specialchars($doc['type_name']); ?>
+            </td>
+            <?php if ('alphabetic' != $sf_request->sort) { ?>
+              <td>
+                <?php echo !empty($doc['updated_at']) ? format_date($doc['updated_at'], 'f') : ''; ?>
+              </td>
+            <?php } ?>
+          </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
+<?php end_slot(); ?>
+
+<?php slot('after-content'); ?>
+
+  <?php echo get_partial('default/pager', ['pager' => $pager]); ?>
+
+  <?php if ($canCreate) { ?>
+    <section class="actions mb-3">
+      <?php echo link_to(__('Add new'), '@function_add_override', ['class' => 'btn atom-btn-outline-light']); ?>
+    </section>
+  <?php } ?>
+
+<?php end_slot(); ?>
