@@ -283,7 +283,7 @@
                 <i class="bi bi-clock-history me-2"></i><?php echo __('Recent Events'); ?>
             </div>
             <ul class="list-group list-group-flush">
-                <?php foreach (array_slice($events, 0, 5) as $event): ?>
+                <?php foreach (array_slice($sf_data->getRaw('events'), 0, 5) as $event): ?>
                 <li class="list-group-item">
                     <div class="d-flex justify-content-between">
                         <span class="badge bg-<?php echo 'success' === $event->event_outcome ? 'success' : ('failure' === $event->event_outcome ? 'danger' : 'secondary'); ?>">
