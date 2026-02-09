@@ -1,5 +1,5 @@
 {
-    "name": "ahgTermTaxonomyPlugin",
+    "name": "AHG Term Taxonomy",
     "version": "1.0.0",
     "description": "High-performance term and taxonomy browse (subjects, places, genres) using Laravel Query Builder and direct ES queries",
     "author": "The Archive and Heritage Group",

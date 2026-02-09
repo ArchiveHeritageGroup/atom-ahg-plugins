@@ -1,0 +1,3 @@
+user_list_override:
+  url: /user/list
+  param: { module: userManage, action: browse }

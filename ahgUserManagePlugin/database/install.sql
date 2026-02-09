@@ -1,0 +1,1 @@
+-- ahgUserManagePlugin: No custom tables required

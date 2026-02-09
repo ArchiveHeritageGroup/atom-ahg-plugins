@@ -1,5 +1,5 @@
 {
-    "name": "ahgStorageManagePlugin",
+    "name": "AHG Storage Manage",
     "version": "1.0.0",
     "description": "Physical storage browse and management using Laravel Query Builder",
     "author": "The Archive and Heritage Group",
