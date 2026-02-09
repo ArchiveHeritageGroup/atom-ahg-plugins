@@ -5,11 +5,12 @@
     <h1 class="mb-0" aria-describedby="heading-label">
       <?php echo $isNew ? __('Add new archival description') : __('Edit archival description'); ?>
     </h1>
-    <?php if (!$isNew) { ?>
-      <span class="small" id="heading-label">
-        <?php echo esc_specialchars($io['title'] ?: __('Untitled')); ?>
-      </span>
-    <?php } ?>
+    <span class="small" id="heading-label">
+      <?php echo __('RAD'); ?>
+      <?php if (!$isNew) { ?>
+        — <?php echo esc_specialchars($io['title'] ?: __('Untitled')); ?>
+      <?php } ?>
+    </span>
   </div>
 <?php end_slot(); ?>
 
@@ -28,123 +29,82 @@
   <?php $rawIo = $sf_data->getRaw('io'); ?>
   <?php $rawLangChoices = $sf_data->getRaw('languageChoices'); ?>
   <?php $rawScriptChoices = $sf_data->getRaw('scriptChoices'); ?>
+  <?php $rawEventTypes = $sf_data->getRaw('eventTypes'); ?>
+  <?php $rawLevels = $sf_data->getRaw('levels'); ?>
+  <?php $rawNoteTypes = $sf_data->getRaw('noteTypes'); ?>
+  <?php $rawMaterialTypes = $sf_data->getRaw('materialTypes'); ?>
+  <?php $rawProps = $rawIo['stringProperties'] ?? []; ?>
 
   <form method="post" action="<?php echo $isNew ? url_for('@io_add_override') : url_for('@io_edit_override?slug=' . $rawIo['slug']); ?>" id="editForm">
 
     <?php echo $form->renderHiddenFields(); ?>
     <input type="hidden" name="parentId" value="<?php echo (int) $rawIo['parentId']; ?>">
 
-    <div class="accordion mb-3" id="isadAccordion">
+    <div class="accordion mb-3" id="radAccordion">
 
-      <!-- 1. Identity Area -->
+      <!-- 1. Title and Statement of Responsibility Area -->
       <div class="accordion-item">
-        <h2 class="accordion-header" id="identity-heading">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#identity-collapse" aria-expanded="true" aria-controls="identity-collapse">
-            <?php echo __('Identity area'); ?>
+        <h2 class="accordion-header" id="title-heading">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#title-collapse" aria-expanded="true" aria-controls="title-collapse">
+            <?php echo __('Title and statement of responsibility area'); ?>
           </button>
         </h2>
-        <div id="identity-collapse" class="accordion-collapse collapse show" aria-labelledby="identity-heading">
+        <div id="title-collapse" class="accordion-collapse collapse show" aria-labelledby="title-heading">
           <div class="accordion-body">
 
             <div class="mb-3">
-              <label for="identifier" class="form-label"><?php echo __('Identifier'); ?></label>
-              <div class="input-group">
-                <input type="text" class="form-control" id="identifier" name="identifier"
-                       value="<?php echo esc_specialchars($rawIo['identifier']); ?>">
-                <button type="button" class="btn btn-outline-secondary" id="generate-identifier"
-                        data-url="<?php echo url_for('@io_generate_identifier'); ?>">
-                  <i class="fas fa-cog me-1" aria-hidden="true"></i><?php echo __('Generate'); ?>
-                </button>
-              </div>
-              <div class="form-text text-muted small">
-                <?php echo __('Scheme: Archive Standard'); ?> <code>{REPO}/{FONDS}/{SEQ:4}</code>
-                — <?php echo __('select a repository first, then click Generate'); ?>
-              </div>
-            </div>
-
-            <!-- Alternative identifiers -->
-            <div class="mb-3">
-              <label class="form-label"><?php echo __('Alternative identifier(s)'); ?></label>
-              <?php $rawAltIds = $rawIo['alternativeIdentifiers'] ?? []; ?>
-              <table class="table table-sm" id="altids-table">
-                <thead>
-                  <tr>
-                    <th><?php echo __('Label'); ?></th>
-                    <th><?php echo __('Value'); ?></th>
-                    <th style="width:80px"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php if (!empty($rawAltIds)) { ?>
-                    <?php foreach ($rawAltIds as $aiIdx => $ai) { ?>
-                      <tr>
-                        <td><input type="text" class="form-control form-control-sm" name="altIds[<?php echo $aiIdx; ?>][label]" value="<?php echo esc_specialchars($ai->label ?? ''); ?>" placeholder="<?php echo __('e.g. Former reference'); ?>"></td>
-                        <td><input type="text" class="form-control form-control-sm" name="altIds[<?php echo $aiIdx; ?>][value]" value="<?php echo esc_specialchars($ai->value ?? ''); ?>"></td>
-                        <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __('Remove'); ?></button></td>
-                      </tr>
-                    <?php } ?>
-                  <?php } ?>
-                </tbody>
-              </table>
-              <button type="button" class="btn btn-sm btn-outline-secondary" id="add-altid-row"><?php echo __('Add alternative identifier'); ?></button>
-            </div>
-
-            <div class="mb-3">
               <label for="title" class="form-label">
-                <?php echo __('Title'); ?>
+                <?php echo __('Title proper'); ?>
                 <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
               </label>
               <input type="text" class="form-control" id="title" name="title"
                      value="<?php echo esc_specialchars($rawIo['title']); ?>" required>
             </div>
 
-            <!-- Events (dates) multi-row -->
+            <!-- General material designation -->
             <div class="mb-3">
-              <label class="form-label"><?php echo __('Date(s)'); ?></label>
-              <?php $rawEventTypes = $sf_data->getRaw('eventTypes'); ?>
-              <?php $rawEvents = $rawIo['events']; ?>
-              <table class="table table-sm" id="events-table">
-                <thead>
-                  <tr>
-                    <th><?php echo __('Type'); ?></th>
-                    <th><?php echo __('Date'); ?></th>
-                    <th><?php echo __('Start'); ?></th>
-                    <th><?php echo __('End'); ?></th>
-                    <th><?php echo __('Actor'); ?></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php if (!empty($rawEvents)) { ?>
-                    <?php foreach ($rawEvents as $idx => $evt) { ?>
-                      <tr>
-                        <td>
-                          <select class="form-select form-select-sm" name="events[<?php echo $idx; ?>][typeId]">
-                            <option value=""><?php echo __('- Select -'); ?></option>
-                            <?php foreach ($rawEventTypes as $et) { ?>
-                              <option value="<?php echo $et->id; ?>" <?php echo ($et->id == ($evt->type_id ?? '')) ? 'selected' : ''; ?>>
-                                <?php echo esc_specialchars($et->name ?? ''); ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </td>
-                        <td><input type="text" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][date]" value="<?php echo esc_specialchars($evt->date ?? ''); ?>" placeholder="<?php echo __('e.g. ca. 1900'); ?>"></td>
-                        <td><input type="date" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][startDate]" value="<?php echo esc_specialchars($evt->start_date ?? ''); ?>"></td>
-                        <td><input type="date" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][endDate]" value="<?php echo esc_specialchars($evt->end_date ?? ''); ?>"></td>
-                        <td>
-                          <input type="text" class="form-control form-control-sm actor-autocomplete" name="events[<?php echo $idx; ?>][actorName]" value="<?php echo esc_specialchars($evt->actor_name ?? ''); ?>" placeholder="<?php echo __('Actor name'); ?>">
-                          <input type="hidden" name="events[<?php echo $idx; ?>][actorId]" value="<?php echo (int) ($evt->actor_id ?? 0); ?>">
-                        </td>
-                        <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __('Remove'); ?></button></td>
-                      </tr>
-                    <?php } ?>
+              <label class="form-label"><?php echo __('General material designation'); ?></label>
+              <?php $rawMatAPs = $rawIo['materialTypes'] ?? []; ?>
+              <div id="mattype-list">
+                <?php if (!empty($rawMatAPs)) { ?>
+                  <?php foreach ($rawMatAPs as $mt) { ?>
+                    <div class="input-group input-group-sm mb-1">
+                      <input type="text" class="form-control" value="<?php echo esc_specialchars($mt->term_name ?? ''); ?>" readonly>
+                      <input type="hidden" name="materialTypeIds[]" value="<?php echo (int) $mt->term_id; ?>">
+                      <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
+                    </div>
                   <?php } ?>
-                </tbody>
-              </table>
-              <button type="button" class="btn btn-sm btn-outline-secondary" id="add-event-row"><?php echo __('Add date'); ?></button>
+                <?php } ?>
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <select class="form-select form-select-sm" id="mattype-select">
+                  <option value=""><?php echo __('- Select type -'); ?></option>
+                  <?php foreach ($rawMaterialTypes as $mt) { ?>
+                    <option value="<?php echo $mt->id; ?>"><?php echo esc_specialchars($mt->name ?? ''); ?></option>
+                  <?php } ?>
+                </select>
+                <button type="button" class="btn btn-outline-secondary" id="add-mattype-btn"><?php echo __('Add'); ?></button>
+              </div>
             </div>
 
-            <?php $rawLevels = $sf_data->getRaw('levels'); ?>
+            <div class="mb-3">
+              <label for="alternateTitle" class="form-label"><?php echo __('Parallel titles'); ?></label>
+              <input type="text" class="form-control" id="alternateTitle" name="alternateTitle"
+                     value="<?php echo esc_specialchars($rawIo['alternateTitle'] ?? ''); ?>">
+            </div>
+
+            <div class="mb-3">
+              <label for="otherTitleInformation" class="form-label"><?php echo __('Other title information'); ?></label>
+              <input type="text" class="form-control" id="otherTitleInformation" name="otherTitleInformation"
+                     value="<?php echo esc_specialchars($rawProps['otherTitleInformation'] ?? ''); ?>">
+            </div>
+
+            <div class="mb-3">
+              <label for="titleStatementOfResponsibility" class="form-label"><?php echo __('Statement of responsibility'); ?></label>
+              <input type="text" class="form-control" id="titleStatementOfResponsibility" name="titleStatementOfResponsibility"
+                     value="<?php echo esc_specialchars($rawProps['titleStatementOfResponsibility'] ?? ''); ?>">
+            </div>
+
             <div class="mb-3">
               <label for="levelOfDescriptionId" class="form-label">
                 <?php echo __('Level of description'); ?>
@@ -181,49 +141,6 @@
             <?php } ?>
 
             <div class="mb-3">
-              <label for="extentAndMedium" class="form-label"><?php echo __('Extent and medium'); ?></label>
-              <textarea class="form-control" id="extentAndMedium" name="extentAndMedium" rows="3"><?php echo esc_specialchars($rawIo['extentAndMedium']); ?></textarea>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- 2. Context Area -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="context-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#context-collapse" aria-expanded="false" aria-controls="context-collapse">
-            <?php echo __('Context area'); ?>
-          </button>
-        </h2>
-        <div id="context-collapse" class="accordion-collapse collapse" aria-labelledby="context-heading">
-          <div class="accordion-body">
-
-            <!-- Name of creator(s) -->
-            <div class="mb-3">
-              <label class="form-label">
-                <?php echo __('Name of creator(s)'); ?>
-                <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
-              </label>
-              <?php $rawCreators = $rawIo['creators'] ?? []; ?>
-              <div id="creator-list">
-                <?php if (!empty($rawCreators)) { ?>
-                  <?php foreach ($rawCreators as $cIdx => $creator) { ?>
-                    <div class="input-group input-group-sm mb-1">
-                      <input type="text" class="form-control" value="<?php echo esc_specialchars($creator->actor_name ?? ''); ?>" readonly>
-                      <input type="hidden" name="creators[<?php echo $cIdx; ?>][actorId]" value="<?php echo (int) ($creator->actor_id ?? 0); ?>">
-                      <input type="hidden" name="creators[<?php echo $cIdx; ?>][actorName]" value="<?php echo esc_specialchars($creator->actor_name ?? ''); ?>">
-                      <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
-                    </div>
-                  <?php } ?>
-                <?php } ?>
-              </div>
-              <div class="input-group input-group-sm mt-1">
-                <input type="text" class="form-control actor-autocomplete-add" data-target="creator-list" data-field="creators" placeholder="<?php echo __('Type to add creator...'); ?>">
-              </div>
-            </div>
-
-            <div class="mb-3">
               <label for="repositoryName" class="form-label"><?php echo __('Repository'); ?></label>
               <input type="text" class="form-control repository-autocomplete" id="repositoryName" name="repositoryName"
                      value="<?php echo esc_specialchars($rawIo['repositoryName'] ?? ''); ?>" placeholder="<?php echo __('Type to search...'); ?>">
@@ -231,80 +148,265 @@
             </div>
 
             <div class="mb-3">
-              <label for="archivalHistory" class="form-label"><?php echo __('Archival history'); ?></label>
-              <textarea class="form-control" id="archivalHistory" name="archivalHistory" rows="3"><?php echo esc_specialchars($rawIo['archivalHistory']); ?></textarea>
+              <label for="identifier" class="form-label"><?php echo __('Identifier'); ?></label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="identifier" name="identifier"
+                       value="<?php echo esc_specialchars($rawIo['identifier']); ?>">
+                <button type="button" class="btn btn-outline-secondary" id="generate-identifier"
+                        data-url="<?php echo url_for('@io_generate_identifier'); ?>">
+                  <i class="fas fa-cog me-1" aria-hidden="true"></i><?php echo __('Generate'); ?>
+                </button>
+              </div>
             </div>
 
+            <!-- Alternative identifiers -->
             <div class="mb-3">
-              <label for="acquisition" class="form-label"><?php echo __('Immediate source of acquisition or transfer'); ?></label>
-              <textarea class="form-control" id="acquisition" name="acquisition" rows="3"><?php echo esc_specialchars($rawIo['acquisition']); ?></textarea>
+              <label class="form-label"><?php echo __('Alternative identifier(s)'); ?></label>
+              <?php $rawAltIds = $rawIo['alternativeIdentifiers'] ?? []; ?>
+              <table class="table table-sm" id="altids-table">
+                <thead><tr><th><?php echo __('Label'); ?></th><th><?php echo __('Value'); ?></th><th style="width:80px"></th></tr></thead>
+                <tbody>
+                  <?php if (!empty($rawAltIds)) { ?>
+                    <?php foreach ($rawAltIds as $aiIdx => $ai) { ?>
+                      <tr>
+                        <td><input type="text" class="form-control form-control-sm" name="altIds[<?php echo $aiIdx; ?>][label]" value="<?php echo esc_specialchars($ai->label ?? ''); ?>"></td>
+                        <td><input type="text" class="form-control form-control-sm" name="altIds[<?php echo $aiIdx; ?>][value]" value="<?php echo esc_specialchars($ai->value ?? ''); ?>"></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __('Remove'); ?></button></td>
+                      </tr>
+                    <?php } ?>
+                  <?php } ?>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="add-altid-row"><?php echo __('Add alternative identifier'); ?></button>
             </div>
 
           </div>
         </div>
       </div>
 
-      <!-- 3. Content and Structure Area -->
+      <!-- 2. Edition Area -->
       <div class="accordion-item">
-        <h2 class="accordion-header" id="content-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#content-collapse" aria-expanded="false" aria-controls="content-collapse">
-            <?php echo __('Content and structure area'); ?>
+        <h2 class="accordion-header" id="edition-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#edition-collapse" aria-expanded="false" aria-controls="edition-collapse">
+            <?php echo __('Edition area'); ?>
           </button>
         </h2>
-        <div id="content-collapse" class="accordion-collapse collapse" aria-labelledby="content-heading">
+        <div id="edition-collapse" class="accordion-collapse collapse" aria-labelledby="edition-heading">
           <div class="accordion-body">
+            <div class="mb-3">
+              <label for="edition" class="form-label"><?php echo __('Edition statement'); ?></label>
+              <textarea class="form-control" id="edition" name="edition" rows="2"><?php echo esc_specialchars($rawIo['edition'] ?? ''); ?></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editionStatementOfResponsibility" class="form-label"><?php echo __('Statement of responsibility relating to the edition'); ?></label>
+              <input type="text" class="form-control" id="editionStatementOfResponsibility" name="editionStatementOfResponsibility"
+                     value="<?php echo esc_specialchars($rawProps['editionStatementOfResponsibility'] ?? ''); ?>">
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <!-- 3. Class of Material Specific Details Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="class-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#class-collapse" aria-expanded="false" aria-controls="class-collapse">
+            <?php echo __('Class of material specific details area'); ?>
+          </button>
+        </h2>
+        <div id="class-collapse" class="accordion-collapse collapse" aria-labelledby="class-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="statementOfScaleCartographic" class="form-label"><?php echo __('Statement of scale (cartographic)'); ?></label>
+              <input type="text" class="form-control" id="statementOfScaleCartographic" name="statementOfScaleCartographic"
+                     value="<?php echo esc_specialchars($rawProps['statementOfScaleCartographic'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="statementOfProjection" class="form-label"><?php echo __('Statement of projection (cartographic)'); ?></label>
+              <input type="text" class="form-control" id="statementOfProjection" name="statementOfProjection"
+                     value="<?php echo esc_specialchars($rawProps['statementOfProjection'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="statementOfCoordinates" class="form-label"><?php echo __('Statement of coordinates (cartographic)'); ?></label>
+              <input type="text" class="form-control" id="statementOfCoordinates" name="statementOfCoordinates"
+                     value="<?php echo esc_specialchars($rawProps['statementOfCoordinates'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="statementOfScaleArchitectural" class="form-label"><?php echo __('Statement of scale (architectural)'); ?></label>
+              <input type="text" class="form-control" id="statementOfScaleArchitectural" name="statementOfScaleArchitectural"
+                     value="<?php echo esc_specialchars($rawProps['statementOfScaleArchitectural'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="issuingJurisdictionAndDenomination" class="form-label"><?php echo __('Issuing jurisdiction and denomination (philatelic)'); ?></label>
+              <input type="text" class="form-control" id="issuingJurisdictionAndDenomination" name="issuingJurisdictionAndDenomination"
+                     value="<?php echo esc_specialchars($rawProps['issuingJurisdictionAndDenomination'] ?? ''); ?>">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Dates of Creation Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="dates-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dates-collapse" aria-expanded="false" aria-controls="dates-collapse">
+            <?php echo __('Dates of creation area'); ?>
+          </button>
+        </h2>
+        <div id="dates-collapse" class="accordion-collapse collapse" aria-labelledby="dates-heading">
+          <div class="accordion-body">
+            <?php $rawEvents = $rawIo['events']; ?>
+            <table class="table table-sm" id="events-table">
+              <thead>
+                <tr>
+                  <th><?php echo __('Type'); ?></th>
+                  <th><?php echo __('Date'); ?></th>
+                  <th><?php echo __('Start'); ?></th>
+                  <th><?php echo __('End'); ?></th>
+                  <th><?php echo __('Actor'); ?></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (!empty($rawEvents)) { ?>
+                  <?php foreach ($rawEvents as $idx => $evt) { ?>
+                    <tr>
+                      <td>
+                        <select class="form-select form-select-sm" name="events[<?php echo $idx; ?>][typeId]">
+                          <option value=""><?php echo __('- Select -'); ?></option>
+                          <?php foreach ($rawEventTypes as $et) { ?>
+                            <option value="<?php echo $et->id; ?>" <?php echo ($et->id == ($evt->type_id ?? '')) ? 'selected' : ''; ?>>
+                              <?php echo esc_specialchars($et->name ?? ''); ?>
+                            </option>
+                          <?php } ?>
+                        </select>
+                      </td>
+                      <td><input type="text" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][date]" value="<?php echo esc_specialchars($evt->date ?? ''); ?>" placeholder="<?php echo __('e.g. ca. 1900'); ?>"></td>
+                      <td><input type="date" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][startDate]" value="<?php echo esc_specialchars($evt->start_date ?? ''); ?>"></td>
+                      <td><input type="date" class="form-control form-control-sm" name="events[<?php echo $idx; ?>][endDate]" value="<?php echo esc_specialchars($evt->end_date ?? ''); ?>"></td>
+                      <td>
+                        <input type="text" class="form-control form-control-sm actor-autocomplete" name="events[<?php echo $idx; ?>][actorName]" value="<?php echo esc_specialchars($evt->actor_name ?? ''); ?>" placeholder="<?php echo __('Actor name'); ?>">
+                        <input type="hidden" name="events[<?php echo $idx; ?>][actorId]" value="<?php echo (int) ($evt->actor_id ?? 0); ?>">
+                      </td>
+                      <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __('Remove'); ?></button></td>
+                    </tr>
+                  <?php } ?>
+                <?php } ?>
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="add-event-row"><?php echo __('Add date'); ?></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Physical Description Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="physical-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#physical-collapse" aria-expanded="false" aria-controls="physical-collapse">
+            <?php echo __('Physical description area'); ?>
+          </button>
+        </h2>
+        <div id="physical-collapse" class="accordion-collapse collapse" aria-labelledby="physical-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="extentAndMedium" class="form-label"><?php echo __('Physical description'); ?></label>
+              <textarea class="form-control" id="extentAndMedium" name="extentAndMedium" rows="3"><?php echo esc_specialchars($rawIo['extentAndMedium']); ?></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Publisher's Series Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="publisher-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#publisher-collapse" aria-expanded="false" aria-controls="publisher-collapse">
+            <?php echo __("Publisher's series area"); ?>
+          </button>
+        </h2>
+        <div id="publisher-collapse" class="accordion-collapse collapse" aria-labelledby="publisher-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="titleProperOfPublishersSeries" class="form-label"><?php echo __("Title proper of publisher's series"); ?></label>
+              <input type="text" class="form-control" id="titleProperOfPublishersSeries" name="titleProperOfPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['titleProperOfPublishersSeries'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="parallelTitleOfPublishersSeries" class="form-label"><?php echo __("Parallel title of publisher's series"); ?></label>
+              <input type="text" class="form-control" id="parallelTitleOfPublishersSeries" name="parallelTitleOfPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['parallelTitleOfPublishersSeries'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="otherTitleInformationOfPublishersSeries" class="form-label"><?php echo __("Other title information of publisher's series"); ?></label>
+              <input type="text" class="form-control" id="otherTitleInformationOfPublishersSeries" name="otherTitleInformationOfPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['otherTitleInformationOfPublishersSeries'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="statementOfResponsibilityRelatingToPublishersSeries" class="form-label"><?php echo __("Statement of responsibility relating to publisher's series"); ?></label>
+              <input type="text" class="form-control" id="statementOfResponsibilityRelatingToPublishersSeries" name="statementOfResponsibilityRelatingToPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['statementOfResponsibilityRelatingToPublishersSeries'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="numberingWithinPublishersSeries" class="form-label"><?php echo __("Numbering within publisher's series"); ?></label>
+              <input type="text" class="form-control" id="numberingWithinPublishersSeries" name="numberingWithinPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['numberingWithinPublishersSeries'] ?? ''); ?>">
+            </div>
+            <div class="mb-3">
+              <label for="noteOnPublishersSeries" class="form-label"><?php echo __("Note on publisher's series"); ?></label>
+              <input type="text" class="form-control" id="noteOnPublishersSeries" name="noteOnPublishersSeries"
+                     value="<?php echo esc_specialchars($rawProps['noteOnPublishersSeries'] ?? ''); ?>">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Archival Description Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="archival-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#archival-collapse" aria-expanded="false" aria-controls="archival-collapse">
+            <?php echo __('Archival description area'); ?>
+          </button>
+        </h2>
+        <div id="archival-collapse" class="accordion-collapse collapse" aria-labelledby="archival-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="archivalHistory" class="form-label"><?php echo __('Custodial history'); ?></label>
+              <textarea class="form-control" id="archivalHistory" name="archivalHistory" rows="3"><?php echo esc_specialchars($rawIo['archivalHistory']); ?></textarea>
+            </div>
             <div class="mb-3">
               <label for="scopeAndContent" class="form-label"><?php echo __('Scope and content'); ?></label>
               <textarea class="form-control" id="scopeAndContent" name="scopeAndContent" rows="4"><?php echo esc_specialchars($rawIo['scopeAndContent']); ?></textarea>
             </div>
-
-            <div class="mb-3">
-              <label for="appraisal" class="form-label"><?php echo __('Appraisal, destruction and scheduling information'); ?></label>
-              <textarea class="form-control" id="appraisal" name="appraisal" rows="3"><?php echo esc_specialchars($rawIo['appraisal']); ?></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label for="accruals" class="form-label"><?php echo __('Accruals'); ?></label>
-              <textarea class="form-control" id="accruals" name="accruals" rows="3"><?php echo esc_specialchars($rawIo['accruals']); ?></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label for="arrangement" class="form-label"><?php echo __('System of arrangement'); ?></label>
-              <textarea class="form-control" id="arrangement" name="arrangement" rows="3"><?php echo esc_specialchars($rawIo['arrangement']); ?></textarea>
-            </div>
-
           </div>
         </div>
       </div>
 
-      <!-- 4. Conditions of Access and Use Area -->
+      <!-- 8. Notes Area -->
       <div class="accordion-item">
-        <h2 class="accordion-header" id="access-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#access-collapse" aria-expanded="false" aria-controls="access-collapse">
-            <?php echo __('Conditions of access and use area'); ?>
+        <h2 class="accordion-header" id="notes-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#notes-collapse" aria-expanded="false" aria-controls="notes-collapse">
+            <?php echo __('Notes area'); ?>
           </button>
         </h2>
-        <div id="access-collapse" class="accordion-collapse collapse" aria-labelledby="access-heading">
+        <div id="notes-collapse" class="accordion-collapse collapse" aria-labelledby="notes-heading">
           <div class="accordion-body">
-
             <div class="mb-3">
-              <label for="accessConditions" class="form-label"><?php echo __('Conditions governing access'); ?></label>
-              <textarea class="form-control" id="accessConditions" name="accessConditions" rows="3"><?php echo esc_specialchars($rawIo['accessConditions']); ?></textarea>
+              <label for="physicalCharacteristics" class="form-label"><?php echo __('Physical condition'); ?></label>
+              <textarea class="form-control" id="physicalCharacteristics" name="physicalCharacteristics" rows="3"><?php echo esc_specialchars($rawIo['physicalCharacteristics']); ?></textarea>
             </div>
-
             <div class="mb-3">
-              <label for="reproductionConditions" class="form-label"><?php echo __('Conditions governing reproduction'); ?></label>
-              <textarea class="form-control" id="reproductionConditions" name="reproductionConditions" rows="3"><?php echo esc_specialchars($rawIo['reproductionConditions']); ?></textarea>
+              <label for="acquisition" class="form-label"><?php echo __('Immediate source of acquisition'); ?></label>
+              <textarea class="form-control" id="acquisition" name="acquisition" rows="3"><?php echo esc_specialchars($rawIo['acquisition']); ?></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="arrangement" class="form-label"><?php echo __('Arrangement'); ?></label>
+              <textarea class="form-control" id="arrangement" name="arrangement" rows="3"><?php echo esc_specialchars($rawIo['arrangement']); ?></textarea>
             </div>
 
             <!-- Language(s) of material -->
             <div class="mb-3">
-              <label class="form-label"><?php echo __('Language(s) of material'); ?></label>
+              <label class="form-label"><?php echo __('Language of material'); ?></label>
               <?php $rawLangs = $rawIo['languages'] ?? []; ?>
               <div id="languages-list">
                 <?php if (!empty($rawLangs)) { ?>
-                  <?php foreach ($rawLangs as $lIdx => $langCode) { ?>
+                  <?php foreach ($rawLangs as $langCode) { ?>
                     <div class="input-group input-group-sm mb-1">
                       <select class="form-select form-select-sm" name="languages[]">
                         <?php foreach ($rawLangChoices as $code => $name) { ?>
@@ -321,11 +423,11 @@
 
             <!-- Script(s) of material -->
             <div class="mb-3">
-              <label class="form-label"><?php echo __('Script(s) of material'); ?></label>
+              <label class="form-label"><?php echo __('Script of material'); ?></label>
               <?php $rawScripts = $rawIo['scripts'] ?? []; ?>
               <div id="scripts-list">
                 <?php if (!empty($rawScripts)) { ?>
-                  <?php foreach ($rawScripts as $sIdx => $scriptCode) { ?>
+                  <?php foreach ($rawScripts as $scriptCode) { ?>
                     <div class="input-group input-group-sm mb-1">
                       <select class="form-select form-select-sm" name="scripts[]">
                         <?php foreach ($rawScriptChoices as $code => $name) { ?>
@@ -340,94 +442,45 @@
               <button type="button" class="btn btn-sm btn-outline-secondary btn-add-script-row" data-target="scripts-list" data-name="scripts[]"><?php echo __('Add script'); ?></button>
             </div>
 
-            <!-- Language and script notes -->
             <div class="mb-3">
               <label for="languageNotes" class="form-label"><?php echo __('Language and script notes'); ?></label>
-              <textarea class="form-control" id="languageNotes" name="languageNotes" rows="3"><?php echo esc_specialchars($rawIo['languageNotes'] ?? ''); ?></textarea>
+              <textarea class="form-control" id="languageNotes" name="languageNotes" rows="2"><?php echo esc_specialchars($rawIo['languageNotes'] ?? ''); ?></textarea>
             </div>
 
             <div class="mb-3">
-              <label for="physicalCharacteristics" class="form-label"><?php echo __('Physical characteristics and technical requirements'); ?></label>
-              <textarea class="form-control" id="physicalCharacteristics" name="physicalCharacteristics" rows="3"><?php echo esc_specialchars($rawIo['physicalCharacteristics']); ?></textarea>
+              <label for="locationOfOriginals" class="form-label"><?php echo __('Location of originals'); ?></label>
+              <textarea class="form-control" id="locationOfOriginals" name="locationOfOriginals" rows="3"><?php echo esc_specialchars($rawIo['locationOfOriginals']); ?></textarea>
             </div>
-
+            <div class="mb-3">
+              <label for="locationOfCopies" class="form-label"><?php echo __('Availability of other formats'); ?></label>
+              <textarea class="form-control" id="locationOfCopies" name="locationOfCopies" rows="3"><?php echo esc_specialchars($rawIo['locationOfCopies']); ?></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="accessConditions" class="form-label"><?php echo __('Restrictions on access'); ?></label>
+              <textarea class="form-control" id="accessConditions" name="accessConditions" rows="3"><?php echo esc_specialchars($rawIo['accessConditions']); ?></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="reproductionConditions" class="form-label"><?php echo __('Terms governing use, reproduction, and publication'); ?></label>
+              <textarea class="form-control" id="reproductionConditions" name="reproductionConditions" rows="3"><?php echo esc_specialchars($rawIo['reproductionConditions']); ?></textarea>
+            </div>
             <div class="mb-3">
               <label for="findingAids" class="form-label"><?php echo __('Finding aids'); ?></label>
               <textarea class="form-control" id="findingAids" name="findingAids" rows="3"><?php echo esc_specialchars($rawIo['findingAids']); ?></textarea>
             </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. Allied Materials Area -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="allied-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#allied-collapse" aria-expanded="false" aria-controls="allied-collapse">
-            <?php echo __('Allied materials area'); ?>
-          </button>
-        </h2>
-        <div id="allied-collapse" class="accordion-collapse collapse" aria-labelledby="allied-heading">
-          <div class="accordion-body">
-
             <div class="mb-3">
-              <label for="locationOfOriginals" class="form-label"><?php echo __('Existence and location of originals'); ?></label>
-              <textarea class="form-control" id="locationOfOriginals" name="locationOfOriginals" rows="3"><?php echo esc_specialchars($rawIo['locationOfOriginals']); ?></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label for="locationOfCopies" class="form-label"><?php echo __('Existence and location of copies'); ?></label>
-              <textarea class="form-control" id="locationOfCopies" name="locationOfCopies" rows="3"><?php echo esc_specialchars($rawIo['locationOfCopies']); ?></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label for="relatedUnitsOfDescription" class="form-label"><?php echo __('Related units of description'); ?></label>
+              <label for="relatedUnitsOfDescription" class="form-label"><?php echo __('Associated materials'); ?></label>
               <textarea class="form-control" id="relatedUnitsOfDescription" name="relatedUnitsOfDescription" rows="3"><?php echo esc_specialchars($rawIo['relatedUnitsOfDescription']); ?></textarea>
             </div>
-
-            <!-- Publication notes -->
             <div class="mb-3">
-              <label class="form-label"><?php echo __('Publication notes'); ?></label>
-              <?php $rawPubNotes = $rawIo['publicationNotes'] ?? []; ?>
-              <div id="pubnotes-list">
-                <?php if (!empty($rawPubNotes)) { ?>
-                  <?php foreach ($rawPubNotes as $pnIdx => $pn) { ?>
-                    <div class="mb-1">
-                      <div class="input-group input-group-sm">
-                        <textarea class="form-control form-control-sm" name="publicationNotes[<?php echo $pnIdx; ?>][content]" rows="2"><?php echo esc_specialchars($pn->content ?? ''); ?></textarea>
-                        <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
-                      </div>
-                    </div>
-                  <?php } ?>
-                <?php } ?>
-              </div>
-              <button type="button" class="btn btn-sm btn-outline-secondary" id="add-pubnote-row"><?php echo __('Add publication note'); ?></button>
+              <label for="accruals" class="form-label"><?php echo __('Accruals'); ?></label>
+              <textarea class="form-control" id="accruals" name="accruals" rows="3"><?php echo esc_specialchars($rawIo['accruals']); ?></textarea>
             </div>
 
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. Notes Area -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="notes-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#notes-collapse" aria-expanded="false" aria-controls="notes-collapse">
-            <?php echo __('Notes area'); ?>
-          </button>
-        </h2>
-        <div id="notes-collapse" class="accordion-collapse collapse" aria-labelledby="notes-heading">
-          <div class="accordion-body">
-
-            <?php $rawNoteTypes = $sf_data->getRaw('noteTypes'); ?>
+            <!-- General notes -->
             <?php $rawNotes = $rawIo['notes']; ?>
+            <label class="form-label"><?php echo __('Other notes'); ?></label>
             <table class="table table-sm" id="notes-table">
-              <thead>
-                <tr>
-                  <th style="width:30%"><?php echo __('Type'); ?></th>
-                  <th><?php echo __('Content'); ?></th>
-                  <th style="width:80px"></th>
-                </tr>
-              </thead>
+              <thead><tr><th style="width:30%"><?php echo __('Type'); ?></th><th><?php echo __('Content'); ?></th><th style="width:80px"></th></tr></thead>
               <tbody>
                 <?php if (!empty($rawNotes)) { ?>
                   <?php foreach ($rawNotes as $nIdx => $note) { ?>
@@ -436,9 +489,7 @@
                         <select class="form-select form-select-sm" name="notes[<?php echo $nIdx; ?>][typeId]">
                           <option value=""><?php echo __('- Select -'); ?></option>
                           <?php foreach ($rawNoteTypes as $nt) { ?>
-                            <option value="<?php echo $nt->id; ?>" <?php echo ($nt->id == ($note->type_id ?? '')) ? 'selected' : ''; ?>>
-                              <?php echo esc_specialchars($nt->name ?? ''); ?>
-                            </option>
+                            <option value="<?php echo $nt->id; ?>" <?php echo ($nt->id == ($note->type_id ?? '')) ? 'selected' : ''; ?>><?php echo esc_specialchars($nt->name ?? ''); ?></option>
                           <?php } ?>
                         </select>
                       </td>
@@ -450,12 +501,30 @@
               </tbody>
             </table>
             <button type="button" class="btn btn-sm btn-outline-secondary" id="add-note-row"><?php echo __('Add note'); ?></button>
-
           </div>
         </div>
       </div>
 
-      <!-- 7. Access Points Area -->
+      <!-- 9. Standard Number Area -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="standard-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#standard-collapse" aria-expanded="false" aria-controls="standard-collapse">
+            <?php echo __('Standard number area'); ?>
+          </button>
+        </h2>
+        <div id="standard-collapse" class="accordion-collapse collapse" aria-labelledby="standard-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="standardNumber" class="form-label"><?php echo __('Standard number'); ?></label>
+              <input type="text" class="form-control" id="standardNumber" name="standardNumber"
+                     value="<?php echo esc_specialchars($rawProps['standardNumber'] ?? ''); ?>">
+              <div class="form-text text-muted small"><?php echo __('ISBN, ISSN, or other standard number.'); ?></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Access Points -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="ap-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ap-collapse" aria-expanded="false" aria-controls="ap-collapse">
@@ -464,16 +533,15 @@
         </h2>
         <div id="ap-collapse" class="accordion-collapse collapse" aria-labelledby="ap-heading">
           <div class="accordion-body">
-
-            <!-- Subject access points -->
+            <!-- Subject -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Subject access points'); ?></label>
               <?php $rawSubjectAPs = $rawIo['subjectAccessPoints']; ?>
               <div id="subject-ap-list">
                 <?php if (!empty($rawSubjectAPs)) { ?>
-                  <?php foreach ($rawSubjectAPs as $sIdx => $sap) { ?>
+                  <?php foreach ($rawSubjectAPs as $sap) { ?>
                     <div class="input-group input-group-sm mb-1">
-                      <input type="text" class="form-control term-autocomplete" data-taxonomy="35" value="<?php echo esc_specialchars($sap->term_name ?? ''); ?>" readonly>
+                      <input type="text" class="form-control" value="<?php echo esc_specialchars($sap->term_name ?? ''); ?>" readonly>
                       <input type="hidden" name="subjectAccessPointIds[]" value="<?php echo (int) $sap->term_id; ?>">
                       <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
                     </div>
@@ -484,8 +552,7 @@
                 <input type="text" class="form-control term-autocomplete-add" data-taxonomy="35" data-target="subject-ap-list" data-name="subjectAccessPointIds[]" placeholder="<?php echo __('Type to add subject...'); ?>">
               </div>
             </div>
-
-            <!-- Place access points -->
+            <!-- Place -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Place access points'); ?></label>
               <?php $rawPlaceAPs = $rawIo['placeAccessPoints']; ?>
@@ -504,8 +571,7 @@
                 <input type="text" class="form-control term-autocomplete-add" data-taxonomy="42" data-target="place-ap-list" data-name="placeAccessPointIds[]" placeholder="<?php echo __('Type to add place...'); ?>">
               </div>
             </div>
-
-            <!-- Genre access points -->
+            <!-- Genre -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Genre access points'); ?></label>
               <?php $rawGenreAPs = $rawIo['genreAccessPoints']; ?>
@@ -524,8 +590,7 @@
                 <input type="text" class="form-control term-autocomplete-add" data-taxonomy="78" data-target="genre-ap-list" data-name="genreAccessPointIds[]" placeholder="<?php echo __('Type to add genre...'); ?>">
               </div>
             </div>
-
-            <!-- Name access points -->
+            <!-- Name -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Name access points'); ?></label>
               <?php $rawNameAPs = $rawIo['nameAccessPoints']; ?>
@@ -545,75 +610,64 @@
                 <input type="text" class="form-control actor-autocomplete-add" data-target="name-ap-list" placeholder="<?php echo __('Type to add name...'); ?>">
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
-      <!-- 8. Description Control Area -->
+      <!-- 11. Control Area -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="control-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#control-collapse" aria-expanded="false" aria-controls="control-collapse">
-            <?php echo __('Description control area'); ?>
+            <?php echo __('Control area'); ?>
           </button>
         </h2>
         <div id="control-collapse" class="accordion-collapse collapse" aria-labelledby="control-heading">
           <div class="accordion-body">
-
             <div class="mb-3">
-              <label for="descriptionIdentifier" class="form-label"><?php echo __('Description identifier'); ?></label>
+              <label for="descriptionIdentifier" class="form-label"><?php echo __('Description record identifier'); ?></label>
               <input type="text" class="form-control" id="descriptionIdentifier" name="descriptionIdentifier"
                      value="<?php echo esc_specialchars($rawIo['descriptionIdentifier']); ?>">
             </div>
-
             <div class="mb-3">
               <label for="institutionResponsibleIdentifier" class="form-label"><?php echo __('Institution identifier'); ?></label>
               <textarea class="form-control" id="institutionResponsibleIdentifier" name="institutionResponsibleIdentifier" rows="2"><?php echo esc_specialchars($rawIo['institutionResponsibleIdentifier']); ?></textarea>
             </div>
-
             <div class="mb-3">
               <label for="rules" class="form-label"><?php echo __('Rules or conventions'); ?></label>
               <textarea class="form-control" id="rules" name="rules" rows="3"><?php echo esc_specialchars($rawIo['rules']); ?></textarea>
             </div>
-
             <?php $rawDescStatuses = $sf_data->getRaw('descriptionStatuses'); ?>
             <div class="mb-3">
-              <label for="descriptionStatusId" class="form-label"><?php echo __('Status of description'); ?></label>
+              <label for="descriptionStatusId" class="form-label"><?php echo __('Status'); ?></label>
               <select class="form-select" id="descriptionStatusId" name="descriptionStatusId">
                 <option value=""><?php echo __('- Select -'); ?></option>
                 <?php foreach ($rawDescStatuses as $status) { ?>
-                  <option value="<?php echo $status->id; ?>"
-                          <?php echo ($status->id == $rawIo['descriptionStatusId']) ? 'selected' : ''; ?>>
+                  <option value="<?php echo $status->id; ?>" <?php echo ($status->id == $rawIo['descriptionStatusId']) ? 'selected' : ''; ?>>
                     <?php echo esc_specialchars($status->name ?? ''); ?>
                   </option>
                 <?php } ?>
               </select>
             </div>
-
             <?php $rawDescDetails = $sf_data->getRaw('descriptionDetails'); ?>
             <div class="mb-3">
               <label for="descriptionDetailId" class="form-label"><?php echo __('Level of detail'); ?></label>
               <select class="form-select" id="descriptionDetailId" name="descriptionDetailId">
                 <option value=""><?php echo __('- Select -'); ?></option>
                 <?php foreach ($rawDescDetails as $detail) { ?>
-                  <option value="<?php echo $detail->id; ?>"
-                          <?php echo ($detail->id == $rawIo['descriptionDetailId']) ? 'selected' : ''; ?>>
+                  <option value="<?php echo $detail->id; ?>" <?php echo ($detail->id == $rawIo['descriptionDetailId']) ? 'selected' : ''; ?>>
                     <?php echo esc_specialchars($detail->name ?? ''); ?>
                   </option>
                 <?php } ?>
               </select>
             </div>
-
             <div class="mb-3">
               <label for="revisionHistory" class="form-label"><?php echo __('Dates of creation, revision and deletion'); ?></label>
               <textarea class="form-control" id="revisionHistory" name="revisionHistory" rows="3"><?php echo esc_specialchars($rawIo['revisionHistory']); ?></textarea>
             </div>
-
             <div class="mb-3">
               <label for="sources" class="form-label"><?php echo __('Sources'); ?></label>
               <textarea class="form-control" id="sources" name="sources" rows="3"><?php echo esc_specialchars($rawIo['sources']); ?></textarea>
             </div>
-
             <!-- Language(s) of description -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Language(s) of description'); ?></label>
@@ -634,7 +688,6 @@
               </div>
               <button type="button" class="btn btn-sm btn-outline-secondary btn-add-lang-row" data-target="langs-of-desc-list" data-name="languagesOfDescription[]"><?php echo __('Add language'); ?></button>
             </div>
-
             <!-- Script(s) of description -->
             <div class="mb-3">
               <label class="form-label"><?php echo __('Script(s) of description'); ?></label>
@@ -655,26 +708,6 @@
               </div>
               <button type="button" class="btn btn-sm btn-outline-secondary btn-add-script-row" data-target="scripts-of-desc-list" data-name="scriptsOfDescription[]"><?php echo __('Add script'); ?></button>
             </div>
-
-            <!-- Archivist's notes -->
-            <div class="mb-3">
-              <label class="form-label"><?php echo __("Archivist's notes"); ?></label>
-              <?php $rawArchNotes = $rawIo['archivistNotes'] ?? []; ?>
-              <div id="archnotes-list">
-                <?php if (!empty($rawArchNotes)) { ?>
-                  <?php foreach ($rawArchNotes as $anIdx => $an) { ?>
-                    <div class="mb-1">
-                      <div class="input-group input-group-sm">
-                        <textarea class="form-control form-control-sm" name="archivistNotes[<?php echo $anIdx; ?>][content]" rows="2"><?php echo esc_specialchars($an->content ?? ''); ?></textarea>
-                        <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
-                      </div>
-                    </div>
-                  <?php } ?>
-                <?php } ?>
-              </div>
-              <button type="button" class="btn btn-sm btn-outline-secondary" id="add-archnote-row"><?php echo __("Add archivist's note"); ?></button>
-            </div>
-
           </div>
         </div>
       </div>
@@ -685,69 +718,43 @@
     <div class="card mb-3">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Administration area'); ?></h5></div>
       <div class="card-body">
-
         <?php if (!$isNew && $rawIo['parentTitle']) { ?>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Part of'); ?></label>
             <p class="form-control-plaintext">
-              <a href="<?php echo url_for('/' . $rawIo['parentSlug']); ?>">
-                <?php echo esc_specialchars($rawIo['parentTitle']); ?>
-              </a>
+              <a href="<?php echo url_for('/' . $rawIo['parentSlug']); ?>"><?php echo esc_specialchars($rawIo['parentTitle']); ?></a>
             </p>
           </div>
         <?php } ?>
-
         <?php $rawPubStatuses = $sf_data->getRaw('publicationStatuses'); ?>
         <div class="mb-3">
           <label for="publicationStatusId" class="form-label"><?php echo __('Publication status'); ?></label>
           <select class="form-select" id="publicationStatusId" name="publicationStatusId">
             <?php foreach ($rawPubStatuses as $ps) { ?>
-              <option value="<?php echo $ps->id; ?>"
-                      <?php echo ($ps->id == $rawIo['publicationStatusId']) ? 'selected' : ''; ?>>
-                <?php echo esc_specialchars($ps->name); ?>
-              </option>
+              <option value="<?php echo $ps->id; ?>" <?php echo ($ps->id == $rawIo['publicationStatusId']) ? 'selected' : ''; ?>><?php echo esc_specialchars($ps->name); ?></option>
             <?php } ?>
           </select>
         </div>
-
-        <!-- Display standard -->
         <?php $rawDisplayStandards = $sf_data->getRaw('displayStandards'); ?>
         <div class="mb-3">
           <label for="displayStandardId" class="form-label"><?php echo __('Display standard'); ?></label>
           <select class="form-select" id="displayStandardId" name="displayStandardId">
             <option value=""><?php echo __('- Use global default -'); ?></option>
             <?php foreach ($rawDisplayStandards as $ds) { ?>
-              <option value="<?php echo $ds->id; ?>"
-                      <?php echo ($ds->id == ($rawIo['displayStandardId'] ?? '')) ? 'selected' : ''; ?>>
-                <?php echo esc_specialchars($ds->name ?? ''); ?>
-              </option>
+              <option value="<?php echo $ds->id; ?>" <?php echo ($ds->id == ($rawIo['displayStandardId'] ?? '')) ? 'selected' : ''; ?>><?php echo esc_specialchars($ds->name ?? ''); ?></option>
             <?php } ?>
           </select>
         </div>
-
-        <?php if (!$isNew) { ?>
-          <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="updateDescendants" name="updateDescendants" value="1">
-            <label class="form-check-label" for="updateDescendants">
-              <?php echo __('Make this the default for existing children'); ?>
-            </label>
-          </div>
-        <?php } ?>
-
-        <!-- Source language (read-only) -->
         <div class="mb-3">
           <label class="form-label"><?php echo __('Source language'); ?></label>
           <p class="form-control-plaintext"><?php echo esc_specialchars($rawIo['sourceCulture'] ?? ''); ?></p>
         </div>
-
-        <!-- Last updated (read-only) -->
         <?php if (!$isNew && !empty($rawIo['updatedAt'])) { ?>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Last updated'); ?></label>
             <p class="form-control-plaintext"><?php echo esc_specialchars($rawIo['updatedAt']); ?></p>
           </div>
         <?php } ?>
-
       </div>
     </div>
 
@@ -768,19 +775,16 @@
 (function() {
   'use strict';
 
-  // ── AJAX endpoint URLs ──────────────────────────────────────────────
   var ACTOR_AC_URL = '<?php echo url_for("@io_actor_autocomplete"); ?>';
   var REPO_AC_URL = '<?php echo url_for("@io_repository_autocomplete"); ?>';
   var TERM_AC_URL = '<?php echo url_for("@io_term_autocomplete"); ?>';
 
-  // ── Utility ──────────────────────────────────────────────────────────
   function escHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   }
 
-  // ── Generic dropdown helper ─────────────────────────────────────────
   function showDropdown(input, results, onSelect) {
     var dropdown = document.createElement('div');
     dropdown.className = 'list-group position-absolute w-100 ac-dropdown';
@@ -803,11 +807,9 @@
   }
 
   function removeDropdownsFor(input) {
-    var existing = input.parentNode.querySelectorAll('.ac-dropdown');
-    existing.forEach(function(el) { el.remove(); });
+    input.parentNode.querySelectorAll('.ac-dropdown').forEach(function(el) { el.remove(); });
   }
 
-  // Global click to close dropdowns
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.ac-dropdown') && !e.target.classList.contains('actor-autocomplete')
         && !e.target.classList.contains('actor-autocomplete-add')
@@ -817,7 +819,6 @@
     }
   });
 
-  // ── Debounced fetch helper ──────────────────────────────────────────
   function setupAutocomplete(input, buildUrl, onSelect) {
     var timeout = null;
     input.addEventListener('input', function() {
@@ -836,52 +837,36 @@
     });
   }
 
-  // ── Generate identifier button ──────────────────────────────────────
+  // Generate identifier
   var genBtn = document.getElementById('generate-identifier');
   if (genBtn) {
     genBtn.addEventListener('click', function() {
       var repoId = document.getElementById('repositoryId').value || '0';
       var parentId = document.querySelector('input[name="parentId"]').value || '0';
-      if (!repoId || repoId === '0') {
-        alert('<?php echo __("Please select a repository first."); ?>');
-        return;
-      }
-      var url = genBtn.getAttribute('data-url')
-        + '?repositoryId=' + encodeURIComponent(repoId)
-        + '&parentId=' + encodeURIComponent(parentId);
+      if (!repoId || repoId === '0') { alert('<?php echo __("Please select a repository first."); ?>'); return; }
+      var url = genBtn.getAttribute('data-url') + '?repositoryId=' + encodeURIComponent(repoId) + '&parentId=' + encodeURIComponent(parentId);
       genBtn.disabled = true;
-      fetch(url)
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.error) {
-            alert(data.error);
-          } else if (data.identifier) {
-            document.getElementById('identifier').value = data.identifier;
-          } else {
-            alert('<?php echo __("Could not generate identifier."); ?>');
-          }
-        })
-        .catch(function() { alert('<?php echo __("Failed to generate identifier."); ?>'); })
-        .finally(function() { genBtn.disabled = false; });
+      fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.error) alert(data.error);
+        else if (data.identifier) document.getElementById('identifier').value = data.identifier;
+        else alert('<?php echo __("Could not generate identifier."); ?>');
+      }).catch(function() { alert('<?php echo __("Failed to generate identifier."); ?>'); }).finally(function() { genBtn.disabled = false; });
     });
   }
 
-  // ── Event rows ─────────────────────────────────────────────────────
+  // Event rows
   var eventsBody = document.querySelector('#events-table tbody');
   var addEventBtn = document.getElementById('add-event-row');
   var eventIdx = eventsBody ? eventsBody.querySelectorAll('tr').length : 0;
-
   var eventTypeOptions = '';
   var firstEvtSelect = document.querySelector('#events-table select');
-  if (firstEvtSelect) {
-    eventTypeOptions = firstEvtSelect.innerHTML;
-  } else {
+  if (firstEvtSelect) { eventTypeOptions = firstEvtSelect.innerHTML; }
+  else {
     eventTypeOptions = '<option value=""><?php echo __("- Select -"); ?></option>';
     <?php foreach ($rawEventTypes as $et) { ?>
     eventTypeOptions += '<option value="<?php echo $et->id; ?>"><?php echo esc_specialchars($et->name ?? ""); ?></option>';
     <?php } ?>
   }
-
   if (addEventBtn) {
     addEventBtn.addEventListener('click', function() {
       var tr = document.createElement('tr');
@@ -890,8 +875,7 @@
         '<td><input type="text" class="form-control form-control-sm" name="events[' + eventIdx + '][date]" placeholder="<?php echo __("e.g. ca. 1900"); ?>"></td>' +
         '<td><input type="date" class="form-control form-control-sm" name="events[' + eventIdx + '][startDate]"></td>' +
         '<td><input type="date" class="form-control form-control-sm" name="events[' + eventIdx + '][endDate]"></td>' +
-        '<td><input type="text" class="form-control form-control-sm actor-autocomplete" name="events[' + eventIdx + '][actorName]" placeholder="<?php echo __("Actor name"); ?>">' +
-            '<input type="hidden" name="events[' + eventIdx + '][actorId]" value="0"></td>' +
+        '<td><input type="text" class="form-control form-control-sm actor-autocomplete" name="events[' + eventIdx + '][actorName]" placeholder="<?php echo __("Actor name"); ?>"><input type="hidden" name="events[' + eventIdx + '][actorId]" value="0"></td>' +
         '<td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __("Remove"); ?></button></td>';
       eventsBody.appendChild(tr);
       initActorAutocomplete(tr.querySelector('.actor-autocomplete'));
@@ -899,22 +883,19 @@
     });
   }
 
-  // ── Note rows ──────────────────────────────────────────────────────
+  // Note rows
   var notesBody = document.querySelector('#notes-table tbody');
   var addNoteBtn = document.getElementById('add-note-row');
   var noteIdx = notesBody ? notesBody.querySelectorAll('tr').length : 0;
-
   var noteTypeOptions = '';
   var firstNoteSelect = document.querySelector('#notes-table select');
-  if (firstNoteSelect) {
-    noteTypeOptions = firstNoteSelect.innerHTML;
-  } else {
+  if (firstNoteSelect) { noteTypeOptions = firstNoteSelect.innerHTML; }
+  else {
     noteTypeOptions = '<option value=""><?php echo __("- Select -"); ?></option>';
     <?php foreach ($rawNoteTypes as $nt) { ?>
     noteTypeOptions += '<option value="<?php echo $nt->id; ?>"><?php echo esc_specialchars($nt->name ?? ""); ?></option>';
     <?php } ?>
   }
-
   if (addNoteBtn) {
     addNoteBtn.addEventListener('click', function() {
       var tr = document.createElement('tr');
@@ -927,16 +908,15 @@
     });
   }
 
-  // ── Alternative identifier rows ────────────────────────────────────
+  // Alternative identifier rows
   var altIdsBody = document.querySelector('#altids-table tbody');
   var addAltIdBtn = document.getElementById('add-altid-row');
   var altIdIdx = altIdsBody ? altIdsBody.querySelectorAll('tr').length : 0;
-
   if (addAltIdBtn) {
     addAltIdBtn.addEventListener('click', function() {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td><input type="text" class="form-control form-control-sm" name="altIds[' + altIdIdx + '][label]" placeholder="<?php echo __("e.g. Former reference"); ?>"></td>' +
+        '<td><input type="text" class="form-control form-control-sm" name="altIds[' + altIdIdx + '][label]"></td>' +
         '<td><input type="text" class="form-control form-control-sm" name="altIds[' + altIdIdx + '][value]"></td>' +
         '<td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __("Remove"); ?></button></td>';
       altIdsBody.appendChild(tr);
@@ -944,73 +924,51 @@
     });
   }
 
-  // ── Child level rows ───────────────────────────────────────────────
+  // Child level rows
   var childBody = document.querySelector('#childlevels-table tbody');
   var addChildBtn = document.getElementById('add-childlevel-row');
   var childIdx = 0;
-
   var levelOptions = '<option value=""><?php echo __("- Select -"); ?></option>';
   <?php foreach ($rawLevels as $lvl) { ?>
   levelOptions += '<option value="<?php echo $lvl->id; ?>"><?php echo esc_specialchars($lvl->name ?? ""); ?></option>';
   <?php } ?>
-
   if (addChildBtn) {
     addChildBtn.addEventListener('click', function() {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][identifier]" placeholder="<?php echo __("Identifier"); ?>"></td>' +
+        '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][identifier]"></td>' +
         '<td><select class="form-select form-select-sm" name="childLevels[' + childIdx + '][levelOfDescriptionId]">' + levelOptions + '</select></td>' +
-        '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][title]" placeholder="<?php echo __("Title"); ?>"></td>' +
+        '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][title]"></td>' +
         '<td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __("Remove"); ?></button></td>';
       childBody.appendChild(tr);
       childIdx++;
     });
   }
 
-  // ── Publication note rows ──────────────────────────────────────────
-  var pubNotesList = document.getElementById('pubnotes-list');
-  var addPubNoteBtn = document.getElementById('add-pubnote-row');
-  var pubNoteIdx = pubNotesList ? pubNotesList.querySelectorAll('.input-group').length : 0;
-
-  if (addPubNoteBtn) {
-    addPubNoteBtn.addEventListener('click', function() {
-      var wrapper = document.createElement('div');
-      wrapper.className = 'mb-1';
-      wrapper.innerHTML =
-        '<div class="input-group input-group-sm">' +
-        '<textarea class="form-control form-control-sm" name="publicationNotes[' + pubNoteIdx + '][content]" rows="2"></textarea>' +
-        '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>' +
-        '</div>';
-      pubNotesList.appendChild(wrapper);
-      pubNoteIdx++;
+  // Material type add
+  var matTypeList = document.getElementById('mattype-list');
+  var matTypeSelect = document.getElementById('mattype-select');
+  var addMatTypeBtn = document.getElementById('add-mattype-btn');
+  if (addMatTypeBtn && matTypeSelect) {
+    addMatTypeBtn.addEventListener('click', function() {
+      var opt = matTypeSelect.options[matTypeSelect.selectedIndex];
+      if (!opt || !opt.value) return;
+      var div = document.createElement('div');
+      div.className = 'input-group input-group-sm mb-1';
+      div.innerHTML =
+        '<input type="text" class="form-control" value="' + escHtml(opt.text) + '" readonly>' +
+        '<input type="hidden" name="materialTypeIds[]" value="' + opt.value + '">' +
+        '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
+      matTypeList.appendChild(div);
+      matTypeSelect.selectedIndex = 0;
     });
   }
 
-  // ── Archivist note rows ────────────────────────────────────────────
-  var archNotesList = document.getElementById('archnotes-list');
-  var addArchNoteBtn = document.getElementById('add-archnote-row');
-  var archNoteIdx = archNotesList ? archNotesList.querySelectorAll('.input-group').length : 0;
-
-  if (addArchNoteBtn) {
-    addArchNoteBtn.addEventListener('click', function() {
-      var wrapper = document.createElement('div');
-      wrapper.className = 'mb-1';
-      wrapper.innerHTML =
-        '<div class="input-group input-group-sm">' +
-        '<textarea class="form-control form-control-sm" name="archivistNotes[' + archNoteIdx + '][content]" rows="2"></textarea>' +
-        '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>' +
-        '</div>';
-      archNotesList.appendChild(wrapper);
-      archNoteIdx++;
-    });
-  }
-
-  // ── Language/script dropdown rows ──────────────────────────────────
+  // Language/script dropdown rows
   var langOptions = '';
   <?php foreach ($rawLangChoices as $code => $name) { ?>
   langOptions += '<option value="<?php echo $code; ?>"><?php echo esc_specialchars($name); ?></option>';
   <?php } ?>
-
   var scriptOptions = '';
   <?php foreach ($rawScriptChoices as $code => $name) { ?>
   scriptOptions += '<option value="<?php echo $code; ?>"><?php echo esc_specialchars($name); ?></option>';
@@ -1021,9 +979,7 @@
       var list = document.getElementById(btn.getAttribute('data-target'));
       var div = document.createElement('div');
       div.className = 'input-group input-group-sm mb-1';
-      div.innerHTML =
-        '<select class="form-select form-select-sm" name="' + btn.getAttribute('data-name') + '">' + langOptions + '</select>' +
-        '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
+      div.innerHTML = '<select class="form-select form-select-sm" name="' + btn.getAttribute('data-name') + '">' + langOptions + '</select><button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
       list.appendChild(div);
     });
   });
@@ -1033,14 +989,12 @@
       var list = document.getElementById(btn.getAttribute('data-target'));
       var div = document.createElement('div');
       div.className = 'input-group input-group-sm mb-1';
-      div.innerHTML =
-        '<select class="form-select form-select-sm" name="' + btn.getAttribute('data-name') + '">' + scriptOptions + '</select>' +
-        '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
+      div.innerHTML = '<select class="form-select form-select-sm" name="' + btn.getAttribute('data-name') + '">' + scriptOptions + '</select><button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
       list.appendChild(div);
     });
   });
 
-  // ── Remove row delegation ──────────────────────────────────────────
+  // Remove row delegation
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-remove-row')) {
       var tr = e.target.closest('tr');
@@ -1049,15 +1003,12 @@
     if (e.target.classList.contains('btn-remove-ap')) {
       var group = e.target.closest('.input-group');
       var wrapper = group ? group.closest('.mb-1') : null;
-      if (wrapper && wrapper.parentNode.id) {
-        wrapper.remove();
-      } else if (group) {
-        group.remove();
-      }
+      if (wrapper && wrapper.parentNode.id) wrapper.remove();
+      else if (group) group.remove();
     }
   });
 
-  // ── Actor autocomplete (events — inline, sets hidden actorId) ──────
+  // Actor autocomplete
   function initActorAutocomplete(input) {
     setupAutocomplete(input,
       function(q) { return ACTOR_AC_URL + '?query=' + encodeURIComponent(q) + '&limit=10'; },
@@ -1068,10 +1019,9 @@
       }
     );
   }
-
   document.querySelectorAll('.actor-autocomplete').forEach(initActorAutocomplete);
 
-  // ── Repository autocomplete ────────────────────────────────────────
+  // Repository autocomplete
   var repoInput = document.getElementById('repositoryName');
   if (repoInput) {
     setupAutocomplete(repoInput,
@@ -1083,78 +1033,48 @@
     );
   }
 
-  // ── Name access point / Creator add ────────────────────────────────
+  // Name access point add
   var nameApIdx = document.querySelectorAll('#name-ap-list .input-group').length;
-  var creatorIdx = document.querySelectorAll('#creator-list .input-group').length;
-
   document.querySelectorAll('.actor-autocomplete-add').forEach(function(input) {
     var targetId = input.getAttribute('data-target');
-    var fieldType = input.getAttribute('data-field');
-
     setupAutocomplete(input,
       function(q) { return ACTOR_AC_URL + '?query=' + encodeURIComponent(q) + '&limit=10'; },
       function(item) {
-        if (fieldType === 'creators') {
-          addCreator(targetId, item.id, item.name);
-        } else {
-          addNameAP(targetId, item.id, item.name);
-        }
+        var list = document.getElementById(targetId);
+        var div = document.createElement('div');
+        div.className = 'input-group input-group-sm mb-1';
+        div.innerHTML =
+          '<input type="text" class="form-control" value="' + escHtml(item.name) + '" readonly>' +
+          '<input type="hidden" name="nameAccessPoints[' + nameApIdx + '][actorId]" value="' + item.id + '">' +
+          '<input type="hidden" name="nameAccessPoints[' + nameApIdx + '][actorName]" value="' + escHtml(item.name) + '">' +
+          '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
+        list.appendChild(div);
+        nameApIdx++;
         input.value = '';
       }
     );
   });
 
-  function addNameAP(targetId, actorId, actorName) {
-    var list = document.getElementById(targetId);
-    var div = document.createElement('div');
-    div.className = 'input-group input-group-sm mb-1';
-    div.innerHTML =
-      '<input type="text" class="form-control" value="' + escHtml(actorName) + '" readonly>' +
-      '<input type="hidden" name="nameAccessPoints[' + nameApIdx + '][actorId]" value="' + actorId + '">' +
-      '<input type="hidden" name="nameAccessPoints[' + nameApIdx + '][actorName]" value="' + escHtml(actorName) + '">' +
-      '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
-    list.appendChild(div);
-    nameApIdx++;
-  }
-
-  function addCreator(targetId, actorId, actorName) {
-    var list = document.getElementById(targetId);
-    var div = document.createElement('div');
-    div.className = 'input-group input-group-sm mb-1';
-    div.innerHTML =
-      '<input type="text" class="form-control" value="' + escHtml(actorName) + '" readonly>' +
-      '<input type="hidden" name="creators[' + creatorIdx + '][actorId]" value="' + actorId + '">' +
-      '<input type="hidden" name="creators[' + creatorIdx + '][actorName]" value="' + escHtml(actorName) + '">' +
-      '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
-    list.appendChild(div);
-    creatorIdx++;
-  }
-
-  // ── Term access point add (subject, place, genre) ──────────────────
+  // Term access point add
   document.querySelectorAll('.term-autocomplete-add').forEach(function(input) {
     var taxonomy = input.getAttribute('data-taxonomy');
     var targetId = input.getAttribute('data-target');
     var fieldName = input.getAttribute('data-name');
-
     setupAutocomplete(input,
       function(q) { return TERM_AC_URL + '?taxonomy=' + taxonomy + '&query=' + encodeURIComponent(q) + '&limit=10'; },
       function(item) {
-        addTermAP(targetId, fieldName, item.id, item.name);
+        var list = document.getElementById(targetId);
+        var div = document.createElement('div');
+        div.className = 'input-group input-group-sm mb-1';
+        div.innerHTML =
+          '<input type="text" class="form-control" value="' + escHtml(item.name) + '" readonly>' +
+          '<input type="hidden" name="' + fieldName + '" value="' + item.id + '">' +
+          '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
+        list.appendChild(div);
         input.value = '';
       }
     );
   });
-
-  function addTermAP(targetId, fieldName, termId, termName) {
-    var list = document.getElementById(targetId);
-    var div = document.createElement('div');
-    div.className = 'input-group input-group-sm mb-1';
-    div.innerHTML =
-      '<input type="text" class="form-control" value="' + escHtml(termName) + '" readonly>' +
-      '<input type="hidden" name="' + fieldName + '" value="' + termId + '">' +
-      '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
-    list.appendChild(div);
-  }
 
 })();
 </script>

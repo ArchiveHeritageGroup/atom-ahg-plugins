@@ -20,6 +20,14 @@ class InformationObjectCrudService
     // Name access point relation type
     const RELATION_NAME_ACCESS_POINT = 161;
 
+    // Event type IDs
+    const EVENT_TYPE_CREATION = 111;
+
+    // Note type IDs
+    const NOTE_TYPE_PUBLICATION = 120;
+    const NOTE_TYPE_ARCHIVIST = 124;
+    const NOTE_TYPE_LANGUAGE = 174;
+
     // Taxonomy IDs
     const TAXONOMY_LEVELS_OF_DESCRIPTION = 32;
     const TAXONOMY_DESCRIPTION_STATUSES = 33;
@@ -28,6 +36,10 @@ class InformationObjectCrudService
     const TAXONOMY_SUBJECT_ACCESS_POINTS = 35;
     const TAXONOMY_PLACE_ACCESS_POINTS = 42;
     const TAXONOMY_GENRE_ACCESS_POINTS = 78;
+    const TAXONOMY_DC_TYPES = 54;
+    const TAXONOMY_MODS_RESOURCE_TYPES = 53;
+    const TAXONOMY_MATERIAL_TYPES = 50;
+    const TAXONOMY_DISPLAY_STANDARD = 70;
 
     // Root information object
     const ROOT_ID = 1;
@@ -55,6 +67,8 @@ class InformationObjectCrudService
         'rules' => 'rules',
         'sources' => 'sources',
         'revisionHistory' => 'revision_history',
+        'alternateTitle' => 'alternate_title',
+        'edition' => 'edition',
     ];
 
     /**
@@ -134,6 +148,9 @@ class InformationObjectCrudService
         $subjectAPs = TermRelationService::getByObjectId($id, self::TAXONOMY_SUBJECT_ACCESS_POINTS, $culture);
         $placeAPs = TermRelationService::getByObjectId($id, self::TAXONOMY_PLACE_ACCESS_POINTS, $culture);
         $genreAPs = TermRelationService::getByObjectId($id, self::TAXONOMY_GENRE_ACCESS_POINTS, $culture);
+        $dcTypes = TermRelationService::getByObjectId($id, self::TAXONOMY_DC_TYPES, $culture);
+        $modsResourceTypes = TermRelationService::getByObjectId($id, self::TAXONOMY_MODS_RESOURCE_TYPES, $culture);
+        $materialTypes = TermRelationService::getByObjectId($id, self::TAXONOMY_MATERIAL_TYPES, $culture);
 
         // Name access points (via relation table, type_id = 161)
         $nameAPs = DB::table('relation')
@@ -153,8 +170,39 @@ class InformationObjectCrudService
             ->get()
             ->all();
 
-        // Notes
+        // Notes (general — excludes typed notes handled separately)
         $notes = NoteService::getByObjectId($id, null, $culture);
+
+        // Creators (events with type_id = Creation)
+        $creators = self::getCreators($id, $culture);
+
+        // Alternative identifiers
+        $altIds = self::getAlternativeIdentifiers($id, $culture);
+
+        // Properties: language, script, languageOfDescription, scriptOfDescription
+        $languages = self::getPropertyArray($id, 'language', $culture);
+        $scripts = self::getPropertyArray($id, 'script', $culture);
+        $languagesOfDescription = self::getPropertyArray($id, 'languageOfDescription', $culture);
+        $scriptsOfDescription = self::getPropertyArray($id, 'scriptOfDescription', $culture);
+
+        // String properties (RAD/DACS)
+        $stringPropertyNames = [
+            'otherTitleInformation', 'titleStatementOfResponsibility',
+            'editionStatementOfResponsibility', 'statementOfScaleCartographic',
+            'statementOfProjection', 'statementOfCoordinates',
+            'statementOfScaleArchitectural', 'issuingJurisdictionAndDenomination',
+            'titleProperOfPublishersSeries', 'parallelTitleOfPublishersSeries',
+            'otherTitleInformationOfPublishersSeries',
+            'statementOfResponsibilityRelatingToPublishersSeries',
+            'numberingWithinPublishersSeries', 'noteOnPublishersSeries',
+            'standardNumber', 'technicalAccess',
+        ];
+        $stringProperties = self::getStringProperties($id, $stringPropertyNames, $culture);
+
+        // Typed notes
+        $languageNotes = self::getSingleNote($id, self::NOTE_TYPE_LANGUAGE, $culture);
+        $publicationNotes = self::getTypedNotes($id, self::NOTE_TYPE_PUBLICATION, $culture);
+        $archivistNotes = self::getTypedNotes($id, self::NOTE_TYPE_ARCHIVIST, $culture);
 
         return [
             'id' => $id,
@@ -192,13 +240,30 @@ class InformationObjectCrudService
             'rules' => $i18n->rules ?? '',
             'sources' => $i18n->sources ?? '',
             'revisionHistory' => $i18n->revision_history ?? '',
+            'alternateTitle' => $i18n->alternate_title ?? '',
+            'edition' => $i18n->edition ?? '',
             // Related data
             'events' => $events,
             'subjectAccessPoints' => $subjectAPs,
             'placeAccessPoints' => $placeAPs,
             'genreAccessPoints' => $genreAPs,
+            'dcTypes' => $dcTypes,
+            'modsResourceTypes' => $modsResourceTypes,
+            'materialTypes' => $materialTypes,
+            'stringProperties' => $stringProperties,
             'nameAccessPoints' => $nameAPs,
             'notes' => $notes,
+            'creators' => $creators,
+            'alternativeIdentifiers' => $altIds,
+            'languages' => $languages,
+            'scripts' => $scripts,
+            'languageNotes' => $languageNotes,
+            'publicationNotes' => $publicationNotes,
+            'archivistNotes' => $archivistNotes,
+            'languagesOfDescription' => $languagesOfDescription,
+            'scriptsOfDescription' => $scriptsOfDescription,
+            'displayStandardId' => $io->display_standard_id,
+            'sourceCulture' => $io->source_culture ?? $culture,
             'publicationStatusId' => $pubStatus->status_id ?? self::STATUS_DRAFT,
             'createdAt' => $io->created_at ?? null,
             'updatedAt' => $io->updated_at ?? null,
@@ -244,6 +309,7 @@ class InformationObjectCrudService
                 'description_status_id' => !empty($data['descriptionStatusId']) ? (int) $data['descriptionStatusId'] : null,
                 'description_detail_id' => !empty($data['descriptionDetailId']) ? (int) $data['descriptionDetailId'] : null,
                 'description_identifier' => $data['descriptionIdentifier'] ?? null,
+                'display_standard_id' => !empty($data['displayStandardId']) ? (int) $data['displayStandardId'] : null,
                 'source_standard' => $data['sourceStandard'] ?? 'ISAD(G) 2nd edition',
                 'source_culture' => $culture,
                 'lft' => 0,
@@ -286,6 +352,71 @@ class InformationObjectCrudService
                 self::saveNotes($id, $data['notes'], $culture);
             }
 
+            // 11. Save creators as Creation events
+            if (!empty($data['creators'])) {
+                foreach ($data['creators'] as $creator) {
+                    $actorId = !empty($creator['actorId']) ? (int) $creator['actorId'] : null;
+                    if ($actorId) {
+                        EventService::save(
+                            [
+                                'type_id' => self::EVENT_TYPE_CREATION,
+                                'object_id' => $id,
+                                'actor_id' => $actorId,
+                                'source_culture' => $culture,
+                            ],
+                            $culture,
+                            []
+                        );
+                    }
+                }
+            }
+
+            // 12. Save properties: language, script, languageOfDescription, scriptOfDescription
+            self::savePropertyArray($id, 'language', $data['languages'] ?? [], $culture);
+            self::savePropertyArray($id, 'script', $data['scripts'] ?? [], $culture);
+            self::savePropertyArray($id, 'languageOfDescription', $data['languagesOfDescription'] ?? [], $culture);
+            self::savePropertyArray($id, 'scriptOfDescription', $data['scriptsOfDescription'] ?? [], $culture);
+
+            // 12. Save alternative identifiers
+            if (!empty($data['alternativeIdentifiers'])) {
+                self::saveAlternativeIdentifiers($id, $data['alternativeIdentifiers'], $culture);
+            }
+
+            // 13. Save language note (single)
+            if (!empty($data['languageNotes'])) {
+                NoteService::save($id, self::NOTE_TYPE_LANGUAGE, $data['languageNotes'], $culture);
+            }
+
+            // 14. Save publication notes (multi)
+            if (!empty($data['publicationNotes'])) {
+                foreach ($data['publicationNotes'] as $pn) {
+                    $content = trim($pn['content'] ?? '');
+                    if (!empty($content)) {
+                        NoteService::save($id, self::NOTE_TYPE_PUBLICATION, $content, $culture);
+                    }
+                }
+            }
+
+            // 15. Save archivist notes (multi)
+            if (!empty($data['archivistNotes'])) {
+                foreach ($data['archivistNotes'] as $an) {
+                    $content = trim($an['content'] ?? '');
+                    if (!empty($content)) {
+                        NoteService::save($id, self::NOTE_TYPE_ARCHIVIST, $content, $culture);
+                    }
+                }
+            }
+
+            // 16. Create child levels
+            if (!empty($data['childLevels'])) {
+                self::createChildLevels($id, $data['childLevels'], $culture);
+            }
+
+            // 17. Save RAD/DACS string properties
+            if (!empty($data['stringProperties'])) {
+                self::saveStringProperties($id, $data['stringProperties'], $culture);
+            }
+
             return $id;
         });
     }
@@ -319,9 +450,25 @@ class InformationObjectCrudService
             if (array_key_exists('sourceStandard', $data)) {
                 $ioUpdate['source_standard'] = $data['sourceStandard'];
             }
+            if (array_key_exists('displayStandardId', $data)) {
+                $ioUpdate['display_standard_id'] = !empty($data['displayStandardId']) ? (int) $data['displayStandardId'] : null;
+            }
 
             if (!empty($ioUpdate)) {
                 DB::table('information_object')->where('id', $id)->update($ioUpdate);
+            }
+
+            // Optional: cascade display_standard_id to descendants
+            if (!empty($data['updateDescendants']) && array_key_exists('displayStandardId', $data)) {
+                $io = DB::table('information_object')->where('id', $id)->select('lft', 'rgt')->first();
+                if ($io) {
+                    DB::table('information_object')
+                        ->where('lft', '>', $io->lft)
+                        ->where('rgt', '<', $io->rgt)
+                        ->update([
+                            'display_standard_id' => !empty($data['displayStandardId']) ? (int) $data['displayStandardId'] : null,
+                        ]);
+                }
             }
 
             // 2. Update i18n fields
@@ -346,11 +493,29 @@ class InformationObjectCrudService
                 ]);
             }
 
-            // 4. Replace events
+            // 4. Replace events (includes creators)
             if (array_key_exists('events', $data)) {
                 EventService::deleteByObjectId($id);
                 if (!empty($data['events'])) {
                     self::saveEvents($id, $data['events'], $culture);
+                }
+                // Re-save creators as Creation events
+                if (!empty($data['creators'])) {
+                    foreach ($data['creators'] as $creator) {
+                        $actorId = !empty($creator['actorId']) ? (int) $creator['actorId'] : null;
+                        if ($actorId) {
+                            EventService::save(
+                                [
+                                    'type_id' => self::EVENT_TYPE_CREATION,
+                                    'object_id' => $id,
+                                    'actor_id' => $actorId,
+                                    'source_culture' => $culture,
+                                ],
+                                $culture,
+                                []
+                            );
+                        }
+                    }
                 }
             }
 
@@ -375,15 +540,68 @@ class InformationObjectCrudService
                 }
             }
 
-            // 7. Replace notes
+            // 7. Replace notes (general)
             if (array_key_exists('notes', $data)) {
                 NoteService::deleteByObjectId($id);
                 if (!empty($data['notes'])) {
                     self::saveNotes($id, $data['notes'], $culture);
                 }
+
+                // Re-save typed notes (since deleteByObjectId removes all)
+                if (!empty($data['languageNotes'])) {
+                    NoteService::save($id, self::NOTE_TYPE_LANGUAGE, $data['languageNotes'], $culture);
+                }
+                if (!empty($data['publicationNotes'])) {
+                    foreach ($data['publicationNotes'] as $pn) {
+                        $content = trim($pn['content'] ?? '');
+                        if (!empty($content)) {
+                            NoteService::save($id, self::NOTE_TYPE_PUBLICATION, $content, $culture);
+                        }
+                    }
+                }
+                if (!empty($data['archivistNotes'])) {
+                    foreach ($data['archivistNotes'] as $an) {
+                        $content = trim($an['content'] ?? '');
+                        if (!empty($content)) {
+                            NoteService::save($id, self::NOTE_TYPE_ARCHIVIST, $content, $culture);
+                        }
+                    }
+                }
             }
 
-            // 8. Touch object
+            // 8. Replace properties
+            if (array_key_exists('languages', $data)) {
+                self::savePropertyArray($id, 'language', $data['languages'], $culture);
+            }
+            if (array_key_exists('scripts', $data)) {
+                self::savePropertyArray($id, 'script', $data['scripts'], $culture);
+            }
+            if (array_key_exists('languagesOfDescription', $data)) {
+                self::savePropertyArray($id, 'languageOfDescription', $data['languagesOfDescription'], $culture);
+            }
+            if (array_key_exists('scriptsOfDescription', $data)) {
+                self::savePropertyArray($id, 'scriptOfDescription', $data['scriptsOfDescription'], $culture);
+            }
+
+            // 9. Replace alternative identifiers
+            if (array_key_exists('alternativeIdentifiers', $data)) {
+                self::deleteProperties($id, 'alternativeIdentifiers');
+                if (!empty($data['alternativeIdentifiers'])) {
+                    self::saveAlternativeIdentifiers($id, $data['alternativeIdentifiers'], $culture);
+                }
+            }
+
+            // 10. Create child levels (additive — does not delete existing children)
+            if (!empty($data['childLevels'])) {
+                self::createChildLevels($id, $data['childLevels'], $culture);
+            }
+
+            // 11. Save RAD/DACS string properties
+            if (array_key_exists('stringProperties', $data) && !empty($data['stringProperties'])) {
+                self::saveStringProperties($id, $data['stringProperties'], $culture);
+            }
+
+            // 12. Touch object
             ObjectService::touch($id);
             ObjectService::incrementSerialNumber($id);
         });
@@ -515,6 +733,210 @@ class InformationObjectCrudService
         ];
     }
 
+    /**
+     * Get display standard terms (taxonomy 70).
+     */
+    public static function getDisplayStandards(string $culture = 'en'): array
+    {
+        return DB::table('term')
+            ->leftJoin('term_i18n', function ($join) use ($culture) {
+                $join->on('term.id', '=', 'term_i18n.id')
+                     ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', self::TAXONOMY_DISPLAY_STANDARD)
+            ->select(['term.id', 'term_i18n.name'])
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get Dublin Core type terms (taxonomy 54).
+     */
+    public static function getDcTypeTerms(string $culture = 'en'): array
+    {
+        return DB::table('term')
+            ->leftJoin('term_i18n', function ($join) use ($culture) {
+                $join->on('term.id', '=', 'term_i18n.id')
+                     ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', self::TAXONOMY_DC_TYPES)
+            ->select(['term.id', 'term_i18n.name'])
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get MODS resource type terms (taxonomy 53).
+     */
+    public static function getModsResourceTypes(string $culture = 'en'): array
+    {
+        return DB::table('term')
+            ->leftJoin('term_i18n', function ($join) use ($culture) {
+                $join->on('term.id', '=', 'term_i18n.id')
+                     ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', self::TAXONOMY_MODS_RESOURCE_TYPES)
+            ->select(['term.id', 'term_i18n.name'])
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get RAD material type terms (taxonomy 50).
+     */
+    public static function getMaterialTypes(string $culture = 'en'): array
+    {
+        return DB::table('term')
+            ->leftJoin('term_i18n', function ($join) use ($culture) {
+                $join->on('term.id', '=', 'term_i18n.id')
+                     ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', self::TAXONOMY_MATERIAL_TYPES)
+            ->select(['term.id', 'term_i18n.name'])
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get string properties for an object (RAD/DACS property-based fields).
+     */
+    public static function getStringProperties(int $objectId, array $names, string $culture): array
+    {
+        $result = array_fill_keys($names, '');
+
+        $props = DB::table('property')
+            ->where('object_id', $objectId)
+            ->whereIn('name', $names)
+            ->whereNull('scope')
+            ->get();
+
+        foreach ($props as $prop) {
+            $pi = DB::table('property_i18n')
+                ->where('id', $prop->id)
+                ->where('culture', $culture)
+                ->first();
+
+            // Non-serialized string value
+            $val = $pi->value ?? '';
+            // Guard against serialized arrays (language/script use those)
+            if ($val && $val[0] !== 'a' || strpos($val, ':{') === false) {
+                $result[$prop->name] = $val;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Save string properties (delete old, insert new).
+     */
+    public static function saveStringProperties(int $objectId, array $data, string $culture): void
+    {
+        foreach ($data as $name => $value) {
+            // Delete existing
+            $existing = DB::table('property')
+                ->where('object_id', $objectId)
+                ->where('name', $name)
+                ->whereNull('scope')
+                ->pluck('id')
+                ->all();
+
+            if (!empty($existing)) {
+                DB::table('property_i18n')->whereIn('id', $existing)->delete();
+                DB::table('property')->whereIn('id', $existing)->delete();
+            }
+
+            // Insert new if non-empty
+            $value = trim($value);
+            if (!empty($value)) {
+                $propId = DB::table('property')->insertGetId([
+                    'object_id' => $objectId,
+                    'name' => $name,
+                    'scope' => null,
+                    'source_culture' => $culture,
+                    'serial_number' => 0,
+                ]);
+
+                DB::table('property_i18n')->insert([
+                    'id' => $propId,
+                    'culture' => $culture,
+                    'value' => $value,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Get ISO 639 language choices.
+     */
+    public static function getLanguageChoices(): array
+    {
+        return [
+            'aa' => 'Afar', 'ab' => 'Abkhazian', 'af' => 'Afrikaans', 'am' => 'Amharic',
+            'ar' => 'Arabic', 'as' => 'Assamese', 'ay' => 'Aymara', 'az' => 'Azerbaijani',
+            'ba' => 'Bashkir', 'be' => 'Belarusian', 'bg' => 'Bulgarian', 'bh' => 'Bihari',
+            'bi' => 'Bislama', 'bn' => 'Bengali', 'bo' => 'Tibetan', 'br' => 'Breton',
+            'ca' => 'Catalan', 'co' => 'Corsican', 'cs' => 'Czech', 'cy' => 'Welsh',
+            'da' => 'Danish', 'de' => 'German', 'dz' => 'Dzongkha', 'el' => 'Greek',
+            'en' => 'English', 'eo' => 'Esperanto', 'es' => 'Spanish', 'et' => 'Estonian',
+            'eu' => 'Basque', 'fa' => 'Persian', 'fi' => 'Finnish', 'fj' => 'Fijian',
+            'fo' => 'Faroese', 'fr' => 'French', 'fy' => 'Western Frisian', 'ga' => 'Irish',
+            'gd' => 'Scottish Gaelic', 'gl' => 'Galician', 'gn' => 'Guarani', 'gu' => 'Gujarati',
+            'ha' => 'Hausa', 'he' => 'Hebrew', 'hi' => 'Hindi', 'hr' => 'Croatian',
+            'hu' => 'Hungarian', 'hy' => 'Armenian', 'ia' => 'Interlingua', 'id' => 'Indonesian',
+            'ie' => 'Interlingue', 'ik' => 'Inupiaq', 'is' => 'Icelandic', 'it' => 'Italian',
+            'iu' => 'Inuktitut', 'ja' => 'Japanese', 'jv' => 'Javanese', 'ka' => 'Georgian',
+            'kk' => 'Kazakh', 'kl' => 'Kalaallisut', 'km' => 'Khmer', 'kn' => 'Kannada',
+            'ko' => 'Korean', 'ks' => 'Kashmiri', 'ku' => 'Kurdish', 'ky' => 'Kirghiz',
+            'la' => 'Latin', 'ln' => 'Lingala', 'lo' => 'Lao', 'lt' => 'Lithuanian',
+            'lv' => 'Latvian', 'mg' => 'Malagasy', 'mi' => 'Maori', 'mk' => 'Macedonian',
+            'ml' => 'Malayalam', 'mn' => 'Mongolian', 'mr' => 'Marathi', 'ms' => 'Malay',
+            'mt' => 'Maltese', 'my' => 'Burmese', 'na' => 'Nauru', 'ne' => 'Nepali',
+            'nl' => 'Dutch', 'no' => 'Norwegian', 'oc' => 'Occitan', 'om' => 'Oromo',
+            'or' => 'Oriya', 'pa' => 'Panjabi', 'pl' => 'Polish', 'ps' => 'Pashto',
+            'pt' => 'Portuguese', 'qu' => 'Quechua', 'rm' => 'Romansh', 'rn' => 'Rundi',
+            'ro' => 'Romanian', 'ru' => 'Russian', 'rw' => 'Kinyarwanda', 'sa' => 'Sanskrit',
+            'sd' => 'Sindhi', 'sg' => 'Sango', 'si' => 'Sinhala', 'sk' => 'Slovak',
+            'sl' => 'Slovenian', 'sm' => 'Samoan', 'sn' => 'Shona', 'so' => 'Somali',
+            'sq' => 'Albanian', 'sr' => 'Serbian', 'ss' => 'Swati', 'st' => 'Southern Sotho',
+            'su' => 'Sundanese', 'sv' => 'Swedish', 'sw' => 'Swahili', 'ta' => 'Tamil',
+            'te' => 'Telugu', 'tg' => 'Tajik', 'th' => 'Thai', 'ti' => 'Tigrinya',
+            'tk' => 'Turkmen', 'tl' => 'Tagalog', 'tn' => 'Tswana', 'to' => 'Tonga',
+            'tr' => 'Turkish', 'ts' => 'Tsonga', 'tt' => 'Tatar', 'tw' => 'Twi',
+            'ug' => 'Uighur', 'uk' => 'Ukrainian', 'ur' => 'Urdu', 'uz' => 'Uzbek',
+            've' => 'Venda', 'vi' => 'Vietnamese', 'vo' => 'Volapük', 'wo' => 'Wolof',
+            'xh' => 'Xhosa', 'yi' => 'Yiddish', 'yo' => 'Yoruba', 'za' => 'Zhuang',
+            'zh' => 'Chinese', 'zu' => 'Zulu',
+        ];
+    }
+
+    /**
+     * Get ISO 15924 script choices.
+     */
+    public static function getScriptChoices(): array
+    {
+        return [
+            'Arab' => 'Arabic', 'Armn' => 'Armenian', 'Beng' => 'Bengali',
+            'Bopo' => 'Bopomofo', 'Brai' => 'Braille', 'Cans' => 'Unified Canadian Aboriginal Syllabics',
+            'Cher' => 'Cherokee', 'Cyrl' => 'Cyrillic', 'Deva' => 'Devanagari',
+            'Ethi' => 'Ethiopic', 'Geor' => 'Georgian', 'Grek' => 'Greek',
+            'Gujr' => 'Gujarati', 'Guru' => 'Gurmukhi', 'Hang' => 'Hangul',
+            'Hani' => 'Han (Hanzi, Kanji, Hanja)', 'Hans' => 'Han (Simplified)',
+            'Hant' => 'Han (Traditional)', 'Hebr' => 'Hebrew', 'Hira' => 'Hiragana',
+            'Jpan' => 'Japanese', 'Kana' => 'Katakana', 'Khmr' => 'Khmer',
+            'Knda' => 'Kannada', 'Kore' => 'Korean', 'Laoo' => 'Lao',
+            'Latn' => 'Latin', 'Mlym' => 'Malayalam', 'Mong' => 'Mongolian',
+            'Mymr' => 'Myanmar', 'Orya' => 'Oriya', 'Sinh' => 'Sinhala',
+            'Taml' => 'Tamil', 'Telu' => 'Telugu', 'Tfng' => 'Tifinagh',
+            'Thai' => 'Thai', 'Tibt' => 'Tibetan', 'Vaii' => 'Vai',
+            'Yiii' => 'Yi', 'Zyyy' => 'Common',
+        ];
+    }
+
     // ─── Private helpers ───────────────────────────────────────────────
 
     /**
@@ -571,6 +993,9 @@ class InformationObjectCrudService
             'subjectAccessPointIds' => self::TAXONOMY_SUBJECT_ACCESS_POINTS,
             'placeAccessPointIds' => self::TAXONOMY_PLACE_ACCESS_POINTS,
             'genreAccessPointIds' => self::TAXONOMY_GENRE_ACCESS_POINTS,
+            'dcTypeIds' => self::TAXONOMY_DC_TYPES,
+            'modsResourceTypeIds' => self::TAXONOMY_MODS_RESOURCE_TYPES,
+            'materialTypeIds' => self::TAXONOMY_MATERIAL_TYPES,
         ];
 
         foreach ($taxonomyMap as $key => $taxonomyId) {
@@ -619,6 +1044,219 @@ class InformationObjectCrudService
             }
 
             NoteService::save($objectId, $typeId, $content, $culture);
+        }
+    }
+
+    // ─── Property helpers ─────────────────────────────────────────────
+
+    /**
+     * Get a serialized array property (language, script, etc.).
+     */
+    protected static function getPropertyArray(int $objectId, string $name, string $culture): array
+    {
+        $prop = DB::table('property')
+            ->where('object_id', $objectId)
+            ->where('name', $name)
+            ->whereNull('scope')
+            ->first();
+
+        if (!$prop) {
+            return [];
+        }
+
+        $pi = DB::table('property_i18n')
+            ->where('id', $prop->id)
+            ->where('culture', $culture)
+            ->value('value');
+
+        if (!$pi) {
+            return [];
+        }
+
+        $arr = @unserialize($pi);
+
+        return is_array($arr) ? $arr : [];
+    }
+
+    /**
+     * Save a serialized array property (delete old, insert new).
+     */
+    protected static function savePropertyArray(int $objectId, string $name, array $values, string $culture): void
+    {
+        // Delete existing
+        $existing = DB::table('property')
+            ->where('object_id', $objectId)
+            ->where('name', $name)
+            ->whereNull('scope')
+            ->pluck('id')
+            ->all();
+
+        if (!empty($existing)) {
+            DB::table('property_i18n')->whereIn('id', $existing)->delete();
+            DB::table('property')->whereIn('id', $existing)->delete();
+        }
+
+        // Insert new
+        $values = array_filter(array_values($values));
+        $serialized = serialize($values);
+
+        $propId = DB::table('property')->insertGetId([
+            'object_id' => $objectId,
+            'name' => $name,
+            'scope' => null,
+            'source_culture' => $culture,
+            'serial_number' => 0,
+        ]);
+
+        DB::table('property_i18n')->insert([
+            'id' => $propId,
+            'culture' => $culture,
+            'value' => $serialized,
+        ]);
+    }
+
+    /**
+     * Get alternative identifiers for an information object.
+     */
+    protected static function getAlternativeIdentifiers(int $objectId, string $culture): array
+    {
+        $props = DB::table('property')
+            ->where('object_id', $objectId)
+            ->where('scope', 'alternativeIdentifiers')
+            ->get();
+
+        $result = [];
+        foreach ($props as $prop) {
+            $pi = DB::table('property_i18n')
+                ->where('id', $prop->id)
+                ->where('culture', $culture)
+                ->first();
+
+            $result[] = (object) [
+                'label' => $prop->name ?? '',
+                'value' => $pi->value ?? '',
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Save alternative identifiers (scope='alternativeIdentifiers').
+     */
+    protected static function saveAlternativeIdentifiers(int $objectId, array $altIds, string $culture): void
+    {
+        foreach ($altIds as $ai) {
+            $label = trim($ai['label'] ?? '');
+            $value = trim($ai['value'] ?? '');
+            if (empty($label) && empty($value)) {
+                continue;
+            }
+
+            $propId = DB::table('property')->insertGetId([
+                'object_id' => $objectId,
+                'scope' => 'alternativeIdentifiers',
+                'name' => $label,
+                'source_culture' => $culture,
+                'serial_number' => 0,
+            ]);
+
+            DB::table('property_i18n')->insert([
+                'id' => $propId,
+                'culture' => $culture,
+                'value' => $value,
+            ]);
+        }
+    }
+
+    /**
+     * Delete properties by object ID and scope.
+     */
+    protected static function deleteProperties(int $objectId, string $scope): void
+    {
+        $ids = DB::table('property')
+            ->where('object_id', $objectId)
+            ->where('scope', $scope)
+            ->pluck('id')
+            ->all();
+
+        if (!empty($ids)) {
+            DB::table('property_i18n')->whereIn('id', $ids)->delete();
+            DB::table('property')->whereIn('id', $ids)->delete();
+        }
+    }
+
+    // ─── Creator helpers ──────────────────────────────────────────────
+
+    /**
+     * Get creators (events with type_id = Creation) for an IO.
+     */
+    protected static function getCreators(int $objectId, string $culture): array
+    {
+        return DB::table('event')
+            ->leftJoin('event_i18n', function ($j) use ($culture) {
+                $j->on('event.id', '=', 'event_i18n.id')
+                    ->where('event_i18n.culture', '=', $culture);
+            })
+            ->leftJoin('actor_i18n', function ($j) use ($culture) {
+                $j->on('event.actor_id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', $culture);
+            })
+            ->where('event.object_id', $objectId)
+            ->where('event.type_id', self::EVENT_TYPE_CREATION)
+            ->select(
+                'event.id as event_id',
+                'event.actor_id',
+                'actor_i18n.authorized_form_of_name as actor_name',
+                'event_i18n.date'
+            )
+            ->get()
+            ->all();
+    }
+
+    // ─── Typed note helpers ───────────────────────────────────────────
+
+    /**
+     * Get a single note of a given type (returns content string).
+     */
+    protected static function getSingleNote(int $objectId, int $typeId, string $culture): string
+    {
+        $notes = NoteService::getByObjectId($objectId, $typeId, $culture);
+        if (!empty($notes)) {
+            return $notes[0]->content ?? '';
+        }
+
+        return '';
+    }
+
+    /**
+     * Get multiple notes of a given type.
+     */
+    protected static function getTypedNotes(int $objectId, int $typeId, string $culture): array
+    {
+        return NoteService::getByObjectId($objectId, $typeId, $culture);
+    }
+
+    // ─── Child levels ─────────────────────────────────────────────────
+
+    /**
+     * Create child information objects under a parent.
+     */
+    protected static function createChildLevels(int $parentId, array $children, string $culture): void
+    {
+        foreach ($children as $child) {
+            $title = trim($child['title'] ?? '');
+            if (empty($title)) {
+                continue;
+            }
+
+            self::create([
+                'title' => $title,
+                'identifier' => $child['identifier'] ?? null,
+                'levelOfDescriptionId' => $child['levelOfDescriptionId'] ?? null,
+                'parentId' => $parentId,
+                'publicationStatusId' => self::STATUS_DRAFT,
+            ], $culture);
         }
     }
 }

@@ -2,9 +2,6 @@
 
 class ioManageActions extends sfActions
 {
-    // Note types taxonomy
-    const TAXONOMY_NOTE_TYPES = 37;
-
     public function preExecute()
     {
         parent::preExecute();
@@ -20,7 +17,11 @@ class ioManageActions extends sfActions
     }
 
     /**
-     * Edit or create an information object (ISAD(G)).
+     * Edit or create an information object.
+     *
+     * Detects the descriptive standard and forwards to the appropriate
+     * standard plugin's module (DC, RAD, MODS, DACS). Falls through
+     * to ISAD(G) template for the default standard.
      */
     public function executeEdit(sfWebRequest $request)
     {
@@ -36,111 +37,27 @@ class ioManageActions extends sfActions
             QubitAcl::forwardUnauthorized();
         }
 
-        $slug = $request->getParameter('slug');
-        $this->isNew = empty($slug);
+        // Load IO data + detect standard
+        $standard = \IoFormHelper::loadIoData($this, $request, $culture);
 
-        // Load dropdown options
-        $this->levels = \AhgInformationObjectManage\Services\InformationObjectCrudService::getLevelsOfDescription($culture);
-        $this->descriptionStatuses = \AhgInformationObjectManage\Services\InformationObjectCrudService::getDescriptionStatuses($culture);
-        $this->descriptionDetails = \AhgInformationObjectManage\Services\InformationObjectCrudService::getDescriptionDetails($culture);
-        $this->eventTypes = \AhgInformationObjectManage\Services\InformationObjectCrudService::getEventTypes($culture);
-        $this->publicationStatuses = \AhgInformationObjectManage\Services\InformationObjectCrudService::getPublicationStatuses();
-        $this->noteTypes = $this->getNoteTypes($culture);
+        // Forward to standard-specific module if not ISAD
+        if (isset(\IoFormHelper::MODULE_MAP[$standard])) {
+            $module = \IoFormHelper::MODULE_MAP[$standard];
 
-        if (!$this->isNew) {
-            $this->io = \AhgInformationObjectManage\Services\InformationObjectCrudService::getBySlug($slug, $culture);
-            if (!$this->io) {
-                $this->forward404();
+            // Check if the target module's plugin is enabled
+            try {
+                $this->forward($module, 'edit');
+            } catch (\sfConfigurationException $e) {
+                // Plugin not installed — fall through to ISAD
             }
-
-            $title = $this->io['title'] ?: $this->context->i18n->__('Untitled');
-            $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
-        } else {
-            // Defaults for new record
-            $parentId = (int) $request->getParameter('parent', \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID);
-            $parentTitle = null;
-            $parentSlug = null;
-
-            if ($parentId && $parentId != \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID) {
-                $parentI18n = \AhgCore\Services\I18nService::getWithFallback('information_object_i18n', $parentId, $culture);
-                $parentTitle = $parentI18n->title ?? null;
-                $parentSlug = \AhgCore\Services\ObjectService::getSlug($parentId);
-            }
-
-            $this->io = [
-                'id' => null,
-                'slug' => null,
-                'identifier' => '',
-                'title' => '',
-                'levelOfDescriptionId' => null,
-                'repositoryId' => null,
-                'repositoryName' => null,
-                'parentId' => $parentId,
-                'parentTitle' => $parentTitle,
-                'parentSlug' => $parentSlug,
-                'descriptionStatusId' => null,
-                'descriptionDetailId' => null,
-                'descriptionIdentifier' => '',
-                'sourceStandard' => 'ISAD(G) 2nd edition',
-                'extentAndMedium' => '',
-                'archivalHistory' => '',
-                'acquisition' => '',
-                'scopeAndContent' => '',
-                'appraisal' => '',
-                'accruals' => '',
-                'arrangement' => '',
-                'accessConditions' => '',
-                'reproductionConditions' => '',
-                'physicalCharacteristics' => '',
-                'findingAids' => '',
-                'locationOfOriginals' => '',
-                'locationOfCopies' => '',
-                'relatedUnitsOfDescription' => '',
-                'institutionResponsibleIdentifier' => '',
-                'rules' => '',
-                'sources' => '',
-                'revisionHistory' => '',
-                'events' => [],
-                'subjectAccessPoints' => [],
-                'placeAccessPoints' => [],
-                'genreAccessPoints' => [],
-                'nameAccessPoints' => [],
-                'notes' => [],
-                'publicationStatusId' => \AhgInformationObjectManage\Services\InformationObjectCrudService::STATUS_DRAFT,
-            ];
-
-            $this->response->setTitle($this->context->i18n->__('Add new archival description') . ' - ' . $this->response->getTitle());
         }
+
+        // ISAD(G) — load dropdowns and continue to editSuccess.php
+        \IoFormHelper::loadDropdowns($this, $culture);
 
         // Handle POST
         if ($request->isMethod('post')) {
-            $this->errors = [];
-
-            $title = trim($request->getParameter('title', ''));
-            $levelOfDescriptionId = $request->getParameter('levelOfDescriptionId', '');
-
-            if (empty($title)) {
-                $this->errors[] = __('Title is required.');
-            }
-            if (empty($levelOfDescriptionId)) {
-                $this->errors[] = __('Level of description is required.');
-            }
-
-            if (empty($this->errors)) {
-                $data = $this->extractFormData($request);
-
-                if ($this->isNew) {
-                    $newId = \AhgInformationObjectManage\Services\InformationObjectCrudService::create($data, $culture);
-                    $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
-                    $this->redirect('/' . $newSlug);
-                } else {
-                    \AhgInformationObjectManage\Services\InformationObjectCrudService::update($this->io['id'], $data, $culture);
-                    $this->redirect('/' . $this->io['slug']);
-                }
-            }
-
-            // If errors, re-populate from submitted data for re-display
-            $this->repopulateFromRequest($request);
+            \IoFormHelper::handlePost($this, $request, $culture);
         }
     }
 
@@ -190,155 +107,224 @@ class ioManageActions extends sfActions
         }
     }
 
-    /**
-     * Extract all form data from the request.
-     */
-    protected function extractFormData(sfWebRequest $request): array
-    {
-        $data = [
-            'title' => trim($request->getParameter('title', '')),
-            'identifier' => trim($request->getParameter('identifier', '')),
-            'levelOfDescriptionId' => $request->getParameter('levelOfDescriptionId', ''),
-            'repositoryId' => $request->getParameter('repositoryId', ''),
-            'parentId' => $request->getParameter('parentId', ''),
-            'descriptionStatusId' => $request->getParameter('descriptionStatusId', ''),
-            'descriptionDetailId' => $request->getParameter('descriptionDetailId', ''),
-            'descriptionIdentifier' => trim($request->getParameter('descriptionIdentifier', '')),
-            'sourceStandard' => trim($request->getParameter('sourceStandard', 'ISAD(G) 2nd edition')),
-            'publicationStatusId' => $request->getParameter('publicationStatusId', ''),
-            // i18n fields
-            'extentAndMedium' => trim($request->getParameter('extentAndMedium', '')),
-            'archivalHistory' => trim($request->getParameter('archivalHistory', '')),
-            'acquisition' => trim($request->getParameter('acquisition', '')),
-            'scopeAndContent' => trim($request->getParameter('scopeAndContent', '')),
-            'appraisal' => trim($request->getParameter('appraisal', '')),
-            'accruals' => trim($request->getParameter('accruals', '')),
-            'arrangement' => trim($request->getParameter('arrangement', '')),
-            'accessConditions' => trim($request->getParameter('accessConditions', '')),
-            'reproductionConditions' => trim($request->getParameter('reproductionConditions', '')),
-            'physicalCharacteristics' => trim($request->getParameter('physicalCharacteristics', '')),
-            'findingAids' => trim($request->getParameter('findingAids', '')),
-            'locationOfOriginals' => trim($request->getParameter('locationOfOriginals', '')),
-            'locationOfCopies' => trim($request->getParameter('locationOfCopies', '')),
-            'relatedUnitsOfDescription' => trim($request->getParameter('relatedUnitsOfDescription', '')),
-            'institutionResponsibleIdentifier' => trim($request->getParameter('institutionResponsibleIdentifier', '')),
-            'rules' => trim($request->getParameter('rules', '')),
-            'sources' => trim($request->getParameter('sources', '')),
-            'revisionHistory' => trim($request->getParameter('revisionHistory', '')),
-        ];
-
-        // Extract events
-        $eventsRaw = $request->getParameter('events', []);
-        $data['events'] = [];
-        if (is_array($eventsRaw)) {
-            foreach ($eventsRaw as $evt) {
-                if (!empty($evt['typeId'])) {
-                    $data['events'][] = [
-                        'typeId' => $evt['typeId'],
-                        'date' => $evt['date'] ?? '',
-                        'startDate' => $evt['startDate'] ?? null,
-                        'endDate' => $evt['endDate'] ?? null,
-                        'actorId' => $evt['actorId'] ?? null,
-                        'actorName' => $evt['actorName'] ?? '',
-                    ];
-                }
-            }
-        }
-
-        // Extract access point term IDs
-        $data['subjectAccessPointIds'] = array_filter((array) $request->getParameter('subjectAccessPointIds', []));
-        $data['placeAccessPointIds'] = array_filter((array) $request->getParameter('placeAccessPointIds', []));
-        $data['genreAccessPointIds'] = array_filter((array) $request->getParameter('genreAccessPointIds', []));
-
-        // Extract name access points
-        $nameAPsRaw = $request->getParameter('nameAccessPoints', []);
-        $data['nameAccessPoints'] = [];
-        if (is_array($nameAPsRaw)) {
-            foreach ($nameAPsRaw as $nap) {
-                if (!empty($nap['actorId'])) {
-                    $data['nameAccessPoints'][] = [
-                        'actorId' => $nap['actorId'],
-                        'actorName' => $nap['actorName'] ?? '',
-                    ];
-                }
-            }
-        }
-
-        // Extract notes
-        $notesRaw = $request->getParameter('notes', []);
-        $data['notes'] = [];
-        if (is_array($notesRaw)) {
-            foreach ($notesRaw as $note) {
-                if (!empty($note['typeId']) && !empty(trim($note['content'] ?? ''))) {
-                    $data['notes'][] = [
-                        'typeId' => $note['typeId'],
-                        'content' => $note['content'],
-                    ];
-                }
-            }
-        }
-
-        return $data;
-    }
+    // ─── AJAX proxy endpoints ─────────────────────────────────────────
 
     /**
-     * Re-populate $this->io from submitted request data after validation error.
+     * Actor autocomplete — returns JSON [{id, name}].
      */
-    protected function repopulateFromRequest(sfWebRequest $request): void
+    public function executeActorAutocomplete(sfWebRequest $request)
     {
-        $this->io['title'] = $request->getParameter('title', '');
-        $this->io['identifier'] = $request->getParameter('identifier', '');
-        $this->io['levelOfDescriptionId'] = $request->getParameter('levelOfDescriptionId', '');
-        $this->io['repositoryId'] = $request->getParameter('repositoryId', '');
-        $this->io['repositoryName'] = $request->getParameter('repositoryName', '');
-        $this->io['descriptionStatusId'] = $request->getParameter('descriptionStatusId', '');
-        $this->io['descriptionDetailId'] = $request->getParameter('descriptionDetailId', '');
-        $this->io['descriptionIdentifier'] = $request->getParameter('descriptionIdentifier', '');
-        $this->io['sourceStandard'] = $request->getParameter('sourceStandard', '');
-        $this->io['publicationStatusId'] = $request->getParameter('publicationStatusId', '');
+        $this->getResponse()->setContentType('application/json');
 
-        // i18n fields
-        foreach ([
-            'extentAndMedium', 'archivalHistory', 'acquisition', 'scopeAndContent',
-            'appraisal', 'accruals', 'arrangement', 'accessConditions',
-            'reproductionConditions', 'physicalCharacteristics', 'findingAids',
-            'locationOfOriginals', 'locationOfCopies', 'relatedUnitsOfDescription',
-            'institutionResponsibleIdentifier', 'rules', 'sources', 'revisionHistory',
-        ] as $field) {
-            $this->io[$field] = $request->getParameter($field, '');
+        $q = trim($request->getParameter('query', ''));
+        $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
+        $culture = $this->context->user->getCulture();
+
+        if (strlen($q) < 2) {
+            return $this->renderText(json_encode([]));
         }
 
-        // Re-populate events from POST
-        $eventsRaw = $request->getParameter('events', []);
-        $this->io['events'] = [];
-        if (is_array($eventsRaw)) {
-            foreach ($eventsRaw as $evt) {
-                $this->io['events'][] = (object) [
-                    'type_id' => $evt['typeId'] ?? null,
-                    'date' => $evt['date'] ?? '',
-                    'start_date' => $evt['startDate'] ?? null,
-                    'end_date' => $evt['endDate'] ?? null,
-                    'actor_id' => $evt['actorId'] ?? null,
-                    'actor_name' => $evt['actorName'] ?? '',
-                ];
-            }
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
         }
-    }
 
-    /**
-     * Get note type terms.
-     */
-    protected function getNoteTypes(string $culture): array
-    {
-        return \Illuminate\Database\Capsule\Manager::table('term')
-            ->leftJoin('term_i18n', function ($join) use ($culture) {
-                $join->on('term.id', '=', 'term_i18n.id')
-                     ->where('term_i18n.culture', '=', $culture);
+        $results = \Illuminate\Database\Capsule\Manager::table('actor')
+            ->join('actor_i18n', function ($j) use ($culture) {
+                $j->on('actor.id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', $culture);
             })
-            ->where('term.taxonomy_id', self::TAXONOMY_NOTE_TYPES)
-            ->select(['term.id', 'term_i18n.name'])
-            ->orderBy('term_i18n.name')
+            ->where('actor_i18n.authorized_form_of_name', 'LIKE', '%' . $q . '%')
+            ->where('actor.id', '!=', \QubitActor::ROOT_ID)
+            ->select('actor.id', 'actor_i18n.authorized_form_of_name as name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->limit($limit)
             ->get()
             ->all();
+
+        $json = array_map(function ($r) {
+            return ['id' => (int) $r->id, 'name' => $r->name];
+        }, $results);
+
+        return $this->renderText(json_encode($json));
     }
+
+    /**
+     * Repository autocomplete — returns JSON [{id, name}].
+     */
+    public function executeRepositoryAutocomplete(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $q = trim($request->getParameter('query', ''));
+        $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
+        $culture = $this->context->user->getCulture();
+
+        if (strlen($q) < 2) {
+            return $this->renderText(json_encode([]));
+        }
+
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        }
+
+        $results = \Illuminate\Database\Capsule\Manager::table('repository')
+            ->join('actor_i18n', function ($j) use ($culture) {
+                $j->on('repository.id', '=', 'actor_i18n.id')
+                    ->where('actor_i18n.culture', '=', $culture);
+            })
+            ->where('actor_i18n.authorized_form_of_name', 'LIKE', '%' . $q . '%')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->limit($limit)
+            ->get()
+            ->all();
+
+        $json = array_map(function ($r) {
+            return ['id' => (int) $r->id, 'name' => $r->name];
+        }, $results);
+
+        return $this->renderText(json_encode($json));
+    }
+
+    /**
+     * Term autocomplete — returns JSON [{id, name}].
+     * Requires ?taxonomy=ID&query=text
+     */
+    public function executeTermAutocomplete(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $q = trim($request->getParameter('query', ''));
+        $taxonomyId = (int) $request->getParameter('taxonomy', 0);
+        $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
+        $culture = $this->context->user->getCulture();
+
+        if (strlen($q) < 2 || !$taxonomyId) {
+            return $this->renderText(json_encode([]));
+        }
+
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        }
+
+        $results = \Illuminate\Database\Capsule\Manager::table('term')
+            ->join('term_i18n', function ($j) use ($culture) {
+                $j->on('term.id', '=', 'term_i18n.id')
+                    ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', $taxonomyId)
+            ->where('term_i18n.name', 'LIKE', '%' . $q . '%')
+            ->select('term.id', 'term_i18n.name')
+            ->orderBy('term_i18n.name')
+            ->limit($limit)
+            ->get()
+            ->all();
+
+        $json = array_map(function ($r) {
+            return ['id' => (int) $r->id, 'name' => $r->name];
+        }, $results);
+
+        return $this->renderText(json_encode($json));
+    }
+
+    /**
+     * Generate identifier using Archive Standard scheme {REPO}/{FONDS}/{SEQ:4}.
+     *
+     * Expects query params: repositoryId, parentId
+     * Returns JSON {identifier, scheme}.
+     */
+    public function executeGenerateIdentifier(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $culture = $this->context->user->getCulture();
+        $repositoryId = (int) $request->getParameter('repositoryId', 0);
+        $parentId = (int) $request->getParameter('parentId', 0);
+
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        }
+
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+        $rootId = \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID;
+
+        // 1. Resolve REPO code
+        $repoCode = '';
+        if ($repositoryId) {
+            $repo = $DB::table('repository')
+                ->where('id', $repositoryId)
+                ->value('identifier');
+
+            if (!$repo) {
+                // Fallback: abbreviate the repository name
+                $name = $DB::table('actor_i18n')
+                    ->where('id', $repositoryId)
+                    ->where('culture', $culture)
+                    ->value('authorized_form_of_name');
+
+                if ($name) {
+                    // Use uppercase initials of each word, max 6 chars
+                    $words = preg_split('/\s+/', trim($name));
+                    $repo = '';
+                    foreach ($words as $w) {
+                        $repo .= strtoupper(mb_substr($w, 0, 1));
+                    }
+                    $repo = substr($repo, 0, 6);
+                }
+            }
+            $repoCode = $repo ?: 'REPO';
+        }
+
+        if (!$repoCode) {
+            return $this->renderText(json_encode([
+                'identifier' => '',
+                'error' => 'Select a repository first.',
+            ]));
+        }
+
+        // 2. Resolve FONDS — walk up parent chain to find fonds-level ancestor
+        $fondsCode = '';
+        $effectiveParent = $parentId ?: $rootId;
+
+        if ($effectiveParent && $effectiveParent != $rootId) {
+            // Walk up from parent to find the fonds (child of root)
+            $currentId = $effectiveParent;
+            $visited = [];
+            while ($currentId && $currentId != $rootId && !isset($visited[$currentId])) {
+                $visited[$currentId] = true;
+                $row = $DB::table('information_object')
+                    ->where('id', $currentId)
+                    ->select('identifier', 'parent_id')
+                    ->first();
+
+                if (!$row) {
+                    break;
+                }
+
+                if ((int) $row->parent_id === $rootId) {
+                    // This is the fonds-level ancestor
+                    $fondsCode = $row->identifier ?: '';
+                    break;
+                }
+                $currentId = (int) $row->parent_id;
+            }
+        }
+
+        // 3. Sequence — count existing children of target parent + 1
+        $childCount = $DB::table('information_object')
+            ->where('parent_id', $effectiveParent)
+            ->count();
+        $seq = str_pad((string) ($childCount + 1), 4, '0', STR_PAD_LEFT);
+
+        // 4. Build identifier
+        if ($fondsCode) {
+            $identifier = $repoCode . '/' . $fondsCode . '/' . $seq;
+        } else {
+            // Creating at fonds level (parent is root) — no fonds component
+            $identifier = $repoCode . '/' . $seq;
+        }
+
+        return $this->renderText(json_encode(['identifier' => $identifier]));
+    }
+
 }

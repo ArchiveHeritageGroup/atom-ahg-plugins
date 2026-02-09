@@ -13,6 +13,22 @@ io_edit_override:
   url: /informationobject/:slug/edit
   param: { module: ioManage, action: edit }
 
+io_actor_autocomplete:
+  url: /informationobject/actorAutocomplete
+  param: { module: ioManage, action: actorAutocomplete }
+
+io_repository_autocomplete:
+  url: /informationobject/repositoryAutocomplete
+  param: { module: ioManage, action: repositoryAutocomplete }
+
+io_term_autocomplete:
+  url: /informationobject/termAutocomplete
+  param: { module: ioManage, action: termAutocomplete }
+
+io_generate_identifier:
+  url: /informationobject/generateIdentifierJson
+  param: { module: ioManage, action: generateIdentifier }
+
 io_add_override:
   url: /informationobject/add
   param: { module: ioManage, action: edit }
