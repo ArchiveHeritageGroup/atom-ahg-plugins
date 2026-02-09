@@ -62,7 +62,7 @@ if (isset($resource)) {
     <li><?php echo link_to(__('Heritage Assets'), '@spectrum_grap_dashboard?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
-    <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'oais', 'action' => 'createSip', 'slug' => $resourceSlug]); ?></li>
+    <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'preservation', 'action' => 'packages']); ?></li>
     <?php endif; ?>
     <?php if ($hasResearch): ?>
     <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?></li>
