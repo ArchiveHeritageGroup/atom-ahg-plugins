@@ -1,0 +1,2 @@
+-- ahgSearchPlugin: No database tables required.
+-- All search functionality uses Elasticsearch and existing AtoM tables.

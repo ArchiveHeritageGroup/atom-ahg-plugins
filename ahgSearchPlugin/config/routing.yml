@@ -1,0 +1,22 @@
+# ahgSearchPlugin routes - override base AtoM search actions
+
+search_autocomplete_override:
+  url: /search/autocomplete
+  param: { module: ahgSearch, action: autocomplete }
+
+search_index_override:
+  url: /search/index
+  param: { module: ahgSearch, action: index }
+
+search_descriptionupdates_override:
+  url: /search/descriptionUpdates
+  param: { module: ahgSearch, action: descriptionUpdates }
+
+search_globalreplace_override:
+  url: /search/globalReplace
+  param: { module: ahgSearch, action: globalReplace }
+
+# Semantic search (optional — routes to ahgRicExplorerPlugin module if available)
+search_semantic_override:
+  url: /search/semantic
+  param: { module: ricSemanticSearch, action: index }

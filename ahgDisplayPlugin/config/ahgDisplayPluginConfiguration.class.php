@@ -21,6 +21,7 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'display';
         $enabledModules[] = 'displaySearch';
+        $enabledModules[] = 'treeview';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -68,9 +69,11 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
             if (is_array($routes)) {
                 foreach ($routes as $name => $config) {
                     if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
+                        $routeClass = $config['class'] ?? 'sfRoute';
+                        $routing->prependRoute($name, new $routeClass(
                             $config['url'],
-                            $config['param']
+                            $config['param'],
+                            $config['requirements'] ?? []
                         ));
                     }
                 }

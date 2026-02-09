@@ -81,3 +81,16 @@ glam_get_browse_settings:
 glam_reset_browse_settings:
   url: /glam/resetBrowseSettings
   param: { module: display, action: resetBrowseSettings }
+
+# Treeview routes - override base AtoM informationobject treeview
+treeview_override:
+  class: QubitResourceRoute
+  url: /:slug/treeView
+  param: { module: treeview, action: view }
+  requirements: { slug: "[a-zA-Z0-9_-]+" }
+
+treeview_sort_override:
+  class: QubitResourceRoute
+  url: /:slug/treeViewSort
+  param: { module: treeview, action: sort }
+  requirements: { slug: "[a-zA-Z0-9_-]+" }
