@@ -314,5 +314,10 @@ class AhgSettingsIndexAction extends sfAction
                 'url' => 'cart/adminOrders'
             ];
         }
+
+        return [
+            '_blade' => 'index',
+            'sections' => $this->sections,
+        ];
     }
 }

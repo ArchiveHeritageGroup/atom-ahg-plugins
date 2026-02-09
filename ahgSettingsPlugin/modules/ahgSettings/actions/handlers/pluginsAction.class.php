@@ -18,6 +18,12 @@ class AhgSettingsPluginsAction extends sfAction
         // Load plugins from database
         $this->plugins = $this->loadPlugins();
         $this->categories = $this->getCategories();
+
+        return [
+            '_blade' => 'plugins',
+            'plugins' => $this->plugins,
+            'categories' => $this->categories,
+        ];
     }
 
     protected function loadPlugins()

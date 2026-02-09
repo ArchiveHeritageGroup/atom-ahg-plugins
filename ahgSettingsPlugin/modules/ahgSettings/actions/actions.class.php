@@ -38,6 +38,14 @@ class ahgSettingsActions extends AhgActions
             $action = new $className($this->context, 'ahgSettings', $this->getActionName());
             $result = $action->execute($request);
 
+            // If the handler returned blade template data (array), render via Blade
+            if (is_array($result) && isset($result['_blade'])) {
+                $template = $result['_blade'];
+                unset($result['_blade']);
+
+                return $this->renderBlade($template, $result);
+            }
+
             // Transfer all public properties from inner action to this action
             // so they're available in the template
             $reflection = new ReflectionObject($action);
@@ -51,9 +59,42 @@ class ahgSettingsActions extends AhgActions
                 $this->$name = $value;
             }
 
+            // Check if a Blade template exists for this action
+            $actionName = $this->getActionName();
+            $bladeFile = sfConfig::get('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/templates/' . $actionName . '.blade.php';
+            if (file_exists($bladeFile) && !is_string($result)) {
+                return $this->renderSettingsBlade($actionName, $request);
+            }
+
             return $result;
         }
         throw new sfError404Exception('Action not found: ' . $actionClass);
+    }
+
+    /**
+     * Build menu nodes and render a Blade template for legacy form handlers.
+     *
+     * Collects menu nodes from the settings menu component and merges all
+     * public properties from this action into the template data array.
+     */
+    private function renderSettingsBlade($template, $request, $additionalData = [])
+    {
+        $menuComponent = new \ahgSettingsMenuComponent($this->context, 'ahgSettings', $this->getActionName());
+        $menuComponent->execute($request);
+        $menuNodes = $menuComponent->getVarHolder()->get('nodes', []);
+
+        $data = array_merge(['menuNodes' => $menuNodes], $additionalData);
+
+        // Transfer all public properties from this action to the data array
+        $reflection = new \ReflectionObject($this);
+        foreach ($reflection->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+            $name = $prop->getName();
+            if (!isset($data[$name])) {
+                $data[$name] = $this->$name;
+            }
+        }
+
+        return $this->renderBlade($template, $data);
     }
 
     public function executeIndex(sfWebRequest $request)

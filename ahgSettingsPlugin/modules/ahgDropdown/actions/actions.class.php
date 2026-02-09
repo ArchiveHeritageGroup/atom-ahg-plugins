@@ -35,13 +35,18 @@ class ahgDropdownActions extends AhgActions
     public function executeIndex(sfWebRequest $request)
     {
         $service = new \ahgCorePlugin\Services\AhgTaxonomyService();
-        $this->taxonomies = $service->getAllTaxonomies();
+        $taxonomies = $service->getAllTaxonomies();
 
         // Get term counts
-        $this->termCounts = [];
-        foreach ($this->taxonomies as $tax) {
-            $this->termCounts[$tax->taxonomy] = $service->getTermCount($tax->taxonomy);
+        $termCounts = [];
+        foreach ($taxonomies as $tax) {
+            $termCounts[$tax->taxonomy] = $service->getTermCount($tax->taxonomy);
         }
+
+        return $this->renderBlade('index', [
+            'taxonomies' => $taxonomies,
+            'termCounts' => $termCounts,
+        ]);
     }
 
     /**
@@ -57,19 +62,24 @@ class ahgDropdownActions extends AhgActions
 
         $service = new \ahgCorePlugin\Services\AhgTaxonomyService();
 
-        $this->taxonomy = $taxonomy;
-        $this->taxonomyLabel = $service->getTaxonomyLabel($taxonomy);
+        $taxonomyLabel = $service->getTaxonomyLabel($taxonomy);
 
-        if (!$this->taxonomyLabel) {
+        if (!$taxonomyLabel) {
             $this->forward404();
         }
 
         // Get all terms including inactive
-        $this->terms = \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+        $terms = \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
             ->where('taxonomy', $taxonomy)
             ->orderBy('sort_order')
             ->orderBy('label')
             ->get();
+
+        return $this->renderBlade('edit', [
+            'taxonomy' => $taxonomy,
+            'taxonomyLabel' => $taxonomyLabel,
+            'terms' => $terms,
+        ]);
     }
 
     /**

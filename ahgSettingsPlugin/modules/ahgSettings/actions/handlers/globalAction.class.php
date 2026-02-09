@@ -58,6 +58,17 @@ class SettingsGlobalAction extends sfAction
         }
 
         $this->populateGlobalForm();
+
+        // Build menu nodes for Blade sidebar
+        $menuComponent = new \ahgSettingsMenuComponent($this->context, 'ahgSettings', 'global');
+        $menuComponent->execute($this->getRequest());
+        $this->menuNodes = $menuComponent->getVarHolder()->get('nodes', []);
+
+        return [
+            '_blade' => 'global',
+            'globalForm' => $this->globalForm,
+            'menuNodes' => $this->menuNodes,
+        ];
     }
 
     /**

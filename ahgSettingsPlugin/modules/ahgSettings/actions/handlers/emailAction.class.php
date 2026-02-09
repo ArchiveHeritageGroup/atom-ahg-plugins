@@ -48,5 +48,12 @@ class AhgSettingsEmailAction extends sfAction
             ->orderBy('id')
             ->get()
             ->toArray();
+
+        return [
+            '_blade' => 'email',
+            'smtpSettings' => $this->smtpSettings,
+            'notificationSettings' => $this->notificationSettings,
+            'templateSettings' => $this->templateSettings,
+        ];
     }
 }

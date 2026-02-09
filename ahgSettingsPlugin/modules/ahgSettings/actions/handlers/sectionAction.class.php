@@ -122,6 +122,13 @@ class AhgSettingsSectionAction extends sfAction
         }
 
         $this->settings = $this->loadSettings($this->currentSection);
+
+        return [
+            '_blade' => 'section',
+            'sections' => $this->sections,
+            'currentSection' => $this->currentSection,
+            'settings' => $this->settings,
+        ];
     }
 
     protected function processSettings($request)
