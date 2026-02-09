@@ -4,12 +4,6 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
 
 <form method="post">
   <div class="row">
@@ -105,7 +99,9 @@
             <code>{reset_url}</code> - <?php echo __('Password reset URL'); ?><br>
             <code>{review_url}</code> - <?php echo __('Review page URL'); ?><br>
             <code>{date}</code>, <code>{time}</code>, <code>{room}</code> - <?php echo __('Booking details'); ?><br>
-            <code>{reason}</code> - <?php echo __('Rejection reason'); ?>
+            <code>{reason}</code> - <?php echo __('Rejection reason'); ?><br>
+            <code>{message}</code>, <code>{file}</code>, <code>{line}</code>, <code>{trace}</code> - <?php echo __('Error alert details'); ?><br>
+            <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - <?php echo __('Error context'); ?>
           </div>
           
           <div class="accordion" id="templateAccordion">
@@ -117,6 +113,7 @@
                 'password_reset' => 'Password Reset (to User)',
                 'booking_confirmed' => 'Booking Confirmed (to Researcher)',
                 'admin_new_researcher' => 'New Registration (to Admin)',
+                'error_alert' => 'System Error Alert (to Admin)',
             ];
             $index = 0;
             foreach ($templateGroups as $templateKey => $templateLabel): 

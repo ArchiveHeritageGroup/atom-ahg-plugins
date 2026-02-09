@@ -161,12 +161,13 @@
   <?php } ?>
 <?php } ?>
 
-<?php if (!empty($semanticTerms)) { ?>
+<?php $rawSemanticTerms = $sf_data->getRaw('semanticTerms'); ?>
+<?php if (!empty($rawSemanticTerms) && is_array($rawSemanticTerms)) { ?>
   <li><hr class="dropdown-divider"></li>
   <li>
     <span class="dropdown-item-text small text-muted">
       <i class="fas fa-brain me-1"></i>
-      <?php echo __('Expanded with: %1%', ['%1%' => implode(', ', $semanticTerms)]); ?>
+      <?php echo __('Expanded with: %1%', ['%1%' => implode(', ', $rawSemanticTerms)]); ?>
     </span>
   </li>
 <?php } ?>

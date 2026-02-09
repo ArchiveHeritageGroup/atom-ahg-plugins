@@ -20,20 +20,6 @@ $settings = $rawSettings;
     </a>
 </div>
 
-<?php if ($sf_user->hasFlash('notice')): ?>
-<div class="alert alert-success alert-dismissible fade show">
-    <i class="fas fa-check-circle me-2"></i><?php echo $sf_user->getFlash('notice') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<?php endif; ?>
-
-<?php if ($sf_user->hasFlash('error')): ?>
-<div class="alert alert-danger alert-dismissible fade show">
-    <i class="fas fa-exclamation-circle me-2"></i><?php echo $sf_user->getFlash('error') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<?php endif; ?>
-
 <form method="post" action="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'aiServices']) ?>">
 
 <!-- General Settings -->

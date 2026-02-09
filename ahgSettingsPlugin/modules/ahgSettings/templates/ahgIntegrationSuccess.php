@@ -8,13 +8,6 @@
     <h1><?php echo __('AHG Central Integration'); ?></h1>
 <?php end_slot(); ?>
 
-<?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?php echo $sf_user->getFlash('notice'); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
-
 <?php if (isset($testResult)): ?>
     <div class="alert alert-<?php echo $testResult['success'] ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
         <strong><?php echo $testResult['success'] ? __('Success!') : __('Error:'); ?></strong>
