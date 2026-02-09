@@ -1,4 +1,5 @@
 <?php
+
 class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Donor and institution agreement management with contract uploads, reminders, and compliance tracking.';
@@ -17,53 +18,25 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
 
     public function configureRouting(sfEvent $event): void
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('donorAgreement');
 
         // Dashboard
-        $routing->prependRoute('donor_dashboard', new sfRoute(
-            '/donor/dashboard',
-            ['module' => 'donorAgreement', 'action' => 'dashboard']
-        ));
+        $router->get('donor_dashboard', '/donor/dashboard', 'dashboard');
 
         // Agreement CRUD
-        $routing->prependRoute('donor_agreement_browse', new sfRoute(
-            '/donor/agreement/browse',
-            ['module' => 'donorAgreement', 'action' => 'browse']
-        ));
-        $routing->prependRoute('donor_agreement_add', new sfRoute(
-            '/donor/agreement/add',
-            ['module' => 'donorAgreement', 'action' => 'add']
-        ));
-        $routing->prependRoute('donor_agreement_view', new sfRoute(
-            '/donor/agreement/:id',
-            ['module' => 'donorAgreement', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('donor_agreement_edit', new sfRoute(
-            '/donor/agreement/:id/edit',
-            ['module' => 'donorAgreement', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('donor_agreement_delete', new sfRoute(
-            '/donor/agreement/:id/delete',
-            ['module' => 'donorAgreement', 'action' => 'delete'],
-            ['id' => '\d+']
-        ));
+        $router->get('donor_agreement_browse', '/donor/agreement/browse', 'browse');
+        $router->get('donor_agreement_add', '/donor/agreement/add', 'add');
+        $router->get('donor_agreement_view', '/donor/agreement/:id', 'view', ['id' => '\d+']);
+        $router->get('donor_agreement_edit', '/donor/agreement/:id/edit', 'edit', ['id' => '\d+']);
+        $router->any('donor_agreement_delete', '/donor/agreement/:id/delete', 'delete', ['id' => '\d+']);
 
         // Reminders
-        $routing->prependRoute('donor_agreement_reminders', new sfRoute(
-            '/donor/agreement/reminders',
-            ['module' => 'donorAgreement', 'action' => 'reminders']
-        ));
+        $router->get('donor_agreement_reminders', '/donor/agreement/reminders', 'reminders');
 
         // Autocomplete
-        $routing->prependRoute('donor_autocomplete_accessions', new sfRoute(
-            '/donor/autocomplete/accessions',
-            ['module' => 'donorAgreement', 'action' => 'autocompleteAccessions']
-        ));
-        $routing->prependRoute('donor_autocomplete_records', new sfRoute(
-            '/donor/autocomplete/records',
-            ['module' => 'donorAgreement', 'action' => 'autocompleteRecords']
-        ));
+        $router->get('donor_autocomplete_accessions', '/donor/autocomplete/accessions', 'autocompleteAccessions');
+        $router->get('donor_autocomplete_records', '/donor/autocomplete/records', 'autocompleteRecords');
+
+        $router->register($event->getSubject());
     }
 }
