@@ -334,16 +334,18 @@ class IoFormHelper
             }
         }
 
-        // Creators
-        $creatorsRaw = $request->getParameter('creators', []);
-        $data['creators'] = [];
-        if (is_array($creatorsRaw)) {
-            foreach ($creatorsRaw as $cr) {
-                if (!empty($cr['actorId'])) {
-                    $data['creators'][] = [
-                        'actorId' => $cr['actorId'],
-                        'actorName' => $cr['actorName'] ?? '',
-                    ];
+        // Creators — only include when template declares it handles creators
+        if ($request->getParameter('_creatorsIncluded', false)) {
+            $creatorsRaw = $request->getParameter('creators', []);
+            $data['creators'] = [];
+            if (is_array($creatorsRaw)) {
+                foreach ($creatorsRaw as $cr) {
+                    if (!empty($cr['actorId'])) {
+                        $data['creators'][] = [
+                            'actorId' => $cr['actorId'],
+                            'actorName' => $cr['actorName'] ?? '',
+                        ];
+                    }
                 }
             }
         }
@@ -403,6 +405,26 @@ class IoFormHelper
                         'identifier' => $ch['identifier'] ?? '',
                         'levelOfDescriptionId' => $ch['levelOfDescriptionId'] ?? '',
                         'title' => $title,
+                    ];
+                }
+            }
+        }
+
+        // DC standalone dates — merge into events as Creation events
+        $dcDatesRaw = $request->getParameter('dcDates', []);
+        if (is_array($dcDatesRaw)) {
+            foreach ($dcDatesRaw as $dd) {
+                $date = trim($dd['date'] ?? '');
+                $start = $dd['startDate'] ?? null;
+                $end = $dd['endDate'] ?? null;
+                if (!empty($date) || !empty($start) || !empty($end)) {
+                    $data['events'][] = [
+                        'typeId' => 111, // Creation
+                        'date' => $date,
+                        'startDate' => $start,
+                        'endDate' => $end,
+                        'actorId' => null,
+                        'actorName' => '',
                     ];
                 }
             }
@@ -501,6 +523,76 @@ class IoFormHelper
                 $action->io['archivistNotes'][] = (object) ['content' => $an['content'] ?? ''];
             }
         }
+
+        // General notes
+        $notesRaw = $request->getParameter('notes', []);
+        $action->io['notes'] = [];
+        if (is_array($notesRaw)) {
+            foreach ($notesRaw as $note) {
+                $action->io['notes'][] = (object) [
+                    'type_id' => $note['typeId'] ?? null,
+                    'content' => $note['content'] ?? '',
+                ];
+            }
+        }
+
+        // Name access points
+        $nameAPsRaw = $request->getParameter('nameAccessPoints', []);
+        $action->io['nameAccessPoints'] = [];
+        if (is_array($nameAPsRaw)) {
+            foreach ($nameAPsRaw as $nap) {
+                if (!empty($nap['actorId'])) {
+                    $action->io['nameAccessPoints'][] = (object) [
+                        'actor_id' => $nap['actorId'],
+                        'actor_name' => $nap['actorName'] ?? '',
+                    ];
+                }
+            }
+        }
+
+        // Term access points — rebuild as objects with term_id/term_name
+        foreach ([
+            'subjectAccessPointIds' => 'subjectAccessPoints',
+            'placeAccessPointIds' => 'placeAccessPoints',
+            'genreAccessPointIds' => 'genreAccessPoints',
+        ] as $postKey => $ioKey) {
+            $ids = array_filter((array) $request->getParameter($postKey, []));
+            $action->io[$ioKey] = [];
+            foreach ($ids as $termId) {
+                $action->io[$ioKey][] = (object) ['term_id' => (int) $termId, 'term_name' => ''];
+            }
+        }
+
+        // Typed term access points
+        foreach ([
+            'dcTypeIds' => 'dcTypes',
+            'modsResourceTypeIds' => 'modsResourceTypes',
+            'materialTypeIds' => 'materialTypes',
+        ] as $postKey => $ioKey) {
+            $ids = array_filter((array) $request->getParameter($postKey, []));
+            $action->io[$ioKey] = [];
+            foreach ($ids as $termId) {
+                $action->io[$ioKey][] = (object) ['term_id' => (int) $termId, 'term_name' => ''];
+            }
+        }
+
+        // RAD/DACS string properties
+        $radPropertyNames = [
+            'otherTitleInformation', 'titleStatementOfResponsibility',
+            'editionStatementOfResponsibility', 'statementOfScaleCartographic',
+            'statementOfProjection', 'statementOfCoordinates',
+            'statementOfScaleArchitectural', 'issuingJurisdictionAndDenomination',
+            'titleProperOfPublishersSeries', 'parallelTitleOfPublishersSeries',
+            'otherTitleInformationOfPublishersSeries',
+            'statementOfResponsibilityRelatingToPublishersSeries',
+            'numberingWithinPublishersSeries', 'noteOnPublishersSeries',
+            'standardNumber', 'technicalAccess',
+        ];
+        $stringProps = [];
+        foreach ($radPropertyNames as $propName) {
+            $stringProps[$propName] = $request->getParameter($propName, '');
+        }
+        $action->io['stringProperties'] = $stringProps;
     }
 
     /**

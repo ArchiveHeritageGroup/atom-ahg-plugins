@@ -2,6 +2,7 @@
 
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
+use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Sector-specific numbering settings (GLAM/DAM).
@@ -201,6 +202,14 @@ class AhgSettingsSectorNumberingAction extends sfAction
 
                 $setting->setValue((string) $value, ['sourceCulture' => true]);
                 $setting->save();
+
+                // Sync counter changes to numbering_scheme table (used by NumberingService)
+                if ($baseKey === 'identifier_counter') {
+                    DB::table('numbering_scheme')
+                        ->where('sector', $sector)
+                        ->where('is_default', 1)
+                        ->update(['current_sequence' => (int) $value, 'updated_at' => date('Y-m-d H:i:s')]);
+                }
             }
         }
     }

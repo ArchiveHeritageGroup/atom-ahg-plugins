@@ -495,12 +495,20 @@ class InformationObjectCrudService
 
             // 4. Replace events (includes creators)
             if (array_key_exists('events', $data)) {
+                // Preserve existing creators if not explicitly provided by the form
+                $preservedCreators = [];
+                if (!array_key_exists('creators', $data)) {
+                    $preservedCreators = self::getCreators($id, $culture);
+                }
+
                 EventService::deleteByObjectId($id);
                 if (!empty($data['events'])) {
                     self::saveEvents($id, $data['events'], $culture);
                 }
-                // Re-save creators as Creation events
-                if (!empty($data['creators'])) {
+
+                // Re-save creators
+                if (array_key_exists('creators', $data)) {
+                    // Explicitly provided by form — save what was submitted
                     foreach ($data['creators'] as $creator) {
                         $actorId = !empty($creator['actorId']) ? (int) $creator['actorId'] : null;
                         if ($actorId) {
@@ -509,6 +517,22 @@ class InformationObjectCrudService
                                     'type_id' => self::EVENT_TYPE_CREATION,
                                     'object_id' => $id,
                                     'actor_id' => $actorId,
+                                    'source_culture' => $culture,
+                                ],
+                                $culture,
+                                []
+                            );
+                        }
+                    }
+                } else {
+                    // Not provided (RAD/MODS) — preserve existing creators
+                    foreach ($preservedCreators as $cr) {
+                        if ($cr->actor_id) {
+                            EventService::save(
+                                [
+                                    'type_id' => self::EVENT_TYPE_CREATION,
+                                    'object_id' => $id,
+                                    'actor_id' => (int) $cr->actor_id,
                                     'source_culture' => $culture,
                                 ],
                                 $culture,

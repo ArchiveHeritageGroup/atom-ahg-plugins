@@ -631,12 +631,19 @@
       </div>
       <div class="collapse" id="repositorySection">
         <div class="card-body">
-          <div class="form-item">
-            <?php echo $form->repository->renderLabel(); ?>
-            <?php echo $form->repository->render(['class' => 'form-autocomplete']); ?>
-            <input class="add" type="hidden" data-link-existing="true" value="<?php echo url_for(['module' => 'repository', 'action' => 'add']); ?> #authorizedFormOfName"/>
-            <input class="list" type="hidden" value="<?php echo url_for(['module' => 'repository', 'action' => 'autocomplete']); ?>"/>
-          </div>
+          <?php
+              $repoExtraInputs = '<input class="list" type="hidden" value="'
+                  .url_for(['module' => 'repository', 'action' => 'autocomplete'])
+                  .'">';
+              $repoExtraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
+                  .url_for(['module' => 'repository', 'action' => 'add'])
+                  .' #authorizedFormOfName">';
+              echo render_field(
+                  $form->repository->label(__('Repository')),
+                  $resource,
+                  ['class' => 'form-autocomplete', 'extraInputs' => $repoExtraInputs]
+              );
+          ?>
         </div>
       </div>
     </div>

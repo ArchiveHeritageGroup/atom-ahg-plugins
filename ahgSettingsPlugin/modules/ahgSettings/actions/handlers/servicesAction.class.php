@@ -713,7 +713,7 @@ class SettingsServicesAction extends sfAction
     protected function checkDiskSpace(): array
     {
         try {
-            $uploadPath = sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+            $uploadPath = sfConfig::get('sf_upload_dir', sfConfig::get('sf_root_dir', dirname(__DIR__, 7)) . '/uploads');
             $totalSpace = disk_total_space($uploadPath);
             $freeSpace = disk_free_space($uploadPath);
             $usedPercent = round((($totalSpace - $freeSpace) / $totalSpace) * 100, 1);

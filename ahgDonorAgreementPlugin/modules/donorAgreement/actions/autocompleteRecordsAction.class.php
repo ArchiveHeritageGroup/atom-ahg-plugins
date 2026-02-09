@@ -44,28 +44,6 @@ class donorAgreementAutocompleteRecordsAction extends sfAction
 
     protected function initDatabase()
     {
-        static $initialized = false;
-        if ($initialized) return;
-
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
-        $config = include(sfConfig::get('sf_root_dir') . '/config/config.php');
-        $dsn = $config['all']['propel']['param']['dsn'];
-        preg_match('/dbname=([^;]+)/', $dsn, $matches);
-        $dbname = $matches[1] ?? 'archive';
-        preg_match('/host=([^;]+)/', $dsn, $hostMatches);
-        $host = $hostMatches[1] ?? 'localhost';
-
-        $capsule = new \Illuminate\Database\Capsule\Manager();
-        $capsule->addConnection([
-            'driver' => 'mysql',
-            'host' => $host,
-            'database' => $dbname,
-            'username' => $config['all']['propel']['param']['username'],
-            'password' => $config['all']['propel']['param']['password'],
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-        ]);
-        $capsule->setAsGlobal();
-        $initialized = true;
+        require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
     }
 }

@@ -213,14 +213,9 @@ class ahgSettingsActions extends sfActions
 
     public function executeSectorNumbering(sfWebRequest $request)
     {
-        error_log('=== executeSectorNumbering CALLED ===');
-
         if (!$this->context->user->isAdministrator()) {
-            error_log('=== NOT ADMIN, forwarding ===');
             $this->forward('admin', 'secure');
         }
-
-        error_log('=== ADMIN CHECK PASSED ===');
 
         $this->i18n = sfContext::getInstance()->i18n;
         $this->form = new sfForm();
@@ -233,8 +228,6 @@ class ahgSettingsActions extends sfActions
             'gallery' => 'Gallery',
             'dam' => 'DAM',
         ];
-
-        error_log('=== SECTORS SET: ' . print_r($this->sectors, true));
 
         // Sector field keys
         $sectorKeys = [
@@ -297,19 +290,27 @@ class ahgSettingsActions extends sfActions
 
                         if ($value === '' || $value === null) {
                             // Empty = inherit: delete sector setting if exists
-                            if (null !== $existing = \AtomExtensions\Services\SettingService::getByName($fieldName)) {
-                                if (method_exists($existing, 'delete')) {
-                                    $existing->delete();
-                                }
+                            $propelSetting = QubitSetting::getByName($fieldName);
+                            if ($propelSetting) {
+                                $propelSetting->delete();
                             }
                         } else {
-                            // Save sector override
-                            if (null === $setting = \AtomExtensions\Services\SettingService::getByName($fieldName)) {
+                            // Save sector override - use Propel QubitSetting for persistence
+                            $setting = QubitSetting::getByName($fieldName);
+                            if (!$setting) {
                                 $setting = new QubitSetting();
                                 $setting->name = $fieldName;
                             }
                             $setting->setValue((string) $value, ['sourceCulture' => true]);
                             $setting->save();
+
+                            // Sync counter changes to numbering_scheme table
+                            if ($baseKey === 'identifier_counter') {
+                                \Illuminate\Database\Capsule\Manager::table('numbering_scheme')
+                                    ->where('sector', $sector)
+                                    ->where('is_default', 1)
+                                    ->update(['current_sequence' => (int) $value, 'updated_at' => date('Y-m-d H:i:s')]);
+                            }
                         }
                     }
                 }

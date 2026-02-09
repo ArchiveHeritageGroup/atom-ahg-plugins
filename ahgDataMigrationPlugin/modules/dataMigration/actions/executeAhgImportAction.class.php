@@ -478,12 +478,21 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         // Generate slug
         $slug = $this->generateSlug($record['title'] ?? $record['identifier'] ?? 'record-' . $objectId);
 
+        // Resolve repository: if CSV has a text name, look it up; else use form dropdown
+        $resolvedRepoId = $repositoryId;
+        $repoName = $record['repository'] ?? null;
+        if (!empty($repoName) && !is_numeric($repoName)) {
+            $resolvedRepoId = $this->resolveRepositoryByName($repoName, $culture) ?: $repositoryId;
+        } elseif (!empty($repoName) && is_numeric($repoName)) {
+            $resolvedRepoId = (int) $repoName;
+        }
+
         // Create information object - lft/rgt will be set in Pass 3
         $DB::table('information_object')->insert([
             'id' => $objectId,
             'identifier' => $record['identifier'] ?? $record['legacyId'] ?? null,
             'level_of_description_id' => $this->getLevelOfDescriptionId($record['levelOfDescription'] ?? 'Item'),
-            'repository_id' => $repositoryId ?: null,
+            'repository_id' => $resolvedRepoId ?: null,
             'parent_id' => $parentId ?: QubitInformationObject::ROOT_ID,
             'lft' => 0,
             'rgt' => 0,
@@ -518,6 +527,9 @@ class dataMigrationExecuteAhgImportAction extends sfAction
 
         // Set publication status
         $this->setPublicationStatus($objectId);
+
+        // Create date/event from dateRange field
+        $this->createDateEvent($objectId, $record, $culture);
 
         // Set GLAM/DAM type in display_object_config
         $sector = $this->getUser()->getAttribute('migration_target_type', 'archives');
@@ -590,6 +602,12 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         $slug = trim($slug, '-');
         if (empty($slug)) {
             $slug = 'record';
+        }
+
+        // Truncate to 245 chars max (slug column is VARCHAR(255), leave room for -N suffix)
+        if (strlen($slug) > 245) {
+            $slug = substr($slug, 0, 245);
+            $slug = rtrim($slug, '-');
         }
 
         // Ensure uniqueness
@@ -1250,20 +1268,143 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                 break;
 
             case 'dam':
-                if ($this->tableExists('dam_metadata')) {
-                    $DB::table('dam_metadata')->updateOrInsert(
-                        ['information_object_id' => $objectId],
-                        [
-                            'asset_type' => $record['assetType'] ?? null,
-                            'file_format' => $record['fileFormat'] ?? null,
-                            'resolution' => $record['resolution'] ?? null,
-                            'color_space' => $record['colorSpace'] ?? null,
-                            'updated_at' => date('Y-m-d H:i:s'),
-                        ]
-                    );
+                if ($this->tableExists('dam_iptc_metadata')) {
+                    $iptcData = array_filter([
+                        'asset_type' => $record['assetType'] ?? $record['asset_type'] ?? null,
+                        'genre' => $record['genre'] ?? null,
+                        'creator' => $record['creator'] ?? $record['iptcCreator'] ?? null,
+                        'headline' => $record['headline'] ?? null,
+                        'caption' => $record['caption'] ?? $record['description'] ?? null,
+                        'keywords' => $record['keywords'] ?? null,
+                        'credit_line' => $record['creditLine'] ?? $record['credit_line'] ?? null,
+                        'source' => $record['source'] ?? null,
+                        'copyright_notice' => $record['copyrightNotice'] ?? $record['copyright_notice'] ?? null,
+                        'rights_usage_terms' => $record['rightsUsageTerms'] ?? $record['rights_usage_terms'] ?? null,
+                        'city' => $record['city'] ?? null,
+                        'state_province' => $record['stateProvince'] ?? $record['state_province'] ?? null,
+                        'country' => $record['country'] ?? null,
+                        'country_code' => $record['countryCode'] ?? $record['country_code'] ?? null,
+                        'color_space' => $record['colorSpace'] ?? $record['color_space'] ?? null,
+                        'production_company' => $record['productionCompany'] ?? $record['production_company'] ?? null,
+                        'audio_language' => $record['audioLanguage'] ?? $record['audio_language'] ?? null,
+                    ], function ($v) { return $v !== null; });
+
+                    if (!empty($iptcData)) {
+                        $iptcData['updated_at'] = date('Y-m-d H:i:s');
+                        $existing = $DB::table('dam_iptc_metadata')->where('object_id', $objectId)->first();
+                        if ($existing) {
+                            $DB::table('dam_iptc_metadata')->where('object_id', $objectId)->update($iptcData);
+                        } else {
+                            $iptcData['object_id'] = $objectId;
+                            $iptcData['created_at'] = date('Y-m-d H:i:s');
+                            $DB::table('dam_iptc_metadata')->insert($iptcData);
+                        }
+                    }
                 }
                 break;
         }
+    }
+
+    /**
+     * Resolve repository ID from text name (case-insensitive partial match)
+     */
+    protected function resolveRepositoryByName($name, $culture = 'en'): ?int
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        // Cache lookups to avoid repeated queries for same repository name
+        static $cache = [];
+        $cacheKey = strtolower(trim($name));
+
+        if (isset($cache[$cacheKey])) {
+            return $cache[$cacheKey];
+        }
+
+        // Exact match first
+        $repo = $DB::table('repository')
+            ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
+            ->where('actor_i18n.culture', $culture)
+            ->whereRaw('LOWER(actor_i18n.authorized_form_of_name) = ?', [$cacheKey])
+            ->select('repository.id')
+            ->first();
+
+        if (!$repo) {
+            // Partial match (LIKE)
+            $repo = $DB::table('repository')
+                ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
+                ->where('actor_i18n.culture', $culture)
+                ->whereRaw('LOWER(actor_i18n.authorized_form_of_name) LIKE ?', ['%' . $cacheKey . '%'])
+                ->select('repository.id')
+                ->first();
+        }
+
+        $id = $repo ? (int) $repo->id : null;
+        $cache[$cacheKey] = $id;
+
+        return $id;
+    }
+
+    /**
+     * Create date/event from dateRange, eventDates, or date field in CSV
+     */
+    protected function createDateEvent($objectId, array $record, $culture)
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        // Try multiple field names for dates
+        $dateStr = $record['dateRange'] ?? $record['eventDates'] ?? $record['date'] ?? $record['dates'] ?? null;
+
+        if (empty($dateStr)) {
+            return;
+        }
+
+        // Create actor placeholder for event (required by AtoM schema)
+        $actorId = $DB::table('object')->insertGetId([
+            'class_name' => 'QubitActor',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+        $DB::table('actor')->insert([
+            'id' => $actorId,
+            'entity_type_id' => null,
+            'parent_id' => QubitActor::ROOT_ID,
+            'source_culture' => $culture,
+            'lft' => 0,
+            'rgt' => 0,
+        ]);
+
+        // Create event (type 111 = Creation)
+        $eventObjectId = $DB::table('object')->insertGetId([
+            'class_name' => 'QubitEvent',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Parse start/end dates from the string
+        $startDate = $this->parseDate($dateStr);
+        $endDate = null;
+
+        // Check for date range patterns like "1986-1990" or "1986 - 1990"
+        if (preg_match('/^(\d{4})\s*[-–]\s*(\d{4})$/', trim($dateStr), $m)) {
+            $startDate = $m[1] . '-01-01';
+            $endDate = $m[2] . '-12-31';
+        }
+
+        $DB::table('event')->insert([
+            'id' => $eventObjectId,
+            'type_id' => 111, // Creation
+            'information_object_id' => $objectId,
+            'actor_id' => $actorId,
+            'source_culture' => $culture,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ]);
+
+        $DB::table('event_i18n')->insert([
+            'id' => $eventObjectId,
+            'culture' => $culture,
+            'date' => trim($dateStr),
+        ]);
     }
 
     /**

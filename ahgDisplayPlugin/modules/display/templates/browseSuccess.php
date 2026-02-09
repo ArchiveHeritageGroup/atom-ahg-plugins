@@ -1,8 +1,8 @@
 <?php decorate_with($sf_request->getParameter('view') === 'full' ? 'layout_1col' : 'layout_2col'); ?>
 <?php use_helper('Date') ?>
 <?php
-// Get values from Symfony request object
-$limit = (int) $sf_request->getParameter('limit', 10);
+// Get limit from action (respects hits_per_page setting)
+$limit = (int) ($sf_data->getRaw('limit') ?: $sf_request->getParameter('limit', sfConfig::get('app_hits_per_page', 30)));
 if ($limit < 10) $limit = 10;
 if ($limit > 100) $limit = 100;
 
@@ -67,7 +67,7 @@ $typeConfig = [
   'library' => ['icon' => 'fa-book', 'color' => 'primary', 'label' => 'Library'],
   'dam' => ['icon' => 'fa-images', 'color' => 'danger', 'label' => 'Photo/DAM'],
 ];
-$limitOptions = [10, 25, 50, 100];
+$limitOptions = [10, 30, 50, 100];
 $sortLabels = [
   'date' => 'Date modified',
   'title' => 'Title',

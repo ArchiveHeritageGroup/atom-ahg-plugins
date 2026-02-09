@@ -523,7 +523,10 @@ class TripoSRService
         try {
             // Copy model to uploads directory
             $filename = basename($job->output_model);
-            $uploadsDir = '/usr/share/nginx/archive/uploads/3dmodels/' . $objectId;
+            $rootDir = class_exists('\AtomFramework\Helpers\PathResolver')
+                ? \AtomFramework\Helpers\PathResolver::getRootDir()
+                : \sfConfig::get('sf_root_dir', dirname(__DIR__, 4));
+            $uploadsDir = $rootDir . '/uploads/3dmodels/' . $objectId;
 
             if (!is_dir($uploadsDir)) {
                 mkdir($uploadsDir, 0755, true);

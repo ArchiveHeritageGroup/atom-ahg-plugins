@@ -299,6 +299,7 @@
                   <thead>
                     <tr>
                       <th><?php echo __('Identifier'); ?></th>
+                      <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
                       <th style="width:80px"></th>
                     </tr>
@@ -560,11 +561,17 @@
   var addChildBtn = document.getElementById('add-childlevel-row');
   var childIdx = 0;
 
+  var levelOptions = '<option value=""><?php echo __("- Select -"); ?></option>';
+  <?php foreach ($rawLevels as $level) { ?>
+  levelOptions += '<option value="<?php echo $level->id; ?>"><?php echo esc_specialchars($level->name ?? ""); ?></option>';
+  <?php } ?>
+
   if (addChildBtn) {
     addChildBtn.addEventListener('click', function() {
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][identifier]" placeholder="<?php echo __("Identifier"); ?>"></td>' +
+        '<td><select class="form-select form-select-sm" name="childLevels[' + childIdx + '][levelOfDescriptionId]">' + levelOptions + '</select></td>' +
         '<td><input type="text" class="form-control form-control-sm" name="childLevels[' + childIdx + '][title]" placeholder="<?php echo __("Title"); ?>"></td>' +
         '<td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row"><?php echo __("Remove"); ?></button></td>';
       childBody.appendChild(tr);

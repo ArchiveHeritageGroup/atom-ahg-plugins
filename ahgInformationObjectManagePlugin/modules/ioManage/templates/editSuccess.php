@@ -200,6 +200,7 @@
           <div class="accordion-body">
 
             <!-- Name of creator(s) -->
+            <input type="hidden" name="_creatorsIncluded" value="1">
             <div class="mb-3">
               <label class="form-label">
                 <?php echo __('Name of creator(s)'); ?>

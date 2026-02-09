@@ -56,7 +56,7 @@ class displayActions extends sfActions
         $this->parentId = $request->getParameter('parent');
         $this->topLevelOnly = $request->getParameter('topLevel', '1');
         $this->page = max(1, (int) $request->getParameter('page', 1));
-        $this->limit = (int) $request->getParameter('limit', 10);
+        $this->limit = (int) $request->getParameter('limit', sfConfig::get('app_hits_per_page', 30));
         if ($this->limit < 10) $this->limit = 10;
         if ($this->limit > 100) $this->limit = 100;
         $this->sort = $request->getParameter('sort', 'date');

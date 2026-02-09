@@ -98,6 +98,14 @@ dataMigration_execute:
   url: /dataMigration/execute
   param: { module: dataMigration, action: execute }
 
+dataMigration_executeAhgImport:
+  url: /dataMigration/executeAhgImport
+  param: { module: dataMigration, action: executeAhgImport }
+
+dataMigration_ahgImportResults:
+  url: /dataMigration/ahgImportResults
+  param: { module: dataMigration, action: ahgImportResults }
+
 # Validation routes
 dataMigration_validate:
   url: /dataMigration/validate

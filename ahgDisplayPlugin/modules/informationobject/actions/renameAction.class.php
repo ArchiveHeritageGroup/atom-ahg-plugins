@@ -44,20 +44,9 @@ class InformationObjectRenameAction extends DefaultEditAction
 
                 $this->getUser()->setFlash('notice', $message);
 
-                // BUG FIX: Redirect to correct module based on display_standard_id
-                $displayStandardId = DB::table('information_object')
-                    ->where('id', $this->resource->id)
-                    ->value('display_standard_id');
-                
-                $module = 'informationobject';
-                switch ($displayStandardId) {
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('library'): $module = 'library'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('museum'):  $module = 'museum'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'): $module = 'gallery'; break;
-                    case \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('dam'): $module = 'dam'; break;
-                }
-
-                $this->redirect([$this->resource, 'module' => $module]);
+                // Always redirect to informationobject module for slug-based URL.
+                // The UI overrides plugin dispatches to the correct viewer/template.
+                $this->redirect([$this->resource, 'module' => 'informationobject']);
             }
         }
     }

@@ -123,6 +123,20 @@ class damActions extends sfActions
                 return sfView::SUCCESS;
             }
 
+            // Auto-numbering: consume the sequence to advance the counter
+            try {
+                $numberingService = \AtomExtensions\Services\NumberingService::getInstance();
+                $info = $numberingService->getNumberingInfo('dam');
+                if (!empty($info['enabled']) && !empty($info['auto_generate'])) {
+                    $consumed = $numberingService->getNextReference('dam');
+                    if (empty($identifier)) {
+                        $identifier = $consumed;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Numbering service unavailable, continue with form value
+            }
+
             // Use Propel ORM to create the information object properly (handles nested set)
             $informationObject = new QubitInformationObject();
             $informationObject->parentId = $parentId;
@@ -215,6 +229,12 @@ class damActions extends sfActions
             ];
 
             DB::table('dam_iptc_metadata')->insert($iptcData);
+
+            // Register as DAM type in display_object_config
+            DB::table('display_object_config')->updateOrInsert(
+                ['object_id' => $objectId],
+                ['object_type' => 'dam', 'updated_at' => date('Y-m-d H:i:s')]
+            );
 
             $this->getUser()->setFlash('success', 'DAM asset created successfully');
             $this->redirect('@slug?slug=' . $informationObject->slug);

@@ -42,13 +42,13 @@ class ThesaurusService
 
     public function __construct(array $config = [])
     {
-        $logDir = class_exists('sfConfig')
-            ? \sfConfig::get('sf_log_dir', '/var/log/atom')
-            : '/var/log/atom';
+        $logDir = class_exists('\AtomFramework\Helpers\PathResolver')
+            ? \AtomFramework\Helpers\PathResolver::getLogDir()
+            : (class_exists('sfConfig') ? \sfConfig::get('sf_log_dir', '/var/log/atom') : '/var/log/atom');
 
-        $frameworkRoot = class_exists('sfConfig')
-            ? \sfConfig::get('sf_root_dir', '/var/www/atom') . '/atom-framework'
-            : '/var/www/atom/atom-framework';
+        $frameworkRoot = class_exists('\AtomFramework\Helpers\PathResolver')
+            ? \AtomFramework\Helpers\PathResolver::getFrameworkDir()
+            : (class_exists('sfConfig') ? \sfConfig::get('sf_root_dir', dirname(__DIR__, 4)) . '/atom-framework' : dirname(__DIR__, 4) . '/atom-framework');
 
         // Load ES synonyms path from DB settings or use default
         $esSynonymsPath = $this->getSettingFromDb('elasticsearch_synonyms_path')
