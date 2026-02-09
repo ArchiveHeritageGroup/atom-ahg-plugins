@@ -26,35 +26,22 @@ class vendorActions extends AhgActions
 
     public function executeList(sfWebRequest $request)
     {
-        error_log("VENDOR: executeList started");
-        
-        try {
-            $this->filters = [
-                'status' => $request->getParameter('status'),
-                'vendor_type' => $request->getParameter('vendor_type'),
-                'service_type_id' => $request->getParameter('service_type_id'),
-                'search' => $request->getParameter('search'),
-                'has_insurance' => $request->getParameter('has_insurance'),
-                'sort' => $request->getParameter('sort', 'name'),
-                'direction' => $request->getParameter('direction', 'asc'),
-            ];
-            error_log("VENDOR: filters set");
+        $filters = [
+            'status' => $request->getParameter('status'),
+            'vendor_type' => $request->getParameter('vendor_type'),
+            'service_type_id' => $request->getParameter('service_type_id'),
+            'search' => $request->getParameter('search'),
+            'has_insurance' => $request->getParameter('has_insurance'),
+            'sort' => $request->getParameter('sort', 'name'),
+            'direction' => $request->getParameter('direction', 'asc'),
+        ];
 
-            $this->vendors = $this->service->listVendors($this->filters);
-            error_log("VENDOR: got " . $this->vendors->count() . " vendors");
-
-            $this->serviceTypes = $this->service->listServiceTypes();
-            error_log("VENDOR: got " . count($this->serviceTypes) . " service types");
-
-            $this->vendorTypes = $this->service->getVendorTypes();
-            error_log("VENDOR: got " . count($this->vendorTypes) . " vendor types");
-
-            error_log("VENDOR: executeList completed successfully");
-        } catch (\Exception $e) {
-            error_log("VENDOR ERROR: " . $e->getMessage());
-            error_log("VENDOR TRACE: " . $e->getTraceAsString());
-            throw $e;
-        }
+        return $this->renderBlade('list', [
+            'filters' => $filters,
+            'vendors' => $this->service->listVendors($filters),
+            'serviceTypes' => $this->service->listServiceTypes(),
+            'vendorTypes' => $this->service->getVendorTypes(),
+        ]);
     }
 
     public function executeView(sfWebRequest $request)
