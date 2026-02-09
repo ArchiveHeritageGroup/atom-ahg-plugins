@@ -1,6 +1,6 @@
 <?php
 
-class identifierApiActions extends sfActions
+class identifierApiActions extends AhgActions
 {
     public function executeLookup(sfWebRequest $request)
     {

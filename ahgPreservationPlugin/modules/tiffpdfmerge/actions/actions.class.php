@@ -5,7 +5,7 @@
  * Uses Laravel Query Builder and framework polling worker
  */
 
-class tiffpdfmergeActions extends sfActions
+class tiffpdfmergeActions extends AhgActions
 {
     protected $repository = null;
     protected $frameworkLoaded = false;
@@ -15,21 +15,11 @@ class tiffpdfmergeActions extends sfActions
         if ($this->frameworkLoaded) {
             return;
         }
-        
-        // Capture any output from bootstrap
-        ob_start();
-        
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            \AhgCore\Core\AhgDb::init();
-        }
-        
+
         if (!class_exists('AtomFramework\Repositories\TiffPdfMergeRepository')) {
             require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
         }
-        
-        // Discard any output
-        ob_end_clean();
-        
+
         $this->frameworkLoaded = true;
     }
 

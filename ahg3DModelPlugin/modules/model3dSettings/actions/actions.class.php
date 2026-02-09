@@ -8,7 +8,7 @@
  * @package ahg3DModelPlugin
  * @subpackage actions
  */
-class model3dSettingsActions extends sfActions
+class model3dSettingsActions extends AhgActions
 {
     private $db;
 

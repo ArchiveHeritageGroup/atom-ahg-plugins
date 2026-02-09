@@ -2,7 +2,7 @@
 /**
  * Heritage Report Actions
  */
-class heritageReportActions extends sfActions
+class heritageReportActions extends AhgActions
 {
     public function executeIndex(sfWebRequest $request)
     {

@@ -7,7 +7,7 @@
  *
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class iiifActions extends sfActions
+class iiifActions extends AhgActions
 {
     /**
      * Generate IIIF manifest by slug
@@ -292,13 +292,6 @@ class iiifActions extends sfActions
         // Check admin access
         if (!$this->context->user->isAuthenticated() || !$this->context->user->isAdministrator()) {
             $this->forward(sfConfig::get('sf_secure_module'), sfConfig::get('sf_secure_action'));
-        }
-
-        // Initialize database
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
-
-        if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
-            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
         }
 
         $db = \Illuminate\Database\Capsule\Manager::class;

@@ -2,7 +2,7 @@
 /**
  * GRAP 103 Compliance Actions
  */
-class grapComplianceActions extends sfActions
+class grapComplianceActions extends AhgActions
 {
     /**
      * GRAP Dashboard

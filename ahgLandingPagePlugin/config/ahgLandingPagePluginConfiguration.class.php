@@ -39,105 +39,32 @@ class ahgLandingPagePluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('landingPageBuilder');
 
         // Admin routes
-        $routing->prependRoute('landing_page_list', new sfRoute('/admin/landing-pages', [
-            'module' => 'landingPageBuilder',
-            'action' => 'list',
-        ]));
-
-        $routing->prependRoute('landing_page_create', new sfRoute('/admin/landing-pages/create', [
-            'module' => 'landingPageBuilder',
-            'action' => 'create',
-        ]));
-
-        $routing->prependRoute('landing_page_edit', new sfRoute('/admin/landing-pages/:id/edit', [
-            'module' => 'landingPageBuilder',
-            'action' => 'edit',
-        ], [
-            'id' => '\d+',
-        ]));
-
-        $routing->prependRoute('landing_page_preview', new sfRoute('/admin/landing-pages/:id/preview', [
-            'module' => 'landingPageBuilder',
-            'action' => 'preview',
-        ], [
-            'id' => '\d+',
-        ]));
+        $router->any('landing_page_list', '/admin/landing-pages', 'list');
+        $router->any('landing_page_create', '/admin/landing-pages/create', 'create');
+        $router->any('landing_page_edit', '/admin/landing-pages/:id/edit', 'edit', ['id' => '\d+']);
+        $router->any('landing_page_preview', '/admin/landing-pages/:id/preview', 'preview', ['id' => '\d+']);
 
         // AJAX endpoints
-        $routing->prependRoute('landing_page_ajax_add_block', new sfRoute('/admin/landing-pages/ajax/add-block', [
-            'module' => 'landingPageBuilder',
-            'action' => 'addBlock',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_update_block', new sfRoute('/admin/landing-pages/ajax/update-block', [
-            'module' => 'landingPageBuilder',
-            'action' => 'updateBlock',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_delete_block', new sfRoute('/admin/landing-pages/ajax/delete-block', [
-            'module' => 'landingPageBuilder',
-            'action' => 'deleteBlock',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_duplicate_block', new sfRoute('/admin/landing-pages/ajax/duplicate-block', [
-            'module' => 'landingPageBuilder',
-            'action' => 'duplicateBlock',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_reorder', new sfRoute('/admin/landing-pages/ajax/reorder', [
-            'module' => 'landingPageBuilder',
-            'action' => 'reorderBlocks',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_toggle_visibility', new sfRoute('/admin/landing-pages/ajax/toggle-visibility', [
-            'module' => 'landingPageBuilder',
-            'action' => 'toggleVisibility',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_get_config', new sfRoute('/admin/landing-pages/ajax/get-config', [
-            'module' => 'landingPageBuilder',
-            'action' => 'getBlockConfig',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_update_settings', new sfRoute('/admin/landing-pages/ajax/update-settings', [
-            'module' => 'landingPageBuilder',
-            'action' => 'updateSettings',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_delete', new sfRoute('/admin/landing-pages/ajax/delete', [
-            'module' => 'landingPageBuilder',
-            'action' => 'delete',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_save_draft', new sfRoute('/admin/landing-pages/ajax/save-draft', [
-            'module' => 'landingPageBuilder',
-            'action' => 'saveDraft',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_publish', new sfRoute('/admin/landing-pages/ajax/publish', [
-            'module' => 'landingPageBuilder',
-            'action' => 'publish',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_restore_version', new sfRoute('/admin/landing-pages/ajax/restore-version', [
-            'module' => 'landingPageBuilder',
-            'action' => 'restoreVersion',
-        ]));
-
-        $routing->prependRoute('landing_page_ajax_move_to_column', new sfRoute('/admin/landing-pages/ajax/move-to-column', [
-            'module' => 'landingPageBuilder',
-            'action' => 'moveToColumn',
-        ]));
+        $router->any('landing_page_ajax_add_block', '/admin/landing-pages/ajax/add-block', 'addBlock');
+        $router->any('landing_page_ajax_update_block', '/admin/landing-pages/ajax/update-block', 'updateBlock');
+        $router->any('landing_page_ajax_delete_block', '/admin/landing-pages/ajax/delete-block', 'deleteBlock');
+        $router->any('landing_page_ajax_duplicate_block', '/admin/landing-pages/ajax/duplicate-block', 'duplicateBlock');
+        $router->any('landing_page_ajax_reorder', '/admin/landing-pages/ajax/reorder', 'reorderBlocks');
+        $router->any('landing_page_ajax_toggle_visibility', '/admin/landing-pages/ajax/toggle-visibility', 'toggleVisibility');
+        $router->any('landing_page_ajax_get_config', '/admin/landing-pages/ajax/get-config', 'getBlockConfig');
+        $router->any('landing_page_ajax_update_settings', '/admin/landing-pages/ajax/update-settings', 'updateSettings');
+        $router->any('landing_page_ajax_delete', '/admin/landing-pages/ajax/delete', 'delete');
+        $router->any('landing_page_ajax_save_draft', '/admin/landing-pages/ajax/save-draft', 'saveDraft');
+        $router->any('landing_page_ajax_publish', '/admin/landing-pages/ajax/publish', 'publish');
+        $router->any('landing_page_ajax_restore_version', '/admin/landing-pages/ajax/restore-version', 'restoreVersion');
+        $router->any('landing_page_ajax_move_to_column', '/admin/landing-pages/ajax/move-to-column', 'moveToColumn');
 
         // Public routes
-        $routing->prependRoute('landing_page_view', new sfRoute('/landing/:slug', [
-            'module' => 'landingPageBuilder',
-            'action' => 'index',
-        ], [
-            'slug' => '[a-z0-9\-]+',
-        ]));
+        $router->any('landing_page_view', '/landing/:slug', 'index', ['slug' => '[a-z0-9\-]+']);
+
+        $router->register($event->getSubject());
     }
 }

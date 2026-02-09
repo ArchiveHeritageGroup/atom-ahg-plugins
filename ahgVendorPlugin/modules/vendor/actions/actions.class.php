@@ -1,13 +1,12 @@
 <?php
 
-class vendorActions extends sfActions
+class vendorActions extends AhgActions
 {
     protected $service;
 
     public function preExecute()
     {
         error_log("VENDOR: preExecute started");
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Repository/VendorRepository.php';
         $this->service = new \AtomFramework\Services\VendorService();

@@ -32,93 +32,43 @@ class ahgDedupePluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('dedupe');
 
         // Dashboard
-        $routing->prependRoute('ahg_dedupe_index', new sfRoute(
-            '/admin/dedupe',
-            ['module' => 'dedupe', 'action' => 'index']
-        ));
+        $router->any('ahg_dedupe_index', '/admin/dedupe', 'index');
 
         // Browse detected duplicates
-        $routing->prependRoute('ahg_dedupe_browse', new sfRoute(
-            '/admin/dedupe/browse',
-            ['module' => 'dedupe', 'action' => 'browse']
-        ));
+        $router->any('ahg_dedupe_browse', '/admin/dedupe/browse', 'browse');
 
         // View duplicate pair
-        $routing->prependRoute('ahg_dedupe_view', new sfRoute(
-            '/admin/dedupe/view/:id',
-            ['module' => 'dedupe', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_dedupe_view', '/admin/dedupe/view/:id', 'view', ['id' => '\d+']);
 
         // Compare records side-by-side
-        $routing->prependRoute('ahg_dedupe_compare', new sfRoute(
-            '/admin/dedupe/compare/:id',
-            ['module' => 'dedupe', 'action' => 'compare'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_dedupe_compare', '/admin/dedupe/compare/:id', 'compare', ['id' => '\d+']);
 
         // Dismiss false positive
-        $routing->prependRoute('ahg_dedupe_dismiss', new sfRoute(
-            '/admin/dedupe/dismiss/:id',
-            ['module' => 'dedupe', 'action' => 'dismiss'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_dedupe_dismiss', '/admin/dedupe/dismiss/:id', 'dismiss', ['id' => '\d+']);
 
         // Merge records
-        $routing->prependRoute('ahg_dedupe_merge', new sfRoute(
-            '/admin/dedupe/merge/:id',
-            ['module' => 'dedupe', 'action' => 'merge'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_dedupe_merge', '/admin/dedupe/merge/:id', 'merge', ['id' => '\d+']);
 
         // Scan for duplicates
-        $routing->prependRoute('ahg_dedupe_scan', new sfRoute(
-            '/admin/dedupe/scan',
-            ['module' => 'dedupe', 'action' => 'scan']
-        ));
+        $router->any('ahg_dedupe_scan', '/admin/dedupe/scan', 'scan');
 
         // Rules configuration
-        $routing->prependRoute('ahg_dedupe_rules', new sfRoute(
-            '/admin/dedupe/rules',
-            ['module' => 'dedupe', 'action' => 'rules']
-        ));
-
-        $routing->prependRoute('ahg_dedupe_rule_create', new sfRoute(
-            '/admin/dedupe/rule/create',
-            ['module' => 'dedupe', 'action' => 'ruleCreate']
-        ));
-
-        $routing->prependRoute('ahg_dedupe_rule_edit', new sfRoute(
-            '/admin/dedupe/rule/:id/edit',
-            ['module' => 'dedupe', 'action' => 'ruleEdit'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('ahg_dedupe_rule_delete', new sfRoute(
-            '/admin/dedupe/rule/:id/delete',
-            ['module' => 'dedupe', 'action' => 'ruleDelete'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_dedupe_rules', '/admin/dedupe/rules', 'rules');
+        $router->any('ahg_dedupe_rule_create', '/admin/dedupe/rule/create', 'ruleCreate');
+        $router->any('ahg_dedupe_rule_edit', '/admin/dedupe/rule/:id/edit', 'ruleEdit', ['id' => '\d+']);
+        $router->any('ahg_dedupe_rule_delete', '/admin/dedupe/rule/:id/delete', 'ruleDelete', ['id' => '\d+']);
 
         // Reports
-        $routing->prependRoute('ahg_dedupe_report', new sfRoute(
-            '/admin/dedupe/report',
-            ['module' => 'dedupe', 'action' => 'report']
-        ));
+        $router->any('ahg_dedupe_report', '/admin/dedupe/report', 'report');
 
         // API routes
-        $routing->prependRoute('ahg_dedupe_api_check', new sfRoute(
-            '/api/dedupe/check',
-            ['module' => 'dedupe', 'action' => 'apiCheck']
-        ));
+        $router->any('ahg_dedupe_api_check', '/api/dedupe/check', 'apiCheck');
+        $router->any('ahg_dedupe_api_realtime', '/api/dedupe/realtime', 'apiRealtime');
 
-        $routing->prependRoute('ahg_dedupe_api_realtime', new sfRoute(
-            '/api/dedupe/realtime',
-            ['module' => 'dedupe', 'action' => 'apiRealtime']
-        ));
+        $router->register($event->getSubject());
     }
 
     /**

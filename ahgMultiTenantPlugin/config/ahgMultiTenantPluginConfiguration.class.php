@@ -63,121 +63,46 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        // Tenant switcher
-        $routing->prependRoute('tenant_switch', new sfRoute(
-            '/tenant/switch/:id',
-            ['module' => 'tenantSwitcher', 'action' => 'switch'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_switch_all', new sfRoute(
-            '/tenant/switch/all',
-            ['module' => 'tenantSwitcher', 'action' => 'switchAll']
-        ));
+        // Tenant switcher module
+        $switcher = new \AtomFramework\Routing\RouteLoader('tenantSwitcher');
+        $switcher->any('tenant_switch', '/tenant/switch/:id', 'switch', ['id' => '\d+']);
+        $switcher->any('tenant_switch_all', '/tenant/switch/all', 'switchAll');
+        $switcher->register($routing);
 
-        // Tenant admin routes (for admins)
-        $routing->prependRoute('tenant_admin', new sfRoute(
-            '/admin/tenants',
-            ['module' => 'tenantAdmin', 'action' => 'index']
-        ));
-        $routing->prependRoute('tenant_admin_create', new sfRoute(
-            '/admin/tenants/create',
-            ['module' => 'tenantAdmin', 'action' => 'create']
-        ));
-        $routing->prependRoute('tenant_admin_store', new sfRoute(
-            '/admin/tenants/store',
-            ['module' => 'tenantAdmin', 'action' => 'store']
-        ));
-        $routing->prependRoute('tenant_admin_edit_tenant', new sfRoute(
-            '/admin/tenants/:id/edit-tenant',
-            ['module' => 'tenantAdmin', 'action' => 'editTenant'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_update_tenant', new sfRoute(
-            '/admin/tenants/:id/update',
-            ['module' => 'tenantAdmin', 'action' => 'updateTenant'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_activate', new sfRoute(
-            '/admin/tenants/:id/activate',
-            ['module' => 'tenantAdmin', 'action' => 'activate'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_suspend', new sfRoute(
-            '/admin/tenants/:id/suspend',
-            ['module' => 'tenantAdmin', 'action' => 'suspend'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_extend_trial', new sfRoute(
-            '/admin/tenants/:id/extend-trial',
-            ['module' => 'tenantAdmin', 'action' => 'extendTrial'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_delete', new sfRoute(
-            '/admin/tenants/:id/delete',
-            ['module' => 'tenantAdmin', 'action' => 'delete'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_assign_user', new sfRoute(
-            '/admin/tenants/assign-user',
-            ['module' => 'tenantAdmin', 'action' => 'assignTenantUser']
-        ));
-        $routing->prependRoute('tenant_admin_remove_user', new sfRoute(
-            '/admin/tenants/remove-user',
-            ['module' => 'tenantAdmin', 'action' => 'removeTenantUser']
-        ));
-        $routing->prependRoute('tenant_admin_update_user_role', new sfRoute(
-            '/admin/tenants/update-user-role',
-            ['module' => 'tenantAdmin', 'action' => 'updateTenantUserRole']
-        ));
+        // Tenant admin module (for admins)
+        $admin = new \AtomFramework\Routing\RouteLoader('tenantAdmin');
+        $admin->any('tenant_admin', '/admin/tenants', 'index');
+        $admin->any('tenant_admin_create', '/admin/tenants/create', 'create');
+        $admin->any('tenant_admin_store', '/admin/tenants/store', 'store');
+        $admin->any('tenant_admin_edit_tenant', '/admin/tenants/:id/edit-tenant', 'editTenant', ['id' => '\d+']);
+        $admin->any('tenant_admin_update_tenant', '/admin/tenants/:id/update', 'updateTenant', ['id' => '\d+']);
+        $admin->any('tenant_admin_activate', '/admin/tenants/:id/activate', 'activate', ['id' => '\d+']);
+        $admin->any('tenant_admin_suspend', '/admin/tenants/:id/suspend', 'suspend', ['id' => '\d+']);
+        $admin->any('tenant_admin_extend_trial', '/admin/tenants/:id/extend-trial', 'extendTrial', ['id' => '\d+']);
+        $admin->any('tenant_admin_delete', '/admin/tenants/:id/delete', 'delete', ['id' => '\d+']);
+        $admin->any('tenant_admin_assign_user', '/admin/tenants/assign-user', 'assignTenantUser');
+        $admin->any('tenant_admin_remove_user', '/admin/tenants/remove-user', 'removeTenantUser');
+        $admin->any('tenant_admin_update_user_role', '/admin/tenants/update-user-role', 'updateTenantUserRole');
         // Legacy routes for repository-based management
-        $routing->prependRoute('tenant_admin_edit', new sfRoute(
-            '/admin/tenants/:id/edit',
-            ['module' => 'tenantAdmin', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_super_users', new sfRoute(
-            '/admin/tenants/:id/super-users',
-            ['module' => 'tenantAdmin', 'action' => 'superUsers'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_admin_assign_super_user', new sfRoute(
-            '/admin/tenants/assign-super-user',
-            ['module' => 'tenantAdmin', 'action' => 'assignSuperUser']
-        ));
-        $routing->prependRoute('tenant_admin_remove_super_user', new sfRoute(
-            '/admin/tenants/remove-super-user',
-            ['module' => 'tenantAdmin', 'action' => 'removeSuperUser']
-        ));
+        $admin->any('tenant_admin_edit', '/admin/tenants/:id/edit', 'edit', ['id' => '\d+']);
+        $admin->any('tenant_admin_super_users', '/admin/tenants/:id/super-users', 'superUsers', ['id' => '\d+']);
+        $admin->any('tenant_admin_assign_super_user', '/admin/tenants/assign-super-user', 'assignSuperUser');
+        $admin->any('tenant_admin_remove_super_user', '/admin/tenants/remove-super-user', 'removeSuperUser');
+        $admin->register($routing);
 
-        // Tenant users routes (for super users)
-        $routing->prependRoute('tenant_users', new sfRoute(
-            '/tenant/:id/users',
-            ['module' => 'tenantUsers', 'action' => 'index'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_users_assign', new sfRoute(
-            '/tenant/users/assign',
-            ['module' => 'tenantUsers', 'action' => 'assign']
-        ));
-        $routing->prependRoute('tenant_users_remove', new sfRoute(
-            '/tenant/users/remove',
-            ['module' => 'tenantUsers', 'action' => 'remove']
-        ));
+        // Tenant users module (for super users)
+        $users = new \AtomFramework\Routing\RouteLoader('tenantUsers');
+        $users->any('tenant_users', '/tenant/:id/users', 'index', ['id' => '\d+']);
+        $users->any('tenant_users_assign', '/tenant/users/assign', 'assign');
+        $users->any('tenant_users_remove', '/tenant/users/remove', 'remove');
+        $users->register($routing);
 
-        // Tenant branding routes (for super users)
-        $routing->prependRoute('tenant_branding', new sfRoute(
-            '/tenant/:id/branding',
-            ['module' => 'tenantBranding', 'action' => 'index'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('tenant_branding_save', new sfRoute(
-            '/tenant/branding/save',
-            ['module' => 'tenantBranding', 'action' => 'save']
-        ));
-        $routing->prependRoute('tenant_branding_logo_upload', new sfRoute(
-            '/tenant/branding/logo-upload',
-            ['module' => 'tenantBranding', 'action' => 'uploadLogo']
-        ));
+        // Tenant branding module (for super users)
+        $branding = new \AtomFramework\Routing\RouteLoader('tenantBranding');
+        $branding->any('tenant_branding', '/tenant/:id/branding', 'index', ['id' => '\d+']);
+        $branding->any('tenant_branding_save', '/tenant/branding/save', 'save');
+        $branding->any('tenant_branding_logo_upload', '/tenant/branding/logo-upload', 'uploadLogo');
+        $branding->register($routing);
     }
 
     /**

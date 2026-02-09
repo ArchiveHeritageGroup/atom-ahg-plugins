@@ -9,7 +9,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @package ahgICIPPlugin
  */
-class icipActions extends sfActions
+class icipActions extends AhgActions
 {
     /**
      * Pre-execute: Check user authentication for admin pages

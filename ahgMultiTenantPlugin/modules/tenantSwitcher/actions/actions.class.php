@@ -7,7 +7,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantSwitcherActions extends sfActions
+class tenantSwitcherActions extends AhgActions
 {
     /**
      * Switch to a specific repository/tenant

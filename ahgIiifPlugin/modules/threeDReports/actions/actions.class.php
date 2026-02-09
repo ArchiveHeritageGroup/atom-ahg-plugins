@@ -6,7 +6,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class threeDReportsActions extends sfActions
+class threeDReportsActions extends AhgActions
 {
     protected function checkAccess()
     {

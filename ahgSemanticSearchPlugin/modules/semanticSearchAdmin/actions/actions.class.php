@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class semanticSearchAdminActions extends sfActions
+class semanticSearchAdminActions extends AhgActions
 {
     public function preExecute()
     {

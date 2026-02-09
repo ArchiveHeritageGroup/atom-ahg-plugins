@@ -39,19 +39,32 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // sfIsdiahPlugin module routes (QubitResourceRoute with requirements - registered directly)
+        // Catch-all slug routes (checked last after prepending)
+        $routing->prependRoute('repository_view_override', new \QubitResourceRoute(
+            '/repository/:slug',
+            ['module' => 'sfIsdiahPlugin', 'action' => 'index'],
+            ['slug' => '[a-zA-Z0-9_.-]+']
+        ));
+        $routing->prependRoute('repository_delete_override', new \QubitResourceRoute(
+            '/repository/:slug/delete',
+            ['module' => 'sfIsdiahPlugin', 'action' => 'delete'],
+            ['slug' => '[a-zA-Z0-9_.-]+']
+        ));
+        $routing->prependRoute('repository_edit_override', new \QubitResourceRoute(
+            '/repository/:slug/edit',
+            ['module' => 'sfIsdiahPlugin', 'action' => 'edit'],
+            ['slug' => '[a-zA-Z0-9_.-]+']
+        ));
+
+        // sfIsdiahPlugin add route (no requirements, sfRoute is fine)
+        $sfIsdiah = new \AtomFramework\Routing\RouteLoader('sfIsdiahPlugin');
+        $sfIsdiah->any('repository_add_override', '/repository/add', 'edit');
+        $sfIsdiah->register($routing);
+
+        // repositoryManage module routes
+        $repoManage = new \AtomFramework\Routing\RouteLoader('repositoryManage');
+        $repoManage->any('repository_browse_override', '/repository/browse', 'browse');
+        $repoManage->register($routing);
     }
 }

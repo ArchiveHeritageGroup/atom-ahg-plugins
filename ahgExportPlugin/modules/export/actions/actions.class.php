@@ -1,6 +1,6 @@
 <?php
 
-class exportActions extends sfActions
+class exportActions extends AhgActions
 {
     public function preExecute()
     {
@@ -35,7 +35,6 @@ class exportActions extends sfActions
      */
     public function executeCsv(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $this->format = 'csv';
@@ -234,7 +233,6 @@ class exportActions extends sfActions
      */
     public function executeEad(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $this->format = 'ead';
@@ -544,7 +542,6 @@ class exportActions extends sfActions
      */
     public function executeArchival(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $this->format = $request->getParameter('format', 'ead');
@@ -708,7 +705,6 @@ class exportActions extends sfActions
      */
     public function executeAuthority(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $this->format = $request->getParameter('format', 'eac');
@@ -1035,7 +1031,6 @@ class exportActions extends sfActions
      */
     public function executeRepository(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         $this->format = $request->getParameter('format', 'csv');

@@ -39,19 +39,17 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // accession module routes (catch-all slug routes registered first = checked last)
+        $accession = new \AtomFramework\Routing\RouteLoader('accession');
+        $accession->any('accession_view_override', '/accession/:slug', 'index', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $accession->any('accession_delete_override', '/accession/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $accession->any('accession_edit_override', '/accession/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $accession->any('accession_add_override', '/accession/add', 'edit');
+        $accession->register($routing);
+
+        // accessionManage module routes (specific routes registered last = checked first)
+        $manage = new \AtomFramework\Routing\RouteLoader('accessionManage');
+        $manage->any('accession_browse_override', '/accession/browse', 'browse');
+        $manage->register($routing);
     }
 }

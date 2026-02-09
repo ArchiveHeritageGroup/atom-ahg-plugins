@@ -5,7 +5,7 @@ require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/PromptService.php';
 
-class aiActions extends sfActions
+class aiActions extends AhgActions
 {
     public function executeExtract(sfWebRequest $request)
     {

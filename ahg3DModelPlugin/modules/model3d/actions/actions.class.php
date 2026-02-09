@@ -9,7 +9,7 @@
  * @subpackage actions
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class model3dActions extends sfActions
+class model3dActions extends AhgActions
 {
     private $model3DService;
     private $db;

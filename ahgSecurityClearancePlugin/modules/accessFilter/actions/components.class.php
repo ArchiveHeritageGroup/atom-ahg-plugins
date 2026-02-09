@@ -1,6 +1,6 @@
 <?php
 
-class accessFilterComponents extends sfComponents
+class accessFilterComponents extends AhgComponents
 {
     public function executeAccessBadge(sfWebRequest $request)
     {

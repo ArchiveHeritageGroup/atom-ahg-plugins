@@ -30,120 +30,48 @@ class ahgCDPAPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('cdpa');
 
         // Dashboard
-        $routing->prependRoute('ahg_cdpa_index', new sfRoute(
-            '/admin/cdpa',
-            ['module' => 'cdpa', 'action' => 'index']
-        ));
+        $router->any('ahg_cdpa_index', '/admin/cdpa', 'index');
 
         // License Management
-        $routing->prependRoute('ahg_cdpa_license', new sfRoute(
-            '/admin/cdpa/license',
-            ['module' => 'cdpa', 'action' => 'license']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_license_edit', new sfRoute(
-            '/admin/cdpa/license/edit',
-            ['module' => 'cdpa', 'action' => 'licenseEdit']
-        ));
+        $router->any('ahg_cdpa_license', '/admin/cdpa/license', 'license');
+        $router->any('ahg_cdpa_license_edit', '/admin/cdpa/license/edit', 'licenseEdit');
 
         // DPO Management
-        $routing->prependRoute('ahg_cdpa_dpo', new sfRoute(
-            '/admin/cdpa/dpo',
-            ['module' => 'cdpa', 'action' => 'dpo']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_dpo_edit', new sfRoute(
-            '/admin/cdpa/dpo/edit',
-            ['module' => 'cdpa', 'action' => 'dpoEdit']
-        ));
+        $router->any('ahg_cdpa_dpo', '/admin/cdpa/dpo', 'dpo');
+        $router->any('ahg_cdpa_dpo_edit', '/admin/cdpa/dpo/edit', 'dpoEdit');
 
         // Data Subject Requests
-        $routing->prependRoute('ahg_cdpa_requests', new sfRoute(
-            '/admin/cdpa/requests',
-            ['module' => 'cdpa', 'action' => 'requests']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_request_view', new sfRoute(
-            '/admin/cdpa/request/:id',
-            ['module' => 'cdpa', 'action' => 'requestView'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_request_create', new sfRoute(
-            '/admin/cdpa/request/create',
-            ['module' => 'cdpa', 'action' => 'requestCreate']
-        ));
+        $router->any('ahg_cdpa_requests', '/admin/cdpa/requests', 'requests');
+        $router->any('ahg_cdpa_request_view', '/admin/cdpa/request/:id', 'requestView', ['id' => '\d+']);
+        $router->any('ahg_cdpa_request_create', '/admin/cdpa/request/create', 'requestCreate');
 
         // Processing Register
-        $routing->prependRoute('ahg_cdpa_processing', new sfRoute(
-            '/admin/cdpa/processing',
-            ['module' => 'cdpa', 'action' => 'processing']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_processing_create', new sfRoute(
-            '/admin/cdpa/processing/create',
-            ['module' => 'cdpa', 'action' => 'processingCreate']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_processing_edit', new sfRoute(
-            '/admin/cdpa/processing/:id/edit',
-            ['module' => 'cdpa', 'action' => 'processingEdit'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_cdpa_processing', '/admin/cdpa/processing', 'processing');
+        $router->any('ahg_cdpa_processing_create', '/admin/cdpa/processing/create', 'processingCreate');
+        $router->any('ahg_cdpa_processing_edit', '/admin/cdpa/processing/:id/edit', 'processingEdit', ['id' => '\d+']);
 
         // DPIA
-        $routing->prependRoute('ahg_cdpa_dpia', new sfRoute(
-            '/admin/cdpa/dpia',
-            ['module' => 'cdpa', 'action' => 'dpia']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_dpia_create', new sfRoute(
-            '/admin/cdpa/dpia/create',
-            ['module' => 'cdpa', 'action' => 'dpiaCreate']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_dpia_view', new sfRoute(
-            '/admin/cdpa/dpia/:id',
-            ['module' => 'cdpa', 'action' => 'dpiaView'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_cdpa_dpia', '/admin/cdpa/dpia', 'dpia');
+        $router->any('ahg_cdpa_dpia_create', '/admin/cdpa/dpia/create', 'dpiaCreate');
+        $router->any('ahg_cdpa_dpia_view', '/admin/cdpa/dpia/:id', 'dpiaView', ['id' => '\d+']);
 
         // Consent Management
-        $routing->prependRoute('ahg_cdpa_consent', new sfRoute(
-            '/admin/cdpa/consent',
-            ['module' => 'cdpa', 'action' => 'consent']
-        ));
+        $router->any('ahg_cdpa_consent', '/admin/cdpa/consent', 'consent');
 
         // Breach Register
-        $routing->prependRoute('ahg_cdpa_breaches', new sfRoute(
-            '/admin/cdpa/breaches',
-            ['module' => 'cdpa', 'action' => 'breaches']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_breach_create', new sfRoute(
-            '/admin/cdpa/breach/create',
-            ['module' => 'cdpa', 'action' => 'breachCreate']
-        ));
-
-        $routing->prependRoute('ahg_cdpa_breach_view', new sfRoute(
-            '/admin/cdpa/breach/:id',
-            ['module' => 'cdpa', 'action' => 'breachView'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_cdpa_breaches', '/admin/cdpa/breaches', 'breaches');
+        $router->any('ahg_cdpa_breach_create', '/admin/cdpa/breach/create', 'breachCreate');
+        $router->any('ahg_cdpa_breach_view', '/admin/cdpa/breach/:id', 'breachView', ['id' => '\d+']);
 
         // Reports
-        $routing->prependRoute('ahg_cdpa_reports', new sfRoute(
-            '/admin/cdpa/reports',
-            ['module' => 'cdpa', 'action' => 'reports']
-        ));
+        $router->any('ahg_cdpa_reports', '/admin/cdpa/reports', 'reports');
 
         // Configuration
-        $routing->prependRoute('ahg_cdpa_config', new sfRoute(
-            '/admin/cdpa/config',
-            ['module' => 'cdpa', 'action' => 'config']
-        ));
+        $router->any('ahg_cdpa_config', '/admin/cdpa/config', 'config');
+
+        $router->register($event->getSubject());
     }
 }

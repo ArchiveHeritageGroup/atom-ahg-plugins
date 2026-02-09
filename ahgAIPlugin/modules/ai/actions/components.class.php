@@ -1,5 +1,5 @@
 <?php
-class aiComponents extends sfComponents
+class aiComponents extends AhgComponents
 {
     public function executeExtractButton(sfWebRequest $request)
     {

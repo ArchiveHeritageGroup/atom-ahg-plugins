@@ -5,7 +5,7 @@
  *
  * Admin interface for National Museums and Monuments of Zimbabwe Act compliance
  */
-class nmmzActions extends sfActions
+class nmmzActions extends AhgActions
 {
     protected function getService(): \AhgNMMZ\Services\NMMZService
     {

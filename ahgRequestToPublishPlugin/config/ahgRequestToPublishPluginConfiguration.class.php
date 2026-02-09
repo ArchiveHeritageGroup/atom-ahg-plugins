@@ -25,45 +25,23 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('requestToPublish');
 
         // IMPORTANT: Order matters! Generic slug route first, specific routes last
         // (prepend adds to front, so last prepended = first matched)
 
         // Generic slug route (prepend first = matched last)
-        $routing->prependRoute(
-            'requesttopublish_edit',
-            new sfRoute(
-                '/requesttopublish/:slug',
-                ['module' => 'requestToPublish', 'action' => 'edit']
-            )
-        );
+        $router->any('requesttopublish_edit', '/requesttopublish/:slug', 'edit');
 
         // Delete route (more specific, prepend second)
-        $routing->prependRoute(
-            'requesttopublish_delete',
-            new sfRoute(
-                '/requesttopublish/delete/:slug',
-                ['module' => 'requestToPublish', 'action' => 'delete']
-            )
-        );
+        $router->any('requesttopublish_delete', '/requesttopublish/delete/:slug', 'delete');
 
         // Submit route for public form
-        $routing->prependRoute(
-            'requesttopublish_submit',
-            new sfRoute(
-                '/requestToPublish/submit/:slug',
-                ['module' => 'requestToPublish', 'action' => 'submit']
-            )
-        );
+        $router->any('requesttopublish_submit', '/requestToPublish/submit/:slug', 'submit');
 
         // Admin browse route (most specific, prepend last = matched first)
-        $routing->prependRoute(
-            'requesttopublish_browse',
-            new sfRoute(
-                '/requesttopublish/browse',
-                ['module' => 'requestToPublish', 'action' => 'browse']
-            )
-        );
+        $router->any('requesttopublish_browse', '/requesttopublish/browse', 'browse');
+
+        $router->register($event->getSubject());
     }
 }

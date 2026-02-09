@@ -1,5 +1,5 @@
 <?php
-class heritageApiActions extends sfActions
+class heritageApiActions extends AhgActions
 {
     /**
      * Autocomplete for information objects

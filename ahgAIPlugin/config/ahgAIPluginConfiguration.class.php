@@ -13,122 +13,46 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
 
     public function routingLoadConfiguration(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('ai');
 
         // NER routes
-        $routing->prependRoute('ahg_ai_ner_extract', new sfRoute(
-            '/ai/ner/extract/:id',
-            ['module' => 'ai', 'action' => 'nerExtract']
-        ));
-
-        $routing->prependRoute('ahg_ai_ner_review', new sfRoute(
-            '/ai/ner/review',
-            ['module' => 'ai', 'action' => 'review']
-        ));
-
-        $routing->prependRoute('ahg_ai_ner_bulk_save', new sfRoute(
-            '/ai/ner/bulk-save',
-            ['module' => 'ai', 'action' => 'bulkSave']
-        ));
-
-        $routing->prependRoute('ahg_ai_create_date', new sfRoute(
-            '/ai/ner/create-date',
-            ['module' => 'ai', 'action' => 'createDate']
-        ));
-
-        $routing->prependRoute('ahg_ai_preview_date_split', new sfRoute(
-            '/ai/ner/preview-date-split',
-            ['module' => 'ai', 'action' => 'previewDateSplit']
-        ));
+        $router->any('ahg_ai_ner_extract', '/ai/ner/extract/:id', 'nerExtract');
+        $router->any('ahg_ai_ner_review', '/ai/ner/review', 'review');
+        $router->any('ahg_ai_ner_bulk_save', '/ai/ner/bulk-save', 'bulkSave');
+        $router->any('ahg_ai_create_date', '/ai/ner/create-date', 'createDate');
+        $router->any('ahg_ai_preview_date_split', '/ai/ner/preview-date-split', 'previewDateSplit');
 
         // Summarization routes
-        $routing->prependRoute('ahg_ai_summarize', new sfRoute(
-            '/ai/summarize/:id',
-            ['module' => 'ai', 'action' => 'summarize']
-        ));
+        $router->any('ahg_ai_summarize', '/ai/summarize/:id', 'summarize');
 
         // Translation routes
-        $routing->prependRoute('ahg_ai_translate', new sfRoute(
-            '/ai/translate/:id',
-            ['module' => 'ai', 'action' => 'translate']
-        ));
-
-        $routing->prependRoute('ahg_ai_translate_batch', new sfRoute(
-            '/ai/translate/batch',
-            ['module' => 'ai', 'action' => 'translateBatch']
-        ));
+        $router->any('ahg_ai_translate', '/ai/translate/:id', 'translate');
+        $router->any('ahg_ai_translate_batch', '/ai/translate/batch', 'translateBatch');
 
         // Spellcheck routes
-        $routing->prependRoute('ahg_ai_spellcheck', new sfRoute(
-            '/ai/spellcheck/:id',
-            ['module' => 'ai', 'action' => 'spellcheck']
-        ));
+        $router->any('ahg_ai_spellcheck', '/ai/spellcheck/:id', 'spellcheck');
 
         // Handwriting Text Recognition (HTR) routes
-        $routing->prependRoute('ahg_ai_htr', new sfRoute(
-            '/ai/htr/:id',
-            ['module' => 'ai', 'action' => 'htr']
-        ));
+        $router->any('ahg_ai_htr', '/ai/htr/:id', 'htr');
 
         // Settings & Health
-        $routing->prependRoute('ahg_ai_settings', new sfRoute(
-            '/ai/settings',
-            ['module' => 'ai', 'action' => 'settings']
-        ));
-
-        $routing->prependRoute('ahg_ai_health', new sfRoute(
-            '/ai/health',
-            ['module' => 'ai', 'action' => 'health']
-        ));
+        $router->any('ahg_ai_settings', '/ai/settings', 'settings');
+        $router->any('ahg_ai_health', '/ai/health', 'health');
 
         // LLM Description Suggestion routes
-        $routing->prependRoute('ahg_ai_suggest', new sfRoute(
-            '/ai/suggest/:id',
-            ['module' => 'ai', 'action' => 'suggest']
-        ));
-
-        $routing->prependRoute('ahg_ai_suggest_preview', new sfRoute(
-            '/ai/suggest/:id/preview',
-            ['module' => 'ai', 'action' => 'suggestPreview']
-        ));
-
-        $routing->prependRoute('ahg_ai_suggest_review', new sfRoute(
-            '/ai/suggest/review',
-            ['module' => 'ai', 'action' => 'suggestReview']
-        ));
-
-        $routing->prependRoute('ahg_ai_suggest_decision', new sfRoute(
-            '/ai/suggest/:id/decision',
-            ['module' => 'ai', 'action' => 'suggestDecision']
-        ));
-
-        $routing->prependRoute('ahg_ai_llm_configs', new sfRoute(
-            '/ai/llm/configs',
-            ['module' => 'ai', 'action' => 'llmConfigs']
-        ));
-
-        $routing->prependRoute('ahg_ai_llm_health', new sfRoute(
-            '/ai/llm/health',
-            ['module' => 'ai', 'action' => 'llmHealth']
-        ));
-
-        $routing->prependRoute('ahg_ai_templates', new sfRoute(
-            '/ai/templates',
-            ['module' => 'ai', 'action' => 'templates']
-        ));
+        $router->any('ahg_ai_suggest', '/ai/suggest/:id', 'suggest');
+        $router->any('ahg_ai_suggest_preview', '/ai/suggest/:id/preview', 'suggestPreview');
+        $router->any('ahg_ai_suggest_review', '/ai/suggest/review', 'suggestReview');
+        $router->any('ahg_ai_suggest_decision', '/ai/suggest/:id/decision', 'suggestDecision');
+        $router->any('ahg_ai_llm_configs', '/ai/llm/configs', 'llmConfigs');
+        $router->any('ahg_ai_llm_health', '/ai/llm/health', 'llmHealth');
+        $router->any('ahg_ai_templates', '/ai/templates', 'templates');
 
         // NER PDF Overlay Display routes (Issue #20)
-        $routing->prependRoute('ahg_ai_ner_pdf_overlay', new sfRoute(
-            '/ai/ner/pdf-overlay/:id',
-            ['module' => 'ai', 'action' => 'pdfOverlay'],
-            ['id' => '\d+']
-        ));
+        $router->any('ahg_ai_ner_pdf_overlay', '/ai/ner/pdf-overlay/:id', 'pdfOverlay', ['id' => '\d+']);
+        $router->any('ahg_ai_ner_approved_entities', '/ai/ner/approved-entities/:id', 'getApprovedEntities', ['id' => '\d+']);
 
-        $routing->prependRoute('ahg_ai_ner_approved_entities', new sfRoute(
-            '/ai/ner/approved-entities/:id',
-            ['module' => 'ai', 'action' => 'getApprovedEntities'],
-            ['id' => '\d+']
-        ));
+        $router->register($event->getSubject());
     }
 
     public function initialize()

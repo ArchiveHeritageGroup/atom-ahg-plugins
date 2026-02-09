@@ -11,7 +11,7 @@ if (file_exists($redactionServicePath)) {
 /**
  * TTS Actions - Text-to-Speech API endpoints
  */
-class ttsActions extends sfActions
+class ttsActions extends AhgActions
 {
     /**
      * Get TTS settings for a specific sector

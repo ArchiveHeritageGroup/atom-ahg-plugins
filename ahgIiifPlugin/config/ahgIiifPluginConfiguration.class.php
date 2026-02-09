@@ -87,333 +87,92 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $routing = $event->getSubject();
 
         // ===================
-        // MANIFEST ROUTES
+        // IIIF MODULE ROUTES (manifests, annotations, settings)
         // ===================
-
-        // IIIF Manifest by slug
-        $routing->prependRoute('iiif_manifest', new sfRoute(
-            '/iiif/manifest/:slug',
-            ['module' => 'iiif', 'action' => 'manifest']
-        ));
-
-        // IIIF Manifest by ID
-        $routing->prependRoute('iiif_manifest_by_id', new sfRoute(
-            '/iiif/manifest/id/:id',
-            ['module' => 'iiif', 'action' => 'manifestById'],
-            ['id' => '\d+']
-        ));
-
-        // Viewer settings admin page
-        $routing->prependRoute('iiif_settings', new sfRoute(
-            '/admin/iiif-settings',
-            ['module' => 'iiif', 'action' => 'settings']
-        ));
+        $iiif = new \AtomFramework\Routing\RouteLoader('iiif');
+        $iiif->any('iiif_manifest', '/iiif/manifest/:slug', 'manifest');
+        $iiif->any('iiif_manifest_by_id', '/iiif/manifest/id/:id', 'manifestById', ['id' => '\d+']);
+        $iiif->any('iiif_settings', '/admin/iiif-settings', 'settings');
+        $iiif->get('iiif_annotations_object', '/iiif/annotations/object/:id', 'annotationsList', ['id' => '\d+']);
+        $iiif->post('iiif_annotations_create', '/iiif/annotations', 'annotationsCreate');
+        $iiif->any('iiif_annotations_update', '/iiif/annotations/:id', 'annotationsUpdate', ['id' => '\d+']);
+        $iiif->any('iiif_annotations_delete', '/iiif/annotations/:id', 'annotationsDelete', ['id' => '\d+']);
+        $iiif->register($routing);
 
         // ===================
-        // ANNOTATION ROUTES
+        // IIIF COLLECTION ROUTES
         // ===================
-
-        // Get annotations for an object
-        $routing->prependRoute('iiif_annotations_object', new sfRoute(
-            '/iiif/annotations/object/:id',
-            ['module' => 'iiif', 'action' => 'annotationsList'],
-            ['id' => '\d+']
-        ));
-
-        // Create annotation
-        $routing->prependRoute('iiif_annotations_create', new sfRoute(
-            '/iiif/annotations',
-            ['module' => 'iiif', 'action' => 'annotationsCreate'],
-            ['sf_method' => ['post']]
-        ));
-
-        // Update annotation
-        $routing->prependRoute('iiif_annotations_update', new sfRoute(
-            '/iiif/annotations/:id',
-            ['module' => 'iiif', 'action' => 'annotationsUpdate'],
-            ['id' => '\d+', 'sf_method' => ['put']]
-        ));
-
-        // Delete annotation
-        $routing->prependRoute('iiif_annotations_delete', new sfRoute(
-            '/iiif/annotations/:id',
-            ['module' => 'iiif', 'action' => 'annotationsDelete'],
-            ['id' => '\d+', 'sf_method' => ['delete']]
-        ));
+        $collection = new \AtomFramework\Routing\RouteLoader('iiifCollection');
+        $collection->any('iiif_collection_autocomplete', '/manifest-collections/autocomplete', 'autocomplete');
+        $collection->any('iiif_collection_index', '/manifest-collections', 'index');
+        $collection->any('iiif_collection_new', '/manifest-collection/new', 'new');
+        $collection->any('iiif_collection_create', '/manifest-collection/create', 'create');
+        $collection->any('iiif_collection_reorder', '/manifest-collection/reorder', 'reorder');
+        $collection->any('iiif_collection_view', '/manifest-collection/:id/view', 'view');
+        $collection->any('iiif_collection_edit', '/manifest-collection/:id/edit', 'edit');
+        $collection->any('iiif_collection_update', '/manifest-collection/:id/update', 'update');
+        $collection->any('iiif_collection_delete', '/manifest-collection/:id/delete', 'delete');
+        $collection->any('iiif_collection_add_items', '/manifest-collection/:id/items/add', 'addItems');
+        $collection->any('iiif_collection_remove_item', '/manifest-collection/item/:item_id/remove', 'removeItem');
+        $collection->any('iiif_collection_manifest', '/manifest-collection/:slug/manifest.json', 'manifest');
+        $collection->register($routing);
 
         // ===================
-        // COLLECTION ROUTES
+        // IIIF AUTH ROUTES (IIIF Auth API 1.0)
         // ===================
-
-        // Autocomplete (most specific first)
-        $routing->prependRoute('iiif_collection_autocomplete', new sfRoute(
-            '/manifest-collections/autocomplete',
-            ['module' => 'iiifCollection', 'action' => 'autocomplete']
-        ));
-
-        // Index/list
-        $routing->prependRoute('iiif_collection_index', new sfRoute(
-            '/manifest-collections',
-            ['module' => 'iiifCollection', 'action' => 'index']
-        ));
-
-        // Create/new
-        $routing->prependRoute('iiif_collection_new', new sfRoute(
-            '/manifest-collection/new',
-            ['module' => 'iiifCollection', 'action' => 'new']
-        ));
-
-        $routing->prependRoute('iiif_collection_create', new sfRoute(
-            '/manifest-collection/create',
-            ['module' => 'iiifCollection', 'action' => 'create']
-        ));
-
-        // Reorder
-        $routing->prependRoute('iiif_collection_reorder', new sfRoute(
-            '/manifest-collection/reorder',
-            ['module' => 'iiifCollection', 'action' => 'reorder']
-        ));
-
-        // View/edit/update/delete
-        $routing->prependRoute('iiif_collection_view', new sfRoute(
-            '/manifest-collection/:id/view',
-            ['module' => 'iiifCollection', 'action' => 'view']
-        ));
-
-        $routing->prependRoute('iiif_collection_edit', new sfRoute(
-            '/manifest-collection/:id/edit',
-            ['module' => 'iiifCollection', 'action' => 'edit']
-        ));
-
-        $routing->prependRoute('iiif_collection_update', new sfRoute(
-            '/manifest-collection/:id/update',
-            ['module' => 'iiifCollection', 'action' => 'update']
-        ));
-
-        $routing->prependRoute('iiif_collection_delete', new sfRoute(
-            '/manifest-collection/:id/delete',
-            ['module' => 'iiifCollection', 'action' => 'delete']
-        ));
-
-        // Items management
-        $routing->prependRoute('iiif_collection_add_items', new sfRoute(
-            '/manifest-collection/:id/items/add',
-            ['module' => 'iiifCollection', 'action' => 'addItems']
-        ));
-
-        $routing->prependRoute('iiif_collection_remove_item', new sfRoute(
-            '/manifest-collection/item/:item_id/remove',
-            ['module' => 'iiifCollection', 'action' => 'removeItem']
-        ));
-
-        // IIIF Collection JSON output (must be last - has wildcard slug)
-        $routing->prependRoute('iiif_collection_manifest', new sfRoute(
-            '/manifest-collection/:slug/manifest.json',
-            ['module' => 'iiifCollection', 'action' => 'manifest']
-        ));
-
-        // ===================
-        // AUTH ROUTES (IIIF Auth API 1.0)
-        // ===================
-
-        // Auth admin
-        $routing->prependRoute('iiif_auth_admin', new sfRoute(
-            '/admin/iiif-auth',
-            ['module' => 'iiifAuth', 'action' => 'index']
-        ));
-
-        // Login service
-        $routing->prependRoute('iiif_auth_login', new sfRoute(
-            '/iiif/auth/login/:service',
-            ['module' => 'iiifAuth', 'action' => 'login']
-        ));
-
-        // Token service
-        $routing->prependRoute('iiif_auth_token', new sfRoute(
-            '/iiif/auth/token/:service',
-            ['module' => 'iiifAuth', 'action' => 'token']
-        ));
-
-        // Logout service
-        $routing->prependRoute('iiif_auth_logout', new sfRoute(
-            '/iiif/auth/logout/:service',
-            ['module' => 'iiifAuth', 'action' => 'logout']
-        ));
-
-        // Confirm (clickthrough)
-        $routing->prependRoute('iiif_auth_confirm', new sfRoute(
-            '/iiif/auth/confirm/:service',
-            ['module' => 'iiifAuth', 'action' => 'confirm']
-        ));
-
-        // Access check API
-        $routing->prependRoute('iiif_auth_check', new sfRoute(
-            '/iiif/auth/check/:id',
-            ['module' => 'iiifAuth', 'action' => 'check'],
-            ['id' => '\d+']
-        ));
-
-        // Protect/unprotect (admin)
-        $routing->prependRoute('iiif_auth_protect', new sfRoute(
-            '/admin/iiif-auth/protect',
-            ['module' => 'iiifAuth', 'action' => 'protect']
-        ));
-
-        $routing->prependRoute('iiif_auth_unprotect', new sfRoute(
-            '/admin/iiif-auth/unprotect',
-            ['module' => 'iiifAuth', 'action' => 'unprotect']
-        ));
+        $auth = new \AtomFramework\Routing\RouteLoader('iiifAuth');
+        $auth->any('iiif_auth_admin', '/admin/iiif-auth', 'index');
+        $auth->any('iiif_auth_login', '/iiif/auth/login/:service', 'login');
+        $auth->any('iiif_auth_token', '/iiif/auth/token/:service', 'token');
+        $auth->any('iiif_auth_logout', '/iiif/auth/logout/:service', 'logout');
+        $auth->any('iiif_auth_confirm', '/iiif/auth/confirm/:service', 'confirm');
+        $auth->any('iiif_auth_check', '/iiif/auth/check/:id', 'check', ['id' => '\d+']);
+        $auth->any('iiif_auth_protect', '/admin/iiif-auth/protect', 'protect');
+        $auth->any('iiif_auth_unprotect', '/admin/iiif-auth/unprotect', 'unprotect');
+        $auth->register($routing);
 
         // ===================
         // 3D REPORTS ROUTES
         // ===================
-
-        $routing->prependRoute('threeD_reports_index', new sfRoute(
-            '/threeDReports',
-            ['module' => 'threeDReports', 'action' => 'index']
-        ));
-
-        $routing->prependRoute('threeD_reports_models', new sfRoute(
-            '/threeDReports/models',
-            ['module' => 'threeDReports', 'action' => 'models']
-        ));
-
-        $routing->prependRoute('threeD_reports_hotspots', new sfRoute(
-            '/threeDReports/hotspots',
-            ['module' => 'threeDReports', 'action' => 'hotspots']
-        ));
-
-        $routing->prependRoute('threeD_reports_thumbnails', new sfRoute(
-            '/threeDReports/thumbnails',
-            ['module' => 'threeDReports', 'action' => 'thumbnails']
-        ));
-
-        $routing->prependRoute('threeD_reports_digitalObjects', new sfRoute(
-            '/threeDReports/digitalObjects',
-            ['module' => 'threeDReports', 'action' => 'digitalObjects']
-        ));
-
-        $routing->prependRoute('threeD_reports_settings', new sfRoute(
-            '/threeDReports/settings',
-            ['module' => 'threeDReports', 'action' => 'settings']
-        ));
-
-        $routing->prependRoute('threeD_reports_createConfig', new sfRoute(
-            '/threeDReports/createConfig',
-            ['module' => 'threeDReports', 'action' => 'createConfig']
-        ));
-
-        $routing->prependRoute('threeD_reports_bulkCreateConfig', new sfRoute(
-            '/threeDReports/bulkCreateConfig',
-            ['module' => 'threeDReports', 'action' => 'bulkCreateConfig']
-        ));
+        $threeD = new \AtomFramework\Routing\RouteLoader('threeDReports');
+        $threeD->any('threeD_reports_index', '/threeDReports', 'index');
+        $threeD->any('threeD_reports_models', '/threeDReports/models', 'models');
+        $threeD->any('threeD_reports_hotspots', '/threeDReports/hotspots', 'hotspots');
+        $threeD->any('threeD_reports_thumbnails', '/threeDReports/thumbnails', 'thumbnails');
+        $threeD->any('threeD_reports_digitalObjects', '/threeDReports/digitalObjects', 'digitalObjects');
+        $threeD->any('threeD_reports_settings', '/threeDReports/settings', 'settings');
+        $threeD->any('threeD_reports_createConfig', '/threeDReports/createConfig', 'createConfig');
+        $threeD->any('threeD_reports_bulkCreateConfig', '/threeDReports/bulkCreateConfig', 'bulkCreateConfig');
+        $threeD->register($routing);
 
         // ===================
-        // MEDIA STREAMING ROUTES (moved from theme routing.yml)
+        // MEDIA STREAMING ROUTES
         // ===================
-
-        $routing->prependRoute('media_stream', new sfRoute(
-            '/media/stream/:id',
-            ['module' => 'media', 'action' => 'stream'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_download', new sfRoute(
-            '/media/download/:id',
-            ['module' => 'media', 'action' => 'download'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_snippets_list', new sfRoute(
-            '/media/snippets/:id',
-            ['module' => 'media', 'action' => 'snippets'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_snippets_save', new sfRoute(
-            '/media/snippets',
-            ['module' => 'media', 'action' => 'saveSnippet']
-        ));
-
-        $routing->prependRoute('media_snippets_delete', new sfRoute(
-            '/media/snippets/:id/delete',
-            ['module' => 'media', 'action' => 'deleteSnippet'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_extract', new sfRoute(
-            '/media/extract/:id',
-            ['module' => 'media', 'action' => 'extract'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_transcribe', new sfRoute(
-            '/media/transcribe/:id',
-            ['module' => 'media', 'action' => 'transcribe'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_transcription', new sfRoute(
-            '/media/transcription/:id',
-            ['module' => 'media', 'action' => 'transcription'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_transcription_format', new sfRoute(
-            '/media/transcription/:id/:format',
-            ['module' => 'media', 'action' => 'transcription', 'format' => 'json'],
-            ['id' => '\d+', 'format' => '(json|vtt|srt|txt)']
-        ));
-
-        $routing->prependRoute('media_convert', new sfRoute(
-            '/media/convert/:id',
-            ['module' => 'media', 'action' => 'convert'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('media_metadata', new sfRoute(
-            '/media/metadata/:id',
-            ['module' => 'media', 'action' => 'metadata'],
-            ['id' => '\d+']
-        ));
+        $media = new \AtomFramework\Routing\RouteLoader('media');
+        $media->any('media_stream', '/media/stream/:id', 'stream', ['id' => '\d+']);
+        $media->any('media_download', '/media/download/:id', 'download', ['id' => '\d+']);
+        $media->any('media_snippets_list', '/media/snippets/:id', 'snippets', ['id' => '\d+']);
+        $media->post('media_snippets_save', '/media/snippets', 'saveSnippet');
+        $media->any('media_snippets_delete', '/media/snippets/:id/delete', 'deleteSnippet', ['id' => '\d+']);
+        $media->any('media_extract', '/media/extract/:id', 'extract', ['id' => '\d+']);
+        $media->any('media_transcribe', '/media/transcribe/:id', 'transcribe', ['id' => '\d+']);
+        $media->any('media_transcription', '/media/transcription/:id', 'transcription', ['id' => '\d+']);
+        $media->any('media_transcription_format', '/media/transcription/:id/:format', 'transcription', ['id' => '\d+', 'format' => '(json|vtt|srt|txt)']);
+        $media->any('media_convert', '/media/convert/:id', 'convert', ['id' => '\d+']);
+        $media->any('media_metadata', '/media/metadata/:id', 'metadata', ['id' => '\d+']);
+        $media->register($routing);
 
         // ===================
         // MEDIA SETTINGS ROUTES
         // ===================
-
-        $routing->prependRoute('media_settings_index', new sfRoute(
-            '/mediaSettings/index',
-            ['module' => 'mediaSettings', 'action' => 'index']
-        ));
-
-        $routing->prependRoute('media_settings_save', new sfRoute(
-            '/mediaSettings/save',
-            ['module' => 'mediaSettings', 'action' => 'save']
-        ));
-
-        $routing->prependRoute('media_settings_test', new sfRoute(
-            '/mediaSettings/test',
-            ['module' => 'mediaSettings', 'action' => 'test']
-        ));
-
-        $routing->prependRoute('media_settings_queue', new sfRoute(
-            '/mediaSettings/queue',
-            ['module' => 'mediaSettings', 'action' => 'queue']
-        ));
-
-        $routing->prependRoute('media_settings_process_queue', new sfRoute(
-            '/mediaSettings/processQueue',
-            ['module' => 'mediaSettings', 'action' => 'processQueue']
-        ));
-
-        $routing->prependRoute('media_settings_clear_queue', new sfRoute(
-            '/mediaSettings/clearQueue',
-            ['module' => 'mediaSettings', 'action' => 'clearQueue']
-        ));
-
-        $routing->prependRoute('media_settings_autocomplete', new sfRoute(
-            '/mediaSettings/autocomplete',
-            ['module' => 'mediaSettings', 'action' => 'autocomplete']
-        ));
+        $mediaSettings = new \AtomFramework\Routing\RouteLoader('mediaSettings');
+        $mediaSettings->any('media_settings_index', '/mediaSettings/index', 'index');
+        $mediaSettings->any('media_settings_save', '/mediaSettings/save', 'save');
+        $mediaSettings->any('media_settings_test', '/mediaSettings/test', 'test');
+        $mediaSettings->any('media_settings_queue', '/mediaSettings/queue', 'queue');
+        $mediaSettings->any('media_settings_process_queue', '/mediaSettings/processQueue', 'processQueue');
+        $mediaSettings->any('media_settings_clear_queue', '/mediaSettings/clearQueue', 'clearQueue');
+        $mediaSettings->any('media_settings_autocomplete', '/mediaSettings/autocomplete', 'autocomplete');
+        $mediaSettings->register($routing);
     }
 }

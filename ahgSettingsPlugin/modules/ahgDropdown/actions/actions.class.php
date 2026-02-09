@@ -5,7 +5,7 @@
  *
  * Admin interface for managing controlled vocabularies (dropdowns).
  */
-class ahgDropdownActions extends sfActions
+class ahgDropdownActions extends AhgActions
 {
     /**
      * Pre-execute - require admin access

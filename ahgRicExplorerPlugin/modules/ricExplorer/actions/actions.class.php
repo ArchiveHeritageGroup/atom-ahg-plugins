@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class ricExplorerActions extends sfActions
+class ricExplorerActions extends AhgActions
 {
     protected $fusekiEndpoint;
     protected $fusekiUsername;

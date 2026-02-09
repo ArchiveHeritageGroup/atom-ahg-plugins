@@ -58,81 +58,24 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
 
     public function listenToRoutingLoadConfiguration(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        // model3d module routes
+        $model = new \AtomFramework\Routing\RouteLoader('model3d');
+        $model->any('ar3d_model_index', '/ahg3DModel/index', 'index');
+        $model->any('ar3d_model_view', '/ahg3DModel/view/:id', 'view', ['id' => '\d+']);
+        $model->any('ar3d_model_upload', '/ahg3DModel/upload', 'upload');
+        $model->any('ar3d_model_edit', '/ahg3DModel/edit/:id', 'edit', ['id' => '\d+']);
+        $model->any('ar3d_model_delete', '/ahg3DModel/delete/:id', 'delete', ['id' => '\d+']);
+        $model->any('ar3d_iiif_manifest', '/iiif/3d/:id/manifest.json', 'iiifManifest', ['id' => '\d+']);
+        $model->any('ar3d_viewer_embed', '/ahg3DModel/embed/:id', 'embed', ['id' => '\d+']);
+        $model->any('ar3d_hotspot_add', '/ahg3DModel/addHotspot/:id', 'addHotspot', ['id' => '\d+']);
+        $model->any('ar3d_hotspot_delete', '/ahg3DModel/deleteHotspot/:id', 'deleteHotspot', ['id' => '\d+']);
+        $model->any('ar3d_api_models', '/api/3d/models/:object_id', 'apiModels', ['object_id' => '\d+']);
+        $model->any('ar3d_api_hotspots', '/api/3d/hotspots/:model_id', 'apiHotspots', ['model_id' => '\d+']);
+        $model->register($event->getSubject());
 
-        // 3D Model viewing routes
-        $routing->prependRoute('ar3d_model_index', new sfRoute(
-            '/ahg3DModel/index',
-            array('module' => 'model3d', 'action' => 'index')
-        ));
-
-        $routing->prependRoute('ar3d_model_view', new sfRoute(
-            '/ahg3DModel/view/:id',
-            array('module' => 'model3d', 'action' => 'view'),
-            array('id' => '\d+')
-        ));
-
-        $routing->prependRoute('ar3d_model_upload', new sfRoute(
-            '/ahg3DModel/upload',
-            array('module' => 'model3d', 'action' => 'upload')
-        ));
-
-        $routing->prependRoute('ar3d_model_edit', new sfRoute(
-            '/ahg3DModel/edit/:id',
-            array('module' => 'model3d', 'action' => 'edit'),
-            array('id' => '\d+')
-        ));
-
-        $routing->prependRoute('ar3d_model_delete', new sfRoute(
-            '/ahg3DModel/delete/:id',
-            array('module' => 'model3d', 'action' => 'delete'),
-            array('id' => '\d+')
-        ));
-
-        // IIIF 3D manifest route
-        $routing->prependRoute('ar3d_iiif_manifest', new sfRoute(
-            '/iiif/3d/:id/manifest.json',
-            array('module' => 'model3d', 'action' => 'iiifManifest'),
-            array('id' => '\d+')
-        ));
-
-        // Viewer embed route
-        $routing->prependRoute('ar3d_viewer_embed', new sfRoute(
-            '/ahg3DModel/embed/:id',
-            array('module' => 'model3d', 'action' => 'embed'),
-            array('id' => '\d+')
-        ));
-
-        // Hotspot routes
-        $routing->prependRoute('ar3d_hotspot_add', new sfRoute(
-            '/ahg3DModel/addHotspot/:id',
-            array('module' => 'model3d', 'action' => 'addHotspot'),
-            array('id' => '\d+')
-        ));
-
-        $routing->prependRoute('ar3d_hotspot_delete', new sfRoute(
-            '/ahg3DModel/deleteHotspot/:id',
-            array('module' => 'model3d', 'action' => 'deleteHotspot'),
-            array('id' => '\d+')
-        ));
-
-        // Settings routes
-        $routing->prependRoute('ar3d_settings', new sfRoute(
-            '/ahg3DSettings/index',
-            array('module' => 'model3dSettings', 'action' => 'index')
-        ));
-
-        // API routes for AJAX
-        $routing->prependRoute('ar3d_api_models', new sfRoute(
-            '/api/3d/models/:object_id',
-            array('module' => 'model3d', 'action' => 'apiModels'),
-            array('object_id' => '\d+')
-        ));
-
-        $routing->prependRoute('ar3d_api_hotspots', new sfRoute(
-            '/api/3d/hotspots/:model_id',
-            array('module' => 'model3d', 'action' => 'apiHotspots'),
-            array('model_id' => '\d+')
-        ));
+        // model3dSettings module routes
+        $settings = new \AtomFramework\Routing\RouteLoader('model3dSettings');
+        $settings->any('ar3d_settings', '/ahg3DSettings/index', 'index');
+        $settings->register($event->getSubject());
     }
 }

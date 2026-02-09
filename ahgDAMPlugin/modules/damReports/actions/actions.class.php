@@ -6,7 +6,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class damReportsActions extends sfActions
+class damReportsActions extends AhgActions
 {
     protected function checkAccess()
     {

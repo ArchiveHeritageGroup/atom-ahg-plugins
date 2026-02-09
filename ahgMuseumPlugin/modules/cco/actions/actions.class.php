@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * CCO (Cataloging Cultural Objects) module actions - Laravel version
  */
-class ccoActions extends sfActions
+class ccoActions extends AhgActions
 {
     /**
      * Display provenance - forwards to ahgMuseumPlugin provenance

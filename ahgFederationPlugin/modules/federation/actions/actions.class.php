@@ -5,7 +5,7 @@
  *
  * Provides admin UI for managing federation peers and harvesting.
  */
-class federationActions extends sfActions
+class federationActions extends AhgActions
 {
     /**
      * Federation dashboard
@@ -21,7 +21,6 @@ class federationActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
 
         $provenance = new \AhgFederation\FederationProvenance();
@@ -58,7 +57,6 @@ class federationActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $this->peers = \Illuminate\Database\Capsule\Manager::table('federation_peer')
             ->orderBy('name')
@@ -111,7 +109,6 @@ class federationActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $peerId = $request->getParameter('id');
         $this->peer = \Illuminate\Database\Capsule\Manager::table('federation_peer')
@@ -137,7 +134,6 @@ class federationActions extends sfActions
      */
     protected function processPeerForm(sfWebRequest $request, ?int $peerId = null)
     {
-        \AhgCore\Core\AhgDb::init();
 
         $data = [
             'name' => $request->getParameter('name'),
@@ -191,7 +187,6 @@ class federationActions extends sfActions
      */
     protected function deletePeer(int $peerId)
     {
-        \AhgCore\Core\AhgDb::init();
 
         \Illuminate\Database\Capsule\Manager::table('federation_peer')
             ->where('id', $peerId)
@@ -214,7 +209,6 @@ class federationActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $peerId = $request->getParameter('peerId');
         $this->peer = \Illuminate\Database\Capsule\Manager::table('federation_peer')
@@ -266,7 +260,6 @@ class federationActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $peerId = $request->getParameter('peer_id');
         $action = $request->getParameter('filter_action');
@@ -369,7 +362,6 @@ class federationActions extends sfActions
 
         $peerId = $request->getParameter('peerId');
 
-        \AhgCore\Core\AhgDb::init();
 
         $peer = \Illuminate\Database\Capsule\Manager::table('federation_peer')
             ->where('id', $peerId)
@@ -469,7 +461,6 @@ class federationActions extends sfActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $peerId = $request->getParameter('peerId');
 

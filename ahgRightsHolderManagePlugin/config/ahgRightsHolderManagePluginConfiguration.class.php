@@ -39,19 +39,15 @@ class ahgRightsHolderManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // All routes target rightsHolderManage module
+        // Catch-all slug routes registered first = checked last
+        $router = new \AtomFramework\Routing\RouteLoader('rightsHolderManage');
+        $router->any('rightsholder_view_override', '/rightsholder/:slug', 'view');
+        $router->any('rightsholder_delete_override', '/rightsholder/:slug/delete', 'delete');
+        $router->any('rightsholder_edit_override', '/rightsholder/:slug/edit', 'edit');
+        // Specific routes registered last = checked first
+        $router->any('rightsholder_add_override', '/rightsholder/add', 'edit');
+        $router->any('rightsholder_browse_override', '/rightsholder/browse', 'browse');
+        $router->register($routing);
     }
 }

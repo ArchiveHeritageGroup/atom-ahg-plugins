@@ -3,7 +3,7 @@
 /**
  * Label module - Barcode/label generation for all GLAM sectors.
  */
-class labelActions extends sfActions
+class labelActions extends AhgActions
 {
     public function executeIndex(sfWebRequest $request)
     {

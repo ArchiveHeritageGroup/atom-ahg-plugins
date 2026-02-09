@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class privacyAdminActions extends sfActions
+class privacyAdminActions extends AhgActions
 {
     public function preExecute()
     {

@@ -15,89 +15,35 @@ class ahgGalleryPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('gallery');
 
         // Order matters! Generic route first, then specific ones prepended after
-        $routing->prependRoute('gallery_view', new AhgMetadataRoute(
-            '/gallery/:slug',
-            ['module' => 'gallery', 'action' => 'index'],
-            ['slug' => '[a-zA-Z0-9_-]+']
-        ));
-        $routing->prependRoute('gallery_edit', new sfRoute(
-            '/gallery/edit/:slug',
-            ['module' => 'gallery', 'action' => 'edit'],
-            ['slug' => '[a-zA-Z0-9_-]+']
-        ));
-        $routing->prependRoute('gallery_add', new sfRoute(
-            '/gallery/add',
-            ['module' => 'gallery', 'action' => 'add']
-        ));
-        $routing->prependRoute('gallery_browse', new sfRoute(
-            '/gallery/browse',
-            ['module' => 'gallery', 'action' => 'browse']
-        ));
-        $routing->prependRoute('gallery_dashboard', new sfRoute(
-            '/gallery/dashboard',
-            ['module' => 'gallery', 'action' => 'dashboard']
-        ));
+        $router->any('gallery_view', '/gallery/:slug', 'index', ['slug' => '[a-zA-Z0-9_-]+']);
+        $router->any('gallery_edit', '/gallery/edit/:slug', 'edit', ['slug' => '[a-zA-Z0-9_-]+']);
+        $router->any('gallery_add', '/gallery/add', 'add');
+        $router->any('gallery_browse', '/gallery/browse', 'browse');
+        $router->any('gallery_dashboard', '/gallery/dashboard', 'dashboard');
 
         // Loans
-        $routing->prependRoute('gallery_loans', new sfRoute(
-            '/gallery/loans',
-            ['module' => 'gallery', 'action' => 'loans']
-        ));
-        $routing->prependRoute('gallery_create_loan', new sfRoute(
-            '/gallery/loans/create',
-            ['module' => 'gallery', 'action' => 'createLoan']
-        ));
-        $routing->prependRoute('gallery_view_loan', new sfRoute(
-            '/gallery/loans/:id',
-            ['module' => 'gallery', 'action' => 'viewLoan'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('gallery_facility_report', new sfRoute(
-            '/gallery/loans/:loan_id/facility-report',
-            ['module' => 'gallery', 'action' => 'facilityReport']
-        ));
+        $router->any('gallery_loans', '/gallery/loans', 'loans');
+        $router->any('gallery_create_loan', '/gallery/loans/create', 'createLoan');
+        $router->any('gallery_view_loan', '/gallery/loans/:id', 'viewLoan', ['id' => '\d+']);
+        $router->any('gallery_facility_report', '/gallery/loans/:loan_id/facility-report', 'facilityReport');
 
         // Valuations
-        $routing->prependRoute('gallery_valuations', new sfRoute(
-            '/gallery/valuations',
-            ['module' => 'gallery', 'action' => 'valuations']
-        ));
-        $routing->prependRoute('gallery_create_valuation', new sfRoute(
-            '/gallery/valuations/create',
-            ['module' => 'gallery', 'action' => 'createValuation']
-        ));
+        $router->any('gallery_valuations', '/gallery/valuations', 'valuations');
+        $router->any('gallery_create_valuation', '/gallery/valuations/create', 'createValuation');
 
         // Artists
-        $routing->prependRoute('gallery_artists', new sfRoute(
-            '/gallery/artists',
-            ['module' => 'gallery', 'action' => 'artists']
-        ));
-        $routing->prependRoute('gallery_create_artist', new sfRoute(
-            '/gallery/artists/create',
-            ['module' => 'gallery', 'action' => 'createArtist']
-        ));
-        $routing->prependRoute('gallery_view_artist', new sfRoute(
-            '/gallery/artists/:id',
-            ['module' => 'gallery', 'action' => 'viewArtist'],
-            ['id' => '\d+']
-        ));
+        $router->any('gallery_artists', '/gallery/artists', 'artists');
+        $router->any('gallery_create_artist', '/gallery/artists/create', 'createArtist');
+        $router->any('gallery_view_artist', '/gallery/artists/:id', 'viewArtist', ['id' => '\d+']);
 
         // Venues
-        $routing->prependRoute('gallery_venues', new sfRoute(
-            '/gallery/venues',
-            ['module' => 'gallery', 'action' => 'venues']
-        ));
-        $routing->prependRoute('gallery_create_venue', new sfRoute(
-            '/gallery/venues/create',
-            ['module' => 'gallery', 'action' => 'createVenue']
-        ));
-        $routing->prependRoute('gallery_view_venue', new sfRoute(
-            '/gallery/venues/:id',
-            ['module' => 'gallery', 'action' => 'viewVenue'],
-            ['id' => '\d+']
-        ));
+        $router->any('gallery_venues', '/gallery/venues', 'venues');
+        $router->any('gallery_create_venue', '/gallery/venues/create', 'createVenue');
+        $router->any('gallery_view_venue', '/gallery/venues/:id', 'viewVenue', ['id' => '\d+']);
+
+        $router->register($event->getSubject());
     }
 }

@@ -39,19 +39,15 @@ class ahgDonorManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // All routes target donorManage module
+        // Catch-all slug routes registered first = checked last
+        $router = new \AtomFramework\Routing\RouteLoader('donorManage');
+        $router->any('donor_view_override', '/donor/:slug', 'view');
+        $router->any('donor_delete_override', '/donor/:slug/delete', 'delete');
+        $router->any('donor_edit_override', '/donor/:slug/edit', 'edit');
+        // Specific routes registered last = checked first
+        $router->any('donor_add_override', '/donor/add', 'edit');
+        $router->any('donor_browse_override', '/donor/browse', 'browse');
+        $router->register($routing);
     }
 }

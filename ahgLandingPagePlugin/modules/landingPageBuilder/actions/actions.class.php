@@ -5,7 +5,7 @@
  * 
  * Admin interface for drag-and-drop page building
  */
-class landingPageBuilderActions extends sfActions
+class landingPageBuilderActions extends AhgActions
 {
     /**
      * Pre-execute - check permissions

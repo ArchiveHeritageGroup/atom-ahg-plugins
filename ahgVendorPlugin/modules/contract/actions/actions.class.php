@@ -2,11 +2,10 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class contractActions extends sfActions
+class contractActions extends AhgActions
 {
     protected function initFramework()
     {
-        \AhgCore\Core\AhgDb::init();
     }
 
     /**

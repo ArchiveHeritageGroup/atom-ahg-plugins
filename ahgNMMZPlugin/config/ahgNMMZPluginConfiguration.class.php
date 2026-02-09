@@ -67,92 +67,41 @@ class ahgNMMZPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        $nmmz = new \AtomFramework\Routing\RouteLoader('nmmz');
+
         // Dashboard
-        $routing->prependRoute('nmmz_index', new sfRoute(
-            '/admin/nmmz',
-            ['module' => 'nmmz', 'action' => 'index']
-        ));
+        $nmmz->any('nmmz_index', '/admin/nmmz', 'index');
 
         // National Monuments
-        $routing->prependRoute('nmmz_monuments', new sfRoute(
-            '/admin/nmmz/monuments',
-            ['module' => 'nmmz', 'action' => 'monuments']
-        ));
-        $routing->prependRoute('nmmz_monument_create', new sfRoute(
-            '/admin/nmmz/monument/create',
-            ['module' => 'nmmz', 'action' => 'monumentCreate']
-        ));
-        $routing->prependRoute('nmmz_monument_view', new sfRoute(
-            '/admin/nmmz/monument/:id',
-            ['module' => 'nmmz', 'action' => 'monumentView'],
-            ['id' => '\d+']
-        ));
+        $nmmz->any('nmmz_monuments', '/admin/nmmz/monuments', 'monuments');
+        $nmmz->any('nmmz_monument_create', '/admin/nmmz/monument/create', 'monumentCreate');
+        $nmmz->any('nmmz_monument_view', '/admin/nmmz/monument/:id', 'monumentView', ['id' => '\d+']);
 
         // Antiquities
-        $routing->prependRoute('nmmz_antiquities', new sfRoute(
-            '/admin/nmmz/antiquities',
-            ['module' => 'nmmz', 'action' => 'antiquities']
-        ));
-        $routing->prependRoute('nmmz_antiquity_create', new sfRoute(
-            '/admin/nmmz/antiquity/create',
-            ['module' => 'nmmz', 'action' => 'antiquityCreate']
-        ));
-        $routing->prependRoute('nmmz_antiquity_view', new sfRoute(
-            '/admin/nmmz/antiquity/:id',
-            ['module' => 'nmmz', 'action' => 'antiquityView'],
-            ['id' => '\d+']
-        ));
+        $nmmz->any('nmmz_antiquities', '/admin/nmmz/antiquities', 'antiquities');
+        $nmmz->any('nmmz_antiquity_create', '/admin/nmmz/antiquity/create', 'antiquityCreate');
+        $nmmz->any('nmmz_antiquity_view', '/admin/nmmz/antiquity/:id', 'antiquityView', ['id' => '\d+']);
 
         // Export Permits
-        $routing->prependRoute('nmmz_permits', new sfRoute(
-            '/admin/nmmz/permits',
-            ['module' => 'nmmz', 'action' => 'permits']
-        ));
-        $routing->prependRoute('nmmz_permit_create', new sfRoute(
-            '/admin/nmmz/permit/create',
-            ['module' => 'nmmz', 'action' => 'permitCreate']
-        ));
-        $routing->prependRoute('nmmz_permit_view', new sfRoute(
-            '/admin/nmmz/permit/:id',
-            ['module' => 'nmmz', 'action' => 'permitView'],
-            ['id' => '\d+']
-        ));
+        $nmmz->any('nmmz_permits', '/admin/nmmz/permits', 'permits');
+        $nmmz->any('nmmz_permit_create', '/admin/nmmz/permit/create', 'permitCreate');
+        $nmmz->any('nmmz_permit_view', '/admin/nmmz/permit/:id', 'permitView', ['id' => '\d+']);
 
         // Archaeological Sites
-        $routing->prependRoute('nmmz_sites', new sfRoute(
-            '/admin/nmmz/sites',
-            ['module' => 'nmmz', 'action' => 'sites']
-        ));
-        $routing->prependRoute('nmmz_site_create', new sfRoute(
-            '/admin/nmmz/site/create',
-            ['module' => 'nmmz', 'action' => 'siteCreate']
-        ));
-        $routing->prependRoute('nmmz_site_view', new sfRoute(
-            '/admin/nmmz/site/:id',
-            ['module' => 'nmmz', 'action' => 'siteView'],
-            ['id' => '\d+']
-        ));
+        $nmmz->any('nmmz_sites', '/admin/nmmz/sites', 'sites');
+        $nmmz->any('nmmz_site_create', '/admin/nmmz/site/create', 'siteCreate');
+        $nmmz->any('nmmz_site_view', '/admin/nmmz/site/:id', 'siteView', ['id' => '\d+']);
 
         // Heritage Impact Assessments
-        $routing->prependRoute('nmmz_hia', new sfRoute(
-            '/admin/nmmz/hia',
-            ['module' => 'nmmz', 'action' => 'hia']
-        ));
-        $routing->prependRoute('nmmz_hia_create', new sfRoute(
-            '/admin/nmmz/hia/create',
-            ['module' => 'nmmz', 'action' => 'hiaCreate']
-        ));
+        $nmmz->any('nmmz_hia', '/admin/nmmz/hia', 'hia');
+        $nmmz->any('nmmz_hia_create', '/admin/nmmz/hia/create', 'hiaCreate');
 
         // Reports
-        $routing->prependRoute('nmmz_reports', new sfRoute(
-            '/admin/nmmz/reports',
-            ['module' => 'nmmz', 'action' => 'reports']
-        ));
+        $nmmz->any('nmmz_reports', '/admin/nmmz/reports', 'reports');
 
         // Config
-        $routing->prependRoute('nmmz_config', new sfRoute(
-            '/admin/nmmz/config',
-            ['module' => 'nmmz', 'action' => 'config']
-        ));
+        $nmmz->any('nmmz_config', '/admin/nmmz/config', 'config');
+
+        $nmmz->register($routing);
     }
 }

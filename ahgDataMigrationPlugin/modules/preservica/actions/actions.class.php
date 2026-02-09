@@ -4,7 +4,7 @@
  * Data Migration module actions.
  * Handles import/export for various formats including Preservica OPEX/PAX.
  */
-class preservicaActions extends sfActions
+class preservicaActions extends AhgActions
 {
     /**
      * Main index - migration dashboard.

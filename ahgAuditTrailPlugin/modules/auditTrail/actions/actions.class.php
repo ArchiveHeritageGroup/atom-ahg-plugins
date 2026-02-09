@@ -3,7 +3,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 // plugins/ahgAuditTrailPlugin/modules/ahgAuditTrailPlugin/actions/actions.class.php
 
-class auditTrailActions extends sfActions
+class auditTrailActions extends AhgActions
 {
     protected function initFramework(): void
     {

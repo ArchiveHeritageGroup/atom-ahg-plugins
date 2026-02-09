@@ -5,7 +5,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class reportsActions extends sfActions
+class reportsActions extends AhgActions
 {
     public function executeIndex(sfWebRequest $request)
     {

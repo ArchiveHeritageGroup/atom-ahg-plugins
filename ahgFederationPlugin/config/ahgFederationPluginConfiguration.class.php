@@ -78,61 +78,28 @@ class ahgFederationPluginConfiguration extends sfPluginConfiguration
      */
     public function configureRouting(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('federation');
 
         // Federation admin dashboard
-        $routing->prependRoute('federation_index', new sfRoute(
-            '/admin/federation',
-            ['module' => 'federation', 'action' => 'index']
-        ));
+        $router->any('federation_index', '/admin/federation', 'index');
 
         // Peer management
-        $routing->prependRoute('federation_peers', new sfRoute(
-            '/admin/federation/peers',
-            ['module' => 'federation', 'action' => 'peers']
-        ));
-
-        $routing->prependRoute('federation_peer_edit', new sfRoute(
-            '/admin/federation/peers/:id',
-            ['module' => 'federation', 'action' => 'editPeer'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('federation_peer_add', new sfRoute(
-            '/admin/federation/peers/add',
-            ['module' => 'federation', 'action' => 'addPeer']
-        ));
+        $router->any('federation_peers', '/admin/federation/peers', 'peers');
+        $router->any('federation_peer_edit', '/admin/federation/peers/:id', 'editPeer', ['id' => '\d+']);
+        $router->any('federation_peer_add', '/admin/federation/peers/add', 'addPeer');
 
         // Harvesting
-        $routing->prependRoute('federation_harvest', new sfRoute(
-            '/admin/federation/harvest/:peerId',
-            ['module' => 'federation', 'action' => 'harvest'],
-            ['peerId' => '\d+']
-        ));
-
-        $routing->prependRoute('federation_harvest_status', new sfRoute(
-            '/admin/federation/harvest/:peerId/status',
-            ['module' => 'federation', 'action' => 'harvestStatus'],
-            ['peerId' => '\d+']
-        ));
+        $router->any('federation_harvest', '/admin/federation/harvest/:peerId', 'harvest', ['peerId' => '\d+']);
+        $router->any('federation_harvest_status', '/admin/federation/harvest/:peerId/status', 'harvestStatus', ['peerId' => '\d+']);
 
         // Harvest log
-        $routing->prependRoute('federation_log', new sfRoute(
-            '/admin/federation/log',
-            ['module' => 'federation', 'action' => 'log']
-        ));
+        $router->any('federation_log', '/admin/federation/log', 'log');
 
         // API endpoints for AJAX
-        $routing->prependRoute('federation_api_test_peer', new sfRoute(
-            '/admin/federation/api/test-peer',
-            ['module' => 'federation', 'action' => 'testPeer']
-        ));
+        $router->any('federation_api_test_peer', '/admin/federation/api/test-peer', 'testPeer');
+        $router->any('federation_api_harvest_run', '/admin/federation/api/harvest/:peerId', 'runHarvest', ['peerId' => '\d+']);
 
-        $routing->prependRoute('federation_api_harvest_run', new sfRoute(
-            '/admin/federation/api/harvest/:peerId',
-            ['module' => 'federation', 'action' => 'runHarvest'],
-            ['peerId' => '\d+']
-        ));
+        $router->register($event->getSubject());
     }
 
     /**

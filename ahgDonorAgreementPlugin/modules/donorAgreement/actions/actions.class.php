@@ -2,11 +2,10 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class donorAgreementActions extends sfActions
+class donorAgreementActions extends AhgActions
 {
     protected function initFramework()
     {
-        \AhgCore\Core\AhgDb::init();
     }
 
     /**

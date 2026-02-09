@@ -1,6 +1,6 @@
 <?php
 
-class statisticsActions extends sfActions
+class statisticsActions extends AhgActions
 {
     protected ?StatisticsService $service = null;
 

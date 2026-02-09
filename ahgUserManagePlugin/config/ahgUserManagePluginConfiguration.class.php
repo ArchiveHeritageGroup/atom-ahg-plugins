@@ -38,19 +38,29 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // userManage module routes
+        $userManage = new \AtomFramework\Routing\RouteLoader('userManage');
+
+        // Catch-all slug route (checked last after prepending)
+        $userManage->any('user_view_override', '/user/:slug', 'view');
+        $userManage->any('user_delete_override', '/user/:slug/delete', 'delete');
+        $userManage->any('user_edit_override', '/user/:slug/edit', 'edit');
+
+        // Specific routes
+        $userManage->any('user_add_override', '/user/add', 'edit');
+        $userManage->any('user_list_override', '/user/list', 'browse');
+        $userManage->any('user_index_override', '/user', 'browse');
+
+        $userManage->register($routing);
+
+        // Base AtoM user passthrough routes (module: user)
+        $userPassthrough = new \AtomFramework\Routing\RouteLoader('user');
+        $userPassthrough->any('user_login_passthrough', '/user/login', 'login');
+        $userPassthrough->any('user_logout_passthrough', '/user/logout', 'logout');
+        $userPassthrough->any('user_password_edit_passthrough', '/user/passwordEdit', 'passwordEdit');
+        $userPassthrough->any('user_clipboard_passthrough', '/user/clipboard', 'clipboard');
+        $userPassthrough->any('user_password_reset_passthrough', '/user/passwordReset', 'passwordReset');
+
+        $userPassthrough->register($routing);
     }
 }

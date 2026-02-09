@@ -18,46 +18,20 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
     
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
-        
+        $router = new \AtomFramework\Routing\RouteLoader('securityClearance');
+
         // Admin clearance management routes
-        $routing->prependRoute('security_compliance', new sfRoute(
-            '/admin/security/compliance',
-            ['module' => 'securityClearance', 'action' => 'securityCompliance']
-        ));
-        $routing->prependRoute('security_clearances', new sfRoute(
-            '/security/clearances',
-            ['module' => 'securityClearance', 'action' => 'index']
-        ));
-        $routing->prependRoute('security_clearance_view', new sfRoute(
-            '/security/clearance/:id',
-            ['module' => 'securityClearance', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('security_clearance_grant', new sfRoute(
-            '/security/clearance/grant',
-            ['module' => 'securityClearance', 'action' => 'grant']
-        ));
-        $routing->prependRoute('security_clearance_revoke', new sfRoute(
-            '/security/clearance/:id/revoke',
-            ['module' => 'securityClearance', 'action' => 'revoke'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('security_clearance_bulk_grant', new sfRoute(
-            '/security/clearance/bulk-grant',
-            ['module' => 'securityClearance', 'action' => 'bulkGrant']
-        ));
-        $routing->prependRoute('security_access_revoke', new sfRoute(
-            '/security/access/:id/revoke',
-            ['module' => 'securityClearance', 'action' => 'revokeAccess'],
-            ['id' => '\d+']
-        ));
+        $router->any('security_compliance', '/admin/security/compliance', 'securityCompliance');
+        $router->any('security_clearances', '/security/clearances', 'index');
+        $router->any('security_clearance_view', '/security/clearance/:id', 'view', ['id' => '\d+']);
+        $router->any('security_clearance_grant', '/security/clearance/grant', 'grant');
+        $router->any('security_clearance_revoke', '/security/clearance/:id/revoke', 'revoke', ['id' => '\d+']);
+        $router->any('security_clearance_bulk_grant', '/security/clearance/bulk-grant', 'bulkGrant');
+        $router->any('security_access_revoke', '/security/access/:id/revoke', 'revokeAccess', ['id' => '\d+']);
 
         // User clearance management (slug-based)
-        $routing->prependRoute('security_clearance_user', new sfRoute(
-            '/security/clearance/user/:slug',
-            ['module' => 'securityClearance', 'action' => 'user'],
-            ['slug' => '[a-zA-Z0-9_-]+']
-        ));
+        $router->any('security_clearance_user', '/security/clearance/user/:slug', 'user', ['slug' => '[a-zA-Z0-9_-]+']);
+
+        $router->register($event->getSubject());
     }
 }

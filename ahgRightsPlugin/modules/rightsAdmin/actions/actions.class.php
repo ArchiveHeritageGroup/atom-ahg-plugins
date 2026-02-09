@@ -12,7 +12,7 @@ use Plugins\ahgRightsPlugin\Services\RightsService;
  *
  * @package ahgRightsPlugin
  */
-class rightsAdminActions extends sfActions
+class rightsAdminActions extends AhgActions
 {
     protected RightsService $rightsService;
 

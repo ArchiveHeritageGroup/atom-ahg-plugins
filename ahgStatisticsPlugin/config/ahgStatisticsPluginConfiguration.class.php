@@ -94,80 +94,38 @@ class ahgStatisticsPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('statistics');
 
         // Dashboard
-        $routing->prependRoute('statistics_dashboard', new sfRoute(
-            '/statistics',
-            ['module' => 'statistics', 'action' => 'dashboard']
-        ));
-        $routing->prependRoute('statistics_index', new sfRoute(
-            '/statistics/dashboard',
-            ['module' => 'statistics', 'action' => 'dashboard']
-        ));
+        $router->any('statistics_dashboard', '/statistics', 'dashboard');
+        $router->any('statistics_index', '/statistics/dashboard', 'dashboard');
 
         // Reports
-        $routing->prependRoute('statistics_views', new sfRoute(
-            '/statistics/views',
-            ['module' => 'statistics', 'action' => 'views']
-        ));
-        $routing->prependRoute('statistics_downloads', new sfRoute(
-            '/statistics/downloads',
-            ['module' => 'statistics', 'action' => 'downloads']
-        ));
-        $routing->prependRoute('statistics_geographic', new sfRoute(
-            '/statistics/geographic',
-            ['module' => 'statistics', 'action' => 'geographic']
-        ));
-        $routing->prependRoute('statistics_top_items', new sfRoute(
-            '/statistics/top-items',
-            ['module' => 'statistics', 'action' => 'topItems']
-        ));
+        $router->any('statistics_views', '/statistics/views', 'views');
+        $router->any('statistics_downloads', '/statistics/downloads', 'downloads');
+        $router->any('statistics_geographic', '/statistics/geographic', 'geographic');
+        $router->any('statistics_top_items', '/statistics/top-items', 'topItems');
 
         // Item-level statistics
-        $routing->prependRoute('statistics_item', new sfRoute(
-            '/statistics/item/:object_id',
-            ['module' => 'statistics', 'action' => 'item'],
-            ['object_id' => '\d+']
-        ));
+        $router->any('statistics_item', '/statistics/item/:object_id', 'item', ['object_id' => '\d+']);
 
         // Repository statistics
-        $routing->prependRoute('statistics_repository', new sfRoute(
-            '/statistics/repository/:id',
-            ['module' => 'statistics', 'action' => 'repository'],
-            ['id' => '\d+']
-        ));
+        $router->any('statistics_repository', '/statistics/repository/:id', 'repository', ['id' => '\d+']);
 
         // Export
-        $routing->prependRoute('statistics_export', new sfRoute(
-            '/statistics/export',
-            ['module' => 'statistics', 'action' => 'export']
-        ));
+        $router->any('statistics_export', '/statistics/export', 'export');
 
         // Admin: Configuration
-        $routing->prependRoute('statistics_admin', new sfRoute(
-            '/statistics/admin',
-            ['module' => 'statistics', 'action' => 'admin']
-        ));
-        $routing->prependRoute('statistics_bots', new sfRoute(
-            '/statistics/admin/bots',
-            ['module' => 'statistics', 'action' => 'bots']
-        ));
+        $router->any('statistics_admin', '/statistics/admin', 'admin');
+        $router->any('statistics_bots', '/statistics/admin/bots', 'bots');
 
         // API for charts
-        $routing->prependRoute('statistics_api_chart', new sfRoute(
-            '/statistics/api/chart/:type',
-            ['module' => 'statistics', 'action' => 'apiChart']
-        ));
-        $routing->prependRoute('statistics_api_summary', new sfRoute(
-            '/statistics/api/summary',
-            ['module' => 'statistics', 'action' => 'apiSummary']
-        ));
+        $router->any('statistics_api_chart', '/statistics/api/chart/:type', 'apiChart');
+        $router->any('statistics_api_summary', '/statistics/api/summary', 'apiSummary');
 
         // Tracking pixel (for email opens, etc.)
-        $routing->prependRoute('statistics_pixel', new sfRoute(
-            '/statistics/pixel/:token',
-            ['module' => 'statistics', 'action' => 'pixel']
-        ));
+        $router->any('statistics_pixel', '/statistics/pixel/:token', 'pixel');
+
+        $router->register($event->getSubject());
     }
 }

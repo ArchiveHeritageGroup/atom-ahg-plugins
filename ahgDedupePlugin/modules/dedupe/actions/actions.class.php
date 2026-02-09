@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * Dedupe module actions.
  */
-class dedupeActions extends sfActions
+class dedupeActions extends AhgActions
 {
     /**
      * Dashboard with statistics.

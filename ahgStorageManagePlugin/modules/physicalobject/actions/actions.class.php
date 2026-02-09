@@ -7,7 +7,7 @@
  * all CRUD + auxiliary actions under plugin ownership.
  */
 
-class physicalobjectActions extends sfActions
+class physicalobjectActions extends AhgActions
 {
     // ---------------------------------------------------------------
     // INDEX (view detail)

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @subpackage actions
  */
 
-class libraryActions extends sfActions
+class libraryActions extends AhgActions
 {
     /**
      * Index action - delegated to indexAction.class.php

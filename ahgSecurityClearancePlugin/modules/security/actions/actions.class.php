@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class securityActions extends sfActions
+class securityActions extends AhgActions
 {
     public function executeAccessRequests(sfWebRequest $request)
     {

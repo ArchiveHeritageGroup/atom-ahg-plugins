@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * ahgMuseumPlugin actions - Laravel Query Builder version.
  */
-class museumActions extends sfActions
+class museumActions extends AhgActions
 {
     /**
      * Display provenance/custody history with D3.js timeline visualization.

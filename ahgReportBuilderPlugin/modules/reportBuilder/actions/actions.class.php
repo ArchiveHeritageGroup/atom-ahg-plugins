@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class reportBuilderActions extends sfActions
+class reportBuilderActions extends AhgActions
 {
     protected ReportBuilderService $service;
 

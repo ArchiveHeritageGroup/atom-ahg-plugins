@@ -3,7 +3,7 @@
 /**
  * DOI module actions.
  */
-class doiActions extends sfActions
+class doiActions extends AhgActions
 {
     /**
      * Dashboard / index.

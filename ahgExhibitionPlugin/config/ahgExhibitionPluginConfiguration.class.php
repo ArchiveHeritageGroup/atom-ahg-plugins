@@ -39,100 +39,50 @@ class ahgExhibitionPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('exhibition');
 
         // Exhibition browse/index
-        $routing->prependRoute('exhibition_index', new sfRoute(
-            '/exhibitions',
-            ['module' => 'exhibition', 'action' => 'index']
-        ));
+        $router->any('exhibition_index', '/exhibitions', 'index');
 
         // Exhibition dashboard
-        $routing->prependRoute('exhibition_dashboard', new sfRoute(
-            '/exhibition/dashboard',
-            ['module' => 'exhibition', 'action' => 'dashboard']
-        ));
+        $router->any('exhibition_dashboard', '/exhibition/dashboard', 'dashboard');
 
         // Create/Add exhibition
-        $routing->prependRoute('exhibition_add', new sfRoute(
-            '/exhibition/add',
-            ['module' => 'exhibition', 'action' => 'add']
-        ));
+        $router->any('exhibition_add', '/exhibition/add', 'add');
 
         // View exhibition by ID
-        $routing->prependRoute('exhibition_show', new sfRoute(
-            '/exhibition/:id',
-            ['module' => 'exhibition', 'action' => 'show'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_show', '/exhibition/:id', 'show', ['id' => '\d+']);
 
         // Edit exhibition
-        $routing->prependRoute('exhibition_edit', new sfRoute(
-            '/exhibition/:id/edit',
-            ['module' => 'exhibition', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_edit', '/exhibition/:id/edit', 'edit', ['id' => '\d+']);
 
         // Exhibition objects management
-        $routing->prependRoute('exhibition_objects', new sfRoute(
-            '/exhibition/:id/objects',
-            ['module' => 'exhibition', 'action' => 'objects'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_objects', '/exhibition/:id/objects', 'objects', ['id' => '\d+']);
 
         // Exhibition storylines
-        $routing->prependRoute('exhibition_storylines', new sfRoute(
-            '/exhibition/:id/storylines',
-            ['module' => 'exhibition', 'action' => 'storylines'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_storylines', '/exhibition/:id/storylines', 'storylines', ['id' => '\d+']);
 
         // Single storyline
-        $routing->prependRoute('exhibition_storyline', new sfRoute(
-            '/exhibition/:id/storyline/:storyline_id',
-            ['module' => 'exhibition', 'action' => 'storyline'],
-            ['id' => '\d+', 'storyline_id' => '\d+']
-        ));
+        $router->any('exhibition_storyline', '/exhibition/:id/storyline/:storyline_id', 'storyline', ['id' => '\d+', 'storyline_id' => '\d+']);
 
         // Exhibition sections
-        $routing->prependRoute('exhibition_sections', new sfRoute(
-            '/exhibition/:id/sections',
-            ['module' => 'exhibition', 'action' => 'sections'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_sections', '/exhibition/:id/sections', 'sections', ['id' => '\d+']);
 
         // Exhibition events
-        $routing->prependRoute('exhibition_events', new sfRoute(
-            '/exhibition/:id/events',
-            ['module' => 'exhibition', 'action' => 'events'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_events', '/exhibition/:id/events', 'events', ['id' => '\d+']);
 
         // Exhibition checklists
-        $routing->prependRoute('exhibition_checklists', new sfRoute(
-            '/exhibition/:id/checklists',
-            ['module' => 'exhibition', 'action' => 'checklists'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_checklists', '/exhibition/:id/checklists', 'checklists', ['id' => '\d+']);
 
         // Object list (for export/print)
-        $routing->prependRoute('exhibition_object_list', new sfRoute(
-            '/exhibition/:id/object-list',
-            ['module' => 'exhibition', 'action' => 'objectList'],
-            ['id' => '\d+']
-        ));
+        $router->any('exhibition_object_list', '/exhibition/:id/object-list', 'objectList', ['id' => '\d+']);
 
         // Venues management
-        $routing->prependRoute('exhibition_venues', new sfRoute(
-            '/exhibition/venues',
-            ['module' => 'exhibition', 'action' => 'venues']
-        ));
+        $router->any('exhibition_venues', '/exhibition/venues', 'venues');
 
         // View exhibition by slug (must be last - catch-all)
-        $routing->prependRoute('exhibition_view', new sfRoute(
-            '/exhibition/:slug',
-            ['module' => 'exhibition', 'action' => 'show'],
-            ['slug' => '[a-z0-9-]+']
-        ));
+        $router->any('exhibition_view', '/exhibition/:slug', 'show', ['slug' => '[a-z0-9-]+']);
+
+        $router->register($event->getSubject());
     }
 }

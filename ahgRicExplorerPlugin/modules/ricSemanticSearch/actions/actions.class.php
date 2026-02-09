@@ -1,6 +1,6 @@
 <?php
 
-class ricSemanticSearchActions extends sfActions
+class ricSemanticSearchActions extends AhgActions
 {
     public function executeIndex(sfWebRequest $request)
     {

@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class heritageAdminActions extends sfActions
+class heritageAdminActions extends AhgActions
 {
     public function preExecute()
     {

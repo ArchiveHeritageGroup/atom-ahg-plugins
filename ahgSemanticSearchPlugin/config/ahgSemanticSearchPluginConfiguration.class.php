@@ -38,45 +38,17 @@ class ahgSemanticSearchPluginConfiguration extends sfPluginConfiguration
      */
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('searchEnhancement');
 
-        $routing->prependRoute('search_enhancement_save', new sfRoute(
-            '/search/enhancement/save',
-            ['module' => 'searchEnhancement', 'action' => 'saveSearch']
-        ));
+        $router->any('search_enhancement_save', '/search/enhancement/save', 'saveSearch');
+        $router->any('search_enhancement_saved', '/search/enhancement/saved', 'savedSearches');
+        $router->any('search_enhancement_run_saved', '/search/enhancement/run/:id', 'runSavedSearch', ['id' => '\d+']);
+        $router->any('search_enhancement_run_template', '/search/enhancement/template/:id', 'runTemplate', ['id' => '\d+']);
+        $router->any('search_enhancement_history', '/search/enhancement/history', 'history');
+        $router->any('search_enhancement_delete', '/search/enhancement/delete/:id', 'deleteSavedSearch', ['id' => '\d+']);
+        $router->any('search_enhancement_admin_templates', '/admin/search-templates', 'adminTemplates');
 
-        $routing->prependRoute('search_enhancement_saved', new sfRoute(
-            '/search/enhancement/saved',
-            ['module' => 'searchEnhancement', 'action' => 'savedSearches']
-        ));
-
-        $routing->prependRoute('search_enhancement_run_saved', new sfRoute(
-            '/search/enhancement/run/:id',
-            ['module' => 'searchEnhancement', 'action' => 'runSavedSearch'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('search_enhancement_run_template', new sfRoute(
-            '/search/enhancement/template/:id',
-            ['module' => 'searchEnhancement', 'action' => 'runTemplate'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('search_enhancement_history', new sfRoute(
-            '/search/enhancement/history',
-            ['module' => 'searchEnhancement', 'action' => 'history']
-        ));
-
-        $routing->prependRoute('search_enhancement_delete', new sfRoute(
-            '/search/enhancement/delete/:id',
-            ['module' => 'searchEnhancement', 'action' => 'deleteSavedSearch'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('search_enhancement_admin_templates', new sfRoute(
-            '/admin/search-templates',
-            ['module' => 'searchEnhancement', 'action' => 'adminTemplates']
-        ));
+        $router->register($event->getSubject());
     }
 
     /**

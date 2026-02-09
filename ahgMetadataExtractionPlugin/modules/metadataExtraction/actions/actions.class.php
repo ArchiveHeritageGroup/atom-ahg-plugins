@@ -7,7 +7,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class metadataExtractionActions extends sfActions
+class metadataExtractionActions extends AhgActions
 {
     /**
      * Index action - display list of digital objects with extraction status.

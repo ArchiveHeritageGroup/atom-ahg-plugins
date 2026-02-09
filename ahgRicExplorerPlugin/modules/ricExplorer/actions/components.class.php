@@ -1,5 +1,5 @@
 <?php
-class ricExplorerComponents extends sfComponents
+class ricExplorerComponents extends AhgComponents
 {
     public function executeRicPanel()
     {

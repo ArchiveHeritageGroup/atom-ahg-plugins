@@ -9,86 +9,34 @@ class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('accessRequest');
 
-		// Admin menu route
-        $routing->prependRoute('accessRequest_index', new sfRoute(
-            '/accessRequest',
-            ['module' => 'accessRequest', 'action' => 'pending']
-        ));
+        // Admin menu route
+        $router->any('accessRequest_index', '/accessRequest', 'pending');
+
         // User routes - clearance requests
-        $routing->prependRoute('access_request_new', new sfRoute(
-            '/security/request-access',
-            ['module' => 'accessRequest', 'action' => 'new']
-        ));
-
-        $routing->prependRoute('access_request_create', new sfRoute(
-            '/security/request-access/create',
-            ['module' => 'accessRequest', 'action' => 'create']
-        ));
+        $router->any('access_request_new', '/security/request-access', 'new');
+        $router->any('access_request_create', '/security/request-access/create', 'create');
 
         // Object access request
-        $routing->prependRoute('access_request_object', new sfRoute(
-            '/security/request-object',
-            ['module' => 'accessRequest', 'action' => 'requestObject']
-        ));
-
-        $routing->prependRoute('access_request_object_create', new sfRoute(
-            '/security/request-object/create',
-            ['module' => 'accessRequest', 'action' => 'createObjectRequest']
-        ));
+        $router->any('access_request_object', '/security/request-object', 'requestObject');
+        $router->any('access_request_object_create', '/security/request-object/create', 'createObjectRequest');
 
         // My requests
-        $routing->prependRoute('access_request_my', new sfRoute(
-            '/security/my-requests',
-            ['module' => 'accessRequest', 'action' => 'myRequests']
-        ));
-
-        $routing->prependRoute('access_request_cancel', new sfRoute(
-            '/security/request/:id/cancel',
-            ['module' => 'accessRequest', 'action' => 'cancel'],
-            ['id' => '\d+']
-        ));
+        $router->any('access_request_my', '/security/my-requests', 'myRequests');
+        $router->any('access_request_cancel', '/security/request/:id/cancel', 'cancel', ['id' => '\d+']);
 
         // Approver routes
-        $routing->prependRoute('access_request_pending', new sfRoute(
-            '/security/access-requests',
-            ['module' => 'accessRequest', 'action' => 'pending']
-        ));
-
-        $routing->prependRoute('access_request_view', new sfRoute(
-            '/security/request/:id',
-            ['module' => 'accessRequest', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('access_request_approve', new sfRoute(
-            '/security/request/:id/approve',
-            ['module' => 'accessRequest', 'action' => 'approve'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('access_request_deny', new sfRoute(
-            '/security/request/:id/deny',
-            ['module' => 'accessRequest', 'action' => 'deny'],
-            ['id' => '\d+']
-        ));
+        $router->any('access_request_pending', '/security/access-requests', 'pending');
+        $router->any('access_request_view', '/security/request/:id', 'view', ['id' => '\d+']);
+        $router->any('access_request_approve', '/security/request/:id/approve', 'approve', ['id' => '\d+']);
+        $router->any('access_request_deny', '/security/request/:id/deny', 'deny', ['id' => '\d+']);
 
         // Admin routes
-        $routing->prependRoute('access_request_approvers', new sfRoute(
-            '/security/approvers',
-            ['module' => 'accessRequest', 'action' => 'approvers']
-        ));
+        $router->any('access_request_approvers', '/security/approvers', 'approvers');
+        $router->any('access_request_add_approver', '/security/approvers/add', 'addApprover');
+        $router->any('access_request_remove_approver', '/security/approvers/:id/remove', 'removeApprover', ['id' => '\d+']);
 
-        $routing->prependRoute('access_request_add_approver', new sfRoute(
-            '/security/approvers/add',
-            ['module' => 'accessRequest', 'action' => 'addApprover']
-        ));
-
-        $routing->prependRoute('access_request_remove_approver', new sfRoute(
-            '/security/approvers/:id/remove',
-            ['module' => 'accessRequest', 'action' => 'removeApprover'],
-            ['id' => '\d+']
-        ));
+        $router->register($event->getSubject());
     }
 }

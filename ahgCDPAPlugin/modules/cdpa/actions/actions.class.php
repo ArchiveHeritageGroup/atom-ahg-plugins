@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * CDPA module actions - Zimbabwe Cyber and Data Protection Act compliance.
  */
-class cdpaActions extends sfActions
+class cdpaActions extends AhgActions
 {
     /**
      * Dashboard.

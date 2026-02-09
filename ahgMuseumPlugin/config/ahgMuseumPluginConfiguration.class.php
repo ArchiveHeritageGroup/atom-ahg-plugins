@@ -27,40 +27,26 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        // === CCO PROVENANCE ===
-        $routing->prependRoute('cco_provenance', new sfRoute(
-            '/:slug/cco/provenance',
-            ['module' => 'cco', 'action' => 'provenance']
-        ));
+        // CCO module routes
+        $cco = new \AtomFramework\Routing\RouteLoader('cco');
+        $cco->any('cco_provenance', '/:slug/cco/provenance', 'provenance');
+        $cco->register($routing);
 
-        // === MUSEUM VIEW/BROWSE/CRUD ===
+        // Museum module routes
+        // museum_view uses AhgMetadataRoute (not sfRoute), so register manually
         $routing->prependRoute('museum_view', new AhgMetadataRoute(
             '/museum/:slug',
             ['module' => 'museum', 'action' => 'index'],
             ['slug' => '[a-zA-Z0-9_-]+']
         ));
-        $routing->prependRoute('museum_browse', new sfRoute(
-            '/museum/browse',
-            ['module' => 'museum', 'action' => 'browse']
-        ));
-        $routing->prependRoute('museum_add', new sfRoute(
-            '/museum/add',
-            ['module' => 'museum', 'action' => 'add']
-        ));
-        $routing->prependRoute('museum_edit', new sfRoute(
-            '/museum/edit/:slug',
-            ['module' => 'museum', 'action' => 'edit'],
-            ['slug' => '[a-zA-Z0-9_-]+']
-        ));
-        // === VOCABULARY/GETTY API ===
-        $routing->prependRoute('museum_vocabulary', new sfRoute(
-            '/museum/vocabulary',
-            ['module' => 'museum', 'action' => 'vocabulary']
-        ));
-        $routing->prependRoute('museum_getty', new sfRoute(
-            '/museum/getty',
-            ['module' => 'museum', 'action' => 'gettyAutocomplete']
-        ));
+
+        $museum = new \AtomFramework\Routing\RouteLoader('museum');
+        $museum->any('museum_browse', '/museum/browse', 'browse');
+        $museum->any('museum_add', '/museum/add', 'add');
+        $museum->any('museum_edit', '/museum/edit/:slug', 'edit', ['slug' => '[a-zA-Z0-9_-]+']);
+        $museum->any('museum_vocabulary', '/museum/vocabulary', 'vocabulary');
+        $museum->any('museum_getty', '/museum/getty', 'gettyAutocomplete');
+        $museum->register($routing);
 
         // Note: Exhibition routes moved to standalone ahgExhibitionPlugin
         // Note: Loan routes moved to standalone ahgLoanPlugin

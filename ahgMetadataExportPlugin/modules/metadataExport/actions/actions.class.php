@@ -11,7 +11,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  * @subpackage metadataExport
  * @author     The Archive and Heritage Group (Pty) Ltd
  */
-class metadataExportActions extends sfActions
+class metadataExportActions extends AhgActions
 {
     /**
      * Export dashboard - format selection

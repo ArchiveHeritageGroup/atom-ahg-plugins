@@ -16,11 +16,10 @@ class ahgLabelPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('label');
 
-        $routing->prependRoute('label_index', new sfRoute('/label/:slug', [
-            'module' => 'label',
-            'action' => 'index',
-        ]));
+        $router->any('label_index', '/label/:slug', 'index');
+
+        $router->register($event->getSubject());
     }
 }

@@ -22,190 +22,68 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        // Spectrum core module
+        $spectrum = new \AtomFramework\Routing\RouteLoader('spectrum');
+
         // Core spectrum routes
-        $routing->prependRoute('spectrum_index', new sfRoute(
-            '/:slug/spectrum',
-            ['module' => 'spectrum', 'action' => 'index']
-        ));
-
-        $routing->prependRoute('spectrum_label', new sfRoute(
-            '/:slug/spectrum/label',
-            ['module' => 'spectrum', 'action' => 'label']
-        ));
-
-        $routing->prependRoute('spectrum_workflow', new sfRoute(
-            '/spectrum/:slug/workflow',
-            ['module' => 'spectrum', 'action' => 'workflow']
-        ));
-
-        $routing->prependRoute('spectrum_workflow_update', new sfRoute(
-            '/spectrum/:slug/workflow/update',
-            ['module' => 'spectrum', 'action' => 'workflowUpdate']
-        ));
-
-        $routing->prependRoute('spectrum_workflow_transition', new sfRoute(
-            '/spectrum/:slug/workflow/transition',
-            ['module' => 'spectrum', 'action' => 'workflowTransition']
-        ));
+        $spectrum->any('spectrum_index', '/:slug/spectrum', 'index');
+        $spectrum->any('spectrum_label', '/:slug/spectrum/label', 'label');
+        $spectrum->any('spectrum_workflow', '/spectrum/:slug/workflow', 'workflow');
+        $spectrum->any('spectrum_workflow_update', '/spectrum/:slug/workflow/update', 'workflowUpdate');
+        $spectrum->any('spectrum_workflow_transition', '/spectrum/:slug/workflow/transition', 'workflowTransition');
 
         // Dashboard routes
-        $routing->prependRoute('spectrum_dashboard', new sfRoute(
-            '/spectrum/dashboard',
-            ['module' => 'spectrum', 'action' => 'dashboard']
-        ));
-
-        // My Tasks route
-        $routing->prependRoute('spectrum_my_tasks', new sfRoute(
-            '/spectrum/my-tasks',
-            ['module' => 'spectrum', 'action' => 'myTasks']
-        ));
-
-        $routing->prependRoute('spectrum_grap_dashboard', new sfRoute(
-            '/:slug/spectrum/grap',
-            ['module' => 'spectrum', 'action' => 'grapDashboard']
-        ));
-
-        $routing->prependRoute('spectrum_loan_dashboard', new sfRoute(
-            '/spectrum/loans',
-            ['module' => 'spectrum', 'action' => 'loanDashboard']
-        ));
+        $spectrum->any('spectrum_dashboard', '/spectrum/dashboard', 'dashboard');
+        $spectrum->any('spectrum_my_tasks', '/spectrum/my-tasks', 'myTasks');
+        $spectrum->any('spectrum_grap_dashboard', '/:slug/spectrum/grap', 'grapDashboard');
+        $spectrum->any('spectrum_loan_dashboard', '/spectrum/loans', 'loanDashboard');
 
         // Condition routes
-        $routing->prependRoute('spectrum_condition_photos', new sfRoute(
-            '/:slug/spectrum/condition-photos',
-            ['module' => 'spectrum', 'action' => 'conditionPhotos']
-        ));
-
-        $routing->prependRoute('spectrum_condition_report', new sfRoute(
-            '/:slug/spectrum/condition-report',
-            ['module' => 'spectrum', 'action' => 'conditionReport']
-        ));
-
-        $routing->prependRoute('spectrum_condition_check', new sfRoute(
-            '/:slug/spectrum/conditionCheck',
-            ['module' => 'spectrum', 'action' => 'conditionCheck']
-        ));
+        $spectrum->any('spectrum_condition_photos', '/:slug/spectrum/condition-photos', 'conditionPhotos');
+        $spectrum->any('spectrum_condition_report', '/:slug/spectrum/condition-report', 'conditionReport');
+        $spectrum->any('spectrum_condition_check', '/:slug/spectrum/conditionCheck', 'conditionCheck');
 
         // Compliance routes
-        $routing->prependRoute('spectrum_security_compliance', new sfRoute(
-            '/:slug/spectrum/security',
-            ['module' => 'spectrum', 'action' => 'securityCompliance']
-        ));
-
-        $routing->prependRoute('spectrum_privacy_compliance', new sfRoute(
-            '/:slug/spectrum/privacy',
-            ['module' => 'spectrum', 'action' => 'privacyCompliance']
-        ));
-
-        $routing->prependRoute('spectrum_privacy_ropa', new sfRoute(
-            '/spectrum/ropa',
-            ['module' => 'spectrum', 'action' => 'ropa']
-        ));
+        $spectrum->any('spectrum_security_compliance', '/:slug/spectrum/security', 'securityCompliance');
+        $spectrum->any('spectrum_privacy_compliance', '/:slug/spectrum/privacy', 'privacyCompliance');
+        $spectrum->any('spectrum_privacy_ropa', '/spectrum/ropa', 'ropa');
 
         // Annotation routes
-        $routing->prependRoute('spectrum_annotation_save', new sfRoute(
-            '/spectrum/annotation/save',
-            ['module' => 'spectrum', 'action' => 'saveAnnotation']
-        ));
-
-        $routing->prependRoute('spectrum_annotation_get', new sfRoute(
-            '/spectrum/annotation/get/:photo_id',
-            ['module' => 'spectrum', 'action' => 'getAnnotation']
-        ));
+        $spectrum->any('spectrum_annotation_save', '/spectrum/annotation/save', 'saveAnnotation');
+        $spectrum->any('spectrum_annotation_get', '/spectrum/annotation/get/:photo_id', 'getAnnotation');
 
         // Photo management
-        $routing->prependRoute('spectrum_photo_delete', new sfRoute(
-            '/spectrum/photo/delete/:photo_id',
-            ['module' => 'spectrum', 'action' => 'deletePhoto']
-        ));
-
-        $routing->prependRoute('spectrum_photo_primary', new sfRoute(
-            '/spectrum/photo/primary/:photo_id',
-            ['module' => 'spectrum', 'action' => 'setPrimaryPhoto']
-        ));
-
-        $routing->prependRoute('spectrum_photo_rotate', new sfRoute(
-            '/spectrum/photo/rotate/:photo_id',
-            ['module' => 'spectrum', 'action' => 'rotatePhoto']
-        ));
+        $spectrum->any('spectrum_photo_delete', '/spectrum/photo/delete/:photo_id', 'deletePhoto');
+        $spectrum->any('spectrum_photo_primary', '/spectrum/photo/primary/:photo_id', 'setPrimaryPhoto');
+        $spectrum->any('spectrum_photo_rotate', '/spectrum/photo/rotate/:photo_id', 'rotatePhoto');
 
         // Provenance
-        $routing->prependRoute('spectrum_provenance_ajax', new sfRoute(
-            '/spectrum/provenance/ajax',
-            ['module' => 'spectrum', 'action' => 'provenanceAjax']
-        ));
+        $spectrum->any('spectrum_provenance_ajax', '/spectrum/provenance/ajax', 'provenanceAjax');
 
         // Admin routes
-        $routing->prependRoute('spectrum_install', new sfRoute(
-            '/spectrum/install',
-            ['module' => 'spectrum', 'action' => 'install']
-        ));
+        $spectrum->any('spectrum_install', '/spectrum/install', 'install');
+        $spectrum->any('spectrum_export', '/spectrum/export', 'export');
+        $spectrum->any('spectrum_template_config', '/spectrum/config/templates', 'templateConfig');
 
-        $routing->prependRoute('spectrum_export', new sfRoute(
-            '/spectrum/export',
-            ['module' => 'spectrum', 'action' => 'export']
-        ));
+        $spectrum->register($routing);
 
-        $routing->prependRoute('spectrum_template_config', new sfRoute(
-            '/spectrum/config/templates',
-            ['module' => 'spectrum', 'action' => 'templateConfig']
-        ));
+        // Spectrum API module
+        $spectrumApi = new \AtomFramework\Routing\RouteLoader('spectrumApi');
+        $spectrumApi->any('spectrum_api_events', '/api/spectrum/events', 'spectrumEvents');
+        $spectrumApi->any('spectrum_api_object_events', '/api/spectrum/objects/:object_id/events', 'spectrumObjectEvents');
+        $spectrumApi->any('spectrum_api_statistics', '/api/spectrum/statistics', 'spectrumStatistics');
+        $spectrumApi->register($routing);
 
-        // API routes
-        $routing->prependRoute('spectrum_api_events', new sfRoute(
-            '/api/spectrum/events',
-            ['module' => 'spectrumApi', 'action' => 'spectrumEvents']
-        ));
-
-        $routing->prependRoute('spectrum_api_object_events', new sfRoute(
-            '/api/spectrum/objects/:object_id/events',
-            ['module' => 'spectrumApi', 'action' => 'spectrumObjectEvents']
-        ));
-
-        $routing->prependRoute('spectrum_api_statistics', new sfRoute(
-            '/api/spectrum/statistics',
-            ['module' => 'spectrumApi', 'action' => 'spectrumStatistics']
-        ));
-
-        // Reports routes - spectrumReports module
-        $routing->prependRoute('spectrum_reports_index', new sfRoute(
-            '/spectrumReports',
-            ['module' => 'spectrumReports', 'action' => 'index']
-        ));
-
-        $routing->prependRoute('spectrum_reports_loans', new sfRoute(
-            '/spectrumReports/loans',
-            ['module' => 'spectrumReports', 'action' => 'loans']
-        ));
-
-        $routing->prependRoute('spectrum_reports_conditions', new sfRoute(
-            '/spectrumReports/conditions',
-            ['module' => 'spectrumReports', 'action' => 'conditions']
-        ));
-
-        $routing->prependRoute('spectrum_reports_valuations', new sfRoute(
-            '/spectrumReports/valuations',
-            ['module' => 'spectrumReports', 'action' => 'valuations']
-        ));
-
-        $routing->prependRoute('spectrum_reports_movements', new sfRoute(
-            '/spectrumReports/movements',
-            ['module' => 'spectrumReports', 'action' => 'movements']
-        ));
-
-        $routing->prependRoute('spectrum_reports_acquisitions', new sfRoute(
-            '/spectrumReports/acquisitions',
-            ['module' => 'spectrumReports', 'action' => 'acquisitions']
-        ));
-
-        $routing->prependRoute('spectrum_reports_conservation', new sfRoute(
-            '/spectrumReports/conservation',
-            ['module' => 'spectrumReports', 'action' => 'conservation']
-        ));
-
-        $routing->prependRoute('spectrum_reports_object_entry', new sfRoute(
-            '/spectrumReports/objectEntry',
-            ['module' => 'spectrumReports', 'action' => 'objectEntry']
-        ));
+        // Spectrum Reports module
+        $spectrumReports = new \AtomFramework\Routing\RouteLoader('spectrumReports');
+        $spectrumReports->any('spectrum_reports_index', '/spectrumReports', 'index');
+        $spectrumReports->any('spectrum_reports_loans', '/spectrumReports/loans', 'loans');
+        $spectrumReports->any('spectrum_reports_conditions', '/spectrumReports/conditions', 'conditions');
+        $spectrumReports->any('spectrum_reports_valuations', '/spectrumReports/valuations', 'valuations');
+        $spectrumReports->any('spectrum_reports_movements', '/spectrumReports/movements', 'movements');
+        $spectrumReports->any('spectrum_reports_acquisitions', '/spectrumReports/acquisitions', 'acquisitions');
+        $spectrumReports->any('spectrum_reports_conservation', '/spectrumReports/conservation', 'conservation');
+        $spectrumReports->any('spectrum_reports_object_entry', '/spectrumReports/objectEntry', 'objectEntry');
+        $spectrumReports->register($routing);
     }
 }

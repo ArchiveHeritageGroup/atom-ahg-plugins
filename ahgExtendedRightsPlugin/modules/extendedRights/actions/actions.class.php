@@ -2,25 +2,11 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-class extendedRightsActions extends sfActions
+class extendedRightsActions extends AhgActions
 {
-    protected static $dbInit = false;
-
-    protected function initDb()
-    {
-        if (self::$dbInit) {
-            return;
-        }
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        if (file_exists($bootstrap)) {
-            require_once $bootstrap;
-        }
-        self::$dbInit = true;
-    }
-
     public function executeIndex(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         // RightsStatements.org
         $this->rightsStatements = Capsule::table('rights_statement')
@@ -92,7 +78,7 @@ class extendedRightsActions extends sfActions
     public function executeEdit(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
-        $this->initDb();
+
 
         $this->resource = Capsule::table('information_object as io')
             ->join('slug', 'slug.object_id', '=', 'io.id')
@@ -203,7 +189,7 @@ class extendedRightsActions extends sfActions
 
     public function executeBatch(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function ($j) {
@@ -298,7 +284,7 @@ class extendedRightsActions extends sfActions
 
     public function executeEmbargoes(sfWebRequest $request)
     {
-        $this->initDb();
+
         $this->embargoes = Capsule::table('rights_embargo')
             ->join('slug', 'slug.object_id', '=', 'rights_embargo.object_id')
             ->leftJoin('information_object_i18n', function ($j) {
@@ -320,7 +306,7 @@ class extendedRightsActions extends sfActions
 
     public function executeLiftEmbargo(sfWebRequest $request)
     {
-        $this->initDb();
+
         Capsule::table('rights_embargo')
             ->where('id', '=', (int) $request->getParameter('id'))
             ->update(['status' => 'lifted', 'lifted_at' => date('Y-m-d H:i:s')]);
@@ -331,7 +317,7 @@ class extendedRightsActions extends sfActions
     public function executeBrowse(sfWebRequest $request)
     {
 
-        $this->initDb();
+
 
         // RightsStatements.org
         $this->rightsStatements = Capsule::table('rights_statement')
@@ -402,7 +388,7 @@ class extendedRightsActions extends sfActions
 
     public function executeExpiringEmbargoes(sfWebRequest $request)
     {
-        $this->initDb();
+
         $days = (int) $request->getParameter('days', 30);
         $this->days = $days;
 
@@ -434,7 +420,7 @@ class extendedRightsActions extends sfActions
     public function executeClear(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
-        $this->initDb();
+
 
         // Get the object ID from slug
         $object = Capsule::table('slug')

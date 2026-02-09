@@ -16,7 +16,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class linkedDataActions extends sfActions
+class linkedDataActions extends AhgActions
 {
     /**
      * JSON-LD endpoint for information objects

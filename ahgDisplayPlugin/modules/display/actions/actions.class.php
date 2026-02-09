@@ -3,7 +3,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 use AhgDisplay\Services\DisplayService;
 use AhgDisplay\Services\DisplayModeService;
 
-class displayActions extends sfActions
+class displayActions extends AhgActions
 {
     protected $service;
     protected $modeService;

@@ -71,141 +71,56 @@ class ahgNAZPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        $naz = new \AtomFramework\Routing\RouteLoader('naz');
+
         // NAZ Dashboard
-        $routing->prependRoute('naz_index', new sfRoute(
-            '/admin/naz',
-            ['module' => 'naz', 'action' => 'index']
-        ));
+        $naz->any('naz_index', '/admin/naz', 'index');
 
         // Closure periods
-        $routing->prependRoute('naz_closures', new sfRoute(
-            '/admin/naz/closures',
-            ['module' => 'naz', 'action' => 'closures']
-        ));
-        $routing->prependRoute('naz_closure_create', new sfRoute(
-            '/admin/naz/closure/create',
-            ['module' => 'naz', 'action' => 'closureCreate']
-        ));
-        $routing->prependRoute('naz_closure_edit', new sfRoute(
-            '/admin/naz/closure/:id/edit',
-            ['module' => 'naz', 'action' => 'closureEdit'],
-            ['id' => '\d+']
-        ));
+        $naz->any('naz_closures', '/admin/naz/closures', 'closures');
+        $naz->any('naz_closure_create', '/admin/naz/closure/create', 'closureCreate');
+        $naz->any('naz_closure_edit', '/admin/naz/closure/:id/edit', 'closureEdit', ['id' => '\d+']);
 
         // Research permits
-        $routing->prependRoute('naz_permits', new sfRoute(
-            '/admin/naz/permits',
-            ['module' => 'naz', 'action' => 'permits']
-        ));
-        $routing->prependRoute('naz_permit_create', new sfRoute(
-            '/admin/naz/permit/create',
-            ['module' => 'naz', 'action' => 'permitCreate']
-        ));
-        $routing->prependRoute('naz_permit_view', new sfRoute(
-            '/admin/naz/permit/:id',
-            ['module' => 'naz', 'action' => 'permitView'],
-            ['id' => '\d+']
-        ));
+        $naz->any('naz_permits', '/admin/naz/permits', 'permits');
+        $naz->any('naz_permit_create', '/admin/naz/permit/create', 'permitCreate');
+        $naz->any('naz_permit_view', '/admin/naz/permit/:id', 'permitView', ['id' => '\d+']);
 
         // Researchers
-        $routing->prependRoute('naz_researchers', new sfRoute(
-            '/admin/naz/researchers',
-            ['module' => 'naz', 'action' => 'researchers']
-        ));
-        $routing->prependRoute('naz_researcher_create', new sfRoute(
-            '/admin/naz/researcher/create',
-            ['module' => 'naz', 'action' => 'researcherCreate']
-        ));
-        $routing->prependRoute('naz_researcher_view', new sfRoute(
-            '/admin/naz/researcher/:id',
-            ['module' => 'naz', 'action' => 'researcherView'],
-            ['id' => '\d+']
-        ));
+        $naz->any('naz_researchers', '/admin/naz/researchers', 'researchers');
+        $naz->any('naz_researcher_create', '/admin/naz/researcher/create', 'researcherCreate');
+        $naz->any('naz_researcher_view', '/admin/naz/researcher/:id', 'researcherView', ['id' => '\d+']);
 
         // Records schedules
-        $routing->prependRoute('naz_schedules', new sfRoute(
-            '/admin/naz/schedules',
-            ['module' => 'naz', 'action' => 'schedules']
-        ));
-        $routing->prependRoute('naz_schedule_create', new sfRoute(
-            '/admin/naz/schedule/create',
-            ['module' => 'naz', 'action' => 'scheduleCreate']
-        ));
-        $routing->prependRoute('naz_schedule_view', new sfRoute(
-            '/admin/naz/schedule/:id',
-            ['module' => 'naz', 'action' => 'scheduleView'],
-            ['id' => '\d+']
-        ));
+        $naz->any('naz_schedules', '/admin/naz/schedules', 'schedules');
+        $naz->any('naz_schedule_create', '/admin/naz/schedule/create', 'scheduleCreate');
+        $naz->any('naz_schedule_view', '/admin/naz/schedule/:id', 'scheduleView', ['id' => '\d+']);
 
         // Transfers
-        $routing->prependRoute('naz_transfers', new sfRoute(
-            '/admin/naz/transfers',
-            ['module' => 'naz', 'action' => 'transfers']
-        ));
-        $routing->prependRoute('naz_transfer_create', new sfRoute(
-            '/admin/naz/transfer/create',
-            ['module' => 'naz', 'action' => 'transferCreate']
-        ));
-        $routing->prependRoute('naz_transfer_view', new sfRoute(
-            '/admin/naz/transfer/:id',
-            ['module' => 'naz', 'action' => 'transferView'],
-            ['id' => '\d+']
-        ));
+        $naz->any('naz_transfers', '/admin/naz/transfers', 'transfers');
+        $naz->any('naz_transfer_create', '/admin/naz/transfer/create', 'transferCreate');
+        $naz->any('naz_transfer_view', '/admin/naz/transfer/:id', 'transferView', ['id' => '\d+']);
 
         // Protected records
-        $routing->prependRoute('naz_protected', new sfRoute(
-            '/admin/naz/protected',
-            ['module' => 'naz', 'action' => 'protectedRecords']
-        ));
+        $naz->any('naz_protected', '/admin/naz/protected', 'protectedRecords');
 
         // Reports
-        $routing->prependRoute('naz_reports', new sfRoute(
-            '/admin/naz/reports',
-            ['module' => 'naz', 'action' => 'reports']
-        ));
+        $naz->any('naz_reports', '/admin/naz/reports', 'reports');
 
         // Config
-        $routing->prependRoute('naz_config', new sfRoute(
-            '/admin/naz/config',
-            ['module' => 'naz', 'action' => 'config']
-        ));
+        $naz->any('naz_config', '/admin/naz/config', 'config');
 
-        // Also add routes without /admin prefix for direct access
-        $routing->prependRoute('naz_index_direct', new sfRoute(
-            '/naz',
-            ['module' => 'naz', 'action' => 'index']
-        ));
-        $routing->prependRoute('naz_closures_direct', new sfRoute(
-            '/naz/closures',
-            ['module' => 'naz', 'action' => 'closures']
-        ));
-        $routing->prependRoute('naz_permits_direct', new sfRoute(
-            '/naz/permits',
-            ['module' => 'naz', 'action' => 'permits']
-        ));
-        $routing->prependRoute('naz_researchers_direct', new sfRoute(
-            '/naz/researchers',
-            ['module' => 'naz', 'action' => 'researchers']
-        ));
-        $routing->prependRoute('naz_schedules_direct', new sfRoute(
-            '/naz/schedules',
-            ['module' => 'naz', 'action' => 'schedules']
-        ));
-        $routing->prependRoute('naz_transfers_direct', new sfRoute(
-            '/naz/transfers',
-            ['module' => 'naz', 'action' => 'transfers']
-        ));
-        $routing->prependRoute('naz_protected_direct', new sfRoute(
-            '/naz/protected',
-            ['module' => 'naz', 'action' => 'protectedRecords']
-        ));
-        $routing->prependRoute('naz_reports_direct', new sfRoute(
-            '/naz/reports',
-            ['module' => 'naz', 'action' => 'reports']
-        ));
-        $routing->prependRoute('naz_config_direct', new sfRoute(
-            '/naz/config',
-            ['module' => 'naz', 'action' => 'config']
-        ));
+        // Direct access routes (without /admin prefix)
+        $naz->any('naz_index_direct', '/naz', 'index');
+        $naz->any('naz_closures_direct', '/naz/closures', 'closures');
+        $naz->any('naz_permits_direct', '/naz/permits', 'permits');
+        $naz->any('naz_researchers_direct', '/naz/researchers', 'researchers');
+        $naz->any('naz_schedules_direct', '/naz/schedules', 'schedules');
+        $naz->any('naz_transfers_direct', '/naz/transfers', 'transfers');
+        $naz->any('naz_protected_direct', '/naz/protected', 'protectedRecords');
+        $naz->any('naz_reports_direct', '/naz/reports', 'reports');
+        $naz->any('naz_config_direct', '/naz/config', 'config');
+
+        $naz->register($routing);
     }
 }

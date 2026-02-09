@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class auditActions extends sfActions
+class auditActions extends AhgActions
 {
     public function preExecute()
     {

@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class preservationActions extends sfActions
+class preservationActions extends AhgActions
 {
     private PreservationService $service;
 

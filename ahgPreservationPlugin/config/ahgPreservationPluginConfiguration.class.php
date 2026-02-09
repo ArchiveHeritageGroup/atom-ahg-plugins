@@ -29,103 +29,39 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        // Preservation module routes
+        $preservation = new \AtomFramework\Routing\RouteLoader('preservation');
+
         // API routes
-        $routing->prependRoute('preservation_api_generate_checksum', new sfRoute(
-            '/api/preservation/checksum/:id/generate',
-            ['module' => 'preservation', 'action' => 'apiGenerateChecksum'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('preservation_api_verify_fixity', new sfRoute(
-            '/api/preservation/fixity/:id/verify',
-            ['module' => 'preservation', 'action' => 'apiVerifyFixity'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('preservation_api_stats', new sfRoute(
-            '/api/preservation/stats',
-            ['module' => 'preservation', 'action' => 'apiStats']
-        ));
+        $preservation->any('preservation_api_generate_checksum', '/api/preservation/checksum/:id/generate', 'apiGenerateChecksum', ['id' => '\d+']);
+        $preservation->any('preservation_api_verify_fixity', '/api/preservation/fixity/:id/verify', 'apiVerifyFixity', ['id' => '\d+']);
+        $preservation->any('preservation_api_stats', '/api/preservation/stats', 'apiStats');
 
         // Dashboard and management routes
-        $routing->prependRoute('preservation_object', new sfRoute(
-            '/admin/preservation/object/:id',
-            ['module' => 'preservation', 'action' => 'object'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('preservation_fixity_log', new sfRoute(
-            '/admin/preservation/fixity-log',
-            ['module' => 'preservation', 'action' => 'fixityLog']
-        ));
-        $routing->prependRoute('preservation_events', new sfRoute(
-            '/admin/preservation/events',
-            ['module' => 'preservation', 'action' => 'events']
-        ));
-        $routing->prependRoute('preservation_formats', new sfRoute(
-            '/admin/preservation/formats',
-            ['module' => 'preservation', 'action' => 'formats']
-        ));
-        $routing->prependRoute('preservation_policies', new sfRoute(
-            '/admin/preservation/policies',
-            ['module' => 'preservation', 'action' => 'policies']
-        ));
-        $routing->prependRoute('preservation_reports', new sfRoute(
-            '/admin/preservation/reports',
-            ['module' => 'preservation', 'action' => 'reports']
-        ));
-        $routing->prependRoute('preservation_index', new sfRoute(
-            '/admin/preservation',
-            ['module' => 'preservation', 'action' => 'index']
-        ));
+        $preservation->any('preservation_object', '/admin/preservation/object/:id', 'object', ['id' => '\d+']);
+        $preservation->any('preservation_fixity_log', '/admin/preservation/fixity-log', 'fixityLog');
+        $preservation->any('preservation_events', '/admin/preservation/events', 'events');
+        $preservation->any('preservation_formats', '/admin/preservation/formats', 'formats');
+        $preservation->any('preservation_policies', '/admin/preservation/policies', 'policies');
+        $preservation->any('preservation_reports', '/admin/preservation/reports', 'reports');
+        $preservation->any('preservation_index', '/admin/preservation', 'index');
+        $preservation->register($routing);
 
-        // TIFF to PDF Merge routes
-        $routing->prependRoute('tiffpdfmerge', new sfRoute(
-            '/tiff-pdf-merge',
-            ['module' => 'tiffpdfmerge', 'action' => 'index']
-        ));
-        $routing->prependRoute('tiffpdfmerge_with_object', new sfRoute(
-            '/tiff-pdf-merge/:informationObject',
-            ['module' => 'tiffpdfmerge', 'action' => 'index']
-        ));
-        $routing->prependRoute('tiffpdfmerge_create', new sfRoute(
-            '/tiff-pdf-merge/create',
-            ['module' => 'tiffpdfmerge', 'action' => 'create']
-        ));
-        $routing->prependRoute('tiffpdfmerge_upload', new sfRoute(
-            '/tiff-pdf-merge/upload',
-            ['module' => 'tiffpdfmerge', 'action' => 'upload']
-        ));
-        $routing->prependRoute('tiffpdfmerge_reorder', new sfRoute(
-            '/tiff-pdf-merge/reorder',
-            ['module' => 'tiffpdfmerge', 'action' => 'reorder']
-        ));
-        $routing->prependRoute('tiffpdfmerge_remove_file', new sfRoute(
-            '/tiff-pdf-merge/remove-file',
-            ['module' => 'tiffpdfmerge', 'action' => 'removeFile']
-        ));
-        $routing->prependRoute('tiffpdfmerge_get_job', new sfRoute(
-            '/tiff-pdf-merge/job/:job_id',
-            ['module' => 'tiffpdfmerge', 'action' => 'getJob']
-        ));
-        $routing->prependRoute('tiffpdfmerge_process', new sfRoute(
-            '/tiff-pdf-merge/process',
-            ['module' => 'tiffpdfmerge', 'action' => 'process']
-        ));
-        $routing->prependRoute('tiffpdfmerge_download', new sfRoute(
-            '/tiff-pdf-merge/download/:job_id',
-            ['module' => 'tiffpdfmerge', 'action' => 'download']
-        ));
-        $routing->prependRoute('tiffpdfmerge_delete', new sfRoute(
-            '/tiff-pdf-merge/delete',
-            ['module' => 'tiffpdfmerge', 'action' => 'delete']
-        ));
-        $routing->prependRoute('tiffpdfmerge_browse', new sfRoute(
-            '/tiff-pdf-merge/jobs',
-            ['module' => 'tiffpdfmerge', 'action' => 'browse']
-        ));
-        $routing->prependRoute('tiffpdfmerge_view', new sfRoute(
-            '/tiff-pdf-merge/job/:job_id/view',
-            ['module' => 'tiffpdfmerge', 'action' => 'view'],
-            ['job_id' => '\d+']
-        ));
+        // TIFF to PDF Merge module routes
+        $tiffpdf = new \AtomFramework\Routing\RouteLoader('tiffpdfmerge');
+        $tiffpdf->any('tiffpdfmerge', '/tiff-pdf-merge', 'index');
+        $tiffpdf->any('tiffpdfmerge_with_object', '/tiff-pdf-merge/:informationObject', 'index');
+        $tiffpdf->any('tiffpdfmerge_create', '/tiff-pdf-merge/create', 'create');
+        $tiffpdf->any('tiffpdfmerge_upload', '/tiff-pdf-merge/upload', 'upload');
+        $tiffpdf->any('tiffpdfmerge_reorder', '/tiff-pdf-merge/reorder', 'reorder');
+        $tiffpdf->any('tiffpdfmerge_remove_file', '/tiff-pdf-merge/remove-file', 'removeFile');
+        $tiffpdf->any('tiffpdfmerge_get_job', '/tiff-pdf-merge/job/:job_id', 'getJob');
+        $tiffpdf->any('tiffpdfmerge_process', '/tiff-pdf-merge/process', 'process');
+        $tiffpdf->any('tiffpdfmerge_download', '/tiff-pdf-merge/download/:job_id', 'download');
+        $tiffpdf->any('tiffpdfmerge_delete', '/tiff-pdf-merge/delete', 'delete');
+        $tiffpdf->any('tiffpdfmerge_browse', '/tiff-pdf-merge/jobs', 'browse');
+        $tiffpdf->any('tiffpdfmerge_view', '/tiff-pdf-merge/job/:job_id/view', 'view', ['job_id' => '\d+']);
+        $tiffpdf->register($routing);
     }
 
     /**

@@ -37,21 +37,17 @@ class ahgFunctionManagePluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('functionManage');
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // Catch-all slug route (checked last after prepending)
+        $router->any('function_view_override', '/function/:slug', 'view');
+        $router->any('function_delete_override', '/function/:slug/delete', 'delete');
+        $router->any('function_edit_override', '/function/:slug/edit', 'edit');
+
+        // Specific routes (checked first after prepending)
+        $router->any('function_add_override', '/function/add', 'edit');
+        $router->any('function_browse_override', '/function/browse', 'browse');
+
+        $router->register($event->getSubject());
     }
 }

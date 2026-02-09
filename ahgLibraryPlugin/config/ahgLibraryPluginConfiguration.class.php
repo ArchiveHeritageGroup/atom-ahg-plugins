@@ -27,105 +27,34 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        // Library module routes
         // IMPORTANT: prependRoute adds to FRONT, so add in reverse priority order
         // (most general first, most specific last)
+        $library = new \AtomFramework\Routing\RouteLoader('library');
 
         // Library view by slug (catch-all - add FIRST so it's checked LAST)
         // Use sfRoute (NOT AhgMetadataRoute) to prevent URL generation conflicts
-        // AhgMetadataRoute was causing /library/ URLs to be generated for non-library items
-        $routing->prependRoute('library_view', new sfRoute(
-            '/library/:slug',
-            ['module' => 'library', 'action' => 'index'],
-            ['slug' => '[^/]+']
-        ));
+        $library->any('library_view', '/library/:slug', 'index', ['slug' => '[^/]+']);
+        $library->any('library_edit', '/library/:slug/edit', 'edit', ['slug' => '[^/]+']);
+        $library->any('library_add', '/library/add', 'edit');
+        $library->any('library_browse', '/library', 'browse');
+        $library->any('library_isbn_lookup', '/library/isbnLookup', 'isbnLookup');
+        $library->any('library_isbn_provider_delete', '/library/isbn-provider/delete/:id', 'isbnProviderDelete');
+        $library->any('library_isbn_provider_toggle', '/library/isbn-provider/toggle/:id', 'isbnProviderToggle');
+        $library->any('library_isbn_provider_edit', '/library/isbn-provider/edit/:id', 'isbnProviderEdit', ['id' => '\d*']);
+        $library->any('library_isbn_providers', '/library/isbn-providers', 'isbnProviders');
+        $library->any('library_api_isbn', '/api/library/isbn/:isbn', 'apiIsbnLookup');
+        $library->any('library_cover_proxy', '/library/cover/:isbn', 'coverProxy');
+        $library->any('library_suggest_subjects', '/library/suggestSubjects', 'suggestSubjects');
+        $library->register($routing);
 
-        // Library edit
-        $routing->prependRoute('library_edit', new sfRoute(
-            '/library/:slug/edit',
-            ['module' => 'library', 'action' => 'edit'],
-            ['slug' => '[^/]+']
-        ));
-
-        // Library add
-        $routing->prependRoute('library_add', new sfRoute(
-            '/library/add',
-            ['module' => 'library', 'action' => 'edit']
-        ));
-
-        // Library browse
-        $routing->prependRoute('library_browse', new sfRoute(
-            '/library',
-            ['module' => 'library', 'action' => 'browse']
-        ));
-
-        // ISBN lookup for library module (matches JavaScript fetch call)
-        $routing->prependRoute('library_isbn_lookup', new sfRoute(
-            '/library/isbnLookup',
-            ['module' => 'library', 'action' => 'isbnLookup']
-        ));
-
-        // ISBN provider routes (specific - add LAST so checked FIRST)
-        $routing->prependRoute('library_isbn_provider_delete', new sfRoute(
-            '/library/isbn-provider/delete/:id',
-            ['module' => 'library', 'action' => 'isbnProviderDelete']
-        ));
-
-        $routing->prependRoute('library_isbn_provider_toggle', new sfRoute(
-            '/library/isbn-provider/toggle/:id',
-            ['module' => 'library', 'action' => 'isbnProviderToggle']
-        ));
-
-        $routing->prependRoute('library_isbn_provider_edit', new sfRoute(
-            '/library/isbn-provider/edit/:id',
-            ['module' => 'library', 'action' => 'isbnProviderEdit'],
-            ['id' => '\d*']
-        ));
-
-        $routing->prependRoute('library_isbn_providers', new sfRoute(
-            '/library/isbn-providers',
-            ['module' => 'library', 'action' => 'isbnProviders']
-        ));
-
-        // API route
-        $routing->prependRoute('library_api_isbn', new sfRoute(
-            '/api/library/isbn/:isbn',
-            ['module' => 'library', 'action' => 'apiIsbnLookup']
-        ));
-
-        // Cover proxy route
-        $routing->prependRoute('library_cover_proxy', new sfRoute(
-            '/library/cover/:isbn',
-            ['module' => 'library', 'action' => 'coverProxy']
-        ));
-
-        // Subject suggestions API route (Issue #55)
-        $routing->prependRoute('library_suggest_subjects', new sfRoute(
-            '/library/suggestSubjects',
-            ['module' => 'library', 'action' => 'suggestSubjects']
-        ));
-
-        // ISBN lookup for information objects
+        // ISBN module routes
         // IMPORTANT: Use 'isbn' module, NOT 'informationobject' to avoid URL generation conflicts
-        // Using 'informationobject' causes url_for(['module'=>'informationobject', 'slug'=>...]) to match this route
-        $routing->prependRoute('isbn_lookup', new sfRoute(
-            '/isbn/lookup',
-            ['module' => 'isbn', 'action' => 'lookup']
-        ));
-
-        // ISBN test routes
-        $routing->prependRoute('isbn_test', new sfRoute(
-            '/isbn/test',
-            ['module' => 'isbn', 'action' => 'test']
-        ));
-
-        $routing->prependRoute('isbn_api_test', new sfRoute(
-            '/isbn/apiTest',
-            ['module' => 'isbn', 'action' => 'apiTest']
-        ));
-
-        $routing->prependRoute('isbn_stats', new sfRoute(
-            '/admin/isbn/stats',
-            ['module' => 'isbn', 'action' => 'stats']
-        ));
+        $isbn = new \AtomFramework\Routing\RouteLoader('isbn');
+        $isbn->any('isbn_lookup', '/isbn/lookup', 'lookup');
+        $isbn->any('isbn_test', '/isbn/test', 'test');
+        $isbn->any('isbn_api_test', '/isbn/apiTest', 'apiTest');
+        $isbn->any('isbn_stats', '/admin/isbn/stats', 'stats');
+        $isbn->register($routing);
     }
 }

@@ -7,7 +7,7 @@
  * AtoM 2.10 / Symfony 1.4 / Bootstrap 5 / PHP 8.3
  */
 
-class ricDashboardActions extends sfActions
+class ricDashboardActions extends AhgActions
 {
     protected $syncService;
 

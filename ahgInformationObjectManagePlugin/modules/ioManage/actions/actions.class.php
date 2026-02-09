@@ -1,19 +1,12 @@
 <?php
 
-class ioManageActions extends sfActions
+class ioManageActions extends AhgActions
 {
     public function preExecute()
     {
         parent::preExecute();
 
         sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $frameworkBoot = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($frameworkBoot)) {
-                require_once $frameworkBoot;
-            }
-        }
     }
 
     /**
@@ -124,13 +117,6 @@ class ioManageActions extends sfActions
             return $this->renderText(json_encode([]));
         }
 
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($bootstrap)) {
-                require_once $bootstrap;
-            }
-        }
-
         $results = \Illuminate\Database\Capsule\Manager::table('actor')
             ->join('actor_i18n', function ($j) use ($culture) {
                 $j->on('actor.id', '=', 'actor_i18n.id')
@@ -164,13 +150,6 @@ class ioManageActions extends sfActions
 
         if (strlen($q) < 2) {
             return $this->renderText(json_encode([]));
-        }
-
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($bootstrap)) {
-                require_once $bootstrap;
-            }
         }
 
         $results = \Illuminate\Database\Capsule\Manager::table('repository')
@@ -209,13 +188,6 @@ class ioManageActions extends sfActions
             return $this->renderText(json_encode([]));
         }
 
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($bootstrap)) {
-                require_once $bootstrap;
-            }
-        }
-
         $results = \Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', function ($j) use ($culture) {
                 $j->on('term.id', '=', 'term_i18n.id')
@@ -249,13 +221,6 @@ class ioManageActions extends sfActions
         $culture = $this->context->user->getCulture();
         $repositoryId = (int) $request->getParameter('repositoryId', 0);
         $parentId = (int) $request->getParameter('parentId', 0);
-
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($bootstrap)) {
-                require_once $bootstrap;
-            }
-        }
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
         $rootId = \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID;

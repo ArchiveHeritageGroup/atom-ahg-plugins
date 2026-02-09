@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class researchActions extends sfActions
+class researchActions extends AhgActions
 {
     protected $service;
 

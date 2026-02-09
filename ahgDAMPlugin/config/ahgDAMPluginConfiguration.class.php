@@ -13,25 +13,31 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
     }
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        // dam module routes
+        $dam = new \AtomFramework\Routing\RouteLoader('dam');
 
         // Base route (must be first - checked last)
-        $routing->prependRoute('dam_index', new sfRoute('/dam', ['module' => 'dam', 'action' => 'dashboard']));
+        $dam->any('dam_index', '/dam', 'dashboard');
 
         // Catch-all slug route - use sfRoute (NOT AhgMetadataRoute) to prevent URL generation conflicts
-        // AhgMetadataRoute was causing /dam/ URLs to be generated for non-DAM items
-        $routing->prependRoute('dam_view', new sfRoute('/dam/:slug', ['module' => 'dam', 'action' => 'index'], ['slug' => '[a-zA-Z0-9_-]+']));
+        $dam->any('dam_view', '/dam/:slug', 'index', ['slug' => '[a-zA-Z0-9_-]+']);
 
         // Specific routes (added last so they are checked first)
-        $routing->prependRoute('dam_browse', new sfRoute('/dam/browse', ['module' => 'dam', 'action' => 'browse']));
-        $routing->prependRoute('dam_lightbox', new sfRoute('/dam/lightbox', ['module' => 'dam', 'action' => 'lightbox']));
-        $routing->prependRoute('dam_reports', new sfRoute('/dam/reports', ['module' => 'damReports', 'action' => 'index']));
-        $routing->prependRoute('dam_dashboard', new sfRoute('/dam/dashboard', ['module' => 'dam', 'action' => 'dashboard']));
-        $routing->prependRoute('dam_create', new sfRoute('/dam/create', ['module' => 'dam', 'action' => 'create']));
-        $routing->prependRoute('dam_bulk_create', new sfRoute('/dam/bulk', ['module' => 'dam', 'action' => 'bulkCreate']));
-        $routing->prependRoute('dam_bulk_create_alt', new sfRoute('/dam/bulkCreate', ['module' => 'dam', 'action' => 'bulkCreate']));
-        $routing->prependRoute('dam_extract_metadata', new sfRoute('/dam/extract/:id', ['module' => 'dam', 'action' => 'extractMetadata']));
-        $routing->prependRoute('dam_convert', new sfRoute('/dam/convert/:id', ['module' => 'dam', 'action' => 'convert']));
-        $routing->prependRoute('dam_edit_iptc', new sfRoute('/dam/iptc/:slug', ['module' => 'dam', 'action' => 'editIptc']));
+        $dam->any('dam_browse', '/dam/browse', 'browse');
+        $dam->any('dam_lightbox', '/dam/lightbox', 'lightbox');
+        $dam->any('dam_dashboard', '/dam/dashboard', 'dashboard');
+        $dam->any('dam_create', '/dam/create', 'create');
+        $dam->any('dam_bulk_create', '/dam/bulk', 'bulkCreate');
+        $dam->any('dam_bulk_create_alt', '/dam/bulkCreate', 'bulkCreate');
+        $dam->any('dam_extract_metadata', '/dam/extract/:id', 'extractMetadata');
+        $dam->any('dam_convert', '/dam/convert/:id', 'convert');
+        $dam->any('dam_edit_iptc', '/dam/iptc/:slug', 'editIptc');
+
+        $dam->register($event->getSubject());
+
+        // damReports module routes
+        $reports = new \AtomFramework\Routing\RouteLoader('damReports');
+        $reports->any('dam_reports', '/dam/reports', 'index');
+        $reports->register($event->getSubject());
     }
 }

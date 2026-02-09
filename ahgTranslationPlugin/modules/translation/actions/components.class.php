@@ -1,6 +1,6 @@
 <?php
 
-class translationComponents extends sfComponents
+class translationComponents extends AhgComponents
 {
     public function executeTranslateModal()
     {

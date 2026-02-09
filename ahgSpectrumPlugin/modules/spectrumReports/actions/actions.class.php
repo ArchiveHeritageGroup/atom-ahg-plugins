@@ -6,7 +6,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class spectrumReportsActions extends sfActions
+class spectrumReportsActions extends AhgActions
 {
     protected function checkAccess()
     {

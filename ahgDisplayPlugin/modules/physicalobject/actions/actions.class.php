@@ -9,12 +9,11 @@ require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/
 /**
  * Extended Physical Object Actions
  */
-class physicalobjectActions extends sfActions
+class physicalobjectActions extends AhgActions
 {
     public function executeIndex($request)
     {
         // Load framework for extended data
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Get resource from route
@@ -31,7 +30,6 @@ class physicalobjectActions extends sfActions
     public function executeEdit($request)
     {
         // Load framework
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Set up resource

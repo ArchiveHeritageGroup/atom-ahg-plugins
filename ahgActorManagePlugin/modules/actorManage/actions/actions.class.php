@@ -1,6 +1,6 @@
 <?php
 
-class actorManageActions extends sfActions
+class actorManageActions extends AhgActions
 {
     protected $service;
 

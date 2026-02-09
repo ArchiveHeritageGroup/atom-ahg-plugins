@@ -1,10 +1,9 @@
 <?php
 
-class accessRequestActions extends sfActions
+class accessRequestActions extends AhgActions
 {
     public function preExecute()
     {
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
         require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgAccessRequestPlugin/lib/Service/AccessRequestService.php';
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
     }

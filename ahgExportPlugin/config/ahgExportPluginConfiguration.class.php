@@ -16,52 +16,20 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('export');
 
-        $routing->prependRoute('export_index', new sfRoute('/export', [
-            'module' => 'export',
-            'action' => 'index',
-        ]));
-
-        $routing->prependRoute('export_archival', new sfRoute('/export/archival', [
-            'module' => 'export',
-            'action' => 'archival',
-        ]));
-
-        $routing->prependRoute('export_authority', new sfRoute('/export/authority', [
-            'module' => 'export',
-            'action' => 'authority',
-        ]));
-
-        $routing->prependRoute('export_repository', new sfRoute('/export/repository', [
-            'module' => 'export',
-            'action' => 'repository',
-        ]));
-
-        $routing->prependRoute('export_csv', new sfRoute('/export/csv', [
-            'module' => 'export',
-            'action' => 'archival',
-        ]));
-
-        $routing->prependRoute('export_ead', new sfRoute('/export/ead', [
-            'module' => 'export',
-            'action' => 'archival',
-        ]));
-
-        $routing->prependRoute('export_grap', new sfRoute('/export/grap', [
-            'module' => 'export',
-            'action' => 'archival',
-        ]));
-
-        $routing->prependRoute('export_authorities', new sfRoute('/export/authorities', [
-            'module' => 'export',
-            'action' => 'authority',
-        ]));
+        $router->any('export_index', '/export', 'index');
+        $router->any('export_archival', '/export/archival', 'archival');
+        $router->any('export_authority', '/export/authority', 'authority');
+        $router->any('export_repository', '/export/repository', 'repository');
+        $router->any('export_csv', '/export/csv', 'archival');
+        $router->any('export_ead', '/export/ead', 'archival');
+        $router->any('export_grap', '/export/grap', 'archival');
+        $router->any('export_authorities', '/export/authorities', 'authority');
 
         // Legacy route for object/export
-        $routing->prependRoute('object_export', new sfRoute('/object/export', [
-            'module' => 'export',
-            'action' => 'index',
-        ]));
+        $router->any('object_export', '/object/export', 'index');
+
+        $router->register($event->getSubject());
     }
 }

@@ -23,125 +23,48 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('workflow');
 
         // Dashboard
-        $routing->prependRoute('workflow_dashboard', new sfRoute(
-            '/workflow',
-            ['module' => 'workflow', 'action' => 'dashboard']
-        ));
-        $routing->prependRoute('workflow_index', new sfRoute(
-            '/workflow/dashboard',
-            ['module' => 'workflow', 'action' => 'dashboard']
-        ));
+        $router->any('workflow_dashboard', '/workflow', 'dashboard');
+        $router->any('workflow_index', '/workflow/dashboard', 'dashboard');
 
         // My Tasks
-        $routing->prependRoute('workflow_my_tasks', new sfRoute(
-            '/workflow/my-tasks',
-            ['module' => 'workflow', 'action' => 'myTasks']
-        ));
+        $router->any('workflow_my_tasks', '/workflow/my-tasks', 'myTasks');
 
         // Task Pool
-        $routing->prependRoute('workflow_pool', new sfRoute(
-            '/workflow/pool',
-            ['module' => 'workflow', 'action' => 'pool']
-        ));
+        $router->any('workflow_pool', '/workflow/pool', 'pool');
 
         // Task actions
-        $routing->prependRoute('workflow_claim_task', new sfRoute(
-            '/workflow/task/:id/claim',
-            ['module' => 'workflow', 'action' => 'claimTask'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_release_task', new sfRoute(
-            '/workflow/task/:id/release',
-            ['module' => 'workflow', 'action' => 'releaseTask'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_approve_task', new sfRoute(
-            '/workflow/task/:id/approve',
-            ['module' => 'workflow', 'action' => 'approveTask'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_reject_task', new sfRoute(
-            '/workflow/task/:id/reject',
-            ['module' => 'workflow', 'action' => 'rejectTask'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_view_task', new sfRoute(
-            '/workflow/task/:id',
-            ['module' => 'workflow', 'action' => 'viewTask'],
-            ['id' => '\d+']
-        ));
+        $router->any('workflow_claim_task', '/workflow/task/:id/claim', 'claimTask', ['id' => '\d+']);
+        $router->any('workflow_release_task', '/workflow/task/:id/release', 'releaseTask', ['id' => '\d+']);
+        $router->any('workflow_approve_task', '/workflow/task/:id/approve', 'approveTask', ['id' => '\d+']);
+        $router->any('workflow_reject_task', '/workflow/task/:id/reject', 'rejectTask', ['id' => '\d+']);
+        $router->any('workflow_view_task', '/workflow/task/:id', 'viewTask', ['id' => '\d+']);
 
         // History
-        $routing->prependRoute('workflow_history', new sfRoute(
-            '/workflow/history',
-            ['module' => 'workflow', 'action' => 'history']
-        ));
-        $routing->prependRoute('workflow_object_history', new sfRoute(
-            '/workflow/history/:object_id',
-            ['module' => 'workflow', 'action' => 'objectHistory'],
-            ['object_id' => '\d+']
-        ));
+        $router->any('workflow_history', '/workflow/history', 'history');
+        $router->any('workflow_object_history', '/workflow/history/:object_id', 'objectHistory', ['object_id' => '\d+']);
 
         // Admin: Workflow configuration
-        $routing->prependRoute('workflow_admin', new sfRoute(
-            '/workflow/admin',
-            ['module' => 'workflow', 'action' => 'admin']
-        ));
-        $routing->prependRoute('workflow_create', new sfRoute(
-            '/workflow/admin/create',
-            ['module' => 'workflow', 'action' => 'createWorkflow']
-        ));
-        $routing->prependRoute('workflow_edit', new sfRoute(
-            '/workflow/admin/edit/:id',
-            ['module' => 'workflow', 'action' => 'editWorkflow'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_delete', new sfRoute(
-            '/workflow/admin/delete/:id',
-            ['module' => 'workflow', 'action' => 'deleteWorkflow'],
-            ['id' => '\d+']
-        ));
+        $router->any('workflow_admin', '/workflow/admin', 'admin');
+        $router->any('workflow_create', '/workflow/admin/create', 'createWorkflow');
+        $router->any('workflow_edit', '/workflow/admin/edit/:id', 'editWorkflow', ['id' => '\d+']);
+        $router->any('workflow_delete', '/workflow/admin/delete/:id', 'deleteWorkflow', ['id' => '\d+']);
 
         // Step management
-        $routing->prependRoute('workflow_add_step', new sfRoute(
-            '/workflow/admin/:workflow_id/step/add',
-            ['module' => 'workflow', 'action' => 'addStep'],
-            ['workflow_id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_edit_step', new sfRoute(
-            '/workflow/admin/step/:id/edit',
-            ['module' => 'workflow', 'action' => 'editStep'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_delete_step', new sfRoute(
-            '/workflow/admin/step/:id/delete',
-            ['module' => 'workflow', 'action' => 'deleteStep'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('workflow_reorder_steps', new sfRoute(
-            '/workflow/admin/:workflow_id/steps/reorder',
-            ['module' => 'workflow', 'action' => 'reorderSteps'],
-            ['workflow_id' => '\d+']
-        ));
+        $router->any('workflow_add_step', '/workflow/admin/:workflow_id/step/add', 'addStep', ['workflow_id' => '\d+']);
+        $router->any('workflow_edit_step', '/workflow/admin/step/:id/edit', 'editStep', ['id' => '\d+']);
+        $router->any('workflow_delete_step', '/workflow/admin/step/:id/delete', 'deleteStep', ['id' => '\d+']);
+        $router->any('workflow_reorder_steps', '/workflow/admin/:workflow_id/steps/reorder', 'reorderSteps', ['workflow_id' => '\d+']);
 
         // Start workflow (triggered when submitting item)
-        $routing->prependRoute('workflow_start', new sfRoute(
-            '/workflow/start/:object_id',
-            ['module' => 'workflow', 'action' => 'startWorkflow'],
-            ['object_id' => '\d+']
-        ));
+        $router->any('workflow_start', '/workflow/start/:object_id', 'startWorkflow', ['object_id' => '\d+']);
 
         // API endpoints for AJAX
-        $routing->prependRoute('workflow_api_stats', new sfRoute(
-            '/workflow/api/stats',
-            ['module' => 'workflow', 'action' => 'apiStats']
-        ));
-        $routing->prependRoute('workflow_api_tasks', new sfRoute(
-            '/workflow/api/tasks',
-            ['module' => 'workflow', 'action' => 'apiTasks']
-        ));
+        $router->any('workflow_api_stats', '/workflow/api/stats', 'apiStats');
+        $router->any('workflow_api_tasks', '/workflow/api/tasks', 'apiTasks');
+
+        $router->register($event->getSubject());
     }
 }

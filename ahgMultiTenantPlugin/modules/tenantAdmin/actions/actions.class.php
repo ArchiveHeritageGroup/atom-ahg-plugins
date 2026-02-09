@@ -12,7 +12,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantAdminActions extends sfActions
+class tenantAdminActions extends AhgActions
 {
     /**
      * Pre-execute check for admin access

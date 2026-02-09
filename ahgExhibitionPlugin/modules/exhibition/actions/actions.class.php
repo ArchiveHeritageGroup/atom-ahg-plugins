@@ -8,7 +8,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class exhibitionActions extends sfActions
+class exhibitionActions extends AhgActions
 {
     /**
      * Browse/list exhibitions.
@@ -1003,7 +1003,6 @@ class exhibitionActions extends sfActions
      */
     protected function getExhibitionService()
     {
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir').'/ahgExhibitionPlugin/lib/Services/ExhibitionService.php';
 
         return new \ahgExhibitionPlugin\Services\ExhibitionService(

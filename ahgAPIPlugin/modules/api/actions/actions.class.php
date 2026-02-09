@@ -1,6 +1,6 @@
 <?php
 
-class apiActions extends sfActions
+class apiActions extends AhgActions
 {
     public function executeSearchInformationObjects(sfWebRequest $request)
     {
@@ -13,7 +13,6 @@ class apiActions extends sfActions
             return $this->renderText(json_encode(['results' => [], 'error' => 'Query too short']));
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {
@@ -64,7 +63,6 @@ class apiActions extends sfActions
             return $this->renderText(json_encode([]));
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $results = \Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('information_object_i18n', function($join) {

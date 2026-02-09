@@ -1,10 +1,9 @@
 <?php
 
-class securityClearanceActions extends sfActions
+class securityClearanceActions extends AhgActions
 {
     public function preExecute()
     {
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
     }
 

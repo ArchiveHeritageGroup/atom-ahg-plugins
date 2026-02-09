@@ -5,7 +5,7 @@
  * Browse and search by object type using Elasticsearch
  */
 
-class displaySearchActions extends sfActions
+class displaySearchActions extends AhgActions
 {
     protected $esService;
     protected $adapter;

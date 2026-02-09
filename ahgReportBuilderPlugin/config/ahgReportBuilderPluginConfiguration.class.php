@@ -23,123 +23,54 @@ class ahgReportBuilderPluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('reportBuilder');
 
         // Widget API routes
-        $routing->prependRoute('report_builder_api_widget_delete', new sfRoute(
-            '/api/report-builder/widget/:id/delete',
-            ['module' => 'reportBuilder', 'action' => 'apiWidgetDelete'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('report_builder_api_widget_save', new sfRoute(
-            '/api/report-builder/widget/save',
-            ['module' => 'reportBuilder', 'action' => 'apiWidgetSave']
-        ));
-        $routing->prependRoute('report_builder_api_widgets', new sfRoute(
-            '/api/report-builder/widgets',
-            ['module' => 'reportBuilder', 'action' => 'apiWidgets']
-        ));
+        $router->any('report_builder_api_widget_delete', '/api/report-builder/widget/:id/delete', 'apiWidgetDelete', ['id' => '\d+']);
+        $router->any('report_builder_api_widget_save', '/api/report-builder/widget/save', 'apiWidgetSave');
+        $router->any('report_builder_api_widgets', '/api/report-builder/widgets', 'apiWidgets');
 
         // Widget embed route
-        $routing->prependRoute('report_builder_widget', new sfRoute(
-            '/report-widget/:id',
-            ['module' => 'reportBuilder', 'action' => 'widget'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_widget', '/report-widget/:id', 'widget', ['id' => '\d+']);
 
         // API routes (must be first due to route priority)
-        $routing->prependRoute('report_builder_api_columns', new sfRoute(
-            '/api/report-builder/columns/:source',
-            ['module' => 'reportBuilder', 'action' => 'apiColumns']
-        ));
-        $routing->prependRoute('report_builder_api_data', new sfRoute(
-            '/api/report-builder/data',
-            ['module' => 'reportBuilder', 'action' => 'apiData']
-        ));
-        $routing->prependRoute('report_builder_api_chart_data', new sfRoute(
-            '/api/report-builder/chart-data',
-            ['module' => 'reportBuilder', 'action' => 'apiChartData']
-        ));
-        $routing->prependRoute('report_builder_api_save', new sfRoute(
-            '/api/report-builder/save',
-            ['module' => 'reportBuilder', 'action' => 'apiSave']
-        ));
-        $routing->prependRoute('report_builder_api_delete', new sfRoute(
-            '/api/report-builder/delete/:id',
-            ['module' => 'reportBuilder', 'action' => 'apiDelete'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_api_columns', '/api/report-builder/columns/:source', 'apiColumns');
+        $router->any('report_builder_api_data', '/api/report-builder/data', 'apiData');
+        $router->any('report_builder_api_chart_data', '/api/report-builder/chart-data', 'apiChartData');
+        $router->any('report_builder_api_save', '/api/report-builder/save', 'apiSave');
+        $router->any('report_builder_api_delete', '/api/report-builder/delete/:id', 'apiDelete', ['id' => '\d+']);
 
         // Public view (for shared/public reports)
-        $routing->prependRoute('report_builder_view', new sfRoute(
-            '/reports/custom/:id',
-            ['module' => 'reportBuilder', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_view', '/reports/custom/:id', 'view', ['id' => '\d+']);
 
         // Schedule management
-        $routing->prependRoute('report_builder_schedule_delete', new sfRoute(
-            '/admin/report-builder/:id/schedule/:scheduleId/delete',
-            ['module' => 'reportBuilder', 'action' => 'scheduleDelete'],
-            ['id' => '\d+', 'scheduleId' => '\d+']
-        ));
-        $routing->prependRoute('report_builder_schedule', new sfRoute(
-            '/admin/report-builder/:id/schedule',
-            ['module' => 'reportBuilder', 'action' => 'schedule'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_schedule_delete', '/admin/report-builder/:id/schedule/:scheduleId/delete', 'scheduleDelete', ['id' => '\d+', 'scheduleId' => '\d+']);
+        $router->any('report_builder_schedule', '/admin/report-builder/:id/schedule', 'schedule', ['id' => '\d+']);
 
         // Export
-        $routing->prependRoute('report_builder_export', new sfRoute(
-            '/admin/report-builder/:id/export/:format',
-            ['module' => 'reportBuilder', 'action' => 'export'],
-            ['id' => '\d+', 'format' => 'pdf|xlsx|csv']
-        ));
+        $router->any('report_builder_export', '/admin/report-builder/:id/export/:format', 'export', ['id' => '\d+', 'format' => 'pdf|xlsx|csv']);
 
         // Preview
-        $routing->prependRoute('report_builder_preview', new sfRoute(
-            '/admin/report-builder/:id/preview',
-            ['module' => 'reportBuilder', 'action' => 'preview'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_preview', '/admin/report-builder/:id/preview', 'preview', ['id' => '\d+']);
 
         // Clone
-        $routing->prependRoute('report_builder_clone', new sfRoute(
-            '/admin/report-builder/:id/clone',
-            ['module' => 'reportBuilder', 'action' => 'cloneReport'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_clone', '/admin/report-builder/:id/clone', 'cloneReport', ['id' => '\d+']);
 
         // Edit
-        $routing->prependRoute('report_builder_edit', new sfRoute(
-            '/admin/report-builder/:id/edit',
-            ['module' => 'reportBuilder', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_edit', '/admin/report-builder/:id/edit', 'edit', ['id' => '\d+']);
 
         // Delete
-        $routing->prependRoute('report_builder_delete', new sfRoute(
-            '/admin/report-builder/:id/delete',
-            ['module' => 'reportBuilder', 'action' => 'delete'],
-            ['id' => '\d+']
-        ));
+        $router->any('report_builder_delete', '/admin/report-builder/:id/delete', 'delete', ['id' => '\d+']);
 
         // Create
-        $routing->prependRoute('report_builder_create', new sfRoute(
-            '/admin/report-builder/create',
-            ['module' => 'reportBuilder', 'action' => 'create']
-        ));
+        $router->any('report_builder_create', '/admin/report-builder/create', 'create');
 
         // Archive
-        $routing->prependRoute('report_builder_archive', new sfRoute(
-            '/admin/report-builder/archive',
-            ['module' => 'reportBuilder', 'action' => 'archive']
-        ));
+        $router->any('report_builder_archive', '/admin/report-builder/archive', 'archive');
 
         // Index (must be last of admin routes)
-        $routing->prependRoute('report_builder_index', new sfRoute(
-            '/admin/report-builder',
-            ['module' => 'reportBuilder', 'action' => 'index']
-        ));
+        $router->any('report_builder_index', '/admin/report-builder', 'index');
+
+        $router->register($event->getSubject());
     }
 }

@@ -3,7 +3,7 @@ require_once dirname(__FILE__)."/../../../lib/DAMConstants.php";
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class damActions extends sfActions
+class damActions extends AhgActions
 {
     public function executeDashboard(sfWebRequest $request)
     {

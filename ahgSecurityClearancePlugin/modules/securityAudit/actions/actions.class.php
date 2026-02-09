@@ -1,12 +1,7 @@
 <?php
 
-class securityAuditActions extends sfActions
+class securityAuditActions extends AhgActions
 {
-    public function preExecute()
-    {
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
-    }
-
     public function executeDashboard(sfWebRequest $request)
     {
         if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {

@@ -1,20 +1,12 @@
 <?php
 
-class termTaxonomyActions extends sfActions
+class termTaxonomyActions extends AhgActions
 {
     public function preExecute()
     {
         parent::preExecute();
 
         sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text']);
-
-        // Bootstrap Laravel DB if not already done
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $frameworkBoot = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($frameworkBoot)) {
-                require_once $frameworkBoot;
-            }
-        }
     }
 
     // -----------------------------------------------------------------------

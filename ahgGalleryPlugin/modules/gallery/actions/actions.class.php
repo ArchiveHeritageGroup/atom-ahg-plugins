@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
-class galleryActions extends sfActions
+class galleryActions extends AhgActions
 {
     protected $service;
 

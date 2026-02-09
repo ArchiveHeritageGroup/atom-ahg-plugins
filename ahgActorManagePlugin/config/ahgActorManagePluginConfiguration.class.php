@@ -39,19 +39,18 @@ class ahgActorManagePluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // sfIsaarPlugin routes (catch-all slug routes registered first = checked last)
+        $isaar = new \AtomFramework\Routing\RouteLoader('sfIsaarPlugin');
+        $isaar->any('actor_view_override', '/actor/:slug', 'index', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $isaar->any('actor_delete_override', '/actor/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $isaar->any('actor_edit_override', '/actor/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $isaar->any('actor_add_override', '/actor/add', 'edit');
+        $isaar->register($routing);
+
+        // actorManage routes (specific routes registered last = checked first)
+        $manage = new \AtomFramework\Routing\RouteLoader('actorManage');
+        $manage->any('actor_browse_override', '/actor/browse', 'browse');
+        $manage->any('actor_autocomplete_override', '/actor/autocomplete', 'autocomplete');
+        $manage->register($routing);
     }
 }

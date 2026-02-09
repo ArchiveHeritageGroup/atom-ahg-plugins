@@ -1,20 +1,12 @@
 <?php
 
-class repositoryManageActions extends sfActions
+class repositoryManageActions extends AhgActions
 {
     public function preExecute()
     {
         parent::preExecute();
 
         sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-
-        // Bootstrap Laravel DB if not already done
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $frameworkBoot = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($frameworkBoot)) {
-                require_once $frameworkBoot;
-            }
-        }
     }
 
     public function executeBrowse(sfWebRequest $request)

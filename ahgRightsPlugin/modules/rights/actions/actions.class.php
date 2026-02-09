@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @package    ahgRightsPlugin
  * @subpackage actions
  */
-class rightsActions extends sfActions
+class rightsActions extends AhgActions
 {
     protected RightsService $service;
 

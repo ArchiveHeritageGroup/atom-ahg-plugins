@@ -1,6 +1,6 @@
 <?php
 
-class searchEnhancementActions extends sfActions
+class searchEnhancementActions extends AhgActions
 {
     public function executeSaveSearch(sfWebRequest $request)
     {

@@ -36,21 +36,19 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('ioManage');
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        // Catch-all slug routes (checked last after prepending)
+        $router->any('io_delete_override', '/informationobject/:slug/delete', 'delete');
+        $router->any('io_edit_override', '/informationobject/:slug/edit', 'edit');
+
+        // Specific routes (checked first after prepending)
+        $router->any('io_actor_autocomplete', '/informationobject/actorAutocomplete', 'actorAutocomplete');
+        $router->any('io_repository_autocomplete', '/informationobject/repositoryAutocomplete', 'repositoryAutocomplete');
+        $router->any('io_term_autocomplete', '/informationobject/termAutocomplete', 'termAutocomplete');
+        $router->any('io_generate_identifier', '/informationobject/generateIdentifierJson', 'generateIdentifier');
+        $router->any('io_add_override', '/informationobject/add', 'edit');
+
+        $router->register($event->getSubject());
     }
 }

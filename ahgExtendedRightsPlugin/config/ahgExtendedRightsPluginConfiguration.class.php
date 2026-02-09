@@ -30,86 +30,41 @@ class ahgExtendedRightsPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        // extendedRights module routes
+        $rightsRouter = new \AtomFramework\Routing\RouteLoader('extendedRights');
 
         // Dashboard/Index
-        $routing->prependRoute('extendedRights_dashboard', new sfRoute(
-            '/extendedRights/dashboard',
-            ['module' => 'extendedRights', 'action' => 'index']
-        ));
-        
-        $routing->prependRoute('extendedRights_index', new sfRoute(
-            '/extendedRights',
-            ['module' => 'extendedRights', 'action' => 'index']
-        ));
+        $rightsRouter->any('extendedRights_dashboard', '/extendedRights/dashboard', 'index');
+        $rightsRouter->any('extendedRights_index', '/extendedRights', 'index');
 
         // Edit
-        $routing->prependRoute('extendedRights_edit', new sfRoute(
-            '/extendedRights/edit/:slug',
-            ['module' => 'extendedRights', 'action' => 'edit']
-        ));
+        $rightsRouter->any('extendedRights_edit', '/extendedRights/edit/:slug', 'edit');
 
         // Batch
-        $routing->prependRoute('extendedRights_batch', new sfRoute(
-            '/extendedRights/batch',
-            ['module' => 'extendedRights', 'action' => 'batch']
-        ));
+        $rightsRouter->any('extendedRights_batch', '/extendedRights/batch', 'batch');
 
         // Browse
-        $routing->prependRoute('extendedRights_browse', new sfRoute(
-            '/extendedRights/browse',
-            ['module' => 'extendedRights', 'action' => 'browse']
-        ));
+        $rightsRouter->any('extendedRights_browse', '/extendedRights/browse', 'browse');
 
         // Embargoes
-        $routing->prependRoute('extendedRights_embargoes', new sfRoute(
-            '/extendedRights/embargoes',
-            ['module' => 'extendedRights', 'action' => 'embargoes']
-        ));
-
-        $routing->prependRoute('extendedRights_liftEmbargo', new sfRoute(
-            '/extendedRights/liftEmbargo/:id',
-            ['module' => 'extendedRights', 'action' => 'liftEmbargo'],
-            ['id' => '\d+']
-        ));
+        $rightsRouter->any('extendedRights_embargoes', '/extendedRights/embargoes', 'embargoes');
+        $rightsRouter->any('extendedRights_liftEmbargo', '/extendedRights/liftEmbargo/:id', 'liftEmbargo', ['id' => '\d+']);
 
         // Admin routes
-        $routing->prependRoute('extendedRights_admin', new sfRoute(
-            '/admin/rights',
-            ['module' => 'extendedRights', 'action' => 'index']
-        ));
+        $rightsRouter->any('extendedRights_admin', '/admin/rights', 'index');
+        $rightsRouter->any('extendedRights_admin_batch', '/admin/rights/batch', 'batch');
 
-        $routing->prependRoute('extendedRights_admin_batch', new sfRoute(
-            '/admin/rights/batch',
-            ['module' => 'extendedRights', 'action' => 'batch']
-        ));
+        $rightsRouter->register($event->getSubject());
 
         // Embargo module routes
-        $routing->prependRoute('ahg_rights_embargo_index', new sfRoute(
-            '/ahg/rights/embargo',
-            ['module' => 'embargo', 'action' => 'index']
-        ));
+        $embargoRouter = new \AtomFramework\Routing\RouteLoader('embargo');
 
-        $routing->prependRoute('ahg_rights_embargo_add', new sfRoute(
-            '/ahg/rights/embargo/add',
-            ['module' => 'embargo', 'action' => 'add']
-        ));
+        $embargoRouter->any('ahg_rights_embargo_index', '/ahg/rights/embargo', 'index');
+        $embargoRouter->any('ahg_rights_embargo_add', '/ahg/rights/embargo/add', 'add');
+        $embargoRouter->any('ahg_rights_embargo_edit', '/ahg/rights/embargo/edit', 'edit');
+        $embargoRouter->any('ahg_rights_embargo_view', '/ahg/rights/embargo/view/:id', 'view', ['id' => '\d+']);
+        $embargoRouter->any('ahg_rights_embargo_lift', '/ahg/rights/embargo/lift/:id', 'lift', ['id' => '\d+']);
 
-        $routing->prependRoute('ahg_rights_embargo_edit', new sfRoute(
-            '/ahg/rights/embargo/edit',
-            ['module' => 'embargo', 'action' => 'edit']
-        ));
-
-        $routing->prependRoute('ahg_rights_embargo_view', new sfRoute(
-            '/ahg/rights/embargo/view/:id',
-            ['module' => 'embargo', 'action' => 'view'],
-            ['id' => '\d+']
-        ));
-
-        $routing->prependRoute('ahg_rights_embargo_lift', new sfRoute(
-            '/ahg/rights/embargo/lift/:id',
-            ['module' => 'embargo', 'action' => 'lift'],
-            ['id' => '\d+']
-        ));
+        $embargoRouter->register($event->getSubject());
     }
 }

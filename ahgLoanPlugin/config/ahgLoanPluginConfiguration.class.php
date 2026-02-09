@@ -55,76 +55,27 @@ class ahgLoanPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
+        $loan = new \AtomFramework\Routing\RouteLoader('loan');
+
         // === LOAN MANAGEMENT ===
-        $routing->prependRoute('loan_index', new sfRoute(
-            '/loan',
-            ['module' => 'loan', 'action' => 'index']
-        ));
-        $routing->prependRoute('loan_add', new sfRoute(
-            '/loan/add',
-            ['module' => 'loan', 'action' => 'add']
-        ));
-        $routing->prependRoute('loan_show', new sfRoute(
-            '/loan/:id',
-            ['module' => 'loan', 'action' => 'show'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_edit', new sfRoute(
-            '/loan/:id/edit',
-            ['module' => 'loan', 'action' => 'edit'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_add_object', new sfRoute(
-            '/loan/:id/add-object',
-            ['module' => 'loan', 'action' => 'addObject'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_remove_object', new sfRoute(
-            '/loan/:id/remove-object',
-            ['module' => 'loan', 'action' => 'removeObject'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_transition', new sfRoute(
-            '/loan/:id/transition',
-            ['module' => 'loan', 'action' => 'transition'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_extend', new sfRoute(
-            '/loan/:id/extend',
-            ['module' => 'loan', 'action' => 'extend'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_return', new sfRoute(
-            '/loan/:id/return',
-            ['module' => 'loan', 'action' => 'return'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_agreement', new sfRoute(
-            '/loan/:id/agreement',
-            ['module' => 'loan', 'action' => 'agreement'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_upload_document', new sfRoute(
-            '/loan/:id/upload-document',
-            ['module' => 'loan', 'action' => 'uploadDocument'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('loan_search_objects', new sfRoute(
-            '/loan/search-objects',
-            ['module' => 'loan', 'action' => 'searchObjects']
-        ));
+        $loan->any('loan_index', '/loan', 'index');
+        $loan->any('loan_add', '/loan/add', 'add');
+        $loan->any('loan_show', '/loan/:id', 'show', ['id' => '\d+']);
+        $loan->any('loan_edit', '/loan/:id/edit', 'edit', ['id' => '\d+']);
+        $loan->any('loan_add_object', '/loan/:id/add-object', 'addObject', ['id' => '\d+']);
+        $loan->any('loan_remove_object', '/loan/:id/remove-object', 'removeObject', ['id' => '\d+']);
+        $loan->any('loan_transition', '/loan/:id/transition', 'transition', ['id' => '\d+']);
+        $loan->any('loan_extend', '/loan/:id/extend', 'extend', ['id' => '\d+']);
+        $loan->any('loan_return', '/loan/:id/return', 'return', ['id' => '\d+']);
+        $loan->any('loan_agreement', '/loan/:id/agreement', 'agreement', ['id' => '\d+']);
+        $loan->any('loan_upload_document', '/loan/:id/upload-document', 'uploadDocument', ['id' => '\d+']);
+        $loan->any('loan_search_objects', '/loan/search-objects', 'searchObjects');
 
         // === SECTOR-SPECIFIC LOAN ROUTES ===
-        $routing->prependRoute('loan_sector_index', new sfRoute(
-            '/loan/:sector',
-            ['module' => 'loan', 'action' => 'index'],
-            ['sector' => 'museum|gallery|archive|library|dam']
-        ));
-        $routing->prependRoute('loan_sector_add', new sfRoute(
-            '/loan/:sector/add',
-            ['module' => 'loan', 'action' => 'add'],
-            ['sector' => 'museum|gallery|archive|library|dam']
-        ));
+        $loan->any('loan_sector_index', '/loan/:sector', 'index', ['sector' => 'museum|gallery|archive|library|dam']);
+        $loan->any('loan_sector_add', '/loan/:sector/add', 'add', ['sector' => 'museum|gallery|archive|library|dam']);
+
+        $loan->register($routing);
     }
 
     /**

@@ -39,21 +39,17 @@ class ahgSearchPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routeClass = $config['class'] ?? 'sfRoute';
-                        $routing->prependRoute($name, new $routeClass(
-                            $config['url'],
-                            $config['param'],
-                            $config['requirements'] ?? []
-                        ));
-                    }
-                }
-            }
-        }
+        // ahgSearch module routes
+        $search = new \AtomFramework\Routing\RouteLoader('ahgSearch');
+        $search->any('search_autocomplete_override', '/search/autocomplete', 'autocomplete');
+        $search->any('search_index_override', '/search/index', 'index');
+        $search->any('search_descriptionupdates_override', '/search/descriptionUpdates', 'descriptionUpdates');
+        $search->any('search_globalreplace_override', '/search/globalReplace', 'globalReplace');
+        $search->register($routing);
+
+        // Semantic search route (ricSemanticSearch module - optional)
+        $semantic = new \AtomFramework\Routing\RouteLoader('ricSemanticSearch');
+        $semantic->any('search_semantic_override', '/search/semantic', 'index');
+        $semantic->register($routing);
     }
 }

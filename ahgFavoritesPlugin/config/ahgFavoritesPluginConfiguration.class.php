@@ -12,23 +12,14 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
 
     public function routingLoadConfiguration(sfEvent $event)
     {
-        $routing = $event->getSubject();
-        $routing->prependRoute('ahg_favorites_browse', new sfRoute(
-            '/favorites',
-            ['module' => 'favorites', 'action' => 'browse']
-        ));
-        $routing->prependRoute('ahg_favorites_add', new sfRoute(
-            '/favorites/add/:slug',
-            ['module' => 'favorites', 'action' => 'add']
-        ));
-        $routing->prependRoute('ahg_favorites_remove', new sfRoute(
-            '/favorites/remove/:id',
-            ['module' => 'favorites', 'action' => 'remove']
-        ));
-        $routing->prependRoute('ahg_favorites_clear', new sfRoute(
-            '/favorites/clear',
-            ['module' => 'favorites', 'action' => 'clear']
-        ));
+        $router = new \AtomFramework\Routing\RouteLoader('favorites');
+
+        $router->any('ahg_favorites_browse', '/favorites', 'browse');
+        $router->any('ahg_favorites_add', '/favorites/add/:slug', 'add');
+        $router->any('ahg_favorites_remove', '/favorites/remove/:id', 'remove');
+        $router->any('ahg_favorites_clear', '/favorites/clear', 'clear');
+
+        $router->register($event->getSubject());
     }
 
     public function contextLoadFactories(sfEvent $event)

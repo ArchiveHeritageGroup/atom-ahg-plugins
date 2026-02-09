@@ -5,7 +5,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantSwitcherComponents extends sfComponents
+class tenantSwitcherComponents extends AhgComponents
 {
     /**
      * Switcher component - renders the tenant switching dropdown

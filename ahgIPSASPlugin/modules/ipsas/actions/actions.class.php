@@ -5,7 +5,7 @@
  *
  * Admin interface for heritage asset management under IPSAS standards
  */
-class ipsasActions extends sfActions
+class ipsasActions extends AhgActions
 {
     protected function getService(): \AhgIPSAS\Services\IPSASService
     {

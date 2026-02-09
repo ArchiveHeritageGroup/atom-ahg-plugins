@@ -8,7 +8,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class loanActions extends sfActions
+class loanActions extends AhgActions
 {
     /**
      * Browse/list loans.
@@ -607,14 +607,6 @@ class loanActions extends sfActions
      */
     private function getDatabase()
     {
-        static $initialized = false;
-
-        if (!$initialized) {
-            require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Database/DatabaseBootstrap.php';
-            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
-            $initialized = true;
-        }
-
         return \Illuminate\Database\Capsule\Manager::connection();
     }
 }

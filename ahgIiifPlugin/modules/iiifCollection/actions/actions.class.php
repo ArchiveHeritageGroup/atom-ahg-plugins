@@ -3,7 +3,7 @@
 /**
  * IIIF Collection Management Actions
  */
-class iiifCollectionActions extends sfActions
+class iiifCollectionActions extends AhgActions
 {
     protected $collectionService;
 
@@ -11,11 +11,6 @@ class iiifCollectionActions extends sfActions
     {
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
         $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
-        
-        // Initialize database
-        if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
-            \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
-        }
     }
 
     /**

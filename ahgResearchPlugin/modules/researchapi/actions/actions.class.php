@@ -9,7 +9,7 @@
  * @package ahgResearchPlugin
  * @version 2.0.0
  */
-class researchapiActions extends sfActions
+class researchapiActions extends AhgActions
 {
     private ?ResearchApiService $apiService = null;
     private int $startTime;

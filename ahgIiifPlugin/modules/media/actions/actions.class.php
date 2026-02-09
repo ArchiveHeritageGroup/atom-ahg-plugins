@@ -11,7 +11,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class mediaActions extends sfActions
+class mediaActions extends AhgActions
 {
     /**
      * Stream media file, transcoding if necessary for browser compatibility

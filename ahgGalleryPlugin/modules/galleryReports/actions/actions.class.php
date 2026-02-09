@@ -6,7 +6,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class galleryReportsActions extends sfActions
+class galleryReportsActions extends AhgActions
 {
     protected function checkAccess()
     {

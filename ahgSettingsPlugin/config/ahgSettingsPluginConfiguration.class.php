@@ -16,98 +16,46 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('ahgSettings');
 
         // Admin routes
-        $routing->prependRoute('admin_ahg_settings', new sfRoute('/admin/ahg-settings', [
-            'module' => 'ahgSettings',
-            'action' => 'index',
-        ]));
-        $routing->prependRoute('admin_ahg_settings_section', new sfRoute('/admin/ahg-settings/section', [
-            'module' => 'ahgSettings',
-            'action' => 'section',
-        ]));
-        $routing->prependRoute('admin_ahg_settings_plugins', new sfRoute('/admin/ahg-settings/plugins', [
-            'module' => 'ahgSettings',
-            'action' => 'plugins',
-        ]));
-        $routing->prependRoute('admin_ahg_settings_ai_services', new sfRoute('/admin/ahg-settings/ai-services', [
-            'module' => 'ahgSettings',
-            'action' => 'aiServices',
-        ]));
-        $routing->prependRoute('admin_ahg_settings_email', new sfRoute('/admin/ahg-settings/email', [
-            'module' => 'ahgSettings',
-            'action' => 'email',
-        ]));
+        $router->any('admin_ahg_settings', '/admin/ahg-settings', 'index');
+        $router->any('admin_ahg_settings_section', '/admin/ahg-settings/section', 'section');
+        $router->any('admin_ahg_settings_plugins', '/admin/ahg-settings/plugins', 'plugins');
+        $router->any('admin_ahg_settings_ai_services', '/admin/ahg-settings/ai-services', 'aiServices');
+        $router->any('admin_ahg_settings_email', '/admin/ahg-settings/email', 'email');
 
         // Settings index and section
-        $routing->prependRoute('ahg_settings_index', new sfRoute('/ahgSettings/index', [
-            'module' => 'ahgSettings',
-            'action' => 'index',
-        ]));
+        $router->any('ahg_settings_index', '/ahgSettings/index', 'index');
 
         // Export/Import
-        $routing->prependRoute('ahg_settings_export', new sfRoute('/ahgSettings/export', [
-            'module' => 'ahgSettings',
-            'action' => 'export',
-        ]));
-        $routing->prependRoute('ahg_settings_import', new sfRoute('/ahgSettings/import', [
-            'module' => 'ahgSettings',
-            'action' => 'import',
-        ]));
-        $routing->prependRoute('ahg_settings_reset', new sfRoute('/ahgSettings/reset', [
-            'module' => 'ahgSettings',
-            'action' => 'reset',
-        ]));
+        $router->any('ahg_settings_export', '/ahgSettings/export', 'export');
+        $router->any('ahg_settings_import', '/ahgSettings/import', 'import');
+        $router->any('ahg_settings_reset', '/ahgSettings/reset', 'reset');
 
         // Email settings
-        $routing->prependRoute('ahg_settings_email', new sfRoute('/ahgSettings/email', [
-            'module' => 'ahgSettings',
-            'action' => 'email',
-        ]));
-        $routing->prependRoute('ahg_settings_email_test', new sfRoute('/ahgSettings/emailTest', [
-            'module' => 'ahgSettings',
-            'action' => 'emailTest',
-        ]));
+        $router->any('ahg_settings_email', '/ahgSettings/email', 'email');
+        $router->any('ahg_settings_email_test', '/ahgSettings/emailTest', 'emailTest');
 
         // Fuseki test
-        $routing->prependRoute('ahg_settings_fuseki_test', new sfRoute('/ahgSettings/fusekiTest', [
-            'module' => 'ahgSettings',
-            'action' => 'fusekiTest',
-        ]));
+        $router->any('ahg_settings_fuseki_test', '/ahgSettings/fusekiTest', 'fusekiTest');
 
         // Plugins
-        $routing->prependRoute('ahg_settings_plugins', new sfRoute('/ahgSettings/plugins', [
-            'module' => 'ahgSettings',
-            'action' => 'plugins',
-        ]));
+        $router->any('ahg_settings_plugins', '/ahgSettings/plugins', 'plugins');
 
         // DAM tools
-        $routing->prependRoute('ahg_settings_save_tiff_pdf', new sfRoute('/ahgSettings/saveTiffPdfSettings', [
-            'module' => 'ahgSettings',
-            'action' => 'saveTiffPdfSettings',
-        ]));
-        $routing->prependRoute('ahg_settings_dam_tools', new sfRoute('/ahgSettings/damTools', [
-            'module' => 'ahgSettings',
-            'action' => 'damTools',
-        ]));
+        $router->any('ahg_settings_save_tiff_pdf', '/ahgSettings/saveTiffPdfSettings', 'saveTiffPdfSettings');
+        $router->any('ahg_settings_dam_tools', '/ahgSettings/damTools', 'damTools');
 
         // API Keys
-        $routing->prependRoute('ahg_settings_api_keys', new sfRoute('/admin/ahg-settings/api-keys', [
-            'module' => 'ahgSettings',
-            'action' => 'apiKeys',
-        ]));
+        $router->any('ahg_settings_api_keys', '/admin/ahg-settings/api-keys', 'apiKeys');
 
         // Preservation settings
-        $routing->prependRoute('ahg_settings_preservation', new sfRoute('/ahgSettings/preservation', [
-            'module' => 'ahgSettings',
-            'action' => 'preservation',
-        ]));
+        $router->any('ahg_settings_preservation', '/ahgSettings/preservation', 'preservation');
 
         // Levels settings
-        $routing->prependRoute('ahg_settings_levels', new sfRoute('/ahgSettings/levels', [
-            'module' => 'ahgSettings',
-            'action' => 'levels',
-        ]));
+        $router->any('ahg_settings_levels', '/ahgSettings/levels', 'levels');
+
+        $router->register($event->getSubject());
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-class workflowActions extends sfActions
+class workflowActions extends AhgActions
 {
     protected ?WorkflowService $service = null;
 

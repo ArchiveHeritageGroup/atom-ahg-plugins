@@ -1,6 +1,6 @@
 <?php
 
-class translationActions extends sfActions
+class translationActions extends AhgActions
 {
     /** @var AhgTranslationService */
     private $svc;

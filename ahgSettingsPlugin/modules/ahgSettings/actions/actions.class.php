@@ -6,7 +6,7 @@
  * Includes and executes action classes from the settings module.
  * Variables set in the inner action are transferred to this action for template rendering.
  */
-class ahgSettingsActions extends sfActions
+class ahgSettingsActions extends AhgActions
 {
     private function executeSettingsAction($actionClass, $request)
     {

@@ -37,21 +37,13 @@ class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('storageManage');
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routing->prependRoute($name, new sfRoute(
-                            $config['url'],
-                            $config['param']
-                        ));
-                    }
-                }
-            }
-        }
+        $router->any('physicalobject_browse_override', '/physicalobject/browse', 'browse');
+        $router->any('physicalobject_autocomplete_override', '/physicalobject/autocomplete', 'autocomplete');
+        $router->any('physicalobject_boxlist_override', '/physicalobject/boxList', 'boxList');
+        $router->any('physicalobject_holdings_export_override', '/physicalobject/holdingsReportExport', 'holdingsReportExport');
+
+        $router->register($event->getSubject());
     }
 }

@@ -38,21 +38,14 @@ class ahgTermTaxonomyPluginConfiguration extends sfPluginConfiguration
     {
         $routing = $event->getSubject();
 
-        $routingFile = __DIR__ . '/routing.yml';
-        if (file_exists($routingFile)) {
-            $routes = sfYaml::load($routingFile);
-            if (is_array($routes)) {
-                foreach ($routes as $name => $config) {
-                    if (isset($config['url']) && isset($config['param'])) {
-                        $routeClass = $config['class'] ?? 'sfRoute';
-                        $routing->prependRoute($name, new $routeClass(
-                            $config['url'],
-                            $config['param'],
-                            $config['requirements'] ?? []
-                        ));
-                    }
-                }
-            }
-        }
+        // All routes target termTaxonomy module
+        // Catch-all slug routes registered first = checked last
+        $router = new \AtomFramework\Routing\RouteLoader('termTaxonomy');
+        $router->any('term_edit_override', '/term/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_-]+']);
+        $router->any('term_delete_override', '/term/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_-]+']);
+        $router->any('term_browse_override', '/term/:slug', 'index', ['slug' => '[a-zA-Z0-9_-]+']);
+        // Taxonomy route with numeric ID
+        $router->any('taxonomy_browse_override', '/taxonomy/:id', 'taxonomyIndex', ['id' => '\d+']);
+        $router->register($routing);
     }
 }

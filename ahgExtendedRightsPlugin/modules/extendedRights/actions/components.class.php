@@ -2,25 +2,8 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-class extendedRightsComponents extends sfComponents
+class extendedRightsComponents extends AhgComponents
 {
-    protected static $capsule = null;
-
-    protected function getDb()
-    {
-        if (self::$capsule !== null) {
-            return self::$capsule;
-        }
-
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        if (file_exists($bootstrap)) {
-            require_once $bootstrap;
-        }
-        self::$capsule = Capsule::getInstance();
-
-        return self::$capsule;
-    }
-
     public function executeRightsDisplay(sfWebRequest $request)
     {
         $objectId = $this->objectId ?? null;
@@ -28,7 +11,7 @@ class extendedRightsComponents extends sfComponents
             return sfView::NONE;
         }
 
-        $this->getDb();
+
         $objectId = (int) $objectId;
 
         // Get Rights Statement
@@ -117,7 +100,7 @@ class extendedRightsComponents extends sfComponents
             return sfView::NONE;
         }
 
-        $this->getDb();
+
         $this->provenance = Capsule::table('object_provenance')->where('object_id', (int) $objectId)->first();
         $this->donor = null;
 
@@ -136,7 +119,7 @@ class extendedRightsComponents extends sfComponents
 
     public function executeGetTkLabels(sfWebRequest $request)
     {
-        $this->getDb();
+
 
         $this->tkLabels = Capsule::table('rights_tk_label')
             ->leftJoin('rights_tk_label_i18n', function ($join) {
@@ -159,7 +142,7 @@ class extendedRightsComponents extends sfComponents
 
     public function executeRightsStats(sfWebRequest $request)
     {
-        $this->getDb();
+
 
         $this->stats = (object) [
             'total_objects' => Capsule::table('information_object')->where('id', '>', 1)->count(),
@@ -179,7 +162,7 @@ class extendedRightsComponents extends sfComponents
             return sfView::NONE;
         }
 
-        $this->getDb();
+
         $objectId = (int) $objectId;
 
         $this->embargo = Capsule::table('rights_embargo')

@@ -1,19 +1,12 @@
 <?php
 
-class dcManageActions extends sfActions
+class dcManageActions extends AhgActions
 {
     public function preExecute()
     {
         parent::preExecute();
 
         sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-
-        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            $frameworkBoot = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($frameworkBoot)) {
-                require_once $frameworkBoot;
-            }
-        }
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-class accessFilterActions extends sfActions
+class accessFilterActions extends AhgActions
 {
     public function executeDenied(sfWebRequest $request)
     {

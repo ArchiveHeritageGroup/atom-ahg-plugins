@@ -3,7 +3,7 @@
 /**
  * Forms module actions.
  */
-class formsActions extends sfActions
+class formsActions extends AhgActions
 {
     /**
      * Dashboard / index.

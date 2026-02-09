@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class spectrumActions extends sfActions
+class spectrumActions extends AhgActions
 {
     /**
      * Initialize AhgDb for Laravel Query Builder.
@@ -12,7 +12,6 @@ class spectrumActions extends sfActions
         $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
-            \AhgCore\Core\AhgDb::init();
         }
     }
 

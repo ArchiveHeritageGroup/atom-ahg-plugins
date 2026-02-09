@@ -7,7 +7,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Condition Photo Annotation Actions
  * Handles photo management and annotation for condition reports
  */
-class conditionActions extends sfActions
+class conditionActions extends AhgActions
 {
     /**
      * Initialize AhgDb for Laravel Query Builder.
@@ -26,7 +26,6 @@ class conditionActions extends sfActions
         $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
-            \AhgCore\Core\AhgDb::init();
         }
     }
 

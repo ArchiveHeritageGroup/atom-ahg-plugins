@@ -5,8 +5,6 @@ class ahgGraphQLPluginConfiguration extends sfPluginConfiguration
     public static $summary = 'GraphQL API';
     public static $version = '1.0.0';
 
-    protected $routing;
-
     public function initialize()
     {
         $enabledModules = sfConfig::get('sf_enabled_modules');
@@ -18,41 +16,15 @@ class ahgGraphQLPluginConfiguration extends sfPluginConfiguration
 
     public function routingLoadConfiguration(sfEvent $event)
     {
-        $this->routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('graphql');
 
         // GraphQL endpoint (POST for queries/mutations, GET for playground)
-        $this->addRoute('POST', '/api/graphql', ['module' => 'graphql', 'action' => 'index']);
-        $this->addRoute('GET', '/api/graphql', ['module' => 'graphql', 'action' => 'index']);
+        $router->post('graphql_index_post', '/api/graphql', 'index');
+        $router->get('graphql_index_get', '/api/graphql', 'index');
 
         // GraphQL Playground (development only)
-        $this->addRoute('GET', '/api/graphql/playground', ['module' => 'graphql', 'action' => 'playground']);
-    }
+        $router->get('graphql_playground', '/api/graphql/playground', 'playground');
 
-    protected function addRoute($method, $pattern, array $options = [])
-    {
-        $defaults = $requirements = [];
-
-        if ('*' != $method) {
-            $requirements['sf_method'] = explode(',', $method);
-        }
-
-        if (isset($options['module'])) {
-            $defaults['module'] = $options['module'];
-        }
-
-        if (isset($options['action'])) {
-            $defaults['action'] = $options['action'];
-            $name = 'graphql_' . $options['action'];
-        } else {
-            $name = 'graphql_' . str_replace(['/', ':'], '_', $pattern);
-        }
-
-        if (isset($options['params'])) {
-            foreach ($options['params'] as $field => $regex) {
-                $requirements[$field] = $regex;
-            }
-        }
-
-        $this->routing->prependRoute($name, new sfRequestRoute($pattern, $defaults, $requirements));
+        $router->register($event->getSubject());
     }
 }

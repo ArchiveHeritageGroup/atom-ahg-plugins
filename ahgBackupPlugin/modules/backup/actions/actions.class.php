@@ -5,7 +5,7 @@ if (file_exists($frameworkBootstrap)) {
     require_once $frameworkBootstrap;
 }
 
-class backupActions extends sfActions
+class backupActions extends AhgActions
 {
     private const MAX_UPLOAD_SIZE = 2147483648; // 2GB
     private const ALLOWED_EXTENSIONS = ['gz', 'tar.gz', 'sql', 'sql.gz', 'zip'];

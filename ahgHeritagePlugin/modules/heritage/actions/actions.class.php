@@ -5,19 +5,8 @@
  *
  * Handles landing page, search, and API endpoints for the Heritage platform.
  */
-class heritageActions extends sfActions
+class heritageActions extends AhgActions
 {
-    /**
-     * Bootstrap the framework (guarded for missing framework).
-     */
-    protected function initDb()
-    {
-        $bootstrap = sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
-        if (file_exists($bootstrap)) {
-            require_once $bootstrap;
-        }
-    }
-
     /**
      * Landing page action.
      *
@@ -25,8 +14,7 @@ class heritageActions extends sfActions
      */
     public function executeLanding(sfWebRequest $request)
     {
-        // Bootstrap the framework
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -180,8 +168,7 @@ class heritageActions extends sfActions
      */
     public function executeSearch(sfWebRequest $request)
     {
-        // Bootstrap the framework
-        $this->initDb();
+
 
         $params = [
             'query' => $request->getParameter('q', ''),
@@ -234,7 +221,7 @@ class heritageActions extends sfActions
      */
     public function executeApiLanding(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -252,7 +239,7 @@ class heritageActions extends sfActions
      */
     public function executeApiDiscover(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         // Get JSON body for POST requests
         $params = [];
@@ -293,7 +280,7 @@ class heritageActions extends sfActions
      */
     public function executeApiAutocomplete(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $query = $request->getParameter('q', '');
         $institutionId = $request->getParameter('institution_id');
@@ -318,7 +305,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -377,7 +364,7 @@ class heritageActions extends sfActions
      */
     public function executeApiClick(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         if (!$request->isMethod('post')) {
             return $this->renderJson([
@@ -403,7 +390,7 @@ class heritageActions extends sfActions
      */
     public function executeApiDwell(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         if (!$request->isMethod('post')) {
             return $this->renderJson([
@@ -437,7 +424,7 @@ class heritageActions extends sfActions
             ]);
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $days = (int) $request->getParameter('days', 30);
@@ -476,7 +463,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -500,7 +487,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -535,7 +522,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -584,7 +571,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
@@ -614,7 +601,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $action = $request->getParameter('featured_action');
@@ -762,7 +749,7 @@ class heritageActions extends sfActions
             }
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $action = $request->getParameter('slide_action');
@@ -914,7 +901,7 @@ class heritageActions extends sfActions
      */
     public function executeRequestAccess(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $slug = $request->getParameter('slug');
         $culture = $this->context->user->getCulture();
@@ -972,7 +959,7 @@ class heritageActions extends sfActions
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        $this->initDb();
+
 
         $userId = $this->context->user->getAttribute('user_id');
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
@@ -997,7 +984,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
@@ -1043,7 +1030,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
@@ -1080,7 +1067,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
@@ -1122,7 +1109,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $userId = $this->context->user->getAttribute('user_id');
@@ -1143,7 +1130,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $slug = $request->getParameter('slug');
         $culture = $this->context->user->getCulture();
@@ -1198,7 +1185,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\CustodianController($culture);
@@ -1223,7 +1210,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\CustodianController($culture);
@@ -1256,7 +1243,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $days = (int) $request->getParameter('days', 30);
@@ -1278,7 +1265,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $days = (int) $request->getParameter('days', 30);
@@ -1314,7 +1301,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $days = (int) $request->getParameter('days', 30);
@@ -1337,7 +1324,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $controller = new \AtomFramework\Heritage\Controllers\Api\AnalyticsController();
@@ -1382,7 +1369,7 @@ class heritageActions extends sfActions
      */
     public function executeContributorLogin(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         // Check if already logged in
         if ($this->getUser()->getAttribute('contributor_id')) {
@@ -1426,7 +1413,7 @@ class heritageActions extends sfActions
      */
     public function executeContributorRegister(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $this->error = null;
         $this->success = false;
@@ -1470,7 +1457,7 @@ class heritageActions extends sfActions
      */
     public function executeContributorLogout(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $token = $this->getUser()->getAttribute('contributor_token');
         if ($token) {
@@ -1491,7 +1478,7 @@ class heritageActions extends sfActions
      */
     public function executeContributorVerify(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $token = $request->getParameter('token');
         $service = new \AtomFramework\Heritage\Contributions\ContributorService();
@@ -1508,7 +1495,7 @@ class heritageActions extends sfActions
      */
     public function executeContribute(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $slug = $request->getParameter('slug');
         $culture = $this->context->user->getCulture();
@@ -1572,7 +1559,7 @@ class heritageActions extends sfActions
      */
     public function executeMyContributions(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $contributorId = $this->getUser()->getAttribute('contributor_id');
         if (!$contributorId) {
@@ -1604,7 +1591,7 @@ class heritageActions extends sfActions
      */
     public function executeContributorProfile(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $contributorId = (int) $request->getParameter('id');
 
@@ -1625,7 +1612,7 @@ class heritageActions extends sfActions
      */
     public function executeLeaderboard(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $period = $request->getParameter('period'); // week, month, or null for all-time
 
@@ -1652,7 +1639,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $culture = $this->context->user->getCulture();
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
@@ -1681,7 +1668,7 @@ class heritageActions extends sfActions
             $this->forward('admin', 'secure');
         }
 
-        $this->initDb();
+
 
         $contributionId = (int) $request->getParameter('id');
         $culture = $this->context->user->getCulture();
@@ -1721,7 +1708,7 @@ class heritageActions extends sfActions
      */
     public function executeApiSubmitContribution(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         if (!$request->isMethod('post')) {
             return $this->renderJson(['success' => false, 'error' => 'POST method required']);
@@ -1756,7 +1743,7 @@ class heritageActions extends sfActions
      */
     public function executeApiContributionStatus(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $contributionId = (int) $request->getParameter('id');
         $culture = $this->context->user->getCulture();
@@ -1785,7 +1772,7 @@ class heritageActions extends sfActions
      */
     public function executeApiSuggestTags(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $query = $request->getParameter('q', '');
         $limit = min(20, max(1, (int) $request->getParameter('limit', 10)));
@@ -1820,7 +1807,7 @@ class heritageActions extends sfActions
             return null;
         }
 
-        $this->initDb();
+
 
         $service = new \AtomFramework\Heritage\Contributions\ContributorService();
         return $service->validateSession($token);
@@ -1835,7 +1822,7 @@ class heritageActions extends sfActions
      */
     public function executeExplore(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -1870,7 +1857,7 @@ class heritageActions extends sfActions
      */
     public function executeTimeline(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -1903,7 +1890,7 @@ class heritageActions extends sfActions
      */
     public function executeCreators(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -1935,7 +1922,7 @@ class heritageActions extends sfActions
      */
     public function executeCreatorsAutocomplete(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $query = trim($request->getParameter('q', ''));
         $results = [];
@@ -2032,7 +2019,7 @@ class heritageActions extends sfActions
      */
     public function executeCollections(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -2060,7 +2047,7 @@ class heritageActions extends sfActions
      */
     public function executeTrending(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -2082,7 +2069,7 @@ class heritageActions extends sfActions
      */
     public function executeApiHeroSlides(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -2098,7 +2085,7 @@ class heritageActions extends sfActions
      */
     public function executeApiFeaturedCollections(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $limit = min(20, max(1, (int) $request->getParameter('limit', 6)));
@@ -2115,7 +2102,7 @@ class heritageActions extends sfActions
      */
     public function executeApiExploreCategories(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -2131,7 +2118,7 @@ class heritageActions extends sfActions
      */
     public function executeApiExploreCategoryItems(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $categoryCode = $request->getParameter('category');
@@ -2164,7 +2151,7 @@ class heritageActions extends sfActions
      */
     public function executeApiTimelinePeriods(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $culture = $this->context->user->getCulture();
@@ -2180,7 +2167,7 @@ class heritageActions extends sfActions
      */
     public function executeApiTimelinePeriodItems(sfWebRequest $request)
     {
-        $this->initDb();
+
 
         $institutionId = $request->getParameter('institution_id');
         $periodId = $request->getParameter('period_id');
@@ -2284,7 +2271,7 @@ EMAIL;
      */
     public function executeGraph(sfWebRequest $request)
     {
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
@@ -2305,7 +2292,7 @@ EMAIL;
     {
         $this->getResponse()->setContentType('application/json');
 
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
@@ -2340,7 +2327,7 @@ EMAIL;
      */
     public function executeEntity(sfWebRequest $request)
     {
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $type = $request->getParameter('type');
@@ -2369,7 +2356,7 @@ EMAIL;
     {
         $this->getResponse()->setContentType('application/json');
 
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $type = $request->getParameter('type');
@@ -2404,7 +2391,7 @@ EMAIL;
     {
         $this->getResponse()->setContentType('application/json');
 
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $nodeId = (int) $request->getParameter('id');
@@ -2435,7 +2422,7 @@ EMAIL;
     {
         $this->getResponse()->setContentType('application/json');
 
-        $this->initDb();
+
 
         $query = $request->getParameter('q', '');
         $type = $request->getParameter('type');
@@ -2478,7 +2465,7 @@ EMAIL;
     {
         $this->getResponse()->setContentType('application/json');
 
-        $this->initDb();
+
         require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();

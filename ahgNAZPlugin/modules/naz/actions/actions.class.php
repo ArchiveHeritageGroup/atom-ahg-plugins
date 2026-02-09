@@ -12,7 +12,7 @@
  * - Transfer tracking
  * - Protected records
  */
-class nazActions extends sfActions
+class nazActions extends AhgActions
 {
     /**
      * Get the NAZ service

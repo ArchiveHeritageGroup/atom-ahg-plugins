@@ -15,7 +15,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  * @subpackage ahgMediaSettings
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class mediaSettingsActions extends sfActions
+class mediaSettingsActions extends AhgActions
 {
     /**
      * Check admin access
@@ -142,7 +142,6 @@ class mediaSettingsActions extends sfActions
             return $this->renderText(json_encode([]));
         }
 
-        \AhgCore\Core\AhgDb::init();
 
         $results = DB::table('information_object')
             ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')

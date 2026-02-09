@@ -3,7 +3,7 @@
 /**
  * ISBN Module Actions.
  */
-class isbnActions extends sfActions
+class isbnActions extends AhgActions
 {
     /**
      * Test page action.

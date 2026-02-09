@@ -64,72 +64,36 @@ class ahgIPSASPluginConfiguration extends sfPluginConfiguration
 
     public function routingLoadConfiguration(sfEvent $event): void
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('ipsas');
 
         // Dashboard
-        $routing->prependRoute('ipsas_index', new sfRoute(
-            '/admin/ipsas',
-            ['module' => 'ipsas', 'action' => 'index']
-        ));
+        $router->any('ipsas_index', '/admin/ipsas', 'index');
 
         // Asset Register
-        $routing->prependRoute('ipsas_assets', new sfRoute(
-            '/admin/ipsas/assets',
-            ['module' => 'ipsas', 'action' => 'assets']
-        ));
-        $routing->prependRoute('ipsas_asset_create', new sfRoute(
-            '/admin/ipsas/asset/create',
-            ['module' => 'ipsas', 'action' => 'assetCreate']
-        ));
-        $routing->prependRoute('ipsas_asset_view', new sfRoute(
-            '/admin/ipsas/asset/:id',
-            ['module' => 'ipsas', 'action' => 'assetView'],
-            ['id' => '\d+']
-        ));
-        $routing->prependRoute('ipsas_asset_edit', new sfRoute(
-            '/admin/ipsas/asset/:id/edit',
-            ['module' => 'ipsas', 'action' => 'assetEdit'],
-            ['id' => '\d+']
-        ));
+        $router->any('ipsas_assets', '/admin/ipsas/assets', 'assets');
+        $router->any('ipsas_asset_create', '/admin/ipsas/asset/create', 'assetCreate');
+        $router->any('ipsas_asset_view', '/admin/ipsas/asset/:id', 'assetView', ['id' => '\d+']);
+        $router->any('ipsas_asset_edit', '/admin/ipsas/asset/:id/edit', 'assetEdit', ['id' => '\d+']);
 
         // Valuations
-        $routing->prependRoute('ipsas_valuations', new sfRoute(
-            '/admin/ipsas/valuations',
-            ['module' => 'ipsas', 'action' => 'valuations']
-        ));
-        $routing->prependRoute('ipsas_valuation_create', new sfRoute(
-            '/admin/ipsas/valuation/create',
-            ['module' => 'ipsas', 'action' => 'valuationCreate']
-        ));
+        $router->any('ipsas_valuations', '/admin/ipsas/valuations', 'valuations');
+        $router->any('ipsas_valuation_create', '/admin/ipsas/valuation/create', 'valuationCreate');
 
         // Impairments
-        $routing->prependRoute('ipsas_impairments', new sfRoute(
-            '/admin/ipsas/impairments',
-            ['module' => 'ipsas', 'action' => 'impairments']
-        ));
+        $router->any('ipsas_impairments', '/admin/ipsas/impairments', 'impairments');
 
         // Insurance
-        $routing->prependRoute('ipsas_insurance', new sfRoute(
-            '/admin/ipsas/insurance',
-            ['module' => 'ipsas', 'action' => 'insurance']
-        ));
+        $router->any('ipsas_insurance', '/admin/ipsas/insurance', 'insurance');
 
         // Reports
-        $routing->prependRoute('ipsas_reports', new sfRoute(
-            '/admin/ipsas/reports',
-            ['module' => 'ipsas', 'action' => 'reports']
-        ));
+        $router->any('ipsas_reports', '/admin/ipsas/reports', 'reports');
 
         // Financial Year
-        $routing->prependRoute('ipsas_financial_year', new sfRoute(
-            '/admin/ipsas/financial-year',
-            ['module' => 'ipsas', 'action' => 'financialYear']
-        ));
+        $router->any('ipsas_financial_year', '/admin/ipsas/financial-year', 'financialYear');
 
         // Config
-        $routing->prependRoute('ipsas_config', new sfRoute(
-            '/admin/ipsas/config',
-            ['module' => 'ipsas', 'action' => 'config']
-        ));
+        $router->any('ipsas_config', '/admin/ipsas/config', 'config');
+
+        $router->register($event->getSubject());
     }
 }

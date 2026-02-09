@@ -10,7 +10,7 @@
  *
  * @see https://iiif.io/api/auth/1.0/
  */
-class iiifAuthActions extends sfActions
+class iiifAuthActions extends AhgActions
 {
     protected function getAuthService(): IiifAuthService
     {

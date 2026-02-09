@@ -1,6 +1,6 @@
 <?php
 
-class privacyActions extends sfActions
+class privacyActions extends AhgActions
 {
     protected function getService(): \ahgPrivacyPlugin\Service\PrivacyService
     {
@@ -34,7 +34,6 @@ class privacyActions extends sfActions
     public function executeDsarRequest(sfWebRequest $request)
     {
         // Bootstrap and require service
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes();
 
@@ -102,7 +101,6 @@ class privacyActions extends sfActions
      */
     public function executeComplaint(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
         require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
 
         $this->complaintTypes = [
@@ -147,7 +145,6 @@ class privacyActions extends sfActions
      */
     public function executeComplaintConfirmation(sfWebRequest $request)
     {
-        \AhgCore\Core\AhgDb::init();
 
         $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
             ->where('id', $request->getParameter('id'))

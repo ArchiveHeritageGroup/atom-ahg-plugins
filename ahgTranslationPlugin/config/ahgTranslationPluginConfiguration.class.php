@@ -19,28 +19,13 @@ class ahgTranslationPluginConfiguration extends sfPluginConfiguration
 
     public function routingLoadConfiguration(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('translation');
 
-        $routing->prependRoute('ahg_translation_health', new sfRoute(
-            '/translation/health',
-            array('module' => 'translation', 'action' => 'health')
-        ));
+        $router->any('ahg_translation_health', '/translation/health', 'health');
+        $router->any('ahg_translation_settings', '/translation/settings', 'settings');
+        $router->any('ahg_translation_translate', '/translation/translate/:id', 'translate', ['id' => '\d+']);
+        $router->any('ahg_translation_apply', '/translation/apply/:draftId', 'apply', ['draftId' => '\d+']);
 
-        $routing->prependRoute('ahg_translation_settings', new sfRoute(
-            '/translation/settings',
-            array('module' => 'translation', 'action' => 'settings')
-        ));
-
-        $routing->prependRoute('ahg_translation_translate', new sfRoute(
-            '/translation/translate/:id',
-            array('module' => 'translation', 'action' => 'translate'),
-            array('id' => '\d+')
-        ));
-
-        $routing->prependRoute('ahg_translation_apply', new sfRoute(
-            '/translation/apply/:draftId',
-            array('module' => 'translation', 'action' => 'apply'),
-            array('draftId' => '\d+')
-        ));
+        $router->register($event->getSubject());
     }
 }

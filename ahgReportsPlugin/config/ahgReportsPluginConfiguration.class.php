@@ -16,68 +16,29 @@ class ahgReportsPluginConfiguration extends sfPluginConfiguration
 
     public function loadRoutes(sfEvent $event)
     {
-        $routing = $event->getSubject();
+        $router = new \AtomFramework\Routing\RouteLoader('reports');
 
         // Central Dashboard
-        $routing->prependRoute('admin_dashboard', new sfRoute('/admin/dashboard', [
-            'module' => 'reports',
-            'action' => 'index',
-        ]));
+        $router->any('admin_dashboard', '/admin/dashboard', 'index');
 
         // Legacy URL redirect
-        $routing->prependRoute('reports_index', new sfRoute('/reports', [
-            'module' => 'reports',
-            'action' => 'index',
-        ]));
+        $router->any('reports_index', '/reports', 'index');
 
         // Centralized Report System
-        $routing->prependRoute('report_view', new sfRoute('/reports/view/:code', [
-            'module' => 'reports',
-            'action' => 'report',
-        ], [
-            'code' => '[a-z_]+',
-        ]));
+        $router->any('report_view', '/reports/view/:code', 'report', ['code' => '[a-z_]+']);
 
         // Report type routes
-        $routing->prependRoute('reports_descriptions', new sfRoute('/reports/descriptions', [
-            'module' => 'reports',
-            'action' => 'descriptions',
-        ]));
-
-        $routing->prependRoute('reports_authorities', new sfRoute('/reports/authorities', [
-            'module' => 'reports',
-            'action' => 'archival',
-        ]));
-
-        $routing->prependRoute('reports_repositories', new sfRoute('/reports/repositories', [
-            'module' => 'reports',
-            'action' => 'repositories',
-        ]));
-
-        $routing->prependRoute('reports_accessions', new sfRoute('/reports/accessions', [
-            'module' => 'reports',
-            'action' => 'accessions',
-        ]));
-
-        $routing->prependRoute('reports_storage', new sfRoute('/reports/storage', [
-            'module' => 'reports',
-            'action' => 'storage',
-        ]));
-
-        $routing->prependRoute('reports_recent', new sfRoute('/reports/recent', [
-            'module' => 'reports',
-            'action' => 'recent',
-        ]));
-
-        $routing->prependRoute('reports_activity', new sfRoute('/reports/activity', [
-            'module' => 'reports',
-            'action' => 'activity',
-        ]));
+        $router->any('reports_descriptions', '/reports/descriptions', 'descriptions');
+        $router->any('reports_authorities', '/reports/authorities', 'archival');
+        $router->any('reports_repositories', '/reports/repositories', 'repositories');
+        $router->any('reports_accessions', '/reports/accessions', 'accessions');
+        $router->any('reports_storage', '/reports/storage', 'storage');
+        $router->any('reports_recent', '/reports/recent', 'recent');
+        $router->any('reports_activity', '/reports/activity', 'activity');
 
         // Spatial Analysis Export
-        $routing->prependRoute('reports_spatial_analysis', new sfRoute('/reports/spatial-analysis', [
-            'module' => 'reports',
-            'action' => 'reportSpatialAnalysis',
-        ]));
+        $router->any('reports_spatial_analysis', '/reports/spatial-analysis', 'reportSpatialAnalysis');
+
+        $router->register($event->getSubject());
     }
 }

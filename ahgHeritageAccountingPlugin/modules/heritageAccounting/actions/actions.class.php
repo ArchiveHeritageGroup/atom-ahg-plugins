@@ -2,7 +2,7 @@
 /**
  * Heritage Accounting Actions
  */
-class heritageAccountingActions extends sfActions
+class heritageAccountingActions extends AhgActions
 {
     /**
      * Dashboard
