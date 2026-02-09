@@ -1,5 +1,5 @@
 {
-    "name": "ahgRepositoryManagePlugin",
+    "name": "AHG Repository Manage",
     "version": "1.0.0",
     "description": "High-performance archival institution browse using Laravel Query Builder and direct ES queries",
     "author": "The Archive and Heritage Group",

@@ -1,5 +1,5 @@
 {
-    "name": "ahgAccessionManagePlugin",
+    "name": "AHG Accession Manage",
     "version": "1.0.0",
     "description": "High-performance accession browse and management using Laravel Query Builder and direct ES queries",
     "author": "The Archive and Heritage Group",
