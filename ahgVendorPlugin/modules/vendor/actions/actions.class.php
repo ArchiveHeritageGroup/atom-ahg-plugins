@@ -6,22 +6,20 @@ class vendorActions extends AhgActions
 
     public function preExecute()
     {
-        error_log("VENDOR: preExecute started");
         require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Repository/VendorRepository.php';
         $this->service = new \AtomFramework\Services\VendorService();
-        error_log("VENDOR: preExecute completed");
     }
 
     public function executeIndex(sfWebRequest $request)
     {
-        error_log("VENDOR: executeIndex started");
-        $this->stats = $this->service->getDashboardStats();
-        $this->overdueTransactions = $this->service->getOverdueTransactions();
-        $this->activeTransactions = $this->service->getActiveTransactions()->take(10);
-        $this->statusCounts = $this->service->getTransactionsByStatus();
-        $this->monthlyStats = $this->service->getMonthlyStats(12);
-        error_log("VENDOR: executeIndex completed");
+        return $this->renderBlade('index', [
+            'stats' => $this->service->getDashboardStats(),
+            'overdueTransactions' => $this->service->getOverdueTransactions(),
+            'activeTransactions' => $this->service->getActiveTransactions()->take(10),
+            'statusCounts' => $this->service->getTransactionsByStatus(),
+            'monthlyStats' => $this->service->getMonthlyStats(12),
+        ]);
     }
 
     public function executeList(sfWebRequest $request)
@@ -47,24 +45,27 @@ class vendorActions extends AhgActions
     public function executeView(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
-        $this->vendor = $this->service->getVendorBySlug($slug);
+        $vendor = $this->service->getVendorBySlug($slug);
 
-        if (!$this->vendor) {
+        if (!$vendor) {
             $this->forward404('Vendor not found');
         }
 
-        $this->contacts = $this->service->getVendorContacts($this->vendor->id);
-        $this->services = $this->service->getVendorServices($this->vendor->id);
-        $this->stats = $this->service->getVendorStats($this->vendor->id);
-        $this->transactions = $this->service->listTransactions(['vendor_id' => $this->vendor->id]);
+        return $this->renderBlade('view', [
+            'vendor' => $vendor,
+            'contacts' => $this->service->getVendorContacts($vendor->id),
+            'services' => $this->service->getVendorServices($vendor->id),
+            'stats' => $this->service->getVendorStats($vendor->id),
+            'transactions' => $this->service->listTransactions(['vendor_id' => $vendor->id]),
+        ]);
     }
 
     public function executeAdd(sfWebRequest $request)
     {
-        $this->form = [];
-        $this->errors = [];
-        $this->vendorTypes = $this->service->getVendorTypes();
-        $this->serviceTypes = $this->service->listServiceTypes();
+        $form = [];
+        $errors = [];
+        $vendorTypes = $this->service->getVendorTypes();
+        $serviceTypes = $this->service->listServiceTypes();
 
         if ($request->isMethod('post')) {
             $data = $this->extractVendorData($request);
@@ -76,42 +77,54 @@ class vendorActions extends AhgActions
                 $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $vendor->slug]);
             }
 
-            $this->errors = $result['errors'];
-            $this->form = $data;
+            $errors = $result['errors'];
+            $form = $data;
         }
+
+        return $this->renderBlade('add', [
+            'form' => $form,
+            'errors' => $errors,
+            'vendorTypes' => $vendorTypes,
+            'serviceTypes' => $serviceTypes,
+        ]);
     }
 
     public function executeEdit(sfWebRequest $request)
     {
         $slug = $request->getParameter('slug');
-        $this->vendor = $this->service->getVendorBySlug($slug);
+        $vendor = $this->service->getVendorBySlug($slug);
 
-        if (!$this->vendor) {
+        if (!$vendor) {
             $this->forward404('Vendor not found');
         }
 
-        $this->errors = [];
-        $this->vendorTypes = $this->service->getVendorTypes();
-        $this->serviceTypes = $this->service->listServiceTypes();
-        $this->vendorServices = $this->service->getVendorServices($this->vendor->id);
+        $errors = [];
+        $vendorTypes = $this->service->getVendorTypes();
+        $serviceTypes = $this->service->listServiceTypes();
+        $vendorServices = $this->service->getVendorServices($vendor->id);
 
         if ($request->isMethod('post')) {
-            error_log('VENDOR EDIT: POST received for vendor ID ' . $this->vendor->id);
             $data = $this->extractVendorData($request);
-            error_log('VENDOR EDIT: Data extracted: ' . json_encode($data));
-            $result = $this->service->updateVendor($this->vendor->id, $data);
-            error_log('VENDOR EDIT: Update result: ' . json_encode($result));
+            $result = $this->service->updateVendor($vendor->id, $data);
 
             if ($result['success']) {
                 $serviceIds = $request->getParameter('service_ids', []);
-                $this->syncVendorServices($this->vendor->id, $serviceIds);
+                $this->syncVendorServices($vendor->id, $serviceIds);
                 $this->getUser()->setFlash('notice', 'Vendor updated successfully');
-                $vendor = $this->service->getVendor($this->vendor->id);
+                $vendor = $this->service->getVendor($vendor->id);
                 $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $vendor->slug]);
             }
 
-            $this->errors = $result['errors'];
+            $errors = $result['errors'];
         }
+
+        return $this->renderBlade('edit', [
+            'vendor' => $vendor,
+            'errors' => $errors,
+            'vendorTypes' => $vendorTypes,
+            'serviceTypes' => $serviceTypes,
+            'vendorServices' => $vendorServices,
+        ]);
     }
 
     public function executeDelete(sfWebRequest $request)
@@ -259,7 +272,7 @@ class vendorActions extends AhgActions
 
     public function executeTransactions(sfWebRequest $request)
     {
-        $this->filters = [
+        $filters = [
             'status' => $request->getParameter('status'),
             'vendor_id' => $request->getParameter('vendor_id'),
             'service_type_id' => $request->getParameter('service_type_id'),
@@ -269,40 +282,46 @@ class vendorActions extends AhgActions
             'overdue' => $request->getParameter('overdue'),
         ];
 
-        $this->transactions = $this->service->listTransactions($this->filters);
-        $this->vendors = $this->service->listVendors(['status' => 'active']);
-        $this->serviceTypes = $this->service->listServiceTypes();
-        $this->statusOptions = $this->service->getStatusOptions();
+        return $this->renderBlade('transactions', [
+            'filters' => $filters,
+            'transactions' => $this->service->listTransactions($filters),
+            'vendors' => $this->service->listVendors(['status' => 'active']),
+            'serviceTypes' => $this->service->listServiceTypes(),
+            'statusOptions' => $this->service->getStatusOptions(),
+        ]);
     }
 
     public function executeViewTransaction(sfWebRequest $request)
     {
         $id = (int)$request->getParameter('id');
-        $this->transaction = $this->service->getTransaction($id);
+        $transaction = $this->service->getTransaction($id);
 
-        if (!$this->transaction) {
+        if (!$transaction) {
             $this->forward404('Transaction not found');
         }
 
-        $this->items = $this->service->getTransactionItems($id);
-        $this->history = $this->service->getTransactionHistory($id);
-        $this->attachments = $this->service->getAttachments($id);
-        $this->statusOptions = $this->service->getStatusOptions();
+        return $this->renderBlade('viewTransaction', [
+            'transaction' => $transaction,
+            'items' => $this->service->getTransactionItems($id),
+            'history' => $this->service->getTransactionHistory($id),
+            'attachments' => $this->service->getAttachments($id),
+            'statusOptions' => $this->service->getStatusOptions(),
+        ]);
     }
 
     public function executeAddTransaction(sfWebRequest $request)
     {
-        $this->form = [];
-        $this->errors = [];
-        $this->vendors = $this->service->listVendors(['status' => 'active']);
-        $this->serviceTypes = $this->service->listServiceTypes();
-        $this->conditionRatings = $this->service->getConditionRatings();
+        $form = [];
+        $errors = [];
+        $vendors = $this->service->listVendors(['status' => 'active']);
+        $serviceTypes = $this->service->listServiceTypes();
+        $conditionRatings = $this->service->getConditionRatings();
 
         $preselectedVendorSlug = $request->getParameter('vendor');
         if ($preselectedVendorSlug) {
             $vendor = $this->service->getVendorBySlug($preselectedVendorSlug);
             if ($vendor) {
-                $this->form['vendor_id'] = $vendor->id;
+                $form['vendor_id'] = $vendor->id;
             }
         }
 
@@ -331,24 +350,32 @@ class vendorActions extends AhgActions
                 $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $result['transaction_id']]);
             }
 
-            $this->errors = $result['errors'];
-            $this->form = $data;
+            $errors = $result['errors'];
+            $form = $data;
         }
+
+        return $this->renderBlade('addTransaction', [
+            'form' => $form,
+            'errors' => $errors,
+            'vendors' => $vendors,
+            'serviceTypes' => $serviceTypes,
+            'conditionRatings' => $conditionRatings,
+        ]);
     }
 
     public function executeEditTransaction(sfWebRequest $request)
     {
         $id = (int)$request->getParameter('id');
-        $this->transaction = $this->service->getTransaction($id);
+        $transaction = $this->service->getTransaction($id);
 
-        if (!$this->transaction) {
+        if (!$transaction) {
             $this->forward404('Transaction not found');
         }
 
-        $this->errors = [];
-        $this->vendors = $this->service->listVendors(['status' => 'active']);
-        $this->serviceTypes = $this->service->listServiceTypes();
-        $this->paymentStatuses = $this->service->getPaymentStatuses();
+        $errors = [];
+        $vendors = $this->service->listVendors(['status' => 'active']);
+        $serviceTypes = $this->service->listServiceTypes();
+        $paymentStatuses = $this->service->getPaymentStatuses();
 
         if ($request->isMethod('post')) {
             $data = $this->extractTransactionData($request);
@@ -359,8 +386,16 @@ class vendorActions extends AhgActions
                 $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $id]);
             }
 
-            $this->errors = $result['errors'];
+            $errors = $result['errors'];
         }
+
+        return $this->renderBlade('editTransaction', [
+            'transaction' => $transaction,
+            'errors' => $errors,
+            'vendors' => $vendors,
+            'serviceTypes' => $serviceTypes,
+            'paymentStatuses' => $paymentStatuses,
+        ]);
     }
 
     public function executeUpdateTransactionStatus(sfWebRequest $request)
@@ -463,18 +498,13 @@ class vendorActions extends AhgActions
 
     public function executeServiceTypes(sfWebRequest $request)
     {
-        error_log("SERVICE_TYPES: Method=" . $request->getMethod());
-        
-        // Handle POST actions
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');
-            error_log("SERVICE_TYPES: POST action=" . $action);
-            error_log("SERVICE_TYPES: name=" . $request->getParameter('name'));
             $id = $request->getParameter('id');
             $name = trim($request->getParameter('name', ''));
             $description = trim($request->getParameter('description', ''));
             $isActive = $request->getParameter('is_active') ? 1 : 0;
-            
+
             try {
                 switch ($action) {
                     case 'add':
@@ -485,7 +515,7 @@ class vendorActions extends AhgActions
                         $this->service->addServiceType($name, $description, $isActive);
                         $this->getUser()->setFlash('success', 'Service type added successfully.');
                         break;
-                        
+
                     case 'edit':
                         if (empty($id) || empty($name)) {
                             $this->getUser()->setFlash('error', 'Invalid request.');
@@ -494,7 +524,7 @@ class vendorActions extends AhgActions
                         $this->service->updateServiceType($id, $name, $description, $isActive);
                         $this->getUser()->setFlash('success', 'Service type updated successfully.');
                         break;
-                        
+
                     case 'delete':
                         if (empty($id)) {
                             $this->getUser()->setFlash('error', 'Invalid request.');
@@ -507,10 +537,12 @@ class vendorActions extends AhgActions
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }
-            
+
             $this->redirect('ahg_vend_service_types');
         }
-        
-        $this->serviceTypes = $this->service->listServiceTypes(false);
+
+        return $this->renderBlade('serviceTypes', [
+            'serviceTypes' => $this->service->listServiceTypes(false),
+        ]);
     }
 }
