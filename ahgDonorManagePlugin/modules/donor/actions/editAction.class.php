@@ -1,101 +1,125 @@
 <?php
 
-/*
- * This file is part of the Access to Memory (AtoM) software.
- *
- * Access to Memory (AtoM) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Access to Memory (AtoM) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
- */
-
-class DonorEditAction extends DefaultEditAction
+class DonorEditAction extends sfAction
 {
-    // Arrays not allowed in class constants
-    public static $NAMES = [
-        'authorizedFormOfName',
-    ];
-
     public function execute($request)
     {
-        parent::execute($request);
-
-        if ($request->isMethod('post')) {
-            $this->form->bind($request->getPostParameters());
-
-            if ($this->form->isValid()) {
-                $this->contactInformationEditComponent->processForm();
-
-                $this->processForm();
-
-                $this->resource->save();
-
-                $this->redirect([$this->resource, 'module' => 'donor']);
-            }
+        // Bootstrap Laravel QB
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
         }
-    }
 
-    protected function earlyExecute()
-    {
+        $culture = $this->context->user->getCulture();
+        $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $this->resource = new QubitDonor();
+        // ACL check — donors require authenticated editor/admin
+        $user = $this->context->user;
+        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
+            QubitAcl::forwardUnauthorized();
+        }
 
-        if (isset($this->getRoute()->resource)) {
-            $this->resource = $this->getRoute()->resource;
+        $slug = $request->getParameter('slug');
+        $this->isNew = empty($slug);
 
-            // Check user authorization
-            if (!QubitAcl::check($this->resource, 'update')) {
-                QubitAcl::forwardUnauthorized();
+        if (!$this->isNew) {
+            // Edit existing donor
+            $this->donor = \AhgDonorManage\Services\DonorCrudService::getBySlug($slug, $culture);
+            if (!$this->donor) {
+                $this->forward404();
             }
 
-            // Add optimistic lock
-            $this->form->setDefault('serialNumber', $this->resource->serialNumber);
-            $this->form->setValidator('serialNumber', new sfValidatorInteger());
-            $this->form->setWidget('serialNumber', new sfWidgetFormInputHidden());
+            $title = $this->donor['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
+            $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
         } else {
-            // Check user authorization
-            if (!QubitAcl::check($this->resource, 'create')) {
-                QubitAcl::forwardUnauthorized();
-            }
+            // Create new donor
+            $this->donor = [
+                'id' => null,
+                'slug' => null,
+                'authorizedFormOfName' => '',
+                'contacts' => [],
+                'accessions' => [],
+                'serialNumber' => 0,
+            ];
+
+            $this->response->setTitle($this->context->i18n->__('Add new donor') . ' - ' . $this->response->getTitle());
         }
 
-        $title = $this->context->i18n->__('Add new donor');
-        if (isset($this->getRoute()->resource)) {
-            if (1 > strlen($title = $this->resource->__toString())) {
-                $title = $this->context->i18n->__('Untitled');
+        // Load contact information for the edit form
+        $this->contacts = $this->donor['contacts'] ?? [];
+
+        // Handle POST
+        if ($request->isMethod('post')) {
+            $authorizedFormOfName = trim($request->getParameter('authorizedFormOfName', ''));
+
+            if ($this->isNew) {
+                // Create
+                $newId = \AhgDonorManage\Services\DonorCrudService::create([
+                    'authorizedFormOfName' => $authorizedFormOfName,
+                    'contacts' => $this->parseContactsFromRequest($request, $culture),
+                ], $culture);
+
+                $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
+                $this->redirect(['module' => 'donor', 'slug' => $newSlug]);
+            } else {
+                // Update
+                \AhgDonorManage\Services\DonorCrudService::update($this->donor['id'], [
+                    'authorizedFormOfName' => $authorizedFormOfName,
+                ], $culture);
+
+                // Handle contact information updates
+                $this->processContactUpdates($request, $this->donor['id'], $culture);
+
+                $this->redirect(['module' => 'donor', 'slug' => $this->donor['slug']]);
             }
-
-            $title = $this->context->i18n->__('Edit %1%', ['%1%' => $title]);
         }
-
-        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
-
-        $this->contactInformationEditComponent = new ContactInformationEditComponent($this->context, 'contactinformation', 'editContactInformation');
-        $this->contactInformationEditComponent->resource = $this->resource;
-        $this->contactInformationEditComponent->execute($this->request);
     }
 
-    protected function addField($name)
+    /**
+     * Parse contact information from POST request.
+     */
+    protected function parseContactsFromRequest($request, string $culture): array
     {
-        switch ($name) {
-            case 'authorizedFormOfName':
-                $this->form->setDefault('authorizedFormOfName', $this->resource->authorizedFormOfName);
-                $this->form->setValidator('authorizedFormOfName', new sfValidatorString());
-                $this->form->setWidget('authorizedFormOfName', new sfWidgetFormInput());
+        $contacts = [];
+        $contact = [];
+        foreach (['contact_person', 'street_address', 'city', 'region', 'postal_code', 'country_code', 'telephone', 'fax', 'email', 'website', 'note'] as $field) {
+            $value = $request->getParameter($field);
+            if (!empty($value)) {
+                $contact[$field] = $value;
+            }
+        }
+        if (!empty($contact)) {
+            $contacts[] = $contact;
+        }
 
-                break;
+        return $contacts;
+    }
 
-            default:
-                return parent::addField($name);
+    /**
+     * Process contact information updates.
+     */
+    protected function processContactUpdates($request, int $donorId, string $culture): void
+    {
+        $contactData = [];
+        foreach (['contact_person', 'street_address', 'city', 'region', 'postal_code', 'country_code', 'telephone', 'fax', 'email', 'website', 'note'] as $field) {
+            $value = $request->getParameter($field);
+            if ($value !== null) {
+                $contactData[$field] = $value;
+            }
+        }
+
+        if (!empty($contactData)) {
+            $existingContacts = \AhgCore\Services\ContactInformationService::getByActorId($donorId, $culture);
+            if (!empty($existingContacts)) {
+                \AhgCore\Services\ContactInformationService::save(
+                    $donorId,
+                    $contactData,
+                    $culture,
+                    $existingContacts[0]->id
+                );
+            } else {
+                \AhgCore\Services\ContactInformationService::save($donorId, $contactData, $culture);
+            }
         }
     }
 }

@@ -1,3 +1,23 @@
+# Routes are loaded via prependRoute() — last entry in this file
+# gets prepended last (checked first). Put catch-all /:slug FIRST
+# so it ends up checked LAST after prepending.
+
+rightsholder_view_override:
+  url: /rightsholder/:slug
+  param: { module: rightsHolderManage, action: view }
+
+rightsholder_delete_override:
+  url: /rightsholder/:slug/delete
+  param: { module: rightsHolderManage, action: delete }
+
+rightsholder_edit_override:
+  url: /rightsholder/:slug/edit
+  param: { module: rightsHolderManage, action: edit }
+
+rightsholder_add_override:
+  url: /rightsholder/add
+  param: { module: rightsHolderManage, action: edit }
+
 rightsholder_browse_override:
   url: /rightsholder/browse
   param: { module: rightsHolderManage, action: browse }

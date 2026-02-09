@@ -132,7 +132,7 @@ if ($sf_request->hasParameter('displayMode')) {
           $faIcon = str_replace('fa-list-ul', 'fa-list', $faIcon);
           $faIcon = str_replace('fa-clock-history', 'fa-history', $faIcon);
           ?>
-          <a href="<?php echo url_for(['module' => 'repository', 'action' => 'browse'] + $modeParams); ?>"
+          <a href="<?php echo url_for('@repository_browse_override?' . http_build_query($modeParams)); ?>"
              class="btn btn-sm <?php echo $meta['active'] ? 'atom-btn-secondary' : 'atom-btn-white'; ?>"
              title="<?php echo htmlspecialchars($meta['description']); ?>">
             <i class="fas <?php echo $faIcon; ?>" aria-hidden="true"></i>

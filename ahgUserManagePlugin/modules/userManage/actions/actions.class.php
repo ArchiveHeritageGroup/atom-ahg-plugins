@@ -76,4 +76,183 @@ class userManageActions extends sfActions
             $browseResult['limit']
         );
     }
+
+    /**
+     * View a user profile.
+     */
+    public function executeView(sfWebRequest $request)
+    {
+        // Admin-only
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+
+            return;
+        }
+
+        $slug = $request->getParameter('slug');
+
+        $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
+        if (!$this->userRecord) {
+            $this->forward404();
+        }
+
+        $title = $this->userRecord['username'] ?: $this->context->i18n->__('Untitled');
+        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
+
+        // Check if viewing own profile
+        $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+
+        // Get security clearance if plugin is active
+        $this->clearance = null;
+        if (class_exists('\\AhgSecurityClearance\\Services\\SecurityClearanceService')) {
+            try {
+                $this->clearance = \AhgSecurityClearance\Services\SecurityClearanceService::getUserClearance($this->userRecord['id']);
+            } catch (\Exception $e) {
+                // Plugin not fully installed
+            }
+        }
+    }
+
+    /**
+     * Edit or create a user.
+     */
+    public function executeEdit(sfWebRequest $request)
+    {
+        // Admin-only
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+
+            return;
+        }
+
+        $culture = $this->context->user->getCulture();
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $slug = $request->getParameter('slug');
+        $this->isNew = empty($slug);
+
+        // Get assignable groups
+        $this->assignableGroups = \AhgUserManage\Services\UserCrudService::getAssignableGroups($culture);
+
+        if (!$this->isNew) {
+            $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
+            if (!$this->userRecord) {
+                $this->forward404();
+            }
+
+            $title = $this->userRecord['username'] ?: $this->context->i18n->__('Untitled');
+            $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
+
+            $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+        } else {
+            $this->userRecord = [
+                'id' => null,
+                'slug' => null,
+                'username' => '',
+                'email' => '',
+                'active' => true,
+                'groups' => [],
+                'serialNumber' => 0,
+            ];
+
+            $this->isSelf = false;
+            $this->response->setTitle($this->context->i18n->__('Add new user') . ' - ' . $this->response->getTitle());
+        }
+
+        // Handle POST
+        if ($request->isMethod('post')) {
+            $this->errors = [];
+            $username = trim($request->getParameter('username', ''));
+            $email = trim($request->getParameter('email', ''));
+            $password = $request->getParameter('password', '');
+            $confirmPassword = $request->getParameter('confirmPassword', '');
+            $active = $request->getParameter('active', '1');
+            $groups = $request->getParameter('groups', []);
+
+            // Validate
+            if (empty($username)) {
+                $this->errors[] = __('Username is required.');
+            }
+            if (empty($email)) {
+                $this->errors[] = __('Email is required.');
+            }
+            if ($this->isNew && empty($password)) {
+                $this->errors[] = __('Password is required for new users.');
+            }
+            if (!empty($password) && $password !== $confirmPassword) {
+                $this->errors[] = __('Password confirmation does not match.');
+            }
+
+            // Check uniqueness
+            $excludeId = $this->isNew ? null : $this->userRecord['id'];
+            if (\AhgUserManage\Services\UserCrudService::usernameExists($username, $excludeId)) {
+                $this->errors[] = __('This username is already in use.');
+            }
+            if (\AhgUserManage\Services\UserCrudService::emailExists($email, $excludeId)) {
+                $this->errors[] = __('This email address is already in use.');
+            }
+
+            if (empty($this->errors)) {
+                $data = [
+                    'username' => $username,
+                    'email' => $email,
+                    'active' => (int) $active,
+                    'groups' => is_array($groups) ? $groups : [],
+                ];
+                if (!empty($password)) {
+                    $data['password'] = $password;
+                }
+
+                if ($this->isNew) {
+                    $newId = \AhgUserManage\Services\UserCrudService::create($data);
+                    $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
+                    $this->redirect('@user_view_override?slug=' . $newSlug);
+                } else {
+                    \AhgUserManage\Services\UserCrudService::update($this->userRecord['id'], $data);
+                    $this->redirect('@user_view_override?slug=' . $this->userRecord['slug']);
+                }
+            }
+
+            // If errors, update the userRecord with submitted values for re-display
+            $this->userRecord['username'] = $username;
+            $this->userRecord['email'] = $email;
+            $this->userRecord['active'] = (bool) $active;
+        }
+    }
+
+    /**
+     * Delete a user.
+     */
+    public function executeDelete(sfWebRequest $request)
+    {
+        // Admin-only
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+
+            return;
+        }
+
+        $this->form = new sfForm();
+        $slug = $request->getParameter('slug');
+
+        $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
+        if (!$this->userRecord) {
+            $this->forward404();
+        }
+
+        // Cannot delete yourself
+        if ($this->userRecord['id'] == $this->getUser()->getUserID()) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('You cannot delete your own account.'));
+            $this->redirect('@user_view_override?slug=' . $slug);
+        }
+
+        if ($request->isMethod('delete')) {
+            $this->form->bind($request->getPostParameters());
+            if ($this->form->isValid()) {
+                \AhgUserManage\Services\UserCrudService::delete($this->userRecord['id']);
+                $this->redirect('@user_list_override');
+            }
+        }
+    }
 }

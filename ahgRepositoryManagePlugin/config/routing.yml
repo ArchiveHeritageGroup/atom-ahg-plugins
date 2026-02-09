@@ -1,3 +1,27 @@
+# Catch-all FIRST in file = checked LAST after prepending
+repository_view_override:
+  class: QubitResourceRoute
+  url: /repository/:slug
+  param: { module: sfIsdiahPlugin, action: index }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+repository_delete_override:
+  class: QubitResourceRoute
+  url: /repository/:slug/delete
+  param: { module: sfIsdiahPlugin, action: delete }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+repository_edit_override:
+  class: QubitResourceRoute
+  url: /repository/:slug/edit
+  param: { module: sfIsdiahPlugin, action: edit }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+# Specific routes LAST in file = checked FIRST after prepending
+repository_add_override:
+  url: /repository/add
+  param: { module: sfIsdiahPlugin, action: edit }
+
 repository_browse_override:
   url: /repository/browse
   param: { module: repositoryManage, action: browse }

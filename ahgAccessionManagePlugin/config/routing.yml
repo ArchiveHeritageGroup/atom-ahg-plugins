@@ -1,3 +1,27 @@
+# Catch-all FIRST in file = checked LAST after prepending
+accession_view_override:
+  class: QubitResourceRoute
+  url: /accession/:slug
+  param: { module: accession, action: index }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+accession_delete_override:
+  class: QubitResourceRoute
+  url: /accession/:slug/delete
+  param: { module: accession, action: delete }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+accession_edit_override:
+  class: QubitResourceRoute
+  url: /accession/:slug/edit
+  param: { module: accession, action: edit }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+# Specific routes LAST in file = checked FIRST after prepending
+accession_add_override:
+  url: /accession/add
+  param: { module: accession, action: edit }
+
 accession_browse_override:
   url: /accession/browse
   param: { module: accessionManage, action: browse }

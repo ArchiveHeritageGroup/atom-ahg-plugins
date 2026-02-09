@@ -1,3 +1,27 @@
+# Catch-all FIRST in file = checked LAST after prepending
+actor_view_override:
+  class: QubitResourceRoute
+  url: /actor/:slug
+  param: { module: sfIsaarPlugin, action: index }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+actor_delete_override:
+  class: QubitResourceRoute
+  url: /actor/:slug/delete
+  param: { module: sfIsaarPlugin, action: delete }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+actor_edit_override:
+  class: QubitResourceRoute
+  url: /actor/:slug/edit
+  param: { module: sfIsaarPlugin, action: edit }
+  requirements: { slug: "[a-zA-Z0-9_.-]+" }
+
+# Specific routes LAST in file = checked FIRST after prepending
+actor_add_override:
+  url: /actor/add
+  param: { module: sfIsaarPlugin, action: edit }
+
 actor_browse_override:
   url: /actor/browse
   param: { module: actorManage, action: browse }

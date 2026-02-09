@@ -230,7 +230,7 @@ $selectedCulture = $sf_data->getRaw('selectedCulture');
               <div class="card h-100">
                 <div class="card-body">
                   <h5 class="card-title">
-                    <a href="<?php echo url_for(['module' => 'actor', 'slug' => $doc['slug']]); ?>">
+                    <a href="<?php echo url_for('@actor_view_override?slug=' . $doc['slug']); ?>">
                       <?php echo esc_entities($browseService->extractI18nField($doc, 'authorizedFormOfName') ?: __('[Untitled]')); ?>
                     </a>
                   </h5>

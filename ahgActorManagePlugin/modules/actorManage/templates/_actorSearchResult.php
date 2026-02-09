@@ -14,7 +14,7 @@ if (empty($name)) {
 <article class="search-result row g-0 p-3 border-bottom">
   <?php if (!empty($doc['hasDigitalObject'])) { ?>
     <div class="col-12 col-lg-3 pb-2 pb-lg-0 pe-lg-3">
-      <a href="<?php echo url_for(['module' => 'actor', 'slug' => $doc['slug']]); ?>">
+      <a href="<?php echo url_for('@actor_view_override?slug=' . $doc['slug']); ?>">
         <?php
         $thumbPath = $doc['digitalObject']['thumbnailPath'] ?? '';
         if (empty($thumbPath)) {
@@ -38,7 +38,7 @@ if (empty($name)) {
     <div class="d-flex align-items-center gap-2 mw-100">
       <?php echo link_to(
           render_title($name),
-          ['module' => 'actor', 'slug' => $doc['slug']],
+          '@actor_view_override?slug=' . $doc['slug'],
           ['class' => 'h5 mb-0 text-truncate']
       ); ?>
 

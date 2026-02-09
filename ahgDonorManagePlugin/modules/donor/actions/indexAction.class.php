@@ -4,33 +4,55 @@ class DonorIndexAction extends sfAction
 {
     public function execute($request)
     {
-        $this->resource = $this->getRoute()->resource;
+        // DEBUG: Verify this action is loading from the plugin
+        error_log('DonorIndexAction loaded from ahgDonorManagePlugin');
 
-        // Check user authorization
-        if (!QubitAcl::check($this->resource, 'read')) {
+        // Bootstrap Laravel QB
+        if (!class_exists('Illuminate\Database\Capsule\Manager')) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        }
+
+        $culture = $this->context->user->getCulture();
+
+        // Resolve slug → donor data
+        $slug = $request->getParameter('slug');
+        $this->donor = \AhgDonorManage\Services\DonorCrudService::getBySlug($slug, $culture);
+
+        if (!$this->donor) {
+            $this->forward404();
+        }
+
+        // ACL check — donors require authenticated editor/admin
+        $user = $this->context->user;
+        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+
+        // For read access, allow all authenticated users (donors are not public)
+        if (!$user->isAuthenticated()) {
             QubitAcl::forwardUnauthorized();
         }
 
-        if (1 > strlen($title = $this->resource->__toString())) {
-            $title = $this->context->i18n->__('Untitled');
-        }
-
+        $title = $this->donor['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
 
-        if (QubitAcl::check($this->resource, 'update')) {
-            $validatorSchema = new sfValidatorSchema();
-            $values = [];
+        // Permission flags for template
+        $this->canEdit = $isAdmin;
+        $this->canDelete = $isAdmin;
+        $this->canCreate = $isAdmin;
 
-            $validatorSchema->authorizedFormOfName = new sfValidatorString(
-                ['required' => true],
-                ['required' => $this->context->i18n->__('Authorized form of name - This field is marked as mandatory in the relevant descriptive standard.').'"<span>*</span><span class="visually-hidden">'.$this->context->i18n->__('This field is marked as mandatory in the relevant descriptive standard.').'</span>']
-            );
-            $values['authorizedFormOfName'] = $this->resource->getAuthorizedFormOfName(['cultureFallback' => true]);
-
-            try {
-                $validatorSchema->clean($values);
-            } catch (sfValidatorErrorSchema $e) {
-                $this->errorSchema = $e;
+        // Validation check for edit permission holders
+        if ($this->canEdit) {
+            $this->errorSchema = null;
+            if (empty($this->donor['authorizedFormOfName'])) {
+                $validatorSchema = new sfValidatorSchema();
+                $validatorSchema->authorizedFormOfName = new sfValidatorString(
+                    ['required' => true],
+                    ['required' => $this->context->i18n->__('Authorized form of name - This is a mandatory field.')]
+                );
+                try {
+                    $validatorSchema->clean(['authorizedFormOfName' => '']);
+                } catch (sfValidatorErrorSchema $e) {
+                    $this->errorSchema = $e;
+                }
             }
         }
     }

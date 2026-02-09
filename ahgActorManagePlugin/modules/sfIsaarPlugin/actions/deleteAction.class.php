@@ -41,7 +41,7 @@ class sfIsaarPluginDeleteAction extends sfAction
             if ($this->form->isValid()) {
                 $this->resource->delete();
 
-                $this->redirect(['module' => 'actor', 'action' => 'browse']);
+                $this->redirect('@actor_browse_override');
             }
         }
     }

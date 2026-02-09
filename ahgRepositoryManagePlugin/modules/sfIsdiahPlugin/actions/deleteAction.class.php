@@ -41,7 +41,7 @@ class sfIsdiahPluginDeleteAction extends sfAction
             if ($this->form->isValid()) {
                 $this->resource->delete();
 
-                $this->redirect(['module' => 'repository', 'action' => 'browse']);
+                $this->redirect('@repository_browse_override');
             }
         }
     }

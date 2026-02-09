@@ -45,10 +45,10 @@
           <?php $title = $rawService->extractI18nField($doc, 'title'); ?>
           <tr>
             <td class="w-20">
-              <?php echo link_to($doc['identifier'] ?? '', ['module' => 'accession', 'slug' => $doc['slug'] ?? '']); ?>
+              <?php echo link_to($doc['identifier'] ?? '', '@accession_view_override?slug=' . ($doc['slug'] ?? '')); ?>
             </td>
             <td>
-              <?php echo link_to(render_title($title), ['module' => 'accession', 'slug' => $doc['slug'] ?? '']); ?>
+              <?php echo link_to(render_title($title), '@accession_view_override?slug=' . ($doc['slug'] ?? '')); ?>
             </td>
             <td class="w-20">
               <?php echo isset($doc['date']) ? format_date($doc['date'], 'i') : ''; ?>
@@ -70,7 +70,7 @@
   <?php echo get_partial('default/pager', ['pager' => $pager]); ?>
 
   <section class="actions mb-3">
-    <?php echo link_to(__('Add new'), ['module' => 'accession', 'action' => 'add'], ['class' => 'btn atom-btn-outline-light']); ?>
+    <?php echo link_to(__('Add new'), '@accession_add_override', ['class' => 'btn atom-btn-outline-light']); ?>
   </section>
 
 <?php end_slot(); ?>

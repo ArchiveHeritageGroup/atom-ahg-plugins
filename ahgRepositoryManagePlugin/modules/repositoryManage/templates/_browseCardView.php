@@ -10,14 +10,14 @@
     <div class="col-sm-6 col-lg-4 masonry-item">
       <div class="card">
         <?php if (file_exists(sfConfig::get('sf_upload_dir').'/r/'.$doc['slug'].'/conf/logo.png')) { ?>
-          <a href="<?php echo url_for(['module' => 'repository', 'slug' => $doc['slug']]); ?>">
+          <a href="<?php echo url_for('@repository_view_override?slug=' . $doc['slug']); ?>">
             <?php echo image_tag('/uploads/r/'.$doc['slug'].'/conf/logo.png', [
                 'alt' => strip_markdown($authorizedFormOfName),
                 'class' => 'card-img-top',
             ]); ?>
           </a>
         <?php } else { ?>
-          <a class="p-3" href="<?php echo url_for(['module' => 'repository', 'slug' => $doc['slug']]); ?>">
+          <a class="p-3" href="<?php echo url_for('@repository_view_override?slug=' . $doc['slug']); ?>">
             <?php echo render_title($authorizedFormOfName); ?>
           </a>
         <?php } ?>

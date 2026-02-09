@@ -59,7 +59,7 @@
           <?php } ?>
 
           <?php echo link_to(render_title(get_search_i18n($rawDoc, 'authorizedFormOfName', ['allowEmpty' => false,
-              'culture' => $selectedCulture, ])), ['module' => 'repository', 'slug' => $rawDoc['slug']]); ?>
+              'culture' => $selectedCulture, ])), '@repository_view_override?slug=' . $rawDoc['slug']); ?>
         </td>
 
         <td>

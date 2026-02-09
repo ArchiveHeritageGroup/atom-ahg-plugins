@@ -1,3 +1,23 @@
+# Routes are loaded via prependRoute() — last entry in this file
+# gets prepended last (checked first). Put catch-all /:slug FIRST
+# so it ends up checked LAST after prepending.
+
+donor_view_override:
+  url: /donor/:slug
+  param: { module: donorManage, action: view }
+
+donor_delete_override:
+  url: /donor/:slug/delete
+  param: { module: donorManage, action: delete }
+
+donor_edit_override:
+  url: /donor/:slug/edit
+  param: { module: donorManage, action: edit }
+
+donor_add_override:
+  url: /donor/add
+  param: { module: donorManage, action: edit }
+
 donor_browse_override:
   url: /donor/browse
   param: { module: donorManage, action: browse }

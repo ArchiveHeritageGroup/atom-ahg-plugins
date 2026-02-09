@@ -10,7 +10,7 @@
     <?php echo get_component('search', 'inlineSearch', [
         'label' => __('Search users'),
         'landmarkLabel' => __('User'),
-        'route' => url_for(['module' => 'userManage', 'action' => 'browse']),
+        'route' => url_for('@user_list_override'),
     ]); ?>
 
     <div class="d-flex flex-wrap gap-2 ms-auto">
@@ -48,7 +48,7 @@
         <?php foreach ($sf_data->getRaw('pager')->getResults() as $doc) { ?>
           <tr>
             <td>
-              <?php echo link_to(esc_specialchars($doc['username']), ['module' => 'user', 'slug' => $doc['slug']]); ?>
+              <?php echo link_to(esc_specialchars($doc['username']), '@user_view_override?slug=' . $doc['slug']); ?>
               <?php if (!$doc['active']) { ?>
                 (<?php echo __('inactive'); ?>)
               <?php } ?>
@@ -79,7 +79,7 @@
   <?php echo get_partial('default/pager', ['pager' => $pager]); ?>
 
   <section class="actions mb-3">
-    <?php echo link_to(__('Add new'), ['module' => 'user', 'action' => 'add'], ['class' => 'btn atom-btn-outline-light']); ?>
+    <?php echo link_to(__('Add new'), '@user_add_override', ['class' => 'btn atom-btn-outline-light']); ?>
   </section>
 
 <?php end_slot(); ?>

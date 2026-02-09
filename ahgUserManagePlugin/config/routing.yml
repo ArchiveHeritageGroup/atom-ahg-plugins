@@ -1,3 +1,51 @@
+# Routes are loaded via prependRoute() — last entry in this file
+# gets prepended last (checked first). Put catch-all /:slug FIRST
+# so it ends up checked LAST after prepending.
+
+# Catch-all FIRST in file = checked LAST
+user_view_override:
+  url: /user/:slug
+  param: { module: userManage, action: view }
+
+user_delete_override:
+  url: /user/:slug/delete
+  param: { module: userManage, action: delete }
+
+user_edit_override:
+  url: /user/:slug/edit
+  param: { module: userManage, action: edit }
+
+user_add_override:
+  url: /user/add
+  param: { module: userManage, action: edit }
+
 user_list_override:
   url: /user/list
+  param: { module: userManage, action: browse }
+
+# Essential AtoM user routes - LAST in file = checked FIRST
+# These prevent the catch-all from capturing login/logout/etc.
+user_login_passthrough:
+  url: /user/login
+  param: { module: user, action: login }
+
+user_logout_passthrough:
+  url: /user/logout
+  param: { module: user, action: logout }
+
+user_password_edit_passthrough:
+  url: /user/passwordEdit
+  param: { module: user, action: passwordEdit }
+
+user_clipboard_passthrough:
+  url: /user/clipboard
+  param: { module: user, action: clipboard }
+
+user_password_reset_passthrough:
+  url: /user/passwordReset
+  param: { module: user, action: passwordReset }
+
+# Bare /user → redirect to list
+user_index_override:
+  url: /user
   param: { module: userManage, action: browse }

@@ -71,4 +71,171 @@ class rightsHolderManageActions extends sfActions
             $browseResult['limit']
         );
     }
+
+    /**
+     * View a rights holder record.
+     */
+    public function executeView(sfWebRequest $request)
+    {
+        $culture = $this->context->user->getCulture();
+        $slug = $request->getParameter('slug');
+
+        $this->rightsHolder = \AhgRightsHolderManage\Services\RightsHolderCrudService::getBySlug($slug, $culture);
+        if (!$this->rightsHolder) {
+            $this->forward404();
+        }
+
+        $user = $this->context->user;
+        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+
+        if (!$user->isAuthenticated()) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        $title = $this->rightsHolder['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
+        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
+
+        $this->canEdit = $isAdmin;
+        $this->canDelete = $isAdmin;
+        $this->canCreate = $isAdmin;
+    }
+
+    /**
+     * Edit or create a rights holder record.
+     */
+    public function executeEdit(sfWebRequest $request)
+    {
+        $culture = $this->context->user->getCulture();
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $user = $this->context->user;
+        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        $slug = $request->getParameter('slug');
+        $this->isNew = empty($slug);
+
+        if (!$this->isNew) {
+            $this->rightsHolder = \AhgRightsHolderManage\Services\RightsHolderCrudService::getBySlug($slug, $culture);
+            if (!$this->rightsHolder) {
+                $this->forward404();
+            }
+
+            $title = $this->rightsHolder['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
+            $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
+        } else {
+            $this->rightsHolder = [
+                'id' => null,
+                'slug' => null,
+                'authorizedFormOfName' => '',
+                'contacts' => [],
+                'serialNumber' => 0,
+            ];
+
+            $this->response->setTitle($this->context->i18n->__('Add new rights holder') . ' - ' . $this->response->getTitle());
+        }
+
+        $this->contacts = $this->rightsHolder['contacts'] ?? [];
+
+        // Handle POST
+        if ($request->isMethod('post')) {
+            $authorizedFormOfName = trim($request->getParameter('authorizedFormOfName', ''));
+
+            if ($this->isNew) {
+                $newId = \AhgRightsHolderManage\Services\RightsHolderCrudService::create([
+                    'authorizedFormOfName' => $authorizedFormOfName,
+                    'contacts' => $this->parseContactsFromRequest($request),
+                ], $culture);
+
+                $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
+                $this->redirect('@rightsholder_view_override?slug=' . $newSlug);
+            } else {
+                \AhgRightsHolderManage\Services\RightsHolderCrudService::update($this->rightsHolder['id'], [
+                    'authorizedFormOfName' => $authorizedFormOfName,
+                ], $culture);
+
+                $this->processContactUpdates($request, $this->rightsHolder['id'], $culture);
+                $this->redirect('@rightsholder_view_override?slug=' . $this->rightsHolder['slug']);
+            }
+        }
+    }
+
+    /**
+     * Delete a rights holder record.
+     */
+    public function executeDelete(sfWebRequest $request)
+    {
+        $this->form = new sfForm();
+        $culture = $this->context->user->getCulture();
+
+        $user = $this->context->user;
+        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        $slug = $request->getParameter('slug');
+        $this->rightsHolder = \AhgRightsHolderManage\Services\RightsHolderCrudService::getBySlug($slug, $culture);
+        if (!$this->rightsHolder) {
+            $this->forward404();
+        }
+
+        if ($request->isMethod('delete')) {
+            $this->form->bind($request->getPostParameters());
+            if ($this->form->isValid()) {
+                \AhgRightsHolderManage\Services\RightsHolderCrudService::delete($this->rightsHolder['id']);
+
+                try {
+                    \AhgCore\Services\ElasticsearchService::deleteDocument('qubitactor', $this->rightsHolder['id']);
+                } catch (\Exception $e) {
+                    // ES failure should not block delete
+                }
+
+                $this->redirect('@rightsholder_browse_override');
+            }
+        }
+    }
+
+    protected function parseContactsFromRequest($request): array
+    {
+        $contacts = [];
+        $contact = [];
+        foreach (['contact_person', 'street_address', 'city', 'region', 'postal_code', 'country_code', 'telephone', 'fax', 'email', 'website', 'note'] as $field) {
+            $value = $request->getParameter($field);
+            if (!empty($value)) {
+                $contact[$field] = $value;
+            }
+        }
+        if (!empty($contact)) {
+            $contacts[] = $contact;
+        }
+
+        return $contacts;
+    }
+
+    protected function processContactUpdates($request, int $rightsHolderId, string $culture): void
+    {
+        $contactData = [];
+        foreach (['contact_person', 'street_address', 'city', 'region', 'postal_code', 'country_code', 'telephone', 'fax', 'email', 'website', 'note'] as $field) {
+            $value = $request->getParameter($field);
+            if ($value !== null) {
+                $contactData[$field] = $value;
+            }
+        }
+
+        if (!empty($contactData)) {
+            $existingContacts = \AhgCore\Services\ContactInformationService::getByActorId($rightsHolderId, $culture);
+            if (!empty($existingContacts)) {
+                \AhgCore\Services\ContactInformationService::save(
+                    $rightsHolderId,
+                    $contactData,
+                    $culture,
+                    $existingContacts[0]->id
+                );
+            } else {
+                \AhgCore\Services\ContactInformationService::save($rightsHolderId, $contactData, $culture);
+            }
+        }
+    }
 }
