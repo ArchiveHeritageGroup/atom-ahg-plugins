@@ -897,3 +897,50 @@ INSERT IGNORE INTO `ahg_tts_settings` (`sector`, `setting_key`, `setting_value`)
 ('museum', 'fields_to_read', '["title","scopeAndContent","physicalDescription"]'),
 ('gallery', 'fields_to_read', '["title","scopeAndContent","medium"]'),
 ('dam', 'fields_to_read', '["title","scopeAndContent","technicalNotes"]');
+
+-- ============================================================================
+-- EMAIL SETTINGS
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `email_setting` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `setting_key` VARCHAR(100) NOT NULL,
+    `setting_value` TEXT,
+    `setting_type` VARCHAR(20) DEFAULT 'text',
+    `setting_group` VARCHAR(50) DEFAULT 'general',
+    `description` VARCHAR(255) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `setting_key` (`setting_key`),
+    KEY `idx_key` (`setting_key`),
+    KEY `idx_group` (`setting_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- SMTP settings (values configured per instance via Admin > Settings > Email)
+INSERT IGNORE INTO `email_setting` (`setting_key`, `setting_value`, `setting_type`, `setting_group`, `description`) VALUES
+('smtp_enabled', '0', 'boolean', 'smtp', 'Enable email sending'),
+('smtp_host', '', 'text', 'smtp', 'SMTP server hostname'),
+('smtp_port', '587', 'number', 'smtp', 'SMTP server port'),
+('smtp_encryption', 'tls', 'text', 'smtp', 'Encryption type (tls, ssl, or empty)'),
+('smtp_username', '', 'text', 'smtp', 'SMTP username'),
+('smtp_password', '', 'password', 'smtp', 'SMTP password'),
+('smtp_from_email', '', 'email', 'smtp', 'From email address'),
+('smtp_from_name', 'AtoM Archive', 'text', 'smtp', 'From name'),
+('notify_new_researcher', '', 'email', 'notifications', 'Email to notify of new researcher registrations'),
+('notify_new_booking', '', 'email', 'notifications', 'Email to notify of new booking requests'),
+('notify_errors', '', 'email', 'notifications', 'Admin email address to receive system error alerts'),
+('email_researcher_pending_subject', 'Registration Received - Pending Approval', 'text', 'templates', 'Subject for pending registration email'),
+('email_researcher_pending_body', 'Dear {name},\n\nThank you for registering as a researcher. Your application is being reviewed.\n\nYou will receive an email once your account has been approved.\n\nRegards,\nThe Archive Team', 'textarea', 'templates', 'Body for pending registration email'),
+('email_researcher_approved_subject', 'Registration Approved', 'text', 'templates', 'Subject for approved registration email'),
+('email_researcher_approved_body', 'Dear {name},\n\nYour researcher registration has been approved!\n\nYou can now log in and book reading room visits at:\n{login_url}\n\nRegards,\nThe Archive Team', 'textarea', 'templates', 'Body for approved registration email'),
+('email_researcher_rejected_subject', 'Registration Not Approved', 'text', 'templates', 'Subject for rejected registration email'),
+('email_researcher_rejected_body', 'Dear {name},\n\nUnfortunately, your researcher registration was not approved.\n\nReason: {reason}\n\nIf you have questions, please contact us.\n\nRegards,\nThe Archive Team', 'textarea', 'templates', 'Body for rejected registration email'),
+('email_password_reset_subject', 'Password Reset Request', 'text', 'templates', 'Subject for password reset email'),
+('email_password_reset_body', 'Dear {name},\n\nA password reset was requested for your account.\n\nClick the link below to reset your password:\n{reset_url}\n\nThis link expires in 2 hours.\n\nIf you did not request this, please ignore this email.\n\nRegards,\nThe Archive Team', 'textarea', 'templates', 'Body for password reset email'),
+('email_booking_confirmed_subject', 'Booking Confirmed', 'text', 'templates', 'Subject for booking confirmation email'),
+('email_booking_confirmed_body', 'Dear {name},\n\nYour reading room booking has been confirmed:\n\nDate: {date}\nTime: {time}\nRoom: {room}\n\nPlease bring valid identification.\n\nRegards,\nThe Archive Team', 'textarea', 'templates', 'Body for booking confirmation email'),
+('email_admin_new_researcher_subject', 'New Researcher Registration', 'text', 'templates', 'Subject for admin notification of new researcher'),
+('email_admin_new_researcher_body', 'A new researcher has registered:\n\nName: {name}\nEmail: {email}\nInstitution: {institution}\n\nReview at: {review_url}', 'textarea', 'templates', 'Body for admin notification of new researcher'),
+('email_error_alert_subject', 'System Error Alert - {hostname}', 'text', 'templates', 'Subject line for error notification emails'),
+('email_error_alert_body', 'System Error Alert\n==================\n\nTime: {timestamp}\nHost: {hostname}\nURL: {url}\n\nError: {message}\nFile: {file}\nLine: {line}\n\nStack Trace:\n{trace}', 'textarea', 'templates', 'Body template for error notification emails');
