@@ -17,7 +17,7 @@ class UserCrudService
             ->join('slug', 'user.id', '=', 'slug.object_id')
             ->where('user.id', $id)
             ->select([
-                'user.id', 'user.username', 'user.email',
+                'user.id as user_id', 'user.username', 'user.email',
                 'user.active', 'user.password_hash', 'user.salt',
                 'slug.slug', 'object.serial_number',
             ])
@@ -27,10 +27,10 @@ class UserCrudService
             return null;
         }
 
-        $groups = self::getUserGroups($id);
+        $groups = self::getUserGroups((int) $user->user_id);
 
         return [
-            'id' => $user->id,
+            'id' => (int) $user->user_id,
             'slug' => $user->slug,
             'username' => $user->username ?? '',
             'email' => $user->email ?? '',
@@ -238,6 +238,84 @@ class UserCrudService
     }
 
     /**
+     * Get an API key for a user.
+     *
+     * @param string $keyName 'RestApiKey' or 'OaiApiKey'
+     */
+    public static function getApiKey(int $userId, string $keyName): ?string
+    {
+        $prop = DB::table('property')
+            ->where('object_id', $userId)
+            ->where('name', $keyName)
+            ->first();
+
+        if (!$prop) {
+            return null;
+        }
+
+        $i18n = DB::table('property_i18n')
+            ->where('id', $prop->id)
+            ->first();
+
+        return $i18n->value ?? null;
+    }
+
+    /**
+     * Generate (or regenerate) an API key for a user.
+     *
+     * @param string $keyName 'RestApiKey' or 'OaiApiKey'
+     */
+    public static function generateApiKey(int $userId, string $keyName): string
+    {
+        $newKey = bin2hex(openssl_random_pseudo_bytes(8));
+
+        $prop = DB::table('property')
+            ->where('object_id', $userId)
+            ->where('name', $keyName)
+            ->first();
+
+        if ($prop) {
+            // Update existing
+            DB::table('property_i18n')
+                ->where('id', $prop->id)
+                ->update(['value' => $newKey]);
+        } else {
+            // Create new property
+            $propId = DB::table('property')->insertGetId([
+                'object_id' => $userId,
+                'name' => $keyName,
+                'source_culture' => 'en',
+            ]);
+
+            DB::table('property_i18n')->insert([
+                'id' => $propId,
+                'culture' => 'en',
+                'value' => $newKey,
+            ]);
+        }
+
+        return $newKey;
+    }
+
+    /**
+     * Delete an API key for a user.
+     *
+     * @param string $keyName 'RestApiKey' or 'OaiApiKey'
+     */
+    public static function deleteApiKey(int $userId, string $keyName): void
+    {
+        $prop = DB::table('property')
+            ->where('object_id', $userId)
+            ->where('name', $keyName)
+            ->first();
+
+        if ($prop) {
+            DB::table('property_i18n')->where('id', $prop->id)->delete();
+            DB::table('property')->where('id', $prop->id)->delete();
+        }
+    }
+
+    /**
      * Verify a user's password.
      */
     public static function verifyPassword(int $userId, string $password): bool
@@ -257,12 +335,100 @@ class UserCrudService
     }
 
     /**
+     * Get allowed translation languages for a user.
+     */
+    public static function getTranslateLanguages(int $userId): array
+    {
+        $perm = DB::table('acl_permission')
+            ->where('user_id', $userId)
+            ->where('action', 'translate')
+            ->first();
+
+        if (!$perm || empty($perm->constants)) {
+            return [];
+        }
+
+        $decoded = @unserialize($perm->constants);
+        if (is_array($decoded) && isset($decoded['languages'])) {
+            return $decoded['languages'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Save allowed translation languages for a user.
+     */
+    public static function saveTranslateLanguages(int $userId, array $languages): void
+    {
+        $now = date('Y-m-d H:i:s');
+
+        $perm = DB::table('acl_permission')
+            ->where('user_id', $userId)
+            ->where('action', 'translate')
+            ->first();
+
+        if (empty($languages)) {
+            // Remove permission if no languages selected
+            if ($perm) {
+                DB::table('acl_permission')->where('id', $perm->id)->delete();
+            }
+
+            return;
+        }
+
+        $constants = serialize(['languages' => array_values($languages)]);
+        $conditional = 'in_array(%p[language], %k[languages])';
+
+        if ($perm) {
+            DB::table('acl_permission')
+                ->where('id', $perm->id)
+                ->update([
+                    'constants' => $constants,
+                    'conditional' => $conditional,
+                    'updated_at' => $now,
+                ]);
+        } else {
+            DB::table('acl_permission')->insert([
+                'user_id' => $userId,
+                'action' => 'translate',
+                'grant_deny' => 1,
+                'conditional' => $conditional,
+                'constants' => $constants,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
+    /**
+     * Get all available languages in the system.
+     */
+    public static function getAvailableLanguages(): array
+    {
+        // Get languages from sfConfig (admin-configured)
+        $configured = \sfConfig::get('app_i18n_languages', ['en']);
+
+        // Also get languages actually in use
+        $inUse = DB::table('information_object_i18n')
+            ->select('culture')
+            ->distinct()
+            ->pluck('culture')
+            ->toArray();
+
+        $all = array_unique(array_merge($configured, $inUse));
+        sort($all);
+
+        return $all;
+    }
+
+    /**
      * Check if a username is already taken (optionally excluding a user ID).
      */
     public static function usernameExists(string $username, ?int $excludeId = null): bool
     {
         $query = DB::table('user')->where('username', $username);
-        if ($excludeId) {
+        if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);
         }
 
@@ -275,7 +441,7 @@ class UserCrudService
     public static function emailExists(string $email, ?int $excludeId = null): bool
     {
         $query = DB::table('user')->where('email', $email);
-        if ($excludeId) {
+        if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);
         }
 

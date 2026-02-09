@@ -102,6 +102,13 @@ class userManageActions extends sfActions
         // Check if viewing own profile
         $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
 
+        // Get API keys
+        $this->restApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'RestApiKey');
+        $this->oaiApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'OaiApiKey');
+
+        // Get translate languages
+        $this->translateLanguages = \AhgUserManage\Services\UserCrudService::getTranslateLanguages($this->userRecord['id']);
+
         // Get security clearance if plugin is active
         $this->clearance = null;
         if (class_exists('\\AhgSecurityClearance\\Services\\SecurityClearanceService')) {
@@ -135,6 +142,9 @@ class userManageActions extends sfActions
         // Get assignable groups
         $this->assignableGroups = \AhgUserManage\Services\UserCrudService::getAssignableGroups($culture);
 
+        // Get available languages for translate permission
+        $this->availableLanguages = \AhgUserManage\Services\UserCrudService::getAvailableLanguages();
+
         if (!$this->isNew) {
             $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
             if (!$this->userRecord) {
@@ -145,6 +155,13 @@ class userManageActions extends sfActions
             $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
 
             $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+
+            // Get API keys
+            $this->restApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'RestApiKey');
+            $this->oaiApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'OaiApiKey');
+
+            // Get current translate languages
+            $this->translateLanguages = \AhgUserManage\Services\UserCrudService::getTranslateLanguages($this->userRecord['id']);
         } else {
             $this->userRecord = [
                 'id' => null,
@@ -157,16 +174,19 @@ class userManageActions extends sfActions
             ];
 
             $this->isSelf = false;
+            $this->restApiKey = null;
+            $this->oaiApiKey = null;
+            $this->translateLanguages = [];
             $this->response->setTitle($this->context->i18n->__('Add new user') . ' - ' . $this->response->getTitle());
         }
 
         // Handle POST
         if ($request->isMethod('post')) {
             $this->errors = [];
-            $username = trim($request->getParameter('username', ''));
-            $email = trim($request->getParameter('email', ''));
-            $password = $request->getParameter('password', '');
-            $confirmPassword = $request->getParameter('confirmPassword', '');
+            $username = trim($request->getParameter('acct_name', ''));
+            $email = trim($request->getParameter('acct_email', ''));
+            $password = $request->getParameter('new_pw', '');
+            $confirmPassword = $request->getParameter('confirm_pw', '');
             $active = $request->getParameter('active', '1');
             $groups = $request->getParameter('groups', []);
 
@@ -184,12 +204,12 @@ class userManageActions extends sfActions
                 $this->errors[] = __('Password confirmation does not match.');
             }
 
-            // Check uniqueness
-            $excludeId = $this->isNew ? null : $this->userRecord['id'];
-            if (\AhgUserManage\Services\UserCrudService::usernameExists($username, $excludeId)) {
+            // Check uniqueness (cast to int to prevent type issues)
+            $excludeId = $this->isNew ? null : (int) $this->userRecord['id'];
+            if (!empty($username) && \AhgUserManage\Services\UserCrudService::usernameExists($username, $excludeId)) {
                 $this->errors[] = __('This username is already in use.');
             }
-            if (\AhgUserManage\Services\UserCrudService::emailExists($email, $excludeId)) {
+            if (!empty($email) && \AhgUserManage\Services\UserCrudService::emailExists($email, $excludeId)) {
                 $this->errors[] = __('This email address is already in use.');
             }
 
@@ -206,10 +226,41 @@ class userManageActions extends sfActions
 
                 if ($this->isNew) {
                     $newId = \AhgUserManage\Services\UserCrudService::create($data);
+
+                    // Save translate languages for new user
+                    $translateLangs = $request->getParameter('translate', []);
+                    if (!empty($translateLangs) && is_array($translateLangs)) {
+                        \AhgUserManage\Services\UserCrudService::saveTranslateLanguages($newId, $translateLangs);
+                    }
+
                     $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
                     $this->redirect('@user_view_override?slug=' . $newSlug);
                 } else {
-                    \AhgUserManage\Services\UserCrudService::update($this->userRecord['id'], $data);
+                    $userId = (int) $this->userRecord['id'];
+                    \AhgUserManage\Services\UserCrudService::update($userId, $data);
+
+                    // Handle API key actions
+                    $restKeyAction = $request->getParameter('restApiKey', '');
+                    if ('generate' === $restKeyAction) {
+                        \AhgUserManage\Services\UserCrudService::generateApiKey($userId, 'RestApiKey');
+                    } elseif ('delete' === $restKeyAction) {
+                        \AhgUserManage\Services\UserCrudService::deleteApiKey($userId, 'RestApiKey');
+                    }
+
+                    $oaiKeyAction = $request->getParameter('oaiApiKey', '');
+                    if ('generate' === $oaiKeyAction) {
+                        \AhgUserManage\Services\UserCrudService::generateApiKey($userId, 'OaiApiKey');
+                    } elseif ('delete' === $oaiKeyAction) {
+                        \AhgUserManage\Services\UserCrudService::deleteApiKey($userId, 'OaiApiKey');
+                    }
+
+                    // Save translate languages
+                    $translateLangs = $request->getParameter('translate', []);
+                    \AhgUserManage\Services\UserCrudService::saveTranslateLanguages(
+                        $userId,
+                        is_array($translateLangs) ? $translateLangs : []
+                    );
+
                     $this->redirect('@user_view_override?slug=' . $this->userRecord['slug']);
                 }
             }

@@ -38,6 +38,35 @@
 
 </div>
 
+<div class="section border-bottom" id="translate">
+
+  <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Allowed languages for translation'); ?></h2>
+
+  <?php
+    $rawTransLangs = $sf_data->getRaw('translateLanguages');
+    if (!empty($rawTransLangs)) {
+        $langNames = array_map(function ($code) { return format_language($code); }, $rawTransLangs);
+        echo render_show(__('Translate'), implode(', ', $langNames));
+    } else {
+        echo render_show(__('Translate'), '<em>' . __('None') . '</em>');
+    }
+  ?>
+
+</div>
+
+<div class="section border-bottom" id="apiKeys">
+
+  <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('API keys'); ?></h2>
+
+  <?php
+    $restKey = $sf_data->getRaw('restApiKey');
+    $oaiKey = $sf_data->getRaw('oaiApiKey');
+  ?>
+  <?php echo render_show(__('REST API access key'), $restKey ? '<code>' . esc_specialchars($restKey) . '</code>' : '<em>' . __('Not generated yet.') . '</em>'); ?>
+  <?php echo render_show(__('OAI-PMH API access key'), $oaiKey ? '<code>' . esc_specialchars($oaiKey) . '</code>' : '<em>' . __('Not generated yet.') . '</em>'); ?>
+
+</div>
+
 <?php if ($clearance !== null) { ?>
 <div class="section border-bottom" id="securityClearance">
 
@@ -61,5 +90,6 @@
       <li><?php echo link_to(__('Delete'), '@user_delete_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-danger']); ?></li>
     <?php } ?>
     <li><?php echo link_to(__('Add new'), '@user_add_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
+    <li><?php echo link_to(__('Return to user list'), '@user_list_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
   </ul>
 <?php end_slot(); ?>
