@@ -15,6 +15,9 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
     {
         // Register autoloader for AhgCore namespace
         $this->registerAutoloader();
+
+        // Register global error notification handler
+        \AhgCore\Services\ErrorNotificationService::register();
     }
 
     /**
@@ -23,9 +26,9 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
     protected function registerAutoloader()
     {
         spl_autoload_register(function ($class) {
-            // Handle ahgCorePlugin namespace
-            if (strpos($class, 'ahgCorePlugin\\') === 0) {
-                $relativePath = str_replace('ahgCorePlugin\\', '', $class);
+            // Handle AhgCore namespace
+            if (strpos($class, 'AhgCore\\') === 0) {
+                $relativePath = str_replace('AhgCore\\', '', $class);
                 $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
                 $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
 

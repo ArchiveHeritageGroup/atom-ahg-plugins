@@ -12,16 +12,15 @@ class AhgSettingsEmailTestAction extends sfAction
         }
 
         \AhgCore\Core\AhgDb::init();
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/Services/EmailService.php';
 
         $testEmail = $request->getParameter('email');
-        
+
         if (empty($testEmail)) {
             $this->getUser()->setFlash('error', 'Please enter a test email address');
             $this->redirect(['module' => 'ahgSettings', 'action' => 'email']);
         }
 
-        $result = EmailService::testConnection($testEmail);
+        $result = \AhgCore\Services\EmailService::testConnection($testEmail);
 
         if ($result['success']) {
             $this->getUser()->setFlash('success', $result['message']);
