@@ -1,3 +1,15 @@
 physicalobject_browse_override:
   url: /physicalobject/browse
   param: { module: storageManage, action: browse }
+
+physicalobject_autocomplete_override:
+  url: /physicalobject/autocomplete
+  param: { module: storageManage, action: autocomplete }
+
+physicalobject_boxlist_override:
+  url: /physicalobject/boxList
+  param: { module: storageManage, action: boxList }
+
+physicalobject_holdings_export_override:
+  url: /physicalobject/holdingsReportExport
+  param: { module: storageManage, action: holdingsReportExport }

@@ -402,6 +402,191 @@ class TermTaxonomyService
     }
 
     // -----------------------------------------------------------------------
+    // Edit/Delete support methods
+    // -----------------------------------------------------------------------
+
+    /**
+     * Load a term for editing by slug.
+     * Returns term data with i18n, taxonomy, parent, and relations via Laravel QB.
+     *
+     * @return array|null
+     */
+    public function loadTermForEdit(string $slug): ?array
+    {
+        try {
+            $term = DB::table('term')
+                ->join('slug', function ($join) {
+                    $join->on('term.id', '=', 'slug.object_id');
+                })
+                ->join('term_i18n', function ($join) {
+                    $join->on('term.id', '=', 'term_i18n.id')
+                        ->where('term_i18n.culture', '=', $this->culture);
+                })
+                ->leftJoin('taxonomy_i18n', function ($join) {
+                    $join->on('term.taxonomy_id', '=', 'taxonomy_i18n.id')
+                        ->where('taxonomy_i18n.culture', '=', $this->culture);
+                })
+                ->where('slug.slug', $slug)
+                ->select(
+                    'term.id',
+                    'term.taxonomy_id',
+                    'term.code',
+                    'term.parent_id',
+                    'term.lft',
+                    'term.rgt',
+                    'term_i18n.name',
+                    'taxonomy_i18n.name as taxonomy_name'
+                )
+                ->first();
+
+            if (!$term) {
+                return null;
+            }
+
+            return (array) $term;
+        } catch (\Exception $e) {
+            error_log('ahgTermTaxonomyPlugin loadTermForEdit error: ' . $e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Load term relations (converse terms, related terms, use-for labels).
+     *
+     * @return array{converse: array, related: array, useFor: array}
+     */
+    public function loadTermRelations(int $termId): array
+    {
+        $result = ['converse' => [], 'related' => [], 'useFor' => []];
+
+        try {
+            // Converse terms
+            $converseRows = DB::table('relation')
+                ->where(function ($q) use ($termId) {
+                    $q->where('subject_id', $termId)
+                        ->orWhere('object_id', $termId);
+                })
+                ->where('type_id', \QubitTerm::CONVERSE_TERM_ID)
+                ->get();
+
+            foreach ($converseRows as $row) {
+                $otherId = ($row->subject_id == $termId) ? $row->object_id : $row->subject_id;
+                $result['converse'][] = ['id' => $otherId, 'relation_id' => $row->id];
+            }
+
+            // Related (associative) terms
+            $relatedRows = DB::table('relation')
+                ->where(function ($q) use ($termId) {
+                    $q->where('subject_id', $termId)
+                        ->orWhere('object_id', $termId);
+                })
+                ->where('type_id', \QubitTerm::TERM_RELATION_ASSOCIATIVE_ID)
+                ->get();
+
+            foreach ($relatedRows as $row) {
+                $otherId = ($row->subject_id == $termId) ? $row->object_id : $row->subject_id;
+                $result['related'][] = ['id' => $otherId, 'relation_id' => $row->id];
+            }
+
+            // Use-for (alternative labels)
+            $useForRows = DB::table('other_name')
+                ->join('other_name_i18n', function ($join) {
+                    $join->on('other_name.id', '=', 'other_name_i18n.id')
+                        ->where('other_name_i18n.culture', '=', $this->culture);
+                })
+                ->where('other_name.object_id', $termId)
+                ->where('other_name.type_id', \QubitTerm::ALTERNATIVE_LABEL_ID)
+                ->select('other_name.id', 'other_name_i18n.name')
+                ->get();
+
+            foreach ($useForRows as $row) {
+                $result['useFor'][] = ['id' => $row->id, 'name' => $row->name];
+            }
+        } catch (\Exception $e) {
+            error_log('ahgTermTaxonomyPlugin loadTermRelations error: ' . $e->getMessage());
+        }
+
+        return $result;
+    }
+
+    /**
+     * Count related objects for delete confirmation.
+     *
+     * @return array{io_count: int, actor_count: int, event_count: int}
+     */
+    public function countRelatedObjects(int $termId): array
+    {
+        $counts = ['io_count' => 0, 'actor_count' => 0, 'event_count' => 0];
+
+        try {
+            // IO count
+            $counts['io_count'] = (int) DB::table('object_term_relation as otr')
+                ->join('object as o', 'otr.object_id', '=', 'o.id')
+                ->where('otr.term_id', $termId)
+                ->where('o.class_name', 'QubitInformationObject')
+                ->count();
+
+            // Actor count
+            $counts['actor_count'] = (int) DB::table('object_term_relation as otr')
+                ->join('object as o', 'otr.object_id', '=', 'o.id')
+                ->where('otr.term_id', $termId)
+                ->where('o.class_name', 'QubitActor')
+                ->count();
+
+            // Event count
+            $counts['event_count'] = (int) DB::table('event')
+                ->where('type_id', $termId)
+                ->count();
+        } catch (\Exception $e) {
+            error_log('ahgTermTaxonomyPlugin countRelatedObjects error: ' . $e->getMessage());
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Load descendants for delete preview.
+     *
+     * @return array{descendants: array, total: int}
+     */
+    public function loadDescendants(int $termId, int $limit = 10): array
+    {
+        try {
+            $term = DB::table('term')
+                ->where('id', $termId)
+                ->select('lft', 'rgt')
+                ->first();
+
+            if (!$term) {
+                return ['descendants' => [], 'total' => 0];
+            }
+
+            $total = (int) (($term->rgt - $term->lft - 1) / 2);
+
+            $descendants = DB::table('term')
+                ->join('term_i18n', function ($join) {
+                    $join->on('term.id', '=', 'term_i18n.id')
+                        ->where('term_i18n.culture', '=', $this->culture);
+                })
+                ->leftJoin('slug', 'term.id', '=', 'slug.object_id')
+                ->where('term.lft', '>', $term->lft)
+                ->where('term.rgt', '<', $term->rgt)
+                ->orderBy('term.lft')
+                ->limit($limit)
+                ->select('term.id', 'term_i18n.name', 'slug.slug')
+                ->get()
+                ->toArray();
+
+            return ['descendants' => $descendants, 'total' => $total];
+        } catch (\Exception $e) {
+            error_log('ahgTermTaxonomyPlugin loadDescendants error: ' . $e->getMessage());
+
+            return ['descendants' => [], 'total' => 0];
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // Helper methods
     // -----------------------------------------------------------------------
 

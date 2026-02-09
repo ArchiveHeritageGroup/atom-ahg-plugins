@@ -1,3 +1,15 @@
+term_edit_override:
+  class: QubitResourceRoute
+  url: /term/:slug/edit
+  param: { module: termTaxonomy, action: edit }
+  requirements: { slug: "[a-zA-Z0-9_-]+" }
+
+term_delete_override:
+  class: QubitResourceRoute
+  url: /term/:slug/delete
+  param: { module: termTaxonomy, action: delete }
+  requirements: { slug: "[a-zA-Z0-9_-]+" }
+
 term_browse_override:
   class: QubitResourceRoute
   url: /term/:slug
