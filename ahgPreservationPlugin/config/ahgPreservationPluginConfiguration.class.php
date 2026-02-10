@@ -44,6 +44,47 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         $preservation->any('preservation_formats', '/admin/preservation/formats', 'formats');
         $preservation->any('preservation_policies', '/admin/preservation/policies', 'policies');
         $preservation->any('preservation_reports', '/admin/preservation/reports', 'reports');
+
+        // OAIS Package routes
+        $preservation->any('preservation_packages', '/admin/preservation/packages', 'packages');
+        $preservation->any('preservation_package_edit', '/admin/preservation/package/edit', 'packageEdit');
+        $preservation->any('preservation_package_view', '/admin/preservation/package/:id', 'packageView', ['id' => '\d+']);
+        $preservation->any('preservation_package_download', '/admin/preservation/package/:id/download', 'packageDownload', ['id' => '\d+']);
+
+        // Package API routes
+        $preservation->any('preservation_api_package_add_object', '/api/preservation/package/add-object', 'apiPackageAddObject');
+        $preservation->any('preservation_api_package_remove_object', '/api/preservation/package/remove-object', 'apiPackageRemoveObject');
+        $preservation->any('preservation_api_package_build', '/api/preservation/package/build', 'apiPackageBuild');
+        $preservation->any('preservation_api_package_validate', '/api/preservation/package/validate', 'apiPackageValidate');
+        $preservation->any('preservation_api_package_export', '/api/preservation/package/export', 'apiPackageExport');
+        $preservation->any('preservation_api_package_convert', '/api/preservation/package/convert', 'apiPackageConvert');
+        $preservation->any('preservation_api_package_delete', '/api/preservation/package/delete', 'apiPackageDelete');
+
+        // Workflow scheduler routes
+        $preservation->any('preservation_scheduler', '/admin/preservation/scheduler', 'scheduler');
+        $preservation->any('preservation_schedule_edit', '/admin/preservation/schedule/edit', 'scheduleEdit');
+        $preservation->any('preservation_schedule_run_view', '/admin/preservation/schedule/run/:id', 'scheduleRunView', ['id' => '\d+']);
+        $preservation->any('preservation_api_schedule_toggle', '/api/preservation/schedule/toggle', 'apiScheduleToggle');
+        $preservation->any('preservation_api_schedule_run', '/api/preservation/schedule/run', 'apiScheduleRun');
+        $preservation->any('preservation_api_schedule_delete', '/api/preservation/schedule/delete', 'apiScheduleDelete');
+
+        // Format identification & conversion routes
+        $preservation->any('preservation_identification', '/admin/preservation/identification', 'identification');
+        $preservation->any('preservation_api_identify', '/api/preservation/identify', 'apiIdentify');
+        $preservation->any('preservation_conversion', '/admin/preservation/conversion', 'conversion');
+        $preservation->any('preservation_api_convert', '/api/preservation/convert', 'apiConvert');
+
+        // Virus scan routes
+        $preservation->any('preservation_virus_scan', '/admin/preservation/virus-scan', 'virusScan');
+        $preservation->any('preservation_api_virus_scan', '/api/preservation/virus-scan', 'apiVirusScan');
+
+        // Backup verification routes
+        $preservation->any('preservation_backup', '/admin/preservation/backup', 'backup');
+        $preservation->any('preservation_api_verify_backup', '/api/preservation/backup/verify', 'apiVerifyBackup');
+
+        // Extended dashboard
+        $preservation->any('preservation_extended', '/admin/preservation/extended', 'extended');
+
         $preservation->any('preservation_index', '/admin/preservation', 'index');
         $preservation->register($routing);
 

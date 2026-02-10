@@ -123,6 +123,30 @@ CREATE TABLE IF NOT EXISTS `rights_cc_license_i18n` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Seed data for `rights_cc_license` (Creative Commons licenses)
+--
+
+INSERT IGNORE INTO `rights_cc_license` (`id`, `code`, `version`, `uri`, `allows_commercial`, `allows_derivatives`, `requires_share_alike`, `requires_attribution`, `icon`, `badge_url`, `sort_order`, `is_active`) VALUES
+(1, 'CC0-1.0', '1.0', 'https://creativecommons.org/publicdomain/zero/1.0/', 1, 1, 0, 0, 'cc-zero.png', 'https://licensebuttons.net/l/zero/1.0/88x31.png', 1, 1),
+(2, 'CC-BY-4.0', '4.0', 'https://creativecommons.org/licenses/by/4.0/', 1, 1, 0, 1, 'cc-by.png', 'https://licensebuttons.net/l/by/4.0/88x31.png', 2, 1),
+(3, 'CC-BY-SA-4.0', '4.0', 'https://creativecommons.org/licenses/by-sa/4.0/', 1, 1, 1, 1, 'cc-by-sa.png', 'https://licensebuttons.net/l/by-sa/4.0/88x31.png', 3, 1),
+(4, 'CC-BY-NC-4.0', '4.0', 'https://creativecommons.org/licenses/by-nc/4.0/', 0, 1, 0, 1, 'cc-by-nc.png', 'https://licensebuttons.net/l/by-nc/4.0/88x31.png', 4, 1),
+(5, 'CC-BY-NC-SA-4.0', '4.0', 'https://creativecommons.org/licenses/by-nc-sa/4.0/', 0, 1, 1, 1, 'cc-by-nc-sa.png', 'https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png', 5, 1),
+(6, 'CC-BY-ND-4.0', '4.0', 'https://creativecommons.org/licenses/by-nd/4.0/', 1, 0, 0, 1, 'cc-by-nd.png', 'https://licensebuttons.net/l/by-nd/4.0/88x31.png', 6, 1),
+(7, 'CC-BY-NC-ND-4.0', '4.0', 'https://creativecommons.org/licenses/by-nc-nd/4.0/', 0, 0, 0, 1, 'cc-by-nc-nd.png', 'https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png', 7, 1),
+(8, 'PDM-1.0', '1.0', 'https://creativecommons.org/publicdomain/mark/1.0/', 1, 1, 0, 0, 'publicdomain.png', NULL, 8, 1);
+
+INSERT IGNORE INTO `rights_cc_license_i18n` (`id`, `culture`, `name`, `description`) VALUES
+(1, 'en', 'CC0 1.0 Universal (Public Domain)', 'No rights reserved.'),
+(2, 'en', 'Attribution 4.0 International', 'Credit must be given to the creator.'),
+(3, 'en', 'Attribution-ShareAlike 4.0 International', 'Credit must be given. Derivatives shared under same license.'),
+(4, 'en', 'Attribution-NonCommercial 4.0 International', 'Credit required. Only noncommercial uses permitted.'),
+(5, 'en', 'Attribution-NonCommercial-ShareAlike 4.0', 'Credit required. Noncommercial. Same license for derivatives.'),
+(6, 'en', 'Attribution-NoDerivatives 4.0 International', 'Credit required. No derivatives or adaptations permitted.'),
+(7, 'en', 'Attribution-NonCommercial-NoDerivatives 4.0', 'Credit required. Noncommercial. No derivatives allowed.'),
+(8, 'en', 'Public Domain Mark 1.0', 'Free of known copyright restrictions.');
+
+--
 -- Table structure for table `rights_derivative_log`
 --
 

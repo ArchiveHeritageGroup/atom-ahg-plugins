@@ -30,6 +30,10 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         // CCO module routes
         $cco = new \AtomFramework\Routing\RouteLoader('cco');
         $cco->any('cco_provenance', '/:slug/cco/provenance', 'provenance');
+        $cco->any('cco_provenance_save', '/museum/provenance/save', 'provenanceSave');
+        $cco->any('cco_provenance_get', '/museum/provenance/get', 'provenanceGet');
+        $cco->any('cco_provenance_delete', '/museum/provenance/delete', 'provenanceDelete');
+        $cco->any('cco_provenance_export', '/museum/provenance/export', 'provenanceExport');
         $cco->register($routing);
 
         // Museum module routes
