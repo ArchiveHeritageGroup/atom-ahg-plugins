@@ -14,6 +14,7 @@ class displayActions extends AhgActions
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayModeService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/FuzzySearchService.php';
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DynamicFacetService.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/DisplayPreferenceRepository.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/GlobalDisplaySettingsRepository.php';
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/UserBrowseSettingsRepository.php';
@@ -125,17 +126,60 @@ class displayActions extends AhgActions
         $this->endDateFilter = $request->getParameter('endDate');
         $this->rangeTypeFilter = $request->getParameter('rangeType', 'inclusive');
 
-        // Load facets from pre-computed cache
-        // Guest users see published-only counts; authenticated users see all-records counts
+        // Load facets: use dynamic counts when filters are active, cached counts otherwise
         $sfx = $this->isAuthenticated ? '_all' : '';
-        $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
-        $this->levels = $this->getCachedFacet('level' . $sfx);
-        $this->repositories = $this->getCachedFacet('repository' . $sfx);
-        $this->creators = $this->getCachedFacet('creator' . $sfx);
-        $this->subjects = $this->getCachedFacet('subject' . $sfx);
-        $this->places = $this->getCachedFacet('place' . $sfx);
-        $this->genres = $this->getCachedFacet('genre' . $sfx);
-        $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
+        $facetService = new \AhgDisplay\Services\DynamicFacetService([
+            'isAuthenticated' => $this->isAuthenticated,
+            'typeFilter' => $this->typeFilter,
+            'parentId' => $this->parentId,
+            'topLevelOnly' => $this->topLevelOnly,
+            'hasDigital' => $this->hasDigital,
+            'creatorFilter' => $this->creatorFilter,
+            'subjectFilter' => $this->subjectFilter,
+            'placeFilter' => $this->placeFilter,
+            'genreFilter' => $this->genreFilter,
+            'levelFilter' => $this->levelFilter,
+            'mediaFilter' => $this->mediaFilter,
+            'repoFilter' => $this->repoFilter,
+            'queryFilter' => $this->queryFilter,
+            'queryFilterTerms' => $this->queryFilterTerms,
+            'titleFilter' => $this->titleFilter,
+            'identifierFilter' => $this->identifierFilter,
+            'referenceCodeFilter' => $this->referenceCodeFilter,
+            'scopeAndContentFilter' => $this->scopeAndContentFilter,
+            'extentAndMediumFilter' => $this->extentAndMediumFilter,
+            'archivalHistoryFilter' => $this->archivalHistoryFilter,
+            'acquisitionFilter' => $this->acquisitionFilter,
+            'creatorSearchFilter' => $this->creatorSearchFilter,
+            'subjectSearchFilter' => $this->subjectSearchFilter,
+            'placeSearchFilter' => $this->placeSearchFilter,
+            'genreSearchFilter' => $this->genreSearchFilter,
+            'startDateFilter' => $this->startDateFilter,
+            'endDateFilter' => $this->endDateFilter,
+            'rangeTypeFilter' => $this->rangeTypeFilter,
+        ]);
+
+        if ($facetService->hasActiveFacetFilters()) {
+            // Dynamic disjunctive faceting: each facet excludes its own filter
+            $this->types = $facetService->getFacetCounts('glam_type');
+            $this->levels = $facetService->getFacetCounts('level');
+            $this->repositories = $facetService->getFacetCounts('repository');
+            $this->creators = $facetService->getFacetCounts('creator');
+            $this->subjects = $facetService->getFacetCounts('subject');
+            $this->places = $facetService->getFacetCounts('place');
+            $this->genres = $facetService->getFacetCounts('genre');
+            $this->mediaTypes = $facetService->getFacetCounts('media_type');
+        } else {
+            // No facet filters active: use pre-computed cached counts (zero overhead)
+            $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
+            $this->levels = $this->getCachedFacet('level' . $sfx);
+            $this->repositories = $this->getCachedFacet('repository' . $sfx);
+            $this->creators = $this->getCachedFacet('creator' . $sfx);
+            $this->subjects = $this->getCachedFacet('subject' . $sfx);
+            $this->places = $this->getCachedFacet('place' . $sfx);
+            $this->genres = $this->getCachedFacet('genre' . $sfx);
+            $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
+        }
 
         // Build count query
         $countQuery = DB::table('information_object as io')
