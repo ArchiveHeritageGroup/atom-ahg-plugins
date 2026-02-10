@@ -907,7 +907,7 @@ class ActorBrowseService
     /**
      * Extract i18n field from ES doc.
      */
-    public function extractI18nField(array $doc, string $field): string
+    public function extractI18nField(array|\sfOutputEscaperArrayDecorator $doc, string $field): string
     {
         // Try current culture first, then fallback cultures
         $cultures = [$this->culture, 'en', 'fr', 'es'];
