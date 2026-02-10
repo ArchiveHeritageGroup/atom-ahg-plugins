@@ -451,8 +451,9 @@ class ricDashboardActions extends AhgActions
         }
     }
 
-    protected function renderJson(array $data)
+    protected function renderJson(array $data, int $status = 200): string
     {
+        $this->getResponse()->setStatusCode($status);
         $this->getResponse()->setContentType('application/json');
         return $this->renderText(json_encode($data));
     }

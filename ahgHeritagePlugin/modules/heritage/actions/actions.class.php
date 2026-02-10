@@ -442,8 +442,9 @@ class heritageActions extends AhgActions
     /**
      * Render JSON response.
      */
-    protected function renderJson(array $data)
+    protected function renderJson(array $data, int $status = 200): string
     {
+        $this->getResponse()->setStatusCode($status);
         $this->getResponse()->setContentType('application/json');
         $this->getResponse()->setContent(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
