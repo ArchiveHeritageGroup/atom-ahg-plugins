@@ -85,12 +85,10 @@ class ahgSettingsActions extends AhgActions
 
         $data = array_merge(['menuNodes' => $menuNodes], $additionalData);
 
-        // Transfer all public properties from this action to the data array
-        $reflection = new \ReflectionObject($this);
-        foreach ($reflection->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
-            $name = $prop->getName();
+        // Transfer varHolder contents (where sfComponent stores template vars via __set)
+        foreach ($this->getVarHolder()->getAll() as $name => $value) {
             if (!isset($data[$name])) {
-                $data[$name] = $this->$name;
+                $data[$name] = $value;
             }
         }
 

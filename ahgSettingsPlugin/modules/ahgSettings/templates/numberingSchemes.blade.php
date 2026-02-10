@@ -60,9 +60,9 @@
             @endphp
           <tr>
             <td>
-              <strong>{{ esc_entities($scheme->name) }}</strong>
+              <strong>{{ $scheme->name }}</strong>
               @if ($scheme->description)
-                <br><small class="text-muted">{{ esc_entities($scheme->description) }}</small>
+                <br><small class="text-muted">{{ $scheme->description }}</small>
               @endif
             </td>
             <td>
@@ -77,8 +77,8 @@
                 {{ ucfirst($scheme->sector) }}
               </span>
             </td>
-            <td><code>{{ esc_entities($scheme->pattern) }}</code></td>
-            <td><code class="text-success">{{ esc_entities($preview) }}</code></td>
+            <td><code>{{ $scheme->pattern }}</code></td>
+            <td><code class="text-success">{{ $preview }}</code></td>
             <td>{{ number_format($scheme->current_sequence) }}</td>
             <td>
               {{ match ($scheme->sequence_reset) {
@@ -139,8 +139,8 @@
         <div class="row">
           @foreach ($tokens as $token => $description)
           <div class="col-md-4 mb-2">
-            <code>{{ esc_entities($token) }}</code>
-            <small class="text-muted d-block">{{ esc_entities($description) }}</small>
+            <code>{{ $token }}</code>
+            <small class="text-muted d-block">{{ $description }}</small>
           </div>
           @endforeach
         </div>

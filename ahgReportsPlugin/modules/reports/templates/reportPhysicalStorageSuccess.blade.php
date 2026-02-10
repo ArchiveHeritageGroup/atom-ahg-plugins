@@ -1,0 +1,205 @@
+@extends('layouts.page')
+
+@section('title')
+  <h1>{{ __('Browse Physical Storage Report') }}</h1>
+@endsection
+
+@section('sidebar')
+
+  <section class="sidebar-widget">
+
+    <div style="margin-bottom: 1rem;">
+      <a href="{{ url_for(['module' => 'reports', 'action' => 'reportSelect']) }}" class="c-btn" style="width:100%;">
+        <i class="fa fa-arrow-left"></i> {{ __('Back to Reports') }}
+      </a>
+    </div>
+
+    <h4>{{ __('Filter options') }}</h4>
+
+    {!! $form->renderFormTag(url_for(['module' => 'reports', 'action' => 'reportPhysicalStorage']), ['method' => 'get']) !!}
+
+      {!! $form->renderHiddenFields() !!}
+
+      <div class="form-item">
+        <label>{{ __('Repository') }}</label>
+        {!! $form['repositoryId']->render() !!}
+      </div>
+
+      <div class="form-item">
+        <label>{{ __('Culture') }}</label>
+        {!! $form['culture']->render() !!}
+      </div>
+
+      <div class="form-item">
+        <label>{{ __('Date start') }}</label>
+        {!! $form['dateStart']->render() !!}
+      </div>
+
+      <div class="form-item">
+        <label>{{ __('Date end') }}</label>
+        {!! $form['dateEnd']->render() !!}
+      </div>
+
+      <div class="form-item">
+        <label>{{ __('Date of') }}</label>
+        {!! $form['dateOf']->render() !!}
+      </div>
+
+      <div class="form-item">
+        <label>
+          {!! $form['showLinkedIO']->render() !!}
+          {{ __('Show linked Information Objects') }}
+        </label>
+      </div>
+
+      <div class="form-item">
+        <label>{{ __('Results per page') }}</label>
+        {!! $form['limit']->render() !!}
+      </div>
+
+      <section>
+        <input class="c-btn c-btn-submit" type="submit" value="{{ __('Search') }}"/>
+      </section>
+
+      <div style="margin-top: 1rem;">
+        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+          <i class="fa fa-download"></i> {{ __('Export CSV') }}
+        </button>
+      </div>
+
+    </form>
+
+  </section>
+
+@endsection
+
+@section('content')
+
+  @if (isset($results) && count($results) > 0)
+
+    <div class="alert alert-info">
+      {{ __('Found %1% results', ['%1%' => $total]) }}
+    </div>
+
+    <div style="margin-bottom: 1rem; font-size: 0.85rem;">
+      <strong>{{ __('Show/Hide Columns') }}:</strong><br/>
+      <label><input type="checkbox" onclick="toggleColumn(0)" checked> {{ __('Name') }}</label>
+      <label><input type="checkbox" onclick="toggleColumn(1)" checked> {{ __('Location') }}</label>
+      <label><input type="checkbox" onclick="toggleColumn(2)" checked> {{ __('Repository') }}</label>
+      <label><input type="checkbox" onclick="toggleColumn(3)" checked> {{ __('Culture') }}</label>
+      <label><input type="checkbox" onclick="toggleColumn(4)" checked> {{ __('Created') }}</label>
+      @if (isset($_GET['showLinkedIO']) && $_GET['showLinkedIO'])
+        <label><input type="checkbox" onclick="toggleColumn(5)" checked> {{ __('Linked Information Objects') }}</label>
+      @endif
+    </div>
+
+    <script {!! $csp_nonce !!}>
+    function toggleColumn(colNum) {
+      var table = document.getElementById('reportTable');
+      var rows = table.getElementsByTagName('tr');
+
+      for (var i = 0; i < rows.length; i++) {
+        var cell = rows[i].cells[colNum];
+        if (cell) {
+          if (cell.style.display === 'none') {
+            cell.style.display = '';
+          } else {
+            cell.style.display = 'none';
+          }
+        }
+      }
+    }
+
+    function exportTableToCSV() {
+      var table = document.getElementById('reportTable');
+      var csv = [];
+      var rows = table.querySelectorAll('tr');
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = [];
+        var cols = rows[i].querySelectorAll('td, th');
+
+        for (var j = 0; j < cols.length; j++) {
+          if (cols[j].style.display !== 'none') {
+            var text = cols[j].innerText.replace(/"/g, '""');
+            row.push('"' + text + '"');
+          }
+        }
+        csv.push(row.join(','));
+      }
+
+      var csvFile = new Blob([csv.join('\n')], {type: 'text/csv'});
+      var downloadLink = document.createElement('a');
+      downloadLink.download = 'physical_storage_report_' + new Date().getTime() + '.csv';
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+    </script>
+
+    <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+      <table id="reportTable" class="table table-bordered table-striped table-sm">
+        <thead>
+          <tr>
+            <th>{{ __('Name') }}</th>
+            <th>{{ __('Location') }}</th>
+            <th>{{ __('Repository') }}</th>
+            <th>{{ __('Culture') }}</th>
+            <th>{{ __('Created') }}</th>
+            @if (isset($_GET['showLinkedIO']) && $_GET['showLinkedIO'])
+              <th>{{ __('Linked Information Objects') }}</th>
+            @endif
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          $termService = new \AtomExtensions\Services\TermService('en');
+          foreach ($results as $item) {
+          ?>
+            <tr>
+              <td>@if(isset($item->name))<a href="{{ url_for(['module' => 'physicalobject', 'slug' => $item->id]) }}">{{ $item->name }}</a>@else - @endif</td>
+              <td>{!! $item->location ?? '-' !!}</td>
+              <td>
+                <?php
+                if (isset($item->repositoryId)) {
+                  $repoService = new \AtomExtensions\Repositories\PhysicalObjectRepository();
+                  $repos = $repoService->getAvailableRepositories('en');
+                  $repo = $repos->firstWhere('id', $item->repositoryId);
+                  echo $repo ? $repo->name : '-';
+                } else {
+                  echo '-';
+                }
+                ?>
+              </td>
+              <td>{!! $item->culture ?? '-' !!}</td>
+              <td>{!! $item->createdAt ?? '-' !!}</td>
+              @if (isset($_GET['showLinkedIO']) && $_GET['showLinkedIO'])
+                <td>
+                  @if (isset($item->linkedInformationObjects) && count($item->linkedInformationObjects) > 0)
+                    <ul style="margin: 0; padding-left: 20px;">
+                      @foreach ($item->linkedInformationObjects as $io)
+                        <li>
+                          <a href="{{ url_for(['module' => 'informationobject', 'slug' => $io->id]) }}">{{ $io->title . ' (' . $io->identifier . ')' }}</a>
+                        </li>
+                      @endforeach
+                    </ul>
+                  @else
+                    -
+                  @endif
+                </td>
+              @endif
+            </tr>
+          <?php } ?>
+        </tbody>
+      </table>
+    </div>
+
+  @else
+    <div class="alert alert-warning">
+      {{ __('No results found.') }}
+    </div>
+  @endif
+
+@endsection

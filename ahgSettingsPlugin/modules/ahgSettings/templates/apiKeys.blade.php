@@ -59,9 +59,9 @@
               @else
                 @foreach ($apiKeys as $key)
                   <tr>
-                    <td><strong>{{ esc_specialchars($key->name) }}</strong></td>
-                    <td>{{ esc_specialchars($key->username ?? 'Unknown') }}</td>
-                    <td><code>{{ esc_specialchars($key->api_key_prefix) }}...</code></td>
+                    <td><strong>{{ $key->name }}</strong></td>
+                    <td>{{ $key->username ?? 'Unknown' }}</td>
+                    <td><code>{{ $key->api_key_prefix }}...</code></td>
                     <td>
                       @php
                       $raw = $key->scopes;
@@ -82,7 +82,7 @@
                               default => "bg-secondary"
                           };
                           @endphp
-                          <span class="badge {{ $badgeClass }}">{{ htmlspecialchars($scope) }}</span>
+                          <span class="badge {{ $badgeClass }}">{{ $scope }}</span>
                         @endforeach
                       @else
                         <span class="text-muted">None</span>
@@ -205,7 +205,7 @@
                 <select name="user_id" class="form-select" required>
                   <option value="">{{ __('Select a user...') }}</option>
                   @foreach ($users as $user)
-                    <option value="{{ $user->id }}">{{ esc_specialchars($user->username) }} ({{ esc_specialchars($user->email) }})</option>
+                    <option value="{{ $user->id }}">{{ $user->username }} ({{ $user->email }})</option>
                   @endforeach
                 </select>
                 <div class="form-text">{{ __('The API key will inherit this user\'s permissions.') }}</div>

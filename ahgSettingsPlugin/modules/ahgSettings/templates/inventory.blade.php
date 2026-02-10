@@ -41,7 +41,7 @@
               @php
                 $taxonomy = QubitTaxonomy::getById(QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID);
               @endphp
-              {!! link_to(__('Review the current terms in the Levels of description taxonomy.'), [$taxonomy, 'module' => 'taxonomy']) !!}
+              <a href="{{ url_for(['module' => 'taxonomy', 'slug' => $taxonomy->slug]) }}">{{ __('Review the current terms in the Levels of description taxonomy.') }}</a>
             </div>
           </div>
         </div>

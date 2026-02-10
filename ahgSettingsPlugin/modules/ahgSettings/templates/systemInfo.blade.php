@@ -12,13 +12,13 @@
     </h1>
 
 @php
-$softwareCategories = $sf_data->getRaw('softwareCategories');
-$systemInfo = $sf_data->getRaw('systemInfo');
-$phpExtensions = $sf_data->getRaw('phpExtensions');
-$diskUsage = $sf_data->getRaw('diskUsage');
-$atomRoot = $sf_data->getRaw('atomRoot');
-$exportFormats = $sf_data->getRaw('exportFormats');
-$doiStats = $sf_data->getRaw('doiStats');
+$softwareCategories = $softwareCategories ?? [];
+$systemInfo = $systemInfo ?? [];
+$phpExtensions = $phpExtensions ?? [];
+$diskUsage = $diskUsage ?? [];
+$atomRoot = $atomRoot ?? '';
+$exportFormats = $exportFormats ?? [];
+$doiStats = $doiStats ?? [];
 @endphp
 
 <style {!! $csp_nonce !!}>

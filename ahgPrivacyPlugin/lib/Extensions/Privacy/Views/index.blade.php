@@ -338,7 +338,7 @@
     </div>
 </div>
 
-<style>
+<style {!! $csp_nonce !!}>
 .compliance-score-circle {
     width: 150px;
     height: 150px;
@@ -367,7 +367,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-refresh dashboard every 5 minutes
     setTimeout(function() {

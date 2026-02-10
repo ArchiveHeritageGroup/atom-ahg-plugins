@@ -12,10 +12,10 @@
     </h1>
 
     @php
-      $services = $sf_data->getRaw('services');
-      $overallStatus = $sf_data->getRaw('overallStatus');
-      $notificationSettings = $sf_data->getRaw('notificationSettings');
-      $serviceHistory = $sf_data->getRaw('serviceHistory');
+      $services = $services ?? [];
+      $overallStatus = $overallStatus ?? 'unknown';
+      $notificationSettings = $notificationSettings ?? [];
+      $serviceHistory = $serviceHistory ?? [];
     @endphp
 
     <style {!! $csp_nonce !!}>

@@ -59,15 +59,15 @@
                 @foreach ($webhooks as $webhook)
                   <tr>
                     <td>
-                      <strong>{{ esc_specialchars($webhook->name) }}</strong>
+                      <strong>{{ $webhook->name }}</strong>
                       @if ($webhook->failure_count > 0)
                         <br><small class="text-danger"><i class="bi bi-exclamation-triangle"></i> {{ $webhook->failure_count }} failures</small>
                       @endif
                     </td>
                     <td>
-                      <code class="small">{{ esc_specialchars(strlen($webhook->url) > 40 ? substr($webhook->url, 0, 40) . '...' : $webhook->url) }}</code>
+                      <code class="small">{{ strlen($webhook->url) > 40 ? substr($webhook->url, 0, 40) . '...' : $webhook->url }}</code>
                     </td>
-                    <td>{{ esc_specialchars($webhook->username ?? 'Unknown') }}</td>
+                    <td>{{ $webhook->username ?? 'Unknown' }}</td>
                     <td>
                       @foreach ($webhook->events as $event)
                         @php
@@ -255,7 +255,7 @@ if (!hash_equals($expected, $signature)) {
                     <select name="user_id" class="form-select" required>
                       <option value="">{{ __('Select a user...') }}</option>
                       @foreach ($users as $user)
-                        <option value="{{ $user->id }}">{{ esc_specialchars($user->username) }} ({{ esc_specialchars($user->email) }})</option>
+                        <option value="{{ $user->id }}">{{ $user->username }} ({{ $user->email }})</option>
                       @endforeach
                     </select>
                     <div class="form-text">{{ __('The user who owns this webhook.') }}</div>
@@ -307,7 +307,7 @@ if (!hash_equals($expected, $signature)) {
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-list-ul me-2"></i>{{ __('Recent Deliveries') }} - {{ esc_specialchars($webhook->name) }}</h5>
+            <h5 class="modal-title"><i class="bi bi-list-ul me-2"></i>{{ __('Recent Deliveries') }} - {{ $webhook->name }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">

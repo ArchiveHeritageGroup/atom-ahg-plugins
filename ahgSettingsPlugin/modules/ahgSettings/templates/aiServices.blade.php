@@ -7,17 +7,12 @@
   </div>
   <div class="col-md-9">
 
-    <?php
-    // Get raw settings (unescape Symfony's automatic HTML escaping)
-    $rawSettings = $sf_data->getRawValue('settings');
-
+    @php
     // Decode JSON arrays for checkboxes
-    $selectedEntityTypes = json_decode($rawSettings['ner_entity_types'] ?? '[]', true) ?: [];
-    $selectedSpellcheckFields = json_decode($rawSettings['spellcheck_fields'] ?? '[]', true) ?: [];
-    $selectedTranslationFields = json_decode($rawSettings['translation_fields'] ?? '["title","scope_and_content"]', true) ?: [];
-
-    // Use raw settings for the rest of the template
-    $settings = $rawSettings;
+    $selectedEntityTypes = json_decode($settings['ner_entity_types'] ?? '[]', true) ?: [];
+    $selectedSpellcheckFields = json_decode($settings['spellcheck_fields'] ?? '[]', true) ?: [];
+    $selectedTranslationFields = json_decode($settings['translation_fields'] ?? '["title","scope_and_content"]', true) ?: [];
+    @endphp
     ?>
 
     <div class="d-flex justify-content-between align-items-center mb-3">

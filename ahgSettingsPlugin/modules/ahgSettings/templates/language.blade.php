@@ -36,7 +36,7 @@
                   </label>
                   <div class="col-1 px-2 text-end align-middle">
                     @if ($setting->deleteable)
-                      <a class="btn atom-btn-white" href="{{ url_for([$setting, 'module' => 'settings', 'action' => 'delete']) }}">
+                      <a class="btn atom-btn-white" href="{{ url_for(['module' => 'settings', 'action' => 'delete', 'slug' => $setting->slug]) }}">
                         <i class="fas fa-fw fa-times" aria-hidden="true"></i>
                         <span class="visually-hidden">{{ __('Delete') }}</span>
                       </a>

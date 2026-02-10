@@ -172,8 +172,8 @@
               <table class="table table-sm mb-0">
                 @foreach ($tokens as $token => $desc)
                 <tr>
-                  <td><code class="small">{{ esc_entities($token) }}</code></td>
-                  <td class="small text-muted">{{ esc_entities($desc) }}</td>
+                  <td><code class="small">{{ $token }}</code></td>
+                  <td class="small text-muted">{{ $desc }}</td>
                 </tr>
                 @endforeach
               </table>

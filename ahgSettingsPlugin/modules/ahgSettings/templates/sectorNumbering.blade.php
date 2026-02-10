@@ -24,9 +24,9 @@
           <dt class="col-sm-3">{{ __('Mask Enabled') }}</dt>
           <dd class="col-sm-3"><code>{{ ($globalValues['identifier_mask_enabled'] ?? '0') ? __('Yes') : __('No') }}</code></dd>
           <dt class="col-sm-3">{{ __('Mask') }}</dt>
-          <dd class="col-sm-3"><code>{{ esc_entities($globalValues['identifier_mask'] ?? '-') }}</code></dd>
+          <dd class="col-sm-3"><code>{{ $globalValues['identifier_mask'] ?? '-' }}</code></dd>
           <dt class="col-sm-3">{{ __('Counter') }}</dt>
-          <dd class="col-sm-3"><code>{{ esc_entities($globalValues['identifier_counter'] ?? '-') }}</code></dd>
+          <dd class="col-sm-3"><code>{{ $globalValues['identifier_counter'] ?? '-' }}</code></dd>
         </dl>
         <div class="text-end mt-2">
           <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'identifier']) }}" class="btn btn-sm btn-outline-secondary">
@@ -42,9 +42,9 @@
       {!! $form->renderHiddenFields() !!}
 
       @php
-        // Get raw arrays from Symfony's output escaper if needed
+        // Ensure $sectors is a plain array (Blade variables are already raw)
         if (isset($sectors) && $sectors instanceof sfOutputEscaperArrayDecorator) {
-            $sectors = $sf_data->getRaw('sectors');
+            $sectors = iterator_to_array($sectors);
         }
         $sectors = isset($sectors) && is_array($sectors) ? $sectors : [];
 
@@ -120,10 +120,10 @@
                       @if ($idDefault)
                         <div class="form-text">
                           <i class="fas fa-lightbulb text-warning me-1"></i>
-                          {{ __('Suggested:') }} <code>{{ esc_entities($idDefault) }}</code>
+                          {{ __('Suggested:') }} <code>{{ $idDefault }}</code>
                           <button type="button" class="btn btn-sm btn-outline-primary ms-2 use-default-btn"
                                   data-target="{{ $fieldName($code, 'identifier_mask') }}"
-                                  data-value="{{ esc_entities($idDefault) }}">
+                                  data-value="{{ $idDefault }}">
                             {{ __('Use') }}
                           </button>
                         </div>

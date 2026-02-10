@@ -96,7 +96,7 @@
           <div id="statements-collapse" class="accordion-collapse collapse" aria-labelledby="statements-heading">
             <div class="accordion-body">
 
-              <?php $firstKey = array_key_first($basis->getRawValue()); ?>
+              <?php $firstKey = array_key_first($basis); ?>
 
               <ul class="nav nav-tabs mb-3" role="tablist">
                 @foreach ($basis as $basisSlug => $basisName)
