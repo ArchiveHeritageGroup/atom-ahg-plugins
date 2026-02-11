@@ -1,0 +1,3 @@
+-- ahgMenuManagePlugin install
+-- No custom tables needed - uses base AtoM menu and menu_i18n tables
+-- Plugin registration handled by bin/install

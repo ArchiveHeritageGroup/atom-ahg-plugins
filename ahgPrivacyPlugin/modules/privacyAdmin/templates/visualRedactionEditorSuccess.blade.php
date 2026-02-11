@@ -242,21 +242,21 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 @if($docInfo)
 <!-- Load required libraries -->
-<link rel="stylesheet" href="{{ $frameworkPath }}/public/css/iiif-viewer.css">
-<link rel="stylesheet" href="{{ $frameworkPath }}/public/viewers/annotorious/annotorious.min.css">
-<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css">
+<link rel="stylesheet" href="{{ $frameworkPath }}/public/css/iiif-viewer.css" {!! $csp_nonce !!}>
+<link rel="stylesheet" href="{{ $frameworkPath }}/public/viewers/annotorious/annotorious.min.css" {!! $csp_nonce !!}>
+<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" {!! $csp_nonce !!}>
 
 @if($docInfo['is_pdf'])
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" {!! $csp_nonce !!}></script>
 <script {!! $csp_nonce !!}>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 @else
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
-<script src="{{ $frameworkPath }}/public/viewers/annotorious/openseadragon-annotorious.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" {!! $csp_nonce !!}></script>
+<script src="{{ $frameworkPath }}/public/viewers/annotorious/openseadragon-annotorious.min.js" {!! $csp_nonce !!}></script>
 @endif
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js" {!! $csp_nonce !!}></script>
 
 <script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {

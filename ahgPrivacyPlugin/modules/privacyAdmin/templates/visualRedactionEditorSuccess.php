@@ -239,21 +239,21 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 <?php if ($docInfo): ?>
 <!-- Load required libraries -->
-<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/css/iiif-viewer.css">
-<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/viewers/annotorious/annotorious.min.css">
-<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css">
+<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/viewers/annotorious/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <?php if ($docInfo['is_pdf']): ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 <?php else: ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
-<script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php endif; ?>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {

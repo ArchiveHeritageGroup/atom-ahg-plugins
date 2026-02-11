@@ -42,6 +42,16 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         $router->any('io_delete_override', '/informationobject/:slug/delete', 'delete');
         $router->any('io_edit_override', '/informationobject/:slug/edit', 'edit');
 
+        // Digital object routes (checked after treeview, before slug catch-alls)
+        $router->any('io_do_upload', '/digitalobject/upload', 'doUpload');
+        $router->any('io_do_edit', '/digitalobject/:id/edit', 'doEdit', ['id' => '\d+']);
+        $router->any('io_do_delete', '/digitalobject/:id/delete', 'doDelete', ['id' => '\d+']);
+
+        // Treeview API routes
+        $router->any('io_treeview', '/informationobject/treeview', 'treeview');
+        $router->any('io_treeview_full', '/informationobject/treeviewFull', 'treeviewFull');
+        $router->any('io_treeview_sort', '/informationobject/treeviewSort', 'treeviewSort');
+
         // Specific routes (checked first after prepending)
         $router->any('io_actor_autocomplete', '/informationobject/actorAutocomplete', 'actorAutocomplete');
         $router->any('io_repository_autocomplete', '/informationobject/repositoryAutocomplete', 'repositoryAutocomplete');

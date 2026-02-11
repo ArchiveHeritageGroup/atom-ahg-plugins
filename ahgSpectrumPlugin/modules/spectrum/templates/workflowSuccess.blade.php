@@ -160,8 +160,13 @@ if ($users->isEmpty()) {
                             <select name="transition_key" class="form-select" required>
                                 <option value="">{{ __('Select action...') }}</option>
                                 @foreach ($availableTransitions as $transKey => $transDef)
+                                @php $isRestart = ($transKey === 'restart'); @endphp
                                 <option value="{{ $transKey }}" data-to-state="{{ $transDef['to'] }}">
-                                    {{ ucwords(str_replace('_', ' ', $transKey)) }} &rarr; {{ ucwords(str_replace('_', ' ', $transDef['to'])) }}
+                                    @if ($isRestart)
+                                        &#x21bb; {{ __('Restart') }} &rarr; {{ ucwords(str_replace('_', ' ', $transDef['to'])) }}
+                                    @else
+                                        {{ ucwords(str_replace('_', ' ', $transKey)) }} &rarr; {{ ucwords(str_replace('_', ' ', $transDef['to'])) }}
+                                    @endif
                                 </option>
                                 @endforeach
                             </select>
@@ -185,8 +190,16 @@ if ($users->isEmpty()) {
                         </div>
 
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
+                            @php
+                            $hasRestart = isset($availableTransitions['restart']);
+                            $hasOnlyRestart = $hasRestart && count($availableTransitions) === 1;
+                            @endphp
+                            <button type="submit" class="btn {{ $hasOnlyRestart ? 'btn-warning' : 'btn-primary' }}">
+                                @if ($hasOnlyRestart)
+                                <i class="fas fa-redo me-1"></i> {{ __('Restart Procedure') }}
+                                @else
                                 <i class="fas fa-play me-1"></i> {{ __('Execute Action') }}
+                                @endif
                             </button>
                         </div>
                     </form>
@@ -229,7 +242,13 @@ if ($users->isEmpty()) {
                         @foreach ($history as $event)
                         <tr>
                             <td><small>{{ $event->created_at }}</small></td>
-                            <td>{{ ucwords(str_replace('_', ' ', $event->transition_key)) }}</td>
+                            <td>
+                                @if ($event->transition_key === 'restart')
+                                <span class="text-warning"><i class="fas fa-redo me-1"></i>{{ __('Restart') }}</span>
+                                @else
+                                {{ ucwords(str_replace('_', ' ', $event->transition_key)) }}
+                                @endif
+                            </td>
                             <td><span class="badge bg-secondary">{{ ucwords(str_replace('_', ' ', $event->from_state)) }}</span></td>
                             <td><span class="badge bg-primary">{{ ucwords(str_replace('_', ' ', $event->to_state)) }}</span></td>
                             <td><small>{{ $event->note ?? '' }}</small></td>

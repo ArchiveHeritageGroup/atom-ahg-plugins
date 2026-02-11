@@ -4,6 +4,7 @@
 #
 # We do NOT override /:slug (view) — base AtoM + ahgUiOverridesPlugin handles that.
 # We only intercept /informationobject/ prefixed edit/add/delete routes.
+# Digital object management routes are also registered here.
 
 io_delete_override:
   url: /informationobject/:slug/delete
@@ -32,3 +33,18 @@ io_generate_identifier:
 io_add_override:
   url: /informationobject/add
   param: { module: ioManage, action: edit }
+
+# Digital object management routes
+io_do_upload:
+  url: /digitalobject/upload
+  param: { module: ioManage, action: doUpload }
+
+io_do_edit:
+  url: /digitalobject/:id/edit
+  param: { module: ioManage, action: doEdit }
+  requirements: { id: \d+ }
+
+io_do_delete:
+  url: /digitalobject/:id/delete
+  param: { module: ioManage, action: doDelete }
+  requirements: { id: \d+ }

@@ -1,0 +1,3 @@
+-- ahgJobsManagePlugin install
+-- No custom tables needed - uses base AtoM job table
+-- Plugin registration handled by bin/install

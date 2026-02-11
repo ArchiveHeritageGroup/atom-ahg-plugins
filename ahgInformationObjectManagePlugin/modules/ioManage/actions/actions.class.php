@@ -100,6 +100,123 @@ class ioManageActions extends AhgActions
         }
     }
 
+    // ─── Treeview JSON API ────────────────────────────────────────────
+
+    /**
+     * Treeview data — returns JSON for sidebar treeview.
+     *
+     * Params: id (node ID), show (item|prevSiblings|nextSiblings), limit
+     */
+    public function executeTreeview(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $id = (int) $request->getParameter('id', 0);
+        $show = $request->getParameter('show', 'item');
+        $limit = max(1, min(50, (int) $request->getParameter('limit', 5)));
+        $culture = $this->context->user->getCulture();
+        $isAuth = $this->context->user->isAuthenticated();
+        $sort = sfConfig::get('app_sort_treeview_informationobject', 'none');
+
+        if (!$id) {
+            return $this->renderText(json_encode(['error' => 'Missing id parameter']));
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\TreeviewService';
+
+        switch ($show) {
+            case 'prevSiblings':
+                $result = $svc::getSiblings($id, 'previous', $culture, $isAuth, $limit, $sort);
+
+                break;
+
+            case 'nextSiblings':
+                $result = $svc::getSiblings($id, 'next', $culture, $isAuth, $limit, $sort);
+
+                break;
+
+            case 'children':
+                $result = $svc::getChildren($id, $culture, $isAuth, $limit, $sort);
+
+                break;
+
+            case 'ancestors':
+                $result = ['items' => $svc::getAncestors($id, $culture, $isAuth)];
+
+                break;
+
+            case 'full':
+                $result = $svc::getTreeViewData($id, $culture, $isAuth, $sort);
+
+                break;
+
+            case 'item':
+            default:
+                $result = $svc::getChildren($id, $culture, $isAuth, $limit, $sort);
+        }
+
+        return $this->renderText(json_encode($result));
+    }
+
+    /**
+     * Full-width treeview — returns paginated flat list of all descendants.
+     */
+    public function executeTreeviewFull(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        $rootId = (int) $request->getParameter('id', 0);
+        $limit = max(1, min(10000, (int) $request->getParameter('limit', 8000)));
+        $offset = max(0, (int) $request->getParameter('offset', 0));
+        $culture = $this->context->user->getCulture();
+        $isAuth = $this->context->user->isAuthenticated();
+        $sort = sfConfig::get('app_sort_treeview_informationobject', 'none');
+
+        if (!$rootId) {
+            return $this->renderText(json_encode(['error' => 'Missing id parameter']));
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\TreeviewService';
+        $result = $svc::getFullWidthTree($rootId, $culture, $isAuth, $limit, $offset, $sort);
+
+        return $this->renderText(json_encode($result));
+    }
+
+    /**
+     * Treeview sort — drag-drop move node after another.
+     *
+     * POST params: id (node to move), target (node to move after)
+     */
+    public function executeTreeviewSort(sfWebRequest $request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        // Require authenticated editor/admin
+        $user = $this->context->user;
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+        ) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
+        }
+
+        // Only allow when sort mode is 'none' (manual)
+        if ('none' !== sfConfig::get('app_sort_treeview_informationobject', 'none')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Drag-drop sorting only available in manual mode']));
+        }
+
+        $nodeId = (int) $request->getParameter('id', 0);
+        $afterId = (int) $request->getParameter('target', 0);
+
+        if (!$nodeId || !$afterId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Missing id or target']));
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\TreeviewService';
+        $success = $svc::moveAfter($nodeId, $afterId);
+
+        return $this->renderText(json_encode(['success' => $success]));
+    }
+
     // ─── AJAX proxy endpoints ─────────────────────────────────────────
 
     /**
@@ -304,4 +421,285 @@ class ioManageActions extends AhgActions
         return $this->renderText(json_encode(['identifier' => $identifier]));
     }
 
+    // ─── Digital Object Actions ──────────────────────────────────────
+
+    /**
+     * Upload a digital object for an information object.
+     *
+     * GET: Shows upload form (requires ?io=<slug>).
+     * POST: Processes file upload, delegates to QubitDigitalObject for
+     *       file handling and derivative generation.
+     */
+    public function executeDoUpload(sfWebRequest $request)
+    {
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $culture = $this->context->user->getCulture();
+
+        // ACL — require editor/admin
+        $user = $this->context->user;
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+        ) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        // Resolve the information object
+        $ioSlug = $request->getParameter('io', '');
+        if (empty($ioSlug)) {
+            $this->forward404();
+        }
+
+        $this->io = \AhgInformationObjectManage\Services\InformationObjectCrudService::getBySlug($ioSlug, $culture);
+        if (!$this->io) {
+            $this->forward404();
+        }
+
+        // Check if a digital object already exists
+        $this->existingDo = \AhgInformationObjectManage\Services\DigitalObjectService::getByInformationObjectId($this->io['id']);
+
+        // Max upload size for display
+        $this->maxUploadSize = \AhgInformationObjectManage\Services\DigitalObjectService::formatFileSize(
+            \AhgInformationObjectManage\Services\DigitalObjectService::getMaxUploadSize()
+        );
+
+        $this->errors = [];
+
+        // Handle POST
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters());
+
+            if (!$this->form->isValid()) {
+                $this->errors[] = __('Invalid form submission.');
+
+                return;
+            }
+
+            // Check for uploaded file
+            if (!isset($_FILES['file']) || $_FILES['file']['error'] === UPLOAD_ERR_NO_FILE) {
+                $this->errors[] = __('Please select a file to upload.');
+
+                return;
+            }
+
+            $file = $_FILES['file'];
+
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $errorMessages = [
+                    UPLOAD_ERR_INI_SIZE => __('The uploaded file exceeds the server limit.'),
+                    UPLOAD_ERR_FORM_SIZE => __('The uploaded file exceeds the form limit.'),
+                    UPLOAD_ERR_PARTIAL => __('The file was only partially uploaded.'),
+                    UPLOAD_ERR_NO_TMP_DIR => __('Missing a temporary folder.'),
+                    UPLOAD_ERR_CANT_WRITE => __('Failed to write file to disk.'),
+                ];
+                $this->errors[] = $errorMessages[$file['error']] ?? __('Unknown upload error.');
+
+                return;
+            }
+
+            try {
+                $ioId = (int) $this->io['id'];
+
+                // If replacing, delete existing digital object first
+                if ($this->existingDo && $request->getParameter('replace', '0') === '1') {
+                    \AhgInformationObjectManage\Services\DigitalObjectService::delete($this->existingDo['id']);
+                } elseif ($this->existingDo) {
+                    $this->errors[] = __('A digital object already exists. Check "Replace existing" to overwrite.');
+
+                    return;
+                }
+
+                // Move uploaded file to tmp directory
+                $movedFile = \Qubit::moveUploadFile($file);
+                $tmpFilePath = $movedFile['tmp_name'];
+
+                // Create QubitDigitalObject via Propel (handles derivatives + filesystem)
+                $do = new \QubitDigitalObject();
+                $do->objectId = $ioId;
+                $do->usageId = \QubitTerm::MASTER_ID;
+                $do->assets[] = new \QubitAsset($tmpFilePath);
+                $do->save();
+
+                // Update search index
+                $ioObject = \QubitInformationObject::getById($ioId);
+                if ($ioObject) {
+                    \QubitSearch::getInstance()->update($ioObject);
+                }
+
+                // Clean up tmp file if it still exists
+                if (file_exists($tmpFilePath)) {
+                    @unlink($tmpFilePath);
+                }
+
+                // Redirect to the IO view page
+                $this->redirect('/' . $this->io['slug']);
+            } catch (\Exception $e) {
+                $this->errors[] = __('Upload failed: %1%', ['%1%' => $e->getMessage()]);
+            }
+        }
+    }
+
+    /**
+     * Edit digital object metadata.
+     *
+     * GET: Shows metadata form (filename, mime type, size + editable fields).
+     * POST: Updates altText, displayAsCompound, mediaTypeId via Laravel QB.
+     */
+    public function executeDoEdit(sfWebRequest $request)
+    {
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        $culture = $this->context->user->getCulture();
+
+        // ACL
+        $user = $this->context->user;
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+        ) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        $doId = (int) $request->getParameter('id', 0);
+        if (!$doId) {
+            $this->forward404();
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\DigitalObjectService';
+
+        $this->digitalObject = $svc::getById($doId);
+        if (!$this->digitalObject) {
+            $this->forward404();
+        }
+
+        // Get the information object for breadcrumb/redirect
+        $ioId = $svc::getInformationObjectId($doId);
+        $this->ioSlug = $ioId ? $svc::getIoSlug($ioId) : null;
+
+        // Load properties
+        $this->properties = $svc::getProperties($doId, $culture);
+
+        // Load media types for dropdown
+        $this->mediaTypes = $svc::getMediaTypes($culture);
+        $this->mediaTypeName = $svc::getMediaTypeName($this->digitalObject['mediaTypeId'], $culture);
+        $this->usageName = $svc::getUsageName($this->digitalObject['usageId'], $culture);
+
+        // Load metadata from extended table
+        $this->metadata = $svc::getMetadata($doId);
+
+        // File size formatted
+        $this->fileSizeFormatted = $svc::formatFileSize($this->digitalObject['byteSize']);
+
+        // Thumbnail URL for preview
+        $this->thumbnailUrl = null;
+        if (!empty($this->digitalObject['derivatives']['thumbnail'])) {
+            $thumbDo = $this->digitalObject['derivatives']['thumbnail'];
+            $this->thumbnailUrl = '/' . ltrim($thumbDo['path'], '/') . $thumbDo['name'];
+        }
+
+        // Reference URL for preview
+        $this->referenceUrl = null;
+        if (!empty($this->digitalObject['derivatives']['reference'])) {
+            $refDo = $this->digitalObject['derivatives']['reference'];
+            $this->referenceUrl = '/' . ltrim($refDo['path'], '/') . $refDo['name'];
+        }
+
+        $this->errors = [];
+
+        // Handle POST
+        if ($request->isMethod('post')) {
+            $this->form->bind($request->getPostParameters());
+            if (!$this->form->isValid()) {
+                $this->errors[] = __('Invalid form submission.');
+
+                return;
+            }
+
+            // Update properties (altText, displayAsCompound)
+            $svc::updateProperties($doId, [
+                'altText' => $request->getParameter('altText', ''),
+                'displayAsCompound' => (bool) $request->getParameter('displayAsCompound', 0),
+            ], $culture);
+
+            // Update media type via direct QB update
+            $newMediaTypeId = $request->getParameter('mediaTypeId', '');
+            if ($newMediaTypeId !== '') {
+                \Illuminate\Database\Capsule\Manager::table('digital_object')
+                    ->where('id', $doId)
+                    ->update(['media_type_id' => (int) $newMediaTypeId ?: null]);
+            }
+
+            // Redirect back to IO
+            if ($this->ioSlug) {
+                $this->redirect('/' . $this->ioSlug);
+            } else {
+                $this->redirect('/');
+            }
+        }
+    }
+
+    /**
+     * Delete a digital object and all its derivatives.
+     *
+     * GET: Shows confirmation page.
+     * POST (sf_method=delete): Delegates to QubitDigitalObject::delete()
+     *       which handles file cleanup, derivative removal, and index update.
+     */
+    public function executeDoDelete(sfWebRequest $request)
+    {
+        $this->form = new sfForm();
+        $culture = $this->context->user->getCulture();
+
+        // ACL
+        $user = $this->context->user;
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+        ) {
+            QubitAcl::forwardUnauthorized();
+        }
+
+        $doId = (int) $request->getParameter('id', 0);
+        if (!$doId) {
+            $this->forward404();
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\DigitalObjectService';
+
+        $this->digitalObject = $svc::getById($doId);
+        if (!$this->digitalObject) {
+            $this->forward404();
+        }
+
+        // Get the information object for redirect
+        $ioId = $svc::getInformationObjectId($doId);
+        $this->ioSlug = $ioId ? $svc::getIoSlug($ioId) : null;
+        $this->fileSizeFormatted = $svc::formatFileSize($this->digitalObject['byteSize']);
+
+        // Count derivatives
+        $this->derivativeCount = 0;
+        if (!empty($this->digitalObject['derivatives'])) {
+            foreach ($this->digitalObject['derivatives'] as $d) {
+                if ($d) {
+                    ++$this->derivativeCount;
+                }
+            }
+        }
+
+        if ($request->isMethod('delete')) {
+            $this->form->bind($request->getPostParameters());
+
+            if ($this->form->isValid()) {
+                $success = $svc::delete($doId);
+
+                if ($success && $this->ioSlug) {
+                    $this->redirect('/' . $this->ioSlug);
+                } elseif ($success) {
+                    $this->redirect('/');
+                } else {
+                    $this->errors = [__('Failed to delete the digital object.')];
+                }
+            }
+        }
+    }
 }

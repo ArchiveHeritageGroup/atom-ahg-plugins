@@ -1,0 +1,3 @@
+-- ahgStaticPagePlugin install
+-- No custom tables needed - uses base AtoM static_page tables
+-- Plugin registration handled by bin/install
