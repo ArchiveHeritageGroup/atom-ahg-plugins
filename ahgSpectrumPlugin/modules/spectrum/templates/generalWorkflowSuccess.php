@@ -178,9 +178,9 @@ $users = DB::table('user')
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-12">
                             <label class="form-label"><?php echo __('Notes'); ?></label>
-                            <input type="text" name="note" class="form-control" placeholder="<?php echo __('Optional'); ?>">
+                            <textarea name="note" class="form-control" rows="3" placeholder="<?php echo __('Optional - describe reason for this action...'); ?>"></textarea>
                         </div>
 
                         <div class="col-12">

@@ -91,14 +91,24 @@ if ($users->isEmpty()) {
             </ul>
         </div>
 
-        <!-- Scope Indicator -->
+        <!-- Linked Record -->
         <div class="card mb-4 border-success">
             <div class="card-header bg-success text-white">
-                <h6 class="mb-0"><i class="fas fa-cube me-2"></i><?php echo __('Scope'); ?></h6>
+                <h6 class="mb-0"><i class="fas fa-link me-2"></i><?php echo __('Linked Record'); ?></h6>
             </div>
-            <div class="card-body py-2">
-                <span class="badge bg-success fs-6"><i class="fas fa-cube me-1"></i><?php echo __('Item'); ?></span>
-                <p class="text-muted small mt-2 mb-0"><?php echo esc_entities($resource->title ?? $resource->slug); ?></p>
+            <div class="card-body">
+                <span class="badge bg-success mb-2"><i class="fas fa-cube me-1"></i><?php echo __('Item-Level Procedure'); ?></span>
+                <h6 class="mb-1">
+                    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>" class="text-decoration-none">
+                        <?php echo esc_entities($resource->title ?? $resource->slug); ?>
+                    </a>
+                </h6>
+                <?php if (!empty($resource->identifier)): ?>
+                <small class="text-muted"><?php echo esc_entities($resource->identifier); ?></small>
+                <?php endif; ?>
+                <?php if (!empty($resource->repositoryName)): ?>
+                <br><small class="text-muted"><i class="fas fa-university me-1"></i><?php echo esc_entities($resource->repositoryName); ?></small>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -190,9 +200,9 @@ if ($users->isEmpty()) {
                             </select>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-12">
                             <label class="form-label"><?php echo __('Notes'); ?></label>
-                            <input type="text" name="note" class="form-control" placeholder="<?php echo __('Optional'); ?>">
+                            <textarea name="note" class="form-control" rows="3" placeholder="<?php echo __('Optional - describe reason for this action...'); ?>"></textarea>
                         </div>
                         
                         <div class="col-12">

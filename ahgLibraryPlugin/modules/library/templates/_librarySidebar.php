@@ -110,13 +110,17 @@ if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul>
     <?php if ($hasCondition): ?>
-    <li><?php echo link_to(__('Condition assessment'), ['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?></li>
+    <li><a href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><?php echo link_to(__('Spectrum data'), '/index.php/' . $resource->slug . '/spectrum'); ?></li>
+    <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+    <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
+    <?php endif; ?>
+    <?php if (isLibraryPluginActive('ahgProvenancePlugin')): ?>
+    <li><a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasResearch): ?>
-    <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resource->slug]); ?></li>
+    <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'cite', 'slug' => $resource->slug]); ?>"><i class="fas fa-quote-left me-2"></i><?php echo __('Cite this Record'); ?></a></li>
     <?php endif; ?>
   </ul>
 </section>

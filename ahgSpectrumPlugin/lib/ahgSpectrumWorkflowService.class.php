@@ -669,8 +669,11 @@ class ahgSpectrumWorkflowService
         $configData = json_decode($config->config_json, true);
         $transitions = $configData['transitions'] ?? [];
 
-        // Check if this state appears in any "from" array
-        foreach ($transitions as $transition) {
+        // Check if this state appears in any "from" array (excluding restart)
+        foreach ($transitions as $transKey => $transition) {
+            if ($transKey === 'restart') {
+                continue; // Restart doesn't count — state is still logically final
+            }
             $fromStates = $transition['from'] ?? [];
             if (in_array($state, $fromStates)) {
                 // State has outgoing transitions, not final
@@ -678,7 +681,7 @@ class ahgSpectrumWorkflowService
             }
         }
 
-        // No outgoing transitions found, this is a final state
+        // No outgoing transitions found (excluding restart), this is a final state
         return true;
     }
 
@@ -703,15 +706,18 @@ class ahgSpectrumWorkflowService
         $states = $configData['states'] ?? [];
         $transitions = $configData['transitions'] ?? [];
 
-        // Collect all states that appear in "from" arrays
+        // Collect all states that appear in "from" arrays (excluding restart)
         $statesWithOutgoing = [];
-        foreach ($transitions as $transition) {
+        foreach ($transitions as $transKey => $transition) {
+            if ($transKey === 'restart') {
+                continue; // Restart doesn't count — state is still logically final
+            }
             $fromStates = $transition['from'] ?? [];
             $statesWithOutgoing = array_merge($statesWithOutgoing, $fromStates);
         }
         $statesWithOutgoing = array_unique($statesWithOutgoing);
 
-        // Final states are those without outgoing transitions
+        // Final states are those without outgoing transitions (excluding restart)
         return array_values(array_diff($states, $statesWithOutgoing));
     }
 
