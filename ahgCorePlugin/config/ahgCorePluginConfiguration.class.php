@@ -37,6 +37,19 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
                     return true;
                 }
             }
+
+            // Handle ahgCorePlugin namespace (used by dependent plugins)
+            if (strpos($class, 'ahgCorePlugin\\') === 0) {
+                $relativePath = str_replace('ahgCorePlugin\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
+
             return false;
         });
     }
