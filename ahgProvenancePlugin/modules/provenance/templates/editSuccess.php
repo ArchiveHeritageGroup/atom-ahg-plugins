@@ -498,8 +498,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Toggle Nazi-era clear
   document.getElementById('naziEraChecked').addEventListener('change', function() {
-  });
     document.getElementById('naziEraClearGroup').style.display = this.checked ? '' : 'none';
+  });
 
   // Add document
   document.getElementById('addDocumentBtn').addEventListener('click', function() {

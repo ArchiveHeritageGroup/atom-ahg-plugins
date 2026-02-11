@@ -55,6 +55,9 @@
                     }
                     ?>
                 </a>
+                <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'general']); ?>" class="btn btn-outline-info w-100 mb-2">
+                    <i class="fas fa-building me-1"></i><?php echo __('General Procedures'); ?>
+                </a>
                 <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dataQuality']); ?>" class="btn btn-outline-success w-100 mb-2">
                     <i class="fas fa-check-circle me-1"></i><?php echo __('Data Quality Dashboard'); ?>
                 </a>

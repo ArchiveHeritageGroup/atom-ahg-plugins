@@ -1,4 +1,4 @@
-<?php 
+<?php
 decorate_with('layout_1col');
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -13,17 +13,17 @@ $steps = $configData['steps'] ?? [];
 $states = $configData['states'] ?? [];
 $transitions = $configData['transitions'] ?? [];
 
-// Get current state for this object/procedure
+// Get current state for general procedure (record_id = 0)
 $currentState = DB::table('spectrum_workflow_state')
-    ->where('record_id', $resource->id)
+    ->where('record_id', 0)
     ->where('procedure_type', $procedureType)
     ->first();
 
 $currentStateName = $currentState->current_state ?? ($configData['initial_state'] ?? 'pending');
 
-// Get workflow history
+// Get workflow history for general procedures
 $history = DB::table('spectrum_workflow_history')
-    ->where('record_id', $resource->id)
+    ->where('record_id', 0)
     ->where('procedure_type', $procedureType)
     ->orderBy('created_at', 'desc')
     ->limit(20)
@@ -37,42 +37,41 @@ foreach ($transitions as $transKey => $transDef) {
     }
 }
 
-// Get users for assignment - use username since authorized_form_of_name is empty
+// Get users for assignment
 $users = DB::table('user')
     ->whereNotNull('username')
     ->where('username', '!=', '')
     ->select('id', 'username', 'email')
     ->orderBy('username')
     ->get();
-
-// Fallback: if no users found, try alternate query
-if ($users->isEmpty()) {
-    $users = DB::table('actor')
-        ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
-        ->join('user', 'actor.id', '=', 'user.id')
-        ->where('actor_i18n.culture', 'en')
-        ->whereNotNull('actor_i18n.authorized_form_of_name')
-        ->select('user.id', 'actor_i18n.authorized_form_of_name')
-        ->orderBy('actor_i18n.authorized_form_of_name')
-        ->get();
-}
 ?>
 
 <?php slot('title'); ?>
-<h1><?php echo __('Spectrum Workflow'); ?>: <?php echo esc_entities($resource->title ?? $resource->slug); ?></h1>
+<h1><?php echo __('General Workflow'); ?>: <?php echo esc_entities($workflowConfig->name ?? ucwords(str_replace('_', ' ', $procedureType))); ?></h1>
 <?php end_slot(); ?>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
-    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo esc_entities($resource->title ?? $resource->slug); ?></a></li>
-    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo __('Spectrum'); ?></a></li>
+    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><?php echo __('Spectrum Dashboard'); ?></a></li>
+    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'general']); ?>"><?php echo __('General Procedures'); ?></a></li>
     <li class="breadcrumb-item active"><?php echo __('Workflow'); ?></li>
   </ol>
 </nav>
 
 <div class="row">
     <div class="col-md-3">
+        <!-- Scope Indicator -->
+        <div class="card mb-4 border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-building me-2"></i><?php echo __('Scope'); ?></h6>
+            </div>
+            <div class="card-body py-2">
+                <span class="badge bg-info fs-6"><i class="fas fa-building me-1"></i><?php echo __('General / Institution'); ?></span>
+                <p class="text-muted small mt-2 mb-0"><?php echo __('This procedure applies to the institution as a whole, not a specific object.'); ?></p>
+            </div>
+        </div>
+
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><?php echo __('Procedures'); ?></h5>
@@ -81,7 +80,7 @@ if ($users->isEmpty()) {
                 <?php foreach ($procedures as $procId => $procDef): ?>
                 <?php $isActive = $procedureType === $procId; ?>
                 <li class="list-group-item <?php echo $isActive ? 'active' : ''; ?>">
-                    <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug, 'procedure_type' => $procId]); ?>"
+                    <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'generalWorkflow', 'procedure_type' => $procId]); ?>"
                        class="<?php echo $isActive ? 'text-white' : ''; ?> text-decoration-none d-block">
                         <i class="fa <?php echo $procDef['icon'] ?? 'fa-circle'; ?> me-2"></i>
                         <?php echo $procDef['label']; ?>
@@ -91,25 +90,14 @@ if ($users->isEmpty()) {
             </ul>
         </div>
 
-        <!-- Scope Indicator -->
-        <div class="card mb-4 border-success">
-            <div class="card-header bg-success text-white">
-                <h6 class="mb-0"><i class="fas fa-cube me-2"></i><?php echo __('Scope'); ?></h6>
-            </div>
-            <div class="card-body py-2">
-                <span class="badge bg-success fs-6"><i class="fas fa-cube me-1"></i><?php echo __('Item'); ?></span>
-                <p class="text-muted small mt-2 mb-0"><?php echo esc_entities($resource->title ?? $resource->slug); ?></p>
-            </div>
-        </div>
-
-        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>" class="btn btn-secondary w-100">
-            <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to record'); ?>
+        <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'general']); ?>" class="btn btn-secondary w-100">
+            <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to General Procedures'); ?>
         </a>
     </div>
 
     <div class="col-md-9">
         <?php if ($workflowConfig): ?>
-        
+
         <!-- Current Status Card -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -122,13 +110,13 @@ if ($users->isEmpty()) {
                 <div class="mb-4">
                     <h6><?php echo __('Steps'); ?></h6>
                     <div class="d-flex flex-wrap gap-2">
-                        <?php 
+                        <?php
                         $stateIndex = array_search($currentStateName, $states);
-                        foreach ($steps as $index => $step): 
+                        foreach ($steps as $index => $step):
                             $stepStatus = 'pending';
                             if ($index < $stateIndex) $stepStatus = 'completed';
                             elseif ($index == $stateIndex) $stepStatus = 'current';
-                            
+
                             $badgeClass = match($stepStatus) {
                                 'completed' => 'bg-success',
                                 'current' => 'bg-warning',
@@ -152,15 +140,15 @@ if ($users->isEmpty()) {
                     </div>
                 </div>
                 <?php endif; ?>
-                
+
                 <!-- Available Actions -->
                 <?php if ($canEdit && !empty($availableTransitions)): ?>
                 <div class="mb-3">
                     <h6><?php echo __('Available Actions'); ?></h6>
-                    <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowTransition', 'slug' => $resource->slug]); ?>" class="row g-3">
+                    <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'generalWorkflowTransition']); ?>" class="row g-3">
                         <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
                         <input type="hidden" name="from_state" value="<?php echo esc_entities($currentStateName); ?>">
-                        
+
                         <div class="col-md-4">
                             <label class="form-label"><?php echo __('Action'); ?></label>
                             <select name="transition_key" class="form-select" required>
@@ -177,7 +165,7 @@ if ($users->isEmpty()) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
+
                         <div class="col-md-4">
                             <label class="form-label"><?php echo __('Assign to'); ?></label>
                             <select name="assigned_to" class="form-select">
@@ -189,12 +177,12 @@ if ($users->isEmpty()) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
+
                         <div class="col-md-4">
                             <label class="form-label"><?php echo __('Notes'); ?></label>
                             <input type="text" name="note" class="form-control" placeholder="<?php echo __('Optional'); ?>">
                         </div>
-                        
+
                         <div class="col-12">
                             <?php
                             $hasRestart = isset($availableTransitions['restart']);
@@ -222,7 +210,7 @@ if ($users->isEmpty()) {
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <!-- History -->
         <div class="card">
             <div class="card-header">
@@ -265,7 +253,7 @@ if ($users->isEmpty()) {
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <?php else: ?>
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle me-2"></i>

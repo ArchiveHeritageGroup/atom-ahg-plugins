@@ -38,6 +38,11 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $spectrum->any('spectrum_grap_dashboard', '/:slug/spectrum/grap', 'grapDashboard');
         $spectrum->any('spectrum_loan_dashboard', '/spectrum/loans', 'loanDashboard');
 
+        // General (institution-level) procedures
+        $spectrum->any('spectrum_general', '/spectrum/general', 'general');
+        $spectrum->any('spectrum_general_workflow', '/spectrum/general/workflow', 'generalWorkflow');
+        $spectrum->any('spectrum_general_workflow_transition', '/spectrum/general/workflow/transition', 'generalWorkflowTransition');
+
         // Condition routes
         $spectrum->any('spectrum_condition_photos', '/:slug/spectrum/condition-photos', 'conditionPhotos');
         $spectrum->any('spectrum_condition_report', '/:slug/spectrum/condition-report', 'conditionReport');

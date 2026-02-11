@@ -500,6 +500,169 @@ class spectrumActions extends AhgActions
         $this->currentFilter = $procedureTypeFilter;
     }
 
+    /**
+     * General Procedures - institution-level procedures not tied to a specific object.
+     * Uses record_id = 0 as sentinel value.
+     */
+    public function executeGeneral(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
+
+        // Get current state for each general procedure (record_id = 0)
+        $this->procedureStatuses = [];
+        try {
+            $states = DB::table('spectrum_workflow_state')
+                ->where('record_id', 0)
+                ->get();
+            foreach ($states as $state) {
+                $this->procedureStatuses[$state->procedure_type] = $state->current_state;
+            }
+        } catch (\Exception $e) {
+            // Table may not exist
+        }
+
+        // Get recent general procedure history
+        $this->recentHistory = [];
+        try {
+            $this->recentHistory = DB::table('spectrum_workflow_history as h')
+                ->leftJoin('user as u', 'h.user_id', '=', 'u.id')
+                ->where('h.record_id', 0)
+                ->select('h.*', 'u.username as user_name')
+                ->orderBy('h.created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            // Table may not exist
+        }
+    }
+
+    /**
+     * General Workflow - workflow for institution-level procedures (record_id = 0)
+     */
+    public function executeGeneralWorkflow(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $this->procedureType = $request->getParameter('procedure_type', ahgSpectrumWorkflowService::PROC_ACQUISITION);
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
+        $this->isGeneral = true;
+        $this->recordId = 0;
+
+        // Check permissions
+        $this->canEdit = $this->getUser()->isAuthenticated()
+            && ($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'));
+    }
+
+    /**
+     * General Workflow Transition - state transitions for general procedures (record_id = 0)
+     */
+    public function executeGeneralWorkflowTransition(sfWebRequest $request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        if (!$this->getUser()->isAuthenticated()
+            || !($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'))) {
+            $this->forward('admin', 'secure');
+        }
+
+        $procedureType = $request->getParameter('procedure_type');
+        $transitionKey = $request->getParameter('transition_key');
+        $fromState = $request->getParameter('from_state');
+        $note = $request->getParameter('note');
+        $assignedTo = $request->getParameter('assigned_to');
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        // Get workflow config to validate transition
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$config) {
+            $this->forward404();
+        }
+
+        $configData = json_decode($config->config_json, true);
+        $transitions = $configData['transitions'] ?? [];
+
+        if (!isset($transitions[$transitionKey])) {
+            $this->forward404();
+        }
+
+        $transition = $transitions[$transitionKey];
+        $toState = $transition['to'];
+
+        if (!in_array($fromState, $transition['from'])) {
+            $this->forward404();
+        }
+
+        $assignedToInt = $assignedTo ? (int) $assignedTo : null;
+        $assignmentData = [];
+        if ($assignedToInt) {
+            $assignmentData = [
+                'assigned_to' => $assignedToInt,
+                'assigned_at' => date('Y-m-d H:i:s'),
+                'assigned_by' => $userId
+            ];
+        }
+
+        // Update or create workflow state for record_id = 0
+        $existingState = DB::table('spectrum_workflow_state')
+            ->where('record_id', 0)
+            ->where('procedure_type', $procedureType)
+            ->first();
+
+        if ($existingState) {
+            $updateData = [
+                'current_state' => $toState,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            if ($assignedToInt) {
+                $updateData = array_merge($updateData, $assignmentData);
+            }
+            DB::table('spectrum_workflow_state')
+                ->where('id', $existingState->id)
+                ->update($updateData);
+        } else {
+            $insertData = [
+                'procedure_type' => $procedureType,
+                'record_id' => 0,
+                'current_state' => $toState,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            if ($assignedToInt) {
+                $insertData = array_merge($insertData, $assignmentData);
+            }
+            DB::table('spectrum_workflow_state')->insert($insertData);
+        }
+
+        // Record history
+        DB::table('spectrum_workflow_history')->insert([
+            'procedure_type' => $procedureType,
+            'record_id' => 0,
+            'from_state' => $fromState,
+            'to_state' => $toState,
+            'transition_key' => $transitionKey,
+            'user_id' => $userId,
+            'assigned_to' => $assignedToInt,
+            'note' => $note,
+            'metadata' => $assignedToInt ? json_encode(['assigned_to' => $assignedToInt, 'scope' => 'general']) : json_encode(['scope' => 'general']),
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        $this->redirect(['module' => 'spectrum', 'action' => 'generalWorkflow', 'procedure_type' => $procedureType]);
+    }
+
     public function executeDashboard(sfWebRequest $request)
     {
         // Get procedures from service
