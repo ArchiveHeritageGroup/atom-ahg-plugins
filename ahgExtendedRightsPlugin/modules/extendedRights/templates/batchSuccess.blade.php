@@ -1,5 +1,5 @@
 <!-- Tom Select CSS -->
-<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" {!! $csp_nonce !!}>
 
 <main id="content" class="container-xxl py-4">
   <h1 class="mb-4"><i class="fas fa-layer-group me-2"></i>{{ __('Batch Rights Assignment') }}</h1>
@@ -183,7 +183,7 @@
 </main>
 
 <!-- Tom Select JS -->
-<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" {!! $csp_nonce !!}></script>
 
 <script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {

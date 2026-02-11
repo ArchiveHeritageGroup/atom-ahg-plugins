@@ -174,7 +174,7 @@ foreach ($statuses as $procId => $procStatus) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><?php echo __('Update Procedure Status'); ?></h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="procedureUpdateForm">
@@ -209,7 +209,7 @@ foreach ($statuses as $procId => $procStatus) {
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"><?php echo __('Cancel'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
                 <button type="button" class="btn btn-primary" id="saveProcedureUpdate"><?php echo __('Save'); ?></button>
             </div>
         </div>
@@ -236,7 +236,7 @@ foreach ($statuses as $procId => $procStatus) {
                 document.getElementById('updateStatus').value = currentStatus;
                 
                 // Show modal
-                $('#procedureUpdateModal').modal('show');
+                new bootstrap.Modal(document.getElementById('procedureUpdateModal')).show();
             });
         });
 

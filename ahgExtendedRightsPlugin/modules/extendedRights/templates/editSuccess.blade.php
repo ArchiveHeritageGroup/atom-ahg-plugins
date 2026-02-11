@@ -1,5 +1,5 @@
 <!-- Tom Select CSS -->
-<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" {!! $csp_nonce !!}>
 
 <h1>Edit Rights: {{ $resource->title ?? 'Untitled' }}</h1>
 <nav aria-label="breadcrumb" class="mb-4">
@@ -114,7 +114,7 @@
 </form>
 
 <!-- Tom Select JS -->
-<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" {!! $csp_nonce !!}></script>
 <script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {
     new TomSelect('#rights_holder_id', {

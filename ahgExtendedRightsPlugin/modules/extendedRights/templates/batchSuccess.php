@@ -1,7 +1,7 @@
 <?php use_helper('Javascript'); ?>
 
 <!-- Tom Select CSS -->
-<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <main id="content" class="container-xxl py-4">
   <h1 class="mb-4"><i class="fas fa-layer-group me-2"></i><?php echo __('Batch Rights Assignment'); ?></h1>
@@ -185,7 +185,7 @@
 </main>
 
 <!-- Tom Select JS -->
-<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {

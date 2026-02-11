@@ -31,7 +31,7 @@
         </div>
         <div class="col-md-4 mb-3">
           <label for="end_date" class="form-label"><?php echo __('End Date'); ?></label>
-          <input type="date" name="end_date" id="end_date" class="form-control" id="end_date_input">
+          <input type="date" name="end_date" id="end_date" class="form-control">
           <small class="text-muted"><?php echo __('Leave blank for perpetual embargo'); ?></small>
         </div>
         <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -135,9 +135,9 @@
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('is_perpetual').addEventListener('change', function() {
-  document.getElementById('end_date_input').disabled = this.checked;
+  document.getElementById('end_date').disabled = this.checked;
   if (this.checked) {
-    document.getElementById('end_date_input').value = '';
+    document.getElementById('end_date').value = '';
   }
 });
 

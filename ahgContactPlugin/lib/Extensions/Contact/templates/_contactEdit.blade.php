@@ -27,7 +27,7 @@ $contacts = $contactRepo->getByActorId($resource->id);
     @include('Extensions.Contact.templates._contactForm', ['contact' => null, 'index' => '__INDEX__'])
 </template>
 
-<script>
+<script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {
     let contactIndex = {{ $contacts->count() }};
 

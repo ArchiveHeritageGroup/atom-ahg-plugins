@@ -48,7 +48,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
         </div>
         <div class="col-md-4 mb-3">
           <label for="end_date" class="form-label">{{ __('End Date') }}</label>
-          <input type="date" name="end_date" id="end_date" class="form-control" id="end_date_input" value="{{ $embargo->end_date ?? '' }}">
+          <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $embargo->end_date ?? '' }}">
           <small class="text-muted">{{ __('Leave blank for perpetual embargo') }}</small>
         </div>
         <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -129,7 +129,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
 
 <script {!! $csp_nonce !!}>
 document.getElementById('is_perpetual').addEventListener('change', function() {
-  var endDateInput = document.getElementById('end_date_input') || document.getElementById('end_date');
+  var endDateInput = document.getElementById('end_date');
   if (endDateInput) {
     endDateInput.disabled = this.checked;
     if (this.checked) {

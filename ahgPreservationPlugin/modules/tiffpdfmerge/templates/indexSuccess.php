@@ -175,7 +175,7 @@ if ($informationObject) {
 .sortable-ghost { opacity: 0.4; background-color: #cfe2ff !important; }
 </style>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {
     'use strict';

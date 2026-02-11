@@ -12,7 +12,7 @@
 
 <?php if ($sf_user->isAdministrator()): ?>
 <li class="dropdown ahg-admin-menu">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-archive"></i>
         <?php echo __('AHG Plugins'); ?>
         <span class="caret"></span>

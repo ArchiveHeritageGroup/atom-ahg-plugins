@@ -359,9 +359,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
         <div class="modal-content bg-dark">
             <div class="modal-header border-0">
                 <h5 class="modal-title text-white" id="lightbox-title"></h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
                 <img id="lightbox-image" src="" alt="" class="img-fluid">
@@ -385,9 +383,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><?php echo __('Edit Photo'); ?></h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="edit-photo-form">
                 <div class="modal-body">
@@ -428,7 +424,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><?php echo __('Cancel'); ?></button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
                     <button type="submit" class="btn btn-primary"><?php echo __('Save Changes'); ?></button>
                 </div>
             </form>
@@ -561,7 +557,7 @@ function initSortable() {
 function openLightbox(photoId) {
     currentPhotoIndex = photos.findIndex(function(p) { return p.id == photoId; });
     updateLightbox();
-    $('#photo-lightbox').modal('show');
+    new bootstrap.Modal(document.getElementById('photo-lightbox')).show();
 }
 
 function updateLightbox() {
@@ -593,7 +589,7 @@ function editPhoto(photoId) {
     document.getElementById('edit-photographer').value = photo.photographer || '';
     document.getElementById('edit-photo-date').value = photo.photo_date || '';
 
-    $('#edit-photo-modal').modal('show');
+    new bootstrap.Modal(document.getElementById('edit-photo-modal')).show();
 }
 
 document.getElementById('edit-photo-form').addEventListener('submit', function(e) {
