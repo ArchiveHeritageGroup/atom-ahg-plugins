@@ -1,15 +1,16 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Cancel a running or pending migration job.
  */
-class dataMigrationCancelJobAction extends sfAction
+class dataMigrationCancelJobAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
 

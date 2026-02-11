@@ -1,6 +1,7 @@
 <?php
 
-class dataMigrationGetPreviewAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class dataMigrationGetPreviewAction extends AhgController
 {
     public function execute($request)
     {

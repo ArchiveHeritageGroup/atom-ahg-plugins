@@ -1,20 +1,21 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class embargoActions extends AhgActions
+class embargoActions extends AhgController
 {
     protected function getService(): \ahgExtendedRightsPlugin\Services\EmbargoService
     {
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
         return new \ahgExtendedRightsPlugin\Services\EmbargoService();
     }
 
     protected function getResource(int $objectId)
     {
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
@@ -26,14 +27,14 @@ class embargoActions extends AhgActions
             ->first();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = $this->getService();
         $this->activeEmbargoes = $service->getActiveEmbargoes();
         $this->expiringEmbargoes = $service->getExpiringEmbargoes(30);
     }
 
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $embargoId = $request->getParameter('id');
         $service = $this->getService();
@@ -43,7 +44,7 @@ class embargoActions extends AhgActions
         }
     }
 
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $objectId = $request->getParameter('objectId');
         if (!$objectId) {
@@ -66,7 +67,7 @@ class embargoActions extends AhgActions
     protected function processAddForm(sfWebRequest $request, int $objectId)
     {
         $service = $this->getService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $data = [
             'embargo_type' => $request->getParameter('embargo_type', 'full'),
@@ -86,14 +87,14 @@ class embargoActions extends AhgActions
         if ($applyToChildren) {
             $results = $service->createEmbargoWithPropagation($objectId, $data, $userId, true);
             // Flash message with results
-            $this->context->user->setFlash('notice', sprintf(
+            $this->getUser()->setFlash('notice', sprintf(
                 'Embargo created for %d records (%d failed)',
                 $results['created'],
                 $results['failed']
             ));
         } else {
             $service->createEmbargo($objectId, $data, $userId);
-            $this->context->user->setFlash('notice', 'Embargo created successfully');
+            $this->getUser()->setFlash('notice', 'Embargo created successfully');
         }
 
         $resource = $this->getResource($objectId);
@@ -101,7 +102,7 @@ class embargoActions extends AhgActions
         $this->redirect('/' . $resource->slug);
     }
 
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $embargoId = $request->getParameter('id');
         $objectId = $request->getParameter('objectId');
@@ -131,7 +132,7 @@ class embargoActions extends AhgActions
     protected function processEditForm(sfWebRequest $request, int $embargoId)
     {
         $service = $this->getService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $data = [
             'embargo_type' => $request->getParameter('embargo_type'),
@@ -153,7 +154,7 @@ class embargoActions extends AhgActions
         $this->redirect('/' . $resource->slug);
     }
 
-    public function executeLift(sfWebRequest $request)
+    public function executeLift($request)
     {
         $embargoId = $request->getParameter('id');
 
@@ -170,7 +171,7 @@ class embargoActions extends AhgActions
 
         if ($request->isMethod('post')) {
             $reason = $request->getParameter('lift_reason');
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $service->liftEmbargo((int)$embargoId, $reason, $userId);
 
             $resource = $this->getResource($embargo->object_id);
@@ -182,7 +183,7 @@ class embargoActions extends AhgActions
         $this->resource = $this->getResource($embargo->object_id);
     }
 
-    public function executeAddException(sfWebRequest $request)
+    public function executeAddException($request)
     {
         $embargoId = $request->getParameter('embargo_id');
 
@@ -202,7 +203,7 @@ class embargoActions extends AhgActions
     protected function processAddExceptionForm(sfWebRequest $request, int $embargoId)
     {
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
         $now = date('Y-m-d H:i:s');
 
         DB::table('embargo_exception')->insert([

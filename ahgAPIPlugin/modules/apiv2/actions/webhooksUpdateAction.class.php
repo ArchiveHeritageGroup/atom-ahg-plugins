@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Update a webhook
  *
@@ -14,7 +15,7 @@
  *   "is_active": false
  * }
  */
-class apiv2WebhooksUpdateAction extends AhgApiAction
+class apiv2WebhooksUpdateAction extends AhgApiController
 {
     public function PUT($request)
     {

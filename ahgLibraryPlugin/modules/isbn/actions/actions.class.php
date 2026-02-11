@@ -1,17 +1,18 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ISBN Module Actions.
  */
-class isbnActions extends AhgActions
+class isbnActions extends AhgController
 {
     /**
      * Test page action.
      */
-    public function executeTest(sfWebRequest $request)
+    public function executeTest($request)
     {
         // Require authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
     }
@@ -19,7 +20,7 @@ class isbnActions extends AhgActions
     /**
      * API test endpoint (for CLI testing with cookie).
      */
-    public function executeApiTest(sfWebRequest $request)
+    public function executeApiTest($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -60,7 +61,7 @@ class isbnActions extends AhgActions
      * ISBN lookup page for information objects.
      * Returns JSON response with ISBN metadata.
      */
-    public function executeLookup(sfWebRequest $request)
+    public function executeLookup($request)
     {
         $isbn = trim($request->getParameter('isbn', ''));
 
@@ -107,9 +108,9 @@ class isbnActions extends AhgActions
     /**
      * Statistics action.
      */
-    public function executeStats(sfWebRequest $request)
+    public function executeStats($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 

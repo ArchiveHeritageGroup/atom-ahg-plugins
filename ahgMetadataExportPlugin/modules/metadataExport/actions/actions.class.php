@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -11,17 +12,17 @@ use Illuminate\Database\Capsule\Manager as DB;
  * @subpackage metadataExport
  * @author     The Archive and Heritage Group (Pty) Ltd
  */
-class metadataExportActions extends AhgActions
+class metadataExportActions extends AhgController
 {
     /**
      * Export dashboard - format selection
      *
      * @param sfWebRequest $request
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -47,10 +48,10 @@ class metadataExportActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executePreview(sfWebRequest $request)
+    public function executePreview($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward404();
         }
 
@@ -99,10 +100,10 @@ class metadataExportActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeDownload(sfWebRequest $request)
+    public function executeDownload($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward404();
         }
 
@@ -156,7 +157,7 @@ class metadataExportActions extends AhgActions
                 $resource->id,
                 '',
                 strlen($content),
-                $this->context->user->getAttribute('user_id')
+                $this->getUser()->getAttribute('user_id')
             );
 
             // Send response
@@ -176,10 +177,10 @@ class metadataExportActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeBulk(sfWebRequest $request)
+    public function executeBulk($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward404();
         }
 
@@ -286,7 +287,7 @@ class metadataExportActions extends AhgActions
                 null,
                 '',
                 filesize($zipPath),
-                $this->context->user->getAttribute('user_id')
+                $this->getUser()->getAttribute('user_id')
             );
 
             $this->setTemplate('none');
@@ -325,7 +326,7 @@ class metadataExportActions extends AhgActions
      */
     protected function loadExportService(): void
     {
-        $pluginDir = sfConfig::get('sf_plugins_dir').'/ahgMetadataExportPlugin';
+        $pluginDir = $this->config('sf_plugins_dir').'/ahgMetadataExportPlugin';
 
         // Register autoloader
         spl_autoload_register(function ($class) use ($pluginDir) {

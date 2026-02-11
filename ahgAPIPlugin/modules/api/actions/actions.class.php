@@ -1,8 +1,9 @@
 <?php
 
-class apiActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class apiActions extends AhgController
 {
-    public function executeSearchInformationObjects(sfWebRequest $request)
+    public function executeSearchInformationObjects($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -52,7 +53,7 @@ class apiActions extends AhgActions
         ]));
     }
 
-    public function executeAutocompleteGlam(sfWebRequest $request)
+    public function executeAutocompleteGlam($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -111,7 +112,7 @@ class apiActions extends AhgActions
      *
      * Returns protection info for all plugins (record counts, lock status).
      */
-    public function executePluginProtection(sfWebRequest $request)
+    public function executePluginProtection($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -131,7 +132,7 @@ class apiActions extends AhgActions
 
         $protectionStatus = [];
 
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Extensions/ExtensionProtection.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/src/Extensions/ExtensionProtection.php';
 
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;

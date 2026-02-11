@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionsDeleteAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionsDeleteAction extends AhgApiController
 {
     public function DELETE($request)
     {

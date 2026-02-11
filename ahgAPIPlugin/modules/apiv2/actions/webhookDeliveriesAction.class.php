@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Get delivery logs for a webhook
  *
@@ -9,7 +10,7 @@
  * - limit: Number of records (default 50, max 100)
  * - offset: Pagination offset (default 0)
  */
-class apiv2WebhookDeliveriesAction extends AhgApiAction
+class apiv2WebhookDeliveriesAction extends AhgApiController
 {
     public function GET($request)
     {

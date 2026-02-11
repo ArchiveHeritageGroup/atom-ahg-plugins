@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -8,17 +9,17 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartSaveSelectionsAction extends sfAction
+class cartSaveSelectionsAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['success' => false, 'message' => 'Not authenticated']));
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $selections = json_decode($request->getParameter('selections', '{}'), true);
         
         if (empty($selections)) {
@@ -26,7 +27,7 @@ class cartSaveSelectionsAction extends sfAction
         }
 
         // Store selections in session for checkout
-        $this->context->user->setAttribute('cart_selections', $selections);
+        $this->getUser()->setAttribute('cart_selections', $selections);
 
         return $this->renderText(json_encode([
             'success' => true,

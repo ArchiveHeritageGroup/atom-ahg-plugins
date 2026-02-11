@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Library Reports Module
  * Reports for library items, creators, subjects, circulation
@@ -6,16 +8,16 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class libraryReportsActions extends AhgActions
+class libraryReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -40,7 +42,7 @@ class libraryReportsActions extends AhgActions
         ];
     }
 
-    public function executeCatalogue(sfWebRequest $request)
+    public function executeCatalogue($request)
     {
         $this->checkAccess();
         
@@ -84,7 +86,7 @@ class libraryReportsActions extends AhgActions
         $this->statuses = ['available', 'on_loan', 'reference', 'processing', 'missing', 'withdrawn'];
     }
 
-    public function executeCreators(sfWebRequest $request)
+    public function executeCreators($request)
     {
         $this->checkAccess();
         
@@ -117,7 +119,7 @@ class libraryReportsActions extends AhgActions
         ];
     }
 
-    public function executeSubjects(sfWebRequest $request)
+    public function executeSubjects($request)
     {
         $this->checkAccess();
         
@@ -146,7 +148,7 @@ class libraryReportsActions extends AhgActions
         $this->sources = DB::table('library_item_subject')->distinct()->whereNotNull('source')->pluck('source')->toArray();
     }
 
-    public function executePublishers(sfWebRequest $request)
+    public function executePublishers($request)
     {
         $this->checkAccess();
         
@@ -160,7 +162,7 @@ class libraryReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeCallNumbers(sfWebRequest $request)
+    public function executeCallNumbers($request)
     {
         $this->checkAccess();
         
@@ -186,7 +188,7 @@ class libraryReportsActions extends AhgActions
         ];
     }
 
-    public function executeExportCsv(sfWebRequest $request)
+    public function executeExportCsv($request)
     {
         $this->checkAccess();
         

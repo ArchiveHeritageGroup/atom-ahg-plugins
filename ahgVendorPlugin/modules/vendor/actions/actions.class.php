@@ -1,17 +1,18 @@
 <?php
 
-class vendorActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class vendorActions extends AhgController
 {
     protected $service;
 
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgVendorPlugin/lib/Repository/VendorRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgVendorPlugin/lib/Repository/VendorRepository.php';
         $this->service = new \AtomFramework\Services\VendorService();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         return $this->renderBlade('index', [
             'stats' => $this->service->getDashboardStats(),
@@ -22,7 +23,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeList(sfWebRequest $request)
+    public function executeList($request)
     {
         $filters = [
             'status' => $request->getParameter('status'),
@@ -42,7 +43,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $slug = $request->getParameter('slug');
         $vendor = $this->service->getVendorBySlug($slug);
@@ -60,7 +61,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $form = [];
         $errors = [];
@@ -89,7 +90,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $slug = $request->getParameter('slug');
         $vendor = $this->service->getVendorBySlug($slug);
@@ -127,7 +128,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $slug = $request->getParameter('slug');
         $vendor = $this->service->getVendorBySlug($slug);
@@ -201,7 +202,7 @@ class vendorActions extends AhgActions
         }
     }
 
-    public function executeAddContact(sfWebRequest $request)
+    public function executeAddContact($request)
     {
         $slug = $request->getParameter('slug');
         $vendor = $this->service->getVendorBySlug($slug);
@@ -234,7 +235,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $slug]);
     }
 
-    public function executeUpdateContact(sfWebRequest $request)
+    public function executeUpdateContact($request)
     {
         $slug = $request->getParameter('slug');
         $contactId = $request->getParameter('contact_id');
@@ -259,7 +260,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $slug]);
     }
 
-    public function executeDeleteContact(sfWebRequest $request)
+    public function executeDeleteContact($request)
     {
         $contactId = $request->getParameter('contact_id');
         $slug = $request->getParameter('slug');
@@ -270,7 +271,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $slug]);
     }
 
-    public function executeTransactions(sfWebRequest $request)
+    public function executeTransactions($request)
     {
         $filters = [
             'status' => $request->getParameter('status'),
@@ -291,7 +292,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeViewTransaction(sfWebRequest $request)
+    public function executeViewTransaction($request)
     {
         $id = (int)$request->getParameter('id');
         $transaction = $this->service->getTransaction($id);
@@ -309,7 +310,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeAddTransaction(sfWebRequest $request)
+    public function executeAddTransaction($request)
     {
         $form = [];
         $errors = [];
@@ -363,7 +364,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeEditTransaction(sfWebRequest $request)
+    public function executeEditTransaction($request)
     {
         $id = (int)$request->getParameter('id');
         $transaction = $this->service->getTransaction($id);
@@ -398,7 +399,7 @@ class vendorActions extends AhgActions
         ]);
     }
 
-    public function executeUpdateTransactionStatus(sfWebRequest $request)
+    public function executeUpdateTransactionStatus($request)
     {
         $id = (int)$request->getParameter('id');
         $status = $request->getParameter('status');
@@ -439,7 +440,7 @@ class vendorActions extends AhgActions
         ];
     }
 
-    public function executeAddTransactionItem(sfWebRequest $request)
+    public function executeAddTransactionItem($request)
     {
         $transactionId = (int)$request->getParameter('transaction_id');
 
@@ -464,7 +465,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $transactionId]);
     }
 
-    public function executeUpdateTransactionItem(sfWebRequest $request)
+    public function executeUpdateTransactionItem($request)
     {
         $itemId = (int)$request->getParameter('item_id');
         $transactionId = (int)$request->getParameter('transaction_id');
@@ -485,7 +486,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $transactionId]);
     }
 
-    public function executeRemoveTransactionItem(sfWebRequest $request)
+    public function executeRemoveTransactionItem($request)
     {
         $itemId = (int)$request->getParameter('item_id');
         $transactionId = (int)$request->getParameter('transaction_id');
@@ -496,7 +497,7 @@ class vendorActions extends AhgActions
         $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $transactionId]);
     }
 
-    public function executeServiceTypes(sfWebRequest $request)
+    public function executeServiceTypes($request)
     {
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * RIC Dashboard Actions
  * 
@@ -7,27 +8,25 @@
  * AtoM 2.10 / Symfony 1.4 / Bootstrap 5 / PHP 8.3
  */
 
-class ricDashboardActions extends AhgActions
+class ricDashboardActions extends AhgController
 {
     protected $syncService;
 
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-
-        // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+// Check authentication
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin access - use isAdministrator() instead of QubitAcl::check()
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
         // Initialize Laravel framework and service
         try {
-            $bootstrapFile = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrapFile = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
             if (file_exists($bootstrapFile)) {
                 require_once $bootstrapFile;
                 $this->syncService = new \AtomFramework\Services\RicSyncService();
@@ -38,7 +37,7 @@ class ricDashboardActions extends AhgActions
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check if service is available
         if ($this->syncService === null) {
@@ -69,7 +68,7 @@ class ricDashboardActions extends AhgActions
         $this->asyncLoad = true;  // Flag for template to load via AJAX
     }
 
-    public function executeSyncStatus(sfWebRequest $request)
+    public function executeSyncStatus($request)
     {
         $entityType = $request->getParameter('entity_type');
         $status = $request->getParameter('status');
@@ -91,7 +90,7 @@ class ricDashboardActions extends AhgActions
         $this->statuses = ['synced', 'pending', 'failed', 'deleted', 'orphaned'];
     }
 
-    public function executeOrphans(sfWebRequest $request)
+    public function executeOrphans($request)
     {
         $status = $request->getParameter('status', 'detected');
         $page = max(1, (int) $request->getParameter('page', 1));
@@ -109,7 +108,7 @@ class ricDashboardActions extends AhgActions
             ->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
     }
 
-    public function executeQueue(sfWebRequest $request)
+    public function executeQueue($request)
     {
         $status = $request->getParameter('status', 'queued');
         $page = max(1, (int) $request->getParameter('page', 1));
@@ -127,7 +126,7 @@ class ricDashboardActions extends AhgActions
             ->selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
     }
 
-    public function executeLogs(sfWebRequest $request)
+    public function executeLogs($request)
     {
         $operation = $request->getParameter('operation');
         $status = $request->getParameter('status');
@@ -151,14 +150,14 @@ class ricDashboardActions extends AhgActions
         $this->filters = compact('operation', 'status', 'entityType', 'dateFrom', 'dateTo');
     }
 
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         // Redirect to AHG Settings - Fuseki section (centralized config)
         $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'fuseki']);
     }
 
     // AJAX Endpoints
-    public function executeAjaxStats(sfWebRequest $request)
+    public function executeAjaxStats($request)
     {
         return $this->renderJson([
             'sync_summary' => $this->getSyncSummary(),
@@ -174,7 +173,7 @@ class ricDashboardActions extends AhgActions
      * Full dashboard data endpoint - used for async loading
      * Includes caching to reduce database load
      */
-    public function executeAjaxDashboard(sfWebRequest $request)
+    public function executeAjaxDashboard($request)
     {
         $cacheKey = 'ric_dashboard_stats';
         $cacheTtl = 60; // Cache for 60 seconds
@@ -209,7 +208,7 @@ class ricDashboardActions extends AhgActions
      */
     protected function getFromCache(string $key): ?array
     {
-        $cacheFile = sfConfig::get('sf_cache_dir') . "/ric_{$key}.json";
+        $cacheFile = $this->config('sf_cache_dir') . "/ric_{$key}.json";
         if (!file_exists($cacheFile)) {
             return null;
         }
@@ -226,12 +225,12 @@ class ricDashboardActions extends AhgActions
 
     protected function saveToCache(string $key, array $data, int $ttl): void
     {
-        $cacheFile = sfConfig::get('sf_cache_dir') . "/ric_{$key}.json";
+        $cacheFile = $this->config('sf_cache_dir') . "/ric_{$key}.json";
         $data['_expires'] = time() + $ttl;
         @file_put_contents($cacheFile, json_encode($data));
     }
 
-    public function executeAjaxIntegrityCheck(sfWebRequest $request)
+    public function executeAjaxIntegrityCheck($request)
     {
         try {
             $results = $this->syncService->runIntegrityCheck();
@@ -253,7 +252,7 @@ class ricDashboardActions extends AhgActions
         }
     }
 
-    public function executeAjaxCleanupOrphans(sfWebRequest $request)
+    public function executeAjaxCleanupOrphans($request)
     {
         $dryRun = $request->getParameter('dry_run', false);
         try {
@@ -264,7 +263,7 @@ class ricDashboardActions extends AhgActions
         }
     }
 
-    public function executeAjaxResync(sfWebRequest $request)
+    public function executeAjaxResync($request)
     {
         $entityType = $request->getParameter('entity_type');
         $entityId = (int) $request->getParameter('entity_id');
@@ -276,7 +275,7 @@ class ricDashboardActions extends AhgActions
         }
     }
 
-    public function executeAjaxClearQueueItem(sfWebRequest $request)
+    public function executeAjaxClearQueueItem($request)
     {
         $id = (int) $request->getParameter('id');
         $action = $request->getParameter('queue_action');
@@ -292,7 +291,7 @@ class ricDashboardActions extends AhgActions
         return $this->renderJson(['success' => true]);
     }
 
-    public function executeAjaxUpdateOrphan(sfWebRequest $request)
+    public function executeAjaxUpdateOrphan($request)
     {
         $id = (int) $request->getParameter('id');
         $status = $request->getParameter('orphan_status');
@@ -367,9 +366,9 @@ class ricDashboardActions extends AhgActions
     protected function checkFusekiStatus(): array
     {
         $config = $this->getConfigSettings();
-        $endpoint = $config['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric');
-        $username = $config['fuseki_username'] ?? sfConfig::get('app_ric_fuseki_username', 'admin');
-        $password = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
+        $endpoint = $config['fuseki_endpoint'] ?? $this->config('app_ric_fuseki_endpoint', 'http://localhost:3030/ric');
+        $username = $config['fuseki_username'] ?? $this->config('app_ric_fuseki_username', 'admin');
+        $password = $config['fuseki_password'] ?? $this->config('app_ric_fuseki_password', '');
 
         try {
             // Use ASK query for quick connectivity check (faster than COUNT on large datasets)

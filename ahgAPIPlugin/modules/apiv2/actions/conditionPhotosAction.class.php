@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionPhotosAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionPhotosAction extends AhgApiController
 {
     public function GET($request)
     {

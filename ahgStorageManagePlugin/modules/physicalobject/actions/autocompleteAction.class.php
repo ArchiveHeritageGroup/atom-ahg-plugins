@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -20,19 +21,19 @@
 /**
  * @author     Peter Van Garderen <peter@artefactual.com>
  */
-class PhysicalObjectAutocompleteAction extends sfAction
+class PhysicalObjectAutocompleteAction extends AhgController
 {
     public function execute($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $criteria = new Criteria();
         $criteria->addJoin(QubitPhysicalObject::ID, QubitPhysicalObjectI18n::ID);
-        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->context->user->getCulture());
+        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->culture());
 
-        if (sfConfig::get('app_markdown_enabled', true)) {
+        if ($this->config('app_markdown_enabled', true)) {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "%{$request->query}%", Criteria::LIKE);
         } else {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "{$request->query}%", Criteria::LIKE);

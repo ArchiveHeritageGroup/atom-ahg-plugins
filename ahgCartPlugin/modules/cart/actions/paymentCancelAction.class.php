@@ -1,5 +1,7 @@
 <?php
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 
 /**
@@ -7,13 +9,13 @@ use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartPaymentCancelAction extends sfAction
+class cartPaymentCancelAction extends AhgController
 {
     public function execute($request)
     {
         $orderNumber = $request->getParameter('order');
         
-        $this->context->user->setFlash('error', 'Payment was cancelled. Your order is still pending.');
+        $this->getUser()->setFlash('error', 'Payment was cancelled. Your order is still pending.');
         $this->redirect(['module' => 'cart', 'action' => 'payment', 'order' => $orderNumber]);
     }
 }

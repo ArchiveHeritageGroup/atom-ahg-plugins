@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 require_once dirname(__FILE__).'/../../../lib/ConditionConstants.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
@@ -7,12 +9,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Condition Photo Annotation Actions
  * Handles photo management and annotation for condition reports
  */
-class conditionActions extends AhgActions
+class conditionActions extends AhgController
 {
     /**
      * Initialize AhgDb for Laravel Query Builder.
      */
-    public function preExecute()
+    public function boot(): void
     {
         // For AJAX actions, start output buffering to prevent any stray output
         $ajaxActions = ['upload', 'deletePhoto', 'getAnnotation', 'saveAnnotation', 'listPhotos', 'updatePhotoMeta'];
@@ -23,7 +25,7 @@ class conditionActions extends AhgActions
         }
 
         // Load AhgDb class for Laravel Query Builder
-        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
         }
@@ -48,7 +50,7 @@ class conditionActions extends AhgActions
     /**
      * Display photos for a condition check
      */
-    public function executePhotos(sfWebRequest $request)
+    public function executePhotos($request)
     {
         $checkIdParam = $request->getParameter('id');
         $objectId = (int) $request->getParameter('object_id');
@@ -75,7 +77,7 @@ class conditionActions extends AhgActions
         }
 
         // Load service
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($this->checkId);
@@ -97,7 +99,7 @@ class conditionActions extends AhgActions
     /**
      * Annotate a single photo
      */
-    public function executeAnnotate(sfWebRequest $request)
+    public function executeAnnotate($request)
     {
         $this->photoId = (int) $request->getParameter('id');
 
@@ -105,7 +107,7 @@ class conditionActions extends AhgActions
             $this->forward404('Photo ID required');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
@@ -127,7 +129,7 @@ class conditionActions extends AhgActions
     /**
      * Get annotations for a photo (AJAX)
      */
-    public function executeGetAnnotation(sfWebRequest $request)
+    public function executeGetAnnotation($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -142,7 +144,7 @@ class conditionActions extends AhgActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $annotations = $service->getAnnotations($photoId);
@@ -156,7 +158,7 @@ class conditionActions extends AhgActions
     /**
      * Save annotations for a photo (AJAX)
      */
-    public function executeSaveAnnotation(sfWebRequest $request)
+    public function executeSaveAnnotation($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -173,7 +175,7 @@ class conditionActions extends AhgActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $userId = (int) $this->getUser()->getAttribute('user_id');
@@ -188,7 +190,7 @@ class conditionActions extends AhgActions
     /**
      * Upload new photo
      */
-    public function executeUpload(sfWebRequest $request)
+    public function executeUpload($request)
     {
         try {
             if (!$this->getUser()->isAuthenticated()) {
@@ -206,7 +208,7 @@ class conditionActions extends AhgActions
                 return $this->jsonResponse(['success' => false, 'error' => 'Upload error: ' . $uploadError]);
             }
 
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
             $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
             $photoType = $request->getParameter('photo_type', 'general');
@@ -240,7 +242,7 @@ class conditionActions extends AhgActions
     /**
      * Delete a photo
      */
-    public function executeDeletePhoto(sfWebRequest $request)
+    public function executeDeletePhoto($request)
     {
         try {
             if (!$this->getUser()->isAuthenticated()) {
@@ -253,7 +255,7 @@ class conditionActions extends AhgActions
                 return $this->jsonResponse(['success' => false, 'error' => 'Missing photo_id']);
             }
 
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
             $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
             $userId = (int) $this->getUser()->getAttribute('user_id');
@@ -271,7 +273,7 @@ class conditionActions extends AhgActions
     /**
      * View photo details
      */
-    public function executeViewPhoto(sfWebRequest $request)
+    public function executeViewPhoto($request)
     {
         $this->photoId = (int) $request->getParameter('id');
 
@@ -279,7 +281,7 @@ class conditionActions extends AhgActions
             $this->forward404('Photo ID required');
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
@@ -296,7 +298,7 @@ class conditionActions extends AhgActions
     /**
      * Export condition report with annotated images
      */
-    public function executeExportReport(sfWebRequest $request)
+    public function executeExportReport($request)
     {
         $checkId = (int) $request->getParameter('id');
 
@@ -306,7 +308,7 @@ class conditionActions extends AhgActions
 
         $format = $request->getParameter('format', 'pdf');
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($checkId);
@@ -326,7 +328,7 @@ class conditionActions extends AhgActions
     /**
      * Get photos list for a condition check (AJAX)
      */
-    public function executeListPhotos(sfWebRequest $request)
+    public function executeListPhotos($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -336,7 +338,7 @@ class conditionActions extends AhgActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing condition_check_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $photos = $service->getPhotosForCheck($checkId);
@@ -366,7 +368,7 @@ class conditionActions extends AhgActions
     /**
      * Update photo metadata
      */
-    public function executeUpdatePhotoMeta(sfWebRequest $request)
+    public function executeUpdatePhotoMeta($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -382,7 +384,7 @@ class conditionActions extends AhgActions
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $result = $service->updatePhotoMeta($photoId, $caption, $photoType);
@@ -396,7 +398,7 @@ class conditionActions extends AhgActions
     /**
      * AJAX autocomplete for objects with digital images
      */
-    public function executeObjectAutocomplete(sfWebRequest $request)
+    public function executeObjectAutocomplete($request)
     {
         $query = $request->getParameter('q', '');
         $results = [];
@@ -436,7 +438,7 @@ class conditionActions extends AhgActions
     /**
      * Condition check overview for an object
      */
-    public function executeConditionCheck(sfWebRequest $request)
+    public function executeConditionCheck($request)
     {
         $this->slug = $request->getParameter('slug');
 

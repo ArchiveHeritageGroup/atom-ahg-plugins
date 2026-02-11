@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Authority Linkage Action
  *
@@ -10,7 +12,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class authorityLinkAction extends sfAction
+class authorityLinkAction extends AhgController
 {
     // Term IDs for entity types
     private const TERM_PERSON_ID = 131;
@@ -20,7 +22,7 @@ class authorityLinkAction extends sfAction
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forwardUnauthorized();
         }
 
@@ -95,7 +97,7 @@ class authorityLinkAction extends sfAction
             return null;
         }
 
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         return DB::table('actor as a')
             ->join('slug', 'a.id', '=', 'slug.object_id')

@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionsUpdateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionsUpdateAction extends AhgApiController
 {
     public function PUT($request)
     {

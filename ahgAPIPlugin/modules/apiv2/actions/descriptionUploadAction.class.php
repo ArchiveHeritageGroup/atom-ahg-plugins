@@ -1,6 +1,7 @@
 <?php
 
-class apiv2DescriptionUploadAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2DescriptionUploadAction extends AhgApiController
 {
     public function POST($request)
     {

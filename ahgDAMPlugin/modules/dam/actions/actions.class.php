@@ -1,11 +1,13 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 require_once dirname(__FILE__)."/../../../lib/DAMConstants.php";
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class damActions extends AhgActions
+class damActions extends AhgController
 {
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -66,7 +68,7 @@ class damActions extends AhgActions
             ->toArray();
     }
 
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -115,7 +117,7 @@ class damActions extends AhgActions
             $identifier = $request->getParameter('identifier');
             $repositoryId = $request->getParameter('repository_id') ?: null;
             $parentId = $request->getParameter('parent_id') ?: DAMConstants::INFORMATION_OBJECT_ROOT_ID;
-            $levelId = $request->getParameter('level_of_description_id') ?: sfConfig::get('app_defaultLevelOfDescriptionId', 380);
+            $levelId = $request->getParameter('level_of_description_id') ?: $this->config('app_defaultLevelOfDescriptionId', 380);
             $scopeContent = $request->getParameter('scope_content');
 
             if (empty($title)) {
@@ -241,7 +243,7 @@ class damActions extends AhgActions
         }
     }
 
-    public function executeEditIptc(sfWebRequest $request)
+    public function executeEditIptc($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -430,7 +432,7 @@ class damActions extends AhgActions
         }
     }
 
-    public function executeExtractMetadata(sfWebRequest $request)
+    public function executeExtractMetadata($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setContentType('application/json');
@@ -451,7 +453,7 @@ class damActions extends AhgActions
         }
 
         // Build file path
-        $uploadDir = sfConfig::get('sf_upload_dir');
+        $uploadDir = $this->config('sf_upload_dir');
         $filePath = $uploadDir . $digitalObject->path . $digitalObject->name;
 
         if (!file_exists($filePath)) {
@@ -579,12 +581,12 @@ class damActions extends AhgActions
     }
 
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->redirect('ahgDisplay/browse?type=dam');
     }
 
-    public function executeBulkCreate(sfWebRequest $request)
+    public function executeBulkCreate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -614,7 +616,7 @@ class damActions extends AhgActions
             ->toArray();
     }
 
-    public function executeConvert(sfWebRequest $request)
+    public function executeConvert($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(403);

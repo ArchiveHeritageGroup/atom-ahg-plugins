@@ -1,8 +1,9 @@
 <?php
 
-class identifierApiActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class identifierApiActions extends AhgController
 {
-    public function executeLookup(sfWebRequest $request)
+    public function executeLookup($request)
     {
         $type = $request->getParameter('type', 'isbn');
         $value = $request->getParameter('value');
@@ -12,9 +13,9 @@ class identifierApiActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/IsbnLookupService.php';
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/GlamIdentifierService.php';
 
             $lookupService = new \AtomFramework\Services\IsbnLookupService();
@@ -42,7 +43,7 @@ class identifierApiActions extends AhgActions
         }
     }
 
-    public function executeValidate(sfWebRequest $request)
+    public function executeValidate($request)
     {
         $type = $request->getParameter('type');
         $value = $request->getParameter('value');
@@ -52,7 +53,7 @@ class identifierApiActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/GlamIdentifierService.php';
 
             $service = new \AtomFramework\Services\GlamIdentifierService();
@@ -66,7 +67,7 @@ class identifierApiActions extends AhgActions
         }
     }
 
-    public function executeDetect(sfWebRequest $request)
+    public function executeDetect($request)
     {
         $value = $request->getParameter('value');
 
@@ -75,7 +76,7 @@ class identifierApiActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/GlamIdentifierService.php';
 
             $service = new \AtomFramework\Services\GlamIdentifierService();
@@ -92,7 +93,7 @@ class identifierApiActions extends AhgActions
         }
     }
 
-    public function executeBarcode(sfWebRequest $request)
+    public function executeBarcode($request)
     {
         $objectId = (int) $request->getParameter('objectId');
         $type = $request->getParameter('type');
@@ -107,7 +108,7 @@ class identifierApiActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/GlamIdentifierService.php';
 
             $service = new \AtomFramework\Services\GlamIdentifierService();
@@ -145,7 +146,7 @@ class identifierApiActions extends AhgActions
         }
     }
 
-    public function executeTypes(sfWebRequest $request)
+    public function executeTypes($request)
     {
         $objectId = (int) $request->getParameter('objectId');
 
@@ -154,7 +155,7 @@ class identifierApiActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_root_dir')
+            require_once $this->config('sf_root_dir')
                 . '/atom-framework/src/Services/GlamIdentifierService.php';
 
             $service = new \AtomFramework\Services\GlamIdentifierService();

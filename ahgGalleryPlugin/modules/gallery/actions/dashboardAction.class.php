@@ -1,7 +1,9 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class galleryDashboardAction extends sfAction
+class galleryDashboardAction extends AhgController
 {
     public function execute($request)
     {

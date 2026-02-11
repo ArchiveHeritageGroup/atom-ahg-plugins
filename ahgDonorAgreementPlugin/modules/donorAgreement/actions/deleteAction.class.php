@@ -1,10 +1,11 @@
 <?php
 
-class donorAgreementDeleteAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementDeleteAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
@@ -19,9 +20,9 @@ class donorAgreementDeleteAction extends sfAction
 
         try {
             $service->delete($id);
-            $this->context->user->setFlash('notice', 'Agreement deleted successfully.');
+            $this->getUser()->setFlash('notice', 'Agreement deleted successfully.');
         } catch (\Exception $e) {
-            $this->context->user->setFlash('error', 'Error deleting agreement: ' . $e->getMessage());
+            $this->getUser()->setFlash('error', 'Error deleting agreement: ' . $e->getMessage());
         }
 
         $this->redirect(['module' => 'donorAgreement', 'action' => 'browse']);

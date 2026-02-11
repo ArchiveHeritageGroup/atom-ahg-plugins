@@ -1,11 +1,13 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class privacyAdminActions extends AhgActions
+class privacyAdminActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
 
         // downloadPdf can be accessed by anyone (public access for viewing redacted PDFs)
         if ($this->getActionName() === 'downloadPdf') {
@@ -28,8 +30,8 @@ class privacyAdminActions extends AhgActions
         $currentAction = $this->getActionName();
 
         // Check admin permission (editors can access PII-related actions)
-        if (!$this->context->user->hasCredential('administrator')) {
-            if (!in_array($currentAction, $editorAllowedActions) || !$this->context->user->hasCredential('editor')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
+            if (!in_array($currentAction, $editorAllowedActions) || !$this->getUser()->hasCredential('editor')) {
                 $this->forward('admin', 'secure');
             }
         }
@@ -37,7 +39,7 @@ class privacyAdminActions extends AhgActions
 
     protected function getService(): \ahgPrivacyPlugin\Service\PrivacyService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         return new \ahgPrivacyPlugin\Service\PrivacyService();
     }
 
@@ -55,7 +57,7 @@ class privacyAdminActions extends AhgActions
     /**
      * Dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = $this->getService();
         $jurisdiction = $this->getJurisdiction();
@@ -73,7 +75,7 @@ class privacyAdminActions extends AhgActions
     // DSAR Management
     // =====================
 
-    public function executeDsarList(sfWebRequest $request)
+    public function executeDsarList($request)
     {
         $service = $this->getService();
         $this->dsars = $service->getDsarList([
@@ -88,7 +90,7 @@ class privacyAdminActions extends AhgActions
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
-    public function executeDsarView(sfWebRequest $request)
+    public function executeDsarView($request)
     {
         $service = $this->getService();
         $this->dsar = $service->getDsar($request->getParameter('id'));
@@ -102,9 +104,9 @@ class privacyAdminActions extends AhgActions
         $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($this->dsar->jurisdiction);
     }
 
-    public function executeDsarAdd(sfWebRequest $request)
+    public function executeDsarAdd($request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($defaultJurisdiction);
                 $service = new \ahgPrivacyPlugin\Service\PrivacyService();
@@ -121,7 +123,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeDsarEdit(sfWebRequest $request)
+    public function executeDsarEdit($request)
     {
         $service = $this->getService();
         $this->dsar = $service->getDsar($request->getParameter('id'));
@@ -151,7 +153,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeDsarUpdate(sfWebRequest $request)
+    public function executeDsarUpdate($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -172,7 +174,7 @@ class privacyAdminActions extends AhgActions
     // Breach Management
     // =====================
 
-    public function executeBreachList(sfWebRequest $request)
+    public function executeBreachList($request)
     {
         $service = $this->getService();
         $this->breaches = $service->getBreachList([
@@ -185,7 +187,7 @@ class privacyAdminActions extends AhgActions
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
-    public function executeBreachView(sfWebRequest $request)
+    public function executeBreachView($request)
     {
         $service = $this->getService();
         $this->breach = $service->getBreach($request->getParameter('id'));
@@ -199,7 +201,7 @@ class privacyAdminActions extends AhgActions
         $this->jurisdictionInfo = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictionConfig($this->breach->jurisdiction);
     }
 
-    public function executeBreachAdd(sfWebRequest $request)
+    public function executeBreachAdd($request)
     {
         $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
         $this->severityLevels = \ahgPrivacyPlugin\Service\PrivacyService::getSeverityLevels();
@@ -215,7 +217,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeBreachEdit(sfWebRequest $request)
+    public function executeBreachEdit($request)
     {
         $service = $this->getService();
         $this->breach = $service->getBreach($request->getParameter('id'));
@@ -244,7 +246,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeBreachUpdate(sfWebRequest $request)
+    public function executeBreachUpdate($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -265,7 +267,7 @@ class privacyAdminActions extends AhgActions
     // ROPA Management
     // =====================
 
-    public function executeRopaList(sfWebRequest $request)
+    public function executeRopaList($request)
     {
         $service = $this->getService();
         $this->activities = $service->getRopaList([
@@ -279,7 +281,7 @@ class privacyAdminActions extends AhgActions
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
-    public function executeRopaView(sfWebRequest $request)
+    public function executeRopaView($request)
     {
         $service = $this->getService();
         $this->activity = $service->getRopa($request->getParameter('id'));
@@ -293,7 +295,7 @@ class privacyAdminActions extends AhgActions
         );
     }
 
-    public function executeRopaAdd(sfWebRequest $request)
+    public function executeRopaAdd($request)
     {
         $defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
         $this->lawfulBases = \ahgPrivacyPlugin\Service\PrivacyService::getLawfulBases($defaultJurisdiction);
@@ -309,7 +311,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeRopaEdit(sfWebRequest $request)
+    public function executeRopaEdit($request)
     {
         $service = $this->getService();
         $this->activity = $service->getRopa($request->getParameter('id'));
@@ -335,7 +337,7 @@ class privacyAdminActions extends AhgActions
     // PAIA Requests (South Africa)
     // =====================
 
-    public function executePaiaList(sfWebRequest $request)
+    public function executePaiaList($request)
     {
         $service = $this->getService();
         $this->requests = $service->getPaiaRequests([
@@ -345,7 +347,7 @@ class privacyAdminActions extends AhgActions
         $this->paiaTypes = \ahgPrivacyPlugin\Service\PrivacyService::getPAIARequestTypes();
     }
 
-    public function executePaiaAdd(sfWebRequest $request)
+    public function executePaiaAdd($request)
     {
         $this->paiaTypes = \ahgPrivacyPlugin\Service\PrivacyService::getPAIARequestTypes();
 
@@ -361,7 +363,7 @@ class privacyAdminActions extends AhgActions
     // Officers Management
     // =====================
 
-    public function executeOfficerList(sfWebRequest $request)
+    public function executeOfficerList($request)
     {
         $service = $this->getService();
         $this->officers = $service->getOfficers($this->getJurisdiction());
@@ -369,9 +371,9 @@ class privacyAdminActions extends AhgActions
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
     }
 
-    public function executeOfficerAdd(sfWebRequest $request)
+    public function executeOfficerAdd($request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
 
@@ -383,9 +385,9 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeOfficerEdit(sfWebRequest $request)
+    public function executeOfficerEdit($request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->jurisdictions = \ahgPrivacyPlugin\Service\PrivacyService::getJurisdictions();
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
         $this->users = \Illuminate\Database\Capsule\Manager::table('user')->select('id', 'username', 'email')->get();
@@ -405,7 +407,7 @@ class privacyAdminActions extends AhgActions
     // Configuration
     // =====================
 
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $service = $this->getService();
         $jurisdiction = $request->getParameter('jurisdiction', 'popia');
@@ -427,7 +429,7 @@ class privacyAdminActions extends AhgActions
     // Reports & Export
     // =====================
 
-    public function executeReport(sfWebRequest $request)
+    public function executeReport($request)
     {
         $service = $this->getService();
         $jurisdiction = $this->getJurisdiction();
@@ -456,7 +458,7 @@ class privacyAdminActions extends AhgActions
             ->get();
     }
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $type = $request->getParameter('type', 'dsar');
         $format = $request->getParameter('format', 'csv');
@@ -503,14 +505,14 @@ class privacyAdminActions extends AhgActions
     // Consent Management
     // =====================
 
-    public function executeConsentList(sfWebRequest $request)
+    public function executeConsentList($request)
     {
         $service = $this->getService();
         $this->consents = $service->getConsentRecords([
             'status' => $request->getParameter('status')
         ]);
     }
-    public function executeConsentAdd(sfWebRequest $request)
+    public function executeConsentAdd($request)
     {
         $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
@@ -524,7 +526,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeConsentView(sfWebRequest $request)
+    public function executeConsentView($request)
     {
         $this->consent = \Illuminate\Database\Capsule\Manager::table('privacy_consent_record')
             ->where('id', $request->getParameter('id'))
@@ -535,7 +537,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeConsentEdit(sfWebRequest $request)
+    public function executeConsentEdit($request)
     {
         $this->consent = \Illuminate\Database\Capsule\Manager::table('privacy_consent_record')
             ->where('id', $request->getParameter('id'))
@@ -567,7 +569,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeConsentWithdraw(sfWebRequest $request)
+    public function executeConsentWithdraw($request)
     {
         if ($request->isMethod('post')) {
             $service = $this->getService();
@@ -581,9 +583,9 @@ class privacyAdminActions extends AhgActions
     // Complaint Management
     // =====================
 
-    public function executeComplaintList(sfWebRequest $request)
+    public function executeComplaintList($request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
 
         $this->complaints = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
             ->when($request->getParameter('status'), function($q, $status) {
@@ -607,7 +609,7 @@ class privacyAdminActions extends AhgActions
         ];
     }
 
-    public function executeComplaintAdd(sfWebRequest $request)
+    public function executeComplaintAdd($request)
     {
         $this->jurisdictions = $this->getService()->getEnabledJurisdictions();
         $this->defaultJurisdiction = $this->getJurisdiction() ?? 'popia';
@@ -637,7 +639,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeComplaintEdit(sfWebRequest $request)
+    public function executeComplaintEdit($request)
     {
         $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
             ->where('id', $request->getParameter('id'))
@@ -680,7 +682,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeComplaintView(sfWebRequest $request)
+    public function executeComplaintView($request)
     {
         $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')
             ->where('id', $request->getParameter('id'))
@@ -691,7 +693,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeComplaintUpdate(sfWebRequest $request)
+    public function executeComplaintUpdate($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -715,14 +717,14 @@ class privacyAdminActions extends AhgActions
     // Jurisdiction Management
     // =====================
 
-    public function executeJurisdictionList(sfWebRequest $request)
+    public function executeJurisdictionList($request)
     {
         $this->jurisdictions = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
             ->orderBy('sort_order')
             ->get();
     }
 
-    public function executeJurisdictionAdd(sfWebRequest $request)
+    public function executeJurisdictionAdd($request)
     {
         $this->jurisdiction = null;
         $this->regions = ['Africa', 'Europe', 'North America', 'South America', 'Asia', 'Oceania', 'International'];
@@ -734,7 +736,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeJurisdictionEdit(sfWebRequest $request)
+    public function executeJurisdictionEdit($request)
     {
         $this->jurisdiction = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')
             ->where('id', $request->getParameter('id'))
@@ -753,7 +755,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executeJurisdictionToggle(sfWebRequest $request)
+    public function executeJurisdictionToggle($request)
     {
         $id = $request->getParameter('id');
         $j = \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->first();
@@ -768,7 +770,7 @@ class privacyAdminActions extends AhgActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'jurisdictionList']);
     }
 
-    public function executeJurisdictionDelete(sfWebRequest $request)
+    public function executeJurisdictionDelete($request)
     {
         $id = $request->getParameter('id');
 
@@ -822,7 +824,7 @@ class privacyAdminActions extends AhgActions
     // =====================
     // ROPA Approval Actions
     // =====================
-    public function executeRopaSubmit(sfWebRequest $request)
+    public function executeRopaSubmit($request)
     {
         $service = $this->getService();
         $id = $request->getParameter('id');
@@ -837,13 +839,13 @@ class privacyAdminActions extends AhgActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
     }
 
-    public function executeRopaApprove(sfWebRequest $request)
+    public function executeRopaApprove($request)
     {
         $service = $this->getService();
         $id = $request->getParameter('id');
         $comment = $request->getParameter('comment');
         
-        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->context->user->isAdministrator()) {
+        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Only Privacy Officers can approve records');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
         }
@@ -857,13 +859,13 @@ class privacyAdminActions extends AhgActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
     }
 
-    public function executeRopaReject(sfWebRequest $request)
+    public function executeRopaReject($request)
     {
         $service = $this->getService();
         $id = $request->getParameter('id');
         $reason = $request->getParameter('reason');
         
-        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->context->user->isAdministrator()) {
+        if (!$service->isPrivacyOfficer($this->getUserId()) && !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Only Privacy Officers can reject records');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
         }
@@ -885,13 +887,13 @@ class privacyAdminActions extends AhgActions
     // =====================
     // Notifications
     // =====================
-    public function executeNotifications(sfWebRequest $request)
+    public function executeNotifications($request)
     {
         $service = $this->getService();
         $this->notifications = $service->getUnreadNotifications($this->getUserId(), 50);
     }
 
-    public function executeNotificationRead(sfWebRequest $request)
+    public function executeNotificationRead($request)
     {
         $service = $this->getService();
         $id = $request->getParameter('id');
@@ -906,7 +908,7 @@ class privacyAdminActions extends AhgActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'notifications']);
     }
 
-    public function executeNotificationMarkAllRead(sfWebRequest $request)
+    public function executeNotificationMarkAllRead($request)
     {
         $service = $this->getService();
         $service->markAllNotificationsRead($this->getUserId());
@@ -920,11 +922,11 @@ class privacyAdminActions extends AhgActions
 
     protected function getPiiService(): \ahgPrivacyPlugin\Service\PiiDetectionService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiDetectionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiDetectionService.php';
         return new \ahgPrivacyPlugin\Service\PiiDetectionService();
     }
 
-    public function executePiiScan(sfWebRequest $request)
+    public function executePiiScan($request)
     {
         $piiService = $this->getPiiService();
         $this->stats = $piiService->getStatistics();
@@ -956,7 +958,7 @@ class privacyAdminActions extends AhgActions
             ->get();
     }
 
-    public function executePiiScanRun(sfWebRequest $request)
+    public function executePiiScanRun($request)
     {
         if (!$request->isMethod('post')) {
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
@@ -982,7 +984,7 @@ class privacyAdminActions extends AhgActions
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'piiScan']);
     }
 
-    public function executePiiScanObject(sfWebRequest $request)
+    public function executePiiScanObject($request)
     {
         $objectId = (int)$request->getParameter('id');
         if (!$objectId) {
@@ -1003,7 +1005,7 @@ class privacyAdminActions extends AhgActions
         }
     }
 
-    public function executePiiReview(sfWebRequest $request)
+    public function executePiiReview($request)
     {
         // Get pending PII entities for review
         $this->entities = DB::table('ahg_ner_entity as e')
@@ -1029,7 +1031,7 @@ class privacyAdminActions extends AhgActions
             ->get();
     }
 
-    public function executePiiEntityAction(sfWebRequest $request)
+    public function executePiiEntityAction($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -1058,12 +1060,12 @@ class privacyAdminActions extends AhgActions
 
         // Clear PDF redaction cache for this object when status changes
         if ($objectId) {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
             $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
             $pdfService->clearCache($objectId);
 
             // Also clear the PII masking cache
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
             \ahgPrivacyPlugin\Service\PiiMaskingService::clearCache($objectId);
         }
 
@@ -1079,7 +1081,7 @@ class privacyAdminActions extends AhgActions
     /**
      * AJAX endpoint for single-object PII scan (called from information object page)
      */
-    public function executePiiScanAjax(sfWebRequest $request)
+    public function executePiiScanAjax($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1134,7 +1136,7 @@ class privacyAdminActions extends AhgActions
      * Serve a redacted PDF document
      * Route: /privacyAdmin/downloadPdf?id=<object_id>
      */
-    public function executeDownloadPdf(sfWebRequest $request)
+    public function executeDownloadPdf($request)
     {
         $objectId = (int)$request->getParameter('id');
 
@@ -1143,7 +1145,7 @@ class privacyAdminActions extends AhgActions
         }
 
         // Load the redaction service
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
         $service = new \ahgPrivacyPlugin\Service\PdfRedactionService();
 
         // Get the digital object path
@@ -1157,7 +1159,7 @@ class privacyAdminActions extends AhgActions
 
         // Build the file path (matches QubitDigitalObject::getAbsolutePath())
         // Path format: sf_web_dir + path + name
-        $originalPath = sfConfig::get('sf_web_dir') . $digitalObject->path . $digitalObject->name;
+        $originalPath = $this->config('sf_web_dir') . $digitalObject->path . $digitalObject->name;
 
         // Check if it's a PDF
         $mimeType = $digitalObject->mime_type ?? mime_content_type($originalPath);
@@ -1217,15 +1219,15 @@ class privacyAdminActions extends AhgActions
     /**
      * Clear redacted PDF cache for an object (call when PII status changes)
      */
-    public function executeClearPdfCache(sfWebRequest $request)
+    public function executeClearPdfCache($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
         $objectId = (int)$request->getParameter('id');
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
         $service = new \ahgPrivacyPlugin\Service\PdfRedactionService();
 
         if ($objectId) {
@@ -1253,7 +1255,7 @@ class privacyAdminActions extends AhgActions
      *   - text: string - The selected text to redact
      *   - redact_all: bool - Whether to redact all instances (default true)
      */
-    public function executeAddManualRedaction(sfWebRequest $request)
+    public function executeAddManualRedaction($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1323,12 +1325,12 @@ class privacyAdminActions extends AhgActions
             }
 
             // Clear the PDF redaction cache so it regenerates
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
             $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
             $pdfService->clearCache($objectId);
 
             // Also clear PII masking cache
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
             \ahgPrivacyPlugin\Service\PiiMaskingService::clearCache($objectId);
 
             return $this->renderText(json_encode([
@@ -1350,7 +1352,7 @@ class privacyAdminActions extends AhgActions
      * AJAX endpoint to get current redacted terms for an object
      * GET /privacyAdmin/getRedactedTerms?id=<object_id>
      */
-    public function executeGetRedactedTerms(sfWebRequest $request)
+    public function executeGetRedactedTerms($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1388,7 +1390,7 @@ class privacyAdminActions extends AhgActions
      * AJAX endpoint to remove a manual redaction
      * POST /privacyAdmin/removeManualRedaction
      */
-    public function executeRemoveManualRedaction(sfWebRequest $request)
+    public function executeRemoveManualRedaction($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1435,7 +1437,7 @@ class privacyAdminActions extends AhgActions
             }
 
             // Clear the PDF redaction cache
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
             $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
             $pdfService->clearCache($objectId);
 
@@ -1458,7 +1460,7 @@ class privacyAdminActions extends AhgActions
 
     protected function getVisualRedactionService(): \ahgPrivacyPlugin\Service\VisualRedactionService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/VisualRedactionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/VisualRedactionService.php';
         return new \ahgPrivacyPlugin\Service\VisualRedactionService();
     }
 
@@ -1466,7 +1468,7 @@ class privacyAdminActions extends AhgActions
      * Visual Redaction Editor page
      * GET /privacyAdmin/visualRedactionEditor?id=<object_id>
      */
-    public function executeVisualRedactionEditor(sfWebRequest $request)
+    public function executeVisualRedactionEditor($request)
     {
         $objectId = (int)$request->getParameter('id');
         if (!$objectId) {
@@ -1512,7 +1514,7 @@ class privacyAdminActions extends AhgActions
      * Get visual redaction regions for an object
      * GET /privacyAdmin/getVisualRedactions?id=<object_id>&page=<page_number>
      */
-    public function executeGetVisualRedactions(sfWebRequest $request)
+    public function executeGetVisualRedactions($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1554,7 +1556,7 @@ class privacyAdminActions extends AhgActions
      * Save visual redaction regions
      * POST /privacyAdmin/saveVisualRedaction
      */
-    public function executeSaveVisualRedaction(sfWebRequest $request)
+    public function executeSaveVisualRedaction($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1617,7 +1619,7 @@ class privacyAdminActions extends AhgActions
      * Delete a visual redaction region
      * POST /privacyAdmin/deleteVisualRedaction
      */
-    public function executeDeleteVisualRedaction(sfWebRequest $request)
+    public function executeDeleteVisualRedaction($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1658,7 +1660,7 @@ class privacyAdminActions extends AhgActions
      * Get NER entities for a specific page
      * GET /privacyAdmin/getNerEntitiesForPage?id=<object_id>&page=<page_number>
      */
-    public function executeGetNerEntitiesForPage(sfWebRequest $request)
+    public function executeGetNerEntitiesForPage($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1695,7 +1697,7 @@ class privacyAdminActions extends AhgActions
      * so the viewer automatically shows redacted content (like PII Review workflow)
      * POST /privacyAdmin/applyVisualRedactions
      */
-    public function executeApplyVisualRedactions(sfWebRequest $request)
+    public function executeApplyVisualRedactions($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1750,7 +1752,7 @@ class privacyAdminActions extends AhgActions
                 ]);
 
             // Clear the PdfRedactionService cache so viewer regenerates redacted output
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
             $pdfService = new \ahgPrivacyPlugin\Service\PdfRedactionService();
             $pdfService->clearCache($objectId);
 
@@ -1780,7 +1782,7 @@ class privacyAdminActions extends AhgActions
      * Get document info (page count, dimensions, type)
      * GET /privacyAdmin/getDocumentInfo?id=<object_id>
      */
-    public function executeGetDocumentInfo(sfWebRequest $request)
+    public function executeGetDocumentInfo($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1830,7 +1832,7 @@ class privacyAdminActions extends AhgActions
      * Download redacted file
      * GET /privacyAdmin/downloadRedactedFile?id=<object_id>
      */
-    public function executeDownloadRedactedFile(sfWebRequest $request)
+    public function executeDownloadRedactedFile($request)
     {
         $objectId = (int)$request->getParameter('id');
 
@@ -1888,14 +1890,14 @@ class privacyAdminActions extends AhgActions
 
     protected function getJurisdictionManager(): \JurisdictionManager
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Jurisdictions/JurisdictionManager.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Jurisdictions/JurisdictionManager.php';
         return \JurisdictionManager::getInstance();
     }
 
     /**
      * List all available jurisdictions (regional architecture)
      */
-    public function executeJurisdictions(sfWebRequest $request)
+    public function executeJurisdictions($request)
     {
         $manager = $this->getJurisdictionManager();
         $this->jurisdictions = $manager->getAvailableJurisdictions();
@@ -1916,7 +1918,7 @@ class privacyAdminActions extends AhgActions
     /**
      * Install a jurisdiction
      */
-    public function executeJurisdictionInstall(sfWebRequest $request)
+    public function executeJurisdictionInstall($request)
     {
         $code = $request->getParameter('code');
         if (!$code) {
@@ -1950,7 +1952,7 @@ class privacyAdminActions extends AhgActions
     /**
      * Uninstall a jurisdiction
      */
-    public function executeJurisdictionUninstall(sfWebRequest $request)
+    public function executeJurisdictionUninstall($request)
     {
         $code = $request->getParameter('code');
         if (!$code) {
@@ -1973,7 +1975,7 @@ class privacyAdminActions extends AhgActions
     /**
      * Set active jurisdiction
      */
-    public function executeJurisdictionSetActive(sfWebRequest $request)
+    public function executeJurisdictionSetActive($request)
     {
         $code = $request->getParameter('code');
         $repositoryId = $request->getParameter('repository_id');
@@ -2003,7 +2005,7 @@ class privacyAdminActions extends AhgActions
     /**
      * Show jurisdiction details
      */
-    public function executeJurisdictionInfo(sfWebRequest $request)
+    public function executeJurisdictionInfo($request)
     {
         $code = $request->getParameter('code');
         if (!$code) {

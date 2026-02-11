@@ -1,16 +1,18 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Heritage Report Actions
  */
-class heritageReportActions extends AhgActions
+class heritageReportActions extends AhgController
 {
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = new HeritageAssetService();
         $this->standards = $service->getAccountingStandards();
     }
 
-    public function executeAssetRegister(sfWebRequest $request)
+    public function executeAssetRegister($request)
     {
         $service = new HeritageAssetService();
         $this->standards = $service->getAccountingStandards();
@@ -27,7 +29,7 @@ class heritageReportActions extends AhgActions
         $this->filters = $filters;
     }
 
-    public function executeValuation(sfWebRequest $request)
+    public function executeValuation($request)
     {
         $service = new HeritageAssetService();
         $this->standards = $service->getAccountingStandards();
@@ -47,7 +49,7 @@ class heritageReportActions extends AhgActions
             ->toArray();
     }
 
-    public function executeMovement(sfWebRequest $request)
+    public function executeMovement($request)
     {
         $from = $request->getParameter('from', date('Y-m-01'));
         $to = $request->getParameter('to', date('Y-m-d'));

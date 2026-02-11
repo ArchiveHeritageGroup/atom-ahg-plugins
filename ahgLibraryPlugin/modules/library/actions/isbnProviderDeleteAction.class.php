@@ -1,10 +1,11 @@
 <?php
 
-class libraryIsbnProviderDeleteAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class libraryIsbnProviderDeleteAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 

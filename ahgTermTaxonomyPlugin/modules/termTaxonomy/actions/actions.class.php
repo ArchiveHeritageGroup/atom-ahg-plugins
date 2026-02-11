@@ -1,19 +1,13 @@
 <?php
 
-class termTaxonomyActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class termTaxonomyActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text']);
-    }
-
     // -----------------------------------------------------------------------
     // Term browse: /term/:slug (moved from ahgTermBrowsePlugin)
     // -----------------------------------------------------------------------
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Get the resource from the route (QubitResourceRoute resolves slug)
         $this->resource = $this->getRoute()->resource;
@@ -43,7 +37,7 @@ class termTaxonomyActions extends AhgActions
         if (isset($request->languages)) {
             $this->culture = $request->languages;
         } else {
-            $this->culture = $this->context->user->getCulture();
+            $this->culture = $this->culture();
         }
 
         // Page title
@@ -91,7 +85,7 @@ class termTaxonomyActions extends AhgActions
         // Collect browse params
         $params = [
             'page' => $request->getParameter('page', 1),
-            'limit' => sfConfig::get('app_hits_per_page', 30),
+            'limit' => $this->config('app_hits_per_page', 30),
             'sort' => $request->getParameter('sort', 'lastUpdated'),
             'sortDir' => $request->getParameter('sortDir', 'desc'),
             'onlyDirect' => $request->getParameter('onlyDirect'),
@@ -135,7 +129,7 @@ class termTaxonomyActions extends AhgActions
         // Load term list for sidebar treeview
         $listParams = [
             'listPage' => $request->getParameter('listPage', 1),
-            'listLimit' => $request->getParameter('listLimit', sfConfig::get('app_hits_per_page', 30)),
+            'listLimit' => $request->getParameter('listLimit', $this->config('app_hits_per_page', 30)),
         ];
         $listResult = $service->loadListTerms(
             (int) $this->resource->taxonomyId,
@@ -159,10 +153,10 @@ class termTaxonomyActions extends AhgActions
     // Taxonomy browse: /taxonomy/:id (NEW — replaces base AtoM indexAction)
     // -----------------------------------------------------------------------
 
-    public function executeTaxonomyIndex(sfWebRequest $request)
+    public function executeTaxonomyIndex($request)
     {
-        if (sfConfig::get('app_enable_institutional_scoping')) {
-            $this->context->user->removeAttribute('search-realm');
+        if ($this->config('app_enable_institutional_scoping')) {
+            $this->getUser()->removeAttribute('search-realm');
         }
 
         // Resolve taxonomy by ID
@@ -193,7 +187,7 @@ class termTaxonomyActions extends AhgActions
 
         if (
             !in_array($this->resource->id, $unrestrictedTaxonomies)
-            && !$this->context->user->hasGroup($allowedGroups)
+            && !$this->getUser()->hasGroup($allowedGroups)
         ) {
             $this->getResponse()->setStatusCode(403);
 
@@ -201,7 +195,7 @@ class termTaxonomyActions extends AhgActions
         }
 
         // Culture
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Per-taxonomy settings
         $this->icon = null;
@@ -241,11 +235,11 @@ class termTaxonomyActions extends AhgActions
         }
 
         // Pagination
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Avoid pagination over ES max result window
-        $maxResultWindow = (int) sfConfig::get('app_opensearch_max_result_window', 10000);
+        $maxResultWindow = (int) $this->config('app_opensearch_max_result_window', 10000);
         if ($limit * $page > $maxResultWindow) {
             if ($request->isXmlHttpRequest()) {
                 return;
@@ -264,8 +258,8 @@ class termTaxonomyActions extends AhgActions
 
         // Sort defaults
         $sortSetting = $this->getUser()->isAuthenticated()
-            ? sfConfig::get('app_sort_browser_user', 'lastUpdated')
-            : sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            ? $this->config('app_sort_browser_user', 'lastUpdated')
+            : $this->config('app_sort_browser_anonymous', 'lastUpdated');
 
         $sort = $request->sort ?: $sortSetting;
         $sortDir = 'asc';
@@ -338,7 +332,7 @@ class termTaxonomyActions extends AhgActions
     {
         $listParams = [
             'listPage' => $request->getParameter('listPage', 1),
-            'listLimit' => $request->getParameter('listLimit', sfConfig::get('app_hits_per_page', 30)),
+            'listLimit' => $request->getParameter('listLimit', $this->config('app_hits_per_page', 30)),
         ];
 
         $listResult = $service->loadListTerms(
@@ -438,11 +432,11 @@ EOF;
      */
     protected function handleTaxonomyXhrRequest(sfWebRequest $request, \AhgTermTaxonomy\Services\TermTaxonomyService $service)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $browseParams = [
             'page' => $request->getParameter('page', 1),
-            'limit' => $request->getParameter('limit', sfConfig::get('app_hits_per_page', 30)),
+            'limit' => $request->getParameter('limit', $this->config('app_hits_per_page', 30)),
             'sort' => 'alphabetic',
             'sortDir' => 'asc',
             'subquery' => $request->subquery,

@@ -1,13 +1,14 @@
 <?php
 
-class workflowActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class workflowActions extends AhgController
 {
     protected ?WorkflowService $service = null;
 
     protected function getService(): WorkflowService
     {
         if ($this->service === null) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowService.php';
             $this->service = new WorkflowService();
         }
         return $this->service;
@@ -15,7 +16,7 @@ class workflowActions extends AhgActions
 
     protected function requireAuth(): void
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
     }
@@ -23,21 +24,21 @@ class workflowActions extends AhgActions
     protected function requireAdmin(): void
     {
         $this->requireAuth();
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward404('Administrator access required');
         }
     }
 
     protected function getCurrentUserId(): int
     {
-        return (int) $this->context->user->getAttribute('user_id');
+        return (int) $this->getUser()->getAttribute('user_id');
     }
 
     // =========================================================================
     // DASHBOARD
     // =========================================================================
 
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $this->requireAuth();
         $userId = $this->getCurrentUserId();
@@ -47,14 +48,14 @@ class workflowActions extends AhgActions
         $this->myTasks = $service->getMyTasks($userId);
         $this->poolTasks = $service->getPoolTasks($userId);
         $this->recentActivity = $service->getRecentActivity(10);
-        $this->isAdmin = $this->context->user->hasCredential('administrator');
+        $this->isAdmin = $this->getUser()->hasCredential('administrator');
     }
 
     // =========================================================================
     // MY TASKS
     // =========================================================================
 
-    public function executeMyTasks(sfWebRequest $request)
+    public function executeMyTasks($request)
     {
         $this->requireAuth();
         $userId = $this->getCurrentUserId();
@@ -68,7 +69,7 @@ class workflowActions extends AhgActions
     // POOL
     // =========================================================================
 
-    public function executePool(sfWebRequest $request)
+    public function executePool($request)
     {
         $this->requireAuth();
         $userId = $this->getCurrentUserId();
@@ -80,7 +81,7 @@ class workflowActions extends AhgActions
     // TASK ACTIONS
     // =========================================================================
 
-    public function executeViewTask(sfWebRequest $request)
+    public function executeViewTask($request)
     {
         $this->requireAuth();
         $taskId = (int) $request->getParameter('id');
@@ -96,34 +97,34 @@ class workflowActions extends AhgActions
         $this->canResubmit = $this->task->submitted_by === $this->currentUserId && $this->task->status === 'returned';
     }
 
-    public function executeClaimTask(sfWebRequest $request)
+    public function executeClaimTask($request)
     {
         $this->requireAuth();
         $taskId = (int) $request->getParameter('id');
 
         try {
             $this->getService()->claimTask($taskId, $this->getCurrentUserId());
-            $this->context->user->setFlash('notice', 'Task claimed successfully');
+            $this->getUser()->setFlash('notice', 'Task claimed successfully');
         } catch (Exception $e) {
-            $this->context->user->setFlash('error', $e->getMessage());
+            $this->getUser()->setFlash('error', $e->getMessage());
         }
 
         $this->redirect("workflow/task/{$taskId}");
     }
 
-    public function executeReleaseTask(sfWebRequest $request)
+    public function executeReleaseTask($request)
     {
         $this->requireAuth();
         $taskId = (int) $request->getParameter('id');
 
         $comment = $request->getParameter('comment');
         $this->getService()->releaseTask($taskId, $this->getCurrentUserId(), $comment);
-        $this->context->user->setFlash('notice', 'Task released to pool');
+        $this->getUser()->setFlash('notice', 'Task released to pool');
 
         $this->redirect('workflow/my-tasks');
     }
 
-    public function executeApproveTask(sfWebRequest $request)
+    public function executeApproveTask($request)
     {
         $this->requireAuth();
 
@@ -134,10 +135,10 @@ class workflowActions extends AhgActions
 
             try {
                 $this->getService()->approveTask($taskId, $this->getCurrentUserId(), $comment, $checklist);
-                $this->context->user->setFlash('notice', 'Task approved');
+                $this->getUser()->setFlash('notice', 'Task approved');
                 $this->redirect('workflow/my-tasks');
             } catch (Exception $e) {
-                $this->context->user->setFlash('error', $e->getMessage());
+                $this->getUser()->setFlash('error', $e->getMessage());
                 $this->redirect("workflow/task/{$taskId}");
             }
         }
@@ -145,7 +146,7 @@ class workflowActions extends AhgActions
         $this->forward404();
     }
 
-    public function executeRejectTask(sfWebRequest $request)
+    public function executeRejectTask($request)
     {
         $this->requireAuth();
 
@@ -154,16 +155,16 @@ class workflowActions extends AhgActions
             $comment = $request->getParameter('comment');
 
             if (empty($comment)) {
-                $this->context->user->setFlash('error', 'A comment is required when rejecting');
+                $this->getUser()->setFlash('error', 'A comment is required when rejecting');
                 $this->redirect("workflow/task/{$taskId}");
             }
 
             try {
                 $this->getService()->rejectTask($taskId, $this->getCurrentUserId(), $comment);
-                $this->context->user->setFlash('notice', 'Task rejected');
+                $this->getUser()->setFlash('notice', 'Task rejected');
                 $this->redirect('workflow/my-tasks');
             } catch (Exception $e) {
-                $this->context->user->setFlash('error', $e->getMessage());
+                $this->getUser()->setFlash('error', $e->getMessage());
                 $this->redirect("workflow/task/{$taskId}");
             }
         }
@@ -175,13 +176,13 @@ class workflowActions extends AhgActions
     // HISTORY
     // =========================================================================
 
-    public function executeHistory(sfWebRequest $request)
+    public function executeHistory($request)
     {
         $this->requireAuth();
         $this->activity = $this->getService()->getRecentActivity(100);
     }
 
-    public function executeObjectHistory(sfWebRequest $request)
+    public function executeObjectHistory($request)
     {
         $this->requireAuth();
         $objectId = (int) $request->getParameter('object_id');
@@ -200,7 +201,7 @@ class workflowActions extends AhgActions
     // START WORKFLOW
     // =========================================================================
 
-    public function executeStartWorkflow(sfWebRequest $request)
+    public function executeStartWorkflow($request)
     {
         $this->requireAuth();
         $objectId = (int) $request->getParameter('object_id');
@@ -208,13 +209,13 @@ class workflowActions extends AhgActions
         try {
             $taskId = $this->getService()->startWorkflow($objectId, $this->getCurrentUserId());
             if ($taskId) {
-                $this->context->user->setFlash('notice', 'Workflow started successfully');
+                $this->getUser()->setFlash('notice', 'Workflow started successfully');
                 $this->redirect("workflow/task/{$taskId}");
             } else {
-                $this->context->user->setFlash('error', 'No workflow configured for this item');
+                $this->getUser()->setFlash('error', 'No workflow configured for this item');
             }
         } catch (Exception $e) {
-            $this->context->user->setFlash('error', $e->getMessage());
+            $this->getUser()->setFlash('error', $e->getMessage());
         }
 
         $this->redirect($request->getReferer() ?? 'workflow/dashboard');
@@ -224,13 +225,13 @@ class workflowActions extends AhgActions
     // ADMIN: WORKFLOW MANAGEMENT
     // =========================================================================
 
-    public function executeAdmin(sfWebRequest $request)
+    public function executeAdmin($request)
     {
         $this->requireAdmin();
         $this->workflows = $this->getService()->getWorkflows();
     }
 
-    public function executeCreateWorkflow(sfWebRequest $request)
+    public function executeCreateWorkflow($request)
     {
         $this->requireAdmin();
 
@@ -249,7 +250,7 @@ class workflowActions extends AhgActions
             ];
 
             $workflowId = $this->getService()->createWorkflow($data);
-            $this->context->user->setFlash('notice', 'Workflow created');
+            $this->getUser()->setFlash('notice', 'Workflow created');
             $this->redirect("workflow/admin/edit/{$workflowId}");
         }
 
@@ -257,7 +258,7 @@ class workflowActions extends AhgActions
         $this->collections = $this->getCollections();
     }
 
-    public function executeEditWorkflow(sfWebRequest $request)
+    public function executeEditWorkflow($request)
     {
         $this->requireAdmin();
         $workflowId = (int) $request->getParameter('id');
@@ -280,7 +281,7 @@ class workflowActions extends AhgActions
             ];
 
             $this->getService()->updateWorkflow($workflowId, $data);
-            $this->context->user->setFlash('notice', 'Workflow updated');
+            $this->getUser()->setFlash('notice', 'Workflow updated');
             $this->redirect("workflow/admin/edit/{$workflowId}");
         }
 
@@ -290,16 +291,16 @@ class workflowActions extends AhgActions
         $this->clearanceLevels = $this->getClearanceLevels();
     }
 
-    public function executeDeleteWorkflow(sfWebRequest $request)
+    public function executeDeleteWorkflow($request)
     {
         $this->requireAdmin();
         $workflowId = (int) $request->getParameter('id');
 
         try {
             $this->getService()->deleteWorkflow($workflowId);
-            $this->context->user->setFlash('notice', 'Workflow deleted');
+            $this->getUser()->setFlash('notice', 'Workflow deleted');
         } catch (Exception $e) {
-            $this->context->user->setFlash('error', $e->getMessage());
+            $this->getUser()->setFlash('error', $e->getMessage());
         }
 
         $this->redirect('workflow/admin');
@@ -309,7 +310,7 @@ class workflowActions extends AhgActions
     // ADMIN: STEP MANAGEMENT
     // =========================================================================
 
-    public function executeAddStep(sfWebRequest $request)
+    public function executeAddStep($request)
     {
         $this->requireAdmin();
         $workflowId = (int) $request->getParameter('workflow_id');
@@ -334,7 +335,7 @@ class workflowActions extends AhgActions
             ];
 
             $this->getService()->addStep($workflowId, $data);
-            $this->context->user->setFlash('notice', 'Step added');
+            $this->getUser()->setFlash('notice', 'Step added');
             $this->redirect("workflow/admin/edit/{$workflowId}");
         }
 
@@ -342,7 +343,7 @@ class workflowActions extends AhgActions
         $this->clearanceLevels = $this->getClearanceLevels();
     }
 
-    public function executeEditStep(sfWebRequest $request)
+    public function executeEditStep($request)
     {
         $this->requireAdmin();
         $stepId = (int) $request->getParameter('id');
@@ -368,7 +369,7 @@ class workflowActions extends AhgActions
             ];
 
             $this->getService()->updateStep($stepId, $data);
-            $this->context->user->setFlash('notice', 'Step updated');
+            $this->getUser()->setFlash('notice', 'Step updated');
             $this->redirect("workflow/admin/edit/{$this->step->workflow_id}");
         }
 
@@ -376,7 +377,7 @@ class workflowActions extends AhgActions
         $this->clearanceLevels = $this->getClearanceLevels();
     }
 
-    public function executeDeleteStep(sfWebRequest $request)
+    public function executeDeleteStep($request)
     {
         $this->requireAdmin();
         $stepId = (int) $request->getParameter('id');
@@ -388,15 +389,15 @@ class workflowActions extends AhgActions
 
         try {
             $this->getService()->deleteStep($stepId);
-            $this->context->user->setFlash('notice', 'Step deleted');
+            $this->getUser()->setFlash('notice', 'Step deleted');
         } catch (Exception $e) {
-            $this->context->user->setFlash('error', $e->getMessage());
+            $this->getUser()->setFlash('error', $e->getMessage());
         }
 
         $this->redirect("workflow/admin/edit/{$step->workflow_id}");
     }
 
-    public function executeReorderSteps(sfWebRequest $request)
+    public function executeReorderSteps($request)
     {
         $this->requireAdmin();
 
@@ -415,14 +416,14 @@ class workflowActions extends AhgActions
     // API ENDPOINTS
     // =========================================================================
 
-    public function executeApiStats(sfWebRequest $request)
+    public function executeApiStats($request)
     {
         $this->requireAuth();
         $stats = $this->getService()->getDashboardStats($this->getCurrentUserId());
         return $this->renderText(json_encode($stats));
     }
 
-    public function executeApiTasks(sfWebRequest $request)
+    public function executeApiTasks($request)
     {
         $this->requireAuth();
         $type = $request->getParameter('type', 'my');

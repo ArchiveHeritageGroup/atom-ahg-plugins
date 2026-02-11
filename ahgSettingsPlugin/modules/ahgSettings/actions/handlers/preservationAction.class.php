@@ -1,22 +1,23 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Preservation Settings Action
  * Configure backup replication targets and preservation settings
  */
-class settingsPreservationAction extends sfAction
+class settingsPreservationAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin access
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 

@@ -1,22 +1,23 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * IIIF Collection Management Actions
  */
-class iiifCollectionActions extends AhgActions
+class iiifCollectionActions extends AhgController
 {
     protected $collectionService;
 
     protected function initService()
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
         $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
     }
 
     /**
      * List all collections
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->initService();
         
@@ -34,7 +35,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * View a single collection
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $this->initService();
         
@@ -54,7 +55,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Create new collection form
      */
-    public function executeNew(sfWebRequest $request)
+    public function executeNew($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -70,7 +71,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Create collection
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -100,7 +101,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Edit collection form
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -123,7 +124,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Update collection
      */
-    public function executeUpdate(sfWebRequest $request)
+    public function executeUpdate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -154,7 +155,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Delete collection
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -177,7 +178,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Add items to collection
      */
-    public function executeAddItems(sfWebRequest $request)
+    public function executeAddItems($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -238,7 +239,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Remove item from collection
      */
-    public function executeRemoveItem(sfWebRequest $request)
+    public function executeRemoveItem($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@login');
@@ -257,7 +258,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Reorder items (AJAX)
      */
-    public function executeReorder(sfWebRequest $request)
+    public function executeReorder($request)
     {
         $this->initService();
         
@@ -277,7 +278,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * Output IIIF Collection JSON
      */
-    public function executeManifest(sfWebRequest $request)
+    public function executeManifest($request)
     {
         $this->initService();
         
@@ -380,7 +381,7 @@ class iiifCollectionActions extends AhgActions
     /**
      * AJAX autocomplete for objects
      */
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
         $this->initService();
 

@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 use AtomExtensions\Services\LevelOfDescriptionService;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class settingsLevelsAction extends sfAction
+class settingsLevelsAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 
@@ -68,7 +69,7 @@ class settingsLevelsAction extends sfAction
             $order += 10;
         }
 
-        $this->context->user->setFlash('notice', 'Sector levels updated successfully.');
+        $this->getUser()->setFlash('notice', 'Sector levels updated successfully.');
     }
 
     private function updateDisplayOrder($request): void
@@ -83,6 +84,6 @@ class settingsLevelsAction extends sfAction
                 ->update(['display_order' => (int) $order]);
         }
 
-        $this->context->user->setFlash('notice', 'Display order updated.');
+        $this->getUser()->setFlash('notice', 'Display order updated.');
     }
 }

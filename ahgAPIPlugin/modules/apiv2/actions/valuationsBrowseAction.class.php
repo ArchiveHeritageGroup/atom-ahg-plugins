@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ValuationsBrowseAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ValuationsBrowseAction extends AhgApiController
 {
     public function GET($request)
     {

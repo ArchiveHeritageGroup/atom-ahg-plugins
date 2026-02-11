@@ -1,18 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * DOI module actions.
  */
-class doiActions extends AhgActions
+class doiActions extends AhgController
 {
     /**
      * Dashboard / index.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $this->stats = $service->getStatistics();
@@ -30,7 +31,7 @@ class doiActions extends AhgActions
     /**
      * Browse all DOIs.
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->checkAdmin();
 
@@ -62,7 +63,7 @@ class doiActions extends AhgActions
     /**
      * View single DOI.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $this->checkAdmin();
 
@@ -89,14 +90,14 @@ class doiActions extends AhgActions
     /**
      * Mint DOI for a record.
      */
-    public function executeMint(sfWebRequest $request)
+    public function executeMint($request)
     {
         $this->checkAdmin();
 
         $objectId = (int) $request->getParameter('id');
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
             $service = new \ahgDoiPlugin\Services\DoiService();
 
             $state = $request->getParameter('state', 'findable');
@@ -131,7 +132,7 @@ class doiActions extends AhgActions
     /**
      * Batch mint DOIs.
      */
-    public function executeBatchMint(sfWebRequest $request)
+    public function executeBatchMint($request)
     {
         $this->checkAdmin();
 
@@ -144,7 +145,7 @@ class doiActions extends AhgActions
                 $this->redirect(['module' => 'doi', 'action' => 'batchMint']);
             }
 
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
             $service = new \ahgDoiPlugin\Services\DoiService();
 
             $queued = 0;
@@ -174,13 +175,13 @@ class doiActions extends AhgActions
     /**
      * Update DOI metadata.
      */
-    public function executeUpdate(sfWebRequest $request)
+    public function executeUpdate($request)
     {
         $this->checkAdmin();
 
         $doiId = (int) $request->getParameter('id');
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $result = $service->updateDoi($doiId);
@@ -197,7 +198,7 @@ class doiActions extends AhgActions
     /**
      * Queue management.
      */
-    public function executeQueue(sfWebRequest $request)
+    public function executeQueue($request)
     {
         $this->checkAdmin();
 
@@ -216,7 +217,7 @@ class doiActions extends AhgActions
     /**
      * Retry queue item.
      */
-    public function executeQueueRetry(sfWebRequest $request)
+    public function executeQueueRetry($request)
     {
         $this->checkAdmin();
 
@@ -237,11 +238,11 @@ class doiActions extends AhgActions
     /**
      * Configuration.
      */
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $this->config = $service->getConfig();
@@ -257,7 +258,7 @@ class doiActions extends AhgActions
     /**
      * Save configuration.
      */
-    public function executeConfigSave(sfWebRequest $request)
+    public function executeConfigSave($request)
     {
         $this->checkAdmin();
 
@@ -265,7 +266,7 @@ class doiActions extends AhgActions
             $this->redirect(['module' => 'doi', 'action' => 'config']);
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $service->saveConfig([
@@ -289,11 +290,11 @@ class doiActions extends AhgActions
     /**
      * Test DataCite connection.
      */
-    public function executeConfigTest(sfWebRequest $request)
+    public function executeConfigTest($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $result = $service->testConnection();
@@ -306,11 +307,11 @@ class doiActions extends AhgActions
     /**
      * Reports.
      */
-    public function executeReport(sfWebRequest $request)
+    public function executeReport($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $this->stats = $service->getStatistics();
@@ -340,7 +341,7 @@ class doiActions extends AhgActions
     /**
      * Resolve DOI to record (public).
      */
-    public function executeResolve(sfWebRequest $request)
+    public function executeResolve($request)
     {
         $doiString = '10.' . $request->getParameter('doi');
 
@@ -362,15 +363,15 @@ class doiActions extends AhgActions
     /**
      * API: Mint DOI.
      */
-    public function executeApiMint(sfWebRequest $request)
+    public function executeApiMint($request)
     {
         $this->getResponse()->setHttpHeader('Content-Type', 'application/json');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['error' => 'Unauthorized']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $result = $service->mintDoi((int) $request->getParameter('id'));
@@ -381,7 +382,7 @@ class doiActions extends AhgActions
     /**
      * API: Get DOI status.
      */
-    public function executeApiStatus(sfWebRequest $request)
+    public function executeApiStatus($request)
     {
         $this->getResponse()->setHttpHeader('Content-Type', 'application/json');
 
@@ -405,11 +406,11 @@ class doiActions extends AhgActions
     /**
      * Export DOIs.
      */
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $format = $request->getParameter('format', 'csv');
@@ -443,11 +444,11 @@ class doiActions extends AhgActions
     /**
      * Bulk sync DOI metadata.
      */
-    public function executeSync(sfWebRequest $request)
+    public function executeSync($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         if ($request->isMethod('post')) {
@@ -486,13 +487,13 @@ class doiActions extends AhgActions
     /**
      * Deactivate a DOI.
      */
-    public function executeDeactivate(sfWebRequest $request)
+    public function executeDeactivate($request)
     {
         $this->checkAdmin();
 
         $doiId = (int) $request->getParameter('id');
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $this->doi = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
@@ -523,13 +524,13 @@ class doiActions extends AhgActions
     /**
      * Reactivate a DOI.
      */
-    public function executeReactivate(sfWebRequest $request)
+    public function executeReactivate($request)
     {
         $this->checkAdmin();
 
         $doiId = (int) $request->getParameter('id');
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $result = $service->reactivateDoi($doiId);
@@ -546,13 +547,13 @@ class doiActions extends AhgActions
     /**
      * Verify DOI resolution.
      */
-    public function executeVerify(sfWebRequest $request)
+    public function executeVerify($request)
     {
         $this->checkAdmin();
 
         $doiId = (int) $request->getParameter('id');
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDoiPlugin/lib/Services/DoiService.php';
         $service = new \ahgDoiPlugin\Services\DoiService();
 
         $result = $service->verifyDoi($doiId);
@@ -575,7 +576,7 @@ class doiActions extends AhgActions
      */
     protected function checkAdmin(): void
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }

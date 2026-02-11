@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Gallery Reports Module
  * Reports for exhibitions, artists, loans, valuations, and facilities
@@ -6,16 +8,16 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class galleryReportsActions extends AhgActions
+class galleryReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -55,7 +57,7 @@ class galleryReportsActions extends AhgActions
         ];
     }
 
-    public function executeExhibitions(sfWebRequest $request)
+    public function executeExhibitions($request)
     {
         $this->checkAccess();
 
@@ -103,7 +105,7 @@ class galleryReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeArtists(sfWebRequest $request)
+    public function executeArtists($request)
     {
         $this->checkAccess();
         
@@ -143,7 +145,7 @@ class galleryReportsActions extends AhgActions
         $this->artistTypes = ['individual', 'collective', 'studio', 'anonymous'];
     }
 
-    public function executeLoans(sfWebRequest $request)
+    public function executeLoans($request)
     {
         $this->checkAccess();
         
@@ -196,7 +198,7 @@ class galleryReportsActions extends AhgActions
         ];
     }
 
-    public function executeValuations(sfWebRequest $request)
+    public function executeValuations($request)
     {
         $this->checkAccess();
         
@@ -248,7 +250,7 @@ class galleryReportsActions extends AhgActions
         ];
     }
 
-    public function executeFacilityReports(sfWebRequest $request)
+    public function executeFacilityReports($request)
     {
         $this->checkAccess();
         
@@ -279,7 +281,7 @@ class galleryReportsActions extends AhgActions
         ];
     }
 
-    public function executeSpaces(sfWebRequest $request)
+    public function executeSpaces($request)
     {
         $this->checkAccess();
         
@@ -300,7 +302,7 @@ class galleryReportsActions extends AhgActions
         ];
     }
 
-    public function executeExportCsv(sfWebRequest $request)
+    public function executeExportCsv($request)
     {
         $this->checkAccess();
         

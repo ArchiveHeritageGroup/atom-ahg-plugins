@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,16 +18,16 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DonorListAction extends sfAction
+class DonorListAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->hasCredential(['contributor', 'editor', 'administrator'], false)) {
+        if (!$this->getUser()->hasCredential(['contributor', 'editor', 'administrator'], false)) {
             QubitAcl::forwardUnauthorized();
         }
 
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $criteria = new Criteria();
@@ -34,7 +35,7 @@ class DonorListAction extends sfAction
 
         if (isset($request->subquery)) {
             $criteria->addJoin(QubitDonor::ID, QubitActorI18n::ID);
-            $criteria->add(QubitActorI18n::CULTURE, $this->context->user->getCulture());
+            $criteria->add(QubitActorI18n::CULTURE, $this->culture());
             $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->subquery}%", Criteria::LIKE);
         } else {
             $this->redirect(['module' => 'donor', 'action' => 'browse']);

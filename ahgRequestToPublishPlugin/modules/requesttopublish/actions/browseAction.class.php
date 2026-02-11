@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 
 /**
@@ -10,20 +12,20 @@ use AtomExtensions\Services\AclService;
  * @version    SVN: $Id 
  */
  
-class RequestToPublishBrowseAction extends sfAction
+class RequestToPublishBrowseAction extends AhgController
 {
   public function execute($request)
   {
 	$title = $this->context->i18n->__('RequestToPublish');
-	$this->response->setTitle("{$title} - {$this->response->getTitle()}");
+	$this->getResponse()->setTitle("{$title} - {$this->getResponse()->getTitle()}");
 
 	if (!isset($request->limit)) {
-		$request->limit = sfConfig::get('app_hits_per_page');
+		$request->limit = $this->config('app_hits_per_page');
 	}
 
-	if (sfConfig::get('app_enable_institutional_scoping')) {
+	if ($this->config('app_enable_institutional_scoping')) {
 		//remove search-realm
-		$this->context->user->removeAttribute('search-realm');
+		$this->getUser()->removeAttribute('search-realm');
 	}
 
 	$this->filter = $request->filter;
@@ -35,7 +37,7 @@ class RequestToPublishBrowseAction extends sfAction
 
     if (!isset($request->limit))
     {
-      $request->limit = sfConfig::get('app_hits_per_page');
+      $request->limit = $this->config('app_hits_per_page');
     }
 
 	if (!isset($this->filter)) {
@@ -43,8 +45,8 @@ class RequestToPublishBrowseAction extends sfAction
 	}
 	
     $criteria = new Criteria;
-	if (!$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID) && !$this->context->user->isAdministrator()) {
-		$criteria->add(QubitRequestToPublishI18n::UNIQUE_IDENTIFIER, $this->context->user->getAttribute('user_id'));
+	if (!$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID) && !$this->getUser()->isAdministrator()) {
+		$criteria->add(QubitRequestToPublishI18n::UNIQUE_IDENTIFIER, $this->getUser()->getAttribute('user_id'));
 	}
 	if ('pending' === $this->filter) {
 		$criteria->add(QubitRequestToPublishI18n::STATUS_ID, QubitTerm::IN_REVIEW_ID);

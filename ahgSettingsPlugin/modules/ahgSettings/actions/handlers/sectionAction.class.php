@@ -1,8 +1,10 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class AhgSettingsSectionAction extends sfAction
+class AhgSettingsSectionAction extends AhgController
 {
     protected $sections = [
         'general' => ['label' => 'General Settings', 'icon' => 'fa-cog'],
@@ -102,7 +104,7 @@ class AhgSettingsSectionAction extends sfAction
 
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 
@@ -172,7 +174,7 @@ class AhgSettingsSectionAction extends sfAction
         
         // Regenerate static CSS
         if ($this->currentSection === 'general') {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/AhgCssGenerator.class.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/AhgCssGenerator.class.php';
             AhgCssGenerator::generate();
         }
         $this->getUser()->setFlash('notice', "Settings saved successfully. ($saved items)");

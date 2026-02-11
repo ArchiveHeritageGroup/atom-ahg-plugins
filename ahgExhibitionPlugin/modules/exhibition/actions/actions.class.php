@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Exhibition module actions.
  *
@@ -8,12 +9,12 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class exhibitionActions extends AhgActions
+class exhibitionActions extends AhgController
 {
     /**
      * Browse/list exhibitions.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = $this->getExhibitionService();
 
@@ -55,7 +56,7 @@ class exhibitionActions extends AhgActions
     /**
      * Show exhibition details.
      */
-    public function executeShow(sfWebRequest $request)
+    public function executeShow($request)
     {
         $service = $this->getExhibitionService();
 
@@ -78,7 +79,7 @@ class exhibitionActions extends AhgActions
     /**
      * Create new exhibition form.
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $service = $this->getExhibitionService();
 
@@ -122,7 +123,7 @@ class exhibitionActions extends AhgActions
     /**
      * Edit exhibition.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $service = $this->getExhibitionService();
 
@@ -173,7 +174,7 @@ class exhibitionActions extends AhgActions
     /**
      * Change exhibition status (AJAX).
      */
-    public function executeTransition(sfWebRequest $request)
+    public function executeTransition($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -201,7 +202,7 @@ class exhibitionActions extends AhgActions
     /**
      * Manage objects in exhibition.
      */
-    public function executeObjects(sfWebRequest $request)
+    public function executeObjects($request)
     {
         $service = $this->getExhibitionService();
 
@@ -218,7 +219,7 @@ class exhibitionActions extends AhgActions
     /**
      * Add object to exhibition (AJAX).
      */
-    public function executeAddObject(sfWebRequest $request)
+    public function executeAddObject($request)
     {
         $service = $this->getExhibitionService();
 
@@ -249,7 +250,7 @@ class exhibitionActions extends AhgActions
     /**
      * Update object in exhibition.
      */
-    public function executeUpdateObject(sfWebRequest $request)
+    public function executeUpdateObject($request)
     {
         $service = $this->getExhibitionService();
 
@@ -276,7 +277,7 @@ class exhibitionActions extends AhgActions
     /**
      * Remove object from exhibition.
      */
-    public function executeRemoveObject(sfWebRequest $request)
+    public function executeRemoveObject($request)
     {
         $service = $this->getExhibitionService();
 
@@ -296,7 +297,7 @@ class exhibitionActions extends AhgActions
     /**
      * Reorder objects via drag and drop (AJAX).
      */
-    public function executeReorderObjects(sfWebRequest $request)
+    public function executeReorderObjects($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -322,7 +323,7 @@ class exhibitionActions extends AhgActions
     /**
      * Manage sections.
      */
-    public function executeSections(sfWebRequest $request)
+    public function executeSections($request)
     {
         $service = $this->getExhibitionService();
 
@@ -360,7 +361,7 @@ class exhibitionActions extends AhgActions
     /**
      * Update a section.
      */
-    public function executeUpdateSection(sfWebRequest $request)
+    public function executeUpdateSection($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -394,7 +395,7 @@ class exhibitionActions extends AhgActions
     /**
      * Delete a section.
      */
-    public function executeDeleteSection(sfWebRequest $request)
+    public function executeDeleteSection($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -420,7 +421,7 @@ class exhibitionActions extends AhgActions
     /**
      * Manage storylines.
      */
-    public function executeStorylines(sfWebRequest $request)
+    public function executeStorylines($request)
     {
         $service = $this->getExhibitionService();
 
@@ -456,7 +457,7 @@ class exhibitionActions extends AhgActions
     /**
      * Add storyline to exhibition.
      */
-    public function executeAddStoryline(sfWebRequest $request)
+    public function executeAddStoryline($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -490,7 +491,7 @@ class exhibitionActions extends AhgActions
     /**
      * Update storyline.
      */
-    public function executeUpdateStoryline(sfWebRequest $request)
+    public function executeUpdateStoryline($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -523,7 +524,7 @@ class exhibitionActions extends AhgActions
     /**
      * Delete storyline.
      */
-    public function executeDeleteStoryline(sfWebRequest $request)
+    public function executeDeleteStoryline($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -549,7 +550,7 @@ class exhibitionActions extends AhgActions
     /**
      * View/edit storyline with stops.
      */
-    public function executeStoryline(sfWebRequest $request)
+    public function executeStoryline($request)
     {
         $service = $this->getExhibitionService();
 
@@ -565,7 +566,7 @@ class exhibitionActions extends AhgActions
     /**
      * Add stop to storyline.
      */
-    public function executeAddStop(sfWebRequest $request)
+    public function executeAddStop($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -596,7 +597,7 @@ class exhibitionActions extends AhgActions
     /**
      * Update stop in storyline.
      */
-    public function executeUpdateStop(sfWebRequest $request)
+    public function executeUpdateStop($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -626,7 +627,7 @@ class exhibitionActions extends AhgActions
     /**
      * Delete stop from storyline.
      */
-    public function executeDeleteStop(sfWebRequest $request)
+    public function executeDeleteStop($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -648,7 +649,7 @@ class exhibitionActions extends AhgActions
     /**
      * Exhibition events.
      */
-    public function executeEvents(sfWebRequest $request)
+    public function executeEvents($request)
     {
         $service = $this->getExhibitionService();
 
@@ -688,7 +689,7 @@ class exhibitionActions extends AhgActions
     /**
      * Add event to exhibition.
      */
-    public function executeAddEvent(sfWebRequest $request)
+    public function executeAddEvent($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -729,7 +730,7 @@ class exhibitionActions extends AhgActions
     /**
      * Update event.
      */
-    public function executeUpdateEvent(sfWebRequest $request)
+    public function executeUpdateEvent($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -770,7 +771,7 @@ class exhibitionActions extends AhgActions
     /**
      * Delete event.
      */
-    public function executeDeleteEvent(sfWebRequest $request)
+    public function executeDeleteEvent($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -796,7 +797,7 @@ class exhibitionActions extends AhgActions
     /**
      * Exhibition checklists.
      */
-    public function executeChecklists(sfWebRequest $request)
+    public function executeChecklists($request)
     {
         $service = $this->getExhibitionService();
 
@@ -829,7 +830,7 @@ class exhibitionActions extends AhgActions
     /**
      * Create checklist from template.
      */
-    public function executeCreateChecklist(sfWebRequest $request)
+    public function executeCreateChecklist($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -857,7 +858,7 @@ class exhibitionActions extends AhgActions
     /**
      * Add item to checklist.
      */
-    public function executeAddChecklistItem(sfWebRequest $request)
+    public function executeAddChecklistItem($request)
     {
         $this->forward404Unless($request->isMethod('post'));
 
@@ -888,7 +889,7 @@ class exhibitionActions extends AhgActions
     /**
      * Complete checklist item (AJAX).
      */
-    public function executeCompleteItem(sfWebRequest $request)
+    public function executeCompleteItem($request)
     {
         $service = $this->getExhibitionService();
 
@@ -906,7 +907,7 @@ class exhibitionActions extends AhgActions
     /**
      * Generate object list report.
      */
-    public function executeObjectList(sfWebRequest $request)
+    public function executeObjectList($request)
     {
         $service = $this->getExhibitionService();
 
@@ -933,7 +934,7 @@ class exhibitionActions extends AhgActions
     /**
      * Dashboard showing all active exhibitions.
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $service = $this->getExhibitionService();
 
@@ -956,7 +957,7 @@ class exhibitionActions extends AhgActions
     /**
      * Search objects for adding to exhibition (AJAX).
      */
-    public function executeSearchObjects(sfWebRequest $request)
+    public function executeSearchObjects($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1003,7 +1004,7 @@ class exhibitionActions extends AhgActions
      */
     protected function getExhibitionService()
     {
-        require_once sfConfig::get('sf_plugins_dir').'/ahgExhibitionPlugin/lib/Services/ExhibitionService.php';
+        require_once $this->config('sf_plugins_dir').'/ahgExhibitionPlugin/lib/Services/ExhibitionService.php';
 
         return new \ahgExhibitionPlugin\Services\ExhibitionService(
             \Illuminate\Database\Capsule\Manager::connection()

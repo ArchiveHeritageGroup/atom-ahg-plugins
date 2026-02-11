@@ -1,10 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-class extendedRightsActions extends AhgActions
+class extendedRightsActions extends AhgController
 {
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
 
 
@@ -75,7 +76,7 @@ class extendedRightsActions extends AhgActions
         ];
     }
 
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $slug = $request->getParameter('slug');
 
@@ -84,7 +85,7 @@ class extendedRightsActions extends AhgActions
             ->join('slug', 'slug.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($j) {
                 $j->on('ioi.id', '=', 'io.id')
-                  ->where('ioi.culture', '=', sfContext::getInstance()->getUser()->getCulture());
+                  ->where('ioi.culture', '=', $this->getContext()->getUser()->getCulture());
             })
             ->where('slug.slug', $slug)
             ->select('io.*', 'ioi.title', 'slug.slug')
@@ -187,7 +188,7 @@ class extendedRightsActions extends AhgActions
         }
     }
 
-    public function executeBatch(sfWebRequest $request)
+    public function executeBatch($request)
     {
 
 
@@ -282,7 +283,7 @@ class extendedRightsActions extends AhgActions
         }
     }
 
-    public function executeEmbargoes(sfWebRequest $request)
+    public function executeEmbargoes($request)
     {
 
         $this->embargoes = Capsule::table('rights_embargo')
@@ -304,7 +305,7 @@ class extendedRightsActions extends AhgActions
             ])->get();
     }
 
-    public function executeLiftEmbargo(sfWebRequest $request)
+    public function executeLiftEmbargo($request)
     {
 
         Capsule::table('rights_embargo')
@@ -314,7 +315,7 @@ class extendedRightsActions extends AhgActions
         $this->redirect(['module' => 'extendedRights', 'action' => 'embargoes']);
     }
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
 
 
@@ -386,7 +387,7 @@ class extendedRightsActions extends AhgActions
         
     }
 
-    public function executeExpiringEmbargoes(sfWebRequest $request)
+    public function executeExpiringEmbargoes($request)
     {
 
         $days = (int) $request->getParameter('days', 30);
@@ -417,7 +418,7 @@ class extendedRightsActions extends AhgActions
     /**
      * Clear all extended rights from an information object
      */
-    public function executeClear(sfWebRequest $request)
+    public function executeClear($request)
     {
         $slug = $request->getParameter('slug');
 

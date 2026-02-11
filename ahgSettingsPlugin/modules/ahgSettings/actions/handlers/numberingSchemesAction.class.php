@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\NumberingService;
 
 /**
@@ -9,15 +10,15 @@ use AtomExtensions\Services\NumberingService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class AhgSettingsNumberingSchemesAction extends sfAction
+class AhgSettingsNumberingSchemesAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
-        $this->i18n = sfContext::getInstance()->i18n;
+        $this->i18n = $this->getContext()->i18n;
         $this->service = NumberingService::getInstance();
 
         // Get filter

@@ -1,59 +1,61 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Reports module actions
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class reportsActions extends AhgActions
+class reportsActions extends AhgController
 {
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->stats = $this->getReportStats();
     }
 
-    public function executeDescriptions(sfWebRequest $request)
+    public function executeDescriptions($request)
     {
         // Redirect to existing report
         $this->forward('reports', 'reportInformationObject');
     }
 
-    public function executeAuthorities(sfWebRequest $request)
+    public function executeAuthorities($request)
     {
         $this->forward('reports', 'reportAuthorityRecord');
     }
 
-    public function executeRepositories(sfWebRequest $request)
+    public function executeRepositories($request)
     {
         $this->forward('reports', 'reportRepository');
     }
 
-    public function executeAccessions(sfWebRequest $request)
+    public function executeAccessions($request)
     {
         $this->forward('reports', 'reportAccession');
     }
 
-    public function executeStorage(sfWebRequest $request)
+    public function executeStorage($request)
     {
         $this->forward('reports', 'reportPhysicalStorage');
     }
 
-    public function executeRecent(sfWebRequest $request)
+    public function executeRecent($request)
     {
         $this->forward('reports', 'reportUpdates');
     }
 
-    public function executeActivity(sfWebRequest $request)
+    public function executeActivity($request)
     {
         $this->forward('reports', 'reportUser');
     }
 
-    public function executeDonors(sfWebRequest $request)
+    public function executeDonors($request)
     {
         $this->forward('reports', 'reportDonor');
     }
 
-    public function executeReportDonor(sfWebRequest $request)
+    public function executeReportDonor($request)
     {
         $this->form = new sfForm();
         $this->form->setWidget("culture", new sfWidgetFormChoice(["choices" => ["en" => "English", "fr" => "French"]]));
@@ -82,7 +84,7 @@ class reportsActions extends AhgActions
         $this->culture = $culture;
     }
 
-    public function executeTaxonomy(sfWebRequest $request)
+    public function executeTaxonomy($request)
     {
         $this->forward('reports', 'reportTaxomomy');
     }

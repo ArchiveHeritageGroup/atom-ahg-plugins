@@ -1,11 +1,12 @@
 <?php
 
-class provenanceActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class provenanceActions extends AhgController
 {
     /**
      * Dashboard / List view
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->requireAuth();
 
@@ -19,7 +20,7 @@ class provenanceActions extends AhgActions
     /**
      * View provenance for an information object
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
@@ -37,7 +38,7 @@ class provenanceActions extends AhgActions
     /**
      * Display visual D3.js timeline
      */
-    public function executeTimeline(sfWebRequest $request)
+    public function executeTimeline($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
@@ -55,7 +56,7 @@ class provenanceActions extends AhgActions
         $this->timelineData = $this->prepareTimelineData();
     }
 
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $this->requireAuth();
 
@@ -196,7 +197,7 @@ class provenanceActions extends AhgActions
         $docUrls = $request->getParameter('doc_url', []);
         $docDescriptions = $request->getParameter('doc_description', []);
 
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/provenance';
+        $uploadDir = $this->config('sf_upload_dir') . '/provenance';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -327,7 +328,7 @@ class provenanceActions extends AhgActions
     /**
      * AJAX: Delete document
      */
-    public function executeDeleteDocument(sfWebRequest $request)
+    public function executeDeleteDocument($request)
     {
         $docId = $request->getParameter('id');
 
@@ -335,7 +336,7 @@ class provenanceActions extends AhgActions
         $doc = \Illuminate\Database\Capsule\Manager::table('provenance_document')->where('id', $docId)->first();
 
         if ($doc && $doc->file_path) {
-            $fullPath = sfConfig::get('sf_web_dir') . $doc->file_path;
+            $fullPath = $this->config('sf_web_dir') . $doc->file_path;
             if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
@@ -349,7 +350,7 @@ class provenanceActions extends AhgActions
     /**
      * AJAX: Search agents
      */
-    public function executeSearchAgents(sfWebRequest $request)
+    public function executeSearchAgents($request)
     {
         $term = $request->getParameter('term', '');
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
@@ -362,7 +363,7 @@ class provenanceActions extends AhgActions
     /**
      * AJAX: Add event
      */
-    public function executeAddEvent(sfWebRequest $request)
+    public function executeAddEvent($request)
     {
         $this->requireAuth();
 
@@ -398,7 +399,7 @@ class provenanceActions extends AhgActions
     /**
      * AJAX: Delete event
      */
-    public function executeDeleteEvent(sfWebRequest $request)
+    public function executeDeleteEvent($request)
     {
         $this->requireAuth();
 
@@ -417,7 +418,7 @@ class provenanceActions extends AhgActions
     /**
      * Component: Display provenance on information object
      */
-    public function executeProvenanceDisplay(sfWebRequest $request)
+    public function executeProvenanceDisplay($request)
     {
         $objectId = $request->getParameter('objectId');
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();

@@ -1,7 +1,8 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 use AtomAhgPlugins\ahgCartPlugin\Repositories\EcommerceRepository;
@@ -12,17 +13,17 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartUpdateItemAction extends sfAction
+class cartUpdateItemAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['success' => false, 'message' => 'Not authenticated']));
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $cartId = intval($request->getParameter('cart_id'));
         $productTypeId = intval($request->getParameter('product_type_id'));
         $quantity = max(1, intval($request->getParameter('quantity', 1)));

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ahg3DSettings Actions
  * 
@@ -8,14 +9,14 @@
  * @package ahg3DModelPlugin
  * @subpackage actions
  */
-class model3dSettingsActions extends AhgActions
+class model3dSettingsActions extends AhgController
 {
     private $db;
 
-    public function preExecute()
+    public function boot(): void
     {
         // Load the Laravel bootstrap
-        $bootstrapPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrapPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrapPath)) {
             require_once $bootstrapPath;
         }
@@ -24,7 +25,7 @@ class model3dSettingsActions extends AhgActions
         $this->db = \Illuminate\Database\Capsule\Manager::class;
         
         // Check admin access
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -33,7 +34,7 @@ class model3dSettingsActions extends AhgActions
     /**
      * Settings index page
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $db = $this->db;
 
@@ -237,7 +238,7 @@ class model3dSettingsActions extends AhgActions
     /**
      * TripoSR settings page (standalone)
      */
-    public function executeTriposr(sfWebRequest $request)
+    public function executeTriposr($request)
     {
         $db = $this->db;
 

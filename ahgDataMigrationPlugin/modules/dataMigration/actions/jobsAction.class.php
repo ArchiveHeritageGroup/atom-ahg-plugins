@@ -1,13 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * List all migration jobs.
  */
-class dataMigrationJobsAction extends sfAction
+class dataMigrationJobsAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 

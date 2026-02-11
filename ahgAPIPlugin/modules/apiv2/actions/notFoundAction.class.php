@@ -1,6 +1,7 @@
 <?php
 
-class apiv2NotFoundAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2NotFoundAction extends AhgApiController
 {
     protected function authenticate(): bool
     {

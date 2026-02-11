@@ -1,13 +1,15 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Heritage Accounting Actions
  */
-class heritageAccountingActions extends AhgActions
+class heritageAccountingActions extends AhgController
 {
     /**
      * Dashboard
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $service = new HeritageAssetService();
         
@@ -26,14 +28,14 @@ class heritageAccountingActions extends AhgActions
     /**
      * Browse assets
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $service = new HeritageAssetService();
         
         $this->standards = $service->getAccountingStandards();
         $this->classes = $service->getAssetClasses();
         
-        $this->limit = sfConfig::get('app_hits_per_page', 25);
+        $this->limit = $this->config('app_hits_per_page', 25);
         $this->page = max(1, (int) $request->getParameter('page', 1));
         $this->offset = ($this->page - 1) * $this->limit;
         
@@ -55,7 +57,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * View asset
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $service = new HeritageAssetService();
         
@@ -82,7 +84,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Add asset
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $service = new HeritageAssetService();
         $this->standards = $service->getAccountingStandards();
@@ -101,7 +103,7 @@ class heritageAccountingActions extends AhgActions
         
         if ($request->isMethod('post')) {
             $data = $this->processFormData($request);
-            $data['created_by'] = sfContext::getInstance()->getUser()->getAttribute('user_id');
+            $data['created_by'] = $this->getContext()->getUser()->getAttribute('user_id');
             if ($request->getParameter('information_object_id')) {
                 $data['information_object_id'] = (int) $request->getParameter('information_object_id');
             }
@@ -126,7 +128,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Edit asset
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $service = new HeritageAssetService();
         $this->asset = $service->getAsset($request->getParameter('id'));
@@ -147,7 +149,7 @@ class heritageAccountingActions extends AhgActions
         $this->classes = $service->getAssetClasses();
         if ($request->isMethod('post')) {
             $data = $this->processFormData($request);
-            $data['updated_by'] = sfContext::getInstance()->getUser()->getAttribute('user_id');
+            $data['updated_by'] = $this->getContext()->getUser()->getAttribute('user_id');
             
             // Validate capitalisation requirements
             $validationError = $this->validateCapitalisation($data);
@@ -167,7 +169,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Add valuation
      */
-    public function executeAddValuation(sfWebRequest $request)
+    public function executeAddValuation($request)
     {
         $service = new HeritageAssetService();
         
@@ -186,7 +188,7 @@ class heritageAccountingActions extends AhgActions
                 'valuer_organization' => $request->getParameter('valuer_organization'),
                 'valuation_report_reference' => $request->getParameter('valuation_report_reference'),
                 'notes' => $request->getParameter('notes'),
-                'created_by' => sfContext::getInstance()->getUser()->getAttribute('user_id')
+                'created_by' => $this->getContext()->getUser()->getAttribute('user_id')
             ];
             
             try {
@@ -201,7 +203,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Add impairment assessment
      */
-    public function executeAddImpairment(sfWebRequest $request)
+    public function executeAddImpairment($request)
     {
         $service = new HeritageAssetService();
         
@@ -226,7 +228,7 @@ class heritageAccountingActions extends AhgActions
                 'impairment_loss' => $request->getParameter('impairment_loss') ?: null,
                 'assessor_name' => $request->getParameter('assessor_name'),
                 'notes' => $request->getParameter('notes'),
-                'created_by' => sfContext::getInstance()->getUser()->getAttribute('user_id')
+                'created_by' => $this->getContext()->getUser()->getAttribute('user_id')
             ];
             
             try {
@@ -241,7 +243,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Add movement
      */
-    public function executeAddMovement(sfWebRequest $request)
+    public function executeAddMovement($request)
     {
         $service = new HeritageAssetService();
         
@@ -263,7 +265,7 @@ class heritageAccountingActions extends AhgActions
                 'condition_on_departure' => $request->getParameter('condition_on_departure'),
                 'insurance_confirmed' => $request->getParameter('insurance_confirmed') ? 1 : 0,
                 'insurance_value' => $request->getParameter('insurance_value') ?: null,
-                'created_by' => sfContext::getInstance()->getUser()->getAttribute('user_id')
+                'created_by' => $this->getContext()->getUser()->getAttribute('user_id')
             ];
             
             try {
@@ -278,7 +280,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Add journal entry
      */
-    public function executeAddJournal(sfWebRequest $request)
+    public function executeAddJournal($request)
     {
         $service = new HeritageAssetService();
         
@@ -300,7 +302,7 @@ class heritageAccountingActions extends AhgActions
                 'reference_document' => $request->getParameter('reference_document'),
                 'fiscal_year' => $request->getParameter('fiscal_year') ?: date('Y'),
                 'fiscal_period' => $request->getParameter('fiscal_period'),
-                'created_by' => sfContext::getInstance()->getUser()->getAttribute('user_id')
+                'created_by' => $this->getContext()->getUser()->getAttribute('user_id')
             ];
             
             try {
@@ -400,7 +402,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Settings - enable/disable accounting standards
      */
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         $this->standards = \Illuminate\Database\Capsule\Manager::table('heritage_accounting_standard')
             ->orderBy('sort_order')
@@ -427,7 +429,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * View heritage asset linked to information object
      */
-    public function executeViewByObject(sfWebRequest $request)
+    public function executeViewByObject($request)
     {
         $slug = $request->getParameter('slug');
         
@@ -459,7 +461,7 @@ class heritageAccountingActions extends AhgActions
     /**
      * Edit heritage asset linked to information object
      */
-    public function executeEditByObject(sfWebRequest $request)
+    public function executeEditByObject($request)
     {
         $slug = $request->getParameter('slug');
         

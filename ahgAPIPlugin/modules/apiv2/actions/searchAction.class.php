@@ -1,6 +1,7 @@
 <?php
 
-class apiv2SearchAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2SearchAction extends AhgApiController
 {
     public function POST($request, $data = null)
     {

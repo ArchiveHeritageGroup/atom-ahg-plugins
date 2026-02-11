@@ -1,11 +1,13 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class heritageAdminActions extends AhgActions
+class heritageAdminActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }
@@ -13,7 +15,7 @@ class heritageAdminActions extends AhgActions
     // =====================
     // Dashboard
     // =====================
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->standards = DB::table('heritage_accounting_standard')
             ->orderBy('sort_order')
@@ -47,7 +49,7 @@ class heritageAdminActions extends AhgActions
     // =====================
     // Regions Management
     // =====================
-    public function executeRegions(sfWebRequest $request)
+    public function executeRegions($request)
     {
         $this->regions = DB::table('heritage_regional_config')
             ->orderBy('region_name')
@@ -81,7 +83,7 @@ class heritageAdminActions extends AhgActions
             ->first();
     }
 
-    public function executeRegionInstall(sfWebRequest $request)
+    public function executeRegionInstall($request)
     {
         $regionCode = $request->getParameter('region');
 
@@ -91,7 +93,7 @@ class heritageAdminActions extends AhgActions
         }
 
         // Load RegionManager
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
         $manager = \RegionManager::getInstance();
 
         $result = $manager->installRegion($regionCode);
@@ -112,7 +114,7 @@ class heritageAdminActions extends AhgActions
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
     }
 
-    public function executeRegionUninstall(sfWebRequest $request)
+    public function executeRegionUninstall($request)
     {
         $regionCode = $request->getParameter('region');
 
@@ -122,7 +124,7 @@ class heritageAdminActions extends AhgActions
         }
 
         // Load RegionManager
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
         $manager = \RegionManager::getInstance();
 
         $result = $manager->uninstallRegion($regionCode);
@@ -136,7 +138,7 @@ class heritageAdminActions extends AhgActions
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
     }
 
-    public function executeRegionSetActive(sfWebRequest $request)
+    public function executeRegionSetActive($request)
     {
         $regionCode = $request->getParameter('region');
 
@@ -146,7 +148,7 @@ class heritageAdminActions extends AhgActions
         }
 
         // Load RegionManager
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgHeritageAccountingPlugin/lib/Regions/RegionManager.php';
         $manager = \RegionManager::getInstance();
 
         $result = $manager->setActiveRegion($regionCode);
@@ -160,7 +162,7 @@ class heritageAdminActions extends AhgActions
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'regions']);
     }
 
-    public function executeRegionInfo(sfWebRequest $request)
+    public function executeRegionInfo($request)
     {
         $regionCode = $request->getParameter('region');
 
@@ -199,14 +201,14 @@ class heritageAdminActions extends AhgActions
     // =====================
     // Standards Management
     // =====================
-    public function executeStandardList(sfWebRequest $request)
+    public function executeStandardList($request)
     {
         $this->standards = DB::table('heritage_accounting_standard')
             ->orderBy('sort_order')
             ->get();
     }
 
-    public function executeStandardAdd(sfWebRequest $request)
+    public function executeStandardAdd($request)
     {
         $this->standard = null;
         $this->valuationMethods = $this->getValuationMethods();
@@ -218,7 +220,7 @@ class heritageAdminActions extends AhgActions
         }
     }
 
-    public function executeStandardEdit(sfWebRequest $request)
+    public function executeStandardEdit($request)
     {
         $this->standard = DB::table('heritage_accounting_standard')
             ->where('id', $request->getParameter('id'))
@@ -237,7 +239,7 @@ class heritageAdminActions extends AhgActions
         }
     }
 
-    public function executeStandardToggle(sfWebRequest $request)
+    public function executeStandardToggle($request)
     {
         $id = $request->getParameter('id');
         $standard = DB::table('heritage_accounting_standard')->where('id', $id)->first();
@@ -252,7 +254,7 @@ class heritageAdminActions extends AhgActions
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'standardList']);
     }
 
-    public function executeStandardDelete(sfWebRequest $request)
+    public function executeStandardDelete($request)
     {
         $id = $request->getParameter('id');
         
@@ -313,7 +315,7 @@ class heritageAdminActions extends AhgActions
     // Compliance Rules Management
     // =====================
 
-    public function executeRuleList(sfWebRequest $request)
+    public function executeRuleList($request)
     {
         $this->standardId = $request->getParameter('standard_id');
         
@@ -333,7 +335,7 @@ class heritageAdminActions extends AhgActions
         $this->rules = $query->orderBy('s.sort_order')->orderBy('r.category')->orderBy('r.sort_order')->get();
     }
 
-    public function executeRuleAdd(sfWebRequest $request)
+    public function executeRuleAdd($request)
     {
         $this->rule = null;
         $this->standards = \Illuminate\Database\Capsule\Manager::table('heritage_accounting_standard')
@@ -352,7 +354,7 @@ class heritageAdminActions extends AhgActions
         }
     }
 
-    public function executeRuleEdit(sfWebRequest $request)
+    public function executeRuleEdit($request)
     {
         $this->rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')
             ->where('id', $request->getParameter('id'))
@@ -377,7 +379,7 @@ class heritageAdminActions extends AhgActions
         }
     }
 
-    public function executeRuleToggle(sfWebRequest $request)
+    public function executeRuleToggle($request)
     {
         $id = $request->getParameter('id');
         $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
@@ -392,7 +394,7 @@ class heritageAdminActions extends AhgActions
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $rule->standard_id ?? null]);
     }
 
-    public function executeRuleDelete(sfWebRequest $request)
+    public function executeRuleDelete($request)
     {
         $id = $request->getParameter('id');
         $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();

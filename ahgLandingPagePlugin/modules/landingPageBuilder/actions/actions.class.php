@@ -1,20 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Landing Page Builder Actions
  * 
  * Admin interface for drag-and-drop page building
  */
-class landingPageBuilderActions extends AhgActions
+class landingPageBuilderActions extends AhgController
 {
     /**
      * Pre-execute - check permissions
      */
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-
-        // Public actions (no auth required)
+// Public actions (no auth required)
         $publicActions = ['index'];
 
         // User actions (requires authentication, but not admin)
@@ -29,14 +28,14 @@ class landingPageBuilderActions extends AhgActions
 
         if (in_array($actionName, $userActions)) {
             // Require authentication but not admin
-            if (!$this->context->user->isAuthenticated()) {
+            if (!$this->getUser()->isAuthenticated()) {
                 $this->redirect(['module' => 'user', 'action' => 'login']);
             }
             return;
         }
 
         // All other actions require administrator
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }
@@ -44,7 +43,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Public landing page display
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
         $slug = $request->getParameter('slug');
@@ -62,7 +61,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - List all landing pages
      */
-    public function executeList(sfWebRequest $request)
+    public function executeList($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
         $this->pages = $service->getAllPages();
@@ -71,11 +70,11 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Create new page form
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         if ($request->isMethod('post')) {
             $service = new \AtomExtensions\Services\LandingPageService();
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             
             $result = $service->createPage([
                 'name' => $request->getParameter('name'),
@@ -97,7 +96,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Edit page (drag-and-drop builder)
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
         $pageId = (int)$request->getParameter('id');
@@ -117,7 +116,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Update page settings (AJAX)
      */
-    public function executeUpdateSettings(sfWebRequest $request)
+    public function executeUpdateSettings($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -126,7 +125,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $pageId = (int)$request->getParameter('id');
 
         $result = $service->updatePage($pageId, [
@@ -143,7 +142,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Delete page (AJAX)
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -152,7 +151,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $pageId = (int)$request->getParameter('id');
 
         $result = $service->deletePage($pageId, $userId);
@@ -163,7 +162,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Add block (AJAX)
      */
-    public function executeAddBlock(sfWebRequest $request)
+    public function executeAddBlock($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -172,7 +171,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $pageId = (int)$request->getParameter('page_id');
         $blockTypeId = (int)$request->getParameter('block_type_id');
@@ -212,7 +211,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Update block (AJAX)
      */
-    public function executeUpdateBlock(sfWebRequest $request)
+    public function executeUpdateBlock($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -221,7 +220,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $blockId = (int)$request->getParameter('block_id');
 
         $data = [];
@@ -247,7 +246,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Delete block (AJAX)
      */
-    public function executeDeleteBlock(sfWebRequest $request)
+    public function executeDeleteBlock($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -256,7 +255,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $blockId = (int)$request->getParameter('block_id');
 
         $result = $service->deleteBlock($blockId, $userId);
@@ -267,7 +266,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Reorder blocks (AJAX)
      */
-    public function executeReorderBlocks(sfWebRequest $request)
+    public function executeReorderBlocks($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -276,7 +275,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $pageId = (int)$request->getParameter('page_id');
         $order = json_decode($request->getParameter('order', '[]'), true);
@@ -289,7 +288,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Duplicate block (AJAX)
      */
-    public function executeDuplicateBlock(sfWebRequest $request)
+    public function executeDuplicateBlock($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -298,7 +297,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $blockId = (int)$request->getParameter('block_id');
 
         $result = $service->duplicateBlock($blockId, $userId);
@@ -309,7 +308,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Toggle block visibility (AJAX)
      */
-    public function executeToggleVisibility(sfWebRequest $request)
+    public function executeToggleVisibility($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -318,7 +317,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $blockId = (int)$request->getParameter('block_id');
 
         $result = $service->toggleBlockVisibility($blockId, $userId);
@@ -329,7 +328,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Save draft (AJAX)
      */
-    public function executeSaveDraft(sfWebRequest $request)
+    public function executeSaveDraft($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -338,7 +337,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $pageId = (int)$request->getParameter('page_id');
         $notes = $request->getParameter('notes');
@@ -351,7 +350,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Publish page (AJAX)
      */
-    public function executePublish(sfWebRequest $request)
+    public function executePublish($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -360,7 +359,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $pageId = (int)$request->getParameter('page_id');
 
         $result = $service->publish($pageId, $userId);
@@ -371,7 +370,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Restore version (AJAX)
      */
-    public function executeRestoreVersion(sfWebRequest $request)
+    public function executeRestoreVersion($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -380,7 +379,7 @@ class landingPageBuilderActions extends AhgActions
         }
 
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $versionId = (int)$request->getParameter('version_id');
 
         $result = $service->restoreVersion($versionId, $userId);
@@ -391,7 +390,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Admin - Get block config form (AJAX)
      */
-    public function executeGetBlockConfig(sfWebRequest $request)
+    public function executeGetBlockConfig($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -428,7 +427,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Preview landing page
      */
-    public function executePreview(sfWebRequest $request)
+    public function executePreview($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
         $pageId = (int)$request->getParameter('id');
@@ -460,7 +459,7 @@ class landingPageBuilderActions extends AhgActions
     /**
      * Move block to column (AJAX)
      */
-    public function executeMoveToColumn(sfWebRequest $request)
+    public function executeMoveToColumn($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -490,10 +489,10 @@ class landingPageBuilderActions extends AhgActions
     /**
      * User - View my dashboard
      */
-    public function executeMyDashboard(sfWebRequest $request)
+    public function executeMyDashboard($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$userId) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
@@ -514,17 +513,17 @@ class landingPageBuilderActions extends AhgActions
     /**
      * User - Edit my dashboard
      */
-    public function executeMyDashboardEdit(sfWebRequest $request)
+    public function executeMyDashboardEdit($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$userId) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
         // Get or create user's dashboard
-        $user = $this->context->user->getUserObject();
+        $user = $this->getUser()->getUserObject();
         $userName = $user ? $user->username : 'User';
         $dashboardData = $service->getOrCreateUserDashboard($userId, $userName);
         $pageId = $dashboardData['page']->id;
@@ -548,10 +547,10 @@ class landingPageBuilderActions extends AhgActions
     /**
      * User - List my dashboards
      */
-    public function executeMyDashboardList(sfWebRequest $request)
+    public function executeMyDashboardList($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$userId) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
@@ -564,10 +563,10 @@ class landingPageBuilderActions extends AhgActions
     /**
      * User - Create new dashboard
      */
-    public function executeMyDashboardCreate(sfWebRequest $request)
+    public function executeMyDashboardCreate($request)
     {
         $service = new \AtomExtensions\Services\LandingPageService();
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$userId) {
             $this->redirect(['module' => 'user', 'action' => 'login']);

@@ -1,17 +1,18 @@
 <?php
 
-class privacyActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class privacyActions extends AhgController
 {
     protected function getService(): \ahgPrivacyPlugin\Service\PrivacyService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         return new \ahgPrivacyPlugin\Service\PrivacyService();
     }
 
     /**
      * Privacy Notice / Policy Page
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = $this->getService();
         $this->config = $service->getConfig('popia');
@@ -21,7 +22,7 @@ class privacyActions extends AhgActions
     /**
      * Privacy Dashboard (public-facing landing page)
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $service = $this->getService();
         $this->config = $service->getConfig('popia');
@@ -31,10 +32,10 @@ class privacyActions extends AhgActions
     /**
      * Submit DSAR Request (public form)
      */
-    public function executeDsarRequest(sfWebRequest $request)
+    public function executeDsarRequest($request)
     {
         // Bootstrap and require service
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes();
 
         if ($request->isMethod('post')) {
@@ -64,7 +65,7 @@ class privacyActions extends AhgActions
     /**
      * DSAR Confirmation page
      */
-    public function executeDsarConfirmation(sfWebRequest $request)
+    public function executeDsarConfirmation($request)
     {
         $service = $this->getService();
         $this->dsar = $service->getDsar($request->getParameter('id'));
@@ -77,7 +78,7 @@ class privacyActions extends AhgActions
     /**
      * Check DSAR Status (public)
      */
-    public function executeDsarStatus(sfWebRequest $request)
+    public function executeDsarStatus($request)
     {
         $reference = $request->getParameter('reference');
         $email = $request->getParameter('email');
@@ -99,9 +100,9 @@ class privacyActions extends AhgActions
     /**
      * Lodge Privacy Complaint (public)
      */
-    public function executeComplaint(sfWebRequest $request)
+    public function executeComplaint($request)
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyService.php';
 
         $this->complaintTypes = [
             'unauthorized_access' => 'Unauthorized access to my personal information',
@@ -143,7 +144,7 @@ class privacyActions extends AhgActions
     /**
      * Complaint Confirmation
      */
-    public function executeComplaintConfirmation(sfWebRequest $request)
+    public function executeComplaintConfirmation($request)
     {
 
         $this->complaint = \Illuminate\Database\Capsule\Manager::table('privacy_complaint')

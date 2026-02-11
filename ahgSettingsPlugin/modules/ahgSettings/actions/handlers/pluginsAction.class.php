@@ -1,12 +1,14 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class AhgSettingsPluginsAction extends sfAction
+class AhgSettingsPluginsAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 
@@ -69,7 +71,7 @@ class AhgSettingsPluginsAction extends sfAction
         }
 
         try {
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'enable') {
                 DB::table('atom_plugin')
@@ -172,7 +174,7 @@ class AhgSettingsPluginsAction extends sfAction
     protected function clearCache()
     {
         try {
-            $cacheDir = sfConfig::get('sf_cache_dir');
+            $cacheDir = $this->config('sf_cache_dir');
             if ($cacheDir && is_dir($cacheDir)) {
                 // Clear template cache
                 sfToolkit::clearDirectory($cacheDir);

@@ -1,29 +1,23 @@
 <?php
 
-class repositoryManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class repositoryManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeBrowse($request)
     {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Page title
-        $title = sfConfig::get('app_ui_label_repository', 'Archival institution');
+        $title = $this->config('app_ui_label_repository', 'Archival institution');
         $this->response->setTitle("{$title} browse - {$this->response->getTitle()}");
 
         // Sort defaults
         if (array_key_exists('query', $request->getGetParameters())) {
             $sortSetting = 'relevance';
         } elseif ($this->getUser()->isAuthenticated()) {
-            $sortSetting = sfConfig::get('app_sort_browser_user', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_user', 'lastUpdated');
         } else {
-            $sortSetting = sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_anonymous', 'lastUpdated');
         }
 
         $sort = $request->getParameter('sort', $sortSetting);
@@ -35,11 +29,11 @@ class repositoryManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Max result window guard
-        $maxResultWindow = (int) sfConfig::get('app_opensearch_max_result_window', 10000);
+        $maxResultWindow = (int) $this->config('app_opensearch_max_result_window', 10000);
         if ($limit * $page > $maxResultWindow) {
             $message = $this->context->i18n->__(
                 "We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. To view the last records in the current result set, try changing the sort direction.",
@@ -59,11 +53,11 @@ class repositoryManageActions extends AhgActions
         }
 
         // Institutional scoping
-        if (sfConfig::get('app_enable_institutional_scoping')) {
+        if ($this->config('app_enable_institutional_scoping')) {
             if (isset($request->repos) && ctype_digit($request->repos)) {
-                $this->context->user->setAttribute('search-realm', $request->repos);
+                $this->getUser()->setAttribute('search-realm', $request->repos);
             } else {
-                $this->context->user->removeAttribute('search-realm');
+                $this->getUser()->removeAttribute('search-realm');
             }
         }
 
@@ -117,7 +111,7 @@ class repositoryManageActions extends AhgActions
         if (isset($request->view) && in_array($request->view, $allowedViews)) {
             $this->view = $request->view;
         } else {
-            $this->view = sfConfig::get('app_default_repository_browse_view', 'card');
+            $this->view = $this->config('app_default_repository_browse_view', 'card');
         }
 
         // Advanced filter dropdown data

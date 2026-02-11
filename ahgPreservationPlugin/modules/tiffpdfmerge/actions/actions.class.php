@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * TIFF to PDF Merge Module Actions
  * Uses Laravel Query Builder and framework polling worker
  */
 
-class tiffpdfmergeActions extends AhgActions
+class tiffpdfmergeActions extends AhgController
 {
     protected $repository = null;
     protected $frameworkLoaded = false;
@@ -17,7 +18,7 @@ class tiffpdfmergeActions extends AhgActions
         }
 
         if (!class_exists('AtomFramework\Repositories\TiffPdfMergeRepository')) {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
         }
 
         $this->frameworkLoaded = true;
@@ -38,9 +39,9 @@ class tiffpdfmergeActions extends AhgActions
         return \Illuminate\Database\Capsule\Manager::class;
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -55,16 +56,16 @@ class tiffpdfmergeActions extends AhgActions
             }
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $this->pendingJobs = $this->getRepository()->getPendingJobs($userId);
         $this->stats = $this->getRepository()->getStatistics($userId);
     }
 
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -72,7 +73,7 @@ class tiffpdfmergeActions extends AhgActions
             return $this->renderJson(['success' => false, 'error' => 'POST required']);
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $jobName = $request->getParameter('job_name', 'Merged PDF ' . date('Y-m-d H:i:s'));
         $informationObjectId = $request->getParameter('information_object_id');
 
@@ -98,11 +99,11 @@ class tiffpdfmergeActions extends AhgActions
         }
     }
 
-    public function executeUpload(sfWebRequest $request)
+    public function executeUpload($request)
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -199,11 +200,11 @@ class tiffpdfmergeActions extends AhgActions
         return $this->renderJson(['success' => $successful > 0, 'uploaded' => $successful, 'results' => $results]);
     }
 
-    public function executeReorder(sfWebRequest $request)
+    public function executeReorder($request)
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -218,11 +219,11 @@ class tiffpdfmergeActions extends AhgActions
         return $this->renderJson(['success' => true]);
     }
 
-    public function executeRemoveFile(sfWebRequest $request)
+    public function executeRemoveFile($request)
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -242,7 +243,7 @@ class tiffpdfmergeActions extends AhgActions
         return $this->renderJson(['success' => true]);
     }
 
-    public function executeGetJob(sfWebRequest $request)
+    public function executeGetJob($request)
     {
         sfConfig::set('sf_web_debug', false);
         
@@ -257,11 +258,11 @@ class tiffpdfmergeActions extends AhgActions
         return $this->renderJson(['success' => true, 'job' => $job, 'files' => $files->toArray()]);
     }
 
-    public function executeProcess(sfWebRequest $request)
+    public function executeProcess($request)
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -289,7 +290,7 @@ class tiffpdfmergeActions extends AhgActions
         try {
             // Load the job class if not already loaded
             if (!class_exists('AtomFramework\Jobs\TiffPdfMergeJob')) {
-                require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Jobs/TiffPdfMergeJob.php';
+                require_once $this->config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Jobs/TiffPdfMergeJob.php';
             }
 
             $jobProcessor = new \AtomFramework\Jobs\TiffPdfMergeJob($mergeJobId);
@@ -332,7 +333,7 @@ class tiffpdfmergeActions extends AhgActions
         }
     }
 
-    public function executeDownload(sfWebRequest $request)
+    public function executeDownload($request)
     {
         $mergeJobId = (int) $request->getParameter('job_id');
         $job = $this->getRepository()->getJob($mergeJobId);
@@ -356,11 +357,11 @@ class tiffpdfmergeActions extends AhgActions
         return sfView::NONE;
     }
 
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
         }
 
@@ -386,9 +387,9 @@ class tiffpdfmergeActions extends AhgActions
         return $this->renderJson(['success' => true]);
     }
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -427,9 +428,9 @@ class tiffpdfmergeActions extends AhgActions
             ->exists();
     }
 
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 

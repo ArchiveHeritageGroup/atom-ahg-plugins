@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
 
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
 
@@ -9,17 +10,17 @@ use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class favoritesBrowseAction extends sfAction
+class favoritesBrowseAction extends AhgController
 {
     public function execute($request)
     {
         // Check if user is authenticated
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $service = new FavoritesService();
 
         $this->favorites = $service->getUserFavorites($userId);

@@ -1,10 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class ccoProvenanceAction extends sfAction
+class ccoProvenanceAction extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
         // Initialize Laravel
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
@@ -77,7 +78,7 @@ class ccoProvenanceAction extends sfAction
      */
     protected function getInformationObjectBySlug(string $slug): ?object
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         return DB::table('information_object as io')
             ->join('slug', 'io.id', '=', 'slug.object_id')
@@ -103,7 +104,7 @@ class ccoProvenanceAction extends sfAction
      */
     protected function getInformationObjectById(int $id): ?object
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         return DB::table('information_object as io')
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')

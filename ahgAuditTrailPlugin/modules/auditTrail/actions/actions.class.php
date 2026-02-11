@@ -1,19 +1,21 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 // plugins/ahgAuditTrailPlugin/modules/ahgAuditTrailPlugin/actions/actions.class.php
 
-class auditTrailActions extends AhgActions
+class auditTrailActions extends AhgController
 {
     protected function initFramework(): void
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework';
         $bootstrapFile = $frameworkPath . '/bootstrap.php';
         if (file_exists($bootstrapFile)) {
             require_once $bootstrapFile;
         }
 
-        $pluginPath = sfConfig::get('sf_plugins_dir') . '/ahgAuditTrailPlugin/lib';
+        $pluginPath = $this->config('sf_plugins_dir') . '/ahgAuditTrailPlugin/lib';
         
         require_once $pluginPath . '/Models/AuditLog.php';
         require_once $pluginPath . '/Models/AuditAuthentication.php';
@@ -28,12 +30,12 @@ class auditTrailActions extends AhgActions
 
     protected function checkAdmin(): void
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -105,7 +107,7 @@ class auditTrailActions extends AhgActions
             ->toArray();
     }
 
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -124,7 +126,7 @@ class auditTrailActions extends AhgActions
         }
     }
 
-    public function executeStatistics(sfWebRequest $request)
+    public function executeStatistics($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -144,7 +146,7 @@ class auditTrailActions extends AhgActions
         $this->dateRange = ['from' => $fromDate, 'to' => $toDate, 'days' => $days];
     }
 
-    public function executeAuthentication(sfWebRequest $request)
+    public function executeAuthentication($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -154,7 +156,7 @@ class auditTrailActions extends AhgActions
         $this->suspiciousActivity = $authRepo->getSuspiciousActivity(50);
     }
 
-    public function executeSecurityAccess(sfWebRequest $request)
+    public function executeSecurityAccess($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -169,7 +171,7 @@ class auditTrailActions extends AhgActions
         $this->classifications = ['public' => 'Public', 'restricted' => 'Restricted', 'confidential' => 'Confidential', 'secret' => 'Secret', 'top_secret' => 'Top Secret'];
     }
 
-    public function executeUserActivity(sfWebRequest $request)
+    public function executeUserActivity($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -179,7 +181,7 @@ class auditTrailActions extends AhgActions
             $this->forward404('User ID is required');
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->targetUser = DB::table("user as u")
             ->join("actor as a", "u.id", "=", "a.id")
             ->leftJoin("actor_i18n as ai", function($j) use ($culture) { $j->on("a.id", "=", "ai.id")->where("ai.culture", "=", $culture); })
@@ -200,7 +202,7 @@ class auditTrailActions extends AhgActions
         $this->accessLogs = $accessRepo->getByUser($userId);
     }
 
-    public function executeEntityHistory(sfWebRequest $request)
+    public function executeEntityHistory($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -221,7 +223,7 @@ class auditTrailActions extends AhgActions
         }
     }
 
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -256,7 +258,7 @@ class auditTrailActions extends AhgActions
         $this->settings = $settingsRepo->all();
     }
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $this->checkAdmin();
         $this->initFramework();
@@ -294,7 +296,7 @@ class auditTrailActions extends AhgActions
     /**
      * Return audit record data as JSON for compare modal
      */
-    public function executeCompareData(sfWebRequest $request)
+    public function executeCompareData($request)
     {
         $this->initFramework();
         $this->setLayout(false);

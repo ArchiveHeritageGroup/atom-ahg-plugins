@@ -1,15 +1,16 @@
 <?php
 
-class libraryBrowseAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class libraryBrowseAction extends AhgController
 {
     public function execute($request)
     {
         // Load framework
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework';
         require_once $frameworkPath . '/bootstrap.php';
 
         $db = \Illuminate\Database\Capsule\Manager::connection();
-        $culture = sfContext::getInstance()->user->getCulture() ?? 'en';
+        $culture = $this->getContext()->user->getCulture() ?? 'en';
 
         // Pagination
         $this->limit = 20;

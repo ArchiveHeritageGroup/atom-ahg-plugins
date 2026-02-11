@@ -1,12 +1,13 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ISBN Lookup Action for Information Objects.
  *
  * Handles AJAX requests for ISBN metadata lookup from WorldCat,
  * Open Library, and Google Books APIs.
  */
-class InformationobjectIsbnLookupAction extends sfAction
+class InformationobjectIsbnLookupAction extends AhgController
 {
     public function execute($request)
     {
@@ -14,7 +15,7 @@ class InformationobjectIsbnLookupAction extends sfAction
         $this->getResponse()->setContentType('application/json');
 
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson([
                 'success' => false,
                 'error' => 'Authentication required',
@@ -43,7 +44,7 @@ class InformationobjectIsbnLookupAction extends sfAction
             // Perform lookup
             $result = $service->lookup(
                 $isbn,
-                $this->context->user->getAttribute('user_id'),
+                $this->getUser()->getAttribute('user_id'),
                 $objectId ? (int) $objectId : null
             );
 
@@ -70,7 +71,7 @@ class InformationobjectIsbnLookupAction extends sfAction
         } catch (\Exception $e) {
             // Log error
             error_log('[ISBN DEBUG] ' . date('Y-m-d H:i:s') . ' ISBN=' . $isbn . ' Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
-            sfContext::getInstance()->getLogger()->err(
+            $this->getContext()->getLogger()->err(
                 'ISBN lookup failed: '.$e->getMessage()
             );
 

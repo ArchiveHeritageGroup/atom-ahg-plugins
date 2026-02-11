@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class ccoObjectComparisonAction extends sfAction
+class ccoObjectComparisonAction extends AhgController
 {
     public $objects = [];
     public $comparisonData = [];
@@ -158,7 +159,7 @@ class ccoObjectComparisonAction extends sfAction
      */
     protected function getInformationObject(int $id): ?object
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
@@ -190,7 +191,7 @@ class ccoObjectComparisonAction extends sfAction
             return null;
         }
 
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         $name = DB::table('term_i18n')
             ->where('id', $termId)
@@ -212,7 +213,7 @@ class ccoObjectComparisonAction extends sfAction
      */
     protected function getCreators(int $objectId): string
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         $creators = DB::table('event as e')
             ->join('actor as a', 'e.actor_id', '=', 'a.id')
@@ -244,7 +245,7 @@ class ccoObjectComparisonAction extends sfAction
      */
     protected function getCreationDate(int $objectId): ?string
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         $event = DB::table('event as e')
             ->leftJoin('event_i18n as ei', function ($join) use ($culture) {
@@ -437,7 +438,7 @@ class ccoObjectComparisonAction extends sfAction
 
             case 'acquisition_source':
                 // Get from information_object_i18n
-                $culture = $this->getUser()->getCulture() ?? 'en';
+                $culture = $this->culture() ?? 'en';
 
                 return DB::table('information_object_i18n')
                     ->where('id', $object->id)

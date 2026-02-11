@@ -1,18 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * NMMZ Module Actions
  *
  * Admin interface for National Museums and Monuments of Zimbabwe Act compliance
  */
-class nmmzActions extends AhgActions
+class nmmzActions extends AhgController
 {
     protected function getService(): \AhgNMMZ\Services\NMMZService
     {
         return new \AhgNMMZ\Services\NMMZService();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
         $service = $this->getService();
@@ -29,7 +30,7 @@ class nmmzActions extends AhgActions
     }
 
     // Monuments
-    public function executeMonuments(sfWebRequest $request)
+    public function executeMonuments($request)
     {
         $this->checkAdmin();
         $filters = [
@@ -44,7 +45,7 @@ class nmmzActions extends AhgActions
         $this->currentStatus = $filters['status'];
     }
 
-    public function executeMonumentCreate(sfWebRequest $request)
+    public function executeMonumentCreate($request)
     {
         $this->checkAdmin();
         $this->categories = $this->getService()->getCategories();
@@ -70,7 +71,7 @@ class nmmzActions extends AhgActions
         }
     }
 
-    public function executeMonumentView(sfWebRequest $request)
+    public function executeMonumentView($request)
     {
         $this->checkAdmin();
         $this->monument = $this->getService()->getMonument($request->getParameter('id'));
@@ -81,7 +82,7 @@ class nmmzActions extends AhgActions
     }
 
     // Antiquities
-    public function executeAntiquities(sfWebRequest $request)
+    public function executeAntiquities($request)
     {
         $this->checkAdmin();
         $filters = [
@@ -93,7 +94,7 @@ class nmmzActions extends AhgActions
         $this->currentStatus = $filters['status'];
     }
 
-    public function executeAntiquityCreate(sfWebRequest $request)
+    public function executeAntiquityCreate($request)
     {
         $this->checkAdmin();
 
@@ -116,7 +117,7 @@ class nmmzActions extends AhgActions
         }
     }
 
-    public function executeAntiquityView(sfWebRequest $request)
+    public function executeAntiquityView($request)
     {
         $this->checkAdmin();
         $this->antiquity = $this->getService()->getAntiquity($request->getParameter('id'));
@@ -126,7 +127,7 @@ class nmmzActions extends AhgActions
     }
 
     // Export Permits
-    public function executePermits(sfWebRequest $request)
+    public function executePermits($request)
     {
         $this->checkAdmin();
         $this->permits = $this->getService()->getPermits([
@@ -135,7 +136,7 @@ class nmmzActions extends AhgActions
         $this->currentStatus = $request->getParameter('status');
     }
 
-    public function executePermitCreate(sfWebRequest $request)
+    public function executePermitCreate($request)
     {
         $this->checkAdmin();
 
@@ -162,7 +163,7 @@ class nmmzActions extends AhgActions
         }
     }
 
-    public function executePermitView(sfWebRequest $request)
+    public function executePermitView($request)
     {
         $this->checkAdmin();
         $this->permit = $this->getService()->getPermit($request->getParameter('id'));
@@ -196,7 +197,7 @@ class nmmzActions extends AhgActions
     }
 
     // Archaeological Sites
-    public function executeSites(sfWebRequest $request)
+    public function executeSites($request)
     {
         $this->checkAdmin();
         $this->sites = $this->getService()->getSites([
@@ -206,7 +207,7 @@ class nmmzActions extends AhgActions
         $this->currentStatus = $request->getParameter('status');
     }
 
-    public function executeSiteCreate(sfWebRequest $request)
+    public function executeSiteCreate($request)
     {
         $this->checkAdmin();
 
@@ -231,7 +232,7 @@ class nmmzActions extends AhgActions
         }
     }
 
-    public function executeSiteView(sfWebRequest $request)
+    public function executeSiteView($request)
     {
         $this->checkAdmin();
         $this->site = $this->getService()->getSite($request->getParameter('id'));
@@ -241,7 +242,7 @@ class nmmzActions extends AhgActions
     }
 
     // Heritage Impact Assessments
-    public function executeHia(sfWebRequest $request)
+    public function executeHia($request)
     {
         $this->checkAdmin();
         $this->hias = $this->getService()->getHIAs([
@@ -251,7 +252,7 @@ class nmmzActions extends AhgActions
         $this->currentStatus = $request->getParameter('status');
     }
 
-    public function executeHiaCreate(sfWebRequest $request)
+    public function executeHiaCreate($request)
     {
         $this->checkAdmin();
 
@@ -277,12 +278,12 @@ class nmmzActions extends AhgActions
         }
     }
 
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->checkAdmin();
     }
 
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->checkAdmin();
         $service = $this->getService();

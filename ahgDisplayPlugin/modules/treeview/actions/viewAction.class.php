@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Treeview data action — returns JSON for sidebar and full-width treeview.
  * Replaces base AtoM InformationObjectTreeViewAction.
@@ -9,7 +10,7 @@
  *   - nextSiblings: get next siblings of the resource
  *   - item (default): get children of the resource
  */
-class treeviewViewAction extends sfAction
+class treeviewViewAction extends AhgController
 {
     public function execute($request)
     {

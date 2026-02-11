@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -9,12 +10,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantBrandingActions extends AhgActions
+class tenantBrandingActions extends AhgController
 {
     /**
      * Pre-execute check for access
      */
-    public function preExecute()
+    public function boot(): void
     {
         $this->loadServices();
 
@@ -28,14 +29,14 @@ class tenantBrandingActions extends AhgActions
      */
     private function loadServices(): void
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantBranding.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantBranding.php';
     }
 
     /**
@@ -53,7 +54,7 @@ class tenantBrandingActions extends AhgActions
     /**
      * Branding settings form
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $repoId = (int) $request->getParameter('id');
         $this->checkAccess($repoId);
@@ -78,7 +79,7 @@ class tenantBrandingActions extends AhgActions
     /**
      * Save branding settings
      */
-    public function executeSave(sfWebRequest $request)
+    public function executeSave($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -116,7 +117,7 @@ class tenantBrandingActions extends AhgActions
     /**
      * Upload logo
      */
-    public function executeUploadLogo(sfWebRequest $request)
+    public function executeUploadLogo($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -149,7 +150,7 @@ class tenantBrandingActions extends AhgActions
     /**
      * Delete logo
      */
-    public function executeDeleteLogo(sfWebRequest $request)
+    public function executeDeleteLogo($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 

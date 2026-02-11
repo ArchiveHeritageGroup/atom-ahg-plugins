@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use AhgMultiTenant\Models\Tenant;
 use AhgMultiTenant\Models\TenantUser;
 use AhgMultiTenant\Services\TenantService;
@@ -12,12 +13,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantAdminActions extends AhgActions
+class tenantAdminActions extends AhgController
 {
     /**
      * Pre-execute check for admin access
      */
-    public function preExecute()
+    public function boot(): void
     {
         $this->loadServices();
 
@@ -38,12 +39,12 @@ class tenantAdminActions extends AhgActions
     private function loadServices(): void
     {
         // Load framework bootstrap
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;
         }
 
-        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib';
+        $pluginDir = $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib';
         require_once $pluginDir . '/Services/TenantContext.php';
         require_once $pluginDir . '/Services/TenantAccess.php';
         require_once $pluginDir . '/Services/TenantBranding.php';
@@ -55,7 +56,7 @@ class tenantAdminActions extends AhgActions
     /**
      * List all tenants and repositories
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Get filter parameters
         $this->statusFilter = $request->getParameter('status', '');
@@ -104,7 +105,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Create new tenant form
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         $this->repositories = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
@@ -125,7 +126,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Store new tenant
      */
-    public function executeStore(sfWebRequest $request)
+    public function executeStore($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -174,7 +175,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Edit tenant form
      */
-    public function executeEditTenant(sfWebRequest $request)
+    public function executeEditTenant($request)
     {
         $tenantId = (int) $request->getParameter('id');
         $this->tenant = Tenant::find($tenantId);
@@ -208,7 +209,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Update tenant
      */
-    public function executeUpdateTenant(sfWebRequest $request)
+    public function executeUpdateTenant($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -244,7 +245,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Activate tenant
      */
-    public function executeActivate(sfWebRequest $request)
+    public function executeActivate($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -270,7 +271,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Suspend tenant
      */
-    public function executeSuspend(sfWebRequest $request)
+    public function executeSuspend($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -297,7 +298,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Extend trial
      */
-    public function executeExtendTrial(sfWebRequest $request)
+    public function executeExtendTrial($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -324,7 +325,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Delete tenant
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -350,7 +351,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Assign user to tenant
      */
-    public function executeAssignTenantUser(sfWebRequest $request)
+    public function executeAssignTenantUser($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -378,7 +379,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Remove user from tenant
      */
-    public function executeRemoveTenantUser(sfWebRequest $request)
+    public function executeRemoveTenantUser($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -405,7 +406,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Update user role in tenant
      */
-    public function executeUpdateTenantUserRole(sfWebRequest $request)
+    public function executeUpdateTenantUserRole($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -433,7 +434,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Edit tenant settings
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $repoId = (int) $request->getParameter('id');
 
@@ -459,7 +460,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Manage super users for a repository
      */
-    public function executeSuperUsers(sfWebRequest $request)
+    public function executeSuperUsers($request)
     {
         $repoId = (int) $request->getParameter('id');
 
@@ -483,7 +484,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Assign super user to repository
      */
-    public function executeAssignSuperUser(sfWebRequest $request)
+    public function executeAssignSuperUser($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -510,7 +511,7 @@ class tenantAdminActions extends AhgActions
     /**
      * Remove super user from repository
      */
-    public function executeRemoveSuperUser(sfWebRequest $request)
+    public function executeRemoveSuperUser($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 

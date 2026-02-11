@@ -1,15 +1,16 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class spectrumActions extends AhgActions
+class spectrumActions extends AhgController
 {
     /**
      * Initialize AhgDb for Laravel Query Builder.
      */
-    public function preExecute()
+    public function boot(): void
     {
-        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
         }
@@ -20,7 +21,7 @@ class spectrumActions extends AhgActions
      */
     protected function getCulture(): string
     {
-        return $this->context->user->getCulture();
+        return $this->culture();
     }
 
     /**
@@ -151,7 +152,7 @@ class spectrumActions extends AhgActions
         return $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
@@ -180,7 +181,7 @@ class spectrumActions extends AhgActions
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
     }
 
-    public function executeWorkflow(sfWebRequest $request)
+    public function executeWorkflow($request)
     {
         $slug = $request->getParameter('slug');
         $this->procedureType = $request->getParameter('procedure_type', ahgSpectrumWorkflowService::PROC_ACQUISITION);
@@ -228,7 +229,7 @@ class spectrumActions extends AhgActions
         $this->canEdit = $this->getUser()->isAuthenticated() && $informationObject && ($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'));
     }
     
-    public function executeWorkflowUpdate(sfWebRequest $request)
+    public function executeWorkflowUpdate($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -265,7 +266,7 @@ class spectrumActions extends AhgActions
     }
 
     
-    public function executeWorkflowTransition(sfWebRequest $request)
+    public function executeWorkflowTransition($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -396,7 +397,7 @@ class spectrumActions extends AhgActions
         $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
     }
 
-    public function executeLabel(sfWebRequest $request)
+    public function executeLabel($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
@@ -412,7 +413,7 @@ class spectrumActions extends AhgActions
     /**
      * My Tasks - Show tasks assigned to current user
      */
-    public function executeMyTasks(sfWebRequest $request)
+    public function executeMyTasks($request)
     {
         // Require authentication
         if (!$this->getUser()->isAuthenticated()) {
@@ -420,7 +421,7 @@ class spectrumActions extends AhgActions
         }
 
         $userId = $this->getUser()->getAttribute('user_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $procedureTypeFilter = $request->getParameter('procedure_type');
 
         // Get workflow configs for state labels and per-procedure final states
@@ -504,7 +505,7 @@ class spectrumActions extends AhgActions
      * General Procedures - institution-level procedures not tied to a specific object.
      * Uses record_id = 0 as sentinel value.
      */
-    public function executeGeneral(sfWebRequest $request)
+    public function executeGeneral($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -544,7 +545,7 @@ class spectrumActions extends AhgActions
     /**
      * General Workflow - workflow for institution-level procedures (record_id = 0)
      */
-    public function executeGeneralWorkflow(sfWebRequest $request)
+    public function executeGeneralWorkflow($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -563,7 +564,7 @@ class spectrumActions extends AhgActions
     /**
      * General Workflow Transition - state transitions for general procedures (record_id = 0)
      */
-    public function executeGeneralWorkflowTransition(sfWebRequest $request)
+    public function executeGeneralWorkflowTransition($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -663,7 +664,7 @@ class spectrumActions extends AhgActions
         $this->redirect(['module' => 'spectrum', 'action' => 'generalWorkflow', 'procedure_type' => $procedureType]);
     }
 
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         // Get procedures from service
         $this->procedures = ahgSpectrumWorkflowService::getProcedures();
@@ -688,7 +689,7 @@ class spectrumActions extends AhgActions
         $repoId = $this->selectedRepository ? (int)$this->selectedRepository : null;
     }
 
-    public function executeConditionPhotos(sfWebRequest $request)
+    public function executeConditionPhotos($request)
     {
         $slug = $request->getParameter('slug');
         $this->objectSlug = $slug;
@@ -806,7 +807,7 @@ class spectrumActions extends AhgActions
             return;
         }
         
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/condition_photos/' . $this->resource->id;
+        $uploadDir = $this->config('sf_upload_dir') . '/condition_photos/' . $this->resource->id;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -860,12 +861,12 @@ class spectrumActions extends AhgActions
         $this->redirect(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $this->resource->slug]);
     }
 
-    public function executeInstall(sfWebRequest $request)
+    public function executeInstall($request)
     {
         $this->installed = $this->checkTablesExist();
     }
 
-    public function executeConditionReport(sfWebRequest $request)
+    public function executeConditionReport($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
@@ -885,7 +886,7 @@ class spectrumActions extends AhgActions
         }
     }
 
-    public function executeGrapDashboard(sfWebRequest $request)
+    public function executeGrapDashboard($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
@@ -1063,7 +1064,7 @@ class spectrumActions extends AhgActions
         return sfView::NONE;
     }
 
-    public function executeLoanDashboard(sfWebRequest $request)
+    public function executeLoanDashboard($request)
     {
         $this->loans = [];
         try {
@@ -1077,7 +1078,7 @@ class spectrumActions extends AhgActions
         }
     }
 
-    public function executeProvenanceAjax(sfWebRequest $request)
+    public function executeProvenanceAjax($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1194,7 +1195,7 @@ class spectrumActions extends AhgActions
     /**
      * Save photo annotations
      */
-    public function executeAnnotationSave(sfWebRequest $request)
+    public function executeAnnotationSave($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1231,7 +1232,7 @@ class spectrumActions extends AhgActions
     /**
      * Get photo annotations
      */
-    public function executeAnnotationGet(sfWebRequest $request)
+    public function executeAnnotationGet($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1264,7 +1265,7 @@ class spectrumActions extends AhgActions
     /**
      * Photo delete action
      */
-    public function executePhotoDelete(sfWebRequest $request)
+    public function executePhotoDelete($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1280,7 +1281,7 @@ class spectrumActions extends AhgActions
                 ->first();
             
             if ($photo && $photo->file_path) {
-                $fullPath = sfConfig::get('sf_web_dir') . $photo->file_path;
+                $fullPath = $this->config('sf_web_dir') . $photo->file_path;
                 if (file_exists($fullPath)) {
                     unlink($fullPath);
                 }
@@ -1299,7 +1300,7 @@ class spectrumActions extends AhgActions
     /**
      * Set primary photo
      */
-    public function executePhotoSetPrimary(sfWebRequest $request)
+    public function executePhotoSetPrimary($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1332,7 +1333,7 @@ class spectrumActions extends AhgActions
     /**
      * Rotate photo
      */
-    public function executePhotoRotate(sfWebRequest $request)
+    public function executePhotoRotate($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1352,7 +1353,7 @@ class spectrumActions extends AhgActions
                 return $this->renderText(json_encode(['success' => false, 'error' => 'Photo not found']));
             }
             
-            $fullPath = sfConfig::get('sf_web_dir') . $photo->file_path;
+            $fullPath = $this->config('sf_web_dir') . $photo->file_path;
             
             if (!file_exists($fullPath)) {
                 return $this->renderText(json_encode(['success' => false, 'error' => 'File not found']));
@@ -1392,7 +1393,7 @@ class spectrumActions extends AhgActions
     /**
      * Security Compliance Dashboard
      */
-    public function executeSecurityCompliance(sfWebRequest $request)
+    public function executeSecurityCompliance($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1414,7 +1415,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy Compliance Dashboard
      */
-    public function executePrivacyCompliance(sfWebRequest $request)
+    public function executePrivacyCompliance($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1446,7 +1447,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy ROPA
      */
-    public function executePrivacyRopa(sfWebRequest $request)
+    public function executePrivacyRopa($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1477,7 +1478,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy DSAR
      */
-    public function executePrivacyDsar(sfWebRequest $request)
+    public function executePrivacyDsar($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1519,7 +1520,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy Breaches
      */
-    public function executePrivacyBreaches(sfWebRequest $request)
+    public function executePrivacyBreaches($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1554,7 +1555,7 @@ class spectrumActions extends AhgActions
     /**
      * Condition Admin Dashboard
      */
-    public function executeConditionAdmin(sfWebRequest $request)
+    public function executeConditionAdmin($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1582,7 +1583,7 @@ class spectrumActions extends AhgActions
     /**
      * Condition Risk
      */
-    public function executeConditionRisk(sfWebRequest $request)
+    public function executeConditionRisk($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1603,7 +1604,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy DSAR Update (AJAX)
      */
-    public function executePrivacyDsarUpdate(sfWebRequest $request)
+    public function executePrivacyDsarUpdate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['error' => 'Not authenticated']));
@@ -1626,7 +1627,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy Breach Update (AJAX)
      */
-    public function executePrivacyBreachUpdate(sfWebRequest $request)
+    public function executePrivacyBreachUpdate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['error' => 'Not authenticated']));
@@ -1653,7 +1654,7 @@ class spectrumActions extends AhgActions
     /**
      * Privacy Admin Landing Page
      */
-    public function executePrivacyAdmin(sfWebRequest $request)
+    public function executePrivacyAdmin($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1679,13 +1680,13 @@ class spectrumActions extends AhgActions
     /**
      * Privacy Templates Library - with file upload support
      */
-    public function executePrivacyTemplates(sfWebRequest $request)
+    public function executePrivacyTemplates($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
         }
         
-        $uploadDir = sfConfig::get('sf_upload_dir', sfConfig::get('sf_upload_dir')) . '/privacy_templates/';
+        $uploadDir = $this->config('sf_upload_dir', $this->config('sf_upload_dir')) . '/privacy_templates/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -1748,7 +1749,7 @@ class spectrumActions extends AhgActions
     /**
      * Download privacy template
      */
-    public function executePrivacyTemplateDownload(sfWebRequest $request)
+    public function executePrivacyTemplateDownload($request)
     {
         $id = $request->getParameter('id');
         $template = DB::table('privacy_template')->where('id', $id)->first();
@@ -1769,7 +1770,7 @@ class spectrumActions extends AhgActions
     /**
      * Delete privacy template
      */
-    public function executePrivacyTemplateDelete(sfWebRequest $request)
+    public function executePrivacyTemplateDelete($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1791,7 +1792,7 @@ class spectrumActions extends AhgActions
     /**
      * Spectrum History Export (PDF/CSV)
      */
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -1940,7 +1941,7 @@ class spectrumActions extends AhgActions
     /**
      * GRAP-Spectrum Procedure Linking
      */
-    public function executeGrapSpectrumLink(sfWebRequest $request)
+    public function executeGrapSpectrumLink($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
@@ -2096,7 +2097,7 @@ class spectrumActions extends AhgActions
     }
 
 
-    public function executeDataQuality(sfWebRequest $request)
+    public function executeDataQuality($request)
     {
         // Get data quality statistics
         $this->totalObjects = DB::table("information_object")->where("id", "!=", 1)->count();

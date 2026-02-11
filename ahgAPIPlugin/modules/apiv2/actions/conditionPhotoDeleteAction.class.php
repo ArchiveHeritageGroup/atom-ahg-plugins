@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionPhotoDeleteAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionPhotoDeleteAction extends AhgApiController
 {
     public function DELETE($request)
     {

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -7,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
-class feedbackViewAction extends sfAction
+class feedbackViewAction extends AhgController
 {
     public function execute($request)
     {
@@ -17,7 +18,7 @@ class feedbackViewAction extends sfAction
         }
 
         $id = $request->getParameter('id');
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
 
         // Load feedback from database
         $this->resource = DB::table('feedback')

@@ -1,6 +1,7 @@
 <?php
 
-class apiv2SyncChangesAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2SyncChangesAction extends AhgApiController
 {
     public function GET($request)
     {

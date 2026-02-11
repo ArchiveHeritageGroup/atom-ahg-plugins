@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 use Illuminate\Database\Capsule\Manager as DB;
 use Plugins\ahgRightsPlugin\Services\RightsService;
 
@@ -12,15 +14,13 @@ use Plugins\ahgRightsPlugin\Services\RightsService;
  *
  * @package ahgRightsPlugin
  */
-class rightsAdminActions extends AhgActions
+class rightsAdminActions extends AhgController
 {
     protected RightsService $rightsService;
 
-    public function preExecute(): void
+    public function boot(): void
     {
-        parent::preExecute();
-
-        if (!$this->context->user->isAdministrator()) {
+if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -31,7 +31,7 @@ class rightsAdminActions extends AhgActions
     // DASHBOARD
     // =========================================================================
 
-    public function executeIndex(sfWebRequest $request): void
+    public function executeIndex($request): void
     {
         $this->stats = $this->rightsService->getStatistics();
         $this->expiringEmbargoes = $this->rightsService->getExpiringEmbargoes(30);
@@ -43,7 +43,7 @@ class rightsAdminActions extends AhgActions
     // EMBARGOES
     // =========================================================================
 
-    public function executeEmbargoes(sfWebRequest $request): void
+    public function executeEmbargoes($request): void
     {
         $status = $request->getParameter('status', 'active');
 
@@ -73,7 +73,7 @@ class rightsAdminActions extends AhgActions
         $this->formOptions = $this->rightsService->getFormOptions();
     }
 
-    public function executeEmbargoEdit(sfWebRequest $request): void
+    public function executeEmbargoEdit($request): void
     {
         $id = (int) $request->getParameter('id');
 
@@ -151,7 +151,7 @@ class rightsAdminActions extends AhgActions
         }
     }
 
-    public function executeEmbargoLift(sfWebRequest $request): void
+    public function executeEmbargoLift($request): void
     {
         $id = (int) $request->getParameter('id');
 
@@ -169,7 +169,7 @@ class rightsAdminActions extends AhgActions
         $this->redirect(['module' => 'rightsAdmin', 'action' => 'embargoes']);
     }
 
-    public function executeEmbargoExtend(sfWebRequest $request): void
+    public function executeEmbargoExtend($request): void
     {
         $id = (int) $request->getParameter('id');
 
@@ -188,7 +188,7 @@ class rightsAdminActions extends AhgActions
         $this->redirect(['module' => 'rightsAdmin', 'action' => 'embargoes']);
     }
 
-    public function executeProcessExpired(sfWebRequest $request): void
+    public function executeProcessExpired($request): void
     {
         $count = $this->rightsService->processExpiredEmbargoes();
         $this->getUser()->setFlash('notice', "Processed {$count} expired embargoes.");
@@ -199,7 +199,7 @@ class rightsAdminActions extends AhgActions
     // ORPHAN WORKS
     // =========================================================================
 
-    public function executeOrphanWorks(sfWebRequest $request): void
+    public function executeOrphanWorks($request): void
     {
         $status = $request->getParameter('status', 'all');
 
@@ -230,7 +230,7 @@ class rightsAdminActions extends AhgActions
         $this->formOptions = $this->rightsService->getFormOptions();
     }
 
-    public function executeOrphanWorkEdit(sfWebRequest $request): void
+    public function executeOrphanWorkEdit($request): void
     {
         $id = (int) $request->getParameter('id');
 
@@ -293,7 +293,7 @@ class rightsAdminActions extends AhgActions
         }
     }
 
-    public function executeAddSearchStep(sfWebRequest $request): void
+    public function executeAddSearchStep($request): void
     {
         $orphanWorkId = (int) $request->getParameter('orphan_work_id');
 
@@ -320,7 +320,7 @@ class rightsAdminActions extends AhgActions
         $this->redirect(['module' => 'rightsAdmin', 'action' => 'orphanWorkEdit', 'id' => $orphanWorkId]);
     }
 
-    public function executeCompleteOrphanSearch(sfWebRequest $request): void
+    public function executeCompleteOrphanSearch($request): void
     {
         $id = (int) $request->getParameter('id');
         $found = $request->getParameter('rights_holder_found') ? true : false;
@@ -336,7 +336,7 @@ class rightsAdminActions extends AhgActions
     // TK LABELS
     // =========================================================================
 
-    public function executeTkLabels(sfWebRequest $request): void
+    public function executeTkLabels($request): void
     {
         $this->tkLabels = $this->rightsService->getTkLabels();
 
@@ -364,7 +364,7 @@ class rightsAdminActions extends AhgActions
             ->get();
     }
 
-    public function executeAssignTkLabel(sfWebRequest $request): void
+    public function executeAssignTkLabel($request): void
     {
         if ($request->isMethod('post')) {
             $objectId = (int) $request->getParameter('object_id');
@@ -388,7 +388,7 @@ class rightsAdminActions extends AhgActions
         $this->redirect(['module' => 'rightsAdmin', 'action' => 'tkLabels']);
     }
 
-    public function executeRemoveTkLabel(sfWebRequest $request): void
+    public function executeRemoveTkLabel($request): void
     {
         $objectId = (int) $request->getParameter('object_id');
         $labelId = (int) $request->getParameter('label_id');
@@ -404,7 +404,7 @@ class rightsAdminActions extends AhgActions
     // RIGHTS STATEMENTS & CC LICENSES
     // =========================================================================
 
-    public function executeStatements(sfWebRequest $request): void
+    public function executeStatements($request): void
     {
         $this->rightsStatements = $this->rightsService->getRightsStatements();
         $this->ccLicenses = $this->rightsService->getCcLicenses();
@@ -414,7 +414,7 @@ class rightsAdminActions extends AhgActions
     // REPORTS
     // =========================================================================
 
-    public function executeReport(sfWebRequest $request): void
+    public function executeReport($request): void
     {
         $type = $request->getParameter('type', 'summary');
 

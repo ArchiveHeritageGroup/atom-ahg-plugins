@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class apiv2BatchAction extends AhgApiAction
+class apiv2BatchAction extends AhgApiController
 {
     public function POST($request, $data = null)
     {

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Metadata Extraction Module Actions.
  *
@@ -7,12 +8,12 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class metadataExtractionActions extends AhgActions
+class metadataExtractionActions extends AhgController
 {
     /**
      * Index action - display list of digital objects with extraction status.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -99,7 +100,7 @@ class metadataExtractionActions extends AhgActions
     /**
      * View metadata for a specific digital object.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -164,7 +165,7 @@ class metadataExtractionActions extends AhgActions
     /**
      * Extract metadata from a digital object.
      */
-    public function executeExtract(sfWebRequest $request)
+    public function executeExtract($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -202,7 +203,7 @@ class metadataExtractionActions extends AhgActions
         }
 
         // Build file path
-        $filePath = sfConfig::get('sf_web_dir') . '/' . $digitalObject->path;
+        $filePath = $this->config('sf_web_dir') . '/' . $digitalObject->path;
 
         if (!file_exists($filePath)) {
             $this->getResponse()->setStatusCode(404);
@@ -212,7 +213,7 @@ class metadataExtractionActions extends AhgActions
 
         try {
             // Use ExifTool to extract metadata
-            $exifToolPath = sfConfig::get('app_metadata_exiftool_path', '/usr/bin/exiftool');
+            $exifToolPath = $this->config('app_metadata_exiftool_path', '/usr/bin/exiftool');
 
             $command = sprintf(
                 '%s -json -a -G1 %s 2>&1',
@@ -264,7 +265,7 @@ class metadataExtractionActions extends AhgActions
     /**
      * Batch extract metadata.
      */
-    public function executeBatchExtract(sfWebRequest $request)
+    public function executeBatchExtract($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -295,10 +296,10 @@ class metadataExtractionActions extends AhgActions
 
         $processed = 0;
         $errors = 0;
-        $exifToolPath = sfConfig::get('app_metadata_exiftool_path', '/usr/bin/exiftool');
+        $exifToolPath = $this->config('app_metadata_exiftool_path', '/usr/bin/exiftool');
 
         foreach ($digitalObjects as $obj) {
-            $filePath = sfConfig::get('sf_web_dir') . '/' . $obj->path;
+            $filePath = $this->config('sf_web_dir') . '/' . $obj->path;
 
             if (!file_exists($filePath)) {
                 ++$errors;
@@ -358,7 +359,7 @@ class metadataExtractionActions extends AhgActions
     /**
      * Delete metadata for a digital object.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -388,7 +389,7 @@ class metadataExtractionActions extends AhgActions
     /**
      * Status check action.
      */
-    public function executeStatus(sfWebRequest $request)
+    public function executeStatus($request)
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
@@ -400,7 +401,7 @@ class metadataExtractionActions extends AhgActions
         // Get ExifTool version if available
         $this->exifToolVersion = null;
         if ($this->exifToolAvailable) {
-            $exifToolPath = sfConfig::get('app_metadata_exiftool_path', '/usr/bin/exiftool');
+            $exifToolPath = $this->config('app_metadata_exiftool_path', '/usr/bin/exiftool');
             exec("{$exifToolPath} -ver 2>&1", $output);
             $this->exifToolVersion = $output[0] ?? 'Unknown';
         }

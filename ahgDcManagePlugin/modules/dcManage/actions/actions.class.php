@@ -1,28 +1,22 @@
 <?php
 
-class dcManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class dcManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
     /**
      * Edit or create a Dublin Core information object.
      *
      * Called via forward() from ioManage when DC standard is detected.
      * Must reload all data since forward() creates a fresh action instance.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
         // ACL — require editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {

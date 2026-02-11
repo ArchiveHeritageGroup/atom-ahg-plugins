@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -20,13 +21,13 @@
 /**
  * Actor - show event data as JSON.
  */
-class sfIsaarPluginActorEventsAction extends sfAction
+class sfIsaarPluginActorEventsAction extends AhgController
 {
     public function execute($request)
     {
         if (empty($request->slug)) {
-            $this->response->setStatusCode(400);
-            $errorMessage = sfContext::getInstance()->i18n->__('Slug must be provided');
+            $this->getResponse()->setStatusCode(400);
+            $errorMessage = $this->getContext()->i18n->__('Slug must be provided');
 
             return $this->renderText(json_encode(['error' => $errorMessage]));
         }
@@ -53,10 +54,7 @@ class sfIsaarPluginActorEventsAction extends sfAction
     {
         $events = [];
 
-        sfContext::getInstance()->getConfiguration()->loadHelpers('Url');
-        sfContext::getInstance()->getConfiguration()->loadHelpers('Qubit');
-
-        foreach (QubitEvent::get($criteria) as $event) {
+foreach (QubitEvent::get($criteria) as $event) {
             $eventData = [
                 'url' => url_for([$event, 'module' => 'event']),
                 'title' => render_title($event->object),

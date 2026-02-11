@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * NAZ Module Actions
  *
@@ -12,7 +13,7 @@
  * - Transfer tracking
  * - Protected records
  */
-class nazActions extends AhgActions
+class nazActions extends AhgController
 {
     /**
      * Get the NAZ service
@@ -25,7 +26,7 @@ class nazActions extends AhgActions
     /**
      * Main dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
 
@@ -63,7 +64,7 @@ class nazActions extends AhgActions
     // CLOSURE PERIODS
     // =========================================================================
 
-    public function executeClosures(sfWebRequest $request)
+    public function executeClosures($request)
     {
         $this->checkAdmin();
 
@@ -77,7 +78,7 @@ class nazActions extends AhgActions
         $this->currentType = $filters['type'];
     }
 
-    public function executeClosureCreate(sfWebRequest $request)
+    public function executeClosureCreate($request)
     {
         $this->checkAdmin();
 
@@ -109,7 +110,7 @@ class nazActions extends AhgActions
         }
     }
 
-    public function executeClosureEdit(sfWebRequest $request)
+    public function executeClosureEdit($request)
     {
         $this->checkAdmin();
 
@@ -150,7 +151,7 @@ class nazActions extends AhgActions
     // RESEARCHERS
     // =========================================================================
 
-    public function executeResearchers(sfWebRequest $request)
+    public function executeResearchers($request)
     {
         $this->checkAdmin();
 
@@ -166,7 +167,7 @@ class nazActions extends AhgActions
         $this->search = $filters['search'];
     }
 
-    public function executeResearcherCreate(sfWebRequest $request)
+    public function executeResearcherCreate($request)
     {
         $this->checkAdmin();
 
@@ -194,7 +195,7 @@ class nazActions extends AhgActions
         }
     }
 
-    public function executeResearcherView(sfWebRequest $request)
+    public function executeResearcherView($request)
     {
         $this->checkAdmin();
 
@@ -216,7 +217,7 @@ class nazActions extends AhgActions
     // RESEARCH PERMITS
     // =========================================================================
 
-    public function executePermits(sfWebRequest $request)
+    public function executePermits($request)
     {
         $this->checkAdmin();
 
@@ -228,7 +229,7 @@ class nazActions extends AhgActions
         $this->currentStatus = $filters['status'];
     }
 
-    public function executePermitCreate(sfWebRequest $request)
+    public function executePermitCreate($request)
     {
         $this->checkAdmin();
 
@@ -258,7 +259,7 @@ class nazActions extends AhgActions
         }
     }
 
-    public function executePermitView(sfWebRequest $request)
+    public function executePermitView($request)
     {
         $this->checkAdmin();
 
@@ -305,7 +306,7 @@ class nazActions extends AhgActions
     // RECORDS SCHEDULES
     // =========================================================================
 
-    public function executeSchedules(sfWebRequest $request)
+    public function executeSchedules($request)
     {
         $this->checkAdmin();
 
@@ -319,7 +320,7 @@ class nazActions extends AhgActions
         $this->currentStatus = $filters['status'];
     }
 
-    public function executeScheduleCreate(sfWebRequest $request)
+    public function executeScheduleCreate($request)
     {
         $this->checkAdmin();
 
@@ -342,7 +343,7 @@ class nazActions extends AhgActions
         }
     }
 
-    public function executeScheduleView(sfWebRequest $request)
+    public function executeScheduleView($request)
     {
         $this->checkAdmin();
 
@@ -376,7 +377,7 @@ class nazActions extends AhgActions
     // TRANSFERS
     // =========================================================================
 
-    public function executeTransfers(sfWebRequest $request)
+    public function executeTransfers($request)
     {
         $this->checkAdmin();
 
@@ -389,7 +390,7 @@ class nazActions extends AhgActions
         $this->currentStatus = $filters['status'];
     }
 
-    public function executeTransferCreate(sfWebRequest $request)
+    public function executeTransferCreate($request)
     {
         $this->checkAdmin();
 
@@ -420,7 +421,7 @@ class nazActions extends AhgActions
         }
     }
 
-    public function executeTransferView(sfWebRequest $request)
+    public function executeTransferView($request)
     {
         $this->checkAdmin();
 
@@ -455,7 +456,7 @@ class nazActions extends AhgActions
     // PROTECTED RECORDS
     // =========================================================================
 
-    public function executeProtectedRecords(sfWebRequest $request)
+    public function executeProtectedRecords($request)
     {
         $this->checkAdmin();
 
@@ -473,7 +474,7 @@ class nazActions extends AhgActions
     // REPORTS
     // =========================================================================
 
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->checkAdmin();
 
@@ -485,7 +486,7 @@ class nazActions extends AhgActions
     // CONFIGURATION
     // =========================================================================
 
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->checkAdmin();
 

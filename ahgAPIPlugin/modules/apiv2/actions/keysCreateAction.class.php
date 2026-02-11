@@ -1,6 +1,7 @@
 <?php
 
-class apiv2KeysCreateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2KeysCreateAction extends AhgApiController
 {
     public function POST($request, $data = null)
     {

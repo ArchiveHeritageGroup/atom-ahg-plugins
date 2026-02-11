@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Enhanced ISBN Lookup Action for Library Module.
  *
  * Uses WorldCatService with Open Library covers and fallback chain.
  */
-class libraryIsbnLookupAction extends sfAction
+class libraryIsbnLookupAction extends AhgController
 {
     public function execute($request)
     {
@@ -23,13 +24,13 @@ class libraryIsbnLookupAction extends sfAction
 
         try {
             // Load framework services
-            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+            $frameworkPath = $this->config('sf_root_dir') . '/atom-framework';
             
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Repository/IsbnLookupRepository.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Repository/IsbnLookupRepository.php';
             require_once $frameworkPath . '/src/Services/LanguageService.php';
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/WorldCatService.php';
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/BookCoverService.php';
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/IsbnMetadataMapper.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/WorldCatService.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/BookCoverService.php';
+            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/IsbnMetadataMapper.php';
 
             $repository = new \ahgLibraryPlugin\Repository\IsbnLookupRepository();
             $service = new \ahgLibraryPlugin\Service\WorldCatService($repository);
@@ -37,8 +38,8 @@ class libraryIsbnLookupAction extends sfAction
 
             // Get user ID for audit
             $userId = null;
-            if ($this->context->user->isAuthenticated()) {
-                $userId = $this->context->user->getAttribute('user_id');
+            if ($this->getUser()->isAuthenticated()) {
+                $userId = $this->getUser()->getAttribute('user_id');
             }
 
             // Perform lookup
@@ -85,7 +86,7 @@ class libraryIsbnLookupAction extends sfAction
             ]);
 
         } catch (\Exception $e) {
-            sfContext::getInstance()->getLogger()->err(
+            $this->getContext()->getLogger()->err(
                 'ISBN lookup failed: ' . $e->getMessage()
             );
 

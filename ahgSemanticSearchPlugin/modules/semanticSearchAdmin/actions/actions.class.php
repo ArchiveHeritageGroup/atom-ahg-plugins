@@ -1,9 +1,11 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class semanticSearchAdminActions extends AhgActions
+class semanticSearchAdminActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
         // Allow testExpand to be called publicly (for search modal)
         $publicActions = ['testExpand'];
@@ -18,7 +20,7 @@ class semanticSearchAdminActions extends AhgActions
         }
 
         // Check admin permission
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
     }
@@ -31,7 +33,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Get stats from thesaurus tables
         $this->stats = [
@@ -70,7 +72,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Configuration page
      */
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->settings = $this->loadSettings();
 
@@ -84,7 +86,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Term browser
      */
-    public function executeTerms(sfWebRequest $request)
+    public function executeTerms($request)
     {
         $source = $request->getParameter('source');
         $search = $request->getParameter('q');
@@ -122,7 +124,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * View term details
      */
-    public function executeTermView(sfWebRequest $request)
+    public function executeTermView($request)
     {
         $this->term = DB::table('ahg_thesaurus_term')
             ->where('id', $request->getParameter('id'))
@@ -145,7 +147,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Add custom term
      */
-    public function executeTermAdd(sfWebRequest $request)
+    public function executeTermAdd($request)
     {
         if ($request->isMethod('post')) {
             $term = trim($request->getParameter('term'));
@@ -193,7 +195,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Sync logs
      */
-    public function executeSyncLogs(sfWebRequest $request)
+    public function executeSyncLogs($request)
     {
         $this->logs = DB::table('ahg_thesaurus_sync_log')
             ->orderByDesc('started_at')
@@ -204,7 +206,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Search logs
      */
-    public function executeSearchLogs(sfWebRequest $request)
+    public function executeSearchLogs($request)
     {
         $this->logs = DB::table('ahg_semantic_search_log')
             ->orderByDesc('created_at')
@@ -223,7 +225,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Run sync (AJAX)
      */
-    public function executeRunSync(sfWebRequest $request)
+    public function executeRunSync($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -232,7 +234,7 @@ class semanticSearchAdminActions extends AhgActions
 
         try {
             // Load services from plugin
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
 
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
@@ -246,7 +248,7 @@ class semanticSearchAdminActions extends AhgActions
                     break;
 
                 case 'wordnet':
-                    require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/WordNetSyncService.php';
+                    require_once $this->config('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/WordNetSyncService.php';
                     $wordnet = new \AtomFramework\Services\SemanticSearch\WordNetSyncService();
                     // Sync all domains for comprehensive vocabulary coverage
                     $allStats = $wordnet->syncAllDomains();
@@ -283,7 +285,7 @@ class semanticSearchAdminActions extends AhgActions
     /**
      * Test query expansion (AJAX)
      */
-    public function executeTestExpand(sfWebRequest $request)
+    public function executeTestExpand($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -291,7 +293,7 @@ class semanticSearchAdminActions extends AhgActions
         $result = ['success' => false, 'expansions' => []];
 
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
             $expansionResult = $thesaurus->expandQuery($query);

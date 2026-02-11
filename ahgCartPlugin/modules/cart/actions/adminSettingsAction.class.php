@@ -1,7 +1,8 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 use AtomAhgPlugins\ahgCartPlugin\Repositories\EcommerceRepository;
@@ -11,17 +12,17 @@ use AtomAhgPlugins\ahgCartPlugin\Repositories\EcommerceRepository;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartAdminSettingsAction extends sfAction
+class cartAdminSettingsAction extends AhgController
 {
     public function execute($request)
     {
         // Check admin access
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
 
-        if (!$this->context->user->hasCredential("administrator")) {
+        if (!$this->getUser()->hasCredential("administrator")) {
             $this->forward404();
             return;
         }
@@ -81,7 +82,7 @@ class cartAdminSettingsAction extends sfAction
         }
 
         $ecommerceRepo->saveSettings($data);
-        $this->context->user->setFlash('notice', 'E-Commerce settings saved successfully.');
+        $this->getUser()->setFlash('notice', 'E-Commerce settings saved successfully.');
     }
 
     protected function savePricing($request, $ecommerceRepo)
@@ -110,7 +111,7 @@ class cartAdminSettingsAction extends sfAction
             ]);
         }
 
-        $this->context->user->setFlash('notice', 'Product pricing updated successfully.');
+        $this->getUser()->setFlash('notice', 'Product pricing updated successfully.');
     }
 
     protected function getProductTypeName($typeId)

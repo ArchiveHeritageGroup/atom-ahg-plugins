@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\SlugService;
 use AtomExtensions\Services\CacheService;
@@ -27,7 +29,7 @@ use AtomExtensions\Services\CacheService;
  * @author     Jack Bates <jack@nottheoilrig.com>
  * @author     David Juhasz <david@artefactual.com>
  */
-class SettingsGlobalAction extends sfAction
+class SettingsGlobalAction extends AhgController
 {
     public function execute($request)
     {
@@ -49,7 +51,7 @@ class SettingsGlobalAction extends sfAction
                     // Do update and redirect to avoid repeat submit wackiness
                     $this->updateGlobalSettings();
 
-                    $notice = sfContext::getInstance()->i18n->__('Global settings saved.');
+                    $notice = $this->getContext()->i18n->__('Global settings saved.');
                     $this->getUser()->setFlash('notice', $notice);
 
                     $this->redirect('settings/global');

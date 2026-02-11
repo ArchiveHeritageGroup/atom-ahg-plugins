@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Create a new webhook
  *
@@ -13,7 +14,7 @@
  *   "entity_types": ["informationobject", "actor"]
  * }
  */
-class apiv2WebhooksCreateAction extends AhgApiAction
+class apiv2WebhooksCreateAction extends AhgApiController
 {
     public function POST($request)
     {

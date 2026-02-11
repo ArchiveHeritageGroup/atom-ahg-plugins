@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,7 +18,7 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DonorPrimaryContactAction extends sfAction
+class DonorPrimaryContactAction extends AhgController
 {
     public function execute($request)
     {
@@ -60,7 +61,7 @@ class DonorPrimaryContactAction extends sfAction
             }
         }
 
-        $this->response->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
 
         return $this->renderText(json_encode($data));
     }

@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ISBN Providers Admin Action
  */
-class libraryIsbnProvidersAction extends sfAction
+class libraryIsbnProvidersAction extends AhgController
 {
     public function execute($request)
     {
         // Check admin permission
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 

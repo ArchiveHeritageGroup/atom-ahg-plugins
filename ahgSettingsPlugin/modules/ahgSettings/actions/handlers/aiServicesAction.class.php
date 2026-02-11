@@ -1,13 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 use AtomExtensions\Services\AclService;
 
-class AhgSettingsAiServicesAction extends sfAction
+class AhgSettingsAiServicesAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 

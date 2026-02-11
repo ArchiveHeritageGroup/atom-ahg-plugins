@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class preservationActions extends AhgActions
+class preservationActions extends AhgController
 {
     private PreservationService $service;
 
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/PreservationService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/PreservationService.php';
         $this->service = new PreservationService();
     }
 
@@ -17,7 +18,7 @@ class preservationActions extends AhgActions
      */
     private function checkAdminAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
     }
@@ -29,7 +30,7 @@ class preservationActions extends AhgActions
     /**
      * Preservation dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdminAccess();
 
@@ -62,7 +63,7 @@ class preservationActions extends AhgActions
     /**
      * View preservation details for a single object
      */
-    public function executeObject(sfWebRequest $request)
+    public function executeObject($request)
     {
         $this->checkAdminAccess();
 
@@ -102,7 +103,7 @@ class preservationActions extends AhgActions
     /**
      * Fixity check log
      */
-    public function executeFixityLog(sfWebRequest $request)
+    public function executeFixityLog($request)
     {
         $this->checkAdminAccess();
 
@@ -121,7 +122,7 @@ class preservationActions extends AhgActions
     /**
      * Preservation events log
      */
-    public function executeEvents(sfWebRequest $request)
+    public function executeEvents($request)
     {
         $this->checkAdminAccess();
 
@@ -156,7 +157,7 @@ class preservationActions extends AhgActions
     /**
      * Format registry
      */
-    public function executeFormats(sfWebRequest $request)
+    public function executeFormats($request)
     {
         $this->checkAdminAccess();
 
@@ -178,7 +179,7 @@ class preservationActions extends AhgActions
     /**
      * Preservation policies
      */
-    public function executePolicies(sfWebRequest $request)
+    public function executePolicies($request)
     {
         $this->checkAdminAccess();
 
@@ -192,7 +193,7 @@ class preservationActions extends AhgActions
     /**
      * Preservation reports
      */
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->checkAdminAccess();
 
@@ -234,7 +235,7 @@ class preservationActions extends AhgActions
     /**
      * API: Generate checksums for a digital object
      */
-    public function executeApiGenerateChecksum(sfWebRequest $request)
+    public function executeApiGenerateChecksum($request)
     {
         $this->checkAdminAccess();
 
@@ -262,7 +263,7 @@ class preservationActions extends AhgActions
     /**
      * API: Verify fixity for a digital object
      */
-    public function executeApiVerifyFixity(sfWebRequest $request)
+    public function executeApiVerifyFixity($request)
     {
         $this->checkAdminAccess();
 
@@ -290,7 +291,7 @@ class preservationActions extends AhgActions
     /**
      * API: Get preservation statistics
      */
-    public function executeApiStats(sfWebRequest $request)
+    public function executeApiStats($request)
     {
         try {
             $stats = $this->service->getStatistics();
@@ -316,7 +317,7 @@ class preservationActions extends AhgActions
     /**
      * Virus scan dashboard
      */
-    public function executeVirusScan(sfWebRequest $request)
+    public function executeVirusScan($request)
     {
         $this->checkAdminAccess();
 
@@ -350,7 +351,7 @@ class preservationActions extends AhgActions
     /**
      * API: Scan single object for virus
      */
-    public function executeApiVirusScan(sfWebRequest $request)
+    public function executeApiVirusScan($request)
     {
         $this->checkAdminAccess();
 
@@ -382,7 +383,7 @@ class preservationActions extends AhgActions
     /**
      * Format conversion dashboard
      */
-    public function executeConversion(sfWebRequest $request)
+    public function executeConversion($request)
     {
         $this->checkAdminAccess();
 
@@ -420,7 +421,7 @@ class preservationActions extends AhgActions
     /**
      * API: Convert single object format
      */
-    public function executeApiConvert(sfWebRequest $request)
+    public function executeApiConvert($request)
     {
         $this->checkAdminAccess();
 
@@ -453,7 +454,7 @@ class preservationActions extends AhgActions
     /**
      * Backup verification dashboard
      */
-    public function executeBackup(sfWebRequest $request)
+    public function executeBackup($request)
     {
         $this->checkAdminAccess();
 
@@ -489,7 +490,7 @@ class preservationActions extends AhgActions
     /**
      * API: Verify specific backup
      */
-    public function executeApiVerifyBackup(sfWebRequest $request)
+    public function executeApiVerifyBackup($request)
     {
         $this->checkAdminAccess();
 
@@ -518,7 +519,7 @@ class preservationActions extends AhgActions
     /**
      * Extended dashboard with all new features
      */
-    public function executeExtended(sfWebRequest $request)
+    public function executeExtended($request)
     {
         $this->checkAdminAccess();
 
@@ -534,7 +535,7 @@ class preservationActions extends AhgActions
     /**
      * Format identification dashboard
      */
-    public function executeIdentification(sfWebRequest $request)
+    public function executeIdentification($request)
     {
         $this->checkAdminAccess();
 
@@ -576,7 +577,7 @@ class preservationActions extends AhgActions
     /**
      * API: Identify a single object
      */
-    public function executeApiIdentify(sfWebRequest $request)
+    public function executeApiIdentify($request)
     {
         $this->checkAdminAccess();
 
@@ -615,7 +616,7 @@ class preservationActions extends AhgActions
     /**
      * Workflow Scheduler Dashboard
      */
-    public function executeScheduler(sfWebRequest $request)
+    public function executeScheduler($request)
     {
         $this->checkAdminAccess();
 
@@ -635,7 +636,7 @@ class preservationActions extends AhgActions
     /**
      * View/Edit single schedule
      */
-    public function executeScheduleEdit(sfWebRequest $request)
+    public function executeScheduleEdit($request)
     {
         $this->checkAdminAccess();
 
@@ -696,7 +697,7 @@ class preservationActions extends AhgActions
     /**
      * API: Toggle schedule enabled/disabled
      */
-    public function executeApiScheduleToggle(sfWebRequest $request)
+    public function executeApiScheduleToggle($request)
     {
         $this->checkAdminAccess();
 
@@ -731,7 +732,7 @@ class preservationActions extends AhgActions
     /**
      * API: Run a schedule manually
      */
-    public function executeApiScheduleRun(sfWebRequest $request)
+    public function executeApiScheduleRun($request)
     {
         $this->checkAdminAccess();
 
@@ -762,7 +763,7 @@ class preservationActions extends AhgActions
     /**
      * API: Delete a schedule
      */
-    public function executeApiScheduleDelete(sfWebRequest $request)
+    public function executeApiScheduleDelete($request)
     {
         $this->checkAdminAccess();
 
@@ -794,7 +795,7 @@ class preservationActions extends AhgActions
     /**
      * View workflow run details
      */
-    public function executeScheduleRunView(sfWebRequest $request)
+    public function executeScheduleRunView($request)
     {
         $this->checkAdminAccess();
 
@@ -830,7 +831,7 @@ class preservationActions extends AhgActions
     /**
      * OAIS Packages Dashboard
      */
-    public function executePackages(sfWebRequest $request)
+    public function executePackages($request)
     {
         $this->checkAdminAccess();
 
@@ -846,7 +847,7 @@ class preservationActions extends AhgActions
     /**
      * View/Edit single package
      */
-    public function executePackageEdit(sfWebRequest $request)
+    public function executePackageEdit($request)
     {
         $this->checkAdminAccess();
 
@@ -908,7 +909,7 @@ class preservationActions extends AhgActions
     /**
      * Package detail view
      */
-    public function executePackageView(sfWebRequest $request)
+    public function executePackageView($request)
     {
         $this->checkAdminAccess();
 
@@ -940,7 +941,7 @@ class preservationActions extends AhgActions
     /**
      * API: Add object to package
      */
-    public function executeApiPackageAddObject(sfWebRequest $request)
+    public function executeApiPackageAddObject($request)
     {
         $this->checkAdminAccess();
 
@@ -974,7 +975,7 @@ class preservationActions extends AhgActions
     /**
      * API: Remove object from package
      */
-    public function executeApiPackageRemoveObject(sfWebRequest $request)
+    public function executeApiPackageRemoveObject($request)
     {
         $this->checkAdminAccess();
 
@@ -1007,7 +1008,7 @@ class preservationActions extends AhgActions
     /**
      * API: Build package
      */
-    public function executeApiPackageBuild(sfWebRequest $request)
+    public function executeApiPackageBuild($request)
     {
         $this->checkAdminAccess();
 
@@ -1037,7 +1038,7 @@ class preservationActions extends AhgActions
     /**
      * API: Validate package
      */
-    public function executeApiPackageValidate(sfWebRequest $request)
+    public function executeApiPackageValidate($request)
     {
         $this->checkAdminAccess();
 
@@ -1067,7 +1068,7 @@ class preservationActions extends AhgActions
     /**
      * API: Export package
      */
-    public function executeApiPackageExport(sfWebRequest $request)
+    public function executeApiPackageExport($request)
     {
         $this->checkAdminAccess();
 
@@ -1098,7 +1099,7 @@ class preservationActions extends AhgActions
     /**
      * API: Delete package
      */
-    public function executeApiPackageDelete(sfWebRequest $request)
+    public function executeApiPackageDelete($request)
     {
         $this->checkAdminAccess();
 
@@ -1130,7 +1131,7 @@ class preservationActions extends AhgActions
     /**
      * API: Convert package (SIP->AIP or AIP->DIP)
      */
-    public function executeApiPackageConvert(sfWebRequest $request)
+    public function executeApiPackageConvert($request)
     {
         $this->checkAdminAccess();
 
@@ -1182,7 +1183,7 @@ class preservationActions extends AhgActions
     /**
      * Download package export file
      */
-    public function executePackageDownload(sfWebRequest $request)
+    public function executePackageDownload($request)
     {
         $this->checkAdminAccess();
 

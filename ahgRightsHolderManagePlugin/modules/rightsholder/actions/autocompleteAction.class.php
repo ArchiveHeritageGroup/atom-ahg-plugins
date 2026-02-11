@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,7 +18,7 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RightsHolderAutocompleteAction extends sfAction
+class RightsHolderAutocompleteAction extends AhgController
 {
     public function execute($request)
     {
@@ -27,16 +28,16 @@ class RightsHolderAutocompleteAction extends sfAction
         }
 
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $criteria = new Criteria();
         $criteria->addJoin(QubitActor::ID, QubitActorI18n::ID);
-        $criteria->add(QubitActorI18n::CULTURE, $this->context->user->getCulture());
+        $criteria->add(QubitActorI18n::CULTURE, $this->culture());
         $criteria->add(QubitActor::CLASS_NAME, 'QubitRightsHolder');
 
         if (isset($request->query)) {
-            if (sfConfig::get('app_markdown_enabled', true)) {
+            if ($this->config('app_markdown_enabled', true)) {
                 $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->query}%", Criteria::LIKE);
             } else {
                 $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "{$request->query}%", Criteria::LIKE);

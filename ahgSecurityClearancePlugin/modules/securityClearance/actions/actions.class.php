@@ -1,18 +1,19 @@
 <?php
 
-class securityClearanceActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class securityClearanceActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
     }
 
     /**
      * List all users and their clearances
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -57,9 +58,9 @@ class securityClearanceActions extends AhgActions
     /**
      * View single user's clearance details
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
@@ -114,9 +115,9 @@ class securityClearanceActions extends AhgActions
     /**
      * Grant or update clearance
      */
-    public function executeGrant(sfWebRequest $request)
+    public function executeGrant($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
@@ -125,7 +126,7 @@ class securityClearanceActions extends AhgActions
             $classificationId = (int) $request->getParameter('classification_id');
             $expiresAt = $request->getParameter('expires_at');
             $notes = trim($request->getParameter('notes'));
-            $grantedBy = $this->context->user->getAttribute('user_id');
+            $grantedBy = $this->getUser()->getAttribute('user_id');
 
             $expiresAt = !empty($expiresAt) ? $expiresAt : null;
 
@@ -152,14 +153,14 @@ class securityClearanceActions extends AhgActions
     /**
      * Revoke clearance
      */
-    public function executeRevoke(sfWebRequest $request)
+    public function executeRevoke($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
         $userId = (int) $request->getParameter('id');
-        $grantedBy = $this->context->user->getAttribute('user_id');
+        $grantedBy = $this->getUser()->getAttribute('user_id');
         $notes = $request->getParameter('notes', 'Clearance revoked by administrator');
 
         $success = \AtomExtensions\Services\SecurityClearanceService::revokeClearance($userId, $grantedBy, $notes);
@@ -175,16 +176,16 @@ class securityClearanceActions extends AhgActions
     /**
      * Bulk grant clearances
      */
-    public function executeBulkGrant(sfWebRequest $request)
+    public function executeBulkGrant($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
         if ($request->isMethod('post')) {
             $userIds = $request->getParameter('user_ids', []);
             $classificationId = (int) $request->getParameter('classification_id');
-            $grantedBy = $this->context->user->getAttribute('user_id');
+            $grantedBy = $this->getUser()->getAttribute('user_id');
             $notes = trim($request->getParameter('notes', 'Bulk grant by administrator'));
 
             $successCount = 0;
@@ -205,17 +206,17 @@ class securityClearanceActions extends AhgActions
     /**
      * Revoke object access grant
      */
-    public function executeRevokeAccess(sfWebRequest $request)
+    public function executeRevokeAccess($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
         $grantId = (int) $request->getParameter('id');
         $userId = (int) $request->getParameter('user_id');
-        $revokedBy = $this->context->user->getAttribute('user_id');
+        $revokedBy = $this->getUser()->getAttribute('user_id');
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/AccessRequestService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Services/AccessRequestService.php';
         $success = \AtomExtensions\Services\AccessRequestService::revokeObjectAccess($grantId, $revokedBy);
 
         $this->getUser()->setFlash(
@@ -233,9 +234,9 @@ class securityClearanceActions extends AhgActions
     /**
      * Security Dashboard
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -335,9 +336,9 @@ class securityClearanceActions extends AhgActions
     /**
      * Security Reports
      */
-    public function executeReport(sfWebRequest $request)
+    public function executeReport($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -411,9 +412,9 @@ class securityClearanceActions extends AhgActions
     /**
      * Compartments management
      */
-    public function executeCompartments(sfWebRequest $request)
+    public function executeCompartments($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -437,7 +438,7 @@ class securityClearanceActions extends AhgActions
     /**
      * Security Compliance Dashboard
      */
-    public function executeSecurityCompliance(sfWebRequest $request)
+    public function executeSecurityCompliance($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -7,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
-class feedbackBrowseAction extends sfAction
+class feedbackBrowseAction extends AhgController
 {
     public function execute($request)
     {
@@ -22,15 +23,15 @@ class feedbackBrowseAction extends sfAction
         }
 
         $title = $this->context->i18n->__('Feedback Management');
-        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
+        $this->getResponse()->setTitle("{$title} - {$this->getResponse()->getTitle()}");
 
         // Set defaults
-        $this->limit = $request->getParameter('limit', sfConfig::get('app_hits_per_page', 25));
+        $this->limit = $request->getParameter('limit', $this->config('app_hits_per_page', 25));
         $this->filter = $request->getParameter('filter', 'all');
         $this->sort = $request->getParameter('sort', 'dateDown');
         $this->page = $request->getParameter('page', 1);
 
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
 
         // Get counts
         $this->totalCount = DB::table('feedback_i18n')->where('culture', $culture)->count();

@@ -1,13 +1,15 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class AhgSettingsResetAction extends sfAction
+class AhgSettingsResetAction extends AhgController
 {
     public function execute($request)
     {
         // Check admin permission
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             AclService::forwardUnauthorized();
         }
 

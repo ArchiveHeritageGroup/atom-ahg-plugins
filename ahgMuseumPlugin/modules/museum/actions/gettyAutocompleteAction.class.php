@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Getty Vocabulary Autocomplete Action.
  *
@@ -8,7 +9,7 @@
  *
  * @package ahgMuseumPlugin
  */
-class museumGettyAutocompleteAction extends sfAction
+class museumGettyAutocompleteAction extends AhgController
 {
     public function execute($request)
     {

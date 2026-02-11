@@ -1,15 +1,16 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Search index XHR action — used by treeview search.
  * Replaces base AtoM SearchIndexAction.
  * Returns JSON: {results: [...], more: "html"}
  */
-class ahgSearchIndexAction extends sfAction
+class ahgSearchIndexAction extends AhgController
 {
     public function execute($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $service = new \AhgSearch\Services\SearchService($culture);
 
         $query = $request->query;
@@ -23,13 +24,13 @@ class ahgSearchIndexAction extends sfAction
         $options = [
             'repos' => null,
             'collection' => null,
-            'limit' => sfConfig::get('app_hits_per_page', 10),
+            'limit' => $this->config('app_hits_per_page', 10),
             'page' => 1,
         ];
 
         if (isset($request->repos) && ctype_digit($request->repos)) {
             $options['repos'] = $request->repos;
-            $this->context->user->setAttribute('search-realm', $request->repos);
+            $this->getUser()->setAttribute('search-realm', $request->repos);
         }
 
         if (isset($request->collection) && ctype_digit($request->collection)) {
@@ -43,10 +44,7 @@ class ahgSearchIndexAction extends sfAction
 
             return;
         }
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['Url', 'Escaping', 'Qubit']);
-
-        $response = ['results' => []];
+$response = ['results' => []];
         foreach ($result['results'] as $hit) {
             $data = $hit['_source'] ?? [];
             $levelOfDescription = isset($data['levelOfDescriptionId']) ? QubitTerm::getById($data['levelOfDescriptionId']) : null;
@@ -75,8 +73,8 @@ class ahgSearchIndexAction extends sfAction
             $urlParams['collection'] = $request->collection;
         }
 
-        if (sfConfig::get('app_enable_institutional_scoping') && $this->context->user->hasAttribute('search-realm')) {
-            $urlParams['repos'] = $this->context->user->getAttribute('search-realm');
+        if ($this->config('app_enable_institutional_scoping') && $this->getUser()->hasAttribute('search-realm')) {
+            $urlParams['repos'] = $this->getUser()->getAttribute('search-realm');
         }
 
         $url = url_for($urlParams);
@@ -90,7 +88,7 @@ class ahgSearchIndexAction extends sfAction
 </div>
 EOF;
 
-        $this->response->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
 
         return $this->renderText(json_encode($response));
     }

@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class apiv2DescriptionsUpdateAction extends AhgApiAction
+class apiv2DescriptionsUpdateAction extends AhgApiController
 {
     public function PUT($request, $data = null)
     {

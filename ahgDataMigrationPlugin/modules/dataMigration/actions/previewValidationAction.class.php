@@ -1,17 +1,18 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * AJAX preview validation action.
  *
  * Validates a sample of rows for live preview during mapping configuration.
  * Returns validation results for display in the UI.
  */
-class previewValidationAction extends sfAction
+class previewValidationAction extends AhgController
 {
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(403);
 
             return $this->renderText(json_encode(['error' => 'Not authenticated']));
@@ -41,7 +42,7 @@ class previewValidationAction extends sfAction
             $mappingMap = $this->convertMapping($mapping);
 
             // Get file path
-            $uploadPath = sfConfig::get('sf_upload_dir').'/dataMigration/'.$filename;
+            $uploadPath = $this->config('sf_upload_dir').'/dataMigration/'.$filename;
             if (!file_exists($uploadPath)) {
                 return $this->renderText(json_encode(['error' => 'File not found']));
             }

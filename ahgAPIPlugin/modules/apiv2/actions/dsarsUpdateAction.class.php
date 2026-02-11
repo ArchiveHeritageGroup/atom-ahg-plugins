@@ -1,6 +1,7 @@
 <?php
 
-class apiv2DsarsUpdateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2DsarsUpdateAction extends AhgApiController
 {
     public function PUT($request)
     {

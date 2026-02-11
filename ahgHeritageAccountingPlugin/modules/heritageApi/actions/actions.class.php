@@ -1,10 +1,12 @@
 <?php
-class heritageApiActions extends AhgActions
+
+use AtomFramework\Http\Controllers\AhgController;
+class heritageApiActions extends AhgController
 {
     /**
      * Autocomplete for information objects
      */
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
         $term = $request->getParameter('term', '');
         $results = [];
@@ -40,7 +42,7 @@ class heritageApiActions extends AhgActions
     /**
      * Get asset summary
      */
-    public function executeSummary(sfWebRequest $request)
+    public function executeSummary($request)
     {
         $service = new HeritageAssetService();
         $stats = $service->getDashboardStats();
@@ -52,7 +54,7 @@ class heritageApiActions extends AhgActions
     /**
      * Get asset details
      */
-    public function executeAsset(sfWebRequest $request)
+    public function executeAsset($request)
     {
         $service = new HeritageAssetService();
         $asset = $service->getAsset($request->getParameter('id'));
@@ -69,7 +71,7 @@ class heritageApiActions extends AhgActions
     /**
      * Autocomplete for actors (donors)
      */
-    public function executeActorAutocomplete(sfWebRequest $request)
+    public function executeActorAutocomplete($request)
     {
         $term = $request->getParameter('term', '');
         $results = [];

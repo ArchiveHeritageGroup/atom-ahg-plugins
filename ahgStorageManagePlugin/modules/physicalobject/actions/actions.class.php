@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * Physical Object module actions — ahgStorageManagePlugin
  *
@@ -7,7 +8,7 @@
  * all CRUD + auxiliary actions under plugin ownership.
  */
 
-class physicalobjectActions extends AhgActions
+class physicalobjectActions extends AhgController
 {
     // ---------------------------------------------------------------
     // INDEX (view detail)
@@ -21,8 +22,8 @@ class physicalobjectActions extends AhgActions
         }
 
         // Load framework for extended data
-        $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        $repoPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
+        $frameworkBootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $repoPath = $this->config('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         if (file_exists($frameworkBootstrap) && file_exists($repoPath)) {
             require_once $frameworkBootstrap;
@@ -48,8 +49,8 @@ class physicalobjectActions extends AhgActions
     public function executeEdit($request)
     {
         // Load framework
-        $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        $repoPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
+        $frameworkBootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $repoPath = $this->config('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         if (file_exists($frameworkBootstrap) && file_exists($repoPath)) {
             require_once $frameworkBootstrap;
@@ -180,14 +181,14 @@ class physicalobjectActions extends AhgActions
     public function executeAutocomplete($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $criteria = new Criteria();
         $criteria->addJoin(QubitPhysicalObject::ID, QubitPhysicalObjectI18n::ID);
-        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->context->user->getCulture());
+        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->culture());
 
-        if (sfConfig::get('app_markdown_enabled', true)) {
+        if ($this->config('app_markdown_enabled', true)) {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "%{$request->query}%", Criteria::LIKE);
         } else {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "{$request->query}%", Criteria::LIKE);
@@ -209,7 +210,7 @@ class physicalobjectActions extends AhgActions
     public function executeBoxList($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $this->resource = $this->getRoute()->resource;
@@ -239,7 +240,7 @@ class physicalobjectActions extends AhgActions
             if ($this->form->isValid()) {
                 if (empty($request->includeEmpty) && empty($request->includeDescriptions) && empty($request->includeAccessions)) {
                     $message = $this->context->i18n->__('Please check one or more of the export options.');
-                    $this->context->user->setFlash('error', $message);
+                    $this->getUser()->setFlash('error', $message);
 
                     $this->redirect(['module' => 'physicalobject', 'action' => 'holdingsReportExport']);
                 } else {
@@ -282,6 +283,6 @@ class physicalobjectActions extends AhgActions
             $messageParams
         );
 
-        $this->context->user->setFlash('notice', $message);
+        $this->getUser()->setFlash('notice', $message);
     }
 }

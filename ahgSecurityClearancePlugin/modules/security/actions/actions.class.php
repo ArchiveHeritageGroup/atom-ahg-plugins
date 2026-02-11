@@ -1,10 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class securityActions extends AhgActions
+class securityActions extends AhgController
 {
-    public function executeAccessRequests(sfWebRequest $request)
+    public function executeAccessRequests($request)
     {
         // Check admin permissions
         if (!$this->getUser()->isAuthenticated()) {
@@ -70,7 +71,7 @@ class securityActions extends AhgActions
         }
     }
     
-    public function executeApproveRequest(sfWebRequest $request)
+    public function executeApproveRequest($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -118,7 +119,7 @@ class securityActions extends AhgActions
         $this->redirect(['module' => 'security', 'action' => 'accessRequests']);
     }
     
-    public function executeDenyRequest(sfWebRequest $request)
+    public function executeDenyRequest($request)
     {
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -164,7 +165,7 @@ class securityActions extends AhgActions
         $this->redirect(['module' => 'security', 'action' => 'accessRequests']);
     }
     
-    public function executeViewRequest(sfWebRequest $request)
+    public function executeViewRequest($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');

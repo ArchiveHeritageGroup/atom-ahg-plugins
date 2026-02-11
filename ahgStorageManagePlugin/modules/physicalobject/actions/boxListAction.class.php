@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,12 +18,12 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class PhysicalObjectBoxListAction extends sfAction
+class PhysicalObjectBoxListAction extends AhgController
 {
     public function execute($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $this->resource = $this->getRoute()->resource;

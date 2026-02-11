@@ -1,13 +1,14 @@
 <?php
 
-class statisticsActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class statisticsActions extends AhgController
 {
     protected ?StatisticsService $service = null;
 
     protected function getService(): StatisticsService
     {
         if ($this->service === null) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgStatisticsPlugin/lib/Services/StatisticsService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgStatisticsPlugin/lib/Services/StatisticsService.php';
             $this->service = new StatisticsService();
         }
         return $this->service;
@@ -15,7 +16,7 @@ class statisticsActions extends AhgActions
 
     protected function requireAuth(): void
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
     }
@@ -23,7 +24,7 @@ class statisticsActions extends AhgActions
     protected function requireAdmin(): void
     {
         $this->requireAuth();
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward404('Administrator access required');
         }
     }
@@ -32,7 +33,7 @@ class statisticsActions extends AhgActions
     // DASHBOARD
     // =========================================================================
 
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $this->requireAdmin();
 
@@ -51,7 +52,7 @@ class statisticsActions extends AhgActions
     // VIEWS REPORT
     // =========================================================================
 
-    public function executeViews(sfWebRequest $request)
+    public function executeViews($request)
     {
         $this->requireAdmin();
 
@@ -66,7 +67,7 @@ class statisticsActions extends AhgActions
     // DOWNLOADS REPORT
     // =========================================================================
 
-    public function executeDownloads(sfWebRequest $request)
+    public function executeDownloads($request)
     {
         $this->requireAdmin();
 
@@ -81,7 +82,7 @@ class statisticsActions extends AhgActions
     // TOP ITEMS
     // =========================================================================
 
-    public function executeTopItems(sfWebRequest $request)
+    public function executeTopItems($request)
     {
         $this->requireAdmin();
 
@@ -97,7 +98,7 @@ class statisticsActions extends AhgActions
     // GEOGRAPHIC
     // =========================================================================
 
-    public function executeGeographic(sfWebRequest $request)
+    public function executeGeographic($request)
     {
         $this->requireAdmin();
 
@@ -111,7 +112,7 @@ class statisticsActions extends AhgActions
     // ITEM STATISTICS
     // =========================================================================
 
-    public function executeItem(sfWebRequest $request)
+    public function executeItem($request)
     {
         $objectId = (int) $request->getParameter('object_id');
 
@@ -139,7 +140,7 @@ class statisticsActions extends AhgActions
     // REPOSITORY STATISTICS
     // =========================================================================
 
-    public function executeRepository(sfWebRequest $request)
+    public function executeRepository($request)
     {
         $this->requireAuth();
 
@@ -168,7 +169,7 @@ class statisticsActions extends AhgActions
     // EXPORT
     // =========================================================================
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $this->requireAdmin();
 
@@ -188,7 +189,7 @@ class statisticsActions extends AhgActions
     // ADMIN: CONFIGURATION
     // =========================================================================
 
-    public function executeAdmin(sfWebRequest $request)
+    public function executeAdmin($request)
     {
         $this->requireAdmin();
 
@@ -209,7 +210,7 @@ class statisticsActions extends AhgActions
                 $service->setConfig($key, $value, $type);
             }
 
-            $this->context->user->setFlash('notice', 'Settings saved');
+            $this->getUser()->setFlash('notice', 'Settings saved');
             $this->redirect('statistics/admin');
         }
 
@@ -235,7 +236,7 @@ class statisticsActions extends AhgActions
     // ADMIN: BOT LIST
     // =========================================================================
 
-    public function executeBots(sfWebRequest $request)
+    public function executeBots($request)
     {
         $this->requireAdmin();
 
@@ -250,10 +251,10 @@ class statisticsActions extends AhgActions
                     'pattern' => $request->getParameter('pattern'),
                     'category' => $request->getParameter('category', 'crawler'),
                 ]);
-                $this->context->user->setFlash('notice', 'Bot pattern added');
+                $this->getUser()->setFlash('notice', 'Bot pattern added');
             } elseif ($action === 'delete') {
                 $service->deleteBot((int) $request->getParameter('id'));
-                $this->context->user->setFlash('notice', 'Bot pattern deleted');
+                $this->getUser()->setFlash('notice', 'Bot pattern deleted');
             } elseif ($action === 'toggle') {
                 $id = (int) $request->getParameter('id');
                 $bot = Qubit::db()->table('ahg_bot_list')->where('id', $id)->first();
@@ -272,7 +273,7 @@ class statisticsActions extends AhgActions
     // API ENDPOINTS
     // =========================================================================
 
-    public function executeApiChart(sfWebRequest $request)
+    public function executeApiChart($request)
     {
         $this->requireAdmin();
 
@@ -293,7 +294,7 @@ class statisticsActions extends AhgActions
         return $this->renderText(json_encode($data));
     }
 
-    public function executeApiSummary(sfWebRequest $request)
+    public function executeApiSummary($request)
     {
         $this->requireAdmin();
 
@@ -309,7 +310,7 @@ class statisticsActions extends AhgActions
     /**
      * Tracking pixel endpoint.
      */
-    public function executePixel(sfWebRequest $request)
+    public function executePixel($request)
     {
         // 1x1 transparent GIF
         $gif = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');

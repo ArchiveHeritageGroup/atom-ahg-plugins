@@ -1,22 +1,24 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class researchActions extends AhgActions
+class researchActions extends AhgController
 {
     protected $service;
 
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchService.php';
         $this->service = new ResearchService();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->redirect("research/dashboard");
     }
 
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $this->stats = $this->service->getDashboardStats();
         $this->researcher = null;
@@ -34,7 +36,7 @@ class researchActions extends AhgActions
             ->orderBy('b.start_time')->get()->toArray();
     }
 
-    public function executeRegister(sfWebRequest $request)
+    public function executeRegister($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->getUser()->setFlash('error', 'Please log in to register');
@@ -92,7 +94,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeProfile(sfWebRequest $request)
+    public function executeProfile($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -120,7 +122,7 @@ class researchActions extends AhgActions
         $this->savedSearches = $this->service->getSavedSearches($this->researcher->id);
     }
 
-    public function executeResearchers(sfWebRequest $request)
+    public function executeResearchers($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->researchers = $this->service->getResearchers([
@@ -130,7 +132,7 @@ class researchActions extends AhgActions
         $this->currentStatus = $request->getParameter('status');
     }
 
-    public function executeViewResearcher(sfWebRequest $request)
+    public function executeViewResearcher($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $id = (int) $request->getParameter('id');
@@ -151,7 +153,7 @@ class researchActions extends AhgActions
         $this->bookings = $this->service->getResearcherBookings($id);
     }
 
-    public function executeBookings(sfWebRequest $request)
+    public function executeBookings($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->rooms = $this->service->getReadingRooms();
@@ -169,7 +171,7 @@ class researchActions extends AhgActions
             ->orderBy('b.booking_date')->limit(20)->get()->toArray();
     }
 
-    public function executeBook(sfWebRequest $request)
+    public function executeBook($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -206,7 +208,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeViewBooking(sfWebRequest $request)
+    public function executeViewBooking($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -240,7 +242,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeViewBooking_OLD(sfWebRequest $request)
+    public function executeViewBooking_OLD($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $id = (int) $request->getParameter('id');
@@ -261,7 +263,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeWorkspace(sfWebRequest $request)
+    public function executeWorkspace($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -328,7 +330,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeSavedSearches(sfWebRequest $request)
+    public function executeSavedSearches($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -349,7 +351,7 @@ class researchActions extends AhgActions
         $this->savedSearches = $this->service->getSavedSearches($this->researcher->id);
     }
 
-    public function executeCollections(sfWebRequest $request)
+    public function executeCollections($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -365,7 +367,7 @@ class researchActions extends AhgActions
         $this->collections = $this->service->getCollections($this->researcher->id);
     }
 
-    public function executeViewCollection(sfWebRequest $request)
+    public function executeViewCollection($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -468,7 +470,7 @@ class researchActions extends AhgActions
 		}
     }
 
-    public function executeAnnotations(sfWebRequest $request)
+    public function executeAnnotations($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $userId = $this->getUser()->getAttribute('user_id');
@@ -523,7 +525,7 @@ class researchActions extends AhgActions
         $this->annotations = $this->service->getAnnotations($this->researcher->id);
     }
 
-    public function executeCite(sfWebRequest $request)
+    public function executeCite($request)
     {
         $slug = $request->getParameter('slug');
         $object = DB::table('slug')->where('slug', $slug)->first();
@@ -551,7 +553,7 @@ class researchActions extends AhgActions
     // PUBLIC REGISTRATION (No login required)
     // =========================================================================
 
-    public function executePublicRegister(sfWebRequest $request)
+    public function executePublicRegister($request)
     {
         if ($this->getUser()->isAuthenticated()) {
             $this->redirect('research/register');
@@ -665,7 +667,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executeRegistrationComplete(sfWebRequest $request)
+    public function executeRegistrationComplete($request)
     {
     }
 
@@ -720,7 +722,7 @@ class researchActions extends AhgActions
     // PASSWORD RESET
     // =========================================================================
 
-    public function executePasswordResetRequest(sfWebRequest $request)
+    public function executePasswordResetRequest($request)
     {
         if ($request->isMethod('post')) {
             $email = trim($request->getParameter('email'));
@@ -732,7 +734,7 @@ class researchActions extends AhgActions
                     ['user_id' => $user->id],
                     ['token' => $token, 'expires_at' => $expires, 'created_at' => date('Y-m-d H:i:s')]
                 );
-                $resetUrl = sfConfig::get('app_siteBaseUrl', 'https://psis.theahg.co.za') . '/index.php/research/passwordReset?token=' . $token;
+                $resetUrl = $this->config('app_siteBaseUrl', 'https://psis.theahg.co.za') . '/index.php/research/passwordReset?token=' . $token;
                 error_log("Password reset for {$email}: {$resetUrl}");
             }
             $this->getUser()->setFlash('success', 'If an account exists, you will receive reset instructions.');
@@ -740,7 +742,7 @@ class researchActions extends AhgActions
         }
     }
 
-    public function executePasswordReset(sfWebRequest $request)
+    public function executePasswordReset($request)
     {
         $token = $request->getParameter('token');
         if (empty($token)) {
@@ -785,7 +787,7 @@ class researchActions extends AhgActions
     // ADMIN: READING ROOM MANAGEMENT
     // =========================================================================
 
-    public function executeRooms(sfWebRequest $request)
+    public function executeRooms($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -794,7 +796,7 @@ class researchActions extends AhgActions
         $this->rooms = $this->service->getReadingRooms(false);
     }
 
-    public function executeEditRoom(sfWebRequest $request)
+    public function executeEditRoom($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -838,7 +840,7 @@ class researchActions extends AhgActions
     // ADMIN: RESEARCHER APPROVAL
     // =========================================================================
 
-    public function executeApproveResearcher(sfWebRequest $request)
+    public function executeApproveResearcher($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -856,7 +858,7 @@ class researchActions extends AhgActions
         $this->redirect('research/viewResearcher?id=' . $id);
     }
 
-    public function executeRejectResearcher(sfWebRequest $request)
+    public function executeRejectResearcher($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -918,7 +920,7 @@ class researchActions extends AhgActions
         $this->redirect('research/researchers');
     }
 
-    public function executeAdminResetPassword(sfWebRequest $request)
+    public function executeAdminResetPassword($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -944,7 +946,7 @@ class researchActions extends AhgActions
     // CHECK-IN/CHECK-OUT
     // =========================================================================
 
-    public function executeCheckIn(sfWebRequest $request)
+    public function executeCheckIn($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -958,7 +960,7 @@ class researchActions extends AhgActions
         $this->redirect('research/viewBooking?id=' . $bookingId);
     }
 
-    public function executeCheckOut(sfWebRequest $request)
+    public function executeCheckOut($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -979,7 +981,7 @@ class researchActions extends AhgActions
     /**
      * AJAX: Add item to collection.
      */
-    public function executeAddToCollection(sfWebRequest $request)
+    public function executeAddToCollection($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1030,7 +1032,7 @@ class researchActions extends AhgActions
     /**
      * AJAX: Create collection and optionally add item.
      */
-    public function executeCreateCollectionAjax(sfWebRequest $request)
+    public function executeCreateCollectionAjax($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1078,7 +1080,7 @@ class researchActions extends AhgActions
     /**
      * Generate Finding Aid PDF for a collection.
      */
-    public function executeGenerateFindingAid(sfWebRequest $request)
+    public function executeGenerateFindingAid($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1113,7 +1115,7 @@ class researchActions extends AhgActions
     /**
      * AJAX: Search items for Tom Select dropdown.
      */
-    public function executeSearchItems(sfWebRequest $request)
+    public function executeSearchItems($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1158,7 +1160,7 @@ class researchActions extends AhgActions
     /**
      * Request renewal of expired researcher status
      */
-    public function executeRenewal(sfWebRequest $request)
+    public function executeRenewal($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1202,7 +1204,7 @@ class researchActions extends AhgActions
     /**
      * Initiate ORCID OAuth connection.
      */
-    public function executeOrcidConnect(sfWebRequest $request)
+    public function executeOrcidConnect($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1216,7 +1218,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
         if (!$orcidService->isConfigured()) {
@@ -1234,7 +1236,7 @@ class researchActions extends AhgActions
     /**
      * ORCID OAuth callback.
      */
-    public function executeOrcidCallback(sfWebRequest $request)
+    public function executeOrcidCallback($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1263,7 +1265,7 @@ class researchActions extends AhgActions
             $this->redirect('research/profile');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
         if (!$orcidService->isConfigured()) {
@@ -1293,7 +1295,7 @@ class researchActions extends AhgActions
     /**
      * Disconnect ORCID from researcher profile.
      */
-    public function executeOrcidDisconnect(sfWebRequest $request)
+    public function executeOrcidDisconnect($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1306,7 +1308,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
         $result = $orcidService->disconnectOrcid($researcher->id);
@@ -1327,7 +1329,7 @@ class researchActions extends AhgActions
     /**
      * List and manage researcher types.
      */
-    public function executeAdminTypes(sfWebRequest $request)
+    public function executeAdminTypes($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -1340,7 +1342,7 @@ class researchActions extends AhgActions
     /**
      * Edit or create researcher type.
      */
-    public function executeEditResearcherType(sfWebRequest $request)
+    public function executeEditResearcherType($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -1389,7 +1391,7 @@ class researchActions extends AhgActions
     /**
      * List researcher's projects.
      */
-    public function executeProjects(sfWebRequest $request)
+    public function executeProjects($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1402,7 +1404,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $this->projects = $projectService->getProjects($this->researcher->id, [
@@ -1431,7 +1433,7 @@ class researchActions extends AhgActions
     /**
      * View project details.
      */
-    public function executeViewProject(sfWebRequest $request)
+    public function executeViewProject($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1444,7 +1446,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $projectId = (int) $request->getParameter('id');
@@ -1473,7 +1475,7 @@ class researchActions extends AhgActions
     /**
      * Edit project.
      */
-    public function executeEditProject(sfWebRequest $request)
+    public function executeEditProject($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1486,7 +1488,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $projectId = (int) $request->getParameter('id');
@@ -1528,7 +1530,7 @@ class researchActions extends AhgActions
     /**
      * Manage project collaborators.
      */
-    public function executeProjectCollaborators(sfWebRequest $request)
+    public function executeProjectCollaborators($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1541,7 +1543,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $projectId = (int) $request->getParameter('id');
@@ -1568,7 +1570,7 @@ class researchActions extends AhgActions
     /**
      * Invite collaborator to project.
      */
-    public function executeInviteCollaborator(sfWebRequest $request)
+    public function executeInviteCollaborator($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1581,7 +1583,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $projectId = (int) $request->getParameter('id');
@@ -1610,7 +1612,7 @@ class researchActions extends AhgActions
     /**
      * Accept collaboration invitation.
      */
-    public function executeAcceptInvitation(sfWebRequest $request)
+    public function executeAcceptInvitation($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1623,7 +1625,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
         $projectService = new ProjectService();
 
         $token = $request->getParameter('token');
@@ -1645,7 +1647,7 @@ class researchActions extends AhgActions
     /**
      * List reproduction requests.
      */
-    public function executeReproductions(sfWebRequest $request)
+    public function executeReproductions($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1658,7 +1660,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
         $reproductionService = new ReproductionService();
 
         $this->requests = $reproductionService->getRequests($this->researcher->id, [
@@ -1669,7 +1671,7 @@ class researchActions extends AhgActions
     /**
      * Create new reproduction request.
      */
-    public function executeNewReproduction(sfWebRequest $request)
+    public function executeNewReproduction($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1683,7 +1685,7 @@ class researchActions extends AhgActions
             $this->redirect('research/dashboard');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
         $reproductionService = new ReproductionService();
 
         if ($request->isMethod('post')) {
@@ -1708,7 +1710,7 @@ class researchActions extends AhgActions
     /**
      * View reproduction request details.
      */
-    public function executeViewReproduction(sfWebRequest $request)
+    public function executeViewReproduction($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1721,7 +1723,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
         $reproductionService = new ReproductionService();
 
         $requestId = (int) $request->getParameter('id');
@@ -1784,7 +1786,7 @@ class researchActions extends AhgActions
     /**
      * List bibliographies.
      */
-    public function executeBibliographies(sfWebRequest $request)
+    public function executeBibliographies($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1797,7 +1799,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
         $bibliographyService = new BibliographyService();
 
         $this->bibliographies = $bibliographyService->getBibliographies($this->researcher->id);
@@ -1821,7 +1823,7 @@ class researchActions extends AhgActions
     /**
      * View bibliography details.
      */
-    public function executeViewBibliography(sfWebRequest $request)
+    public function executeViewBibliography($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1834,7 +1836,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
         $bibliographyService = new BibliographyService();
 
         $bibliographyId = (int) $request->getParameter('id');
@@ -1888,7 +1890,7 @@ class researchActions extends AhgActions
     /**
      * Export bibliography in various formats.
      */
-    public function executeExportBibliography(sfWebRequest $request)
+    public function executeExportBibliography($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1901,7 +1903,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
         $bibliographyService = new BibliographyService();
 
         $bibliographyId = (int) $request->getParameter('id');
@@ -1933,7 +1935,7 @@ class researchActions extends AhgActions
     /**
      * List researcher's workspaces.
      */
-    public function executeWorkspaces(sfWebRequest $request)
+    public function executeWorkspaces($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1946,7 +1948,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
         $collaborationService = new CollaborationService();
 
         $this->workspaces = $collaborationService->getWorkspaces($this->researcher->id);
@@ -1971,7 +1973,7 @@ class researchActions extends AhgActions
     /**
      * View workspace details.
      */
-    public function executeViewWorkspace(sfWebRequest $request)
+    public function executeViewWorkspace($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1984,7 +1986,7 @@ class researchActions extends AhgActions
             $this->redirect('research/register');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationService.php';
         $collaborationService = new CollaborationService();
 
         $workspaceId = (int) $request->getParameter('id');
@@ -2053,14 +2055,14 @@ class researchActions extends AhgActions
     /**
      * Admin statistics dashboard.
      */
-    public function executeAdminStatistics(sfWebRequest $request)
+    public function executeAdminStatistics($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
             $this->redirect('@homepage');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/StatisticsService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/StatisticsService.php';
         $statisticsService = new StatisticsService();
 
         $dateFrom = $request->getParameter('date_from', date('Y-m-01'));
@@ -2082,7 +2084,7 @@ class researchActions extends AhgActions
     /**
      * Manage API keys.
      */
-    public function executeApiKeys(sfWebRequest $request)
+    public function executeApiKeys($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -2132,13 +2134,13 @@ class researchActions extends AhgActions
     /**
      * Retrieval queue dashboard for staff.
      */
-    public function executeRetrievalQueue(sfWebRequest $request)
+    public function executeRetrievalQueue($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
         $retrievalService = new RetrievalService();
 
         $this->queueCounts = $retrievalService->getQueueCounts();
@@ -2175,13 +2177,13 @@ class researchActions extends AhgActions
     /**
      * Print call slips.
      */
-    public function executePrintCallSlips(sfWebRequest $request)
+    public function executePrintCallSlips($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
         $retrievalService = new RetrievalService();
 
         $requestIds = $request->getParameter('ids');
@@ -2214,14 +2216,14 @@ class researchActions extends AhgActions
     /**
      * Manage reading room seats.
      */
-    public function executeSeats(sfWebRequest $request)
+    public function executeSeats($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
             $this->redirect('@homepage');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
         $seatService = new SeatService();
 
         $roomId = (int) $request->getParameter('room_id');
@@ -2291,13 +2293,13 @@ class researchActions extends AhgActions
     /**
      * Seat assignment for a booking.
      */
-    public function executeAssignSeat(sfWebRequest $request)
+    public function executeAssignSeat($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
         $seatService = new SeatService();
 
         $bookingId = (int) $request->getParameter('booking_id');
@@ -2351,11 +2353,11 @@ class researchActions extends AhgActions
     /**
      * Get seat map data (AJAX).
      */
-    public function executeSeatMap(sfWebRequest $request)
+    public function executeSeatMap($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
         $seatService = new SeatService();
 
         $roomId = (int) $request->getParameter('room_id');
@@ -2377,14 +2379,14 @@ class researchActions extends AhgActions
     /**
      * Manage reading room equipment.
      */
-    public function executeEquipment(sfWebRequest $request)
+    public function executeEquipment($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->getUser()->setFlash('error', 'Administrator access required');
             $this->redirect('@homepage');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
         $equipmentService = new EquipmentService();
 
         $roomId = (int) $request->getParameter('room_id');
@@ -2453,7 +2455,7 @@ class researchActions extends AhgActions
     /**
      * Book equipment for a session.
      */
-    public function executeBookEquipment(sfWebRequest $request)
+    public function executeBookEquipment($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -2467,7 +2469,7 @@ class researchActions extends AhgActions
             $this->redirect('research/dashboard');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
         $equipmentService = new EquipmentService();
 
         $bookingId = (int) $request->getParameter('booking_id');
@@ -2526,14 +2528,14 @@ class researchActions extends AhgActions
     /**
      * Register a walk-in visitor.
      */
-    public function executeWalkIn(sfWebRequest $request)
+    public function executeWalkIn($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
         $retrievalService = new RetrievalService();
         $seatService = new SeatService();
 
@@ -2589,7 +2591,7 @@ class researchActions extends AhgActions
     /**
      * List and manage activities.
      */
-    public function executeActivities(sfWebRequest $request)
+    public function executeActivities($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -2644,7 +2646,7 @@ class researchActions extends AhgActions
     /**
      * View activity details.
      */
-    public function executeViewActivity(sfWebRequest $request)
+    public function executeViewActivity($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');

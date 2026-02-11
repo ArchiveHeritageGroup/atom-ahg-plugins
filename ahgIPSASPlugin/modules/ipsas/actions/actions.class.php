@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * IPSAS Module Actions
  *
  * Admin interface for heritage asset management under IPSAS standards
  */
-class ipsasActions extends AhgActions
+class ipsasActions extends AhgController
 {
     protected function getService(): \AhgIPSAS\Services\IPSASService
     {
@@ -15,7 +16,7 @@ class ipsasActions extends AhgActions
     /**
      * Dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
 
@@ -42,7 +43,7 @@ class ipsasActions extends AhgActions
     /**
      * Asset register
      */
-    public function executeAssets(sfWebRequest $request)
+    public function executeAssets($request)
     {
         $this->checkAdmin();
 
@@ -64,7 +65,7 @@ class ipsasActions extends AhgActions
     /**
      * Create asset
      */
-    public function executeAssetCreate(sfWebRequest $request)
+    public function executeAssetCreate($request)
     {
         $this->checkAdmin();
         $this->categories = $this->getService()->getCategories();
@@ -95,7 +96,7 @@ class ipsasActions extends AhgActions
     /**
      * View asset
      */
-    public function executeAssetView(sfWebRequest $request)
+    public function executeAssetView($request)
     {
         $this->checkAdmin();
 
@@ -113,7 +114,7 @@ class ipsasActions extends AhgActions
     /**
      * Edit asset
      */
-    public function executeAssetEdit(sfWebRequest $request)
+    public function executeAssetEdit($request)
     {
         $this->checkAdmin();
 
@@ -144,7 +145,7 @@ class ipsasActions extends AhgActions
     /**
      * Valuations list
      */
-    public function executeValuations(sfWebRequest $request)
+    public function executeValuations($request)
     {
         $this->checkAdmin();
 
@@ -161,7 +162,7 @@ class ipsasActions extends AhgActions
     /**
      * Create valuation
      */
-    public function executeValuationCreate(sfWebRequest $request)
+    public function executeValuationCreate($request)
     {
         $this->checkAdmin();
 
@@ -195,7 +196,7 @@ class ipsasActions extends AhgActions
     /**
      * Impairments list
      */
-    public function executeImpairments(sfWebRequest $request)
+    public function executeImpairments($request)
     {
         $this->checkAdmin();
         $this->impairments = $this->getService()->getImpairments([
@@ -206,7 +207,7 @@ class ipsasActions extends AhgActions
     /**
      * Insurance policies
      */
-    public function executeInsurance(sfWebRequest $request)
+    public function executeInsurance($request)
     {
         $this->checkAdmin();
 
@@ -221,7 +222,7 @@ class ipsasActions extends AhgActions
     /**
      * Reports
      */
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->checkAdmin();
         $this->year = $request->getParameter('year', date('Y'));
@@ -380,7 +381,7 @@ class ipsasActions extends AhgActions
     /**
      * Financial year summary
      */
-    public function executeFinancialYear(sfWebRequest $request)
+    public function executeFinancialYear($request)
     {
         $this->checkAdmin();
 
@@ -394,7 +395,7 @@ class ipsasActions extends AhgActions
     /**
      * Configuration
      */
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->checkAdmin();
 

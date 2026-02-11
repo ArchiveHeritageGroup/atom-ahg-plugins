@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -15,16 +16,14 @@ use Illuminate\Database\Capsule\Manager as DB;
  * @subpackage ahgMediaSettings
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class mediaSettingsActions extends AhgActions
+class mediaSettingsActions extends AhgController
 {
     /**
      * Check admin access
      */
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-
-        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }
@@ -32,7 +31,7 @@ class mediaSettingsActions extends AhgActions
     /**
      * Index - Main settings page
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->settings = $this->loadSettings();
         $this->grouped = $this->groupSettings($this->settings);
@@ -50,7 +49,7 @@ class mediaSettingsActions extends AhgActions
     /**
      * Save settings
      */
-    public function executeSave(sfWebRequest $request)
+    public function executeSave($request)
     {
         if ($request->isMethod('POST')) {
             $settings = $request->getParameter('settings', []);
@@ -101,7 +100,7 @@ class mediaSettingsActions extends AhgActions
     /**
      * Test processing on a specific file
      */
-    public function executeTest(sfWebRequest $request)
+    public function executeTest($request)
     {
         $slug = $request->getParameter('slug');
         if (!$slug) {
@@ -122,7 +121,7 @@ class mediaSettingsActions extends AhgActions
         }
 
         // Load processor
-        require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
+        require_once $this->config('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
         $result = MediaUploadHook::processDigitalObject($digitalObject);
 
         $this->result = $result;
@@ -133,7 +132,7 @@ class mediaSettingsActions extends AhgActions
     /**
      * JSON autocomplete for information objects
      */
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -176,7 +175,7 @@ class mediaSettingsActions extends AhgActions
         return $this->renderText(json_encode($formatted));
     }
 
-    public function executeQueue(sfWebRequest $request)
+    public function executeQueue($request)
     {
         // Get queue statistics
         $stats = DB::table('media_processing_queue')
@@ -201,9 +200,9 @@ class mediaSettingsActions extends AhgActions
     /**
      * Process queue items manually
      */
-    public function executeProcessQueue(sfWebRequest $request)
+    public function executeProcessQueue($request)
     {
-        require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
+        require_once $this->config('sf_plugins_dir').'/ahgThemeB5Plugin/lib/MediaUploadHook.php';
 
         $limit = $request->getParameter('limit', 5);
         $results = MediaUploadHook::processQueue($limit);
@@ -215,7 +214,7 @@ class mediaSettingsActions extends AhgActions
     /**
      * Clear completed queue items
      */
-    public function executeClearQueue(sfWebRequest $request)
+    public function executeClearQueue($request)
     {
         DB::table('media_processing_queue')
             ->whereIn('status', ['completed', 'failed'])

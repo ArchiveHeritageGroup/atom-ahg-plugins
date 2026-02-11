@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 
@@ -9,16 +10,16 @@ use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartOrdersAction extends sfAction
+class cartOrdersAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $ecommerceService = new EcommerceService();
 
         $this->orders = $ecommerceService->getUserOrders($userId);

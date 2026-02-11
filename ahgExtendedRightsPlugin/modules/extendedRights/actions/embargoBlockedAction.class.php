@@ -1,6 +1,7 @@
 <?php
 
-class extendedRightsEmbargoBlockedAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class extendedRightsEmbargoBlockedAction extends AhgController
 {
     public function execute($request)
     {

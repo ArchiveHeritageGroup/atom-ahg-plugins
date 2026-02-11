@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
 
@@ -27,12 +29,12 @@ use AtomExtensions\Services\CacheService;
  * @author     David Juhasz <david@artefactual.com>
  * @author     Damian Bauder <drbauder@ucalgary.ca>
  */
-class SettingsOaiAction extends sfAction
+class SettingsOaiAction extends AhgController
 {
     public function execute($request)
     {
         // Redirect to global settings form if the OAI plugin is not enabled
-        if (!in_array('arOaiPlugin', unserialize(sfConfig::get('app_plugins')))) {
+        if (!in_array('arOaiPlugin', unserialize($this->config('app_plugins')))) {
             $this->redirect('settings/global');
         }
 
@@ -51,7 +53,7 @@ class SettingsOaiAction extends sfAction
 
                     $this->getUser()->setFlash(
                         'notice',
-                        sfContext::getInstance()->i18n->__('OAI repository settings saved.')
+                        $this->getContext()->i18n->__('OAI repository settings saved.')
                     );
 
                     $this->redirect('settings/oai');

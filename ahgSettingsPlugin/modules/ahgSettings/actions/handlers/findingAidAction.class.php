@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
 
@@ -22,7 +24,7 @@ use AtomExtensions\Services\CacheService;
 /**
  * Finding Aid settings.
  */
-class SettingsFindingAidAction extends sfAction
+class SettingsFindingAidAction extends AhgController
 {
     /**
      * Main business/application logic.

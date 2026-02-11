@@ -1,9 +1,10 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Load PdfRedactionService if available
-$redactionServicePath = sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+$redactionServicePath = $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
 if (file_exists($redactionServicePath)) {
     require_once $redactionServicePath;
 }
@@ -11,13 +12,13 @@ if (file_exists($redactionServicePath)) {
 /**
  * TTS Actions - Text-to-Speech API endpoints
  */
-class ttsActions extends AhgActions
+class ttsActions extends AhgController
 {
     /**
      * Get TTS settings for a specific sector
      * GET /tts/settings?sector=archive
      */
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -56,7 +57,7 @@ class ttsActions extends AhgActions
      * Extract text from PDF for TTS
      * GET /tts/pdfText?id=<digital_object_id>
      */
-    public function executePdfText(sfWebRequest $request)
+    public function executePdfText($request)
     {
         $this->getResponse()->setContentType('application/json');
 

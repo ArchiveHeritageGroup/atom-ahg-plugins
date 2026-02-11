@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Linked Data Actions
  *
@@ -16,14 +17,14 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class linkedDataActions extends AhgActions
+class linkedDataActions extends AhgController
 {
     /**
      * JSON-LD endpoint for information objects
      *
      * Accessed via /{slug}.jsonld or with Accept: application/ld+json
      */
-    public function executeRecord(sfWebRequest $request)
+    public function executeRecord($request)
     {
         $slug = $request->getParameter('slug');
 
@@ -51,7 +52,7 @@ class linkedDataActions extends AhgActions
     /**
      * JSON-LD endpoint for repositories
      */
-    public function executeRepository(sfWebRequest $request)
+    public function executeRepository($request)
     {
         $slug = $request->getParameter('slug');
 
@@ -74,7 +75,7 @@ class linkedDataActions extends AhgActions
     /**
      * JSON-LD endpoint for actors
      */
-    public function executeActor(sfWebRequest $request)
+    public function executeActor($request)
     {
         $slug = $request->getParameter('slug');
 
@@ -97,9 +98,9 @@ class linkedDataActions extends AhgActions
     /**
      * Linked data sitemap for crawlers
      */
-    public function executeSitemap(sfWebRequest $request)
+    public function executeSitemap($request)
     {
-        $baseUrl = rtrim(sfConfig::get('app_siteBaseUrl', 'https://example.org'), '/');
+        $baseUrl = rtrim($this->config('app_siteBaseUrl', 'https://example.org'), '/');
 
         // Build XML sitemap
         $xml = new XMLWriter();
@@ -204,7 +205,7 @@ class linkedDataActions extends AhgActions
      *
      * Checks Accept header and redirects to JSON-LD if requested
      */
-    public function executeNegotiate(sfWebRequest $request)
+    public function executeNegotiate($request)
     {
         $slug = $request->getParameter('slug');
         $type = $request->getParameter('type', 'record');
@@ -369,7 +370,7 @@ class linkedDataActions extends AhgActions
      */
     protected function loadExporter(): void
     {
-        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgMetadataExportPlugin';
+        $pluginDir = $this->config('sf_plugins_dir') . '/ahgMetadataExportPlugin';
 
         // Load required classes
         require_once $pluginDir . '/lib/Contracts/ExporterInterface.php';

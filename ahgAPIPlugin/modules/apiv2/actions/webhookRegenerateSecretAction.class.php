@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Regenerate webhook secret
  *
@@ -7,7 +8,7 @@
  *
  * Returns new secret (only time it's shown after initial creation)
  */
-class apiv2WebhookRegenerateSecretAction extends AhgApiAction
+class apiv2WebhookRegenerateSecretAction extends AhgApiController
 {
     public function POST($request)
     {

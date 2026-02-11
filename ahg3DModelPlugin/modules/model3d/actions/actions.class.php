@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ahg3DModel Actions
  * 
@@ -9,29 +10,29 @@
  * @subpackage actions
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class model3dActions extends AhgActions
+class model3dActions extends AhgController
 {
     private $model3DService;
     private $db;
 
-    public function preExecute()
+    public function boot(): void
     {
         // Use AhgCore for database access
-        $corePluginPath = sfConfig::get('sf_root_dir') . '/plugins/ahgCorePlugin/lib/Core/AhgDb.php';
+        $corePluginPath = $this->config('sf_root_dir') . '/plugins/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($corePluginPath)) {
             require_once $corePluginPath;
         }
 
         // Fallback to bootstrap if AhgCore not available
         if (!class_exists('AhgCore\\Core\\AhgDb')) {
-            $bootstrapPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrapPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
             if (file_exists($bootstrapPath)) {
                 require_once $bootstrapPath;
             }
         }
 
         // Manually load the service file if not autoloaded
-        $servicePath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/Model3DService.php';
+        $servicePath = $this->config('sf_root_dir') . '/atom-framework/src/Services/Model3DService.php';
         if (file_exists($servicePath)) {
             require_once $servicePath;
         }
@@ -50,10 +51,10 @@ class model3dActions extends AhgActions
     /**
      * List all 3D models (admin view)
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@homepage');
         }
 
@@ -98,7 +99,7 @@ class model3dActions extends AhgActions
     /**
      * View a single 3D model
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $modelId = (int)$request->getParameter('id');
         $db = $this->db;
@@ -148,7 +149,7 @@ class model3dActions extends AhgActions
     /**
      * Embedded viewer (for iframes)
      */
-    public function executeEmbed(sfWebRequest $request)
+    public function executeEmbed($request)
     {
         $modelId = (int)$request->getParameter('id');
         $db = $this->db;
@@ -189,15 +190,15 @@ class model3dActions extends AhgActions
     /**
      * Upload a new 3D model
      */
-    public function executeUpload(sfWebRequest $request)
+    public function executeUpload($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@homepage');
         }
 
-        if (!$this->context->user->hasCredential('administrator') && 
-            !$this->context->user->hasCredential('editor')) {
+        if (!$this->getUser()->hasCredential('administrator') && 
+            !$this->getUser()->hasCredential('editor')) {
             $this->forward('default', 'secure');
         }
 
@@ -235,7 +236,7 @@ class model3dActions extends AhgActions
     private function processUpload(sfWebRequest $request)
     {
         $db = $this->db;
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/3d/' . $this->objectId;
+        $uploadDir = $this->config('sf_upload_dir') . '/3d/' . $this->objectId;
 
         // Create directory
         if (!is_dir($uploadDir)) {
@@ -315,7 +316,7 @@ class model3dActions extends AhgActions
             'is_primary' => $isPrimary,
             'is_public' => $request->getParameter('is_public', 1),
             'display_order' => $existingCount,
-            'created_by' => $this->context->user->getUserId(),
+            'created_by' => $this->getUser()->getUserId(),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -340,15 +341,15 @@ class model3dActions extends AhgActions
     /**
      * Edit 3D model settings
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@homepage');
         }
 
-        if (!$this->context->user->hasCredential('administrator') && 
-            !$this->context->user->hasCredential('editor')) {
+        if (!$this->getUser()->hasCredential('administrator') && 
+            !$this->getUser()->hasCredential('editor')) {
             $this->forward('default', 'secure');
         }
 
@@ -425,7 +426,7 @@ class model3dActions extends AhgActions
                 'ar_placement' => $request->getParameter('ar_placement', 'floor'),
                 'is_primary' => $request->getParameter('is_primary', 0) ? 1 : 0,
                 'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
-                'updated_by' => $this->context->user->getUserId(),
+                'updated_by' => $this->getUser()->getUserId(),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
@@ -459,14 +460,14 @@ class model3dActions extends AhgActions
     /**
      * Delete a 3D model
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('@homepage');
         }
 
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('default', 'secure');
         }
 
@@ -482,14 +483,14 @@ class model3dActions extends AhgActions
         $objectId = $model->object_id;
 
         // Delete file
-        $filePath = sfConfig::get('sf_upload_dir') . '/' . $model->file_path;
+        $filePath = $this->config('sf_upload_dir') . '/' . $model->file_path;
         if (file_exists($filePath)) {
             unlink($filePath);
         }
 
         // Delete poster if exists
         if ($model->poster_image) {
-            $posterPath = sfConfig::get('sf_upload_dir') . '/' . $model->poster_image;
+            $posterPath = $this->config('sf_upload_dir') . '/' . $model->poster_image;
             if (file_exists($posterPath)) {
                 unlink($posterPath);
             }
@@ -537,7 +538,7 @@ class model3dActions extends AhgActions
     /**
      * Generate IIIF 3D manifest
      */
-    public function executeIiifManifest(sfWebRequest $request)
+    public function executeIiifManifest($request)
     {
         $modelId = (int)$request->getParameter('id');
         $db = $this->db;
@@ -672,14 +673,14 @@ class model3dActions extends AhgActions
     /**
      * Add a hotspot
      */
-    public function executeAddHotspot(sfWebRequest $request)
+    public function executeAddHotspot($request)
     {
         if (!$request->isMethod('post')) {
             $this->getResponse()->setStatusCode(405);
             return sfView::NONE;
         }
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(401);
             return sfView::NONE;
         }
@@ -747,14 +748,14 @@ class model3dActions extends AhgActions
     /**
      * Delete a hotspot
      */
-    public function executeDeleteHotspot(sfWebRequest $request)
+    public function executeDeleteHotspot($request)
     {
         if (!$request->isMethod('post')) {
             $this->getResponse()->setStatusCode(405);
             return sfView::NONE;
         }
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(401);
             return sfView::NONE;
         }
@@ -788,7 +789,7 @@ class model3dActions extends AhgActions
     /**
      * API: Get models for an object
      */
-    public function executeApiModels(sfWebRequest $request)
+    public function executeApiModels($request)
     {
         $objectId = (int)$request->getParameter('object_id');
         $db = $this->db;
@@ -816,7 +817,7 @@ class model3dActions extends AhgActions
     /**
      * API: Get hotspots for a model
      */
-    public function executeApiHotspots(sfWebRequest $request)
+    public function executeApiHotspots($request)
     {
         $modelId = (int)$request->getParameter('model_id');
         $db = $this->db;
@@ -868,8 +869,8 @@ class model3dActions extends AhgActions
         $db::table('object_3d_audit_log')->insert([
             'model_id' => $modelId,
             'object_id' => $objectId,
-            'user_id' => $this->context->user->getUserId(),
-            'user_name' => $this->context->user->getUsername(),
+            'user_id' => $this->getUser()->getUserId(),
+            'user_name' => $this->getUser()->getUsername(),
             'action' => $action,
             'details' => !empty($details) ? json_encode($details) : null,
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
@@ -917,7 +918,7 @@ class model3dActions extends AhgActions
     {
         try {
             // Load AhgAuditService if available
-            $auditServicePath = sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            $auditServicePath = $this->config('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
             if (file_exists($auditServicePath)) {
                 require_once $auditServicePath;
             }

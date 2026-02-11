@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Label module - Barcode/label generation for all GLAM sectors.
  */
-class labelActions extends AhgActions
+class labelActions extends AhgController
 {
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);

@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
 
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
 
@@ -9,12 +10,12 @@ use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class favoritesRemoveAction extends sfAction
+class favoritesRemoveAction extends AhgController
 {
     public function execute($request)
     {
         // Check if user is authenticated
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
@@ -22,12 +23,12 @@ class favoritesRemoveAction extends sfAction
         $id = $request->getParameter('id');
         $returnUrl = $request->getReferer();
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $service = new FavoritesService();
 
         $result = $service->removeFromFavorites($userId, (int) $id);
 
-        $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
+        $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
 
         // Redirect back
         if ($returnUrl) {

@@ -1,15 +1,16 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * AJAX endpoint to get job progress.
  */
-class dataMigrationJobProgressAction extends sfAction
+class dataMigrationJobProgressAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['error' => 'Unauthorized']));
         }
 

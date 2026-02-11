@@ -1,6 +1,7 @@
 <?php
 
-class apiv2DsarsCreateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2DsarsCreateAction extends AhgApiController
 {
     public function POST($request)
     {

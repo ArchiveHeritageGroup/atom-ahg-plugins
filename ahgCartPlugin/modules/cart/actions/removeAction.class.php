@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 
@@ -9,11 +10,11 @@ use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartRemoveAction extends sfAction
+class cartRemoveAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
@@ -21,12 +22,12 @@ class cartRemoveAction extends sfAction
         $id = $request->getParameter('id');
         $returnUrl = $request->getReferer();
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $service = new CartService();
 
         $result = $service->removeFromCart($userId, (int) $id);
 
-        $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
+        $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
 
         if ($returnUrl) {
             $this->redirect($returnUrl);

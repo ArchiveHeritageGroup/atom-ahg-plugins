@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 
@@ -9,11 +10,11 @@ use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartClearAction extends sfAction
+class cartClearAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
@@ -23,12 +24,12 @@ class cartClearAction extends sfAction
             return;
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $service = new CartService();
 
         $result = $service->clearAll($userId);
 
-        $this->context->user->setFlash('notice', $result['message']);
+        $this->getUser()->setFlash('notice', $result['message']);
         $this->redirect(['module' => 'cart', 'action' => 'browse']);
     }
 }

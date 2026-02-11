@@ -1,17 +1,11 @@
 <?php
 
-class rightsHolderManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class rightsHolderManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeBrowse($request)
     {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('Browse rights holders') . ' - ' . $this->response->getTitle());
 
@@ -24,9 +18,9 @@ class rightsHolderManageActions extends AhgActions
 
         // Sort defaults
         if ($this->getUser()->isAuthenticated()) {
-            $sortSetting = sfConfig::get('app_sort_browser_user', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_user', 'lastUpdated');
         } else {
-            $sortSetting = sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_anonymous', 'lastUpdated');
         }
 
         $sort = $request->getParameter('sort', $sortSetting);
@@ -38,7 +32,7 @@ class rightsHolderManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Handle global search redirect: ?query=X -> subquery=X
@@ -68,9 +62,9 @@ class rightsHolderManageActions extends AhgActions
     /**
      * View a rights holder record.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $slug = $request->getParameter('slug');
 
         $this->rightsHolder = \AhgRightsHolderManage\Services\RightsHolderCrudService::getBySlug($slug, $culture);
@@ -78,7 +72,7 @@ class rightsHolderManageActions extends AhgActions
             $this->forward404();
         }
 
-        $user = $this->context->user;
+        $user = $this->getUser();
         $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
 
         if (!$user->isAuthenticated()) {
@@ -96,13 +90,13 @@ class rightsHolderManageActions extends AhgActions
     /**
      * Edit or create a rights holder record.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
             QubitAcl::forwardUnauthorized();
         }
@@ -158,12 +152,12 @@ class rightsHolderManageActions extends AhgActions
     /**
      * Delete a rights holder record.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->form = new sfForm();
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
             QubitAcl::forwardUnauthorized();
         }

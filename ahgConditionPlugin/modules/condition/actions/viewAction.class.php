@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * View Condition Check with Template Data
  */
-class conditionViewAction extends sfAction
+class conditionViewAction extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
         // Load AhgDb class for Laravel Query Builder
-        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
             \AhgCore\Core\AhgDb::init();
@@ -24,7 +25,7 @@ class conditionViewAction extends sfAction
         }
         
         // Load services
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
         $templateService = new \ahgConditionPlugin\Service\ConditionTemplateService();
         
         // Get condition check

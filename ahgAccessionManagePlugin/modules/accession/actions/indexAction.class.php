@@ -1,6 +1,7 @@
 <?php
 
-class AccessionIndexAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class AccessionIndexAction extends AhgController
 {
     public function execute($request)
     {
@@ -19,7 +20,7 @@ class AccessionIndexAction extends sfAction
             $title = $this->context->i18n->__('Untitled');
         }
 
-        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
+        $this->getResponse()->setTitle("{$title} - {$this->getResponse()->getTitle()}");
 
         if (QubitAcl::check($this->resource, 'update')) {
             $validatorSchema = new sfValidatorSchema();

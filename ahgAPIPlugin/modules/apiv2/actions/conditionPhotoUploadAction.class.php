@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionPhotoUploadAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionPhotoUploadAction extends AhgApiController
 {
     public function POST($request)
     {
@@ -34,7 +35,7 @@ class apiv2ConditionPhotoUploadAction extends AhgApiAction
 
     protected function handleFileUpload($file, $conditionId, $request)
     {
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/conditions/' . date('Y/m');
+        $uploadDir = $this->config('sf_upload_dir') . '/conditions/' . date('Y/m');
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -92,7 +93,7 @@ class apiv2ConditionPhotoUploadAction extends AhgApiAction
             return $this->error(400, 'Bad Request', 'Invalid base64 data');
         }
 
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/conditions/' . date('Y/m');
+        $uploadDir = $this->config('sf_upload_dir') . '/conditions/' . date('Y/m');
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }

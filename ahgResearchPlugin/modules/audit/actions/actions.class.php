@@ -1,10 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class auditActions extends AhgActions
+class auditActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required');
@@ -12,7 +13,7 @@ class auditActions extends AhgActions
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->filters = [
             'table' => $request->getParameter('table'),
@@ -88,7 +89,7 @@ class auditActions extends AhgActions
         ];
     }
 
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $id = (int) $request->getParameter('id');
         
@@ -117,7 +118,7 @@ class auditActions extends AhgActions
         }
     }
 
-    public function executeRecord(sfWebRequest $request)
+    public function executeRecord($request)
     {
         $this->tableName = $request->getParameter('table');
         $this->recordId = (int) $request->getParameter('record_id');
@@ -141,7 +142,7 @@ class auditActions extends AhgActions
         }
     }
 
-    public function executeUser(sfWebRequest $request)
+    public function executeUser($request)
     {
         $this->userId = (int) $request->getParameter('id');
         $this->user = DB::table('user')->where('id', $this->userId)->first();
@@ -180,7 +181,7 @@ class auditActions extends AhgActions
             ->toArray();
     }
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $query = DB::table('audit_log as a')
             ->leftJoin('user as u', 'a.user_id', '=', 'u.id')

@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Delete a webhook
  *
  * DELETE /api/v2/webhooks/:id
  */
-class apiv2WebhooksDeleteAction extends AhgApiAction
+class apiv2WebhooksDeleteAction extends AhgApiController
 {
     public function DELETE($request)
     {

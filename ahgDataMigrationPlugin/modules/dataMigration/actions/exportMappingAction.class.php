@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Export a mapping profile to JSON file.
  */
-class exportMappingAction extends sfAction
+class exportMappingAction extends AhgController
 {
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
 

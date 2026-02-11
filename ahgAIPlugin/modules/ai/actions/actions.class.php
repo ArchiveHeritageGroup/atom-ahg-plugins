@@ -1,13 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/PromptService.php';
 
-class aiActions extends AhgActions
+class aiActions extends AhgController
 {
-    public function executeExtract(sfWebRequest $request)
+    public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -62,7 +63,7 @@ class aiActions extends AhgActions
         ]));
     }
 
-    public function executeReview(sfWebRequest $request)
+    public function executeReview($request)
     {
         $this->pendingCount = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->where('status', 'pending')
@@ -89,7 +90,7 @@ class aiActions extends AhgActions
             ->toArray();
     }
 
-    public function executeGetEntities(sfWebRequest $request)
+    public function executeGetEntities($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -136,7 +137,7 @@ class aiActions extends AhgActions
         ]));
     }
 
-    public function executeUpdateEntity(sfWebRequest $request)
+    public function executeUpdateEntity($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -208,7 +209,7 @@ class aiActions extends AhgActions
         }
     }
 
-    public function executeCreateActor(sfWebRequest $request)
+    public function executeCreateActor($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -265,7 +266,7 @@ class aiActions extends AhgActions
         return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $actor->id]));
     }
 
-    public function executeCreatePlace(sfWebRequest $request)
+    public function executeCreatePlace($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -320,7 +321,7 @@ class aiActions extends AhgActions
         return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $term->id]));
     }
 
-    public function executeCreateSubject(sfWebRequest $request)
+    public function executeCreateSubject($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -375,7 +376,7 @@ class aiActions extends AhgActions
         return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $term->id]));
     }
 
-    public function executeHealth(sfWebRequest $request)
+    public function executeHealth($request)
     {
         $this->getResponse()->setContentType('application/json');
         $nerService = new ahgNerService();
@@ -420,7 +421,7 @@ class aiActions extends AhgActions
         }
 
         // Try upload directory
-        $uploadPath = sfConfig::get('sf_upload_dir');
+        $uploadPath = $this->config('sf_upload_dir');
         $objectPath = $uploadPath . '/r/' . $digitalObject->id;
         if (is_dir($objectPath)) {
             foreach ($allowedExts as $ext) {
@@ -433,7 +434,7 @@ class aiActions extends AhgActions
         $path = $digitalObject->path;
         $name = $digitalObject->name;
         if ($path && $name) {
-            $fullPath = sfConfig::get('sf_web_dir') . '/' . ltrim($path, '/') . $name;
+            $fullPath = $this->config('sf_web_dir') . '/' . ltrim($path, '/') . $name;
             if (file_exists($fullPath)) {
                 $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
                 if (in_array($ext, $allowedExts)) return $fullPath;
@@ -442,7 +443,7 @@ class aiActions extends AhgActions
 
         // Try uploads directory with path + name
         if ($path && $name) {
-            $fullPath = sfConfig::get('sf_upload_dir') . '/' . ltrim(str_replace('/uploads/', '', $path), '/') . $name;
+            $fullPath = $this->config('sf_upload_dir') . '/' . ltrim(str_replace('/uploads/', '', $path), '/') . $name;
             if (file_exists($fullPath)) {
                 $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
                 if (in_array($ext, $allowedExts)) return $fullPath;
@@ -749,7 +750,7 @@ class aiActions extends AhgActions
     /**
      * Create date event(s) from NER entity - handles compound dates.
      */
-    public function executeCreateDate(sfWebRequest $request)
+    public function executeCreateDate($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -811,7 +812,7 @@ class aiActions extends AhgActions
     /**
      * Preview compound date splitting without creating events.
      */
-    public function executePreviewDateSplit(sfWebRequest $request)
+    public function executePreviewDateSplit($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -840,7 +841,7 @@ class aiActions extends AhgActions
         ]));
     }
 
-    public function executeBulkSave(sfWebRequest $request)
+    public function executeBulkSave($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -1151,7 +1152,7 @@ class aiActions extends AhgActions
     /**
      * Generate summary and save to Scope & Content field
      */
-    public function executeSummarize(sfWebRequest $request)
+    public function executeSummarize($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1293,7 +1294,7 @@ class aiActions extends AhgActions
     /**
      * Translate record fields using NLLB-200
      */
-    public function executeTranslate(sfWebRequest $request)
+    public function executeTranslate($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1368,11 +1369,11 @@ class aiActions extends AhgActions
     /**
      * Get available languages
      */
-    public function executeTranslateLanguages(sfWebRequest $request)
+    public function executeTranslateLanguages($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
+        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
         $url = $apiUrl . '/ai/v1/translate/languages';
 
         $ch = curl_init($url);
@@ -1398,8 +1399,8 @@ class aiActions extends AhgActions
      */
     private function callTranslationApi($text, $sourceLang, $targetLang)
     {
-        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
-        $apiKey = sfConfig::get('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
+        $apiKey = $this->config('app_ai_api_key', 'ahg_ai_demo_internal_2026');
 
         $url = $apiUrl . '/ai/v1/translate';
 
@@ -1450,7 +1451,7 @@ class aiActions extends AhgActions
      * Uses models at /opt/ahg-ai/models/date, digits, letters
      * Zone detection enabled by default - detects text lines and processes each separately
      */
-    public function executeHtr(sfWebRequest $request)
+    public function executeHtr($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1496,8 +1497,8 @@ class aiActions extends AhgActions
         }
 
         // Call the Python HTR API
-        $apiUrl = sfConfig::get('app_ai_api_url', 'http://192.168.0.112:5004');
-        $apiKey = sfConfig::get('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
+        $apiKey = $this->config('app_ai_api_key', 'ahg_ai_demo_internal_2026');
 
         $url = $apiUrl . '/ai/v1/htr';
 
@@ -1577,7 +1578,7 @@ class aiActions extends AhgActions
      * Generate a description suggestion for an object
      * POST /ai/suggest/:id
      */
-    public function executeSuggest(sfWebRequest $request)
+    public function executeSuggest($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1604,7 +1605,7 @@ class aiActions extends AhgActions
      * Get suggestion review dashboard
      * GET /ai/suggest/review
      */
-    public function executeSuggestReview(sfWebRequest $request)
+    public function executeSuggestReview($request)
     {
         $service = new DescriptionService();
 
@@ -1634,7 +1635,7 @@ class aiActions extends AhgActions
      * View a single suggestion
      * GET /ai/suggest/:id/view
      */
-    public function executeSuggestView(sfWebRequest $request)
+    public function executeSuggestView($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1669,7 +1670,7 @@ class aiActions extends AhgActions
      * Process suggestion decision (approve/reject)
      * POST /ai/suggest/:id/decision
      */
-    public function executeSuggestDecision(sfWebRequest $request)
+    public function executeSuggestDecision($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1699,7 +1700,7 @@ class aiActions extends AhgActions
      * Get suggestions for a specific object
      * GET /ai/suggest/object/:id
      */
-    public function executeSuggestObject(sfWebRequest $request)
+    public function executeSuggestObject($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1719,7 +1720,7 @@ class aiActions extends AhgActions
      * Get LLM configurations
      * GET /ai/llm/configs
      */
-    public function executeLlmConfigs(sfWebRequest $request)
+    public function executeLlmConfigs($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1744,7 +1745,7 @@ class aiActions extends AhgActions
      * Get LLM health status
      * GET /ai/llm/health
      */
-    public function executeLlmHealth(sfWebRequest $request)
+    public function executeLlmHealth($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1761,7 +1762,7 @@ class aiActions extends AhgActions
      * Get prompt templates
      * GET /ai/templates
      */
-    public function executeTemplates(sfWebRequest $request)
+    public function executeTemplates($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1782,7 +1783,7 @@ class aiActions extends AhgActions
      * Preview a suggestion without saving
      * POST /ai/suggest/:id/preview
      */
-    public function executeSuggestPreview(sfWebRequest $request)
+    public function executeSuggestPreview($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1849,9 +1850,9 @@ class aiActions extends AhgActions
      * Batch job queue dashboard
      * GET /ai/batch
      */
-    public function executeBatch(sfWebRequest $request)
+    public function executeBatch($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -1877,11 +1878,11 @@ class aiActions extends AhgActions
      * Create new batch job
      * POST /ai/batch/create
      */
-    public function executeBatchCreate(sfWebRequest $request)
+    public function executeBatchCreate($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
         }
 
@@ -1909,7 +1910,7 @@ class aiActions extends AhgActions
                 'delay_between_ms' => $data['delay_between_ms'] ?? 1000,
                 'max_retries' => $data['max_retries'] ?? 3,
                 'options' => $data['options'] ?? null,
-                'created_by' => $this->context->user->getUserId(),
+                'created_by' => $this->getUser()->getUserId(),
             ]);
 
             // Get object IDs
@@ -2003,9 +2004,9 @@ class aiActions extends AhgActions
      * Get batch details
      * GET /ai/batch/:id
      */
-    public function executeBatchView(sfWebRequest $request)
+    public function executeBatchView($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -2047,7 +2048,7 @@ class aiActions extends AhgActions
      * Get batch progress (AJAX)
      * GET /ai/batch/:id/progress
      */
-    public function executeBatchProgress(sfWebRequest $request)
+    public function executeBatchProgress($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -2078,11 +2079,11 @@ class aiActions extends AhgActions
      * Batch action (start, pause, resume, cancel, retry)
      * POST /ai/batch/:id/action
      */
-    public function executeBatchAction(sfWebRequest $request)
+    public function executeBatchAction($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
         }
 
@@ -2145,7 +2146,7 @@ class aiActions extends AhgActions
      * Process next jobs (called by cron or manually)
      * POST /ai/batch/process
      */
-    public function executeBatchProcess(sfWebRequest $request)
+    public function executeBatchProcess($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -2195,7 +2196,7 @@ class aiActions extends AhgActions
      * Get job details
      * GET /ai/job/:id
      */
-    public function executeJobView(sfWebRequest $request)
+    public function executeJobView($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -2237,7 +2238,7 @@ class aiActions extends AhgActions
      *
      * GET /ai/ner/approved-entities/:id
      */
-    public function executeGetApprovedEntities(sfWebRequest $request)
+    public function executeGetApprovedEntities($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -2355,7 +2356,7 @@ class aiActions extends AhgActions
      *
      * GET /ai/ner/pdf-overlay/:id
      */
-    public function executePdfOverlay(sfWebRequest $request)
+    public function executePdfOverlay($request)
     {
         $objectId = $request->getParameter('id');
 
@@ -2384,7 +2385,7 @@ class aiActions extends AhgActions
             $webPath = rtrim($doPath, '/') . '/' . $doName;
 
             // Get absolute path for page count
-            $absolutePath = sfConfig::get('sf_web_dir', '') . $webPath;
+            $absolutePath = $this->config('sf_web_dir', '') . $webPath;
 
             // Get page count for PDFs
             $pageCount = 1;

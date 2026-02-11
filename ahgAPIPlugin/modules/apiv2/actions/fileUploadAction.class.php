@@ -1,6 +1,7 @@
 <?php
 
-class apiv2FileUploadAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2FileUploadAction extends AhgApiController
 {
     public function POST($request)
     {
@@ -9,7 +10,7 @@ class apiv2FileUploadAction extends AhgApiAction
         }
 
         $type = $request->getParameter('type', 'general');
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/' . $type . '/' . date('Y/m');
+        $uploadDir = $this->config('sf_upload_dir') . '/' . $type . '/' . date('Y/m');
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
@@ -75,7 +76,7 @@ class apiv2FileUploadAction extends AhgApiAction
             'original_name' => $file['name'],
             'mime_type' => $file['type'],
             'size' => $file['size'],
-            'path' => str_replace(sfConfig::get('sf_upload_dir'), '/uploads', $filepath)
+            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath)
         ];
     }
 
@@ -103,7 +104,7 @@ class apiv2FileUploadAction extends AhgApiAction
             'original_name' => $originalName,
             'mime_type' => $mimeType,
             'size' => strlen($content),
-            'path' => str_replace(sfConfig::get('sf_upload_dir'), '/uploads', $filepath)
+            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath)
         ];
     }
 }

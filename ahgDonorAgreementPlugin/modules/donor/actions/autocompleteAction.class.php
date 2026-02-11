@@ -1,12 +1,13 @@
 <?php
 
-class donorAutocompleteAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAutocompleteAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode([]));
         }
         

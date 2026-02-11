@@ -1,26 +1,27 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * System Information Page
  *
  * Displays installed software versions and system health information
  */
 
-class SettingsSystemInfoAction extends sfAction
+class SettingsSystemInfoAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin permission
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
-        $this->atomRoot = sfConfig::get('sf_root_dir');
+        $this->atomRoot = $this->config('sf_root_dir');
 
         // Get software versions
         $this->softwareVersions = $this->getSoftwareVersions();
@@ -125,10 +126,10 @@ class SettingsSystemInfoAction extends sfAction
     protected function getDiskUsage(): array
     {
         $paths = [
-            'AtoM Root' => sfConfig::get('sf_root_dir'),
-            'Uploads' => sfConfig::get('sf_upload_dir'),
-            'Cache' => sfConfig::get('sf_cache_dir'),
-            'Logs' => sfConfig::get('sf_log_dir'),
+            'AtoM Root' => $this->config('sf_root_dir'),
+            'Uploads' => $this->config('sf_upload_dir'),
+            'Cache' => $this->config('sf_cache_dir'),
+            'Logs' => $this->config('sf_log_dir'),
         ];
 
         $usage = [];
@@ -256,8 +257,8 @@ class SettingsSystemInfoAction extends sfAction
 
         // Search Engine (auto-detect Elasticsearch or OpenSearch)
         try {
-            $esHost = sfConfig::get('app_elasticsearch_host', 'localhost');
-            $esPort = sfConfig::get('app_elasticsearch_port', 9200);
+            $esHost = $this->config('app_elasticsearch_host', 'localhost');
+            $esPort = $this->config('app_elasticsearch_port', 9200);
 
             // Use factory for auto-detection (may not exist on older installs)
             $engineName = 'Search Engine';
@@ -504,7 +505,7 @@ class SettingsSystemInfoAction extends sfAction
 
         // Cantaloupe
         try {
-            $cantaloupeHost = sfConfig::get('app_cantaloupe_host', 'localhost:8182');
+            $cantaloupeHost = $this->config('app_cantaloupe_host', 'localhost:8182');
             $ch = curl_init("http://{$cantaloupeHost}/iiif/2");
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -573,7 +574,7 @@ class SettingsSystemInfoAction extends sfAction
 
         // AtoM Version
         $atomVersion = 'Unknown';
-        $versionFile = sfConfig::get('sf_root_dir') . '/VERSION';
+        $versionFile = $this->config('sf_root_dir') . '/VERSION';
         if (file_exists($versionFile)) {
             $atomVersion = trim(file_get_contents($versionFile));
         }
@@ -582,7 +583,7 @@ class SettingsSystemInfoAction extends sfAction
             'version' => $atomVersion,
             'icon' => 'bi-archive',
             'status' => 'ok',
-            'path' => sfConfig::get('sf_root_dir'),
+            'path' => $this->config('sf_root_dir'),
         ];
 
         // Symfony Version
@@ -591,7 +592,7 @@ class SettingsSystemInfoAction extends sfAction
             'version' => SYMFONY_VERSION,
             'icon' => 'bi-bricks',
             'status' => 'ok',
-            'path' => sfConfig::get('sf_symfony_lib_dir'),
+            'path' => $this->config('sf_symfony_lib_dir'),
         ];
 
         return $versions;

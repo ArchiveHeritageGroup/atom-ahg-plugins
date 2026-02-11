@@ -1,16 +1,17 @@
 <?php
 
-class translationActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class translationActions extends AhgController
 {
     /** @var AhgTranslationService */
     private $svc;
 
-    public function preExecute()
+    public function boot(): void
     {
         $this->svc = new AhgTranslationService();
     }
 
-    public function executeHealth(sfWebRequest $request)
+    public function executeHealth($request)
     {
         $endpoint = $this->svc->getSetting('mt.endpoint', 'http://127.0.0.1:5100/translate');
 
@@ -39,7 +40,7 @@ class translationActions extends AhgActions
         )));
     }
 
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         // Require authenticated user (tighten to admin later if you want)
         if (!$this->getUser()->isAuthenticated()) $this->forward404();
@@ -69,14 +70,14 @@ class translationActions extends AhgActions
      *  - overwrite: 0/1 (default 0)
      *  - saveCulture: 0/1 (default 1) save with AtoM culture code
      */
-    public function executeTranslate(sfWebRequest $request)
+    public function executeTranslate($request)
     {
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 
         $id = (int)$request->getParameter('id');
         $fieldKey = (string)$request->getParameter('field');
         $targetFieldKey = (string)$request->getParameter('targetField', $fieldKey); // Default to same field
-        $source = (string)$request->getParameter('source', $this->getUser()->getCulture());
+        $source = (string)$request->getParameter('source', $this->culture());
         $target = (string)$request->getParameter('target', $this->svc->getSetting('mt.target_culture', 'en'));
         $apply = ((int)$request->getParameter('apply', 0) === 1);
         $overwrite = ((int)$request->getParameter('overwrite', 0) === 1);
@@ -145,7 +146,7 @@ class translationActions extends AhgActions
         return $this->renderText(json_encode($resp));
     }
 
-    public function executeApply(sfWebRequest $request)
+    public function executeApply($request)
     {
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 

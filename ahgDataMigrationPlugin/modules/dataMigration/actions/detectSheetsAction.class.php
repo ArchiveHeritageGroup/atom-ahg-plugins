@@ -1,12 +1,13 @@
 <?php
 
-class dataMigrationDetectSheetsAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class dataMigrationDetectSheetsAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
         
@@ -24,7 +25,7 @@ class dataMigrationDetectSheetsAction extends sfAction
         
         try {
             // Load PhpSpreadsheet
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
             if (file_exists($bootstrap)) {
                 require_once $bootstrap;
             }

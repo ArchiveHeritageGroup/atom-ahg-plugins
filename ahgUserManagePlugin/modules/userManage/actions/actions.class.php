@@ -1,15 +1,9 @@
 <?php
 
-class userManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class userManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         // Admin-only access
         if (!$this->getUser()->isAdministrator()) {
@@ -18,7 +12,7 @@ class userManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('List users') . ' - ' . $this->response->getTitle());
 
@@ -39,7 +33,7 @@ class userManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Handle global search redirect: ?query=X -> subquery=X
@@ -73,7 +67,7 @@ class userManageActions extends AhgActions
     /**
      * View a user profile.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         // Admin-only
         if (!$this->getUser()->isAdministrator()) {
@@ -116,7 +110,7 @@ class userManageActions extends AhgActions
     /**
      * Edit or create a user.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         // Admin-only
         if (!$this->getUser()->isAdministrator()) {
@@ -125,7 +119,7 @@ class userManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
@@ -268,7 +262,7 @@ class userManageActions extends AhgActions
     /**
      * Delete a user.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Admin-only
         if (!$this->getUser()->isAdministrator()) {

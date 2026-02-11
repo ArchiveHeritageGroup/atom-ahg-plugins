@@ -1,15 +1,9 @@
 <?php
 
-class accessionManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class accessionManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         // Access control: accessions require authentication
         if (!$this->getUser()->isAuthenticated()) {
@@ -17,7 +11,7 @@ class accessionManageActions extends AhgActions
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Page title
         $this->response->setTitle(__('Browse accessions') . ' - ' . $this->response->getTitle());
@@ -35,9 +29,9 @@ class accessionManageActions extends AhgActions
             || !empty($request->getParameter('subquery'))) {
             $sortSetting = 'relevance';
         } elseif ($this->getUser()->isAuthenticated()) {
-            $sortSetting = sfConfig::get('app_sort_browser_user', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_user', 'lastUpdated');
         } else {
-            $sortSetting = sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_anonymous', 'lastUpdated');
         }
 
         $sort = $request->getParameter('sort', $sortSetting);
@@ -49,11 +43,11 @@ class accessionManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Max result window guard
-        $maxResultWindow = (int) sfConfig::get('app_opensearch_max_result_window', 10000);
+        $maxResultWindow = (int) $this->config('app_opensearch_max_result_window', 10000);
         if ($limit * $page > $maxResultWindow) {
             $message = $this->context->i18n->__(
                 "We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. To view the last records in the current result set, try changing the sort direction.",

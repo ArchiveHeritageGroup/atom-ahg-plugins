@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
 
@@ -26,7 +28,7 @@ use AtomExtensions\Services\CacheService;
  * @author     Jack Bates <jack@nottheoilrig.com>
  * @author     David Juhasz <david@artefactual.com>
  */
-class SettingsInterfaceLabelAction extends sfAction
+class SettingsInterfaceLabelAction extends AhgController
 {
     public function execute($request)
     {
@@ -52,7 +54,7 @@ class SettingsInterfaceLabelAction extends sfAction
                     // Do update and redirect to avoid repeat submit wackiness
                     $this->updateUiLabelSettings($this->uiLabelForm);
 
-                    $notice = sfContext::getInstance()->i18n->__('User interface labels saved.');
+                    $notice = $this->getContext()->i18n->__('User interface labels saved.');
                     $this->getUser()->setFlash('notice', $notice);
 
                     $this->redirect('settings/interfaceLabel');

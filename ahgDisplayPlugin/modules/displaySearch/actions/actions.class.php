@@ -1,19 +1,21 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Display Search Actions
  * 
  * Browse and search by object type using Elasticsearch
  */
 
-class displaySearchActions extends AhgActions
+class displaySearchActions extends AhgController
 {
     protected $esService;
     protected $adapter;
     
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Elasticsearch/DisplayElasticsearchService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Elasticsearch/DisplaySearchResultAdapter.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Elasticsearch/DisplayElasticsearchService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Elasticsearch/DisplaySearchResultAdapter.php';
         
         $this->esService = new DisplayElasticsearchService();
         $this->adapter = new DisplaySearchResultAdapter();
@@ -22,7 +24,7 @@ class displaySearchActions extends AhgActions
     /**
      * Main search action with display facets
      */
-    public function executeSearch(sfWebRequest $request)
+    public function executeSearch($request)
     {
         $params = [
             'query' => $request->getParameter('query', '*'),
@@ -48,7 +50,7 @@ class displaySearchActions extends AhgActions
     /**
      * Browse by object type
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $objectType = $request->getParameter('type', 'archive');
         
@@ -125,7 +127,7 @@ class displaySearchActions extends AhgActions
     /**
      * AJAX autocomplete
      */
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
         $query = $request->getParameter('query', '');
         
@@ -141,7 +143,7 @@ class displaySearchActions extends AhgActions
     /**
      * Get facets only (for AJAX updates)
      */
-    public function executeFacets(sfWebRequest $request)
+    public function executeFacets($request)
     {
         $filters = [
             'object_type' => $request->getParameter('object_type'),
@@ -157,7 +159,7 @@ class displaySearchActions extends AhgActions
     /**
      * ES Admin - reindex display data
      */
-    public function executeReindex(sfWebRequest $request)
+    public function executeReindex($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -180,7 +182,7 @@ class displaySearchActions extends AhgActions
     /**
      * Update ES mapping
      */
-    public function executeUpdateMapping(sfWebRequest $request)
+    public function executeUpdateMapping($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');

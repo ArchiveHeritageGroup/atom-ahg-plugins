@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Request to Publish Submit Action
  *
@@ -10,12 +11,12 @@
  * @subpackage ahgRequestToPublishPlugin
  * @author     The Archive and Heritage Group
  */
-class requestToPublishSubmitAction extends sfAction
+class requestToPublishSubmitAction extends AhgController
 {
     public function execute($request)
     {
         // Initialize service
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Services/RequestToPublishService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Services/RequestToPublishService.php';
         $service = new \ahgRequestToPublishPlugin\Services\RequestToPublishService();
 
         // Get object ID from route
@@ -65,7 +66,7 @@ class requestToPublishSubmitAction extends sfAction
                 ];
 
                 $service->submitRequest($data);
-                $this->context->user->setFlash('notice', 'Your request has been submitted successfully. We will contact you soon.');
+                $this->getUser()->setFlash('notice', 'Your request has been submitted successfully. We will contact you soon.');
                 
                 // Redirect back to information object
                 $this->redirect([
@@ -73,7 +74,7 @@ class requestToPublishSubmitAction extends sfAction
                     'slug' => $this->informationObject->slug
                 ]);
             } catch (\Exception $e) {
-                $this->context->user->setFlash('error', 'Error: ' . $e->getMessage());
+                $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }
         }
 
@@ -82,8 +83,8 @@ class requestToPublishSubmitAction extends sfAction
         $this->userSurname = '';
         $this->userEmail = '';
 
-        if ($this->context->user->isAuthenticated()) {
-            $userId = $this->context->user->getAttribute('user_id');
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
             if ($userId) {
                 $user = \Illuminate\Database\Capsule\Manager::table('user')
                     ->where('id', $userId)

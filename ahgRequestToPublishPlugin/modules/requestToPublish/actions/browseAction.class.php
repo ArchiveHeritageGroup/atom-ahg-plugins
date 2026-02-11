@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Request to Publish Browse Action
  *
@@ -10,22 +11,22 @@
  * @subpackage ahgRequestToPublishPlugin
  * @author     The Archive and Heritage Group
  */
-class requestToPublishBrowseAction extends sfAction
+class requestToPublishBrowseAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin permission
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
         // Initialize repository
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
         $repository = new \ahgRequestToPublishPlugin\Repositories\RequestToPublishRepository();
 
         // Get filter parameters

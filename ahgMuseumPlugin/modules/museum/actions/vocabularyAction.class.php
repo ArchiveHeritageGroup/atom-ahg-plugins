@@ -1,12 +1,13 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Returns existing vocabulary values for CCO fields.
  * Combines local database values with Getty vocabulary search.
  */
-class museumVocabularyAction extends sfAction
+class museumVocabularyAction extends AhgController
 {
     public function execute($request)
     {

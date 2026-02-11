@@ -1,16 +1,16 @@
 <?php
 
-class exportActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class exportActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-        if (!$this->context->user->isAuthenticated()) {
+if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Load AhgDb for database access
-        $ahgDbFile = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
         if (file_exists($ahgDbFile)) {
             require_once $ahgDbFile;
         }
@@ -19,7 +19,7 @@ class exportActions extends AhgActions
     /**
      * Export dashboard/index
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->exportFormats = [
             'ead' => ['name' => 'EAD 2002', 'description' => 'Encoded Archival Description'],
@@ -33,7 +33,7 @@ class exportActions extends AhgActions
     /**
      * CSV Export page and download
      */
-    public function executeCsv(sfWebRequest $request)
+    public function executeCsv($request)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
@@ -231,7 +231,7 @@ class exportActions extends AhgActions
     /**
      * EAD Export page and download
      */
-    public function executeEad(sfWebRequest $request)
+    public function executeEad($request)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
@@ -540,7 +540,7 @@ class exportActions extends AhgActions
     /**
      * Archival descriptions export
      */
-    public function executeArchival(sfWebRequest $request)
+    public function executeArchival($request)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
@@ -703,7 +703,7 @@ class exportActions extends AhgActions
     /**
      * Authority records export
      */
-    public function executeAuthority(sfWebRequest $request)
+    public function executeAuthority($request)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
@@ -878,7 +878,7 @@ class exportActions extends AhgActions
 
         // Maintenance agency
         $maintenanceAgency = $dom->createElement('maintenanceAgency');
-        $agencyName = $dom->createElement('agencyName', sfConfig::get('app_siteTitle', 'AtoM'));
+        $agencyName = $dom->createElement('agencyName', $this->config('app_siteTitle', 'AtoM'));
         $maintenanceAgency->appendChild($agencyName);
         $control->appendChild($maintenanceAgency);
 
@@ -1029,7 +1029,7 @@ class exportActions extends AhgActions
     /**
      * Repository export
      */
-    public function executeRepository(sfWebRequest $request)
+    public function executeRepository($request)
     {
         $DB = \Illuminate\Database\Capsule\Manager::class;
 

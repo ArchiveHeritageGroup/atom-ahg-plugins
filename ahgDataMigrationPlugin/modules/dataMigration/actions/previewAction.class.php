@@ -1,6 +1,7 @@
 <?php
 
-class dataMigrationPreviewAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class dataMigrationPreviewAction extends AhgController
 {
     public function execute($request)
     {
@@ -20,7 +21,7 @@ class dataMigrationPreviewAction extends sfAction
     
     protected function handleMappingSubmit($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
         
@@ -71,7 +72,7 @@ class dataMigrationPreviewAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
         
@@ -91,7 +92,7 @@ class dataMigrationPreviewAction extends sfAction
             $rows = [];
             
             if (in_array($ext, ['xls', 'xlsx'])) {
-                $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+                $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
                 if (file_exists($bootstrap)) {
                     require_once $bootstrap;
                 }

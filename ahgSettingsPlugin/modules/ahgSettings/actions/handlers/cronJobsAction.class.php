@@ -1,26 +1,27 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * Cron Jobs Information Page
  *
  * Displays all available cron jobs with explanations and scheduling examples
  */
 
-class SettingsCronJobsAction extends sfAction
+class SettingsCronJobsAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin permission
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
-        $this->atomRoot = sfConfig::get('sf_root_dir');
+        $this->atomRoot = $this->config('sf_root_dir');
 
         // Define all cron jobs with explanations
         $this->cronJobs = $this->getAllCronJobs();
@@ -60,7 +61,7 @@ class SettingsCronJobsAction extends sfAction
 
         // Elasticsearch
         try {
-            $esHost = sfConfig::get('app_elasticsearch_host', 'localhost:9200');
+            $esHost = $this->config('app_elasticsearch_host', 'localhost:9200');
             $ch = curl_init("http://{$esHost}");
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -310,7 +311,7 @@ class SettingsCronJobsAction extends sfAction
 
         // Cantaloupe (IIIF Image Server)
         try {
-            $cantaloupeHost = sfConfig::get('app_cantaloupe_host', 'localhost:8182');
+            $cantaloupeHost = $this->config('app_cantaloupe_host', 'localhost:8182');
             $ch = curl_init("http://{$cantaloupeHost}/iiif/2");
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -493,7 +494,7 @@ class SettingsCronJobsAction extends sfAction
 
         // AtoM Version
         $atomVersion = 'Unknown';
-        $versionFile = sfConfig::get('sf_root_dir') . '/VERSION';
+        $versionFile = $this->config('sf_root_dir') . '/VERSION';
         if (file_exists($versionFile)) {
             $atomVersion = trim(file_get_contents($versionFile));
         }
@@ -502,7 +503,7 @@ class SettingsCronJobsAction extends sfAction
             'version' => $atomVersion,
             'icon' => 'bi-archive',
             'status' => 'ok',
-            'path' => sfConfig::get('sf_root_dir'),
+            'path' => $this->config('sf_root_dir'),
         ];
 
         // Symfony Version
@@ -511,7 +512,7 @@ class SettingsCronJobsAction extends sfAction
             'version' => SYMFONY_VERSION,
             'icon' => 'bi-bricks',
             'status' => 'ok',
-            'path' => sfConfig::get('sf_symfony_lib_dir'),
+            'path' => $this->config('sf_symfony_lib_dir'),
         ];
 
         return $versions;

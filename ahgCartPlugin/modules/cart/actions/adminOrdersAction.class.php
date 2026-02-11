@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Repositories\EcommerceRepository;
 use Illuminate\Database\Capsule\Manager as DB;
@@ -10,16 +11,16 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartAdminOrdersAction extends sfAction
+class cartAdminOrdersAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
 
-        if (!$this->context->user->hasCredential("administrator")) {
+        if (!$this->getUser()->hasCredential("administrator")) {
             $this->forward404();
             return;
         }

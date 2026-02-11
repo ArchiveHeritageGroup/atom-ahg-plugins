@@ -1,20 +1,21 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * CDPA module actions - Zimbabwe Cyber and Data Protection Act compliance.
  */
-class cdpaActions extends AhgActions
+class cdpaActions extends AhgController
 {
     /**
      * Dashboard.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->stats = $service->getDashboardStats();
@@ -26,11 +27,11 @@ class cdpaActions extends AhgActions
     /**
      * License management.
      */
-    public function executeLicense(sfWebRequest $request)
+    public function executeLicense($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->license = $service->getCurrentLicense();
@@ -40,11 +41,11 @@ class cdpaActions extends AhgActions
     /**
      * Edit license.
      */
-    public function executeLicenseEdit(sfWebRequest $request)
+    public function executeLicenseEdit($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->license = $service->getCurrentLicense();
@@ -70,11 +71,11 @@ class cdpaActions extends AhgActions
     /**
      * DPO management.
      */
-    public function executeDpo(sfWebRequest $request)
+    public function executeDpo($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->dpo = $service->getActiveDPO();
@@ -83,11 +84,11 @@ class cdpaActions extends AhgActions
     /**
      * Edit DPO.
      */
-    public function executeDpoEdit(sfWebRequest $request)
+    public function executeDpoEdit($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->dpo = $service->getActiveDPO();
@@ -114,11 +115,11 @@ class cdpaActions extends AhgActions
     /**
      * Data subject requests list.
      */
-    public function executeRequests(sfWebRequest $request)
+    public function executeRequests($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $status = $request->getParameter('status');
@@ -129,7 +130,7 @@ class cdpaActions extends AhgActions
     /**
      * View request.
      */
-    public function executeRequestView(sfWebRequest $request)
+    public function executeRequestView($request)
     {
         $this->checkAdmin();
 
@@ -141,12 +142,12 @@ class cdpaActions extends AhgActions
     /**
      * Create request.
      */
-    public function executeRequestCreate(sfWebRequest $request)
+    public function executeRequestCreate($request)
     {
         $this->checkAdmin();
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
             $service = new \ahgCDPAPlugin\Services\CDPAService();
 
             $id = $service->createRequest([
@@ -167,11 +168,11 @@ class cdpaActions extends AhgActions
     /**
      * Processing activities list.
      */
-    public function executeProcessing(sfWebRequest $request)
+    public function executeProcessing($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->activities = $service->getProcessingActivities();
@@ -180,12 +181,12 @@ class cdpaActions extends AhgActions
     /**
      * Create processing activity.
      */
-    public function executeProcessingCreate(sfWebRequest $request)
+    public function executeProcessingCreate($request)
     {
         $this->checkAdmin();
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
             $service = new \ahgCDPAPlugin\Services\CDPAService();
 
             $service->createProcessingActivity([
@@ -204,7 +205,7 @@ class cdpaActions extends AhgActions
                 'children_data' => $request->getParameter('children_data') ? 1 : 0,
                 'biometric_data' => $request->getParameter('biometric_data') ? 1 : 0,
                 'health_data' => $request->getParameter('health_data') ? 1 : 0,
-                'created_by' => $this->context->user->getUserId(),
+                'created_by' => $this->getUser()->getUserId(),
             ]);
 
             $this->getUser()->setFlash('notice', 'Processing activity created.');
@@ -215,11 +216,11 @@ class cdpaActions extends AhgActions
     /**
      * Edit processing activity.
      */
-    public function executeProcessingEdit(sfWebRequest $request)
+    public function executeProcessingEdit($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->activity = $service->getProcessingActivity((int) $request->getParameter('id'));
@@ -251,11 +252,11 @@ class cdpaActions extends AhgActions
     /**
      * DPIA list.
      */
-    public function executeDpia(sfWebRequest $request)
+    public function executeDpia($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->dpias = $service->getDPIAs();
@@ -264,11 +265,11 @@ class cdpaActions extends AhgActions
     /**
      * Create DPIA.
      */
-    public function executeDpiaCreate(sfWebRequest $request)
+    public function executeDpiaCreate($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->activities = $service->getProcessingActivities();
@@ -281,7 +282,7 @@ class cdpaActions extends AhgActions
                 'necessity_assessment' => $request->getParameter('necessity_assessment'),
                 'risk_level' => $request->getParameter('risk_level'),
                 'assessor_name' => $request->getParameter('assessor_name'),
-                'created_by' => $this->context->user->getUserId(),
+                'created_by' => $this->getUser()->getUserId(),
             ]);
 
             $this->getUser()->setFlash('notice', 'DPIA created.');
@@ -292,11 +293,11 @@ class cdpaActions extends AhgActions
     /**
      * View DPIA.
      */
-    public function executeDpiaView(sfWebRequest $request)
+    public function executeDpiaView($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->dpia = $service->getDPIA((int) $request->getParameter('id'));
@@ -306,11 +307,11 @@ class cdpaActions extends AhgActions
     /**
      * Consent management.
      */
-    public function executeConsent(sfWebRequest $request)
+    public function executeConsent($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $activeOnly = !$request->getParameter('show_all');
@@ -321,11 +322,11 @@ class cdpaActions extends AhgActions
     /**
      * Breach register.
      */
-    public function executeBreaches(sfWebRequest $request)
+    public function executeBreaches($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $status = $request->getParameter('status');
@@ -336,12 +337,12 @@ class cdpaActions extends AhgActions
     /**
      * Create breach.
      */
-    public function executeBreachCreate(sfWebRequest $request)
+    public function executeBreachCreate($request)
     {
         $this->checkAdmin();
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
             $service = new \ahgCDPAPlugin\Services\CDPAService();
 
             $id = $service->createBreach([
@@ -354,7 +355,7 @@ class cdpaActions extends AhgActions
                 'data_subjects_affected' => $request->getParameter('data_subjects_affected'),
                 'severity' => $request->getParameter('severity'),
                 'root_cause' => $request->getParameter('root_cause'),
-                'reported_by' => $this->context->user->getUserId(),
+                'reported_by' => $this->getUser()->getUserId(),
             ]);
 
             $this->getUser()->setFlash('notice', 'Breach recorded. Remember to notify POTRAZ within 72 hours!');
@@ -365,11 +366,11 @@ class cdpaActions extends AhgActions
     /**
      * View breach.
      */
-    public function executeBreachView(sfWebRequest $request)
+    public function executeBreachView($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->breach = $service->getBreach((int) $request->getParameter('id'));
@@ -381,11 +382,11 @@ class cdpaActions extends AhgActions
     /**
      * Reports.
      */
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         $this->stats = $service->getDashboardStats();
@@ -394,11 +395,11 @@ class cdpaActions extends AhgActions
     /**
      * Configuration.
      */
-    public function executeConfig(sfWebRequest $request)
+    public function executeConfig($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgCDPAPlugin/lib/Services/CDPAService.php';
         $service = new \ahgCDPAPlugin\Services\CDPAService();
 
         if ($request->isMethod('post')) {
@@ -430,7 +431,7 @@ class cdpaActions extends AhgActions
      */
     protected function checkAdmin(): void
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }

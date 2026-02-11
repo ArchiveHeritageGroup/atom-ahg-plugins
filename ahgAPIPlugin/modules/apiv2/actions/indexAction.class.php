@@ -1,6 +1,7 @@
 <?php
 
-class apiv2IndexAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2IndexAction extends AhgApiController
 {
     public function GET($request)
     {

@@ -1,29 +1,28 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * AHG Dropdown Management Actions
  *
  * Admin interface for managing controlled vocabularies (dropdowns).
  */
-class ahgDropdownActions extends AhgActions
+class ahgDropdownActions extends AhgController
 {
     /**
      * Pre-execute - require admin access
      */
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-
-        if (!$this->context->user->isAdministrator()) {
+if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
         // Initialize database and services
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }
-        $taxonomyService = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+        $taxonomyService = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
         if (file_exists($taxonomyService)) {
             require_once $taxonomyService;
         }
@@ -32,7 +31,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * List all taxonomies
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = new \ahgCorePlugin\Services\AhgTaxonomyService();
         $taxonomies = $service->getAllTaxonomies();
@@ -52,7 +51,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * View/edit a single taxonomy's terms
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $taxonomy = $request->getParameter('taxonomy');
 
@@ -85,7 +84,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Create new taxonomy (AJAX)
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -117,7 +116,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Rename taxonomy (AJAX)
      */
-    public function executeRename(sfWebRequest $request)
+    public function executeRename($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -141,7 +140,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Delete taxonomy (AJAX)
      */
-    public function executeDeleteTaxonomy(sfWebRequest $request)
+    public function executeDeleteTaxonomy($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -165,7 +164,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Add term to taxonomy (AJAX)
      */
-    public function executeAddTerm(sfWebRequest $request)
+    public function executeAddTerm($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -202,7 +201,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Update term (AJAX)
      */
-    public function executeUpdateTerm(sfWebRequest $request)
+    public function executeUpdateTerm($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -245,7 +244,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Delete term (AJAX)
      */
-    public function executeDeleteTerm(sfWebRequest $request)
+    public function executeDeleteTerm($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -269,7 +268,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Reorder terms (AJAX)
      */
-    public function executeReorder(sfWebRequest $request)
+    public function executeReorder($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -295,7 +294,7 @@ class ahgDropdownActions extends AhgActions
     /**
      * Set default term (AJAX)
      */
-    public function executeSetDefault(sfWebRequest $request)
+    public function executeSetDefault($request)
     {
         $this->getResponse()->setContentType('application/json');
 

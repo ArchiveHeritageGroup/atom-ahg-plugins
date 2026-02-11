@@ -1,34 +1,33 @@
 <?php
 
-class actorManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class actorManageActions extends AhgController
 {
     protected $service;
 
-    public function preExecute()
+    public function boot(): void
     {
         // Ensure I18N helper is available for the service
-        sfContext::getInstance()->getConfiguration()->loadHelpers('I18N');
-
-        // Bootstrap Laravel if not already loaded
-        $bootstrapFile = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+// Bootstrap Laravel if not already loaded
+        $bootstrapFile = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrapFile)) {
             require_once $bootstrapFile;
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgActorManagePlugin/lib/Services/ActorBrowseService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgActorManagePlugin/lib/SimplePager.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgActorManagePlugin/lib/Services/ActorBrowseService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgActorManagePlugin/lib/SimplePager.php';
     }
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
         $this->service = new \AhgActorManage\Services\ActorBrowseService($culture);
 
         // Collect all request params
         $params = [
             'page' => $request->getParameter('page', 1),
             'limit' => $request->getParameter('limit', 30),
-            'sort' => $request->getParameter('sort', sfConfig::get('app_sort_browser_user', 'alphabetic')),
+            'sort' => $request->getParameter('sort', $this->config('app_sort_browser_user', 'alphabetic')),
             'sortDir' => $request->getParameter('sortDir', 'asc'),
             'subquery' => $request->getParameter('subquery', ''),
             'subqueryField' => $request->getParameter('subqueryField', ''),
@@ -109,9 +108,9 @@ class actorManageActions extends AhgActions
         $this->showAdvanced = $this->hasAdvancedParams($params);
     }
 
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
         $this->service = new \AhgActorManage\Services\ActorBrowseService($culture);
 
         $query = $request->getParameter('query', '');

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Request to Publish Edit Action
  *
@@ -10,23 +11,23 @@
  * @subpackage ahgRequestToPublishPlugin
  * @author     The Archive and Heritage Group
  */
-class requestToPublishEditAction extends sfAction
+class requestToPublishEditAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin permission
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
         // Initialize service and repository
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Services/RequestToPublishService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Services/RequestToPublishService.php';
         
         $repository = new \ahgRequestToPublishPlugin\Repositories\RequestToPublishRepository();
         $service = new \ahgRequestToPublishPlugin\Services\RequestToPublishService();
@@ -50,19 +51,19 @@ class requestToPublishEditAction extends sfAction
             try {
                 if ($action === 'approve') {
                     $service->approveRequest($this->resource->id, $adminNotes);
-                    $this->context->user->setFlash('notice', 'Request has been approved.');
+                    $this->getUser()->setFlash('notice', 'Request has been approved.');
                 } elseif ($action === 'reject') {
                     $service->rejectRequest($this->resource->id, $adminNotes);
-                    $this->context->user->setFlash('notice', 'Request has been rejected.');
+                    $this->getUser()->setFlash('notice', 'Request has been rejected.');
                 } else {
                     // Just update admin notes
                     $repository->update($this->resource->id, ['rtp_admin_notes' => $adminNotes]);
-                    $this->context->user->setFlash('notice', 'Request has been updated.');
+                    $this->getUser()->setFlash('notice', 'Request has been updated.');
                 }
 
                 $this->redirect(['module' => 'requestToPublish', 'action' => 'browse']);
             } catch (\Exception $e) {
-                $this->context->user->setFlash('error', 'Error: ' . $e->getMessage());
+                $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }
 
             // Reload resource after update

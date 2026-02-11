@@ -1,20 +1,15 @@
 <?php
 
-class radManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class radManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeEdit($request)
     {
-        parent::preExecute();
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeEdit(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {

@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Queue a migration import as a background Gearman job.
  * Called from the mapping page when user clicks "Import (Background)"
  */
-class dataMigrationQueueJobAction extends sfAction
+class dataMigrationQueueJobAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -80,14 +81,14 @@ class dataMigrationQueueJobAction extends sfAction
                 'import_options' => json_encode($options),
                 'status' => 'pending',
                 'total_records' => count($detection['rows'] ?? []),
-                'created_by' => $this->context->user->getUserID(),
+                'created_by' => $this->getUser()->getUserID(),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
 
             // Create AtoM job record
             $job = new QubitJob();
             $job->name = 'arMigrationImportJob';
-            $job->userId = $this->context->user->getUserID();
+            $job->userId = $this->getUser()->getUserID();
             $job->statusId = QubitTerm::JOB_STATUS_IN_PROGRESS_ID;
             $job->save();
 

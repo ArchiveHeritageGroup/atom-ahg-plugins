@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class apiv2KeysDeleteAction extends AhgApiAction
+class apiv2KeysDeleteAction extends AhgApiController
 {
     public function DELETE($request)
     {

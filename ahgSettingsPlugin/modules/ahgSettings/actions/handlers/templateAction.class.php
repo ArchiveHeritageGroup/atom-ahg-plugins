@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
 
@@ -26,7 +28,7 @@ use AtomExtensions\Services\CacheService;
  * @author     Jack Bates <jack@nottheoilrig.com>
  * @author     David Juhasz <david@artefactual.com>
  */
-class SettingsTemplateAction extends sfAction
+class SettingsTemplateAction extends AhgController
 {
     public function execute($request)
     {
@@ -43,7 +45,7 @@ class SettingsTemplateAction extends sfAction
                     // Do update and redirect to avoid repeat submit wackiness
                     $this->updateDefaultTemplateSettings($this->defaultTemplateForm);
 
-                    $notice = sfContext::getInstance()->i18n->__('Default templates saved.');
+                    $notice = $this->getContext()->i18n->__('Default templates saved.');
                     $this->getUser()->setFlash('notice', $notice);
 
                     $this->redirect('settings/template');

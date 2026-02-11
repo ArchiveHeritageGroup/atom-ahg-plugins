@@ -1,18 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Data Migration module actions.
  * Handles import/export for various formats including Preservica OPEX/PAX.
  */
-class preservicaActions extends AhgActions
+class preservicaActions extends AhgController
 {
     /**
      * Main index - migration dashboard.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -32,9 +33,9 @@ class preservicaActions extends AhgActions
     /**
      * Preservica-specific import page.
      */
-    public function executePreservicaImport(sfWebRequest $request)
+    public function executePreservicaImport($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -54,7 +55,7 @@ class preservicaActions extends AhgActions
      */
     protected function processPreservicaImport(sfWebRequest $request)
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;
         }
@@ -73,7 +74,7 @@ class preservicaActions extends AhgActions
         }
 
         // Move to temp location
-        $tmpDir = sfConfig::get('sf_upload_dir') . '/tmp';
+        $tmpDir = $this->config('sf_upload_dir') . '/tmp';
         if (!is_dir($tmpDir)) {
             mkdir($tmpDir, 0755, true);
         }
@@ -132,9 +133,9 @@ class preservicaActions extends AhgActions
     /**
      * Preservica-specific export page.
      */
-    public function executePreservicaExport(sfWebRequest $request)
+    public function executePreservicaExport($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -160,7 +161,7 @@ class preservicaActions extends AhgActions
      */
     protected function processPreservicaExport(sfWebRequest $request)
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;
         }
@@ -183,7 +184,7 @@ class preservicaActions extends AhgActions
             $service = new \ahgDataMigrationPlugin\Services\PreservicaExportService($format, $options);
             
             // Set output directory
-            $outputDir = sfConfig::get('sf_upload_dir') . '/exports/preservica';
+            $outputDir = $this->config('sf_upload_dir') . '/exports/preservica';
             if (!is_dir($outputDir)) {
                 mkdir($outputDir, 0755, true);
             }
@@ -224,10 +225,10 @@ class preservicaActions extends AhgActions
     /**
      * Download exported file.
      */
-    public function executeDownload(sfWebRequest $request)
+    public function executeDownload($request)
     {
         $filename = $request->getParameter('file');
-        $filepath = sfConfig::get('sf_upload_dir') . '/exports/preservica/' . basename($filename);
+        $filepath = $this->config('sf_upload_dir') . '/exports/preservica/' . basename($filename);
 
         if (!file_exists($filepath)) {
             $this->forward404('File not found');
@@ -259,9 +260,9 @@ class preservicaActions extends AhgActions
     /**
      * Import form - step 1: upload and configure.
      */
-    public function executeImport(sfWebRequest $request)
+    public function executeImport($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -273,9 +274,9 @@ class preservicaActions extends AhgActions
     /**
      * Export form.
      */
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
@@ -286,11 +287,11 @@ class preservicaActions extends AhgActions
     /**
      * AJAX: Get field mapping for source system.
      */
-    public function executeGetMapping(sfWebRequest $request)
+    public function executeGetMapping($request)
     {
         $sourceSystem = $request->getParameter('source');
         
-        $mappingFile = sfConfig::get('sf_plugins_dir') 
+        $mappingFile = $this->config('sf_plugins_dir') 
             . '/ahgDataMigrationPlugin/data/mappings/defaults/' 
             . $sourceSystem . '.json';
 
@@ -411,7 +412,7 @@ class preservicaActions extends AhgActions
     protected function getRepositories(): array
     {
         $repos = [];
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $rows = \Illuminate\Database\Capsule\Manager::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
@@ -436,7 +437,7 @@ class preservicaActions extends AhgActions
     protected function getDefaultMappings(): array
     {
         $mappings = [];
-        $mappingDir = sfConfig::get('sf_plugins_dir') . '/ahgDataMigrationPlugin/data/mappings/defaults/';
+        $mappingDir = $this->config('sf_plugins_dir') . '/ahgDataMigrationPlugin/data/mappings/defaults/';
         
         if (is_dir($mappingDir)) {
             foreach (glob($mappingDir . '*.json') as $file) {

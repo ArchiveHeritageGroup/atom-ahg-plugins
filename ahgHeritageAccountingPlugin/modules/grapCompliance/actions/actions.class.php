@@ -1,13 +1,15 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * GRAP 103 Compliance Actions
  */
-class grapComplianceActions extends AhgActions
+class grapComplianceActions extends AhgController
 {
     /**
      * GRAP Dashboard
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $service = new GrapComplianceService();
         $heritageService = new HeritageAssetService();
@@ -24,7 +26,7 @@ class grapComplianceActions extends AhgActions
     /**
      * Run compliance check on asset
      */
-    public function executeCheck(sfWebRequest $request)
+    public function executeCheck($request)
     {
         $service = new GrapComplianceService();
         $heritageService = new HeritageAssetService();
@@ -40,7 +42,7 @@ class grapComplianceActions extends AhgActions
     /**
      * Batch compliance check
      */
-    public function executeBatchCheck(sfWebRequest $request)
+    public function executeBatchCheck($request)
     {
         $service = new GrapComplianceService();
         $heritageService = new HeritageAssetService();
@@ -60,7 +62,7 @@ class grapComplianceActions extends AhgActions
     /**
      * National Treasury Report format
      */
-    public function executeNationalTreasuryReport(sfWebRequest $request)
+    public function executeNationalTreasuryReport($request)
     {
         $service = new GrapComplianceService();
         $heritageService = new HeritageAssetService();

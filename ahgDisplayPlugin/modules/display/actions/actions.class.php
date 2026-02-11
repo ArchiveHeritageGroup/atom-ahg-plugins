@@ -1,28 +1,30 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 use AhgDisplay\Services\DisplayService;
 use AhgDisplay\Services\DisplayModeService;
 
-class displayActions extends AhgActions
+class displayActions extends AhgController
 {
     protected $service;
     protected $modeService;
 
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayModeService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/FuzzySearchService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DynamicFacetService.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/DisplayPreferenceRepository.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/GlobalDisplaySettingsRepository.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/UserBrowseSettingsRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayTypeDetector.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayModeService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/FuzzySearchService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DynamicFacetService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/DisplayPreferenceRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/GlobalDisplaySettingsRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Repositories/UserBrowseSettingsRepository.php';
         $this->service = new DisplayService();
         $this->modeService = new DisplayModeService();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
 
@@ -47,17 +49,17 @@ class displayActions extends AhgActions
         ];
     }
 
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         // Check if user is authenticated (can see drafts)
-        $this->isAuthenticated = sfContext::getInstance()->getUser()->isAuthenticated();
+        $this->isAuthenticated = $this->getContext()->getUser()->isAuthenticated();
         
         // Get all filter parameters
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
         $this->topLevelOnly = $request->getParameter('topLevel', '1');
         $this->page = max(1, (int) $request->getParameter('page', 1));
-        $this->limit = (int) $request->getParameter('limit', sfConfig::get('app_hits_per_page', 30));
+        $this->limit = (int) $request->getParameter('limit', $this->config('app_hits_per_page', 30));
         if ($this->limit < 10) $this->limit = 10;
         if ($this->limit > 100) $this->limit = 100;
         $this->sort = $request->getParameter('sort', 'date');
@@ -372,7 +374,7 @@ class displayActions extends AhgActions
     {
         // Filter by publication status - only show Published items (status_id = 160) for guests
         // Authenticated users (editors/admins) can see all items
-        if (!sfContext::getInstance()->getUser()->isAuthenticated()) {
+        if (!$this->getContext()->getUser()->isAuthenticated()) {
             $query->join('status as pub_st', function($j) {
                 $j->on('pub_st.object_id', '=', 'io.id')
                   ->where('pub_st.type_id', '=', 158)  // publication status type
@@ -607,7 +609,7 @@ class displayActions extends AhgActions
         }
     }
 
-    public function executePrint(sfWebRequest $request)
+    public function executePrint($request)
     {
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
@@ -678,7 +680,7 @@ class displayActions extends AhgActions
         $this->setLayout(false);
     }
 
-    public function executeExportCsv(sfWebRequest $request)
+    public function executeExportCsv($request)
     {
         $typeFilter = $request->getParameter('type');
         $parentId = $request->getParameter('parent');
@@ -761,7 +763,7 @@ class displayActions extends AhgActions
         exit;
     }
 
-    public function executeChangeType(sfWebRequest $request)
+    public function executeChangeType($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(403);
@@ -829,7 +831,7 @@ class displayActions extends AhgActions
         return $breadcrumb;
     }
 
-    public function executeSetType(sfWebRequest $request)
+    public function executeSetType($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $objectId = (int) $request->getParameter('object_id');
@@ -845,7 +847,7 @@ class displayActions extends AhgActions
         $this->redirect($request->getReferer() ?: 'display/index');
     }
 
-    public function executeAssignProfile(sfWebRequest $request)
+    public function executeAssignProfile($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $objectId = (int) $request->getParameter('object_id');
@@ -857,7 +859,7 @@ class displayActions extends AhgActions
         $this->redirect($request->getReferer() ?: 'display/index');
     }
 
-    public function executeProfiles(sfWebRequest $request)
+    public function executeProfiles($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->profiles = DB::table('display_profile as dp')
@@ -869,7 +871,7 @@ class displayActions extends AhgActions
             ->get()->toArray();
     }
 
-    public function executeLevels(sfWebRequest $request)
+    public function executeLevels($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $domain = $request->getParameter('domain');
@@ -878,7 +880,7 @@ class displayActions extends AhgActions
         $this->domains = ['archive', 'museum', 'gallery', 'library', 'dam', 'universal'];
     }
 
-    public function executeBulkSetType(sfWebRequest $request)
+    public function executeBulkSetType($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         if ($request->isMethod('post')) {
@@ -900,7 +902,7 @@ class displayActions extends AhgActions
         $this->collectionTypes = $this->service->getCollectionTypes();
     }
 
-    public function executeFields(sfWebRequest $request)
+    public function executeFields($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->fields = DB::table('display_field as df')
@@ -922,7 +924,7 @@ class displayActions extends AhgActions
     protected function expandQueryWithSynonyms(string $query): array
     {
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgSemanticSearchPlugin/lib/Services/ThesaurusService.php';
             $thesaurus = new \AtomFramework\Services\SemanticSearch\ThesaurusService();
 
             $expansions = $thesaurus->expandQuery($query);
@@ -1058,7 +1060,7 @@ class displayActions extends AhgActions
         }
 
         // Determine index name from sfConfig or default pattern
-        $indexName = sfConfig::get('app_opensearch_index_name', '');
+        $indexName = $this->config('app_opensearch_index_name', '');
         if (empty($indexName)) {
             // Convention: {database}_qubitinformationobject
             try {
@@ -1070,8 +1072,8 @@ class displayActions extends AhgActions
         }
 
         // Build multi_match fuzzy query via direct curl (avoids client dependencies)
-        $esHost = sfConfig::get('app_opensearch_host', 'localhost');
-        $esPort = (int) sfConfig::get('app_opensearch_port', 9200);
+        $esHost = $this->config('app_opensearch_host', 'localhost');
+        $esPort = (int) $this->config('app_opensearch_port', 9200);
 
         $body = [
             'size' => 200,
@@ -1129,7 +1131,7 @@ class displayActions extends AhgActions
      * AJAX endpoint for embedded GLAM browser (landing page block)
      * Returns just the browse content without full page layout
      */
-    public function executeBrowseAjax(sfWebRequest $request)
+    public function executeBrowseAjax($request)
     {
         // Reuse browse logic
         $this->executeBrowse($request);
@@ -1188,7 +1190,7 @@ class displayActions extends AhgActions
     /**
      * User browse settings page
      */
-    public function executeBrowseSettings(sfWebRequest $request)
+    public function executeBrowseSettings($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -1220,7 +1222,7 @@ class displayActions extends AhgActions
     /**
      * Toggle GLAM browse via AJAX
      */
-    public function executeToggleGlamBrowse(sfWebRequest $request)
+    public function executeToggleGlamBrowse($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1240,7 +1242,7 @@ class displayActions extends AhgActions
     /**
      * Save browse settings via AJAX
      */
-    public function executeSaveBrowseSettings(sfWebRequest $request)
+    public function executeSaveBrowseSettings($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1262,7 +1264,7 @@ class displayActions extends AhgActions
     /**
      * Get browse settings via AJAX
      */
-    public function executeGetBrowseSettings(sfWebRequest $request)
+    public function executeGetBrowseSettings($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -1281,7 +1283,7 @@ class displayActions extends AhgActions
     /**
      * Reset browse settings to defaults
      */
-    public function executeResetBrowseSettings(sfWebRequest $request)
+    public function executeResetBrowseSettings($request)
     {
         $this->getResponse()->setContentType('application/json');
 

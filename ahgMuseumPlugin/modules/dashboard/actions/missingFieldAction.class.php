@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Missing Field Records Action
  *
@@ -10,7 +12,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class dashboardMissingFieldAction extends sfAction
+class dashboardMissingFieldAction extends AhgController
 {
     // Root repository ID
     private const ROOT_REPOSITORY_ID = 3;
@@ -18,7 +20,7 @@ class dashboardMissingFieldAction extends sfAction
     public function execute($request)
     {
         // Check permissions
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forwardUnauthorized();
         }
 
@@ -60,7 +62,7 @@ class dashboardMissingFieldAction extends sfAction
      */
     protected function getRepositories(): array
     {
-        $culture = $this->getUser()->getCulture() ?? 'en';
+        $culture = $this->culture() ?? 'en';
 
         $repositories = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {

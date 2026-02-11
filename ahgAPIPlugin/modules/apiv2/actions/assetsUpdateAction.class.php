@@ -1,6 +1,7 @@
 <?php
 
-class apiv2AssetsUpdateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2AssetsUpdateAction extends AhgApiController
 {
     public function PUT($request)
     {

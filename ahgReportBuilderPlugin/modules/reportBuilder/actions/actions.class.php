@@ -1,15 +1,16 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class reportBuilderActions extends AhgActions
+class reportBuilderActions extends AhgController
 {
     protected ReportBuilderService $service;
 
-    public function preExecute()
+    public function boot(): void
     {
         // Load framework bootstrap (Illuminate DB + PathResolver)
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }
@@ -17,17 +18,17 @@ class reportBuilderActions extends AhgActions
         // Load root Composer autoloader for Dompdf, PhpSpreadsheet, etc.
         $rootAutoload = class_exists('\AtomFramework\Helpers\PathResolver')
             ? \AtomFramework\Helpers\PathResolver::getRootAutoloadPath()
-            : sfConfig::get('sf_root_dir') . '/vendor/autoload.php';
+            : $this->config('sf_root_dir') . '/vendor/autoload.php';
         if (file_exists($rootAutoload)) {
             require_once $rootAutoload;
         }
 
-        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgReportBuilderPlugin/lib';
+        $pluginDir = $this->config('sf_plugins_dir') . '/ahgReportBuilderPlugin/lib';
         require_once $pluginDir . '/DataSourceRegistry.php';
         require_once $pluginDir . '/ColumnDiscovery.php';
         require_once $pluginDir . '/ReportBuilderService.php';
 
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
         $this->service = new ReportBuilderService($culture);
     }
 
@@ -41,9 +42,9 @@ class reportBuilderActions extends AhgActions
         }
 
         // Check for admin, editor, or contributor role (AtoM method)
-        if (!$this->context->user->isAdministrator() &&
-            !$this->context->user->hasCredential('editor') &&
-            !$this->context->user->hasCredential('contributor')) {
+        if (!$this->getUser()->isAdministrator() &&
+            !$this->getUser()->hasCredential('editor') &&
+            !$this->getUser()->hasCredential('contributor')) {
             QubitAcl::forwardUnauthorized();
         }
     }
@@ -59,7 +60,7 @@ class reportBuilderActions extends AhgActions
     /**
      * List all custom reports.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdminAccess();
 
@@ -71,7 +72,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Create a new custom report.
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         $this->checkAdminAccess();
 
@@ -108,7 +109,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Edit a custom report (designer view).
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $this->checkAdminAccess();
 
@@ -135,7 +136,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Preview a custom report.
      */
-    public function executePreview(sfWebRequest $request)
+    public function executePreview($request)
     {
         $this->checkAdminAccess();
 
@@ -156,7 +157,7 @@ class reportBuilderActions extends AhgActions
     /**
      * View a shared/public report.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $id = (int) $request->getParameter('id');
         $this->report = $this->service->getReport($id);
@@ -186,7 +187,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Clone a custom report.
      */
-    public function executeCloneReport(sfWebRequest $request)
+    public function executeCloneReport($request)
     {
         $this->checkAdminAccess();
 
@@ -205,7 +206,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Delete a custom report.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->checkAdminAccess();
 
@@ -233,7 +234,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Export a custom report.
      */
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         $this->checkAdminAccess();
 
@@ -423,7 +424,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Manage report schedules.
      */
-    public function executeSchedule(sfWebRequest $request)
+    public function executeSchedule($request)
     {
         $this->checkAdminAccess();
 
@@ -473,7 +474,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Delete a report schedule.
      */
-    public function executeScheduleDelete(sfWebRequest $request)
+    public function executeScheduleDelete($request)
     {
         $this->checkAdminAccess();
 
@@ -492,7 +493,7 @@ class reportBuilderActions extends AhgActions
     /**
      * View archived reports.
      */
-    public function executeArchive(sfWebRequest $request)
+    public function executeArchive($request)
     {
         $this->checkAdminAccess();
 
@@ -512,7 +513,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Save report definition.
      */
-    public function executeApiSave(sfWebRequest $request)
+    public function executeApiSave($request)
     {
         $this->checkAdminAccess();
 
@@ -544,7 +545,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Get report data.
      */
-    public function executeApiData(sfWebRequest $request)
+    public function executeApiData($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -582,7 +583,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Get chart data for a report.
      */
-    public function executeApiChartData(sfWebRequest $request)
+    public function executeApiChartData($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -617,7 +618,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Get columns for a data source.
      */
-    public function executeApiColumns(sfWebRequest $request)
+    public function executeApiColumns($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -642,7 +643,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Delete a report.
      */
-    public function executeApiDelete(sfWebRequest $request)
+    public function executeApiDelete($request)
     {
         $this->checkAdminAccess();
 
@@ -682,7 +683,7 @@ class reportBuilderActions extends AhgActions
     /**
      * Render a dashboard widget.
      */
-    public function executeWidget(sfWebRequest $request)
+    public function executeWidget($request)
     {
         $widgetId = (int) $request->getParameter('id');
 
@@ -773,7 +774,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Get widgets for current user.
      */
-    public function executeApiWidgets(sfWebRequest $request)
+    public function executeApiWidgets($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -798,7 +799,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Save widget configuration.
      */
-    public function executeApiWidgetSave(sfWebRequest $request)
+    public function executeApiWidgetSave($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -852,7 +853,7 @@ class reportBuilderActions extends AhgActions
     /**
      * API: Delete widget.
      */
-    public function executeApiWidgetDelete(sfWebRequest $request)
+    public function executeApiWidgetDelete($request)
     {
         $this->getResponse()->setContentType('application/json');
 

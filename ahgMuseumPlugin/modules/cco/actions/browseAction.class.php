@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -25,7 +26,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class ccoBrowseAction extends sfAction
+class ccoBrowseAction extends AhgController
 {
     public function execute($request)
     {

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Research API Module - REST API Endpoints
  *
@@ -9,7 +10,7 @@
  * @package ahgResearchPlugin
  * @version 2.0.0
  */
-class researchapiActions extends AhgActions
+class researchapiActions extends AhgController
 {
     private ?ResearchApiService $apiService = null;
     private int $startTime;
@@ -17,12 +18,12 @@ class researchapiActions extends AhgActions
     /**
      * Pre-execute hook - handles authentication for all API actions.
      */
-    public function preExecute()
+    public function boot(): void
     {
         $this->startTime = (int) (microtime(true) * 1000);
 
         // Load API service
-        $servicePath = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ResearchApiService.php';
+        $servicePath = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ResearchApiService.php';
         if (file_exists($servicePath)) {
             require_once $servicePath;
         }
@@ -88,7 +89,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/profile
      */
-    public function executeProfile(sfWebRequest $request)
+    public function executeProfile($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -104,7 +105,7 @@ class researchapiActions extends AhgActions
     /**
      * GET/POST /api/research/projects
      */
-    public function executeProjects(sfWebRequest $request)
+    public function executeProjects($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -138,7 +139,7 @@ class researchapiActions extends AhgActions
     /**
      * GET/POST /api/research/collections
      */
-    public function executeCollections(sfWebRequest $request)
+    public function executeCollections($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -166,7 +167,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/collections/:id
      */
-    public function executeCollection(sfWebRequest $request)
+    public function executeCollection($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -189,7 +190,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/searches
      */
-    public function executeSearches(sfWebRequest $request)
+    public function executeSearches($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -205,7 +206,7 @@ class researchapiActions extends AhgActions
     /**
      * GET/POST /api/research/bookings
      */
-    public function executeBookings(sfWebRequest $request)
+    public function executeBookings($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -238,7 +239,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/citations/:id/:format
      */
-    public function executeCitation(sfWebRequest $request)
+    public function executeCitation($request)
     {
         // Citations can be public, but log if authenticated
         $this->authenticate();
@@ -266,7 +267,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/bibliographies
      */
-    public function executeBibliographies(sfWebRequest $request)
+    public function executeBibliographies($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -278,7 +279,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/bibliographies/:id/export/:format
      */
-    public function executeExportBibliography(sfWebRequest $request)
+    public function executeExportBibliography($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -307,7 +308,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/annotations
      */
-    public function executeAnnotations(sfWebRequest $request)
+    public function executeAnnotations($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);
@@ -327,7 +328,7 @@ class researchapiActions extends AhgActions
     /**
      * GET /api/research/stats
      */
-    public function executeStats(sfWebRequest $request)
+    public function executeStats($request)
     {
         if (!$this->authenticate()) {
             return $this->sendError('Unauthorized', 401);

@@ -1,8 +1,9 @@
 <?php
 
-class searchEnhancementActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class searchEnhancementActions extends AhgController
 {
-    public function executeSaveSearch(sfWebRequest $request)
+    public function executeSaveSearch($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -47,7 +48,7 @@ class searchEnhancementActions extends AhgActions
         }
     }
     
-    public function executeSavedSearches(sfWebRequest $request)
+    public function executeSavedSearches($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -61,7 +62,7 @@ class searchEnhancementActions extends AhgActions
             ->toArray();
     }
     
-    public function executeRunSavedSearch(sfWebRequest $request)
+    public function executeRunSavedSearch($request)
     {
         $id = (int)$request->getParameter('id');
         $search = \Illuminate\Database\Capsule\Manager::table('saved_search')->where('id', $id)->first();
@@ -84,7 +85,7 @@ class searchEnhancementActions extends AhgActions
         $this->redirect($url);
     }
     
-    public function executeRunTemplate(sfWebRequest $request)
+    public function executeRunTemplate($request)
     {
         $id = (int)$request->getParameter('id');
         $template = \Illuminate\Database\Capsule\Manager::table('search_template')->where('id', $id)->first();
@@ -99,7 +100,7 @@ class searchEnhancementActions extends AhgActions
         $this->redirect($url);
     }
     
-    public function executeHistory(sfWebRequest $request)
+    public function executeHistory($request)
     {
         $userId = $this->getUser()->isAuthenticated() ? $this->getUser()->getAttribute('user_id') : null;
         $sessionId = session_id();
@@ -114,7 +115,7 @@ class searchEnhancementActions extends AhgActions
         $this->history = $query->orderBy('created_at', 'desc')->limit(50)->get()->toArray();
     }
     
-    public function executeDeleteSavedSearch(sfWebRequest $request)
+    public function executeDeleteSavedSearch($request)
     {
         $this->getResponse()->setContentType('application/json');
         
@@ -133,7 +134,7 @@ class searchEnhancementActions extends AhgActions
         return $this->renderText(json_encode(['success' => $deleted > 0]));
     }
     
-    public function executeAdminTemplates(sfWebRequest $request)
+    public function executeAdminTemplates($request)
     {
         if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');

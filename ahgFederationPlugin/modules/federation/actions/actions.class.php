@@ -1,16 +1,17 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Federation module actions
  *
  * Provides admin UI for managing federation peers and harvesting.
  */
-class federationActions extends AhgActions
+class federationActions extends AhgController
 {
     /**
      * Federation dashboard
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check authentication and admin access
         if (!$this->getUser()->isAuthenticated()) {
@@ -21,7 +22,7 @@ class federationActions extends AhgActions
             $this->forward('admin', 'secure');
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
 
         $provenance = new \AhgFederation\FederationProvenance();
 
@@ -47,7 +48,7 @@ class federationActions extends AhgActions
     /**
      * List all federation peers
      */
-    public function executePeers(sfWebRequest $request)
+    public function executePeers($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -65,7 +66,7 @@ class federationActions extends AhgActions
 
         // Get record counts for each peer
         $this->recordCounts = [];
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
         $provenance = new \AhgFederation\FederationProvenance();
 
         foreach ($this->peers as $peer) {
@@ -76,7 +77,7 @@ class federationActions extends AhgActions
     /**
      * Add a new federation peer
      */
-    public function executeAddPeer(sfWebRequest $request)
+    public function executeAddPeer($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -99,7 +100,7 @@ class federationActions extends AhgActions
     /**
      * Edit an existing federation peer
      */
-    public function executeEditPeer(sfWebRequest $request)
+    public function executeEditPeer($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -199,7 +200,7 @@ class federationActions extends AhgActions
     /**
      * Harvest management page for a peer
      */
-    public function executeHarvest(sfWebRequest $request)
+    public function executeHarvest($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -230,7 +231,7 @@ class federationActions extends AhgActions
         // Get available sets from peer
         $this->sets = [];
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
             $client = new \AhgFederation\HarvestClient();
             $this->sets = $client->listSets($this->peer->base_url);
         } catch (\Exception $e) {
@@ -250,7 +251,7 @@ class federationActions extends AhgActions
     /**
      * View harvest log
      */
-    public function executeLog(sfWebRequest $request)
+    public function executeLog($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -271,7 +272,7 @@ class federationActions extends AhgActions
             ->leftJoin('information_object as io', 'l.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', sfContext::getInstance()->user->getCulture() ?: 'en');
+                     ->where('ioi.culture', '=', $this->getContext()->user->getCulture() ?: 'en');
             });
 
         if ($peerId) {
@@ -312,7 +313,7 @@ class federationActions extends AhgActions
     /**
      * AJAX: Test peer connection
      */
-    public function executeTestPeer(sfWebRequest $request)
+    public function executeTestPeer($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -327,7 +328,7 @@ class federationActions extends AhgActions
         }
 
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
 
             $client = new \AhgFederation\HarvestClient();
             $client->setTimeout(30);
@@ -352,7 +353,7 @@ class federationActions extends AhgActions
     /**
      * AJAX: Run harvest
      */
-    public function executeRunHarvest(sfWebRequest $request)
+    public function executeRunHarvest($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -385,9 +386,9 @@ class federationActions extends AhgActions
         ]);
 
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestService.php';
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestClient.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/HarvestService.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/FederationProvenance.php';
 
             $service = new \AhgFederation\HarvestService();
 
@@ -453,7 +454,7 @@ class federationActions extends AhgActions
     /**
      * AJAX: Get harvest status
      */
-    public function executeHarvestStatus(sfWebRequest $request)
+    public function executeHarvestStatus($request)
     {
         $this->getResponse()->setContentType('application/json');
 

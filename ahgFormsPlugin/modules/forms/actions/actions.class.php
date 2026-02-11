@@ -1,18 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Forms module actions.
  */
-class formsActions extends AhgActions
+class formsActions extends AhgController
 {
     /**
      * Dashboard / index.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->templates = $service->getTemplates();
@@ -22,11 +23,11 @@ class formsActions extends AhgActions
     /**
      * List templates.
      */
-    public function executeTemplates(sfWebRequest $request)
+    public function executeTemplates($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $type = $request->getParameter('type');
@@ -37,12 +38,12 @@ class formsActions extends AhgActions
     /**
      * Create new template.
      */
-    public function executeTemplateCreate(sfWebRequest $request)
+    public function executeTemplateCreate($request)
     {
         $this->checkAdmin();
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
             $service = new \ahgFormsPlugin\Services\FormService();
 
             $templateId = $service->createTemplate([
@@ -61,11 +62,11 @@ class formsActions extends AhgActions
     /**
      * Edit template.
      */
-    public function executeTemplateEdit(sfWebRequest $request)
+    public function executeTemplateEdit($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->template = $service->getTemplate((int) $request->getParameter('id'));
@@ -86,11 +87,11 @@ class formsActions extends AhgActions
     /**
      * Delete template.
      */
-    public function executeTemplateDelete(sfWebRequest $request)
+    public function executeTemplateDelete($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $service->deleteTemplate((int) $request->getParameter('id'));
@@ -101,11 +102,11 @@ class formsActions extends AhgActions
     /**
      * Clone template.
      */
-    public function executeTemplateClone(sfWebRequest $request)
+    public function executeTemplateClone($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $sourceId = (int) $request->getParameter('id');
@@ -123,11 +124,11 @@ class formsActions extends AhgActions
     /**
      * Export template as JSON.
      */
-    public function executeTemplateExport(sfWebRequest $request)
+    public function executeTemplateExport($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $export = $service->exportTemplate((int) $request->getParameter('id'));
@@ -141,7 +142,7 @@ class formsActions extends AhgActions
     /**
      * Import template from JSON.
      */
-    public function executeTemplateImport(sfWebRequest $request)
+    public function executeTemplateImport($request)
     {
         $this->checkAdmin();
 
@@ -153,7 +154,7 @@ class formsActions extends AhgActions
                 $data = json_decode($json, true);
 
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+                    require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
                     $service = new \ahgFormsPlugin\Services\FormService();
 
                     $name = $request->getParameter('name') ?: null;
@@ -171,11 +172,11 @@ class formsActions extends AhgActions
     /**
      * Form builder (drag-drop interface).
      */
-    public function executeBuilder(sfWebRequest $request)
+    public function executeBuilder($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->template = $service->getTemplate((int) $request->getParameter('id'));
@@ -209,7 +210,7 @@ class formsActions extends AhgActions
     /**
      * Add field to template (AJAX).
      */
-    public function executeFieldAdd(sfWebRequest $request)
+    public function executeFieldAdd($request)
     {
         $this->checkAdmin();
         $this->getResponse()->setContentType('application/json');
@@ -242,7 +243,7 @@ class formsActions extends AhgActions
     /**
      * Get field data (AJAX).
      */
-    public function executeFieldGet(sfWebRequest $request)
+    public function executeFieldGet($request)
     {
         $this->checkAdmin();
         $this->getResponse()->setContentType('application/json');
@@ -262,7 +263,7 @@ class formsActions extends AhgActions
     /**
      * Update field (AJAX).
      */
-    public function executeFieldUpdate(sfWebRequest $request)
+    public function executeFieldUpdate($request)
     {
         $this->checkAdmin();
         $this->getResponse()->setContentType('application/json');
@@ -288,7 +289,7 @@ class formsActions extends AhgActions
     /**
      * Delete field (AJAX).
      */
-    public function executeFieldDelete(sfWebRequest $request)
+    public function executeFieldDelete($request)
     {
         $this->checkAdmin();
         $this->getResponse()->setContentType('application/json');
@@ -305,7 +306,7 @@ class formsActions extends AhgActions
     /**
      * Reorder fields (AJAX).
      */
-    public function executeFieldReorder(sfWebRequest $request)
+    public function executeFieldReorder($request)
     {
         $this->checkAdmin();
         $this->getResponse()->setContentType('application/json');
@@ -325,11 +326,11 @@ class formsActions extends AhgActions
     /**
      * Preview form template.
      */
-    public function executePreview(sfWebRequest $request)
+    public function executePreview($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->template = $service->getTemplate((int) $request->getParameter('id'));
@@ -344,11 +345,11 @@ class formsActions extends AhgActions
     /**
      * Assignments list.
      */
-    public function executeAssignments(sfWebRequest $request)
+    public function executeAssignments($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->assignments = $service->getAssignments();
@@ -358,12 +359,12 @@ class formsActions extends AhgActions
     /**
      * Create assignment.
      */
-    public function executeAssignmentCreate(sfWebRequest $request)
+    public function executeAssignmentCreate($request)
     {
         $this->checkAdmin();
 
         if ($request->isMethod('post')) {
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
             $service = new \ahgFormsPlugin\Services\FormService();
 
             $service->createAssignment([
@@ -378,7 +379,7 @@ class formsActions extends AhgActions
             $this->redirect(['module' => 'forms', 'action' => 'assignments']);
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $this->templates = $service->getTemplates();
@@ -387,11 +388,11 @@ class formsActions extends AhgActions
     /**
      * Delete assignment.
      */
-    public function executeAssignmentDelete(sfWebRequest $request)
+    public function executeAssignmentDelete($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $service->deleteAssignment((int) $request->getParameter('id'));
@@ -402,7 +403,7 @@ class formsActions extends AhgActions
     /**
      * API: Save fields (AJAX).
      */
-    public function executeApiSaveFields(sfWebRequest $request)
+    public function executeApiSaveFields($request)
     {
         $this->checkAdmin();
 
@@ -412,7 +413,7 @@ class formsActions extends AhgActions
             return $this->renderText(json_encode(['error' => 'POST required']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $templateId = (int) $request->getParameter('id');
@@ -437,7 +438,7 @@ class formsActions extends AhgActions
     /**
      * API: Reorder fields (AJAX).
      */
-    public function executeApiReorderFields(sfWebRequest $request)
+    public function executeApiReorderFields($request)
     {
         $this->checkAdmin();
 
@@ -447,7 +448,7 @@ class formsActions extends AhgActions
             return $this->renderText(json_encode(['error' => 'POST required']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $templateId = (int) $request->getParameter('id');
@@ -461,11 +462,11 @@ class formsActions extends AhgActions
     /**
      * API: Get rendered form (AJAX).
      */
-    public function executeApiGetForm(sfWebRequest $request)
+    public function executeApiGetForm($request)
     {
         $this->getResponse()->setHttpHeader('Content-Type', 'application/json');
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $type = $request->getParameter('type');
@@ -502,7 +503,7 @@ class formsActions extends AhgActions
     /**
      * API: Autosave draft (AJAX).
      */
-    public function executeApiAutosave(sfWebRequest $request)
+    public function executeApiAutosave($request)
     {
         $this->getResponse()->setHttpHeader('Content-Type', 'application/json');
 
@@ -516,7 +517,7 @@ class formsActions extends AhgActions
             return $this->renderText(json_encode(['error' => 'Missing required fields']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         $draftId = $service->saveDraft(
@@ -536,11 +537,11 @@ class formsActions extends AhgActions
     /**
      * Browse all form templates.
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->checkAdmin();
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
         // Get filter parameters
@@ -588,7 +589,7 @@ class formsActions extends AhgActions
     /**
      * Template library.
      */
-    public function executeLibrary(sfWebRequest $request)
+    public function executeLibrary($request)
     {
         $this->checkAdmin();
 
@@ -635,7 +636,7 @@ class formsActions extends AhgActions
     /**
      * Install template from library.
      */
-    public function executeLibraryInstall(sfWebRequest $request)
+    public function executeLibraryInstall($request)
     {
         $this->checkAdmin();
 
@@ -650,7 +651,7 @@ class formsActions extends AhgActions
      */
     protected function checkAdmin(): void
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }

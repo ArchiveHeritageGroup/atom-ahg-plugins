@@ -1,18 +1,19 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Digital Object Delete Action - Pure Laravel Implementation
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class digitalobjectDeleteAction extends sfAction
+class digitalobjectDeleteAction extends AhgController
 {
     protected $uploadDir;
 
     public function execute($request)
     {
-        $this->uploadDir = sfConfig::get('sf_upload_dir');
+        $this->uploadDir = $this->config('sf_upload_dir');
 
         // Get resource from route (AtoM standard way)
         $resource = $this->getRoute()->resource;

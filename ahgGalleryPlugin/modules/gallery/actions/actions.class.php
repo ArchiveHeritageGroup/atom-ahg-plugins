@@ -1,19 +1,21 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class galleryActions extends AhgActions
+class galleryActions extends AhgController
 {
     protected $service;
 
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgGalleryPlugin/lib/Services/GalleryService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgGalleryPlugin/lib/Services/GalleryService.php';
         $this->service = new GalleryService();
     }
 
-    public function executeIndex(sfWebRequest $request) { $this->redirect('gallery/dashboard'); }
+    public function executeIndex($request) { $this->redirect('gallery/dashboard'); }
 
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $this->stats = $this->service->getDashboardStats();
     }
@@ -22,23 +24,23 @@ class galleryActions extends AhgActions
     // Exhibition functionality moved to standalone ahgExhibitionPlugin
     // These actions redirect to the unified exhibition module
 
-    public function executeExhibitions(sfWebRequest $request)
+    public function executeExhibitions($request)
     {
         $this->redirect('exhibition/index');
     }
 
-    public function executeCreateExhibition(sfWebRequest $request)
+    public function executeCreateExhibition($request)
     {
         $this->redirect('exhibition/add');
     }
 
-    public function executeViewExhibition(sfWebRequest $request)
+    public function executeViewExhibition($request)
     {
         $id = $request->getParameter('id');
         $this->redirect('exhibition/show?id=' . $id);
     }
 
-    public function executeAddExhibitionObject(sfWebRequest $request)
+    public function executeAddExhibitionObject($request)
     {
         $id = $request->getParameter('exhibition_id');
         $this->redirect('exhibition/objects?id=' . $id);
@@ -46,7 +48,7 @@ class galleryActions extends AhgActions
 
     // =========== LOANS ===========
 
-    public function executeLoans(sfWebRequest $request)
+    public function executeLoans($request)
     {
         $this->loans = $this->service->getLoans([
             'type' => $request->getParameter('type'),
@@ -56,7 +58,7 @@ class galleryActions extends AhgActions
         $this->currentStatus = $request->getParameter('status');
     }
 
-    public function executeCreateLoan(sfWebRequest $request)
+    public function executeCreateLoan($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         // Get exhibitions from unified exhibition table
@@ -84,7 +86,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeViewLoan(sfWebRequest $request)
+    public function executeViewLoan($request)
     {
         $id = (int) $request->getParameter('id');
         $this->loan = $this->service->getLoan($id);
@@ -107,7 +109,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeFacilityReport(sfWebRequest $request)
+    public function executeFacilityReport($request)
     {
         $loanId = (int) $request->getParameter('loan_id');
         $this->loan = $this->service->getLoan($loanId);
@@ -142,7 +144,7 @@ class galleryActions extends AhgActions
 
     // =========== VALUATIONS ===========
 
-    public function executeValuations(sfWebRequest $request)
+    public function executeValuations($request)
     {
         $objectId = (int) $request->getParameter('object_id');
         if ($objectId) {
@@ -160,7 +162,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeCreateValuation(sfWebRequest $request)
+    public function executeCreateValuation($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->objectId = (int) $request->getParameter('object_id');
@@ -188,7 +190,7 @@ class galleryActions extends AhgActions
 
     // =========== ARTISTS ===========
 
-    public function executeArtists(sfWebRequest $request)
+    public function executeArtists($request)
     {
         $this->artists = $this->service->getArtists([
             'represented' => $request->getParameter('represented'),
@@ -196,7 +198,7 @@ class galleryActions extends AhgActions
         ]);
     }
 
-    public function executeCreateArtist(sfWebRequest $request)
+    public function executeCreateArtist($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         if ($request->isMethod('post')) {
@@ -220,7 +222,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeViewArtist(sfWebRequest $request)
+    public function executeViewArtist($request)
     {
         $id = (int) $request->getParameter('id');
         $this->artist = $this->service->getArtist($id);
@@ -269,7 +271,7 @@ class galleryActions extends AhgActions
 
     // =========== VENUES ===========
 
-    public function executeVenues(sfWebRequest $request)
+    public function executeVenues($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->venues = DB::table('gallery_venue')->orderBy('name')->get()->toArray();
@@ -278,7 +280,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeCreateVenue(sfWebRequest $request)
+    public function executeCreateVenue($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         if ($request->isMethod('post')) {
@@ -300,7 +302,7 @@ class galleryActions extends AhgActions
         }
     }
 
-    public function executeViewVenue(sfWebRequest $request)
+    public function executeViewVenue($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $id = (int) $request->getParameter('id');

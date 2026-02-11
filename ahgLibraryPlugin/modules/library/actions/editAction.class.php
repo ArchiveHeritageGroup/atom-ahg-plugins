@@ -1,10 +1,11 @@
 <?php
 
-class libraryEditAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class libraryEditAction extends AhgController
 {
     public function execute($request)
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework';
         require_once $frameworkPath . '/bootstrap.php';
 
         $this->resource = null;
@@ -54,7 +55,7 @@ class libraryEditAction extends sfAction
 
     protected function loadLibraryData(int $informationObjectId): void
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
 
         $repo = new \AtomFramework\Repositories\LibraryItemRepository();
         $this->libraryData = $repo->getLibraryData($informationObjectId) ?? [];
@@ -68,14 +69,14 @@ class libraryEditAction extends sfAction
             $this->libraryData['subjects'] = [];
         }
         // Load item physical location
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
         $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
         $this->itemLocation = $locRepo->getLocationWithContainer($informationObjectId) ?? [];
         }
 
     protected function processForm($request): int
     {
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/LibraryItemRepository.php';
 
         $repo = new \AtomFramework\Repositories\LibraryItemRepository();
 
@@ -145,7 +146,7 @@ class libraryEditAction extends sfAction
             $this->recordEntitySubjectCooccurrences($savedId, $subjects);
         }
         // Save item physical location
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/ItemPhysicalLocationRepository.php';
         $locRepo = new \AtomFramework\Repositories\ItemPhysicalLocationRepository();
         $locationData = [
             'physical_object_id' => $request->getParameter('item_physical_object_id') ?: null,
@@ -261,7 +262,7 @@ class libraryEditAction extends sfAction
     protected function loadFormOptions(): void
     {
         $db = \Illuminate\Database\Capsule\Manager::connection();
-        $culture = sfContext::getInstance()->user->getCulture() ?? 'en';
+        $culture = $this->getContext()->user->getCulture() ?? 'en';
 
         $levels = $db->table('level_of_description_sector as los')
             ->join('term', 'los.term_id', '=', 'term.id')
@@ -304,7 +305,7 @@ class libraryEditAction extends sfAction
     {
         try {
             // Use a separate PDO connection to avoid transaction conflicts
-            $config = include(sfConfig::get('sf_root_dir') . '/config/config.php');
+            $config = include($this->config('sf_root_dir') . '/config/config.php');
             $dsn = $config['all']['propel']['param']['dsn'];
             $user = $config['all']['propel']['param']['username'];
             $pass = $config['all']['propel']['param']['password'];
@@ -338,7 +339,7 @@ class libraryEditAction extends sfAction
     {
         try {
             $db = \Illuminate\Database\Capsule\Manager::connection();
-            $culture = $this->getUser()->getCulture() ?? 'en';
+            $culture = $this->culture() ?? 'en';
             
             $io = $db->table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
@@ -390,7 +391,7 @@ class libraryEditAction extends sfAction
     protected function logAudit(string $action, int $resourceId, array $oldValues, array $newValues): void
     {
         try {
-            $auditServicePath = sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            $auditServicePath = $this->config('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
             if (file_exists($auditServicePath)) {
                 require_once $auditServicePath;
             }
@@ -436,7 +437,7 @@ class libraryEditAction extends sfAction
     protected function updateSubjectAuthority(int $libraryItemId, array $subjects): void
     {
         try {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
 
             $authorityRepo = new \ahgLibraryPlugin\Repository\SubjectAuthorityRepository();
             $db = \Illuminate\Database\Capsule\Manager::connection();
@@ -494,7 +495,7 @@ class libraryEditAction extends sfAction
                 return;
             }
 
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
+            require_once $this->config('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Repository/SubjectAuthorityRepository.php';
 
             $authorityRepo = new \ahgLibraryPlugin\Repository\SubjectAuthorityRepository();
 

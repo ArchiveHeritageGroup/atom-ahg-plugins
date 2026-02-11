@@ -1,10 +1,11 @@
 <?php
 
-class donorAgreementViewAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementViewAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
@@ -122,7 +123,7 @@ class donorAgreementViewAction extends sfAction
 
     protected function initDatabase()
     {
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }

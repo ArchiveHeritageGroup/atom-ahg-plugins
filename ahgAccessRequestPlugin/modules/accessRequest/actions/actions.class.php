@@ -1,28 +1,29 @@
 <?php
 
-class accessRequestActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class accessRequestActions extends AhgController
 {
-    public function preExecute()
+    public function boot(): void
     {
-        require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgAccessRequestPlugin/lib/Service/AccessRequestService.php';
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
+        require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgAccessRequestPlugin/lib/Service/AccessRequestService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
     }
 
     /**
      * New clearance request form
      */
-    public function executeNew(sfWebRequest $request)
+    public function executeNew($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         $this->classifications = \AtomExtensions\Services\SecurityClearanceService::getAllClassifications();
         $this->currentClearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance(
-            $this->context->user->getAttribute('user_id')
+            $this->getUser()->getAttribute('user_id')
         );
         $this->pendingRequest = \Illuminate\Database\Capsule\Manager::table('access_request')
-            ->where('user_id', $this->context->user->getAttribute('user_id'))
+            ->where('user_id', $this->getUser()->getAttribute('user_id'))
             ->where('status', 'pending')
             ->where('request_type', 'clearance')
             ->first();
@@ -31,13 +32,13 @@ class accessRequestActions extends AhgActions
     /**
      * Request access to specific object
      */
-    public function executeRequestObject(sfWebRequest $request)
+    public function executeRequestObject($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $objectType = $request->getParameter('type', 'information_object');
         $objectId = (int) $request->getParameter('id');
 
@@ -63,14 +64,14 @@ class accessRequestActions extends AhgActions
     /**
      * Create clearance request
      */
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         if ($request->isMethod('post')) {
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $classificationId = (int) $request->getParameter('classification_id');
             $reason = trim($request->getParameter('reason'));
             $justification = trim($request->getParameter('justification'));
@@ -98,14 +99,14 @@ class accessRequestActions extends AhgActions
     /**
      * Create object access request
      */
-    public function executeCreateObjectRequest(sfWebRequest $request)
+    public function executeCreateObjectRequest($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         if ($request->isMethod('post')) {
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $objectType = $request->getParameter('object_type');
             $objectId = (int) $request->getParameter('object_id');
             $includeDescendants = (bool) $request->getParameter('include_descendants');
@@ -142,13 +143,13 @@ class accessRequestActions extends AhgActions
     /**
      * View user's requests
      */
-    public function executeMyRequests(sfWebRequest $request)
+    public function executeMyRequests($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $this->requests = \AtomExtensions\Services\AccessRequestService::getUserRequests($userId);
         $this->currentClearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($userId);
         $this->accessGrants = \AtomExtensions\Services\AccessRequestService::getUserAccessGrants($userId);
@@ -157,14 +158,14 @@ class accessRequestActions extends AhgActions
     /**
      * Cancel request
      */
-    public function executeCancel(sfWebRequest $request)
+    public function executeCancel($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         $requestId = (int) $request->getParameter('id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (\AtomExtensions\Services\AccessRequestService::cancelRequest($requestId, $userId)) {
             $this->getUser()->setFlash('success', 'Request cancelled successfully.');
@@ -178,13 +179,13 @@ class accessRequestActions extends AhgActions
     /**
      * Pending requests for approvers
      */
-    public function executePending(sfWebRequest $request)
+    public function executePending($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!\AtomExtensions\Services\AccessRequestService::isApprover($userId)) {
             $this->getUser()->setFlash('error', 'You are not authorized to view this page.');
@@ -198,14 +199,14 @@ class accessRequestActions extends AhgActions
     /**
      * View single request
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         $requestId = (int) $request->getParameter('id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $this->accessRequest = \AtomExtensions\Services\AccessRequestService::getRequest($requestId);
 
@@ -229,14 +230,14 @@ class accessRequestActions extends AhgActions
     /**
      * Approve request
      */
-    public function executeApprove(sfWebRequest $request)
+    public function executeApprove($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         $requestId = (int) $request->getParameter('id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$request->isMethod('post')) {
             $this->redirect(['module' => 'accessRequest', 'action' => 'view', 'id' => $requestId]);
@@ -258,14 +259,14 @@ class accessRequestActions extends AhgActions
     /**
      * Deny request
      */
-    public function executeDeny(sfWebRequest $request)
+    public function executeDeny($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         $requestId = (int) $request->getParameter('id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$request->isMethod('post')) {
             $this->redirect(['module' => 'accessRequest', 'action' => 'view', 'id' => $requestId]);
@@ -290,9 +291,9 @@ class accessRequestActions extends AhgActions
     /**
      * Manage approvers
      */
-    public function executeApprovers(sfWebRequest $request)
+    public function executeApprovers($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
@@ -311,9 +312,9 @@ class accessRequestActions extends AhgActions
     /**
      * Add approver
      */
-    public function executeAddApprover(sfWebRequest $request)
+    public function executeAddApprover($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
@@ -336,9 +337,9 @@ class accessRequestActions extends AhgActions
     /**
      * Remove approver
      */
-    public function executeRemoveApprover(sfWebRequest $request)
+    public function executeRemoveApprover($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 

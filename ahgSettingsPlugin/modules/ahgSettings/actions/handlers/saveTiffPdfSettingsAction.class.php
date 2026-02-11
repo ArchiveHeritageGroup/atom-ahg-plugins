@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Save TIFF to PDF Merge Settings Action
  */
@@ -8,12 +9,12 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class saveTiffPdfSettingsAction extends sfAction
+class saveTiffPdfSettingsAction extends AhgController
 {
     public function execute($request)
     {
         // Check admin access
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             return $this->jsonResponse(['success' => false, 'error' => 'Administrator access required']);
         }
 

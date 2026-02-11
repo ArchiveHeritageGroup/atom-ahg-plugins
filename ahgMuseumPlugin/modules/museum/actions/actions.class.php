@@ -1,16 +1,17 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * ahgMuseumPlugin actions - Laravel Query Builder version.
  */
-class museumActions extends AhgActions
+class museumActions extends AhgController
 {
     /**
      * Display provenance/custody history with D3.js timeline visualization.
      */
-    public function executeProvenance(sfWebRequest $request)
+    public function executeProvenance($request)
     {
         $slug = $request->getParameter('slug');
         
@@ -30,7 +31,7 @@ class museumActions extends AhgActions
         $this->custodyHistory = $this->getCustodyHistory($this->resource->id);
 
         // Get i18n fields
-        $culture = sfContext::getInstance()->getUser()->getCulture() ?? 'en';
+        $culture = $this->getContext()->getUser()->getCulture() ?? 'en';
         $i18n = DB::table('information_object_i18n')
             ->where('id', $this->resource->id)
             ->where('culture', $culture)

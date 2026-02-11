@@ -1,5 +1,7 @@
 <?php
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -8,7 +10,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartAddAction extends sfAction
+class cartAddAction extends AhgController
 {
     public function execute($request)
     {
@@ -19,7 +21,7 @@ class cartAddAction extends sfAction
             ->value('object_id');
         
         if (!$objectId) {
-            $this->context->user->setFlash('error', 'Item not found.');
+            $this->getUser()->setFlash('error', 'Item not found.');
             $this->redirect(['module' => 'informationobject', 'action' => 'browse']);
             return;
         }
@@ -33,8 +35,8 @@ class cartAddAction extends sfAction
         $userId = null;
         $sessionId = null;
         
-        if ($this->context->user->isAuthenticated()) {
-            $userId = $this->context->user->getAttribute('user_id');
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
         } else {
             // Guest user - use session ID
             $sessionId = session_id();
@@ -48,7 +50,7 @@ class cartAddAction extends sfAction
         $service = new CartService();
         $result = $service->addToCart($userId, $objectId, $title, $slug, $sessionId);
         
-        $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
+        $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
         // Use direct slug URL to avoid routing conflicts
         $this->redirect('/' . $slug);
     }

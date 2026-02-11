@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class contractActions extends AhgActions
+class contractActions extends AhgController
 {
     protected function initFramework()
     {
@@ -42,7 +43,7 @@ class contractActions extends AhgActions
     /**
      * Browse contracts
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->initFramework();
         $this->types = $this->getContractTypes();
@@ -78,7 +79,7 @@ class contractActions extends AhgActions
     /**
      * Add new contract
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $this->initFramework();
         $this->types = $this->getContractTypes();
@@ -102,7 +103,7 @@ class contractActions extends AhgActions
     /**
      * Edit existing contract
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $this->initFramework();
         $this->types = $this->getContractTypes();
@@ -135,7 +136,7 @@ class contractActions extends AhgActions
     /**
      * View contract details
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $this->initFramework();
         $id = (int)$request->getParameter('id');
@@ -165,7 +166,7 @@ class contractActions extends AhgActions
     /**
      * Reminders list
      */
-    public function executeReminders(sfWebRequest $request)
+    public function executeReminders($request)
     {
         $this->initFramework();
         $this->reminders = DB::table('ahg_contract_reminder as r')
@@ -272,7 +273,7 @@ class contractActions extends AhgActions
                 if ($id) {
                     $existing = DB::table('ahg_contract')->where('id', $id)->first();
                     if ($existing && $existing->logo_path) {
-                        $fullPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                        $fullPath = $this->config('sf_root_dir') . '/uploads' . $existing->logo_path;
                         if (file_exists($fullPath)) {
                             @unlink($fullPath);
                         }
@@ -285,7 +286,7 @@ class contractActions extends AhgActions
                 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
                 if (in_array($file['type'], $allowedTypes)) {
-                    $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/contracts/logos';
+                    $uploadDir = $this->config('sf_root_dir') . '/uploads/contracts/logos';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
@@ -298,7 +299,7 @@ class contractActions extends AhgActions
                         if ($id) {
                             $existing = DB::table('ahg_contract')->where('id', $id)->first();
                             if ($existing && $existing->logo_path) {
-                                $oldPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                                $oldPath = $this->config('sf_root_dir') . '/uploads' . $existing->logo_path;
                                 if (file_exists($oldPath)) {
                                     @unlink($oldPath);
                                 }
@@ -343,7 +344,7 @@ class contractActions extends AhgActions
     /**
      * Delete contract
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->initFramework();
         $id = (int)$request->getParameter('id');

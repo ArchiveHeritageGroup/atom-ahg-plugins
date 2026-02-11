@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Delete Feedback action.
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
-class feedbackDeleteAction extends sfAction
+class feedbackDeleteAction extends AhgController
 {
     public function execute($request)
     {

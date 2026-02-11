@@ -1,6 +1,7 @@
 <?php
 
-class donorAgreementAutocompleteAccessionsAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementAutocompleteAccessionsAction extends AhgController
 {
     public function execute($request)
     {
@@ -41,7 +42,7 @@ class donorAgreementAutocompleteAccessionsAction extends sfAction
 
     protected function initDatabase()
     {
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }

@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * IIIF Authentication Actions
  *
@@ -10,11 +11,11 @@
  *
  * @see https://iiif.io/api/auth/1.0/
  */
-class iiifAuthActions extends AhgActions
+class iiifAuthActions extends AhgController
 {
     protected function getAuthService(): IiifAuthService
     {
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAuthService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAuthService.php';
         return new IiifAuthService();
     }
 
@@ -22,7 +23,7 @@ class iiifAuthActions extends AhgActions
      * Login endpoint - handles user authentication
      * GET /iiif/auth/login/:service
      */
-    public function executeLogin(sfWebRequest $request)
+    public function executeLogin($request)
     {
         $serviceName = $request->getParameter('service');
         $authService = $this->getAuthService();
@@ -88,7 +89,7 @@ class iiifAuthActions extends AhgActions
      * Token endpoint - issues access tokens
      * GET /iiif/auth/token/:service
      */
-    public function executeToken(sfWebRequest $request)
+    public function executeToken($request)
     {
         $serviceName = $request->getParameter('service');
         $messageId = $request->getParameter('messageId');
@@ -112,7 +113,7 @@ class iiifAuthActions extends AhgActions
      * Logout endpoint - revokes token
      * GET /iiif/auth/logout/:service
      */
-    public function executeLogout(sfWebRequest $request)
+    public function executeLogout($request)
     {
         $authService = $this->getAuthService();
         $authService->logout();
@@ -125,7 +126,7 @@ class iiifAuthActions extends AhgActions
      * Confirm clickthrough - user agreed to terms
      * POST /iiif/auth/confirm/:service
      */
-    public function executeConfirm(sfWebRequest $request)
+    public function executeConfirm($request)
     {
         $serviceName = $request->getParameter('service');
 
@@ -154,7 +155,7 @@ class iiifAuthActions extends AhgActions
      * Admin: List protected resources
      * GET /admin/iiif-auth
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
@@ -170,7 +171,7 @@ class iiifAuthActions extends AhgActions
      * Admin: Protect a resource
      * POST /admin/iiif-auth/protect
      */
-    public function executeProtect(sfWebRequest $request)
+    public function executeProtect($request)
     {
         if (!$this->getUser()->hasCredential('administrator')) {
             return $this->renderJson(['error' => 'Unauthorized'], 403);
@@ -198,7 +199,7 @@ class iiifAuthActions extends AhgActions
      * Admin: Remove protection from a resource
      * POST /admin/iiif-auth/unprotect
      */
-    public function executeUnprotect(sfWebRequest $request)
+    public function executeUnprotect($request)
     {
         if (!$this->getUser()->hasCredential('administrator')) {
             return $this->renderJson(['error' => 'Unauthorized'], 403);
@@ -220,7 +221,7 @@ class iiifAuthActions extends AhgActions
      * Check access for an object (API)
      * GET /iiif/auth/check/:id
      */
-    public function executeCheck(sfWebRequest $request)
+    public function executeCheck($request)
     {
         $objectId = (int)$request->getParameter('id');
 

@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * Get a single webhook by ID
  *
  * GET /api/v2/webhooks/:id
  */
-class apiv2WebhooksReadAction extends AhgApiAction
+class apiv2WebhooksReadAction extends AhgApiController
 {
     public function GET($request)
     {

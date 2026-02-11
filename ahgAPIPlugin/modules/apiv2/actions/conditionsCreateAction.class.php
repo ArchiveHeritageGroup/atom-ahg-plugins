@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionsCreateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionsCreateAction extends AhgApiController
 {
     public function POST($request)
     {

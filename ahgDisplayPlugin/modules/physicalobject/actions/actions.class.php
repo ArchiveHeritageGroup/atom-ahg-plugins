@@ -1,20 +1,21 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 // Include parent actions
-require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/editAction.class.php';
-require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
-require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/browseAction.class.php';
-require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/deleteAction.class.php';
+require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/editAction.class.php';
+require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
+require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/browseAction.class.php';
+require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/deleteAction.class.php';
 
 /**
  * Extended Physical Object Actions
  */
-class physicalobjectActions extends AhgActions
+class physicalobjectActions extends AhgController
 {
     public function executeIndex($request)
     {
         // Load framework for extended data
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Get resource from route
         $this->resource = $this->getRoute()->resource;
@@ -30,7 +31,7 @@ class physicalobjectActions extends AhgActions
     public function executeEdit($request)
     {
         // Load framework
-        require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
+        require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Set up resource
         $this->resource = new QubitPhysicalObject();

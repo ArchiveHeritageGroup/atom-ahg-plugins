@@ -1,10 +1,11 @@
 <?php
 
-class securityAuditActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class securityAuditActions extends AhgController
 {
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -16,9 +17,9 @@ class securityAuditActions extends AhgActions
         $this->period = $period;
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
@@ -126,9 +127,9 @@ class securityAuditActions extends AhgActions
         $this->categories = $db::table('spectrum_audit_log')->distinct()->pluck('procedure_type')->toArray();
     }
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 
@@ -177,9 +178,9 @@ class securityAuditActions extends AhgActions
         return sfView::NONE;
     }
 
-    public function executeObjectAccess(sfWebRequest $request)
+    public function executeObjectAccess($request)
     {
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
 

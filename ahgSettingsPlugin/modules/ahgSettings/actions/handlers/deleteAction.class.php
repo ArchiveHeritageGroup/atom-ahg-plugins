@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\SettingService;
 
 /*
@@ -18,11 +20,11 @@ use AtomExtensions\Services\SettingService;
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsDeleteAction extends sfAction
+class SettingsDeleteAction extends AhgController
 {
     public function execute($request)
     {
-        $setting = SettingService::getById($this->request->id);
+        $setting = SettingService::getById($this->getRequest()->id);
 
         $this->forward404Unless($setting);
 

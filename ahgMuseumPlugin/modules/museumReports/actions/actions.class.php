@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Museum Reports Module
  * CCO-based reports for museum objects, creators, condition, provenance
@@ -6,16 +8,16 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class museumReportsActions extends AhgActions
+class museumReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -58,7 +60,7 @@ class museumReportsActions extends AhgActions
         ];
     }
 
-    public function executeObjects(sfWebRequest $request)
+    public function executeObjects($request)
     {
         $this->checkAccess();
         
@@ -92,7 +94,7 @@ class museumReportsActions extends AhgActions
         $this->conditions = DB::table('museum_metadata')->distinct()->whereNotNull('condition_term')->pluck('condition_term')->toArray();
     }
 
-    public function executeCreators(sfWebRequest $request)
+    public function executeCreators($request)
     {
         $this->checkAccess();
         
@@ -124,7 +126,7 @@ class museumReportsActions extends AhgActions
         ];
     }
 
-    public function executeConditionReport(sfWebRequest $request)
+    public function executeConditionReport($request)
     {
         $this->checkAccess();
         
@@ -165,7 +167,7 @@ class museumReportsActions extends AhgActions
         ];
     }
 
-    public function executeProvenance(sfWebRequest $request)
+    public function executeProvenance($request)
     {
         $this->checkAccess();
         
@@ -191,7 +193,7 @@ class museumReportsActions extends AhgActions
         ];
     }
 
-    public function executeStylePeriod(sfWebRequest $request)
+    public function executeStylePeriod($request)
     {
         $this->checkAccess();
         
@@ -228,7 +230,7 @@ class museumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeMaterials(sfWebRequest $request)
+    public function executeMaterials($request)
     {
         $this->checkAccess();
         
@@ -245,7 +247,7 @@ class museumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeExportCsv(sfWebRequest $request)
+    public function executeExportCsv($request)
     {
         $this->checkAccess();
         

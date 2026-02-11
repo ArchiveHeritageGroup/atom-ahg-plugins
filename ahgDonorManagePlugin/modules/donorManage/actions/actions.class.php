@@ -1,17 +1,11 @@
 <?php
 
-class donorManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class donorManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeBrowse($request)
     {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('Browse donors') . ' - ' . $this->response->getTitle());
 
@@ -24,9 +18,9 @@ class donorManageActions extends AhgActions
 
         // Sort defaults
         if ($this->getUser()->isAuthenticated()) {
-            $sortSetting = sfConfig::get('app_sort_browser_user', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_user', 'lastUpdated');
         } else {
-            $sortSetting = sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_anonymous', 'lastUpdated');
         }
 
         $sort = $request->getParameter('sort', $sortSetting);
@@ -38,7 +32,7 @@ class donorManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Handle global search redirect: ?query=X -> subquery=X
@@ -68,9 +62,9 @@ class donorManageActions extends AhgActions
     /**
      * View a donor record.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $slug = $request->getParameter('slug');
 
         $this->donor = \AhgDonorManage\Services\DonorCrudService::getBySlug($slug, $culture);
@@ -79,7 +73,7 @@ class donorManageActions extends AhgActions
         }
 
         // ACL — donors require authenticated editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
 
         if (!$user->isAuthenticated()) {
@@ -111,14 +105,14 @@ class donorManageActions extends AhgActions
     /**
      * Edit or create a donor record.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
         // ACL — donors require authenticated editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
             QubitAcl::forwardUnauthorized();
         }
@@ -175,13 +169,13 @@ class donorManageActions extends AhgActions
     /**
      * Delete a donor record.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->form = new sfForm();
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
             QubitAcl::forwardUnauthorized();
         }

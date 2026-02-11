@@ -1,11 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 /**
  * List webhooks for the authenticated user
  *
  * GET /api/v2/webhooks
  */
-class apiv2WebhooksBrowseAction extends AhgApiAction
+class apiv2WebhooksBrowseAction extends AhgApiController
 {
     public function GET($request)
     {

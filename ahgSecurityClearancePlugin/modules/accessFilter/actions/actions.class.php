@@ -1,8 +1,9 @@
 <?php
 
-class accessFilterActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class accessFilterActions extends AhgController
 {
-    public function executeDenied(sfWebRequest $request)
+    public function executeDenied($request)
     {
         $this->objectId = $request->getParameter('id');
         $this->slug = $request->getParameter('slug');

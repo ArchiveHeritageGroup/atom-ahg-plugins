@@ -1,14 +1,15 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Import a mapping profile from JSON file.
  */
-class importMappingAction extends sfAction
+class importMappingAction extends AhgController
 {
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
 
@@ -55,7 +56,7 @@ class importMappingAction extends sfAction
                 'sector_code' => $data['sector_code'] ?? null,
                 'field_mappings' => json_encode($data['field_mappings']),
                 'is_default' => 0,
-                'created_by' => $this->context->user->getAttribute('user_id'),
+                'created_by' => $this->getUser()->getAttribute('user_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);

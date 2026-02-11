@@ -1,10 +1,11 @@
 <?php
 
-class donorAgreementAddAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementAddAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
@@ -27,7 +28,7 @@ class donorAgreementAddAction extends sfAction
 
         if ($request->isMethod('POST')) {
             $data = $request->getParameter('agreement', []);
-            $data['created_by'] = $this->context->user->getAttribute('user_id');
+            $data['created_by'] = $this->getUser()->getAttribute('user_id');
             
             try {
                 $id = $this->createAgreement($data);
@@ -38,17 +39,17 @@ class donorAgreementAddAction extends sfAction
                 // Handle reminders
                 $this->handleReminders($request, $id);
                 
-                $this->context->user->setFlash('notice', 'Agreement created successfully. Edit to link Archival Descriptions and Accessions.' . ($uploadResult ? ' ' . $uploadResult : ''));
+                $this->getUser()->setFlash('notice', 'Agreement created successfully. Edit to link Archival Descriptions and Accessions.' . ($uploadResult ? ' ' . $uploadResult : ''));
                 $this->redirect(['module' => 'donorAgreement', 'action' => 'view', 'id' => $id]);
             } catch (Exception $e) {
-                $this->context->user->setFlash('error', 'Error creating agreement: ' . $e->getMessage());
+                $this->getUser()->setFlash('error', 'Error creating agreement: ' . $e->getMessage());
             }
         }
     }
 
     protected function initDatabase()
     {
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }
@@ -138,9 +139,9 @@ class donorAgreementAddAction extends sfAction
         }
 
         // Use AtoM's upload directory
-        $baseUploadDir = sfConfig::get('sf_upload_dir');
+        $baseUploadDir = $this->config('sf_upload_dir');
         if (empty($baseUploadDir)) {
-            $baseUploadDir = sfConfig::get('sf_root_dir') . '/uploads';
+            $baseUploadDir = $this->config('sf_root_dir') . '/uploads';
         }
         
         $uploadDir = $baseUploadDir . '/donor_agreements/' . $agreementId;
@@ -241,7 +242,7 @@ class donorAgreementAddAction extends sfAction
                 'file_size' => $size,
                 'mime_type' => $mimeType,
                 'description' => $description,
-                'uploaded_by' => $this->context->user->getAttribute('user_id'),
+                'uploaded_by' => $this->getUser()->getAttribute('user_id'),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
             

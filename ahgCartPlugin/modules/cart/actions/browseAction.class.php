@@ -1,6 +1,8 @@
 <?php
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
@@ -10,7 +12,7 @@ use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartBrowseAction extends sfAction
+class cartBrowseAction extends AhgController
 {
     public function execute($request)
     {
@@ -21,15 +23,15 @@ class cartBrowseAction extends sfAction
         $userId = null;
         $sessionId = null;
         
-        if ($this->context->user->isAuthenticated()) {
-            $userId = $this->context->user->getAttribute('user_id');
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
             
             // Merge any guest cart items
             $guestSessionId = session_id();
             if ($guestSessionId) {
                 $merged = $cartService->mergeGuestCart($guestSessionId, $userId);
                 if ($merged > 0) {
-                    $this->context->user->setFlash('notice', sprintf('%d item(s) from your guest cart have been added.', $merged));
+                    $this->getUser()->setFlash('notice', sprintf('%d item(s) from your guest cart have been added.', $merged));
                 }
             }
         } else {
@@ -57,6 +59,6 @@ class cartBrowseAction extends sfAction
         }
         
         $this->count = count($this->items);
-        $this->isGuest = !$this->context->user->isAuthenticated();
+        $this->isGuest = !$this->getUser()->isAuthenticated();
     }
 }

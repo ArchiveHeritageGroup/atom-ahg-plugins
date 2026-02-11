@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -9,20 +10,18 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @package ahgICIPPlugin
  */
-class icipActions extends AhgActions
+class icipActions extends AhgController
 {
     /**
      * Pre-execute: Check user authentication for admin pages
      */
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-
-        // Public actions that don't require authentication
+// Public actions that don't require authentication
         $publicActions = ['acknowledge', 'apiSummary', 'apiCheckAccess'];
 
         if (!in_array($this->getActionName(), $publicActions)) {
-            if (!$this->context->user->isAuthenticated()) {
+            if (!$this->getUser()->isAuthenticated()) {
                 $this->redirect('user/login');
             }
         }
@@ -35,7 +34,7 @@ class icipActions extends AhgActions
     /**
      * ICIP Dashboard
      */
-    public function executeDashboard(sfWebRequest $request)
+    public function executeDashboard($request)
     {
         $this->stats = ahgICIPService::getDashboardStats();
         $this->pendingConsultations = ahgICIPService::getPendingConsultation(10);
@@ -58,7 +57,7 @@ class icipActions extends AhgActions
     /**
      * Redirect /icip/community to /icip/communities
      */
-    public function executeCommunity(sfWebRequest $request)
+    public function executeCommunity($request)
     {
         $this->redirect('icip/communities');
     }
@@ -66,7 +65,7 @@ class icipActions extends AhgActions
     /**
      * List communities
      */
-    public function executeCommunities(sfWebRequest $request)
+    public function executeCommunities($request)
     {
         $query = DB::table('icip_community')
             ->orderBy('name');
@@ -98,7 +97,7 @@ class icipActions extends AhgActions
     /**
      * Add/Edit community
      */
-    public function executeCommunityEdit(sfWebRequest $request)
+    public function executeCommunityEdit($request)
     {
         $this->id = $request->getParameter('id');
         $this->community = null;
@@ -139,7 +138,7 @@ class icipActions extends AhgActions
                     ->update($data);
                 $this->getUser()->setFlash('notice', 'Community updated successfully.');
             } else {
-                $data['created_by'] = $this->context->user->getAttribute('user_id');
+                $data['created_by'] = $this->getUser()->getAttribute('user_id');
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $this->id = DB::table('icip_community')->insertGetId($data);
                 $this->getUser()->setFlash('notice', 'Community created successfully.');
@@ -152,7 +151,7 @@ class icipActions extends AhgActions
     /**
      * View community details
      */
-    public function executeCommunityView(sfWebRequest $request)
+    public function executeCommunityView($request)
     {
         $this->id = $request->getParameter('id');
         $this->community = DB::table('icip_community')
@@ -190,7 +189,7 @@ class icipActions extends AhgActions
     /**
      * Delete community
      */
-    public function executeCommunityDelete(sfWebRequest $request)
+    public function executeCommunityDelete($request)
     {
         $id = $request->getParameter('id');
 
@@ -215,7 +214,7 @@ class icipActions extends AhgActions
     /**
      * List consent records
      */
-    public function executeConsentList(sfWebRequest $request)
+    public function executeConsentList($request)
     {
         $query = DB::table('icip_consent as c')
             ->leftJoin('icip_community as com', 'c.community_id', '=', 'com.id')
@@ -255,7 +254,7 @@ class icipActions extends AhgActions
     /**
      * Add/Edit consent record
      */
-    public function executeConsentEdit(sfWebRequest $request)
+    public function executeConsentEdit($request)
     {
         $this->id = $request->getParameter('id');
         $this->objectId = $request->getParameter('object_id');
@@ -316,7 +315,7 @@ class icipActions extends AhgActions
                     ->where('id', $this->id)
                     ->update($data);
             } else {
-                $data['created_by'] = $this->context->user->getAttribute('user_id');
+                $data['created_by'] = $this->getUser()->getAttribute('user_id');
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $this->id = DB::table('icip_consent')->insertGetId($data);
             }
@@ -337,7 +336,7 @@ class icipActions extends AhgActions
     /**
      * View consent details
      */
-    public function executeConsentView(sfWebRequest $request)
+    public function executeConsentView($request)
     {
         $this->id = $request->getParameter('id');
         $this->consent = DB::table('icip_consent as c')
@@ -371,7 +370,7 @@ class icipActions extends AhgActions
     /**
      * List consultations
      */
-    public function executeConsultations(sfWebRequest $request)
+    public function executeConsultations($request)
     {
         $query = DB::table('icip_consultation as c')
             ->join('icip_community as com', 'c.community_id', '=', 'com.id')
@@ -412,7 +411,7 @@ class icipActions extends AhgActions
     /**
      * Add/Edit consultation
      */
-    public function executeConsultationEdit(sfWebRequest $request)
+    public function executeConsultationEdit($request)
     {
         $this->id = $request->getParameter('id');
         $this->objectId = $request->getParameter('object_id');
@@ -503,7 +502,7 @@ class icipActions extends AhgActions
                     ->where('id', $this->id)
                     ->update($data);
             } else {
-                $data['created_by'] = $this->context->user->getAttribute('user_id');
+                $data['created_by'] = $this->getUser()->getAttribute('user_id');
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $this->id = DB::table('icip_consultation')->insertGetId($data);
             }
@@ -521,7 +520,7 @@ class icipActions extends AhgActions
     /**
      * View consultation details
      */
-    public function executeConsultationView(sfWebRequest $request)
+    public function executeConsultationView($request)
     {
         $this->id = $request->getParameter('id');
         $this->consultation = DB::table('icip_consultation as c')
@@ -552,7 +551,7 @@ class icipActions extends AhgActions
     /**
      * Manage TK Labels
      */
-    public function executeTkLabels(sfWebRequest $request)
+    public function executeTkLabels($request)
     {
         // Get label types
         $this->labelTypes = DB::table('icip_tk_label_type')
@@ -606,7 +605,7 @@ class icipActions extends AhgActions
     /**
      * Manage Cultural Notices
      */
-    public function executeNotices(sfWebRequest $request)
+    public function executeNotices($request)
     {
         // Get notice types
         $this->noticeTypes = DB::table('icip_cultural_notice_type')
@@ -641,7 +640,7 @@ class icipActions extends AhgActions
     /**
      * Manage Notice Types
      */
-    public function executeNoticeTypes(sfWebRequest $request)
+    public function executeNoticeTypes($request)
     {
         $this->noticeTypes = DB::table('icip_cultural_notice_type')
             ->orderBy('display_order')
@@ -688,7 +687,7 @@ class icipActions extends AhgActions
     /**
      * Manage Access Restrictions
      */
-    public function executeRestrictions(sfWebRequest $request)
+    public function executeRestrictions($request)
     {
         $this->restrictionTypes = ahgICIPService::getRestrictionTypes();
 
@@ -717,7 +716,7 @@ class icipActions extends AhgActions
     /**
      * Reports overview
      */
-    public function executeReports(sfWebRequest $request)
+    public function executeReports($request)
     {
         $this->stats = ahgICIPService::getDashboardStats();
 
@@ -746,7 +745,7 @@ class icipActions extends AhgActions
     /**
      * Pending consultations report
      */
-    public function executeReportPending(sfWebRequest $request)
+    public function executeReportPending($request)
     {
         $this->records = ahgICIPService::getPendingConsultation(200);
         $this->statusOptions = ahgICIPService::getConsentStatusOptions();
@@ -755,7 +754,7 @@ class icipActions extends AhgActions
     /**
      * Expiring consents report
      */
-    public function executeReportExpiry(sfWebRequest $request)
+    public function executeReportExpiry($request)
     {
         $days = (int) $request->getParameter('days', 90);
         $this->days = $days;
@@ -765,7 +764,7 @@ class icipActions extends AhgActions
     /**
      * Community-specific report
      */
-    public function executeReportCommunity(sfWebRequest $request)
+    public function executeReportCommunity($request)
     {
         $this->id = $request->getParameter('id');
         $this->community = DB::table('icip_community')
@@ -828,7 +827,7 @@ class icipActions extends AhgActions
     /**
      * ICIP overview for a specific object
      */
-    public function executeObjectIcip(sfWebRequest $request)
+    public function executeObjectIcip($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -852,7 +851,7 @@ class icipActions extends AhgActions
     /**
      * Manage consent for an object
      */
-    public function executeObjectConsent(sfWebRequest $request)
+    public function executeObjectConsent($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -883,7 +882,7 @@ class icipActions extends AhgActions
                 'consent_granted_by' => $request->getParameter('consent_granted_by'),
                 'conditions' => $request->getParameter('conditions'),
                 'notes' => $request->getParameter('notes'),
-                'created_by' => $this->context->user->getAttribute('user_id'),
+                'created_by' => $this->getUser()->getAttribute('user_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
@@ -899,7 +898,7 @@ class icipActions extends AhgActions
     /**
      * Manage notices for an object
      */
-    public function executeObjectNotices(sfWebRequest $request)
+    public function executeObjectNotices($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -935,7 +934,7 @@ class icipActions extends AhgActions
                     'start_date' => $request->getParameter('start_date') ?: null,
                     'end_date' => $request->getParameter('end_date') ?: null,
                     'notes' => $request->getParameter('notes'),
-                    'created_by' => $this->context->user->getAttribute('user_id'),
+                    'created_by' => $this->getUser()->getAttribute('user_id'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
                 $this->getUser()->setFlash('notice', 'Cultural notice added.');
@@ -955,7 +954,7 @@ class icipActions extends AhgActions
     /**
      * Manage TK labels for an object
      */
-    public function executeObjectLabels(sfWebRequest $request)
+    public function executeObjectLabels($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -990,7 +989,7 @@ class icipActions extends AhgActions
                     'applied_by' => $request->getParameter('applied_by', 'institution'),
                     'local_contexts_project_id' => $request->getParameter('local_contexts_project_id'),
                     'notes' => $request->getParameter('notes'),
-                    'created_by' => $this->context->user->getAttribute('user_id'),
+                    'created_by' => $this->getUser()->getAttribute('user_id'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
                 $this->getUser()->setFlash('notice', 'TK Label added.');
@@ -1010,7 +1009,7 @@ class icipActions extends AhgActions
     /**
      * Manage restrictions for an object
      */
-    public function executeObjectRestrictions(sfWebRequest $request)
+    public function executeObjectRestrictions($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -1043,7 +1042,7 @@ class icipActions extends AhgActions
                     'override_security_clearance' => $request->getParameter('override_security_clearance', 1) ? 1 : 0,
                     'custom_restriction_text' => $request->getParameter('custom_restriction_text'),
                     'notes' => $request->getParameter('notes'),
-                    'created_by' => $this->context->user->getAttribute('user_id'),
+                    'created_by' => $this->getUser()->getAttribute('user_id'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
                 $this->getUser()->setFlash('notice', 'Restriction added.');
@@ -1063,7 +1062,7 @@ class icipActions extends AhgActions
     /**
      * Manage consultations for an object
      */
-    public function executeObjectConsultations(sfWebRequest $request)
+    public function executeObjectConsultations($request)
     {
         $slug = $request->getParameter('slug');
         $this->object = $this->getObjectBySlug($slug);
@@ -1110,10 +1109,10 @@ class icipActions extends AhgActions
     /**
      * Record user acknowledgement of a notice
      */
-    public function executeAcknowledge(sfWebRequest $request)
+    public function executeAcknowledge($request)
     {
         $noticeId = $request->getParameter('notice_id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         if (!$userId) {
             return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
@@ -1142,7 +1141,7 @@ class icipActions extends AhgActions
     /**
      * API: Get ICIP summary for an object
      */
-    public function executeApiSummary(sfWebRequest $request)
+    public function executeApiSummary($request)
     {
         $objectId = (int) $request->getParameter('object_id');
 
@@ -1164,10 +1163,10 @@ class icipActions extends AhgActions
     /**
      * API: Check access for an object
      */
-    public function executeApiCheckAccess(sfWebRequest $request)
+    public function executeApiCheckAccess($request)
     {
         $objectId = (int) $request->getParameter('object_id');
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $access = ahgICIPService::checkAccess($objectId, $userId);
 

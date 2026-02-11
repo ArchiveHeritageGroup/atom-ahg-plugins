@@ -1,5 +1,7 @@
 <?php
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 
 /**
@@ -7,7 +9,7 @@ use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartOrderConfirmationAction extends sfAction
+class cartOrderConfirmationAction extends AhgController
 {
     public function execute($request)
     {
@@ -17,16 +19,16 @@ class cartOrderConfirmationAction extends sfAction
         $this->order = $ecommerceService->getOrderByNumber($orderNumber);
         
         if (!$this->order) {
-            $this->context->user->setFlash('error', 'Order not found.');
+            $this->getUser()->setFlash('error', 'Order not found.');
             $this->redirect(['module' => 'cart', 'action' => 'browse']);
             return;
         }
         
         // Verify access (user or session)
-        if ($this->context->user->isAuthenticated()) {
-            $userId = $this->context->user->getAttribute('user_id');
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
             if ($this->order->user_id && $this->order->user_id != $userId) {
-                $this->context->user->setFlash('error', 'Access denied.');
+                $this->getUser()->setFlash('error', 'Access denied.');
                 $this->redirect(['module' => 'cart', 'action' => 'browse']);
                 return;
             }
@@ -37,7 +39,7 @@ class cartOrderConfirmationAction extends sfAction
                 $sessionId = session_id();
             }
             if ($this->order->session_id && $this->order->session_id != $sessionId) {
-                $this->context->user->setFlash('error', 'Access denied.');
+                $this->getUser()->setFlash('error', 'Access denied.');
                 $this->redirect(['module' => 'cart', 'action' => 'browse']);
                 return;
             }

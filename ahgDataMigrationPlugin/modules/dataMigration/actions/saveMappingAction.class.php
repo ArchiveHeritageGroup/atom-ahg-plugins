@@ -1,12 +1,13 @@
 <?php
 
-class dataMigrationSaveMappingAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class dataMigrationSaveMappingAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
 

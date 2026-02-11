@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ValuationsCreateAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ValuationsCreateAction extends AhgApiController
 {
     public function POST($request)
     {

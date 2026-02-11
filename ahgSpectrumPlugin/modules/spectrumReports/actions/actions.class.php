@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Spectrum Reports Module
  * Reports for Spectrum 5.0 procedures
@@ -6,21 +8,21 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class spectrumReportsActions extends AhgActions
+class spectrumReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
     protected function getCulture(): string
     {
-        return $this->context->user->getCulture();
+        return $this->culture();
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -46,7 +48,7 @@ class spectrumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeLoans(sfWebRequest $request)
+    public function executeLoans($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -77,7 +79,7 @@ class spectrumReportsActions extends AhgActions
         ];
     }
 
-    public function executeConditions(sfWebRequest $request)
+    public function executeConditions($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -104,7 +106,7 @@ class spectrumReportsActions extends AhgActions
         ];
     }
 
-    public function executeValuations(sfWebRequest $request)
+    public function executeValuations($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -125,7 +127,7 @@ class spectrumReportsActions extends AhgActions
         ];
     }
 
-    public function executeMovements(sfWebRequest $request)
+    public function executeMovements($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -146,7 +148,7 @@ class spectrumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeAcquisitions(sfWebRequest $request)
+    public function executeAcquisitions($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -168,7 +170,7 @@ class spectrumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeConservation(sfWebRequest $request)
+    public function executeConservation($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();
@@ -184,7 +186,7 @@ class spectrumReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeObjectEntry(sfWebRequest $request)
+    public function executeObjectEntry($request)
     {
         $this->checkAccess();
         $culture = $this->getCulture();

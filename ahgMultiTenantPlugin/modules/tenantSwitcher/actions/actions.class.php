@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * tenantSwitcher module actions
  *
@@ -7,20 +8,20 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantSwitcherActions extends AhgActions
+class tenantSwitcherActions extends AhgController
 {
     /**
      * Switch to a specific repository/tenant
      */
-    public function executeSwitch(sfWebRequest $request)
+    public function executeSwitch($request)
     {
         $this->checkUserAuthenticated();
 
         $repositoryId = (int) $request->getParameter('id');
 
         // Use TenantContext to switch
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
 
         $result = \AhgMultiTenant\Services\TenantContext::setCurrentRepository($repositoryId);
 
@@ -47,11 +48,11 @@ class tenantSwitcherActions extends AhgActions
     /**
      * Switch to "View All" mode (admin only)
      */
-    public function executeSwitchAll(sfWebRequest $request)
+    public function executeSwitchAll($request)
     {
         $this->checkUserAuthenticated();
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
 
         $result = \AhgMultiTenant\Services\TenantContext::setCurrentRepository(null);
 
@@ -78,11 +79,11 @@ class tenantSwitcherActions extends AhgActions
     /**
      * Get tenant switcher data (AJAX)
      */
-    public function executeGetSwitcher(sfWebRequest $request)
+    public function executeGetSwitcher($request)
     {
         $this->checkUserAuthenticated();
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
 
         $userId = $this->getUser()->getAttribute('user_id');
         $repositories = \AhgMultiTenant\Services\TenantContext::getUserRepositories($userId);

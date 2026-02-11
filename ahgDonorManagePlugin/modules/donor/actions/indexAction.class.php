@@ -1,6 +1,7 @@
 <?php
 
-class DonorIndexAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class DonorIndexAction extends AhgController
 {
     public function execute($request)
     {
@@ -9,10 +10,10 @@ class DonorIndexAction extends sfAction
 
         // Bootstrap Laravel QB
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
-            require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Resolve slug → donor data
         $slug = $request->getParameter('slug');
@@ -23,7 +24,7 @@ class DonorIndexAction extends sfAction
         }
 
         // ACL check — donors require authenticated editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
 
         // For read access, allow all authenticated users (donors are not public)
@@ -32,7 +33,7 @@ class DonorIndexAction extends sfAction
         }
 
         $title = $this->donor['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
-        $this->response->setTitle("{$title} - {$this->response->getTitle()}");
+        $this->getResponse()->setTitle("{$title} - {$this->getResponse()->getTitle()}");
 
         // Permission flags for template
         $this->canEdit = $isAdmin;

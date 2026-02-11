@@ -1,6 +1,7 @@
 <?php
 
-class libraryCoverProxyAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class libraryCoverProxyAction extends AhgController
 {
     public function execute($request)
     {

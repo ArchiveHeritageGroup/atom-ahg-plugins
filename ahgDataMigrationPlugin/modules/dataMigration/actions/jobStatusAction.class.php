@@ -1,13 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Show status of a migration job with live progress updates.
  */
-class dataMigrationJobStatusAction extends sfAction
+class dataMigrationJobStatusAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 

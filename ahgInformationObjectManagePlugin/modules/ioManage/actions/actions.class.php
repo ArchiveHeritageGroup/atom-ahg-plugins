@@ -1,14 +1,8 @@
 <?php
 
-class ioManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class ioManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
     /**
      * Edit or create an information object.
      *
@@ -16,14 +10,14 @@ class ioManageActions extends AhgActions
      * standard plugin's module (DC, RAD, MODS, DACS). Falls through
      * to ISAD(G) template for the default standard.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
         // ACL — require editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -57,13 +51,13 @@ class ioManageActions extends AhgActions
     /**
      * Delete an information object.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->form = new sfForm();
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -107,16 +101,16 @@ class ioManageActions extends AhgActions
      *
      * Params: id (node ID), show (item|prevSiblings|nextSiblings), limit
      */
-    public function executeTreeview(sfWebRequest $request)
+    public function executeTreeview($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         $id = (int) $request->getParameter('id', 0);
         $show = $request->getParameter('show', 'item');
         $limit = max(1, min(50, (int) $request->getParameter('limit', 5)));
-        $culture = $this->context->user->getCulture();
-        $isAuth = $this->context->user->isAuthenticated();
-        $sort = sfConfig::get('app_sort_treeview_informationobject', 'none');
+        $culture = $this->culture();
+        $isAuth = $this->getUser()->isAuthenticated();
+        $sort = $this->config('app_sort_treeview_informationobject', 'none');
 
         if (!$id) {
             return $this->renderText(json_encode(['error' => 'Missing id parameter']));
@@ -161,16 +155,16 @@ class ioManageActions extends AhgActions
     /**
      * Full-width treeview — returns paginated flat list of all descendants.
      */
-    public function executeTreeviewFull(sfWebRequest $request)
+    public function executeTreeviewFull($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         $rootId = (int) $request->getParameter('id', 0);
         $limit = max(1, min(10000, (int) $request->getParameter('limit', 8000)));
         $offset = max(0, (int) $request->getParameter('offset', 0));
-        $culture = $this->context->user->getCulture();
-        $isAuth = $this->context->user->isAuthenticated();
-        $sort = sfConfig::get('app_sort_treeview_informationobject', 'none');
+        $culture = $this->culture();
+        $isAuth = $this->getUser()->isAuthenticated();
+        $sort = $this->config('app_sort_treeview_informationobject', 'none');
 
         if (!$rootId) {
             return $this->renderText(json_encode(['error' => 'Missing id parameter']));
@@ -187,12 +181,12 @@ class ioManageActions extends AhgActions
      *
      * POST params: id (node to move), target (node to move after)
      */
-    public function executeTreeviewSort(sfWebRequest $request)
+    public function executeTreeviewSort($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         // Require authenticated editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -200,7 +194,7 @@ class ioManageActions extends AhgActions
         }
 
         // Only allow when sort mode is 'none' (manual)
-        if ('none' !== sfConfig::get('app_sort_treeview_informationobject', 'none')) {
+        if ('none' !== $this->config('app_sort_treeview_informationobject', 'none')) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Drag-drop sorting only available in manual mode']));
         }
 
@@ -222,13 +216,13 @@ class ioManageActions extends AhgActions
     /**
      * Actor autocomplete — returns JSON [{id, name}].
      */
-    public function executeActorAutocomplete(sfWebRequest $request)
+    public function executeActorAutocomplete($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         $q = trim($request->getParameter('query', ''));
         $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (strlen($q) < 2) {
             return $this->renderText(json_encode([]));
@@ -257,13 +251,13 @@ class ioManageActions extends AhgActions
     /**
      * Repository autocomplete — returns JSON [{id, name}].
      */
-    public function executeRepositoryAutocomplete(sfWebRequest $request)
+    public function executeRepositoryAutocomplete($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         $q = trim($request->getParameter('query', ''));
         $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (strlen($q) < 2) {
             return $this->renderText(json_encode([]));
@@ -292,14 +286,14 @@ class ioManageActions extends AhgActions
      * Term autocomplete — returns JSON [{id, name}].
      * Requires ?taxonomy=ID&query=text
      */
-    public function executeTermAutocomplete(sfWebRequest $request)
+    public function executeTermAutocomplete($request)
     {
         $this->getResponse()->setContentType('application/json');
 
         $q = trim($request->getParameter('query', ''));
         $taxonomyId = (int) $request->getParameter('taxonomy', 0);
         $limit = max(1, min(50, (int) $request->getParameter('limit', 10)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (strlen($q) < 2 || !$taxonomyId) {
             return $this->renderText(json_encode([]));
@@ -331,11 +325,11 @@ class ioManageActions extends AhgActions
      * Expects query params: repositoryId, parentId
      * Returns JSON {identifier, scheme}.
      */
-    public function executeGenerateIdentifier(sfWebRequest $request)
+    public function executeGenerateIdentifier($request)
     {
         $this->getResponse()->setContentType('application/json');
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $repositoryId = (int) $request->getParameter('repositoryId', 0);
         $parentId = (int) $request->getParameter('parentId', 0);
 
@@ -430,15 +424,15 @@ class ioManageActions extends AhgActions
      * POST: Processes file upload, delegates to QubitDigitalObject for
      *       file handling and derivative generation.
      */
-    public function executeDoUpload(sfWebRequest $request)
+    public function executeDoUpload($request)
     {
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL — require editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -546,15 +540,15 @@ class ioManageActions extends AhgActions
      * GET: Shows metadata form (filename, mime type, size + editable fields).
      * POST: Updates altText, displayAsCompound, mediaTypeId via Laravel QB.
      */
-    public function executeDoEdit(sfWebRequest $request)
+    public function executeDoEdit($request)
     {
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -646,13 +640,13 @@ class ioManageActions extends AhgActions
      * POST (sf_method=delete): Delegates to QubitDigitalObject::delete()
      *       which handles file cleanup, derivative removal, and index update.
      */
-    public function executeDoDelete(sfWebRequest $request)
+    public function executeDoDelete($request)
     {
         $this->form = new sfForm();
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {

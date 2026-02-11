@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgApiController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class apiv2KeysBrowseAction extends AhgApiAction
+class apiv2KeysBrowseAction extends AhgApiController
 {
     public function GET($request)
     {

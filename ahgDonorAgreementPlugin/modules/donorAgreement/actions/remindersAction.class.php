@@ -1,10 +1,11 @@
 <?php
 
-class donorAgreementRemindersAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementRemindersAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 

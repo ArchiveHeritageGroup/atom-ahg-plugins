@@ -1,16 +1,17 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * CCO (Cataloging Cultural Objects) module actions - Laravel version
  */
-class ccoActions extends AhgActions
+class ccoActions extends AhgController
 {
     /**
      * Display provenance - forwards to ahgMuseumPlugin provenance
      */
-    public function executeProvenance(sfWebRequest $request)
+    public function executeProvenance($request)
     {
         $slug = $request->getParameter('slug');
         
@@ -30,7 +31,7 @@ class ccoActions extends AhgActions
         $this->custodyHistory = $this->getCustodyHistory($this->resource->id);
 
         // Get i18n fields
-        $culture = sfContext::getInstance()->getUser()->getCulture() ?? 'en';
+        $culture = $this->getContext()->getUser()->getCulture() ?? 'en';
         $i18n = DB::table('information_object_i18n')
             ->where('id', $this->resource->id)
             ->where('culture', $culture)
@@ -228,7 +229,7 @@ class ccoActions extends AhgActions
         return 'event';
     }
     
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->forward('cco', 'provenance');
     }
@@ -236,7 +237,7 @@ class ccoActions extends AhgActions
     /**
      * Save provenance entry (AJAX)
      */
-    public function executeProvenanceSave(sfWebRequest $request)
+    public function executeProvenanceSave($request)
     {
         // Initialize Laravel
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
@@ -289,7 +290,7 @@ class ccoActions extends AhgActions
     /**
      * Get provenance entry (AJAX)
      */
-    public function executeProvenanceGet(sfWebRequest $request)
+    public function executeProvenanceGet($request)
     {
         // Initialize Laravel
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
@@ -312,7 +313,7 @@ class ccoActions extends AhgActions
     /**
      * Delete provenance entry (AJAX)
      */
-    public function executeProvenanceDelete(sfWebRequest $request)
+    public function executeProvenanceDelete($request)
     {
         // Initialize Laravel
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
@@ -334,7 +335,7 @@ class ccoActions extends AhgActions
     /**
      * Export provenance (CSV)
      */
-    public function executeProvenanceExport(sfWebRequest $request)
+    public function executeProvenanceExport($request)
     {
         // Initialize Laravel
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {

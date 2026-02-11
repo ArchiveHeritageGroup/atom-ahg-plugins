@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -11,14 +12,14 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class mediaActions extends AhgActions
+class mediaActions extends AhgController
 {
     /**
      * Stream media file, transcoding if necessary for browser compatibility
      *
      * @param sfWebRequest $request
      */
-    public function executeStream(sfWebRequest $request)
+    public function executeStream($request)
     {
         $id = (int) $request->getParameter('id');
 
@@ -58,7 +59,7 @@ class mediaActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeDownload(sfWebRequest $request)
+    public function executeDownload($request)
     {
         $id = (int) $request->getParameter('id');
 
@@ -100,7 +101,7 @@ class mediaActions extends AhgActions
         }
 
         // The path in database may already contain /uploads/ prefix
-        $webDir = sfConfig::get('sf_web_dir');
+        $webDir = $this->config('sf_web_dir');
 
         // Check if path already starts with /uploads/
         if (str_starts_with($path, '/uploads/')) {
@@ -304,7 +305,7 @@ class mediaActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeSnippets(sfWebRequest $request)
+    public function executeSnippets($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -338,7 +339,7 @@ class mediaActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeSaveSnippet(sfWebRequest $request)
+    public function executeSaveSnippet($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -414,7 +415,7 @@ class mediaActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeDeleteSnippet(sfWebRequest $request)
+    public function executeDeleteSnippet($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -439,7 +440,7 @@ class mediaActions extends AhgActions
     /**
      * Extract media metadata (AJAX POST)
      */
-    public function executeExtract(sfWebRequest $request)
+    public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -533,7 +534,7 @@ class mediaActions extends AhgActions
      * Start transcription as background job (AJAX POST)
      * Returns immediately with status=processing, client polls /media/transcription/:id
      */
-    public function executeTranscribe(sfWebRequest $request)
+    public function executeTranscribe($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -573,7 +574,7 @@ class mediaActions extends AhgActions
         file_put_contents($lockFile, json_encode(['started' => date('Y-m-d H:i:s'), 'pid' => getmypid()]));
 
         // Build background transcription script
-        $rootDir = sfConfig::get('sf_root_dir');
+        $rootDir = $this->config('sf_root_dir');
         $script = <<<PHP
 <?php
 // Background transcription worker
@@ -603,7 +604,7 @@ PHP;
         file_put_contents($scriptFile, $script);
 
         // Launch background process
-        $logFile = sfConfig::get('sf_log_dir', '/var/log/atom') . '/transcription-bg.log';
+        $logFile = $this->config('sf_log_dir', '/var/log/atom') . '/transcription-bg.log';
         $cmd = sprintf('php %s >> %s 2>&1 &', escapeshellarg($scriptFile), escapeshellarg($logFile));
         exec($cmd);
 
@@ -619,7 +620,7 @@ PHP;
     /**
      * Get transcription data (AJAX GET) or download in format (vtt/srt/txt)
      */
-    public function executeTranscription(sfWebRequest $request)
+    public function executeTranscription($request)
     {
         $id = (int) $request->getParameter('id');
         $format = $request->getParameter('format', 'json');
@@ -704,7 +705,7 @@ PHP;
     /**
      * Get media metadata (AJAX GET)
      */
-    public function executeMetadata(sfWebRequest $request)
+    public function executeMetadata($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -744,7 +745,7 @@ PHP;
      *
      * Results are cached in uploads/conversions/
      */
-    public function executeConvert(sfWebRequest $request)
+    public function executeConvert($request)
     {
         $id = (int) $request->getParameter('id');
 
@@ -763,7 +764,7 @@ PHP;
         }
 
         $ext = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));
-        $cacheDir = sfConfig::get('sf_web_dir') . '/uploads/conversions';
+        $cacheDir = $this->config('sf_web_dir') . '/uploads/conversions';
 
         if (!is_dir($cacheDir)) {
             @mkdir($cacheDir, 0755, true);

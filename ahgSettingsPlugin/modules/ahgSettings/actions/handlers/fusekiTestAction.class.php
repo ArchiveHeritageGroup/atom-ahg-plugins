@@ -1,15 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Test Fuseki Connection Action
  * AJAX endpoint for testing Fuseki SPARQL endpoint connectivity
  */
-class AhgSettingsFusekiTestAction extends sfAction
+class AhgSettingsFusekiTestAction extends AhgController
 {
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
         

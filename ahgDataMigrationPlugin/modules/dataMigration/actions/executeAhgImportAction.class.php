@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Execute AHG Extended Import - imports records with AHG plugin integration.
  *
@@ -12,7 +14,7 @@
  * - Pass 2: Link parent-child relationships using legacyId/parentId
  * - Pass 3: Rebuild nested set (lft/rgt)
  */
-class dataMigrationExecuteAhgImportAction extends sfAction
+class dataMigrationExecuteAhgImportAction extends AhgController
 {
     protected $importService;
     protected $stats = [
@@ -36,7 +38,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
 
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -85,7 +87,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
     protected function executeImport($request)
     {
         // Load required services
-        $pluginPath = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgDataMigrationPlugin';
+        $pluginPath = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgDataMigrationPlugin';
         if (file_exists($pluginPath . '/lib/Services/PreservicaImportService.php')) {
             require_once $pluginPath . '/lib/Services/PreservicaImportService.php';
         }
@@ -1100,7 +1102,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
         // Check if file exists
         $fullPath = $path;
         if (!file_exists($fullPath)) {
-            $fullPath = sfConfig::get("sf_upload_dir") . "/" . ltrim($path, "/");
+            $fullPath = $this->config("sf_upload_dir") . "/" . ltrim($path, "/");
         }
         
         if (!file_exists($fullPath)) {
@@ -1154,7 +1156,7 @@ class dataMigrationExecuteAhgImportAction extends sfAction
                 // Create upload directory structure
                 $checksumPath = implode("/", str_split(substr($checksum, 0, 4)));
                 $relativePath = "/uploads/r/" . $repoSlug . "/" . $checksumPath . "/";
-                $absolutePath = sfConfig::get("sf_web_dir") . $relativePath;
+                $absolutePath = $this->config("sf_web_dir") . $relativePath;
                 
                 if (!is_dir($absolutePath)) {
                     mkdir($absolutePath, 0755, true);

@@ -1,16 +1,18 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class securityClearanceWatermarkSettingsAction extends sfAction
+class securityClearanceWatermarkSettingsAction extends AhgController
 {
     public function execute($request)
     {
         // Check admin permission
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Services/WatermarkSettingsService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/bootstrap.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Services/WatermarkSettingsService.php';
         
         if ($request->isMethod('post')) {
             // Handle custom watermark upload
@@ -94,7 +96,7 @@ class securityClearanceWatermarkSettingsAction extends sfAction
         }
         
         // Create uploads directory if needed
-        $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/watermarks';
+        $uploadDir = $this->config('sf_root_dir') . '/uploads/watermarks';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -117,7 +119,7 @@ class securityClearanceWatermarkSettingsAction extends sfAction
                 'file_path' => $filepath,
                 'position' => $position,
                 'opacity' => (float)$opacity,
-                'created_by' => $this->context->user->getUserId(),
+                'created_by' => $this->getUser()->getUserId(),
                 'active' => 1,
                 'created_at' => date('Y-m-d H:i:s')
             ]);

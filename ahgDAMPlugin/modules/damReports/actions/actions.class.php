@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * DAM Reports Module
  * Reports for digital assets, IPTC metadata, file types, storage
@@ -6,16 +8,16 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class damReportsActions extends AhgActions
+class damReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -51,7 +53,7 @@ class damReportsActions extends AhgActions
         ];
     }
 
-    public function executeAssets(sfWebRequest $request)
+    public function executeAssets($request)
     {
         $this->checkAccess();
         
@@ -98,7 +100,7 @@ class damReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeMetadata(sfWebRequest $request)
+    public function executeMetadata($request)
     {
         $this->checkAccess();
         
@@ -136,7 +138,7 @@ class damReportsActions extends AhgActions
         ];
     }
 
-    public function executeIptc(sfWebRequest $request)
+    public function executeIptc($request)
     {
         $this->checkAccess();
         
@@ -185,7 +187,7 @@ class damReportsActions extends AhgActions
         ];
     }
 
-    public function executeStorage(sfWebRequest $request)
+    public function executeStorage($request)
     {
         $this->checkAccess();
         
@@ -213,7 +215,7 @@ class damReportsActions extends AhgActions
         ];
     }
 
-    public function executeExportCsv(sfWebRequest $request)
+    public function executeExportCsv($request)
     {
         $this->checkAccess();
         

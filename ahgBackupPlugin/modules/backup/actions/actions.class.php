@@ -1,24 +1,24 @@
 <?php
 
-$frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+use AtomFramework\Http\Controllers\AhgController;
+$frameworkBootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 if (file_exists($frameworkBootstrap)) {
     require_once $frameworkBootstrap;
 }
 
-class backupActions extends AhgActions
+class backupActions extends AhgController
 {
     private const MAX_UPLOAD_SIZE = 2147483648; // 2GB
     private const ALLOWED_EXTENSIONS = ['gz', 'tar.gz', 'sql', 'sql.gz', 'zip'];
 
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-        if (!$this->context->user->isAdministrator()) {
+if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $backupService = new \AtomExtensions\Services\BackupService();
         $scheduleService = new \AtomExtensions\Services\ScheduleService();
@@ -31,7 +31,7 @@ class backupActions extends AhgActions
         $this->pendingUploads = $this->getPendingUploads();
     }
 
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         $settingsService = new \AtomExtensions\Services\BackupSettingsService();
         $this->settings = $settingsService->getAllWithMeta();
@@ -87,7 +87,7 @@ class backupActions extends AhgActions
         }
     }
 
-    public function executeCreate(sfWebRequest $request)
+    public function executeCreate($request)
     {
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
@@ -117,7 +117,7 @@ class backupActions extends AhgActions
     /**
      * Show upload form
      */
-    public function executeUpload(sfWebRequest $request)
+    public function executeUpload($request)
     {
         $this->maxUploadSize = $this->getMaxUploadSize();
         $this->pendingUploads = $this->getPendingUploads();
@@ -126,7 +126,7 @@ class backupActions extends AhgActions
     /**
      * Handle file upload (AJAX)
      */
-    public function executeDoUpload(sfWebRequest $request)
+    public function executeDoUpload($request)
     {
         if (!$request->isMethod('post')) {
             return $this->renderJson(['error' => 'POST required'], 400);
@@ -335,7 +335,7 @@ class backupActions extends AhgActions
     /**
      * Restore from uploaded backup
      */
-    public function executeRestoreUpload(sfWebRequest $request)
+    public function executeRestoreUpload($request)
     {
         $uploadId = $request->getParameter('id');
         
@@ -365,7 +365,7 @@ class backupActions extends AhgActions
     /**
      * Execute restore from upload (AJAX)
      */
-    public function executeDoRestoreUpload(sfWebRequest $request)
+    public function executeDoRestoreUpload($request)
     {
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
@@ -421,7 +421,7 @@ class backupActions extends AhgActions
     /**
      * Delete pending upload
      */
-    public function executeDeleteUpload(sfWebRequest $request)
+    public function executeDeleteUpload($request)
     {
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
@@ -452,7 +452,7 @@ class backupActions extends AhgActions
     // EXISTING RESTORE FUNCTIONALITY
     // ==========================================
 
-    public function executeRestore(sfWebRequest $request)
+    public function executeRestore($request)
     {
         $backupId = $request->getParameter('id');
         if (!$backupId) {
@@ -468,7 +468,7 @@ class backupActions extends AhgActions
         }
     }
 
-    public function executeDoRestore(sfWebRequest $request)
+    public function executeDoRestore($request)
     {
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
@@ -495,7 +495,7 @@ class backupActions extends AhgActions
         }
     }
 
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
             $this->forward404();
@@ -514,7 +514,7 @@ class backupActions extends AhgActions
         }
     }
 
-    public function executeDownload(sfWebRequest $request)
+    public function executeDownload($request)
     {
         $settingsService = new \AtomExtensions\Services\BackupSettingsService();
         $backupPath = $settingsService->get('backup_path', '/var/backups/atom');
@@ -562,7 +562,7 @@ class backupActions extends AhgActions
         return sfView::NONE;
     }
 
-    public function executeTestConnection(sfWebRequest $request)
+    public function executeTestConnection($request)
     {
         if (!$request->isXmlHttpRequest()) {
             $this->forward404();

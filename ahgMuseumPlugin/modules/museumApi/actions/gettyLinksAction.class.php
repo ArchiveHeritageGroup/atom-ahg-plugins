@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use ahgCorePlugin\Services\AhgTaxonomyService;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -8,17 +9,16 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Admin interface for reviewing, confirming, and managing Getty vocabulary links.
  */
-class gettyLinksAction extends sfAction
+class gettyLinksAction extends AhgController
 {
     public $links = [];
     public $statistics = [];
     public $vocabularies = ['aat', 'tgn', 'ulan'];
     public $statuses = [];
 
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-        // Load statuses from database
+// Load statuses from database
         $taxonomyService = new AhgTaxonomyService();
         $this->statuses = array_keys($taxonomyService->getLinkStatuses(false));
 

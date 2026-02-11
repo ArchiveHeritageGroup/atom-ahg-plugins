@@ -1,6 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
 
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
 use Illuminate\Database\Capsule\Manager as DB;
@@ -10,13 +11,13 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class favoritesAddAction extends sfAction
+class favoritesAddAction extends AhgController
 {
     public function execute($request)
     {
         // Check if user is authenticated
-        if (!$this->context->user->isAuthenticated()) {
-            $this->context->user->setFlash('error', 'Please log in to add favorites.');
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getUser()->setFlash('error', 'Please log in to add favorites.');
             $this->redirect(['module' => 'user', 'action' => 'login']);
             return;
         }
@@ -29,7 +30,7 @@ class favoritesAddAction extends sfAction
             ->value('object_id');
 
         if (!$objectId) {
-            $this->context->user->setFlash('error', 'Item not found.');
+            $this->getUser()->setFlash('error', 'Item not found.');
             $this->redirect(['module' => 'informationobject', 'action' => 'browse']);
             return;
         }
@@ -40,12 +41,12 @@ class favoritesAddAction extends sfAction
             ->where('culture', 'en')
             ->value('title');
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $service = new FavoritesService();
 
         $result = $service->addToFavorites($userId, $objectId, $title, $slug);
 
-        $this->context->user->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
+        $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
 
         // Redirect back to the item using direct slug URL to avoid routing conflicts
         $this->redirect('/' . $slug);

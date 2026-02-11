@@ -1,37 +1,39 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * RiC Semantic Search Actions
  * 
  * Controller actions for the semantic search interface.
  */
 
-class ricSemanticSearchActions extends sfActions
+class ricSemanticSearchActions extends AhgController
 {
     /**
      * Main search page
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
-        $this->searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api');
-        $this->atomBaseUrl = sfConfig::get('app_siteBaseUrl', '');
+        $this->searchApiUrl = $this->config('app_ric_search_api', 'http://localhost:5001/api');
+        $this->atomBaseUrl = $this->config('app_siteBaseUrl', '');
     }
     
     /**
      * Embedded widget for sidebar/panel
      */
-    public function executeWidget(sfWebRequest $request)
+    public function executeWidget($request)
     {
-        $this->searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api');
+        $this->searchApiUrl = $this->config('app_ric_search_api', 'http://localhost:5001/api');
     }
     
     /**
      * Proxy search requests (if needed for CORS)
      */
-    public function executeProxy(sfWebRequest $request)
+    public function executeProxy($request)
     {
         $this->getResponse()->setContentType('application/json');
         
-        $apiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api');
+        $apiUrl = $this->config('app_ric_search_api', 'http://localhost:5001/api');
         $endpoint = $request->getParameter('endpoint', 'search');
         $query = $request->getParameter('q', '');
         
@@ -65,7 +67,7 @@ class ricSemanticSearchActions extends sfActions
     /**
      * Get search examples
      */
-    public function executeExamples(sfWebRequest $request)
+    public function executeExamples($request)
     {
         $this->getResponse()->setContentType('application/json');
         

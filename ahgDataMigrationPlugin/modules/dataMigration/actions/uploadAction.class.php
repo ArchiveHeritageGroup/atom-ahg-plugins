@@ -1,10 +1,11 @@
 <?php
 
-class dataMigrationUploadAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class dataMigrationUploadAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -41,7 +42,7 @@ class dataMigrationUploadAction extends sfAction
         $savedMapping = $request->getParameter('saved_mapping', '');
 
         // Save file to temp location
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/migration';
+        $uploadDir = $this->config('sf_upload_dir') . '/migration';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -144,7 +145,7 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // Create combined OPEX file for mapping
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/migration';
+        $uploadDir = $this->config('sf_upload_dir') . '/migration';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -193,7 +194,7 @@ class dataMigrationUploadAction extends sfAction
         }
 
         // Create extraction directory
-        $extractDir = sfConfig::get('sf_upload_dir') . '/migration/extracted_' . uniqid();
+        $extractDir = $this->config('sf_upload_dir') . '/migration/extracted_' . uniqid();
         if (!mkdir($extractDir, 0755, true)) {
             $zip->close();
             return ['success' => false, 'error' => 'Cannot create extraction directory'];
@@ -209,7 +210,7 @@ class dataMigrationUploadAction extends sfAction
 
         if ($result['success'] && !empty($result['opex_files'])) {
             // Create combined file
-            $uploadDir = sfConfig::get('sf_upload_dir') . '/migration';
+            $uploadDir = $this->config('sf_upload_dir') . '/migration';
             $combinedFile = $this->createCombinedOpexFile($result['opex_files'], $result['digital_object_mappings'], $uploadDir);
             $result['combined_file'] = $combinedFile;
         }
@@ -674,7 +675,7 @@ class dataMigrationUploadAction extends sfAction
 
         if (in_array($ext, ['xls', 'xlsx'])) {
             // Excel file
-            $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+            $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
             if (file_exists($bootstrap)) {
                 require_once $bootstrap;
             }

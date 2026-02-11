@@ -1,17 +1,18 @@
 <?php
 
-class extendedRightsEmbargoesAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class extendedRightsEmbargoesAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Load service
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
+        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
 
         $service = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService($culture);
 

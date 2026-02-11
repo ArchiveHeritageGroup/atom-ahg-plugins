@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Shared Loan module actions.
  *
@@ -8,12 +9,12 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class loanActions extends AhgActions
+class loanActions extends AhgController
 {
     /**
      * Browse/list loans.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $service = $this->getLoanService();
         $sector = $request->getParameter('sector', 'museum');
@@ -59,7 +60,7 @@ class loanActions extends AhgActions
     /**
      * Show loan details.
      */
-    public function executeShow(sfWebRequest $request)
+    public function executeShow($request)
     {
         $service = $this->getLoanService();
 
@@ -79,7 +80,7 @@ class loanActions extends AhgActions
     /**
      * Create new loan form.
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $service = $this->getLoanService();
         $sector = $request->getParameter('sector', 'museum');
@@ -151,7 +152,7 @@ class loanActions extends AhgActions
     /**
      * Edit loan.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $service = $this->getLoanService();
 
@@ -200,7 +201,7 @@ class loanActions extends AhgActions
     /**
      * Generate loan agreement document.
      */
-    public function executeAgreement(sfWebRequest $request)
+    public function executeAgreement($request)
     {
         $service = $this->getLoanService();
 
@@ -212,15 +213,15 @@ class loanActions extends AhgActions
         }
 
         // Load the agreement generator
-        require_once sfConfig::get('sf_plugins_dir').'/ahgLoanPlugin/lib/Services/Loan/LoanAgreementGenerator.php';
+        require_once $this->config('sf_plugins_dir').'/ahgLoanPlugin/lib/Services/Loan/LoanAgreementGenerator.php';
         $generator = new \AhgLoan\Services\Loan\LoanAgreementGenerator($service);
 
         // Set institution details from settings if available
         $generator->setInstitution([
-            'name' => sfConfig::get('app_siteTitle', 'The Archive and Heritage Group'),
-            'address' => sfConfig::get('app_siteAddress', ''),
-            'phone' => sfConfig::get('app_sitePhone', ''),
-            'email' => sfConfig::get('app_siteEmail', ''),
+            'name' => $this->config('app_siteTitle', 'The Archive and Heritage Group'),
+            'address' => $this->config('app_siteAddress', ''),
+            'phone' => $this->config('app_sitePhone', ''),
+            'email' => $this->config('app_siteEmail', ''),
         ]);
 
         $format = $request->getParameter('format', 'html');
@@ -248,7 +249,7 @@ class loanActions extends AhgActions
     /**
      * Extend loan period.
      */
-    public function executeExtend(sfWebRequest $request)
+    public function executeExtend($request)
     {
         $service = $this->getLoanService();
         $id = (int) $request->getParameter('id');
@@ -296,7 +297,7 @@ class loanActions extends AhgActions
     /**
      * Record loan return.
      */
-    public function executeReturn(sfWebRequest $request)
+    public function executeReturn($request)
     {
         $service = $this->getLoanService();
         $id = (int) $request->getParameter('id');
@@ -341,7 +342,7 @@ class loanActions extends AhgActions
     /**
      * Add object to loan.
      */
-    public function executeAddObject(sfWebRequest $request)
+    public function executeAddObject($request)
     {
         $service = $this->getLoanService();
         $id = (int) $request->getParameter('id');
@@ -380,7 +381,7 @@ class loanActions extends AhgActions
     /**
      * Remove object from loan.
      */
-    public function executeRemoveObject(sfWebRequest $request)
+    public function executeRemoveObject($request)
     {
         $service = $this->getLoanService();
         $loanId = (int) $request->getParameter('id');
@@ -406,7 +407,7 @@ class loanActions extends AhgActions
     /**
      * Upload document to loan.
      */
-    public function executeUploadDocument(sfWebRequest $request)
+    public function executeUploadDocument($request)
     {
         $service = $this->getLoanService();
         $id = (int) $request->getParameter('id');
@@ -421,7 +422,7 @@ class loanActions extends AhgActions
 
             if ($file['error'] === UPLOAD_ERR_OK) {
                 try {
-                    $uploadDir = sfConfig::get('sf_upload_dir').'/loans/'.$id;
+                    $uploadDir = $this->config('sf_upload_dir').'/loans/'.$id;
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
@@ -462,7 +463,7 @@ class loanActions extends AhgActions
     /**
      * Search objects (AJAX).
      */
-    public function executeSearchObjects(sfWebRequest $request)
+    public function executeSearchObjects($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -501,7 +502,7 @@ class loanActions extends AhgActions
     /**
      * Workflow transition (AJAX).
      */
-    public function executeTransition(sfWebRequest $request)
+    public function executeTransition($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -594,7 +595,7 @@ class loanActions extends AhgActions
         static $service = null;
 
         if (null === $service) {
-            require_once sfConfig::get('sf_plugins_dir').'/ahgLoanPlugin/lib/Services/Loan/LoanService.php';
+            require_once $this->config('sf_plugins_dir').'/ahgLoanPlugin/lib/Services/Loan/LoanService.php';
             $db = $this->getDatabase();
             $service = new \AhgLoan\Services\Loan\LoanService($db);
         }

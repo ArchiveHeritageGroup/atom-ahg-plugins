@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * ahgLibraryPlugin Actions
  *
@@ -11,12 +13,12 @@ declare(strict_types=1);
  * @subpackage actions
  */
 
-class libraryActions extends AhgActions
+class libraryActions extends AhgController
 {
     /**
      * Index action - delegated to indexAction.class.php
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $action = new ahgLibraryPluginIndexAction($this->context, 'ahgLibraryPlugin', 'index');
         return $action->execute($request);
@@ -25,7 +27,7 @@ class libraryActions extends AhgActions
     /**
      * Edit action - delegated to editAction.class.php
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $action = new ahgLibraryPluginEditAction($this->context, 'ahgLibraryPlugin', 'edit');
         return $action->execute($request);
@@ -34,7 +36,7 @@ class libraryActions extends AhgActions
     /**
      * Add action - alias for edit with no slug
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $action = new ahgLibraryPluginEditAction($this->context, 'ahgLibraryPlugin', 'add');
         return $action->execute($request);
@@ -43,7 +45,7 @@ class libraryActions extends AhgActions
     /**
      * Browse action - delegated to browseAction.class.php
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $action = new ahgLibraryPluginBrowseAction($this->context, 'ahgLibraryPlugin', 'browse');
         return $action->execute($request);
@@ -52,7 +54,7 @@ class libraryActions extends AhgActions
     /**
      * API: Search library items
      */
-    public function executeApiSearch(sfWebRequest $request)
+    public function executeApiSearch($request)
     {
         $this->response->setContentType('application/json');
 
@@ -104,7 +106,7 @@ class libraryActions extends AhgActions
      * ISBN lookup (for edit form AJAX calls)
      * Alias for executeApiIsbnLookup
      */
-    public function executeIsbnLookup(sfWebRequest $request)
+    public function executeIsbnLookup($request)
     {
         return $this->executeApiIsbnLookup($request);
     }
@@ -112,7 +114,7 @@ class libraryActions extends AhgActions
     /**
      * API: ISBN lookup via Open Library
      */
-    public function executeApiIsbnLookup(sfWebRequest $request)
+    public function executeApiIsbnLookup($request)
     {
         $this->response->setContentType('application/json');
 
@@ -171,7 +173,7 @@ class libraryActions extends AhgActions
     /**
      * API: Validate ISBN
      */
-    public function executeApiValidateIsbn(sfWebRequest $request)
+    public function executeApiValidateIsbn($request)
     {
         $this->response->setContentType('application/json');
 
@@ -193,7 +195,7 @@ class libraryActions extends AhgActions
     /**
      * API: Get statistics
      */
-    public function executeApiStatistics(sfWebRequest $request)
+    public function executeApiStatistics($request)
     {
         $this->response->setContentType('application/json');
 

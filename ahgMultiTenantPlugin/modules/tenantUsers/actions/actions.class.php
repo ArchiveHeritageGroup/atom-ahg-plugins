@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -9,12 +10,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class tenantUsersActions extends AhgActions
+class tenantUsersActions extends AhgController
 {
     /**
      * Pre-execute check for access
      */
-    public function preExecute()
+    public function boot(): void
     {
         $this->loadServices();
 
@@ -28,13 +29,13 @@ class tenantUsersActions extends AhgActions
      */
     private function loadServices(): void
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $frameworkPath = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($frameworkPath)) {
             require_once $frameworkPath;
         }
 
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantContext.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgMultiTenantPlugin/lib/Services/TenantAccess.php';
     }
 
     /**
@@ -52,7 +53,7 @@ class tenantUsersActions extends AhgActions
     /**
      * List users for a repository
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $repoId = (int) $request->getParameter('id');
         $this->checkAccess($repoId);
@@ -80,7 +81,7 @@ class tenantUsersActions extends AhgActions
     /**
      * Assign user to repository
      */
-    public function executeAssign(sfWebRequest $request)
+    public function executeAssign($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 
@@ -109,7 +110,7 @@ class tenantUsersActions extends AhgActions
     /**
      * Remove user from repository
      */
-    public function executeRemove(sfWebRequest $request)
+    public function executeRemove($request)
     {
         $this->forward404Unless($request->isMethod('POST'));
 

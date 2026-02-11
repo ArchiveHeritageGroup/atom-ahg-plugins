@@ -1,5 +1,7 @@
 <?php
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+
+use AtomFramework\Http\Controllers\AhgController;
+require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 
 /**
@@ -7,7 +9,7 @@ use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartPaymentReturnAction extends sfAction
+class cartPaymentReturnAction extends AhgController
 {
     public function execute($request)
     {
@@ -17,13 +19,13 @@ class cartPaymentReturnAction extends sfAction
         $order = $ecommerceService->getOrderByNumber($orderNumber);
         
         if (!$order) {
-            $this->context->user->setFlash('error', 'Order not found.');
+            $this->getUser()->setFlash('error', 'Order not found.');
             $this->redirect(['module' => 'cart', 'action' => 'browse']);
             return;
         }
         
         // Payment was successful (ITN will confirm)
-        $this->context->user->setFlash('notice', 'Thank you! Your payment is being processed.');
+        $this->getUser()->setFlash('notice', 'Thank you! Your payment is being processed.');
         $this->redirect(['module' => 'cart', 'action' => 'orderConfirmation', 'order' => $orderNumber]);
     }
 }

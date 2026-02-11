@@ -1,10 +1,11 @@
 <?php
 
-class donorAgreementEditAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+class donorAgreementEditAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
@@ -100,7 +101,7 @@ class donorAgreementEditAction extends sfAction
 
     protected function initDatabase()
     {
-        $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }
@@ -192,7 +193,7 @@ class donorAgreementEditAction extends sfAction
                     'is_template' => !empty($data['is_template']) ? 1 : 0,
                     'supersedes_agreement_id' => !empty($data['supersedes_agreement_id']) ? $data['supersedes_agreement_id'] : null,
                     'updated_at' => date('Y-m-d H:i:s'),
-                    'updated_by' => $this->context->user->getAttribute('user_id'),
+                    'updated_by' => $this->getUser()->getAttribute('user_id'),
                 ]);
             
             // Update i18n
@@ -220,7 +221,7 @@ class donorAgreementEditAction extends sfAction
                 \Illuminate\Database\Capsule\Manager::table('donor_agreement_history')->insert([
                     'agreement_id' => $id,
                     'action' => 'updated',
-                    'user_id' => $this->context->user->getAttribute('user_id'),
+                    'user_id' => $this->getUser()->getAttribute('user_id'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (Exception $e) {
@@ -233,7 +234,7 @@ class donorAgreementEditAction extends sfAction
             if ($uploadResult) {
                 $message .= ' ' . $uploadResult;
             }
-            $this->context->user->setFlash('notice', $message);
+            $this->getUser()->setFlash('notice', $message);
             $this->redirect(['module' => 'donorAgreement', 'action' => 'view', 'id' => $id]);
             
 		} catch (Exception $e) {
@@ -241,7 +242,7 @@ class donorAgreementEditAction extends sfAction
                 throw $e;
             }
             $db->rollBack();
-            $this->context->user->setFlash('error', 'Error updating agreement: ' . $e->getMessage());
+            $this->getUser()->setFlash('error', 'Error updating agreement: ' . $e->getMessage());
             $this->redirect(['module' => 'donorAgreement', 'action' => 'edit', 'id' => $id]);
         }
     }
@@ -257,9 +258,9 @@ class donorAgreementEditAction extends sfAction
             return null;
         }
 
-        $baseUploadDir = sfConfig::get('sf_upload_dir');
+        $baseUploadDir = $this->config('sf_upload_dir');
         if (empty($baseUploadDir)) {
-            $baseUploadDir = sfConfig::get('sf_root_dir') . '/uploads';
+            $baseUploadDir = $this->config('sf_root_dir') . '/uploads';
         }
         
         $uploadDir = $baseUploadDir . '/donor_agreements/' . $agreementId;
@@ -325,7 +326,7 @@ class donorAgreementEditAction extends sfAction
                 'file_size' => $size,
                 'mime_type' => $mimeType,
                 'description' => $description,
-                'uploaded_by' => $this->context->user->getAttribute('user_id'),
+                'uploaded_by' => $this->getUser()->getAttribute('user_id'),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
             
@@ -400,7 +401,7 @@ class donorAgreementEditAction extends sfAction
                     'donor_agreement_id' => $agreementId,
                     'accession_id' => (int) $accession['id'],
                     'is_primary' => !empty($accession['primary']) ? 1 : 0,
-                    'linked_by' => $this->context->user->getAttribute('user_id'),
+                    'linked_by' => $this->getUser()->getAttribute('user_id'),
                     'linked_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (Exception $e) {

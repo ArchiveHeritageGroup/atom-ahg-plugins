@@ -1,8 +1,9 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class donorAgreementActions extends AhgActions
+class donorAgreementActions extends AhgController
 {
     protected function initFramework()
     {
@@ -40,7 +41,7 @@ class donorAgreementActions extends AhgActions
     /**
      * Browse agreements
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         $this->initFramework();
         $this->types = $this->getAgreementTypes();
@@ -84,7 +85,7 @@ class donorAgreementActions extends AhgActions
     /**
      * Add new agreement
      */
-    public function executeAdd(sfWebRequest $request)
+    public function executeAdd($request)
     {
         $this->initFramework();
         $this->types = $this->getAgreementTypes();
@@ -113,7 +114,7 @@ class donorAgreementActions extends AhgActions
     /**
      * Edit existing agreement
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         $this->initFramework();
         $this->types = $this->getAgreementTypes();
@@ -155,7 +156,7 @@ class donorAgreementActions extends AhgActions
     /**
      * View agreement details
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
         $this->initFramework();
         $id = (int)$request->getParameter('id');
@@ -193,7 +194,7 @@ class donorAgreementActions extends AhgActions
     /**
      * Reminders list
      */
-    public function executeReminders(sfWebRequest $request)
+    public function executeReminders($request)
     {
         $this->initFramework();
         $this->reminders = DB::table('donor_agreement_reminder as r')
@@ -269,7 +270,7 @@ class donorAgreementActions extends AhgActions
                 if ($id) {
                     $existing = DB::table('donor_agreement')->where('id', $id)->first();
                     if ($existing && $existing->logo_path) {
-                        $fullPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                        $fullPath = $this->config('sf_root_dir') . '/uploads' . $existing->logo_path;
                         if (file_exists($fullPath)) {
                             @unlink($fullPath);
                         }
@@ -283,7 +284,7 @@ class donorAgreementActions extends AhgActions
                 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
                 if (in_array($file['type'], $allowedTypes)) {
-                    $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/agreements/logos';
+                    $uploadDir = $this->config('sf_root_dir') . '/uploads/agreements/logos';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
@@ -297,7 +298,7 @@ class donorAgreementActions extends AhgActions
                         if ($id) {
                             $existing = DB::table('donor_agreement')->where('id', $id)->first();
                             if ($existing && $existing->logo_path) {
-                                $oldPath = sfConfig::get('sf_root_dir') . '/uploads' . $existing->logo_path;
+                                $oldPath = $this->config('sf_root_dir') . '/uploads' . $existing->logo_path;
                                 if (file_exists($oldPath)) {
                                     @unlink($oldPath);
                                 }
@@ -341,7 +342,7 @@ class donorAgreementActions extends AhgActions
     /**
      * Delete agreement
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->initFramework();
         $id = (int)$request->getParameter('id');
@@ -414,7 +415,7 @@ class donorAgreementActions extends AhgActions
     {
         try {
             // Use AhgAuditService if available
-            $auditServicePath = sfConfig::get('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
+            $auditServicePath = $this->config('sf_root_dir') . '/plugins/ahgAuditTrailPlugin/lib/Services/AhgAuditService.php';
             if (file_exists($auditServicePath)) {
                 require_once $auditServicePath;
             }

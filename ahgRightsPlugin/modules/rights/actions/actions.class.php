@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Rights module actions
  *
  * @package    ahgRightsPlugin
  * @subpackage actions
  */
-class rightsActions extends AhgActions
+class rightsActions extends AhgController
 {
     protected RightsService $service;
 
-    public function preExecute(): void
+    public function boot(): void
     {
-        parent::preExecute();
-
-        if (!class_exists('RightsService')) {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgRightsPlugin/lib/Service/RightsService.php';
+if (!class_exists('RightsService')) {
+            require_once $this->config('sf_plugins_dir') . '/ahgRightsPlugin/lib/Service/RightsService.php';
         }
 
         $this->service = RightsService::getInstance();
@@ -26,7 +26,7 @@ class rightsActions extends AhgActions
     /**
      * View rights for an object
      */
-    public function executeIndex(sfWebRequest $request): void
+    public function executeIndex($request): void
     {
         $this->resource = $this->getRoute()->resource;
 
@@ -49,7 +49,7 @@ class rightsActions extends AhgActions
     /**
      * Add new rights record
      */
-    public function executeAdd(sfWebRequest $request): void
+    public function executeAdd($request): void
     {
         $this->resource = $this->getRoute()->resource;
 
@@ -75,7 +75,7 @@ class rightsActions extends AhgActions
     /**
      * Edit existing rights record
      */
-    public function executeEdit(sfWebRequest $request): void
+    public function executeEdit($request): void
     {
         $this->resource = $this->getRoute()->resource;
         $rightId = (int) $request->getParameter('id');
@@ -176,7 +176,7 @@ class rightsActions extends AhgActions
     /**
      * Delete rights record
      */
-    public function executeDelete(sfWebRequest $request): void
+    public function executeDelete($request): void
     {
         $this->resource = $this->getRoute()->resource;
         $rightId = (int) $request->getParameter('id');
@@ -200,7 +200,7 @@ class rightsActions extends AhgActions
     /**
      * Edit embargo
      */
-    public function executeEditEmbargo(sfWebRequest $request): void
+    public function executeEditEmbargo($request): void
     {
         $this->resource = $this->getRoute()->resource;
 
@@ -245,7 +245,7 @@ class rightsActions extends AhgActions
     /**
      * Release embargo
      */
-    public function executeReleaseEmbargo(sfWebRequest $request): void
+    public function executeReleaseEmbargo($request): void
     {
         $this->resource = $this->getRoute()->resource;
         $embargoId = (int) $request->getParameter('id');
@@ -269,7 +269,7 @@ class rightsActions extends AhgActions
     /**
      * Manage TK Labels
      */
-    public function executeTkLabels(sfWebRequest $request): void
+    public function executeTkLabels($request): void
     {
         $this->resource = $this->getRoute()->resource;
 
@@ -307,7 +307,7 @@ class rightsActions extends AhgActions
     /**
      * Orphan work management
      */
-    public function executeOrphanWork(sfWebRequest $request): void
+    public function executeOrphanWork($request): void
     {
         $this->resource = $this->getRoute()->resource;
 
@@ -351,7 +351,7 @@ class rightsActions extends AhgActions
     /**
      * API: Check access rights
      */
-    public function executeApiCheck(sfWebRequest $request): sfView
+    public function executeApiCheck($request): sfView
     {
         $objectId = (int) $request->getParameter('id');
 
@@ -368,7 +368,7 @@ class rightsActions extends AhgActions
     /**
      * API: Get embargo status
      */
-    public function executeApiEmbargo(sfWebRequest $request): sfView
+    public function executeApiEmbargo($request): sfView
     {
         $objectId = (int) $request->getParameter('id');
 

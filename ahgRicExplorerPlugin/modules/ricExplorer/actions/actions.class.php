@@ -1,22 +1,23 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class ricExplorerActions extends AhgActions
+class ricExplorerActions extends AhgController
 {
     protected $fusekiEndpoint;
     protected $fusekiUsername;
     protected $fusekiPassword;
     protected $baseUri;
 
-    public function preExecute()
+    public function boot(): void
     {
-        parent::preExecute();
-        // Load from database settings (AHG Settings UI), fallback to sfConfig
+// Load from database settings (AHG Settings UI), fallback to sfConfig
         $config = $this->getConfigSettings();
-        $this->fusekiEndpoint = ($config['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')) . '/query';
-        $this->fusekiUsername = $config['fuseki_username'] ?? sfConfig::get('app_ric_fuseki_username', 'admin');
-        $this->fusekiPassword = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
-        $this->baseUri = sfConfig::get('app_ric_base_uri', sfConfig::get('app_siteBaseUrl', '') . '/ric');
+        $this->fusekiEndpoint = ($config['fuseki_endpoint'] ?? $this->config('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')) . '/query';
+        $this->fusekiUsername = $config['fuseki_username'] ?? $this->config('app_ric_fuseki_username', 'admin');
+        $this->fusekiPassword = $config['fuseki_password'] ?? $this->config('app_ric_fuseki_password', '');
+        $this->baseUri = $this->config('app_ric_base_uri', $this->config('app_siteBaseUrl', '') . '/ric');
     }
 
     protected function getConfigSettings(): array
@@ -32,7 +33,7 @@ class ricExplorerActions extends AhgActions
         }
     }
 
-    public function executeGetData(sfWebRequest $request)
+    public function executeGetData($request)
     {
         $this->getResponse()->setContentType('application/json');
         

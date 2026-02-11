@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Request to Publish Delete Action
  *
@@ -9,22 +10,22 @@
  * @subpackage ahgRequestToPublishPlugin
  * @author     The Archive and Heritage Group
  */
-class requestToPublishDeleteAction extends sfAction
+class requestToPublishDeleteAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin permission
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
         // Initialize repository
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Repositories/RequestToPublishRepository.php';
         $repository = new \ahgRequestToPublishPlugin\Repositories\RequestToPublishRepository();
 
         // Get request by slug
@@ -39,10 +40,10 @@ class requestToPublishDeleteAction extends sfAction
         if ($request->isMethod('post') && $request->getParameter('confirm') === 'yes') {
             try {
                 $repository->delete($resource->id);
-                $this->context->user->setFlash('notice', 'Request has been deleted.');
+                $this->getUser()->setFlash('notice', 'Request has been deleted.');
                 $this->redirect(['module' => 'requestToPublish', 'action' => 'browse']);
             } catch (\Exception $e) {
-                $this->context->user->setFlash('error', 'Error deleting request: ' . $e->getMessage());
+                $this->getUser()->setFlash('error', 'Error deleting request: ' . $e->getMessage());
             }
         }
 

@@ -1,16 +1,17 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ahgSettings actions - Handles AHG settings directly
  *
  * Includes and executes action classes from the settings module.
  * Variables set in the inner action are transferred to this action for template rendering.
  */
-class ahgSettingsActions extends AhgActions
+class ahgSettingsActions extends AhgController
 {
     private function executeSettingsAction($actionClass, $request)
     {
-        $actionFile = sfConfig::get('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/actions/handlers/' . $actionClass . '.class.php';
+        $actionFile = $this->config('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/actions/handlers/' . $actionClass . '.class.php';
         if (file_exists($actionFile)) {
             require_once $actionFile;
 
@@ -61,7 +62,7 @@ class ahgSettingsActions extends AhgActions
 
             // Check if a Blade template exists for this action
             $actionName = $this->getActionName();
-            $bladeFile = sfConfig::get('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/templates/' . $actionName . '.blade.php';
+            $bladeFile = $this->config('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/templates/' . $actionName . '.blade.php';
             if (file_exists($bladeFile) && !is_string($result)) {
                 return $this->renderSettingsBlade($actionName, $request);
             }
@@ -95,168 +96,168 @@ class ahgSettingsActions extends AhgActions
         return $this->renderBlade($template, $data);
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         return $this->executeSettingsAction('indexAction', $request);
     }
 
-    public function executeSection(sfWebRequest $request)
+    public function executeSection($request)
     {
         return $this->executeSettingsAction('sectionAction', $request);
     }
 
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         return $this->executeSettingsAction('exportAction', $request);
     }
 
-    public function executeImport(sfWebRequest $request)
+    public function executeImport($request)
     {
         return $this->executeSettingsAction('importAction', $request);
     }
 
-    public function executeReset(sfWebRequest $request)
+    public function executeReset($request)
     {
         return $this->executeSettingsAction('resetAction', $request);
     }
 
-    public function executeEmail(sfWebRequest $request)
+    public function executeEmail($request)
     {
         return $this->executeSettingsAction('emailAction', $request);
     }
 
-    public function executeEmailTest(sfWebRequest $request)
+    public function executeEmailTest($request)
     {
         return $this->executeSettingsAction('emailTestAction', $request);
     }
 
-    public function executeFusekiTest(sfWebRequest $request)
+    public function executeFusekiTest($request)
     {
         return $this->executeSettingsAction('fusekiTestAction', $request);
     }
 
-    public function executePlugins(sfWebRequest $request)
+    public function executePlugins($request)
     {
         return $this->executeSettingsAction('pluginsAction', $request);
     }
 
-    public function executeSaveTiffPdfSettings(sfWebRequest $request)
+    public function executeSaveTiffPdfSettings($request)
     {
         return $this->executeSettingsAction('saveTiffPdfSettingsAction', $request);
     }
 
-    public function executeDamTools(sfWebRequest $request)
+    public function executeDamTools($request)
     {
         return $this->executeSettingsAction('damToolsAction', $request);
     }
 
-    public function executePreservation(sfWebRequest $request)
+    public function executePreservation($request)
     {
         return $this->executeSettingsAction('preservationAction', $request);
     }
 
-    public function executeLevels(sfWebRequest $request)
+    public function executeLevels($request)
     {
         return $this->executeSettingsAction('levelsAction', $request);
     }
 
-    public function executeAiServices(sfWebRequest $request)
+    public function executeAiServices($request)
     {
         return $this->executeSettingsAction('aiServicesAction', $request);
     }
 
-    public function executeApiKeys(sfWebRequest $request)
+    public function executeApiKeys($request)
     {
         return $this->executeSettingsAction('apiKeysAction', $request);
     }
 
-    public function executeWebhooks(sfWebRequest $request)
+    public function executeWebhooks($request)
     {
         return $this->executeSettingsAction('webhooksAction', $request);
     }
 
-    public function executeGlobal(sfWebRequest $request)
+    public function executeGlobal($request)
     {
         return $this->executeSettingsAction('globalAction', $request);
     }
 
-    public function executeLanguage(sfWebRequest $request)
+    public function executeLanguage($request)
     {
         return $this->executeSettingsAction('languageAction', $request);
     }
 
-    public function executeSiteInformation(sfWebRequest $request)
+    public function executeSiteInformation($request)
     {
         return $this->executeSettingsAction('siteInformationAction', $request);
     }
 
-    public function executePageElements(sfWebRequest $request)
+    public function executePageElements($request)
     {
         return $this->executeSettingsAction('pageElementsAction', $request);
     }
 
-    public function executePermissions(sfWebRequest $request)
+    public function executePermissions($request)
     {
         return $this->executeSettingsAction('permissionsAction', $request);
     }
 
-    public function executeSecurity(sfWebRequest $request)
+    public function executeSecurity($request)
     {
         return $this->executeSettingsAction('securityAction', $request);
     }
 
-    public function executeTreeview(sfWebRequest $request)
+    public function executeTreeview($request)
     {
         return $this->executeSettingsAction('treeviewAction', $request);
     }
 
-    public function executeUploads(sfWebRequest $request)
+    public function executeUploads($request)
     {
         return $this->executeSettingsAction('uploadsAction', $request);
     }
 
-    public function executeVisibleElements(sfWebRequest $request)
+    public function executeVisibleElements($request)
     {
         return $this->executeSettingsAction('visibleElementsAction', $request);
     }
 
-    public function executeTemplate(sfWebRequest $request)
+    public function executeTemplate($request)
     {
         return $this->executeSettingsAction('templateAction', $request);
     }
 
-    public function executeFindingAid(sfWebRequest $request)
+    public function executeFindingAid($request)
     {
         return $this->executeSettingsAction('findingAidAction', $request);
     }
 
-    public function executeOai(sfWebRequest $request)
+    public function executeOai($request)
     {
         return $this->executeSettingsAction('oaiAction', $request);
     }
 
-    public function executeIdentifier(sfWebRequest $request)
+    public function executeIdentifier($request)
     {
         return $this->executeSettingsAction('identifierAction', $request);
     }
 
-    public function executeIcipSettings(sfWebRequest $request)
+    public function executeIcipSettings($request)
     {
         return $this->executeSettingsAction('icipSettingsAction', $request);
     }
 
-    public function executeAhgIntegration(sfWebRequest $request)
+    public function executeAhgIntegration($request)
     {
         return $this->executeSettingsAction('ahgIntegrationAction', $request);
     }
 
-    public function executeSectorNumbering(sfWebRequest $request)
+    public function executeSectorNumbering($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
-        $this->i18n = sfContext::getInstance()->i18n;
+        $this->i18n = $this->getContext()->i18n;
         $this->form = new sfForm();
 
         // GLAM/DAM sectors - always show all 5
@@ -361,103 +362,103 @@ class ahgSettingsActions extends AhgActions
         }
     }
 
-    public function executeDiacritics(sfWebRequest $request)
+    public function executeDiacritics($request)
     {
         return $this->executeSettingsAction('diacriticsAction', $request);
     }
 
-    public function executeCsvValidator(sfWebRequest $request)
+    public function executeCsvValidator($request)
     {
         return $this->executeSettingsAction('csvValidatorAction', $request);
     }
 
-    public function executeClipboard(sfWebRequest $request)
+    public function executeClipboard($request)
     {
         return $this->executeSettingsAction('clipboardAction', $request);
     }
 
-    public function executeTts(sfWebRequest $request)
+    public function executeTts($request)
     {
         return $this->executeSettingsAction('ttsAction', $request);
     }
 
-    public function executeServices(sfWebRequest $request)
+    public function executeServices($request)
     {
         return $this->executeSettingsAction('servicesAction', $request);
     }
 
-    public function executeMarkdown(sfWebRequest $request)
+    public function executeMarkdown($request)
     {
         return $this->executeSettingsAction('markdownAction', $request);
     }
 
-    public function executePrivacyNotification(sfWebRequest $request)
+    public function executePrivacyNotification($request)
     {
         return $this->executeSettingsAction('privacyNotificationAction', $request);
     }
 
-    public function executeDigitalObjectDerivatives(sfWebRequest $request)
+    public function executeDigitalObjectDerivatives($request)
     {
         return $this->executeSettingsAction('digitalObjectDerivativesAction', $request);
     }
 
-    public function executeDipUpload(sfWebRequest $request)
+    public function executeDipUpload($request)
     {
         return $this->executeSettingsAction('dipUploadAction', $request);
     }
 
-    public function executeInventory(sfWebRequest $request)
+    public function executeInventory($request)
     {
         return $this->executeSettingsAction('inventoryAction', $request);
     }
 
-    public function executeInterfaceLabel(sfWebRequest $request)
+    public function executeInterfaceLabel($request)
     {
         return $this->executeSettingsAction('interfaceLabelAction', $request);
     }
 
-    public function executeLdap(sfWebRequest $request)
+    public function executeLdap($request)
     {
         return $this->executeSettingsAction('ldapAction', $request);
     }
 
-    public function executeNumberingSchemes(sfWebRequest $request)
+    public function executeNumberingSchemes($request)
     {
         return $this->executeSettingsAction('numberingSchemesAction', $request);
     }
 
-    public function executeNumberingSchemeEdit(sfWebRequest $request)
+    public function executeNumberingSchemeEdit($request)
     {
         return $this->executeSettingsAction('numberingSchemeEditAction', $request);
     }
 
-    public function executeGenerateIdentifier(sfWebRequest $request)
+    public function executeGenerateIdentifier($request)
     {
         return $this->executeSettingsAction('generateIdentifierAction', $request);
     }
 
-    public function executeValidateIdentifier(sfWebRequest $request)
+    public function executeValidateIdentifier($request)
     {
         return $this->executeSettingsAction('validateIdentifierAction', $request);
     }
 
     // Aliases for legacy URLs
-    public function executeAhgSettings(sfWebRequest $request)
+    public function executeAhgSettings($request)
     {
         return $this->executeIndex($request);
     }
 
-    public function executeAhgDashboard(sfWebRequest $request)
+    public function executeAhgDashboard($request)
     {
         return $this->executeIndex($request);
     }
 
-    public function executeCronJobs(sfWebRequest $request)
+    public function executeCronJobs($request)
     {
         return $this->executeSettingsAction('cronJobsAction', $request);
     }
 
-    public function executeSystemInfo(sfWebRequest $request)
+    public function executeSystemInfo($request)
     {
         return $this->executeSettingsAction('systemInfoAction', $request);
     }

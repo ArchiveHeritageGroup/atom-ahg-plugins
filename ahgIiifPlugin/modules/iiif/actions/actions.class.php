@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * ahgIiif module actions
  *
@@ -7,12 +8,12 @@
  *
  * @author Johan Pieterse - The Archive and Heritage Group
  */
-class iiifActions extends AhgActions
+class iiifActions extends AhgController
 {
     /**
      * Generate IIIF manifest by slug
      */
-    public function executeManifest(sfWebRequest $request)
+    public function executeManifest($request)
     {
         $slug = $request->getParameter('slug');
 
@@ -27,7 +28,7 @@ class iiifActions extends AhgActions
     /**
      * Generate IIIF manifest by ID
      */
-    public function executeManifestById(sfWebRequest $request)
+    public function executeManifestById($request)
     {
         $id = $request->getParameter('id');
 
@@ -115,7 +116,7 @@ class iiifActions extends AhgActions
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
         $baseUrl = "{$protocol}://{$host}";
-        $cantaloupeBaseUrl = sfConfig::get('app_iiif_cantaloupe_internal_url', 'http://127.0.0.1:8182');
+        $cantaloupeBaseUrl = $this->config('app_iiif_cantaloupe_internal_url', 'http://127.0.0.1:8182');
 
         $label = $object['title'] ?: $object['identifier'] ?: 'Untitled';
         $manifestId = "{$baseUrl}/iiif/manifest/{$object['slug']}";
@@ -287,11 +288,11 @@ class iiifActions extends AhgActions
     /**
      * IIIF settings admin page - display and save
      */
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         // Check admin access
-        if (!$this->context->user->isAuthenticated() || !$this->context->user->isAdministrator()) {
-            $this->forward(sfConfig::get('sf_secure_module'), sfConfig::get('sf_secure_action'));
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
         }
 
         $db = \Illuminate\Database\Capsule\Manager::class;
@@ -359,7 +360,7 @@ class iiifActions extends AhgActions
      * Get annotations for an object
      * GET /iiif/annotations/object/:id
      */
-    public function executeAnnotationsList(sfWebRequest $request)
+    public function executeAnnotationsList($request)
     {
         $this->response->setContentType('application/json');
 
@@ -384,12 +385,12 @@ class iiifActions extends AhgActions
      * Create a new annotation
      * POST /iiif/annotations
      */
-    public function executeAnnotationsCreate(sfWebRequest $request)
+    public function executeAnnotationsCreate($request)
     {
         $this->response->setContentType('application/json');
         $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
 
             return $this->renderText(json_encode(['error' => 'Authentication required']));
@@ -405,7 +406,7 @@ class iiifActions extends AhgActions
 
         $service = new IiifAnnotationService();
         $parsed = $service->parseAnnotoriousAnnotation($data, $data['object_id']);
-        $parsed['created_by'] = $this->context->user->getAttribute('user_id');
+        $parsed['created_by'] = $this->getUser()->getAttribute('user_id');
 
         $annotationId = $service->createAnnotation($parsed);
 
@@ -419,12 +420,12 @@ class iiifActions extends AhgActions
      * Update an annotation
      * PUT /iiif/annotations/:id
      */
-    public function executeAnnotationsUpdate(sfWebRequest $request)
+    public function executeAnnotationsUpdate($request)
     {
         $this->response->setContentType('application/json');
         $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
 
             return $this->renderText(json_encode(['error' => 'Authentication required']));
@@ -474,12 +475,12 @@ class iiifActions extends AhgActions
      * Delete an annotation
      * DELETE /iiif/annotations/:id
      */
-    public function executeAnnotationsDelete(sfWebRequest $request)
+    public function executeAnnotationsDelete($request)
     {
         $this->response->setContentType('application/json');
         $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
 
             return $this->renderText(json_encode(['error' => 'Authentication required']));

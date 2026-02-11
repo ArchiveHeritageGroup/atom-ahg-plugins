@@ -1,19 +1,20 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Dedupe module actions.
  */
-class dedupeActions extends AhgActions
+class dedupeActions extends AhgController
 {
     /**
      * Dashboard with statistics.
      */
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         // Check admin access
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -67,9 +68,9 @@ class dedupeActions extends AhgActions
     /**
      * Browse all detected duplicates.
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -128,9 +129,9 @@ class dedupeActions extends AhgActions
     /**
      * View duplicate pair details.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -152,9 +153,9 @@ class dedupeActions extends AhgActions
     /**
      * Side-by-side comparison view.
      */
-    public function executeCompare(sfWebRequest $request)
+    public function executeCompare($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -178,9 +179,9 @@ class dedupeActions extends AhgActions
     /**
      * Dismiss a false positive.
      */
-    public function executeDismiss(sfWebRequest $request)
+    public function executeDismiss($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -192,7 +193,7 @@ class dedupeActions extends AhgActions
             ->where('status', '!=', 'merged')
             ->update([
                 'status' => 'dismissed',
-                'reviewed_by' => $this->context->user->getUserId(),
+                'reviewed_by' => $this->getUser()->getUserId(),
                 'reviewed_at' => date('Y-m-d H:i:s'),
                 'review_notes' => $notes,
             ]);
@@ -207,9 +208,9 @@ class dedupeActions extends AhgActions
     /**
      * Merge duplicate records.
      */
-    public function executeMerge(sfWebRequest $request)
+    public function executeMerge($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -235,11 +236,11 @@ class dedupeActions extends AhgActions
             $primaryId = (int) $request->getParameter('primary_id');
             $fieldChoices = $request->getParameter('field_choices', []);
 
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
             $service = new \ahgDedupePlugin\Services\DedupeService();
 
             try {
-                $result = $service->mergeRecords($id, $primaryId, $this->context->user->getUserId(), $fieldChoices);
+                $result = $service->mergeRecords($id, $primaryId, $this->getUser()->getUserId(), $fieldChoices);
 
                 $this->getUser()->setFlash('notice', 'Records merged successfully. Merge log ID: ' . $result['merge_log_id']);
                 $this->redirect(['module' => 'dedupe', 'action' => 'browse']);
@@ -252,9 +253,9 @@ class dedupeActions extends AhgActions
     /**
      * Start a new scan.
      */
-    public function executeScan(sfWebRequest $request)
+    public function executeScan($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -271,11 +272,11 @@ class dedupeActions extends AhgActions
         if ($request->isMethod('post')) {
             $repositoryId = $request->getParameter('repository_id') ? (int) $request->getParameter('repository_id') : null;
 
-            require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
+            require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
             $service = new \ahgDedupePlugin\Services\DedupeService();
 
             try {
-                $scanId = $service->startScan($repositoryId, $this->context->user->getUserId());
+                $scanId = $service->startScan($repositoryId, $this->getUser()->getUserId());
                 $this->getUser()->setFlash('notice', "Scan job #{$scanId} started. Run 'php symfony dedupe:scan' to process.");
                 $this->redirect(['module' => 'dedupe', 'action' => 'index']);
             } catch (\Exception $e) {
@@ -287,9 +288,9 @@ class dedupeActions extends AhgActions
     /**
      * Manage detection rules.
      */
-    public function executeRules(sfWebRequest $request)
+    public function executeRules($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -306,9 +307,9 @@ class dedupeActions extends AhgActions
     /**
      * Create a new detection rule.
      */
-    public function executeRuleCreate(sfWebRequest $request)
+    public function executeRuleCreate($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -353,9 +354,9 @@ class dedupeActions extends AhgActions
     /**
      * Edit a detection rule.
      */
-    public function executeRuleEdit(sfWebRequest $request)
+    public function executeRuleEdit($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -407,9 +408,9 @@ class dedupeActions extends AhgActions
     /**
      * Delete a detection rule.
      */
-    public function executeRuleDelete(sfWebRequest $request)
+    public function executeRuleDelete($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -423,9 +424,9 @@ class dedupeActions extends AhgActions
     /**
      * Generate duplicate report.
      */
-    public function executeReport(sfWebRequest $request)
+    public function executeReport($request)
     {
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
 
@@ -473,7 +474,7 @@ class dedupeActions extends AhgActions
     /**
      * API: Check for duplicates in real-time.
      */
-    public function executeApiCheck(sfWebRequest $request)
+    public function executeApiCheck($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -485,7 +486,7 @@ class dedupeActions extends AhgActions
             return $this->renderText(json_encode(['error' => 'Title or identifier required']));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
         $service = new \ahgDedupePlugin\Services\DedupeService();
 
         $data = [
@@ -505,7 +506,7 @@ class dedupeActions extends AhgActions
     /**
      * API: Real-time duplicate check during data entry.
      */
-    public function executeApiRealtime(sfWebRequest $request)
+    public function executeApiRealtime($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -515,7 +516,7 @@ class dedupeActions extends AhgActions
             return $this->renderText(json_encode(['matches' => []]));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
         $service = new \ahgDedupePlugin\Services\DedupeService();
 
         $matches = $service->realtimeCheck(['title' => $title], 5);

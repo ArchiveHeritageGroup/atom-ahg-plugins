@@ -1,4 +1,6 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * 3D Object Reports Module
  * Reports for 3D models, hotspots, thumbnails, file inventory
@@ -6,16 +8,16 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class threeDReportsActions extends AhgActions
+class threeDReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
     }
 
-    public function executeIndex(sfWebRequest $request)
+    public function executeIndex($request)
     {
         $this->checkAccess();
         
@@ -54,7 +56,7 @@ class threeDReportsActions extends AhgActions
             ->toArray();
     }
 
-    public function executeModels(sfWebRequest $request)
+    public function executeModels($request)
     {
         $this->checkAccess();
         
@@ -87,7 +89,7 @@ class threeDReportsActions extends AhgActions
         $this->formats = ['glb', 'gltf', 'obj', 'fbx', 'stl', 'ply', 'usdz'];
     }
 
-    public function executeHotspots(sfWebRequest $request)
+    public function executeHotspots($request)
     {
         $this->checkAccess();
         
@@ -122,7 +124,7 @@ class threeDReportsActions extends AhgActions
         ];
     }
 
-    public function executeThumbnails(sfWebRequest $request)
+    public function executeThumbnails($request)
     {
         $this->checkAccess();
         
@@ -154,7 +156,7 @@ class threeDReportsActions extends AhgActions
         ];
     }
 
-    public function executeDigitalObjects(sfWebRequest $request)
+    public function executeDigitalObjects($request)
     {
         $this->checkAccess();
         
@@ -186,7 +188,7 @@ class threeDReportsActions extends AhgActions
         ];
     }
 
-    public function executeSettings(sfWebRequest $request)
+    public function executeSettings($request)
     {
         $this->checkAccess();
         
@@ -204,7 +206,7 @@ class threeDReportsActions extends AhgActions
     /**
      * Create model config for a digital object
      */
-    public function executeCreateConfig(sfWebRequest $request)
+    public function executeCreateConfig($request)
     {
         $this->checkAccess();
         
@@ -279,7 +281,7 @@ class threeDReportsActions extends AhgActions
     /**
      * Bulk create configs for all unconfigured 3D files
      */
-    public function executeBulkCreateConfig(sfWebRequest $request)
+    public function executeBulkCreateConfig($request)
     {
         $this->checkAccess();
         

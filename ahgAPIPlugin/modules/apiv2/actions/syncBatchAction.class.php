@@ -1,6 +1,7 @@
 <?php
 
-class apiv2SyncBatchAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2SyncBatchAction extends AhgApiController
 {
     public function POST($request)
     {

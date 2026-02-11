@@ -1,23 +1,24 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Heritage module actions.
  *
  * Handles landing page, search, and API endpoints for the Heritage platform.
  */
-class heritageActions extends AhgActions
+class heritageActions extends AhgController
 {
     /**
      * Landing page action.
      *
      * @param sfWebRequest $request
      */
-    public function executeLanding(sfWebRequest $request)
+    public function executeLanding($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\LandingController($culture);
         $response = $controller->index($institutionId ? (int) $institutionId : null, $culture);
@@ -166,7 +167,7 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeSearch(sfWebRequest $request)
+    public function executeSearch($request)
     {
 
 
@@ -176,7 +177,7 @@ class heritageActions extends AhgActions
             'page' => (int) $request->getParameter('page', 1),
             'limit' => (int) $request->getParameter('limit', 20),
             'institution_id' => $request->getParameter('institution_id'),
-            'culture' => $this->context->user->getCulture(),
+            'culture' => $this->culture(),
         ];
 
         // Parse filters from query string if needed
@@ -219,12 +220,12 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiLanding(sfWebRequest $request)
+    public function executeApiLanding($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\LandingController($culture);
         $response = $controller->index($institutionId ? (int) $institutionId : null, $culture);
@@ -237,7 +238,7 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiDiscover(sfWebRequest $request)
+    public function executeApiDiscover($request)
     {
 
 
@@ -255,7 +256,7 @@ class heritageActions extends AhgActions
             ];
         }
 
-        $params['culture'] = $this->context->user->getCulture();
+        $params['culture'] = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\DiscoverController($params['culture']);
 
@@ -278,14 +279,14 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiAutocomplete(sfWebRequest $request)
+    public function executeApiAutocomplete($request)
     {
 
 
         $query = $request->getParameter('q', '');
         $institutionId = $request->getParameter('institution_id');
         $limit = min(20, max(1, (int) $request->getParameter('limit', 10)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\DiscoverController($culture);
         $response = $controller->autocomplete($query, $institutionId ? (int) $institutionId : null, $limit);
@@ -298,17 +299,17 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeAdminConfig(sfWebRequest $request)
+    public function executeAdminConfig($request)
     {
         // Check admin access
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
 
@@ -362,7 +363,7 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiClick(sfWebRequest $request)
+    public function executeApiClick($request)
     {
 
 
@@ -375,7 +376,7 @@ class heritageActions extends AhgActions
 
         $content = $request->getContent();
         $params = json_decode($content, true) ?: [];
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\DiscoverController($culture);
         $response = $controller->logClick($params);
@@ -388,7 +389,7 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiDwell(sfWebRequest $request)
+    public function executeApiDwell($request)
     {
 
 
@@ -401,7 +402,7 @@ class heritageActions extends AhgActions
 
         $content = $request->getContent();
         $params = json_decode($content, true) ?: [];
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\DiscoverController($culture);
         $response = $controller->updateDwellTime($params);
@@ -414,10 +415,10 @@ class heritageActions extends AhgActions
      *
      * @param sfWebRequest $request
      */
-    public function executeApiAnalytics(sfWebRequest $request)
+    public function executeApiAnalytics($request)
     {
         // Check admin access
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             return $this->renderJson([
                 'success' => false,
                 'error' => 'Unauthorized',
@@ -428,7 +429,7 @@ class heritageActions extends AhgActions
 
         $institutionId = $request->getParameter('institution_id');
         $days = (int) $request->getParameter('days', 30);
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\DiscoverController($culture);
         $response = $controller->analytics(
@@ -458,16 +459,16 @@ class heritageActions extends AhgActions
     /**
      * Admin dashboard.
      */
-    public function executeAdminDashboard(sfWebRequest $request)
+    public function executeAdminDashboard($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $configController = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
         $analyticsController = new \AtomFramework\Heritage\Controllers\Api\AnalyticsController();
@@ -482,16 +483,16 @@ class heritageActions extends AhgActions
     /**
      * Admin feature toggles.
      */
-    public function executeAdminFeatures(sfWebRequest $request)
+    public function executeAdminFeatures($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
 
@@ -517,16 +518,16 @@ class heritageActions extends AhgActions
     /**
      * Admin branding configuration.
      */
-    public function executeAdminBranding(sfWebRequest $request)
+    public function executeAdminBranding($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
 
@@ -566,15 +567,15 @@ class heritageActions extends AhgActions
     /**
      * Admin user management.
      */
-    public function executeAdminUsers(sfWebRequest $request)
+    public function executeAdminUsers($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\Admin\ConfigController($culture);
 
         $params = [
@@ -596,15 +597,15 @@ class heritageActions extends AhgActions
     /**
      * Admin featured/curated collections management.
      */
-    public function executeAdminFeaturedCollections(sfWebRequest $request)
+    public function executeAdminFeaturedCollections($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $action = $request->getParameter('featured_action');
         $featuredId = $request->getParameter('featured_id');
 
@@ -728,15 +729,15 @@ class heritageActions extends AhgActions
     /**
      * Admin hero slides management.
      */
-    public function executeAdminHeroSlides(sfWebRequest $request)
+    public function executeAdminHeroSlides($request)
     {
-        if (!$this->context->user->isAdministrator() && !$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAdministrator() && !$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
         }
 
         // Check for editor role as well
-        if (!$this->context->user->isAdministrator()) {
-            $user = $this->context->user;
+        if (!$this->getUser()->isAdministrator()) {
+            $user = $this->getUser();
             $groups = $user->getAclGroups();
             $isEditor = false;
             foreach ($groups as $group) {
@@ -756,7 +757,7 @@ class heritageActions extends AhgActions
         $action = $request->getParameter('slide_action');
         $slideId = $request->getParameter('slide_id');
 
-        $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($this->context->user->getCulture());
+        $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($this->culture());
 
         // Handle actions
         if ($request->isMethod('post')) {
@@ -875,7 +876,7 @@ class heritageActions extends AhgActions
         }
 
         // Create upload directory
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/heritage/hero';
+        $uploadDir = $this->config('sf_upload_dir') . '/heritage/hero';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -900,12 +901,12 @@ class heritageActions extends AhgActions
     /**
      * Request access form.
      */
-    public function executeRequestAccess(sfWebRequest $request)
+    public function executeRequestAccess($request)
     {
 
 
         $slug = $request->getParameter('slug');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Get object
         $object = \Illuminate\Database\Capsule\Manager::table('information_object')
@@ -928,9 +929,9 @@ class heritageActions extends AhgActions
         $this->purposes = $purposeResponse['data'] ?? [];
 
         // Handle POST
-        if ($request->isMethod('post') && $this->context->user->isAuthenticated()) {
+        if ($request->isMethod('post') && $this->getUser()->isAuthenticated()) {
             $data = [
-                'user_id' => $this->context->user->getAttribute('user_id'),
+                'user_id' => $this->getUser()->getAttribute('user_id'),
                 'object_id' => $object->id,
                 'purpose_id' => $request->getParameter('purpose_id'),
                 'justification' => $request->getParameter('justification'),
@@ -954,15 +955,15 @@ class heritageActions extends AhgActions
     /**
      * User's access requests.
      */
-    public function executeMyAccessRequests(sfWebRequest $request)
+    public function executeMyAccessRequests($request)
     {
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
 
 
-        $userId = $this->context->user->getAttribute('user_id');
+        $userId = $this->getUser()->getAttribute('user_id');
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
         $params = [
@@ -979,9 +980,9 @@ class heritageActions extends AhgActions
     /**
      * Admin access requests.
      */
-    public function executeAdminAccessRequests(sfWebRequest $request)
+    public function executeAdminAccessRequests($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -993,7 +994,7 @@ class heritageActions extends AhgActions
         if ($request->isMethod('post')) {
             $requestId = (int) $request->getParameter('request_id');
             $action = $request->getParameter('decision');
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'approve') {
                 $controller->approveRequest($requestId, $userId, [
@@ -1025,9 +1026,9 @@ class heritageActions extends AhgActions
     /**
      * Admin embargoes.
      */
-    public function executeAdminEmbargoes(sfWebRequest $request)
+    public function executeAdminEmbargoes($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1062,9 +1063,9 @@ class heritageActions extends AhgActions
     /**
      * Admin POPIA dashboard.
      */
-    public function executeAdminPopia(sfWebRequest $request)
+    public function executeAdminPopia($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1075,7 +1076,7 @@ class heritageActions extends AhgActions
         // Handle resolve
         if ($request->isMethod('post') && $request->getParameter('form_action') === 'resolve') {
             $id = (int) $request->getParameter('flag_id');
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $notes = $request->getParameter('resolution_notes');
             $controller->resolvePOPIAFlag($id, $userId, $notes);
             $this->getUser()->setFlash('notice', 'Flag resolved');
@@ -1104,16 +1105,16 @@ class heritageActions extends AhgActions
     /**
      * Custodian dashboard.
      */
-    public function executeCustodianDashboard(sfWebRequest $request)
+    public function executeCustodianDashboard($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
-        $userId = $this->context->user->getAttribute('user_id');
+        $culture = $this->culture();
+        $userId = $this->getUser()->getAttribute('user_id');
 
         $controller = new \AtomFramework\Heritage\Controllers\Api\CustodianController($culture);
         $response = $controller->getDashboard($userId);
@@ -1125,16 +1126,16 @@ class heritageActions extends AhgActions
     /**
      * Custodian item editor.
      */
-    public function executeCustodianItem(sfWebRequest $request)
+    public function executeCustodianItem($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $slug = $request->getParameter('slug');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Get object by slug (slug is in the slug table, not information_object)
         $object = \Illuminate\Database\Capsule\Manager::table('information_object as io')
@@ -1154,7 +1155,7 @@ class heritageActions extends AhgActions
             $data = $request->getParameterHolder()->getAll();
             unset($data['module'], $data['action'], $data['form_action'], $data['slug']);
 
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $response = $controller->updateItem($object->id, $data, $userId);
 
             if ($response['success']) {
@@ -1180,15 +1181,15 @@ class heritageActions extends AhgActions
     /**
      * Custodian batch operations.
      */
-    public function executeCustodianBatch(sfWebRequest $request)
+    public function executeCustodianBatch($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\CustodianController($culture);
 
         $params = [
@@ -1205,15 +1206,15 @@ class heritageActions extends AhgActions
     /**
      * Custodian audit history.
      */
-    public function executeCustodianHistory(sfWebRequest $request)
+    public function executeCustodianHistory($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $controller = new \AtomFramework\Heritage\Controllers\Api\CustodianController($culture);
 
         $params = [
@@ -1238,9 +1239,9 @@ class heritageActions extends AhgActions
     /**
      * Analytics dashboard.
      */
-    public function executeAnalyticsDashboard(sfWebRequest $request)
+    public function executeAnalyticsDashboard($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1260,9 +1261,9 @@ class heritageActions extends AhgActions
     /**
      * Analytics search insights.
      */
-    public function executeAnalyticsSearch(sfWebRequest $request)
+    public function executeAnalyticsSearch($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1296,9 +1297,9 @@ class heritageActions extends AhgActions
     /**
      * Analytics content insights.
      */
-    public function executeAnalyticsContent(sfWebRequest $request)
+    public function executeAnalyticsContent($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1319,9 +1320,9 @@ class heritageActions extends AhgActions
     /**
      * Analytics alerts.
      */
-    public function executeAnalyticsAlerts(sfWebRequest $request)
+    public function executeAnalyticsAlerts($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -1333,7 +1334,7 @@ class heritageActions extends AhgActions
         // Handle dismiss
         if ($request->isMethod('post') && $request->getParameter('form_action') === 'dismiss') {
             $alertId = (int) $request->getParameter('alert_id');
-            $userId = $this->context->user->getAttribute('user_id');
+            $userId = $this->getUser()->getAttribute('user_id');
             $controller->dismissAlert($alertId, $userId);
             $this->getUser()->setFlash('notice', 'Alert dismissed');
             $this->redirect(['module' => 'heritage', 'action' => 'analyticsAlerts']);
@@ -1368,7 +1369,7 @@ class heritageActions extends AhgActions
     /**
      * Contributor login.
      */
-    public function executeContributorLogin(sfWebRequest $request)
+    public function executeContributorLogin($request)
     {
 
 
@@ -1412,7 +1413,7 @@ class heritageActions extends AhgActions
     /**
      * Contributor registration.
      */
-    public function executeContributorRegister(sfWebRequest $request)
+    public function executeContributorRegister($request)
     {
 
 
@@ -1456,7 +1457,7 @@ class heritageActions extends AhgActions
     /**
      * Contributor logout.
      */
-    public function executeContributorLogout(sfWebRequest $request)
+    public function executeContributorLogout($request)
     {
 
 
@@ -1477,7 +1478,7 @@ class heritageActions extends AhgActions
     /**
      * Email verification.
      */
-    public function executeContributorVerify(sfWebRequest $request)
+    public function executeContributorVerify($request)
     {
 
 
@@ -1494,12 +1495,12 @@ class heritageActions extends AhgActions
     /**
      * Contribution form for an item.
      */
-    public function executeContribute(sfWebRequest $request)
+    public function executeContribute($request)
     {
 
 
         $slug = $request->getParameter('slug');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // Get the item
         $item = \Illuminate\Database\Capsule\Manager::table('information_object as io')
@@ -1558,7 +1559,7 @@ class heritageActions extends AhgActions
     /**
      * User's contribution history.
      */
-    public function executeMyContributions(sfWebRequest $request)
+    public function executeMyContributions($request)
     {
 
 
@@ -1568,7 +1569,7 @@ class heritageActions extends AhgActions
             $this->redirect(['module' => 'heritage', 'action' => 'contributorLogin']);
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
 
         $params = [
@@ -1590,7 +1591,7 @@ class heritageActions extends AhgActions
     /**
      * Public contributor profile.
      */
-    public function executeContributorProfile(sfWebRequest $request)
+    public function executeContributorProfile($request)
     {
 
 
@@ -1611,7 +1612,7 @@ class heritageActions extends AhgActions
     /**
      * Leaderboard.
      */
-    public function executeLeaderboard(sfWebRequest $request)
+    public function executeLeaderboard($request)
     {
 
 
@@ -1634,15 +1635,15 @@ class heritageActions extends AhgActions
     /**
      * Review queue (Custodian/Admin).
      */
-    public function executeReviewQueue(sfWebRequest $request)
+    public function executeReviewQueue($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
 
         $params = [
@@ -1663,16 +1664,16 @@ class heritageActions extends AhgActions
     /**
      * Single contribution review.
      */
-    public function executeReviewContribution(sfWebRequest $request)
+    public function executeReviewContribution($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
 
 
         $contributionId = (int) $request->getParameter('id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
 
@@ -1680,7 +1681,7 @@ class heritageActions extends AhgActions
         if ($request->isMethod('post')) {
             $action = $request->getParameter('decision');
             $notes = $request->getParameter('notes');
-            $reviewerId = $this->context->user->getAttribute('user_id');
+            $reviewerId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'approve') {
                 $service->approve($contributionId, $reviewerId, $notes);
@@ -1707,7 +1708,7 @@ class heritageActions extends AhgActions
     /**
      * API: Submit contribution.
      */
-    public function executeApiSubmitContribution(sfWebRequest $request)
+    public function executeApiSubmitContribution($request)
     {
 
 
@@ -1727,7 +1728,7 @@ class heritageActions extends AhgActions
             return $this->renderJson(['success' => false, 'error' => 'Missing required fields']);
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
         $response = $service->create(
             $contributorId,
@@ -1742,12 +1743,12 @@ class heritageActions extends AhgActions
     /**
      * API: Get contribution status.
      */
-    public function executeApiContributionStatus(sfWebRequest $request)
+    public function executeApiContributionStatus($request)
     {
 
 
         $contributionId = (int) $request->getParameter('id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Contributions\ContributionService($culture);
         $response = $service->getForReview($contributionId);
@@ -1771,13 +1772,13 @@ class heritageActions extends AhgActions
     /**
      * API: Suggest tags.
      */
-    public function executeApiSuggestTags(sfWebRequest $request)
+    public function executeApiSuggestTags($request)
     {
 
 
         $query = $request->getParameter('q', '');
         $limit = min(20, max(1, (int) $request->getParameter('limit', 10)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (strlen($query) < 2) {
             return $this->renderJson(['success' => true, 'data' => []]);
@@ -1821,12 +1822,12 @@ class heritageActions extends AhgActions
     /**
      * Explore categories landing.
      */
-    public function executeExplore(sfWebRequest $request)
+    public function executeExplore($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $categoryCode = $request->getParameter('category');
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
@@ -1856,12 +1857,12 @@ class heritageActions extends AhgActions
     /**
      * Timeline navigation page.
      */
-    public function executeTimeline(sfWebRequest $request)
+    public function executeTimeline($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $periodId = $request->getParameter('period_id');
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
@@ -1889,12 +1890,12 @@ class heritageActions extends AhgActions
     /**
      * Creators/People browse page.
      */
-    public function executeCreators(sfWebRequest $request)
+    public function executeCreators($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $searchQuery = trim($request->getParameter('q', ''));
 
         $page = max(1, (int) $request->getParameter('page', 1));
@@ -1921,7 +1922,7 @@ class heritageActions extends AhgActions
     /**
      * Creators autocomplete for search.
      */
-    public function executeCreatorsAutocomplete(sfWebRequest $request)
+    public function executeCreatorsAutocomplete($request)
     {
 
 
@@ -2018,12 +2019,12 @@ class heritageActions extends AhgActions
     /**
      * Featured collections page.
      */
-    public function executeCollections(sfWebRequest $request)
+    public function executeCollections($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $collectionId = $request->getParameter('id');
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
@@ -2046,12 +2047,12 @@ class heritageActions extends AhgActions
     /**
      * Trending/popular items page.
      */
-    public function executeTrending(sfWebRequest $request)
+    public function executeTrending($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
 
@@ -2068,12 +2069,12 @@ class heritageActions extends AhgActions
     /**
      * API: Get hero slides.
      */
-    public function executeApiHeroSlides(sfWebRequest $request)
+    public function executeApiHeroSlides($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
         $slides = $service->getHeroSlides($institutionId ? (int) $institutionId : null);
@@ -2084,13 +2085,13 @@ class heritageActions extends AhgActions
     /**
      * API: Get featured collections.
      */
-    public function executeApiFeaturedCollections(sfWebRequest $request)
+    public function executeApiFeaturedCollections($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
         $limit = min(20, max(1, (int) $request->getParameter('limit', 6)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
         $collections = $service->getFeaturedCollections($institutionId ? (int) $institutionId : null, $limit);
@@ -2101,12 +2102,12 @@ class heritageActions extends AhgActions
     /**
      * API: Get explore categories.
      */
-    public function executeApiExploreCategories(sfWebRequest $request)
+    public function executeApiExploreCategories($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
         $categories = $service->getExploreCategories($institutionId ? (int) $institutionId : null);
@@ -2117,7 +2118,7 @@ class heritageActions extends AhgActions
     /**
      * API: Get explore category items.
      */
-    public function executeApiExploreCategoryItems(sfWebRequest $request)
+    public function executeApiExploreCategoryItems($request)
     {
 
 
@@ -2125,7 +2126,7 @@ class heritageActions extends AhgActions
         $categoryCode = $request->getParameter('category');
         $page = max(1, (int) $request->getParameter('page', 1));
         $limit = min(100, max(1, (int) $request->getParameter('limit', 24)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (!$categoryCode) {
             return $this->renderJson(['success' => false, 'error' => 'Category code required']);
@@ -2150,12 +2151,12 @@ class heritageActions extends AhgActions
     /**
      * API: Get timeline periods.
      */
-    public function executeApiTimelinePeriods(sfWebRequest $request)
+    public function executeApiTimelinePeriods($request)
     {
 
 
         $institutionId = $request->getParameter('institution_id');
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
         $periods = $service->getTimelinePeriods($institutionId ? (int) $institutionId : null);
@@ -2166,7 +2167,7 @@ class heritageActions extends AhgActions
     /**
      * API: Get timeline period items.
      */
-    public function executeApiTimelinePeriodItems(sfWebRequest $request)
+    public function executeApiTimelinePeriodItems($request)
     {
 
 
@@ -2174,7 +2175,7 @@ class heritageActions extends AhgActions
         $periodId = $request->getParameter('period_id');
         $page = max(1, (int) $request->getParameter('page', 1));
         $limit = min(100, max(1, (int) $request->getParameter('limit', 24)));
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         if (!$periodId) {
             return $this->renderJson(['success' => false, 'error' => 'Period ID required']);
@@ -2206,8 +2207,8 @@ class heritageActions extends AhgActions
      */
     protected function sendVerificationEmail(string $email, string $displayName, string $token): bool
     {
-        $siteName = sfConfig::get('app_siteTitle', 'Heritage Portal');
-        $baseUrl = sfConfig::get('app_siteBaseUrl', $this->getRequest()->getUriPrefix());
+        $siteName = $this->config('app_siteTitle', 'Heritage Portal');
+        $baseUrl = $this->config('app_siteBaseUrl', $this->getRequest()->getUriPrefix());
         $verifyUrl = $baseUrl . url_for([
             'module' => 'heritage',
             'action' => 'contributorVerify',
@@ -2238,7 +2239,7 @@ EMAIL;
             if (class_exists('sfMail')) {
                 $mail = new sfMail();
                 $mail->initialize();
-                $mail->setFrom(sfConfig::get('app_mail_from', 'noreply@' . $_SERVER['HTTP_HOST']));
+                $mail->setFrom($this->config('app_mail_from', 'noreply@' . $_SERVER['HTTP_HOST']));
                 $mail->addAddress($email);
                 $mail->setSubject($subject);
                 $mail->setBody($body);
@@ -2248,8 +2249,8 @@ EMAIL;
 
             // Fallback to PHP mail
             $headers = [
-                'From: ' . sfConfig::get('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
-                'Reply-To: ' . sfConfig::get('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
+                'From: ' . $this->config('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
+                'Reply-To: ' . $this->config('app_mail_from', 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')),
                 'X-Mailer: PHP/' . phpversion(),
                 'Content-Type: text/plain; charset=UTF-8',
             ];
@@ -2270,10 +2271,10 @@ EMAIL;
     /**
      * Knowledge Graph visualization page.
      */
-    public function executeGraph(sfWebRequest $request)
+    public function executeGraph($request)
     {
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
 
@@ -2289,12 +2290,12 @@ EMAIL;
     /**
      * Knowledge Graph data API (JSON for D3.js).
      */
-    public function executeGraphData(sfWebRequest $request)
+    public function executeGraphData($request)
     {
         $this->getResponse()->setContentType('application/json');
 
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
 
@@ -2326,10 +2327,10 @@ EMAIL;
     /**
      * Entity detail page.
      */
-    public function executeEntity(sfWebRequest $request)
+    public function executeEntity($request)
     {
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $type = $request->getParameter('type');
         $value = urldecode($request->getParameter('value'));
@@ -2353,12 +2354,12 @@ EMAIL;
     /**
      * Entity API (JSON).
      */
-    public function executeApiEntity(sfWebRequest $request)
+    public function executeApiEntity($request)
     {
         $this->getResponse()->setContentType('application/json');
 
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $type = $request->getParameter('type');
         $value = urldecode($request->getParameter('value'));
@@ -2388,12 +2389,12 @@ EMAIL;
     /**
      * Related entities API.
      */
-    public function executeApiEntityRelated(sfWebRequest $request)
+    public function executeApiEntityRelated($request)
     {
         $this->getResponse()->setContentType('application/json');
 
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $nodeId = (int) $request->getParameter('id');
         $depth = min(3, max(1, (int) $request->getParameter('depth', 1)));
@@ -2419,7 +2420,7 @@ EMAIL;
     /**
      * Entity search/autocomplete API.
      */
-    public function executeApiEntitySearch(sfWebRequest $request)
+    public function executeApiEntitySearch($request)
     {
         $this->getResponse()->setContentType('application/json');
 
@@ -2462,12 +2463,12 @@ EMAIL;
     /**
      * Graph statistics API.
      */
-    public function executeApiGraphStats(sfWebRequest $request)
+    public function executeApiGraphStats($request)
     {
         $this->getResponse()->setContentType('application/json');
 
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Heritage/Services/KnowledgeGraphService.php';
 
         $graphService = new \AtomFramework\Heritage\Services\KnowledgeGraphService();
 

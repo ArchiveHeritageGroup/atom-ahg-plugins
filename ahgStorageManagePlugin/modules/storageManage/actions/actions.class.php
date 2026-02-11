@@ -1,28 +1,22 @@
 <?php
 
-class storageManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+class storageManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeBrowse($request)
     {
-        parent::preExecute();
+        $culture = $this->culture();
 
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
-
-        $label = sfConfig::get('app_ui_label_physicalobject', 'Physical storage');
+        $label = $this->config('app_ui_label_physicalobject', 'Physical storage');
         $this->response->setTitle(__('Browse %1%', ['%1%' => $label]) . ' - ' . $this->response->getTitle());
 
         // Institutional scoping
-        if (sfConfig::get('app_enable_institutional_scoping')) {
-            $this->context->user->removeAttribute('search-realm');
+        if ($this->config('app_enable_institutional_scoping')) {
+            $this->getUser()->removeAttribute('search-realm');
         }
 
         $sort = $request->getParameter('sort', 'nameUp');
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Handle global search redirect: ?query=X -> subquery=X
@@ -48,17 +42,17 @@ class storageManageActions extends AhgActions
         );
     }
 
-    public function executeAutocomplete(sfWebRequest $request)
+    public function executeAutocomplete($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $criteria = new Criteria();
         $criteria->addJoin(QubitPhysicalObject::ID, QubitPhysicalObjectI18n::ID);
-        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->context->user->getCulture());
+        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->culture());
 
-        if (sfConfig::get('app_markdown_enabled', true)) {
+        if ($this->config('app_markdown_enabled', true)) {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "%{$request->query}%", Criteria::LIKE);
         } else {
             $criteria->add(QubitPhysicalObjectI18n::NAME, "{$request->query}%", Criteria::LIKE);
@@ -74,10 +68,10 @@ class storageManageActions extends AhgActions
         $this->physicalObjects = $this->pager->getResults();
     }
 
-    public function executeBoxList(sfWebRequest $request)
+    public function executeBoxList($request)
     {
         if (!isset($request->limit)) {
-            $request->limit = sfConfig::get('app_hits_per_page');
+            $request->limit = $this->config('app_hits_per_page');
         }
 
         $this->resource = $this->getRoute()->resource;
@@ -93,7 +87,7 @@ class storageManageActions extends AhgActions
         $this->foundcount = BasePeer::doCount($c2)->fetchColumn(0);
     }
 
-    public function executeHoldingsReportExport(sfWebRequest $request)
+    public function executeHoldingsReportExport($request)
     {
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
@@ -104,7 +98,7 @@ class storageManageActions extends AhgActions
             if ($this->form->isValid()) {
                 if (empty($request->includeEmpty) && empty($request->includeDescriptions) && empty($request->includeAccessions)) {
                     $message = $this->context->i18n->__('Please check one or more of the export options.');
-                    $this->context->user->setFlash('error', $message);
+                    $this->getUser()->setFlash('error', $message);
 
                     $this->redirect(['module' => 'physicalobject', 'action' => 'holdingsReportExport']);
                 } else {
@@ -147,6 +141,6 @@ class storageManageActions extends AhgActions
             $messageParams
         );
 
-        $this->context->user->setFlash('notice', $message);
+        $this->getUser()->setFlash('notice', $message);
     }
 }

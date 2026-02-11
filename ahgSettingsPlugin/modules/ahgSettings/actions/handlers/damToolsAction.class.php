@@ -1,19 +1,20 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * DAM Tools Action
  */
-class damToolsAction extends sfAction
+class damToolsAction extends AhgController
 {
     public function execute($request)
     {
         // Check authentication
-        if (!$this->context->user->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
 
         // Check admin access
-        if (!$this->context->user->hasCredential('administrator')) {
+        if (!$this->getUser()->hasCredential('administrator')) {
             $this->forward('admin', 'secure');
         }
     }

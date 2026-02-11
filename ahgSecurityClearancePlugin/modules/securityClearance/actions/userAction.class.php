@@ -1,13 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class securityClearanceUserAction extends sfAction
+class securityClearanceUserAction extends AhgController
 {
     public function execute($request)
     {
         $slug = $request->getParameter('slug');
-        $culture = $this->getUser()->getCulture();
+        $culture = $this->culture();
 
         // Get user by slug using Laravel Query Builder
         $this->user = DB::table('user as u')

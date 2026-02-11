@@ -1,6 +1,7 @@
 <?php
 
-class apiv2ConditionsReadAction extends AhgApiAction
+use AtomFramework\Http\Controllers\AhgApiController;
+class apiv2ConditionsReadAction extends AhgApiController
 {
     public function GET($request)
     {
