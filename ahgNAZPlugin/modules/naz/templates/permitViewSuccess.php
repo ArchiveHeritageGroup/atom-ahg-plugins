@@ -78,10 +78,10 @@
                 <div class="card-header"><h5 class="mb-0">Review Actions</h5></div>
                 <div class="card-body">
                     <form method="post">
-                        <button type="submit" name="action" value="approve" class="btn btn-success me-2">
+                        <button type="submit" name="form_action" value="approve" class="btn btn-success me-2">
                             <i class="fas fa-check me-1"></i> Approve
                         </button>
-                        <button type="submit" name="action" value="reject" class="btn btn-danger">
+                        <button type="submit" name="form_action" value="reject" class="btn btn-danger">
                             <i class="fas fa-times me-1"></i> Reject
                         </button>
                     </form>

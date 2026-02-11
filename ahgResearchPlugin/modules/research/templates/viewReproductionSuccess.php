@@ -16,7 +16,7 @@
     </div>
     <?php if ($reproductionRequest->status === 'draft'): ?>
         <form method="post" class="d-inline">
-            <input type="hidden" name="action" value="submit">
+            <input type="hidden" name="form_action" value="submit">
             <button type="submit" class="btn btn-success" <?php echo empty($items) ? 'disabled' : ''; ?>>
                 <i class="fas fa-paper-plane me-1"></i> Submit Request
             </button>
@@ -112,7 +112,7 @@
                                     <?php if ($reproductionRequest->status === 'draft'): ?>
                                         <td>
                                             <form method="post" class="d-inline">
-                                                <input type="hidden" name="action" value="remove_item">
+                                                <input type="hidden" name="form_action" value="remove_item">
                                                 <input type="hidden" name="item_id" value="<?php echo $item->id; ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
                                             </form>
@@ -203,7 +203,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="add_item">
+                <input type="hidden" name="form_action" value="add_item">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Item</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

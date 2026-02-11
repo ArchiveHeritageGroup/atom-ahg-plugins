@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-tasks me-2"></i>Workflow Dashboard</h1>
         <?php if ($isAdmin): ?>
-            <a href="<?php echo url_for('workflow/admin') ?>" class="btn btn-outline-primary">
+            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="btn btn-outline-primary">
                 <i class="fas fa-cog me-1"></i>Manage Workflows
             </a>
         <?php endif ?>
@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
-                    <a href="<?php echo url_for('workflow/myTasks') ?>" class="text-white text-decoration-none small">
+                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>" class="text-white text-decoration-none small">
                         View all <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
-                    <a href="<?php echo url_for('workflow/pool') ?>" class="text-dark text-decoration-none small">
+                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>" class="text-dark text-decoration-none small">
                         Browse pool <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -95,7 +95,7 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>My Tasks</h5>
-                    <a href="<?php echo url_for('workflow/myTasks') ?>" class="btn btn-sm btn-outline-secondary">View All</a>
+                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>" class="btn btn-sm btn-outline-secondary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($myTasks)): ?>
@@ -105,8 +105,8 @@
                         </div>
                     <?php else: ?>
                         <div class="list-group list-group-flush">
-                            <?php foreach (array_slice($myTasks, 0, 5) as $task): ?>
-                                <a href="<?php echo url_for("workflow/task/{$task->id}") ?>" class="list-group-item list-group-item-action">
+                            <?php foreach (array_slice(sfOutputEscaper::unescape($myTasks), 0, 5) as $task): ?>
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'viewTask', 'id' => $task->id]) ?>" class="list-group-item list-group-item-action">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-1"><?php echo esc_entities($task->object_title ?? "Object #{$task->object_id}") ?></h6>
@@ -131,7 +131,7 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Available Tasks</h5>
-                    <a href="<?php echo url_for('workflow/pool') ?>" class="btn btn-sm btn-outline-secondary">Browse Pool</a>
+                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>" class="btn btn-sm btn-outline-secondary">Browse Pool</a>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($poolTasks)): ?>
@@ -141,7 +141,7 @@
                         </div>
                     <?php else: ?>
                         <div class="list-group list-group-flush">
-                            <?php foreach (array_slice($poolTasks, 0, 5) as $task): ?>
+                            <?php foreach (array_slice(sfOutputEscaper::unescape($poolTasks), 0, 5) as $task): ?>
                                 <div class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
@@ -150,7 +150,7 @@
                                                 <?php echo esc_entities($task->step_name) ?>
                                             </small>
                                         </div>
-                                        <a href="<?php echo url_for("workflow/task/{$task->id}/claim") ?>" class="btn btn-sm btn-primary">
+                                        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'claimTask', 'id' => $task->id]) ?>" class="btn btn-sm btn-primary">
                                             Claim
                                         </a>
                                     </div>
@@ -167,7 +167,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
-            <a href="<?php echo url_for('workflow/history') ?>" class="btn btn-sm btn-outline-secondary">View All</a>
+            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'history']) ?>" class="btn btn-sm btn-outline-secondary">View All</a>
         </div>
         <div class="card-body p-0">
             <?php if (empty($recentActivity)): ?>

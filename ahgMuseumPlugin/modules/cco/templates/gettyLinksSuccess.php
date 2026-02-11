@@ -151,7 +151,7 @@
           <?php if ($link->status !== 'confirmed'): ?>
           <form method="post" style="display: inline;">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
-            <button type="submit" name="action" value="confirm" class="btn btn-sm btn-success">
+            <button type="submit" name="form_action" value="confirm" class="btn btn-sm btn-success">
               <?php echo __('Confirm'); ?>
             </button>
           </form>
@@ -159,7 +159,7 @@
           <?php if ($link->status !== 'rejected'): ?>
           <form method="post" style="display: inline;">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
-            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">
+            <button type="submit" name="form_action" value="reject" class="btn btn-sm btn-danger">
               <?php echo __('Reject'); ?>
             </button>
           </form>

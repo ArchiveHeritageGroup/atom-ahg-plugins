@@ -61,7 +61,7 @@
                                 <td>
                                     <?php if ($collab->role !== 'owner'): ?>
                                         <form method="post" class="d-inline" onsubmit="return confirm('Remove this collaborator?')">
-                                            <input type="hidden" name="action" value="remove">
+                                            <input type="hidden" name="form_action" value="remove">
                                             <input type="hidden" name="collaborator_id" value="<?php echo $collab->id; ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-times"></i>

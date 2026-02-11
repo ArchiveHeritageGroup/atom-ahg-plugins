@@ -62,7 +62,7 @@
                             <td>
                                 <?php if ($key->is_active): ?>
                                     <form method="post" class="d-inline" onsubmit="return confirm('Revoke this API key? This cannot be undone.')">
-                                        <input type="hidden" name="action" value="revoke">
+                                        <input type="hidden" name="form_action" value="revoke">
                                         <input type="hidden" name="key_id" value="<?php echo $key->id; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
                                     </form>
@@ -119,7 +119,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="generate">
+                <input type="hidden" name="form_action" value="generate">
                 <div class="modal-header">
                     <h5 class="modal-title">Generate API Key</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

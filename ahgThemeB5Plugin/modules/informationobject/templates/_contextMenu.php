@@ -42,7 +42,7 @@ if (isset($resource)) {
   $hasOais = isPluginActive('ahgPreservationPlugin');
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
-  
+
   // Only show section if at least one plugin is enabled
   if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
 ?>
@@ -59,7 +59,7 @@ if (isset($resource)) {
     <li><?php echo link_to(__('Spectrum data'), '@spectrum_index?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
-    <li><?php echo link_to(__('Heritage Assets'), '@spectrum_grap_dashboard?slug=' . $resourceSlug); ?></li>
+    <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><?php echo __('Heritage Assets'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
     <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'preservation', 'action' => 'packages']); ?></li>

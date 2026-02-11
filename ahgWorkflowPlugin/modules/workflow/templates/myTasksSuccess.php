@@ -3,7 +3,7 @@
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-clipboard-list me-2"></i>My Tasks</h1>
-        <a href="<?php echo url_for('workflow/dashboard') ?>" class="btn btn-outline-secondary">
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Dashboard
         </a>
     </div>
@@ -11,17 +11,17 @@
     <!-- Filter Tabs -->
     <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
-            <a class="nav-link <?php echo !$currentStatus ? 'active' : '' ?>" href="<?php echo url_for('workflow/myTasks') ?>">
+            <a class="nav-link <?php echo !$currentStatus ? 'active' : '' ?>" href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>">
                 All Active
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $currentStatus === 'claimed' ? 'active' : '' ?>" href="<?php echo url_for('workflow/myTasks?status=claimed') ?>">
+            <a class="nav-link <?php echo $currentStatus === 'claimed' ? 'active' : '' ?>" href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks', 'status' => 'claimed']) ?>">
                 Claimed
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $currentStatus === 'in_progress' ? 'active' : '' ?>" href="<?php echo url_for('workflow/myTasks?status=in_progress') ?>">
+            <a class="nav-link <?php echo $currentStatus === 'in_progress' ? 'active' : '' ?>" href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks', 'status' => 'in_progress']) ?>">
                 In Progress
             </a>
         </li>
@@ -31,7 +31,7 @@
         <div class="text-center text-muted py-5">
             <i class="fas fa-inbox fa-4x mb-3 opacity-50"></i>
             <h4>No tasks assigned to you</h4>
-            <p>Browse the <a href="<?php echo url_for('workflow/pool') ?>">task pool</a> to claim available tasks.</p>
+            <p>Browse the <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>">task pool</a> to claim available tasks.</p>
         </div>
     <?php else: ?>
         <div class="table-responsive">
@@ -51,7 +51,7 @@
                     <?php foreach ($tasks as $task): ?>
                         <tr class="<?php echo ($task->due_date && $task->due_date < date('Y-m-d')) ? 'table-danger' : '' ?>">
                             <td>
-                                <a href="<?php echo url_for("workflow/task/{$task->id}") ?>">
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'viewTask', 'id' => $task->id]) ?>">
                                     <?php echo esc_entities($task->object_title ?? "Object #{$task->object_id}") ?>
                                 </a>
                             </td>
@@ -83,7 +83,7 @@
                                 ?>"><?php echo ucfirst($task->status) ?></span>
                             </td>
                             <td>
-                                <a href="<?php echo url_for("workflow/task/{$task->id}") ?>" class="btn btn-sm btn-primary">
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'viewTask', 'id' => $task->id]) ?>" class="btn btn-sm btn-primary">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                             </td>

@@ -126,7 +126,7 @@
                                         </button>
                                         <?php if ($seat->is_active): ?>
                                         <form method="post" class="d-inline" onsubmit="return confirm('Deactivate this seat?')">
-                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="form_action" value="delete">
                                             <input type="hidden" name="seat_id" value="<?php echo $seat->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-ban"></i>
@@ -152,7 +152,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="bulk_create">
+                        <input type="hidden" name="form_action" value="bulk_create">
                         <div class="mb-3">
                             <label class="form-label">Pattern</label>
                             <input type="text" name="pattern" class="form-control" placeholder="e.g., A1-A10 or 1-20" required>
@@ -207,7 +207,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" id="seatForm">
-                <input type="hidden" name="action" id="seatAction" value="create">
+                <input type="hidden" name="form_action" id="seatAction" value="create">
                 <input type="hidden" name="seat_id" id="seatId">
                 <div class="modal-header">
                     <h5 class="modal-title" id="seatModalTitle">Add Seat</h5>

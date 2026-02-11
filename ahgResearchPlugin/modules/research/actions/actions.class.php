@@ -1410,7 +1410,7 @@ class researchActions extends AhgActions
         ]);
 
         // Handle project creation
-        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
             try {
                 $projectId = $projectService->createProject($this->researcher->id, [
                     'title' => $request->getParameter('title'),
@@ -1554,7 +1554,7 @@ class researchActions extends AhgActions
         $this->collaborators = $projectService->getCollaborators($projectId);
 
         // Handle remove collaborator
-        if ($request->isMethod('post') && $request->getParameter('action') === 'remove') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'remove') {
             $collaboratorId = (int) $request->getParameter('collaborator_id');
             DB::table('research_project_collaborator')
                 ->where('id', $collaboratorId)
@@ -1735,7 +1735,7 @@ class researchActions extends AhgActions
 
         // Handle item actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add_item') {
                 $objectId = (int) $request->getParameter('object_id');
@@ -1803,7 +1803,7 @@ class researchActions extends AhgActions
         $this->bibliographies = $bibliographyService->getBibliographies($this->researcher->id);
 
         // Handle create
-        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
             try {
                 $bibliographyId = $bibliographyService->createBibliography($this->researcher->id, [
                     'name' => $request->getParameter('name'),
@@ -1851,7 +1851,7 @@ class researchActions extends AhgActions
 
         // Handle actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add_entry') {
                 $objectId = (int) $request->getParameter('object_id');
@@ -1952,7 +1952,7 @@ class researchActions extends AhgActions
         $this->workspaces = $collaborationService->getWorkspaces($this->researcher->id);
 
         // Handle create
-        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
             $result = $collaborationService->createWorkspace($this->researcher->id, [
                 'name' => $request->getParameter('name'),
                 'description' => $request->getParameter('description'),
@@ -1999,7 +1999,7 @@ class researchActions extends AhgActions
 
         // Handle actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'invite') {
                 $email = trim($request->getParameter('email'));
@@ -2099,7 +2099,7 @@ class researchActions extends AhgActions
         $this->apiKeys = $this->service->getApiKeys($this->researcher->id);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'generate') {
                 $name = trim($request->getParameter('name', 'API Key'));
@@ -2157,7 +2157,7 @@ class researchActions extends AhgActions
 
         // Handle status updates
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $requestIds = $request->getParameter('request_ids', []);
             $userId = $this->getUser()->getAttribute('user_id');
 
@@ -2237,7 +2237,7 @@ class researchActions extends AhgActions
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'create') {
                 $seatService->createSeat([
@@ -2317,7 +2317,7 @@ class researchActions extends AhgActions
         $this->currentAssignment = $seatService->getSeatAssignment($bookingId);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'assign') {
@@ -2400,7 +2400,7 @@ class researchActions extends AhgActions
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'create') {
                 $equipmentService->createEquipment([
@@ -2487,7 +2487,7 @@ class researchActions extends AhgActions
         $this->bookedEquipment = $equipmentService->getBookingsForRoomBooking($bookingId);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'book') {
                 $equipmentId = (int) $request->getParameter('equipment_id');
@@ -2550,7 +2550,7 @@ class researchActions extends AhgActions
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'register') {
@@ -2616,7 +2616,7 @@ class researchActions extends AhgActions
             ->get()
             ->toArray();
 
-        if ($request->isMethod('post') && $request->getParameter('action') === 'create') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
             $activityId = DB::table('research_activity')->insertGetId([
                 'activity_type' => $request->getParameter('activity_type'),
                 'title' => $request->getParameter('title'),
@@ -2678,7 +2678,7 @@ class researchActions extends AhgActions
             ->toArray();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'confirm' && $this->getUser()->isAdministrator()) {

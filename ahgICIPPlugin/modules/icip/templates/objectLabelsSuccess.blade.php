@@ -52,7 +52,7 @@
                                                 </div>
                                             </div>
                                             <form method="post" class="d-inline" onsubmit="return confirm('Remove this label?');">
-                                                <input type="hidden" name="action" value="remove">
+                                                <input type="hidden" name="form_action" value="remove">
                                                 <input type="hidden" name="label_id" value="{{ $label->id }}">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
                                                     <i class="bi bi-x-lg"></i>
@@ -74,7 +74,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="form_action" value="add">
 
                         <div class="mb-3">
                             <label class="form-label">Label Type <span class="text-danger">*</span></label>

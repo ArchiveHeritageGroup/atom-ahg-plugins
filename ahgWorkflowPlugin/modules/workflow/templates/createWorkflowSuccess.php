@@ -3,8 +3,8 @@
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard') ?>">Workflow</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/admin') ?>">Admin</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>">Workflow</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>">Admin</a></li>
             <li class="breadcrumb-item active">Create Workflow</li>
         </ol>
     </nav>
@@ -39,10 +39,16 @@
                             </div>
                             <div class="col-md-6" id="scope_id_container" style="display:none">
                                 <label for="scope_id" class="form-label">Select Target</label>
-                                <select class="form-select" id="scope_id" name="scope_id">
-                                    <option value="">Select...</option>
+                                <select class="form-select" id="scope_id_repo" name="scope_id" style="display:none">
+                                    <option value="">Select repository...</option>
                                     <?php foreach ($repositories as $repo): ?>
                                         <option value="<?php echo $repo->id ?>"><?php echo esc_entities($repo->name) ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                                <select class="form-select" id="scope_id_collection" name="scope_id" style="display:none">
+                                    <option value="">Select collection...</option>
+                                    <?php foreach ($collections as $col): ?>
+                                        <option value="<?php echo $col->id ?>"><?php echo esc_entities($col->name) ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
@@ -94,7 +100,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i>Create Workflow
                             </button>
-                            <a href="<?php echo url_for('workflow/admin') ?>" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -120,6 +126,26 @@
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('scope_type').addEventListener('change', function() {
     var container = document.getElementById('scope_id_container');
-    container.style.display = this.value === 'global' ? 'none' : '';
+    var repoSelect = document.getElementById('scope_id_repo');
+    var colSelect = document.getElementById('scope_id_collection');
+    if (this.value === 'global') {
+        container.style.display = 'none';
+        repoSelect.style.display = 'none';
+        colSelect.style.display = 'none';
+        repoSelect.disabled = true;
+        colSelect.disabled = true;
+    } else if (this.value === 'repository') {
+        container.style.display = '';
+        repoSelect.style.display = '';
+        repoSelect.disabled = false;
+        colSelect.style.display = 'none';
+        colSelect.disabled = true;
+    } else {
+        container.style.display = '';
+        colSelect.style.display = '';
+        colSelect.disabled = false;
+        repoSelect.style.display = 'none';
+        repoSelect.disabled = true;
+    }
 });
 </script>

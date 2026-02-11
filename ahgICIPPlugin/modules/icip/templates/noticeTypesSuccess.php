@@ -84,7 +84,7 @@
                                         </td>
                                         <td>
                                             <form method="post" class="d-inline">
-                                                <input type="hidden" name="action" value="toggle">
+                                                <input type="hidden" name="form_action" value="toggle">
                                                 <input type="hidden" name="type_id" value="<?php echo $type->id ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-<?php echo $type->is_active ? 'warning' : 'success' ?>" title="<?php echo $type->is_active ? 'Deactivate' : 'Activate' ?>">
                                                     <i class="bi bi-<?php echo $type->is_active ? 'pause' : 'play' ?>"></i>
@@ -106,7 +106,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="form_action" value="add">
 
                         <div class="row">
                             <div class="col-md-4 mb-3">

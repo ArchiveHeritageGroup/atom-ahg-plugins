@@ -3,7 +3,7 @@
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-history me-2"></i>Workflow History</h1>
-        <a href="<?php echo url_for('workflow/dashboard') ?>" class="btn btn-outline-secondary">
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Dashboard
         </a>
     </div>
@@ -49,7 +49,7 @@
                             <td><?php echo esc_entities($entry->workflow_name ?? '-') ?></td>
                             <td>
                                 <?php if ($entry->object_id): ?>
-                                    <a href="<?php echo url_for("workflow/history/{$entry->object_id}") ?>">
+                                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'objectHistory', 'object_id' => $entry->object_id]) ?>">
                                         <?php echo esc_entities($entry->object_title ?? "Object #{$entry->object_id}") ?>
                                     </a>
                                 <?php else: ?>

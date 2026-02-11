@@ -61,7 +61,7 @@
                                         <?php endif; ?>
                                     </div>
                                     <form method="post" class="d-inline">
-                                        <input type="hidden" name="action" value="remove_entry">
+                                        <input type="hidden" name="form_action" value="remove_entry">
                                         <input type="hidden" name="entry_id" value="<?php echo $entry->id; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this entry?')">
                                             <i class="fas fa-times"></i>
@@ -100,7 +100,7 @@
             <div class="card-header"><h6 class="mb-0"><i class="fas fa-cog me-2"></i>Actions</h6></div>
             <div class="card-body">
                 <form method="post" onsubmit="return confirm('Are you sure you want to delete this bibliography?')">
-                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="form_action" value="delete">
                     <button type="submit" class="btn btn-outline-danger w-100">
                         <i class="fas fa-trash me-1"></i> Delete Bibliography
                     </button>
@@ -115,7 +115,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="add_entry">
+                <input type="hidden" name="form_action" value="add_entry">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Entry from Archive</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

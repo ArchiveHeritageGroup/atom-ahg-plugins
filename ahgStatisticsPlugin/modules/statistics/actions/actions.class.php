@@ -242,7 +242,7 @@ class statisticsActions extends AhgActions
         $service = $this->getService();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add') {
                 $service->addBot([

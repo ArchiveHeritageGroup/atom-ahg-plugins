@@ -3,7 +3,7 @@
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-layer-group me-2"></i>Task Pool</h1>
-        <a href="<?php echo url_for('workflow/dashboard') ?>" class="btn btn-outline-secondary">
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Dashboard
         </a>
     </div>
@@ -39,10 +39,10 @@
                         </div>
                         <div class="card-footer bg-transparent">
                             <div class="d-grid gap-2">
-                                <a href="<?php echo url_for("workflow/task/{$task->id}/claim") ?>" class="btn btn-primary">
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'claimTask', 'id' => $task->id]) ?>" class="btn btn-primary">
                                     <i class="fas fa-hand-paper me-1"></i>Claim Task
                                 </a>
-                                <a href="<?php echo url_for("workflow/task/{$task->id}") ?>" class="btn btn-outline-secondary btn-sm">
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'viewTask', 'id' => $task->id]) ?>" class="btn btn-outline-secondary btn-sm">
                                     <i class="fas fa-eye me-1"></i>View Details
                                 </a>
                             </div>

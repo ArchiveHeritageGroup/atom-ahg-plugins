@@ -53,14 +53,14 @@
                                         </td>
                                         <td>
                                             <form method="post" class="d-inline">
-                                                <input type="hidden" name="action" value="toggle">
+                                                <input type="hidden" name="form_action" value="toggle">
                                                 <input type="hidden" name="id" value="<?php echo $bot->id ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary" title="Toggle">
                                                     <i class="fas fa-toggle-<?php echo $bot->is_active ? 'on' : 'off' ?>"></i>
                                                 </button>
                                             </form>
                                             <form method="post" class="d-inline" onsubmit="return confirm('Delete this bot pattern?');">
-                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="form_action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $bot->id ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                                     <i class="fas fa-trash"></i>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="form_action" value="add">
 
                         <div class="mb-3">
                             <label for="name" class="form-label">Name *</label>

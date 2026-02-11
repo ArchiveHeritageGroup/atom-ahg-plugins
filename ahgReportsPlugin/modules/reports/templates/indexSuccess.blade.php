@@ -1,4 +1,4 @@
-@extends('layout_2col')
+@extends('layouts.page')
 
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
@@ -47,6 +47,7 @@ $hasDedupe = isPluginActive('ahgDedupePlugin');
 $hasForms = isPluginActive('ahgFormsPlugin');
 $hasDoi = isPluginActive('ahgDoiPlugin');
 $hasHeritage2 = isPluginActive('ahgHeritagePlugin');
+$hasWorkflow = isPluginActive('ahgWorkflowPlugin');
 // Zimbabwe Compliance Plugins
 $hasCDPA = isPluginActive('ahgCDPAPlugin');
 $hasNAZ = isPluginActive('ahgNAZPlugin');
@@ -236,6 +237,11 @@ $canManage = $isAdmin || $isEditor;
                 <ul class="list-group list-group-flush">
                     @if ($hasSpectrum)
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Spectrum Workflow') }}</a></li>
+                    @endif
+                    @if ($hasWorkflow)
+                    <li class="list-group-item"><a href="/workflow"><i class="fas fa-tasks me-2 text-muted"></i>{{ __('Approval Workflow') }}</a></li>
+                    <li class="list-group-item"><a href="/workflow/my-tasks"><i class="fas fa-clipboard-check me-2 text-muted"></i>{{ __('My Workflow Tasks') }}</a></li>
+                    <li class="list-group-item"><a href="/workflow/pool"><i class="fas fa-inbox me-2 text-muted"></i>{{ __('Task Pool') }}</a></li>
                     @endif
                     @if ($hasGrap)
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'grapCompliance', 'action' => 'dashboard']) }}"><i class="fas fa-balance-scale me-2 text-muted"></i>{{ __('GRAP 103 Dashboard') }}</a></li>

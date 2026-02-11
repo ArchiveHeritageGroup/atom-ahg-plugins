@@ -131,7 +131,7 @@ $total = $flagData['total'] ?? 0;
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="action" value="resolve">
+                    <input type="hidden" name="form_action" value="resolve">
                     <input type="hidden" name="flag_id" id="resolve_flag_id">
                     <div class="mb-3">
                         <label for="resolution_notes" class="form-label">Resolution Notes</label>

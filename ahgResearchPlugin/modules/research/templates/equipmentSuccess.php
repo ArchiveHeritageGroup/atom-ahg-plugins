@@ -168,7 +168,7 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" id="equipmentForm">
-                <input type="hidden" name="action" id="equipmentAction" value="create">
+                <input type="hidden" name="form_action" id="equipmentAction" value="create">
                 <input type="hidden" name="equipment_id" id="equipmentId">
                 <div class="modal-header">
                     <h5 class="modal-title" id="equipmentModalTitle">Add Equipment</h5>
@@ -258,7 +258,7 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="maintenance">
+                <input type="hidden" name="form_action" value="maintenance">
                 <input type="hidden" name="equipment_id" id="maintenanceEquipmentId">
                 <div class="modal-header">
                     <h5 class="modal-title">Log Maintenance</h5>

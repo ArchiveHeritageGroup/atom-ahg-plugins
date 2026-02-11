@@ -31,7 +31,7 @@
             </div>
             <div class="card-body">
                 <form method="post" action="">
-                    <input type="hidden" name="action" value="<?php echo $package ? 'update' : 'create'; ?>">
+                    <input type="hidden" name="form_action" value="<?php echo $package ? 'update' : 'create'; ?>">
 
                     <div class="mb-3">
                         <label class="form-label"><?php echo __('Package Name'); ?> <span class="text-danger">*</span></label>

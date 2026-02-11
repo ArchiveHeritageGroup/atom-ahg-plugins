@@ -4,10 +4,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-cog me-2"></i>Workflow Administration</h1>
         <div>
-            <a href="<?php echo url_for('workflow/admin/create') ?>" class="btn btn-primary">
+            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'createWorkflow']) ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Create Workflow
             </a>
-            <a href="<?php echo url_for('workflow/dashboard') ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Dashboard
             </a>
         </div>
@@ -31,7 +31,7 @@
             <i class="fas fa-project-diagram fa-4x mb-3 opacity-50"></i>
             <h4>No workflows configured</h4>
             <p>Create your first workflow to get started.</p>
-            <a href="<?php echo url_for('workflow/admin/create') ?>" class="btn btn-primary btn-lg">
+            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'createWorkflow']) ?>" class="btn btn-primary btn-lg">
                 <i class="fas fa-plus me-1"></i>Create Workflow
             </a>
         </div>
@@ -52,7 +52,7 @@
                     <?php foreach ($workflows as $wf): ?>
                         <tr>
                             <td>
-                                <a href="<?php echo url_for("workflow/admin/edit/{$wf->id}") ?>">
+                                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editWorkflow', 'id' => $wf->id]) ?>">
                                     <strong><?php echo esc_entities($wf->name) ?></strong>
                                 </a>
                                 <?php if ($wf->description): ?>
@@ -80,10 +80,10 @@
                             </td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="<?php echo url_for("workflow/admin/edit/{$wf->id}") ?>" class="btn btn-sm btn-outline-primary">
+                                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editWorkflow', 'id' => $wf->id]) ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="<?php echo url_for("workflow/admin/delete/{$wf->id}") ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this workflow?');">
+                                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteWorkflow', 'id' => $wf->id]) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this workflow?');">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>

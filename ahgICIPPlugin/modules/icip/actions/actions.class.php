@@ -649,7 +649,7 @@ class icipActions extends AhgActions
             ->toArray();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $typeId = $request->getParameter('type_id');
 
             if ($action === 'add') {
@@ -923,7 +923,7 @@ class icipActions extends AhgActions
         $this->notices = ahgICIPService::getObjectNotices($this->object->id);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add') {
                 DB::table('icip_cultural_notice')->insert([
@@ -980,7 +980,7 @@ class icipActions extends AhgActions
         $this->labels = ahgICIPService::getObjectTKLabels($this->object->id);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add') {
                 DB::table('icip_tk_label')->insertOrIgnore([
@@ -1030,7 +1030,7 @@ class icipActions extends AhgActions
         $this->restrictions = ahgICIPService::getObjectRestrictions($this->object->id);
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             if ($action === 'add') {
                 DB::table('icip_access_restriction')->insert([

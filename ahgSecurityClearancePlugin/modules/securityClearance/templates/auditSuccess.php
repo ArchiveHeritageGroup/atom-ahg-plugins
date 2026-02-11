@@ -21,13 +21,13 @@
         </div>
         <div class="col-md-2">
           <label class="form-label"><?php echo __('Action') ?></label>
-          <select name="action" class="form-select">
+          <select name="form_action" class="form-select">
             <option value=""><?php echo __('All') ?></option>
-            <option value="view" <?php echo ('view' === ($filters['action'] ?? '')) ? 'selected' : '' ?>><?php echo __('View') ?></option>
-            <option value="download" <?php echo ('download' === ($filters['action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Download') ?></option>
-            <option value="print" <?php echo ('print' === ($filters['action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Print') ?></option>
-            <option value="classify" <?php echo ('classify' === ($filters['action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Classify') ?></option>
-            <option value="access_denied" <?php echo ('access_denied' === ($filters['action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Denied') ?></option>
+            <option value="view" <?php echo ('view' === ($filters['form_action'] ?? '')) ? 'selected' : '' ?>><?php echo __('View') ?></option>
+            <option value="download" <?php echo ('download' === ($filters['form_action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Download') ?></option>
+            <option value="print" <?php echo ('print' === ($filters['form_action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Print') ?></option>
+            <option value="classify" <?php echo ('classify' === ($filters['form_action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Classify') ?></option>
+            <option value="access_denied" <?php echo ('access_denied' === ($filters['form_action'] ?? '')) ? 'selected' : '' ?>><?php echo __('Denied') ?></option>
           </select>
         </div>
         <div class="col-md-2">

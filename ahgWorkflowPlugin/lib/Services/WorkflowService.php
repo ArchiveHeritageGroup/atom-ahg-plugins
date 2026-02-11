@@ -987,7 +987,7 @@ class WorkflowService
         if ($step->allowed_group_ids) {
             $allowedGroups = json_decode($step->allowed_group_ids, true) ?: [];
             if (!empty($allowedGroups)) {
-                $userGroups = DB::table('aclUserGroup')->where('userId', $userId)->pluck('groupId')->toArray();
+                $userGroups = DB::table('acl_user_group')->where('user_id', $userId)->pluck('group_id')->toArray();
                 if (empty(array_intersect($allowedGroups, $userGroups))) {
                     return false;
                 }
@@ -1003,16 +1003,18 @@ class WorkflowService
     protected function getUserRoleAndClearance(int $userId): array
     {
         // Get roles
-        $roles = DB::table('aclUserGroup')
-            ->where('userId', $userId)
-            ->pluck('groupId')
+        $roles = DB::table('acl_user_group')
+            ->where('user_id', $userId)
+            ->pluck('group_id')
             ->toArray();
 
         // Get clearance level from ahgSecurityClearancePlugin
         $clearance = DB::table('user_security_clearance')
-            ->where('user_id', $userId)
-            ->where('is_active', 1)
-            ->orderBy('clearance_level', 'desc')
+            ->join('security_classification', 'security_classification.id', '=', 'user_security_clearance.classification_id')
+            ->where('user_security_clearance.user_id', $userId)
+            ->where('security_classification.active', 1)
+            ->orderBy('security_classification.level', 'desc')
+            ->select('security_classification.level as clearance_level')
             ->first();
 
         return [
@@ -1043,9 +1045,9 @@ class WorkflowService
 
         // Filter by role if required
         if ($step->required_role_id) {
-            $userIds = DB::table('aclUserGroup')
-                ->where('groupId', $step->required_role_id)
-                ->pluck('userId')
+            $userIds = DB::table('acl_user_group')
+                ->where('group_id', $step->required_role_id)
+                ->pluck('user_id')
                 ->toArray();
             $query->whereIn('id', $userIds);
         }
@@ -1053,9 +1055,10 @@ class WorkflowService
         // Filter by clearance if required
         if ($step->required_clearance_level) {
             $clearedUserIds = DB::table('user_security_clearance')
-                ->where('clearance_level', '>=', $step->required_clearance_level)
-                ->where('is_active', 1)
-                ->pluck('user_id')
+                ->join('security_classification', 'security_classification.id', '=', 'user_security_clearance.classification_id')
+                ->where('security_classification.level', '>=', $step->required_clearance_level)
+                ->where('security_classification.active', 1)
+                ->pluck('user_security_clearance.user_id')
                 ->toArray();
             $query->whereIn('id', $clearedUserIds);
         }

@@ -19,6 +19,7 @@ class imageflowComponent extends sfComponent
         }
 
         $this->thumbnails = [];
+        $this->thumbnailMeta = [];
 
         // Set limit (null for no limit)
         if (!isset($request->showFullImageflow) || 'true' != $request->showFullImageflow) {
@@ -48,7 +49,35 @@ class imageflowComponent extends sfComponent
                 $query->limit($this->limit);
             }
 
-            $rows = $query->select('do.id')->get();
+            $rows = $query->select('do.id', 'do.object_id')->get();
+
+            // Pre-fetch slugs for all information objects
+            $objectIds = $rows->pluck('object_id')->toArray();
+            $slugMap = [];
+            if (!empty($objectIds)) {
+                $slugRows = DB::table('slug')
+                    ->whereIn('object_id', $objectIds)
+                    ->select('object_id', 'slug')
+                    ->get();
+                foreach ($slugRows as $sr) {
+                    $slugMap[$sr->object_id] = $sr->slug;
+                }
+            }
+
+            // Pre-fetch titles for all information objects
+            $titleMap = [];
+            if (!empty($objectIds)) {
+                $titleRows = DB::table('information_object_i18n')
+                    ->whereIn('id', $objectIds)
+                    ->where('culture', '=', 'en')
+                    ->select('id', 'title')
+                    ->get();
+                foreach ($titleRows as $tr) {
+                    $titleMap[$tr->id] = $tr->title;
+                }
+            }
+
+            $this->thumbnailMeta = [];
 
             foreach ($rows as $row) {
                 $item = QubitDigitalObject::getById($row->id);
@@ -81,6 +110,10 @@ class imageflowComponent extends sfComponent
                 }
 
                 $this->thumbnails[] = $thumbnail;
+                $this->thumbnailMeta[] = [
+                    'slug' => $slugMap[$row->object_id] ?? null,
+                    'title' => $titleMap[$row->object_id] ?? '',
+                ];
             }
         } catch (\Exception $e) {
             error_log('ahgDisplayPlugin imageflow error: ' . $e->getMessage());
@@ -149,6 +182,23 @@ class imageflowComponent extends sfComponent
             }
 
             $this->thumbnails[] = $thumbnail;
+
+            // Build meta from Propel objects
+            $infoObj = $item->object;
+            $slug = null;
+            $title = '';
+            if ($infoObj) {
+                try {
+                    $slug = $infoObj->slug;
+                } catch (\Exception $e) {
+                    $slug = null;
+                }
+                $title = (string) $infoObj;
+            }
+            $this->thumbnailMeta[] = [
+                'slug' => $slug,
+                'title' => $title,
+            ];
         }
     }
 

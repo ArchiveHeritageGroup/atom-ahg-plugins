@@ -1036,7 +1036,7 @@ class heritageActions extends AhgActions
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
         // Handle remove
-        if ($request->isMethod('post') && $request->getParameter('action') === 'remove') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'remove') {
             $id = (int) $request->getParameter('embargo_id');
             $controller->removeEmbargo($id);
             $this->getUser()->setFlash('notice', 'Embargo removed');
@@ -1073,7 +1073,7 @@ class heritageActions extends AhgActions
         $controller = new \AtomFramework\Heritage\Controllers\Api\AccessController();
 
         // Handle resolve
-        if ($request->isMethod('post') && $request->getParameter('action') === 'resolve') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'resolve') {
             $id = (int) $request->getParameter('flag_id');
             $userId = $this->context->user->getAttribute('user_id');
             $notes = $request->getParameter('resolution_notes');
@@ -1152,7 +1152,7 @@ class heritageActions extends AhgActions
         // Handle POST
         if ($request->isMethod('post')) {
             $data = $request->getParameterHolder()->getAll();
-            unset($data['module'], $data['action'], $data['slug']);
+            unset($data['module'], $data['action'], $data['form_action'], $data['slug']);
 
             $userId = $this->context->user->getAttribute('user_id');
             $response = $controller->updateItem($object->id, $data, $userId);
@@ -1331,7 +1331,7 @@ class heritageActions extends AhgActions
         $controller = new \AtomFramework\Heritage\Controllers\Api\AnalyticsController();
 
         // Handle dismiss
-        if ($request->isMethod('post') && $request->getParameter('action') === 'dismiss') {
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'dismiss') {
             $alertId = (int) $request->getParameter('alert_id');
             $userId = $this->context->user->getAttribute('user_id');
             $controller->dismissAlert($alertId, $userId);

@@ -271,7 +271,7 @@ class nazActions extends AhgActions
 
         // Handle actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action_type');
+            $action = $request->getParameter('form_action');
             $service = $this->getService();
             $userId = $this->getUser()->getAttribute('user_id');
 

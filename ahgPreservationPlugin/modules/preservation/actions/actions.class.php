@@ -867,7 +867,7 @@ class preservationActions extends AhgActions
 
         // Handle form submission
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
 
             try {
                 if ('create' === $action) {

@@ -3,8 +3,8 @@
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard') ?>">Workflow</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/admin') ?>">Admin</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>">Workflow</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>">Admin</a></li>
             <li class="breadcrumb-item active">Edit: <?php echo esc_entities($workflow->name) ?></li>
         </ol>
     </nav>
@@ -58,11 +58,19 @@
                             </div>
                             <div class="col-md-8" id="scope_id_container" style="<?php echo $workflow->scope_type === 'global' ? 'display:none' : '' ?>">
                                 <label for="scope_id" class="form-label">Scope Target</label>
-                                <select class="form-select" id="scope_id" name="scope_id">
-                                    <option value="">Select...</option>
+                                <select class="form-select" id="scope_id_repo" name="scope_id" style="<?php echo $workflow->scope_type !== 'repository' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'repository' ? 'disabled' : '' ?>>
+                                    <option value="">Select repository...</option>
                                     <?php foreach ($repositories as $repo): ?>
-                                        <option value="<?php echo $repo->id ?>" <?php echo $workflow->scope_id == $repo->id ? 'selected' : '' ?>>
+                                        <option value="<?php echo $repo->id ?>" <?php echo ($workflow->scope_type === 'repository' && $workflow->scope_id == $repo->id) ? 'selected' : '' ?>>
                                             <?php echo esc_entities($repo->name) ?>
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
+                                <select class="form-select" id="scope_id_collection" name="scope_id" style="<?php echo $workflow->scope_type !== 'collection' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'collection' ? 'disabled' : '' ?>>
+                                    <option value="">Select collection...</option>
+                                    <?php foreach ($collections as $col): ?>
+                                        <option value="<?php echo $col->id ?>" <?php echo ($workflow->scope_type === 'collection' && $workflow->scope_id == $col->id) ? 'selected' : '' ?>>
+                                            <?php echo esc_entities($col->name) ?>
                                         </option>
                                     <?php endforeach ?>
                                 </select>
@@ -101,7 +109,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-list-ol me-2"></i>Workflow Steps</h5>
-                    <a href="<?php echo url_for("workflow/admin/{$workflow->id}/step/add") ?>" class="btn btn-sm btn-primary">
+                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'addStep', 'workflow_id' => $workflow->id]) ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus me-1"></i>Add Step
                     </a>
                 </div>
@@ -132,10 +140,10 @@
                                             </div>
                                         </div>
                                         <div class="btn-group">
-                                            <a href="<?php echo url_for("workflow/admin/step/{$step->id}/edit") ?>" class="btn btn-sm btn-outline-secondary">
+                                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editStep', 'id' => $step->id]) ?>" class="btn btn-sm btn-outline-secondary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="<?php echo url_for("workflow/admin/step/{$step->id}/delete") ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this step?');">
+                                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteStep', 'id' => $step->id]) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this step?');">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -170,7 +178,7 @@
             </div>
 
             <div class="d-grid gap-2">
-                <a href="<?php echo url_for('workflow/admin') ?>" class="btn btn-outline-secondary">
+                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Back to Workflows
                 </a>
             </div>
@@ -181,6 +189,26 @@
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.getElementById('scope_type').addEventListener('change', function() {
     var container = document.getElementById('scope_id_container');
-    container.style.display = this.value === 'global' ? 'none' : '';
+    var repoSelect = document.getElementById('scope_id_repo');
+    var colSelect = document.getElementById('scope_id_collection');
+    if (this.value === 'global') {
+        container.style.display = 'none';
+        repoSelect.style.display = 'none';
+        colSelect.style.display = 'none';
+        repoSelect.disabled = true;
+        colSelect.disabled = true;
+    } else if (this.value === 'repository') {
+        container.style.display = '';
+        repoSelect.style.display = '';
+        repoSelect.disabled = false;
+        colSelect.style.display = 'none';
+        colSelect.disabled = true;
+    } else {
+        container.style.display = '';
+        colSelect.style.display = '';
+        colSelect.disabled = false;
+        repoSelect.style.display = 'none';
+        repoSelect.disabled = true;
+    }
 });
 </script>

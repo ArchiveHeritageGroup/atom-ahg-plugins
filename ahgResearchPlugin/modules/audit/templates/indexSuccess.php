@@ -67,11 +67,11 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">Action</label>
-        <select name="action" class="form-select form-select-sm">
+        <select name="form_action" class="form-select form-select-sm">
           <option value="">All Actions</option>
-          <option value="create" <?php echo $sf_request->getParameter('action') === 'create' ? 'selected' : ''; ?>>Create</option>
-          <option value="update" <?php echo $sf_request->getParameter('action') === 'update' ? 'selected' : ''; ?>>Update</option>
-          <option value="delete" <?php echo $sf_request->getParameter('action') === 'delete' ? 'selected' : ''; ?>>Delete</option>
+          <option value="create" <?php echo $sf_request->getParameter('form_action') === 'create' ? 'selected' : ''; ?>>Create</option>
+          <option value="update" <?php echo $sf_request->getParameter('form_action') === 'update' ? 'selected' : ''; ?>>Update</option>
+          <option value="delete" <?php echo $sf_request->getParameter('form_action') === 'delete' ? 'selected' : ''; ?>>Delete</option>
         </select>
       </div>
       <div class="col-md-2">
@@ -161,7 +161,7 @@
         <ul class="pagination pagination-sm justify-content-center mb-0">
           <?php for ($i = max(1, $currentPage - 2); $i <= min($totalPages, $currentPage + 2); $i++): ?>
             <li class="page-item <?php echo $i === $currentPage ? 'active' : ''; ?>">
-              <a class="page-link" href="<?php echo url_for(['module' => 'audit', 'action' => 'index', 'page' => $i, 'table' => $sf_request->getParameter('table'), 'action' => $sf_request->getParameter('action'), 'from_date' => $sf_request->getParameter('from_date'), 'to_date' => $sf_request->getParameter('to_date')]); ?>"><?php echo $i; ?></a>
+              <a class="page-link" href="<?php echo url_for(['module' => 'audit', 'action' => 'index', 'page' => $i, 'table' => $sf_request->getParameter('table'), 'form_action' => $sf_request->getParameter('form_action'), 'from_date' => $sf_request->getParameter('from_date'), 'to_date' => $sf_request->getParameter('to_date')]); ?>"><?php echo $i; ?></a>
             </li>
           <?php endfor; ?>
         </ul>

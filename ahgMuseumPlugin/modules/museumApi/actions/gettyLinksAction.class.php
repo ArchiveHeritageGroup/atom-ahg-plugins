@@ -86,7 +86,7 @@ class gettyLinksAction extends sfAction
 
         // Handle POST actions
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $linkId = $request->getParameter('link_id');
 
             if ($linkId && in_array($action, ['confirm', 'reject'])) {

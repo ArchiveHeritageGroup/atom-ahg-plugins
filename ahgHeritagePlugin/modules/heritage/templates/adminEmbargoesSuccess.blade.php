@@ -111,7 +111,7 @@ $expiringEmbargoes = $toArray($expiringEmbargoes ?? []);
                         </td>
                         <td class="text-end">
                             <form method="post" class="d-inline" onsubmit="return confirm('Remove this embargo?');">
-                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="form_action" value="remove">
                                 <input type="hidden" name="embargo_id" value="{{ $embargo->id }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     <i class="fas fa-unlock"></i>

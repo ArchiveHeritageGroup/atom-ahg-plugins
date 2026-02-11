@@ -3,7 +3,7 @@
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard') ?>">Workflow</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>">Workflow</a></li>
             <li class="breadcrumb-item active">Task #<?php echo $task->id ?></li>
         </ol>
     </nav>
@@ -106,7 +106,7 @@
                 <!-- Action Buttons -->
                 <?php if ($canClaim): ?>
                     <div class="card-footer">
-                        <a href="<?php echo url_for("workflow/task/{$task->id}/claim") ?>" class="btn btn-primary btn-lg">
+                        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'claimTask', 'id' => $task->id]) ?>" class="btn btn-primary btn-lg">
                             <i class="fas fa-hand-paper me-1"></i>Claim This Task
                         </a>
                     </div>
@@ -121,15 +121,15 @@
                             </div>
 
                             <div class="btn-group">
-                                <button type="submit" formaction="<?php echo url_for("workflow/task/{$task->id}/approve") ?>" class="btn btn-success btn-lg">
+                                <button type="submit" formaction="<?php echo url_for(['module' => 'workflow', 'action' => 'approveTask', 'id' => $task->id]) ?>" class="btn btn-success btn-lg">
                                     <i class="fas fa-check me-1"></i>Approve
                                 </button>
-                                <button type="submit" formaction="<?php echo url_for("workflow/task/{$task->id}/reject") ?>" class="btn btn-danger btn-lg" onclick="return confirm('Are you sure you want to reject this task?');">
+                                <button type="submit" formaction="<?php echo url_for(['module' => 'workflow', 'action' => 'rejectTask', 'id' => $task->id]) ?>" class="btn btn-danger btn-lg" onclick="return confirm('Are you sure you want to reject this task?');">
                                     <i class="fas fa-times me-1"></i>Reject
                                 </button>
                             </div>
 
-                            <a href="<?php echo url_for("workflow/task/{$task->id}/release") ?>" class="btn btn-outline-secondary btn-lg ms-2">
+                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'releaseTask', 'id' => $task->id]) ?>" class="btn btn-outline-secondary btn-lg ms-2">
                                 <i class="fas fa-undo me-1"></i>Release
                             </a>
                         </form>
@@ -139,7 +139,7 @@
                         <div class="alert alert-warning mb-3">
                             <strong>Returned:</strong> <?php echo esc_entities($task->decision_comment) ?>
                         </div>
-                        <form method="post" action="<?php echo url_for("workflow/task/{$task->id}/resubmit") ?>">
+                        <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'resubmitTask', 'id' => $task->id]) ?>">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-paper-plane me-1"></i>Resubmit for Review
                             </button>
@@ -229,10 +229,10 @@
             </div>
 
             <div class="d-grid gap-2">
-                <a href="<?php echo url_for('workflow/myTasks') ?>" class="btn btn-outline-secondary">
+                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Back to My Tasks
                 </a>
-                <a href="<?php echo url_for('workflow/pool') ?>" class="btn btn-outline-secondary">
+                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>" class="btn btn-outline-secondary">
                     <i class="fas fa-layer-group me-1"></i>Browse Task Pool
                 </a>
             </div>

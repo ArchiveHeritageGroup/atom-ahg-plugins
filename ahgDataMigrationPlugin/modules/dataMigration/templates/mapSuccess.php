@@ -328,7 +328,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
           <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']) ?>" class="btn btn-secondary">
             ← Back
           </a>
-          <button type="submit" class="btn btn-primary" name="action" value="preview">
+          <button type="submit" class="btn btn-primary" name="form_action" value="preview">
             <i class="bi bi-play-fill me-1"></i> Preview / Import
           </button>
           <button type="button" class="btn btn-success" id="backgroundJobBtn" title="Process large files in background without timeout">

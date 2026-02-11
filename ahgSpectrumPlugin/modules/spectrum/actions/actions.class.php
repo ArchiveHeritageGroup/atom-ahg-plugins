@@ -423,22 +423,22 @@ class spectrumActions extends AhgActions
         $culture = $this->context->user->getCulture();
         $procedureTypeFilter = $request->getParameter('procedure_type');
 
-        // Get workflow configs for state labels and final states
+        // Get workflow configs for state labels and per-procedure final states
         $this->workflowConfigs = [];
-        $allFinalStates = [];
+        $finalStatesByProcedure = [];
         $configs = DB::table('spectrum_workflow_config')
             ->where('is_active', 1)
             ->get();
         foreach ($configs as $config) {
             $configData = json_decode($config->config_json, true);
             $this->workflowConfigs[$config->procedure_type] = $configData;
-            // Collect final states for this procedure
             $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
-            $allFinalStates = array_merge($allFinalStates, $finalStates);
+            if (!empty($finalStates)) {
+                $finalStatesByProcedure[$config->procedure_type] = $finalStates;
+            }
         }
-        $allFinalStates = array_unique($allFinalStates);
 
-        // Build query for assigned tasks (excluding final states)
+        // Build query for assigned tasks (excluding final states per procedure)
         $query = DB::table('spectrum_workflow_state as sws')
             ->select([
                 'sws.*',
@@ -458,9 +458,17 @@ class spectrumActions extends AhgActions
             ->leftJoin('user as assigner', 'sws.assigned_by', '=', 'assigner.id')
             ->where('sws.assigned_to', $userId);
 
-        // Exclude all final states from all procedures
-        if (!empty($allFinalStates)) {
-            $query->whereNotIn('sws.current_state', $allFinalStates);
+        // Exclude final states per procedure (avoids cross-procedure collisions)
+        // e.g. "documented" is final for disposal but intermediate for object_entry
+        if (!empty($finalStatesByProcedure)) {
+            $query->where(function ($q) use ($finalStatesByProcedure) {
+                foreach ($finalStatesByProcedure as $proc => $finals) {
+                    $q->where(function ($inner) use ($proc, $finals) {
+                        $inner->where('sws.procedure_type', '!=', $proc)
+                              ->orWhereNotIn('sws.current_state', $finals);
+                    });
+                }
+            });
         }
 
         // Apply procedure type filter
@@ -1521,7 +1529,7 @@ class spectrumActions extends AhgActions
         
         // Handle file upload
         if ($request->isMethod('post') && isset($_FILES['template_file'])) {
-            $action = $request->getParameter('action');
+            $action = $request->getParameter('form_action');
             $file = $_FILES['template_file'];
             
             if ($file['error'] === UPLOAD_ERR_OK) {

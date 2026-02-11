@@ -77,7 +77,7 @@ $privacyOptions = $taxonomyService->getWorkspacePrivacyOptions(false);
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="form_action" value="create">
                 <div class="modal-header">
                     <h5 class="modal-title">Create Workspace</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

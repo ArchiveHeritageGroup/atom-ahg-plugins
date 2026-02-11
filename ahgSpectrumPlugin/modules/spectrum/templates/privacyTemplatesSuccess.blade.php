@@ -99,7 +99,7 @@ $categories = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="upload">
+                <input type="hidden" name="form_action" value="upload">
                 <div class="modal-header" style="background-color: #1a5f2a;">
                     <h5 class="modal-title" style="color: #fff;"><i class="fas fa-upload me-2"></i>Upload Template</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -141,7 +141,7 @@ $categories = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="replace">
+                <input type="hidden" name="form_action" value="replace">
                 <input type="hidden" name="id" id="replace_id">
                 <div class="modal-header" style="background-color: #d4a200;">
                     <h5 class="modal-title" style="color: #fff;"><i class="fas fa-sync me-2"></i>Replace Template</h5>

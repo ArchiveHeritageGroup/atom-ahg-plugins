@@ -16,7 +16,7 @@ class auditActions extends AhgActions
     {
         $this->filters = [
             'table' => $request->getParameter('table'),
-            'action' => $request->getParameter('action'),
+            'action' => $request->getParameter('form_action'),
             'user_id' => $request->getParameter('user_id'),
             'from_date' => $request->getParameter('from_date'),
             'to_date' => $request->getParameter('to_date'),

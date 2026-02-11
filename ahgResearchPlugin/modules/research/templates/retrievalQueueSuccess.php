@@ -49,7 +49,7 @@
             </div>
             <?php else: ?>
             <form method="post" id="queueForm">
-                <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="form_action" value="update_status">
 
                 <div class="table-responsive">
                     <table class="table table-hover">

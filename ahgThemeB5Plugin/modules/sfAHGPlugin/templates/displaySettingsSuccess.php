@@ -50,7 +50,7 @@ $moduleLabels = [
         </p>
         
         <form id="globalDisplaySettingsForm" method="post" action="/atom-framework/public/api/admin/display-settings.php">
-            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="form_action" value="update">
             
             <div class="table-responsive">
                 <table class="table table-hover align-middle">

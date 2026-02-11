@@ -79,10 +79,10 @@
           </div>
 
           <div class="d-grid gap-2">
-            <button type="submit" name="action" value="approve" class="btn btn-success btn-lg">
+            <button type="submit" name="form_action" value="approve" class="btn btn-success btn-lg">
               <i class="fas fa-check"></i> <?php echo __('Approve') ?>
             </button>
-            <button type="submit" name="action" value="deny" class="btn btn-danger">
+            <button type="submit" name="form_action" value="deny" class="btn btn-danger">
               <i class="fas fa-times"></i> <?php echo __('Deny') ?>
             </button>
           </div>

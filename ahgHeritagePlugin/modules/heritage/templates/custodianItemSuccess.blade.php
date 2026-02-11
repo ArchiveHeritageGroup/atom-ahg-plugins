@@ -277,10 +277,10 @@ $history = $toArray($itemRaw['history'] ?? []);
             <i class="fas fa-arrow-left me-1"></i>Cancel
         </a>
         <div>
-            <button type="submit" name="action" value="save" class="btn btn-primary">
+            <button type="submit" name="form_action" value="save" class="btn btn-primary">
                 <i class="fas fa-check me-2"></i>Save Changes
             </button>
-            <button type="submit" name="action" value="save_continue" class="btn btn-outline-primary ms-2">
+            <button type="submit" name="form_action" value="save_continue" class="btn btn-outline-primary ms-2">
                 Save & Continue Editing
             </button>
         </div>

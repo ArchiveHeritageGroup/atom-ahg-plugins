@@ -151,7 +151,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="create_discussion">
+                <input type="hidden" name="form_action" value="create_discussion">
                 <div class="modal-header">
                     <h5 class="modal-title">New Discussion</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -180,7 +180,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="invite">
+                <input type="hidden" name="form_action" value="invite">
                 <div class="modal-header">
                     <h5 class="modal-title">Invite Member</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -214,7 +214,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
-                <input type="hidden" name="action" value="add_resource">
+                <input type="hidden" name="form_action" value="add_resource">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Resource</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

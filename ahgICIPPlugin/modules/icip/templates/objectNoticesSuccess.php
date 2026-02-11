@@ -56,7 +56,7 @@
                                     </div>
                                 </div>
                                 <form method="post" class="d-inline" onsubmit="return confirm('Remove this notice?');">
-                                    <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="form_action" value="remove">
                                     <input type="hidden" name="notice_id" value="<?php echo $notice->id ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
                                         <i class="bi bi-x-lg"></i>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="form_action" value="add">
 
                         <div class="row">
                             <div class="col-md-6 mb-3">

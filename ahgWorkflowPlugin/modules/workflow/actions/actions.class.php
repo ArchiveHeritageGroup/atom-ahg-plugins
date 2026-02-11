@@ -190,7 +190,7 @@ class workflowActions extends AhgActions
         $this->history = $this->getService()->getObjectHistory($objectId);
 
         // Get object info
-        $this->object = Qubit::db()->table('information_object_i18n')
+        $this->object = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
             ->where('id', $objectId)
             ->where('culture', 'en')
             ->first();
@@ -254,6 +254,7 @@ class workflowActions extends AhgActions
         }
 
         $this->repositories = $this->getRepositories();
+        $this->collections = $this->getCollections();
     }
 
     public function executeEditWorkflow(sfWebRequest $request)
@@ -284,6 +285,7 @@ class workflowActions extends AhgActions
         }
 
         $this->repositories = $this->getRepositories();
+        $this->collections = $this->getCollections();
         $this->roles = $this->getRoles();
         $this->clearanceLevels = $this->getClearanceLevels();
     }
@@ -438,12 +440,12 @@ class workflowActions extends AhgActions
 
     protected function getRepositories(): array
     {
-        return Qubit::db()->table('actor as a')
+        return \Illuminate\Database\Capsule\Manager::table('repository as r')
             ->join('actor_i18n as ai', function ($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
             })
-            ->where('a.class_name', 'QubitRepository')
-            ->select('a.id', 'ai.authorized_form_of_name as name')
+            ->whereNotNull('ai.authorized_form_of_name')
+            ->select('r.id', 'ai.authorized_form_of_name as name')
             ->orderBy('ai.authorized_form_of_name')
             ->get()
             ->toArray();
@@ -451,20 +453,35 @@ class workflowActions extends AhgActions
 
     protected function getRoles(): array
     {
-        return Qubit::db()->table('actor as a')
-            ->join('actor_i18n as ai', function ($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+        return \Illuminate\Database\Capsule\Manager::table('acl_group as g')
+            ->join('acl_group_i18n as gi', function ($join) {
+                $join->on('g.id', '=', 'gi.id')->where('gi.culture', '=', 'en');
             })
-            ->where('a.class_name', 'QubitAclGroup')
-            ->select('a.id', 'ai.authorized_form_of_name as name')
-            ->orderBy('ai.authorized_form_of_name')
+            ->whereNotNull('gi.name')
+            ->where('g.id', '>', 1)
+            ->select('g.id', 'gi.name')
+            ->orderBy('gi.name')
+            ->get()
+            ->toArray();
+    }
+
+    protected function getCollections(): array
+    {
+        return \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->join('information_object_i18n as ioi', function ($join) {
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            })
+            ->where('io.parent_id', 1)
+            ->whereNotNull('ioi.title')
+            ->select('io.id', 'ioi.title as name')
+            ->orderBy('ioi.title')
             ->get()
             ->toArray();
     }
 
     protected function getClearanceLevels(): array
     {
-        return Qubit::db()->table('security_classification')
+        return \Illuminate\Database\Capsule\Manager::table('security_classification')
             ->orderBy('level')
             ->get()
             ->toArray();

@@ -3,9 +3,9 @@
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard') ?>">Workflow</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/admin') ?>">Admin</a></li>
-            <li class="breadcrumb-item"><a href="<?php echo url_for("workflow/admin/edit/{$workflow->id}") ?>"><?php echo esc_entities($workflow->name) ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>">Workflow</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>">Admin</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editWorkflow', 'id' => $workflow->id]) ?>"><?php echo esc_entities($workflow->name) ?></a></li>
             <li class="breadcrumb-item active">Add Step</li>
         </ol>
     </nav>
@@ -106,7 +106,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i>Add Step
                             </button>
-                            <a href="<?php echo url_for("workflow/admin/edit/{$workflow->id}") ?>" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editWorkflow', 'id' => $workflow->id]) ?>" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

@@ -39,7 +39,7 @@ $idTypes = $taxonomyService->getIdTypes(true);
                 </div>
                 <div class="card-body">
                     <form method="post">
-                        <input type="hidden" name="action" value="register">
+                        <input type="hidden" name="form_action" value="register">
 
                         <div class="row">
                             <div class="col-6">
@@ -199,7 +199,7 @@ $idTypes = $taxonomyService->getIdTypes(true);
                                     </td>
                                     <td>
                                         <form method="post" class="d-inline">
-                                            <input type="hidden" name="action" value="checkout">
+                                            <input type="hidden" name="form_action" value="checkout">
                                             <input type="hidden" name="visitor_id" value="<?php echo $visitor->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-success"
                                                     onclick="return confirm('Check out this visitor?')">
