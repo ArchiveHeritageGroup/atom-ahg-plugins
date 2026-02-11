@@ -7,6 +7,7 @@ class ricExplorerGetDataAction extends sfAction
     protected $fusekiUsername;
     protected $fusekiPassword;
     protected $baseUri;
+    protected $instanceId;
 
     public function preExecute()
     {
@@ -16,7 +17,8 @@ class ricExplorerGetDataAction extends sfAction
         $this->fusekiEndpoint = ($config['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')) . '/query';
         $this->fusekiUsername = $config['fuseki_username'] ?? sfConfig::get('app_ric_fuseki_username', 'admin');
         $this->fusekiPassword = $config['fuseki_password'] ?? sfConfig::get('app_ric_fuseki_password', '');
-        $this->baseUri = sfConfig::get('app_ric_base_uri', sfConfig::get('app_siteBaseUrl', '') . '/ric');
+        $this->baseUri = $config['ric_base_uri'] ?? sfConfig::get('app_ric_base_uri', 'https://archives.theahg.co.za/ric');
+        $this->instanceId = $config['ric_instance_id'] ?? sfConfig::get('app_ric_instance_id', 'atom-psis');
     }
 
     protected function getConfigSettings(): array
@@ -35,20 +37,79 @@ class ricExplorerGetDataAction extends sfAction
     public function execute($request)
     {
         $this->getResponse()->setContentType('application/json');
-        
+
         $recordId = $request->getParameter('id');
         if (!$recordId) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'No ID provided']));
         }
-        
-        $graphData = $this->buildGraphData($recordId);
-        
+
+        if ($recordId === 'overview') {
+            $graphData = $this->buildOverviewGraph();
+        } else {
+            $graphData = $this->buildGraphData($recordId);
+        }
+
         return $this->renderText(json_encode([
             'success' => true,
             'graphData' => $graphData
         ]));
     }
-    
+
+    protected function buildOverviewGraph()
+    {
+        // Get top-level recordsets with their relationships
+        $query = <<<SPARQL
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+SELECT ?s ?label ?type ?related ?relLabel ?relType ?pred WHERE {
+  ?s a rico:RecordSet .
+  ?s rico:title ?label .
+  OPTIONAL {
+    ?s ?pred ?related .
+    FILTER(isURI(?related) && ?pred != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
+    OPTIONAL { ?related rico:title ?relLabel }
+    OPTIONAL { ?related a ?relType . FILTER(STRSTARTS(STR(?relType), "https://www.ica.org/standards/RiC/ontology#")) }
+  }
+} LIMIT 200
+SPARQL;
+
+        $result = $this->executeSparql($query);
+        $nodes = [];
+        $edges = [];
+        $nodeIndex = [];
+
+        if ($result && isset($result['results']['bindings'])) {
+            foreach ($result['results']['bindings'] as $row) {
+                $uri = $row['s']['value'];
+                if (!isset($nodeIndex[$uri])) {
+                    $nodeIndex[$uri] = true;
+                    $nodes[] = [
+                        'id' => $uri,
+                        'label' => $row['label']['value'] ?? $this->extractLabel($uri),
+                        'type' => 'RecordSet'
+                    ];
+                }
+                if (isset($row['related'])) {
+                    $relUri = $row['related']['value'];
+                    if (!isset($nodeIndex[$relUri])) {
+                        $nodeIndex[$relUri] = true;
+                        $relType = isset($row['relType']) ? $this->extractType($row['relType']['value']) : $this->extractTypeFromUri($relUri);
+                        $nodes[] = [
+                            'id' => $relUri,
+                            'label' => isset($row['relLabel']) ? $row['relLabel']['value'] : $this->extractLabel($relUri),
+                            'type' => $relType
+                        ];
+                    }
+                    $predLabel = isset($row['pred']) ? $this->extractLabel($row['pred']['value']) : '';
+                    $edges[] = ['source' => $uri, 'target' => $relUri, 'label' => $predLabel];
+                }
+            }
+        }
+
+        $nodes = $this->enrichNodesWithSlugs($nodes);
+
+        return ['nodes' => $nodes, 'edges' => $edges];
+    }
+
     protected function executeSparql($query)
     {
         $ch = curl_init();
@@ -62,8 +123,8 @@ class ricExplorerGetDataAction extends sfAction
             ],
             CURLOPT_USERPWD => $this->fusekiPassword ? "{$this->fusekiUsername}:{$this->fusekiPassword}" : null,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 5,
-            CURLOPT_CONNECTTIMEOUT => 2
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_CONNECTTIMEOUT => 3
         ]);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -73,64 +134,105 @@ class ricExplorerGetDataAction extends sfAction
         return json_decode($response, true);
     }
     
+    protected function buildRecordUri($type, $id)
+    {
+        return $this->baseUri . '/' . $this->instanceId . '/' . $type . '/' . $id;
+    }
+
     protected function buildGraphData($recordId)
     {
         $nodes = [];
         $edges = [];
-        
-        // Try SPARQL first
+
+        // Use correct URI pattern: {baseUri}/{instanceId}/{type}/{id}
         $recordUris = [
-            $this->baseUri . '/recordset/' . $recordId,
-            $this->baseUri . '/record/' . $recordId
+            $this->buildRecordUri('recordset', $recordId),
+            $this->buildRecordUri('record', $recordId)
         ];
         $uriFilter = '<' . implode('>, <', $recordUris) . '>';
-        
+
+        // Step 1: Fast query - get relationships only (no OPTIONAL to avoid timeout on large stores)
         $query = <<<SPARQL
-PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
-SELECT DISTINCT ?subject ?subjectLabel ?predicate ?object ?objectLabel ?subjectType ?objectType WHERE {
+SELECT ?subject ?predicate ?object WHERE {
   { ?subject ?predicate ?object . FILTER(?subject IN ({$uriFilter})) FILTER(isURI(?object)) }
   UNION
   { ?subject ?predicate ?object . FILTER(?object IN ({$uriFilter})) FILTER(isURI(?subject)) }
-  OPTIONAL { ?subject rico:title ?subjectLabel }
-  OPTIONAL { ?object rico:title ?objectLabel }
-  OPTIONAL { ?subject a ?subjectType }
-  OPTIONAL { ?object a ?objectType }
   FILTER(?predicate != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
-} LIMIT 50
+} LIMIT 100
 SPARQL;
 
         $result = $this->executeSparql($query);
-        
+
         if ($result && isset($result['results']['bindings']) && count($result['results']['bindings']) > 0) {
             $nodeIndex = [];
+            $allUris = [];
+
             foreach ($result['results']['bindings'] as $row) {
                 $subjectUri = $row['subject']['value'];
                 $objectUri = $row['object']['value'];
-                
+                $predLabel = $this->extractLabel($row['predicate']['value']);
+
                 if (!isset($nodeIndex[$subjectUri])) {
                     $nodeIndex[$subjectUri] = true;
-                    $nodes[] = [
-                        'id' => $subjectUri,
-                        'label' => isset($row['subjectLabel']) ? $row['subjectLabel']['value'] : $this->extractLabel($subjectUri),
-                        'type' => isset($row['subjectType']) ? $this->extractType($row['subjectType']['value']) : 'Unknown'
-                    ];
+                    $allUris[] = $subjectUri;
                 }
                 if (!isset($nodeIndex[$objectUri])) {
                     $nodeIndex[$objectUri] = true;
-                    $nodes[] = [
-                        'id' => $objectUri,
-                        'label' => isset($row['objectLabel']) ? $row['objectLabel']['value'] : $this->extractLabel($objectUri),
-                        'type' => isset($row['objectType']) ? $this->extractType($row['objectType']['value']) : 'Unknown'
-                    ];
+                    $allUris[] = $objectUri;
                 }
-                $edges[] = ['source' => $subjectUri, 'target' => $objectUri];
+                $edges[] = ['source' => $subjectUri, 'target' => $objectUri, 'label' => $predLabel];
+            }
+
+            // Step 2: Batch-fetch labels and types for discovered URIs
+            $uriLabels = $this->fetchUriMetadata($allUris);
+
+            foreach ($allUris as $uri) {
+                $meta = $uriLabels[$uri] ?? [];
+                $nodes[] = [
+                    'id' => $uri,
+                    'label' => $meta['label'] ?? $this->extractLabel($uri),
+                    'type' => $meta['type'] ?? $this->extractTypeFromUri($uri)
+                ];
             }
         } else {
             // Fallback to database
             return $this->buildGraphFromDatabase($recordId);
         }
-        
+
+        // Enrich nodes with AtoM slugs for correct URLs
+        $nodes = $this->enrichNodesWithSlugs($nodes);
+
         return ['nodes' => $nodes, 'edges' => $edges];
+    }
+
+    protected function fetchUriMetadata(array $uris)
+    {
+        if (empty($uris)) return [];
+
+        // Batch SPARQL for labels and types - targeted query, much faster than OPTIONAL on full store
+        $uriList = '<' . implode('>, <', $uris) . '>';
+        $query = <<<SPARQL
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+SELECT ?uri ?label ?type WHERE {
+  VALUES ?uri { {$uriList} }
+  OPTIONAL { ?uri rico:title ?label }
+  OPTIONAL { ?uri a ?type . FILTER(STRSTARTS(STR(?type), "https://www.ica.org/standards/RiC/ontology#")) }
+}
+SPARQL;
+
+        $result = $this->executeSparql($query);
+        $metadata = [];
+
+        if ($result && isset($result['results']['bindings'])) {
+            foreach ($result['results']['bindings'] as $row) {
+                $uri = $row['uri']['value'];
+                if (!isset($metadata[$uri])) $metadata[$uri] = [];
+                if (isset($row['label'])) $metadata[$uri]['label'] = $row['label']['value'];
+                if (isset($row['type'])) $metadata[$uri]['type'] = $this->extractType($row['type']['value']);
+            }
+        }
+
+        return $metadata;
     }
     
     protected function buildGraphFromDatabase($recordId)
@@ -145,8 +247,8 @@ SPARQL;
             ->first();
             
         if (!$record) return ['nodes' => $nodes, 'edges' => $edges];
-        
-        $recordUri = $this->baseUri . '/record/' . $recordId;
+
+        $recordUri = $this->buildRecordUri('recordset', $recordId);
         $nodes[] = [
             'id' => $recordUri,
             'label' => $record->title ?: 'Record ' . $recordId,
@@ -164,7 +266,7 @@ SPARQL;
             
         foreach ($events as $event) {
             if ($event->actor_id) {
-                $actorUri = $this->baseUri . '/person/' . $event->actor_id;
+                $actorUri = $this->buildRecordUri('person', $event->actor_id);
                 $nodes[] = [
                     'id' => $actorUri,
                     'label' => $event->authorized_form_of_name ?: 'Actor ' . $event->actor_id,
@@ -174,10 +276,16 @@ SPARQL;
             }
         }
         
+        $nodes = $this->enrichNodesWithSlugs($nodes);
+
         return ['nodes' => $nodes, 'edges' => $edges];
     }
-    
+
     protected function extractLabel($uri) {
+        // Handle ontology predicate URIs (e.g., https://...#hasOrHadSubject)
+        if (preg_match('/#(\w+)$/', $uri, $m)) {
+            return $this->camelToReadable($m[1]);
+        }
         if (preg_match('/\/(place|term)\/(\d+)$/', $uri, $m)) {
             $id = $m[2];
             $term = DB::table('term_i18n')->where('id', $id)->where('culture', 'en')->value('name');
@@ -196,9 +304,63 @@ SPARQL;
         if (preg_match('/\/(\w+)\/(\d+)$/', $uri, $m)) return ucfirst($m[1]) . ' ' . $m[2];
         return 'Unknown';
     }
-    
+
     protected function extractType($uri) {
         if (preg_match('/#(\w+)$/', $uri, $m)) return $m[1];
         return 'Unknown';
+    }
+
+    protected function extractTypeFromUri($uri) {
+        if (preg_match('/\/(\w+)\/\d+$/', $uri, $m)) {
+            $map = [
+                'recordset' => 'RecordSet', 'record' => 'Record', 'recordpart' => 'RecordPart',
+                'person' => 'Person', 'family' => 'Family', 'corporatebody' => 'CorporateBody',
+                'place' => 'Place', 'instantiation' => 'Instantiation',
+                'production' => 'Production', 'accumulation' => 'Accumulation',
+                'activity' => 'Activity', 'function' => 'Function'
+            ];
+            return $map[strtolower($m[1])] ?? ucfirst($m[1]);
+        }
+        return 'Unknown';
+    }
+
+    protected function enrichNodesWithSlugs(array $nodes) {
+        // Extract numeric IDs from URIs, batch-fetch slugs
+        $idMap = []; // id => [node indices]
+        foreach ($nodes as $idx => $node) {
+            if (preg_match('/\/(\d+)$/', $node['id'], $m)) {
+                $id = (int)$m[1];
+                $idMap[$id][] = $idx;
+            }
+        }
+
+        if (empty($idMap)) return $nodes;
+
+        try {
+            $slugs = DB::table('slug')
+                ->whereIn('object_id', array_keys($idMap))
+                ->pluck('slug', 'object_id')
+                ->toArray();
+        } catch (\Exception $e) {
+            return $nodes;
+        }
+
+        foreach ($idMap as $id => $indices) {
+            $slug = $slugs[$id] ?? null;
+            foreach ($indices as $idx) {
+                $nodes[$idx]['atomId'] = $id;
+                if ($slug) {
+                    $nodes[$idx]['atomUrl'] = '/index.php/' . $slug;
+                }
+            }
+        }
+
+        return $nodes;
+    }
+
+    protected function camelToReadable($str) {
+        // hasOrHadSubject → Has Or Had Subject
+        $result = preg_replace('/([a-z])([A-Z])/', '$1 $2', $str);
+        return ucfirst($result);
     }
 }
