@@ -349,6 +349,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
 </div><!-- /TTS Content Area -->
 
 <?php slot('context-menu'); ?>
+    <?php use_helper('informationobject'); ?>
     <!-- Cover Image -->
     <?php if (isset($digitalObject) && $digitalObject): ?>
       <?php if (EmbargoHelper::canViewThumbnail($rawResource->id)): ?>
@@ -357,38 +358,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
           <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Cover'); ?></h5>
         </div>
         <div class="card-body text-center">
-          <?php
-            // Use unified viewer dispatch for all format support
-            // Pass $rawResource (unescaped) so render_iiif_viewer can access digitalObjectsRelatedByobjectId
-            if (function_exists('render_digital_object_viewer')) {
-                echo render_digital_object_viewer($rawResource, $digitalObject);
-            } else {
-                // Fallback: basic rendering
-                $mimeType = $digitalObject->mimeType ?? '';
-                $mediaTypeId = $digitalObject->mediaTypeId ?? null;
-                $thumbObj = $digitalObject->getRepresentationByUsage(QubitTerm::THUMBNAIL_ID);
-                $refObj = $digitalObject->getRepresentationByUsage(QubitTerm::REFERENCE_ID);
-                $thumbPath = $thumbObj ? $thumbObj->getFullPath() : null;
-                $refPath = $refObj ? $refObj->getFullPath() : null;
-                $masterPath = $digitalObject->getFullPath();
-                $displayPath = $refPath ?: $thumbPath ?: $masterPath;
-
-                $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
-                $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
-
-                if ($isVideo || $isAudio) {
-                    include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]);
-                } elseif (strpos($mimeType, 'image') !== false && $displayPath) {
-                    echo '<a href="' . $masterPath . '" target="_blank">';
-                    echo '<img src="' . $displayPath . '" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 300px;">';
-                    echo '</a>';
-                } else {
-                    echo '<a href="' . $masterPath . '" target="_blank" class="btn btn-outline-primary">';
-                    echo '<i class="fas fa-file me-2"></i>' . __('View file');
-                    echo '</a>';
-                }
-            }
-          ?>
+          <?php echo render_digital_object_viewer($rawResource, $digitalObject); ?>
         </div>
       </section>
       <?php else: ?>
@@ -499,6 +469,15 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('View GRAP data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'grap', 'action' => 'edit', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice me-2"></i><?php echo __('Edit GRAP data'); ?></a></li>
+            <?php endif; ?>
+            <?php if (checkPluginEnabled('ahgSpectrumPlugin')): ?>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-barcode me-2"></i><?php echo __('Generate barcode label'); ?></a></li>
+            <?php endif; ?>
+            <?php if (checkPluginEnabled('ahgProvenancePlugin')): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
             <?php endif; ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?php echo '/index.php/label/' . $rawResource->slug; ?>"><i class="fas fa-tag me-2"></i><?php echo __('Generate label'); ?></a></li>

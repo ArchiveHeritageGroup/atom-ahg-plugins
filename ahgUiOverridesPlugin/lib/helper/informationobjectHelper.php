@@ -72,6 +72,11 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
             return _render_legacy_download($doId, $digitalObject, 'Adobe Flash (SWF)');
         }
 
+        // 3D models -> model-viewer (GLB/GLTF) or Three.js (OBJ/STL)
+        if (in_array($ext, ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'dae', 'usdz'])) {
+            return _render_3d_viewer($doId, $digitalObject, $ext);
+        }
+
         // Video/audio - use transcription-enabled player
         $isVideo = ($mediaTypeId == QubitTerm::VIDEO_ID) || strpos($mimeType, 'video') !== false;
         $isAudio = ($mediaTypeId == QubitTerm::AUDIO_ID) || strpos($mimeType, 'audio') !== false;
@@ -316,6 +321,87 @@ function _render_legacy_download(int $doId, $digitalObject, string $formatLabel)
     $html .= '<p class="text-muted">This format is no longer supported by modern browsers and cannot be displayed inline.</p>';
     $html .= '<a href="' . htmlspecialchars($downloadUrl) . '" download class="btn btn-primary">';
     $html .= '<i class="fas fa-download me-1"></i>Download Original File</a>';
+    $html .= '</div></div>';
+
+    return $html;
+}
+
+/**
+ * Render 3D model viewer (GLB, GLTF, OBJ, STL, etc.)
+ * Uses Google model-viewer for GLB/GLTF, Three.js for OBJ/STL
+ */
+function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
+{
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+    $fullPath = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
+    $viewerId = 'viewer-3d-' . $doId;
+
+    $html = '<div class="model3d-viewer">';
+    $html .= '<div class="d-flex flex-column align-items-center">';
+    $html .= '<div class="mb-2">';
+    $html .= '<span class="badge bg-primary"><i class="fas fa-cube me-1"></i>' . htmlspecialchars($digitalObject->name ?? '') . ' (3D)</span>';
+    $html .= '</div>';
+
+    $html .= '<div id="' . $viewerId . '-container" style="width:100%;height:400px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:8px;position:relative;">';
+
+    if (in_array($ext, ['glb', 'gltf'])) {
+        // Google model-viewer for GLB/GLTF
+        $html .= '<script type="module" src="/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js"></script>';
+        $html .= '<model-viewer id="' . $viewerId . '"';
+        $html .= ' src="' . htmlspecialchars($fullPath) . '"';
+        $html .= ' camera-controls touch-action="pan-y" auto-rotate shadow-intensity="1" exposure="1"';
+        $html .= ' style="width:100%;height:100%;background:transparent;border-radius:8px;">';
+        $html .= '<div slot="poster" class="d-flex flex-column align-items-center justify-content-center h-100 text-white">';
+        $html .= '<div class="spinner-border text-primary mb-3" role="status"></div>';
+        $html .= '<span>Loading 3D model...</span>';
+        $html .= '</div>';
+        $html .= '</model-viewer>';
+    } elseif (in_array($ext, ['obj', 'stl'])) {
+        // Three.js for OBJ/STL
+        $html .= '<div id="' . $viewerId . '-threejs" style="width:100%;height:100%;border-radius:8px;"></div>';
+        $html .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>';
+        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>';
+        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>';
+        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>';
+        $html .= '<script ' . $nonceAttr . '>';
+        $html .= '(function(){';
+        $html .= 'var c=document.getElementById("' . $viewerId . '-threejs");if(!c)return;';
+        $html .= 'var s=new THREE.Scene();s.background=new THREE.Color(0x1a1a2e);';
+        $html .= 'var cam=new THREE.PerspectiveCamera(45,c.clientWidth/c.clientHeight,0.1,1000);cam.position.set(0,1,3);';
+        $html .= 'var r=new THREE.WebGLRenderer({antialias:true});r.setSize(c.clientWidth,c.clientHeight);r.setPixelRatio(window.devicePixelRatio);c.appendChild(r.domElement);';
+        $html .= 'var ctrl=new THREE.OrbitControls(cam,r.domElement);ctrl.enableDamping=true;ctrl.autoRotate=true;';
+        $html .= 's.add(new THREE.AmbientLight(0xffffff,0.6));var dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(5,10,7.5);s.add(dl);';
+        $html .= 'function fit(o){var b=new THREE.Box3().setFromObject(o);var ct=b.getCenter(new THREE.Vector3());var sz=b.getSize(new THREE.Vector3());var sc=2/Math.max(sz.x,sz.y,sz.z);o.scale.setScalar(sc);o.position.sub(ct.multiplyScalar(sc));o.traverse(function(ch){if(ch.isMesh)ch.material=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.5,metalness:0.3});});s.add(o);}';
+        $html .= 'var ext="' . $ext . '";';
+        $html .= 'if(ext==="obj")new THREE.OBJLoader().load("' . htmlspecialchars($fullPath) . '",fit);';
+        $html .= 'else if(ext==="stl")new THREE.STLLoader().load("' . htmlspecialchars($fullPath) . '",function(g){fit(new THREE.Mesh(g));});';
+        $html .= '(function anim(){requestAnimationFrame(anim);ctrl.update();r.render(s,cam);})();';
+        $html .= 'window.addEventListener("resize",function(){cam.aspect=c.clientWidth/c.clientHeight;cam.updateProjectionMatrix();r.setSize(c.clientWidth,c.clientHeight);});';
+        $html .= '})();';
+        $html .= '</script>';
+    } else {
+        // FBX, PLY, DAE, USDZ - download with 3D badge
+        $html .= '<div class="d-flex flex-column align-items-center justify-content-center h-100 text-white">';
+        $html .= '<i class="fas fa-cube fa-4x mb-3 text-info"></i>';
+        $html .= '<h6>' . strtoupper($ext) . ' 3D Model</h6>';
+        $html .= '<a href="' . htmlspecialchars($fullPath) . '" download class="btn btn-primary mt-2">';
+        $html .= '<i class="fas fa-download me-1"></i>Download 3D Model</a>';
+        $html .= '</div>';
+    }
+
+    $html .= '</div>';
+
+    $html .= '<small class="text-muted mt-2">';
+    $html .= '<i class="fas fa-mouse me-1"></i>Drag to rotate | <i class="fas fa-search-plus me-1"></i>Scroll to zoom';
+    $html .= '</small>';
+
+    // Download link
+    $html .= '<div class="mt-2">';
+    $html .= '<a href="' . htmlspecialchars($fullPath) . '" download class="btn btn-sm btn-outline-secondary">';
+    $html .= '<i class="fas fa-download me-1"></i>Download Original</a>';
+    $html .= '</div>';
+
     $html .= '</div></div>';
 
     return $html;
