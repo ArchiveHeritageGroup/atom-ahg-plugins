@@ -1,18 +1,13 @@
 <?php
 
-class jobsManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+
+class jobsManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
     /**
      * Browse jobs with filters, pagination, and stats.
      */
-    public function executeBrowse(sfWebRequest $request)
+    public function executeBrowse($request)
     {
         // Require authenticated user
         if (!$this->getUser()->isAuthenticated()) {
@@ -32,7 +27,7 @@ class jobsManageActions extends AhgActions
         $sort = $request->getParameter('sort', 'date');
         $sortDir = $request->getParameter('sortDir', 'desc');
         $page = max(1, (int) $request->getParameter('page', 1));
-        $limit = max(1, min(100, (int) ($request->getParameter('limit') ?: sfConfig::get('app_hits_per_page', 25))));
+        $limit = max(1, min(100, (int) ($request->getParameter('limit') ?: $this->config('app_hits_per_page', 25))));
 
         // Get stats
         $this->stats = $service->getStats($userId, $isAdmin);
@@ -64,7 +59,7 @@ class jobsManageActions extends AhgActions
     /**
      * Show detailed report for a single job.
      */
-    public function executeReport(sfWebRequest $request)
+    public function executeReport($request)
     {
         // Require authenticated user
         if (!$this->getUser()->isAuthenticated()) {
@@ -114,7 +109,7 @@ class jobsManageActions extends AhgActions
     /**
      * Delete jobs — single or all inactive.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Require authenticated user
         if (!$this->getUser()->isAuthenticated()) {
@@ -163,7 +158,7 @@ class jobsManageActions extends AhgActions
     /**
      * Export jobs as CSV download.
      */
-    public function executeExport(sfWebRequest $request)
+    public function executeExport($request)
     {
         // Require authenticated user
         if (!$this->getUser()->isAuthenticated()) {
@@ -179,8 +174,8 @@ class jobsManageActions extends AhgActions
 
         $filename = 'jobs-export-' . date('Y-m-d-His') . '.csv';
 
-        $this->getResponse()->setHttpHeader('Content-Type', 'text/csv; charset=utf-8');
-        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $this->response->setContentType('text/csv; charset=utf-8');
+        $this->response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
         $output = fopen('php://temp', 'r+');
 

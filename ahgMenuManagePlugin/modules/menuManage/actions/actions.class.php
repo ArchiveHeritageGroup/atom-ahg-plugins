@@ -1,20 +1,15 @@
 <?php
 
-class menuManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+
+class menuManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
     /**
      * List all menu items as a tree.
      *
      * Handles inline reordering via ?move=ID&before=ID or ?move=ID&after=ID.
      */
-    public function executeList(sfWebRequest $request)
+    public function executeList($request)
     {
         // Require administrator
         if (!$this->getUser()->isAdministrator()) {
@@ -23,7 +18,7 @@ class menuManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('Menus') . ' - ' . $this->response->getTitle());
 
@@ -61,7 +56,7 @@ class menuManageActions extends AhgActions
     /**
      * Edit or create a menu item.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         // Require administrator
         if (!$this->getUser()->isAdministrator()) {
@@ -70,7 +65,7 @@ class menuManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
@@ -181,7 +176,7 @@ class menuManageActions extends AhgActions
     /**
      * Delete a menu item (with confirmation).
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Require administrator
         if (!$this->getUser()->isAdministrator()) {
@@ -190,7 +185,7 @@ class menuManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $id = (int) $request->getParameter('id');
 

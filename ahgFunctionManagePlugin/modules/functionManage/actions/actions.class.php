@@ -1,32 +1,27 @@
 <?php
 
-class functionManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+
+class functionManageActions extends AhgController
 {
-    public function preExecute()
+    public function executeBrowse($request)
     {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
-    public function executeBrowse(sfWebRequest $request)
-    {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('Browse functions') . ' - ' . $this->response->getTitle());
 
         // Sort options
         $this->sortOptions = [
-            'alphabetic' => $this->context->i18n->__('Name'),
-            'lastUpdated' => $this->context->i18n->__('Date modified'),
-            'identifier' => $this->context->i18n->__('Identifier'),
+            'alphabetic' => __('Name'),
+            'lastUpdated' => __('Date modified'),
+            'identifier' => __('Identifier'),
         ];
 
         // Sort defaults
         if ($this->getUser()->isAuthenticated()) {
-            $sortSetting = sfConfig::get('app_sort_browser_user', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_user', 'lastUpdated');
         } else {
-            $sortSetting = sfConfig::get('app_sort_browser_anonymous', 'lastUpdated');
+            $sortSetting = $this->config('app_sort_browser_anonymous', 'lastUpdated');
         }
 
         $sort = $request->getParameter('sort', $sortSetting);
@@ -38,7 +33,7 @@ class functionManageActions extends AhgActions
             $sortDir = $request->sortDir;
         }
 
-        $limit = (int) ($request->limit ?: sfConfig::get('app_hits_per_page', 30));
+        $limit = (int) ($request->limit ?: $this->config('app_hits_per_page', 30));
         $page = (int) ($request->page ?: 1);
 
         // Handle global search redirect: ?query=X -> subquery=X
@@ -65,7 +60,7 @@ class functionManageActions extends AhgActions
         );
 
         // ACL for add button visibility
-        $user = $this->context->user;
+        $user = $this->getUser();
         $this->canCreate = $user->isAuthenticated()
             && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID)
                 || $user->hasGroup(QubitAclGroup::EDITOR_ID));
@@ -74,9 +69,9 @@ class functionManageActions extends AhgActions
     /**
      * View a function record.
      */
-    public function executeView(sfWebRequest $request)
+    public function executeView($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $slug = $request->getParameter('slug');
 
         $this->func = \AhgFunctionManage\Services\FunctionCrudService::getBySlug($slug, $culture);
@@ -84,11 +79,11 @@ class functionManageActions extends AhgActions
             $this->forward404();
         }
 
-        $title = $this->func['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
+        $title = $this->func['authorizedFormOfName'] ?: __('Untitled');
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         $isAdmin = $user->isAuthenticated()
             && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID)
                 || $user->hasGroup(QubitAclGroup::EDITOR_ID));
@@ -101,14 +96,14 @@ class functionManageActions extends AhgActions
     /**
      * Edit or create a function record.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
         // ACL — require editor/admin
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {
@@ -129,8 +124,8 @@ class functionManageActions extends AhgActions
                 $this->forward404();
             }
 
-            $title = $this->func['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
-            $this->response->setTitle($this->context->i18n->__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
+            $title = $this->func['authorizedFormOfName'] ?: __('Untitled');
+            $this->response->setTitle(__('Edit %1%', ['%1%' => $title]) . ' - ' . $this->response->getTitle());
         } else {
             $this->func = [
                 'id' => null,
@@ -153,7 +148,7 @@ class functionManageActions extends AhgActions
                 'serialNumber' => 0,
             ];
 
-            $this->response->setTitle($this->context->i18n->__('Add new function') . ' - ' . $this->response->getTitle());
+            $this->response->setTitle(__('Add new function') . ' - ' . $this->response->getTitle());
         }
 
         // Handle POST
@@ -217,13 +212,13 @@ class functionManageActions extends AhgActions
     /**
      * Delete a function record.
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         $this->form = new sfForm();
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         // ACL
-        $user = $this->context->user;
+        $user = $this->getUser();
         if (!$user->isAuthenticated()
             || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
         ) {

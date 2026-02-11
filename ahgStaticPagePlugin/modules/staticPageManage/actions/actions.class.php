@@ -1,18 +1,13 @@
 <?php
 
-class staticPageManageActions extends AhgActions
+use AtomFramework\Http\Controllers\AhgController;
+
+class staticPageManageActions extends AhgController
 {
-    public function preExecute()
-    {
-        parent::preExecute();
-
-        sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N', 'Url', 'Qubit', 'Text', 'Date']);
-    }
-
     /**
      * List all static pages.
      */
-    public function executeList(sfWebRequest $request)
+    public function executeList($request)
     {
         // Require administrator or editor
         if (!$this->getUser()->isAdministrator()) {
@@ -21,7 +16,7 @@ class staticPageManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
 
         $this->response->setTitle(__('Static pages') . ' - ' . $this->response->getTitle());
 
@@ -31,7 +26,7 @@ class staticPageManageActions extends AhgActions
     /**
      * Edit or create a static page.
      */
-    public function executeEdit(sfWebRequest $request)
+    public function executeEdit($request)
     {
         // Require administrator or editor
         if (!$this->getUser()->isAdministrator()) {
@@ -40,7 +35,7 @@ class staticPageManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
@@ -130,7 +125,7 @@ class staticPageManageActions extends AhgActions
     /**
      * Delete a static page (with confirmation).
      */
-    public function executeDelete(sfWebRequest $request)
+    public function executeDelete($request)
     {
         // Require administrator
         if (!$this->getUser()->isAdministrator()) {
@@ -139,7 +134,7 @@ class staticPageManageActions extends AhgActions
             return;
         }
 
-        $culture = $this->context->user->getCulture();
+        $culture = $this->culture();
         $this->form = new sfForm();
         $id = (int) $request->getParameter('id');
 
