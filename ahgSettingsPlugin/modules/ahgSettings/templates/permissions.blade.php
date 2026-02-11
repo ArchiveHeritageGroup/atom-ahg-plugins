@@ -73,6 +73,7 @@
                       <td class="text-center">{!! $sf['disallow_master'] !!}</td>
                       <td class="text-center">{!! $sf['disallow_reference'] !!}</td>
                       <td class="text-center">{!! $sf['disallow_thumb'] !!}</td>
+                    </tr>
                   @endforeach
                   </tbody>
                 </table>

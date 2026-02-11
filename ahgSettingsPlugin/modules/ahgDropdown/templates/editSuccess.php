@@ -147,7 +147,7 @@
     </div>
 </div>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var taxonomy = '<?php echo esc_entities($taxonomy) ?>';
 var taxonomyLabel = '<?php echo esc_entities($taxonomyLabel) ?>';

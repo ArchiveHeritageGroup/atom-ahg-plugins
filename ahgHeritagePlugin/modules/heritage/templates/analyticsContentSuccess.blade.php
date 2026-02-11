@@ -234,7 +234,7 @@ $summary = [
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" {!! $csp_nonce !!}></script>
 <script {!! $csp_nonce !!}>
 @php
 $levelData = $summary['by_level'];

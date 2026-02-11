@@ -146,7 +146,7 @@
       </div>
     </div>
 
-    <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js"></script>
+    <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" {!! $csp_nonce !!}></script>
     <script {!! $csp_nonce !!}>
     var taxonomy = '{{ e($taxonomy) }}';
     var taxonomyLabel = '{{ e($taxonomyLabel) }}';

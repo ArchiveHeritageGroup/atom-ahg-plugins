@@ -13,7 +13,6 @@
     $selectedSpellcheckFields = json_decode($settings['spellcheck_fields'] ?? '[]', true) ?: [];
     $selectedTranslationFields = json_decode($settings['translation_fields'] ?? '["title","scope_and_content"]', true) ?: [];
     @endphp
-    ?>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="mb-0"><i class="fas fa-brain text-primary"></i> AI Services Settings</h1>
