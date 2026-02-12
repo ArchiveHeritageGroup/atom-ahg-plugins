@@ -316,7 +316,7 @@ class reportBuilderActions extends AhgController
         // Write header row
         $col = 1;
         foreach ($report->columns as $column) {
-            $sheet->setCellValueByColumnAndRow($col, 1, $allColumns[$column]['label'] ?? $column);
+            $sheet->setCellValue([$col, 1], $allColumns[$column]['label'] ?? $column);
             $col++;
         }
 
@@ -336,7 +336,7 @@ class reportBuilderActions extends AhgController
             $col = 1;
             foreach ($report->columns as $column) {
                 $value = $item->{$column} ?? '';
-                $sheet->setCellValueByColumnAndRow($col, $row, $value);
+                $sheet->setCellValue([$col, $row], $value);
                 $col++;
             }
             $row++;

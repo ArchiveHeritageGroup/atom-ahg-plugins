@@ -12,6 +12,7 @@ $rawFilters = is_array($rawReport->filters) ? $rawReport->filters : [];
 $rawCharts = is_array($rawReport->charts) ? $rawReport->charts : [];
 $rawSortConfig = is_array($rawReport->sort_config) ? $rawReport->sort_config : [];
 $rawLayout = is_array($rawReport->layout) ? $rawReport->layout : ['blocks' => []];
+$rawAllColumns = $sf_data->getRaw('allColumns');
 ?>
 <?php if ($sf_user->hasFlash('success')): ?>
     <div class="alert alert-success alert-dismissible fade show">
@@ -337,7 +338,7 @@ window.reportBuilder = {
     charts: <?php echo json_encode($rawCharts); ?>,
     sortConfig: <?php echo json_encode($rawSortConfig); ?>,
     layout: <?php echo json_encode($rawLayout); ?>,
-    allColumns: <?php echo json_encode($allColumns); ?>,
+    allColumns: <?php echo json_encode($rawAllColumns); ?>,
     apiSaveUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiSave'])); ?>,
     apiDataUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiData'])); ?>,
     apiChartUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiChartData'])); ?>
