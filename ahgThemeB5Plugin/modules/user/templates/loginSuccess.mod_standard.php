@@ -33,6 +33,13 @@
     </div>
   </form>
 
+  <!-- Demo Credentials -->
+  <div class="alert alert-info mt-3">
+    <h6 class="alert-heading"><i class="fas fa-info-circle me-1"></i><?php echo __('Demo Login'); ?></h6>
+    <p class="mb-1"><strong><?php echo __('Email'); ?>:</strong> <code>louise@theahg.co.za</code></p>
+    <p class="mb-0"><strong><?php echo __('Password'); ?>:</strong> <code>Password@123</code></p>
+  </div>
+
   <hr class="my-4">
 
   <!-- Researcher Registration -->

@@ -550,7 +550,7 @@
     }
 
     /**
-     * Update preview table headers
+     * Update preview table headers (draggable)
      */
     function updatePreviewHeaders() {
         const headers = document.getElementById('previewHeaders');
@@ -564,9 +564,102 @@
         let html = '';
         config.columns.forEach(function(col) {
             const colConfig = config.allColumns[col] || {};
-            html += '<th class="small">' + (colConfig.label || col) + '</th>';
+            html += '<th class="small draggable-col" data-column="' + col + '">' +
+                '<i class="bi bi-grip-vertical text-muted me-1" style="font-size:0.7rem;"></i>' +
+                (colConfig.label || col) + '</th>';
         });
         headers.innerHTML = html;
+
+        initHeaderDragDrop();
+    }
+
+    /**
+     * Initialize drag-drop on preview table header cells
+     */
+    function initHeaderDragDrop() {
+        var headers = document.getElementById('previewHeaders');
+        if (!headers) return;
+
+        if (typeof Sortable === 'undefined') {
+            setTimeout(initHeaderDragDrop, 150);
+            return;
+        }
+
+        // Destroy previous instance
+        if (headers._sortableInstance) {
+            headers._sortableInstance.destroy();
+            headers._sortableInstance = null;
+        }
+
+        if (headers.querySelectorAll('th.draggable-col').length < 2) return;
+
+        headers._sortableInstance = new Sortable(headers, {
+            animation: 150,
+            draggable: 'th.draggable-col',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            direction: 'horizontal',
+            onEnd: function() {
+                // Read new order from DOM
+                var newOrder = [];
+                headers.querySelectorAll('th.draggable-col').forEach(function(th) {
+                    if (th.dataset.column) newOrder.push(th.dataset.column);
+                });
+                config.columns = newOrder;
+
+                // Sync right sidebar Column Order list
+                syncColumnOrderPanel();
+
+                // Re-order preview data rows
+                reorderPreviewDataCells();
+
+                markDirty();
+            }
+        });
+    }
+
+    /**
+     * Sync the right-sidebar Column Order list to match config.columns
+     */
+    function syncColumnOrderPanel() {
+        var container = document.getElementById('selectedColumns');
+        if (!container) return;
+
+        // Build a map of existing <li> elements by column key
+        var liMap = {};
+        container.querySelectorAll('li[data-column]').forEach(function(li) {
+            liMap[li.dataset.column] = li;
+        });
+
+        // Re-append in new order
+        config.columns.forEach(function(col) {
+            if (liMap[col]) container.appendChild(liMap[col]);
+        });
+    }
+
+    /**
+     * Re-order cells in each preview data row to match new column order
+     */
+    function reorderPreviewDataCells() {
+        var body = document.getElementById('previewBody');
+        if (!body) return;
+
+        var headers = document.getElementById('previewHeaders');
+        if (!headers) return;
+
+        // Build column-index mapping from old DOM order stored in data rows
+        var rows = body.querySelectorAll('tr');
+        rows.forEach(function(row) {
+            var cells = row.querySelectorAll('td');
+            // Only re-order if cells have data-column attrs
+            if (cells.length > 0 && cells[0].dataset.column) {
+                var cellMap = {};
+                cells.forEach(function(td) { cellMap[td.dataset.column] = td; });
+                config.columns.forEach(function(col) {
+                    if (cellMap[col]) row.appendChild(cellMap[col]);
+                });
+            }
+        });
     }
 
     /**
@@ -587,7 +680,7 @@
             config.columns.forEach(function(col) {
                 let value = row[col] || '';
                 if (value.length > 50) value = value.substring(0, 50) + '...';
-                html += '<td class="small">' + escapeHtml(value) + '</td>';
+                html += '<td class="small" data-column="' + col + '">' + escapeHtml(value) + '</td>';
             });
             html += '</tr>';
         });

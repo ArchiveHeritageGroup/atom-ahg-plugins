@@ -27,11 +27,16 @@ if (!function_exists('isPluginActive')) {
 
 // Museum/CCO specific links for authenticated users
 if (isset($resource)) {
+  // Get raw resource to bypass sfOutputEscaperObjectDecorator (instanceof fails on wrapped objects)
+  $rawResource = isset($sf_data) ? $sf_data->getRaw('resource') : $resource;
   $resourceSlug = null;
-  if ($resource instanceof QubitInformationObject) {
-    $resourceSlug = $resource->slug;
-  } elseif (is_object($resource) && isset($resource->slug)) {
-    $resourceSlug = $resource->slug;
+  if ($rawResource instanceof QubitInformationObject) {
+    $resourceSlug = $rawResource->slug;
+  } elseif (is_object($rawResource) && property_exists($rawResource, 'slug')) {
+    $resourceSlug = $rawResource->slug;
+  } elseif (is_object($resource) && method_exists($resource, '__call')) {
+    // Fallback for escaped objects — access slug via method call
+    try { $resourceSlug = $resource->slug; } catch (Exception $e) {}
   }
   
   // Check which plugins are enabled
@@ -43,8 +48,8 @@ if (isset($resource)) {
   $hasResearch = isPluginActive('ahgResearchPlugin');
   $hasDisplay = isPluginActive('ahgDisplayPlugin');
 
-  // Only show section if at least one plugin is enabled
-  if ($resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
+  // Only show section if user is authenticated and at least one plugin is enabled
+  if ($sf_user->isAuthenticated() && $resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Collections Management'); ?></h4>

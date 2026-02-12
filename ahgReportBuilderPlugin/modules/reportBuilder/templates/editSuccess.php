@@ -358,70 +358,17 @@ window.reportBuilder = {
 #selectedColumns .sortable-item.sortable-chosen { background-color: #e3f2fd !important; }
 #selectedColumns .sortable-item.sortable-ghost { opacity: 0.4; background-color: #bbdefb !important; }
 .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.15) !important; }
+#previewHeaders th.draggable-col { cursor: grab; user-select: none; position: relative; white-space: nowrap; }
+#previewHeaders th.draggable-col:hover { background-color: #e3f2fd; }
+#previewHeaders th.draggable-col:active { cursor: grabbing; }
+#previewHeaders th.sortable-ghost { opacity: 0.3; background-color: #bbdefb !important; }
+#previewHeaders th.sortable-chosen { background-color: #e3f2fd !important; }
 </style>
 
 <!-- Load CDN libraries first -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<!-- Inline initialization as backup -->
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-(function() {
-    function initDragDrop() {
-        if (typeof Sortable === 'undefined') {
-            console.log('Waiting for Sortable...');
-            setTimeout(initDragDrop, 150);
-            return;
-        }
-
-        var container = document.getElementById('selectedColumns');
-        if (!container) {
-            console.log('selectedColumns container not found');
-            return;
-        }
-
-        if (container.sortableInstance) {
-            console.log('Already initialized');
-            return;
-        }
-
-        console.log('Creating Sortable instance...');
-        container.sortableInstance = Sortable.create(container, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            dragClass: 'sortable-drag',
-            handle: '.drag-handle',
-            draggable: '.sortable-item',
-            onStart: function(evt) {
-                console.log('Drag START:', evt.item.dataset.column);
-            },
-            onEnd: function(evt) {
-                console.log('Drag END:', evt.item.dataset.column, 'from', evt.oldIndex, 'to', evt.newIndex);
-                // Update config
-                if (window.reportBuilder) {
-                    window.reportBuilder.columns = [];
-                    container.querySelectorAll('li[data-column]').forEach(function(li) {
-                        window.reportBuilder.columns.push(li.dataset.column);
-                    });
-                    console.log('New order:', window.reportBuilder.columns);
-                }
-                // Mark dirty
-                var saveBtn = document.getElementById('btnSave');
-                if (saveBtn) saveBtn.innerHTML = '<i class="bi bi-save me-1"></i>Save *';
-            }
-        });
-        console.log('Sortable created successfully:', container.sortableInstance);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDragDrop);
-    } else {
-        initDragDrop();
-    }
-})();
-</script>
-
-<!-- Then load designer.js for other functionality -->
+<!-- Load designer.js (handles all Sortable init for columns + layout + headers) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js"></script>
 <?php end_slot() ?>
