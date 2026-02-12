@@ -159,13 +159,9 @@
                       render_title(get_search_i18n($doc, 'title', ['allowEmpty' => false])),
                       ['slug' => $doc['slug'], 'module' => 'informationobject']
                   ); ?>
-                  <?php $status = (isset($doc['publicationStatusId']))
-                      ? QubitTerm::getById($doc['publicationStatusId'])
-                      : null;
-                  ?>
-                  <?php if (isset($status) && QubitTerm::PUBLICATION_STATUS_DRAFT_ID == $status->id) { ?>
+                  <?php if (isset($doc['publicationStatusId']) && QubitTerm::PUBLICATION_STATUS_DRAFT_ID == $doc['publicationStatusId']) { ?>
                     <span class="text-muted">
-                      <?php echo ' (' . render_value_inline($status) . ')'; ?>
+                      <?php echo ' (' . (term_name($doc['publicationStatusId']) ?: '') . ')'; ?>
                     </span>
                   <?php } ?>
 

@@ -35,7 +35,7 @@
               <?php echo format_date($modification->createdAt, 'f'); ?>
             </td>
             <td>
-              <?php echo QubitTerm::getById($modification->actionTypeId)->getName(['cultureFallback' => true]); ?>
+              <?php echo term_name($modification->actionTypeId) ?: ''; ?>
             </td>
             <td>
               <?php echo link_to_if($sf_user->isAdministrator() && $modification->userId, $modification->userName, [QubitUser::getById($modification->userId), 'module' => 'user']); ?>

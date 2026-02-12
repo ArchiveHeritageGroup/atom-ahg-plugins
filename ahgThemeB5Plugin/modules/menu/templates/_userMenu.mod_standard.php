@@ -74,6 +74,10 @@ if ($isAuthenticated && $hasSpectrum) {
       </button>
     </form>
 
+    <div class="alert alert-info py-2 px-2 mt-2 mb-2 small">
+      <strong><?php echo __('Demo'); ?>:</strong> <code>louise@theahg.co.za</code> / <code>Password@123</code>
+    </div>
+
     <div class="text-center mt-2">
       <a href="<?php echo url_for(['module' => 'user', 'action' => 'passwordReset']); ?>" class="small text-muted">
         <i class="fas fa-key me-1"></i><?php echo __('Forgot password?'); ?>

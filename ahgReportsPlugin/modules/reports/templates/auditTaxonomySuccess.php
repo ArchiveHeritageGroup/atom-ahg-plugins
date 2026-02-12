@@ -32,8 +32,8 @@
 				</td>
 			</tr>
 			<tr>
-				<?php $taxonomy = QubitTerm::getById($item['SECONDARY_VALUE']); ?>
-				<?php $taxonomyObjectsAudit = QubitTerm::getById($item['RECORD_ID']); ?>
+				<?php $taxonomy = term_name($item['SECONDARY_VALUE']); ?>
+				<?php $taxonomyObjectsAudit = term_name($item['RECORD_ID']); ?>
 				<td>Name</td><td colspan=2><?php echo QubitTaxonomy::getById($taxonomy->taxonomyId).' - '.$taxonomyObjectsAudit; ?></td> 
 			</tr>
 			

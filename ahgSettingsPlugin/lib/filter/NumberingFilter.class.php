@@ -61,9 +61,9 @@ class NumberingFilter
     {
         // Check display standard
         if ($object->displayStandardId) {
-            $term = QubitTerm::getById($object->displayStandardId);
-            if ($term) {
-                $name = strtolower($term->getName(['sourceCulture' => true]));
+            $termName = term_name($object->displayStandardId, 'en');
+            if ($termName) {
+                $name = strtolower($termName);
 
                 $mapping = [
                     'isad' => 'archive',

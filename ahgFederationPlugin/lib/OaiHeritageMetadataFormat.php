@@ -247,9 +247,9 @@ class OaiHeritageMetadataFormat
             }
 
             // Actor type
-            $entityType = $creator->entityTypeId ? \QubitTerm::getById($creator->entityTypeId) : null;
-            if ($entityType) {
-                $xml->writeElement('heritage:type', self::escapeXml($entityType->getName(['culture' => 'en'])));
+            $entityTypeName = $creator->entityTypeId ? term_name($creator->entityTypeId, 'en') : '';
+            if ($entityTypeName) {
+                $xml->writeElement('heritage:type', self::escapeXml($entityTypeName));
             }
 
             $xml->endElement();
@@ -323,9 +323,9 @@ class OaiHeritageMetadataFormat
 
             // Media type
             if ($digitalObject->mediaTypeId) {
-                $mediaType = \QubitTerm::getById($digitalObject->mediaTypeId);
-                if ($mediaType) {
-                    $xml->writeElement('heritage:mediaType', $mediaType->getName(['culture' => 'en']));
+                $mediaTypeName = term_name($digitalObject->mediaTypeId, 'en');
+                if ($mediaTypeName) {
+                    $xml->writeElement('heritage:mediaType', $mediaTypeName);
                 }
             }
 

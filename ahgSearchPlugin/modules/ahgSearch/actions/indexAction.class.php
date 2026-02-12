@@ -47,7 +47,7 @@ class ahgSearchIndexAction extends AhgController
 $response = ['results' => []];
         foreach ($result['results'] as $hit) {
             $data = $hit['_source'] ?? [];
-            $levelOfDescription = isset($data['levelOfDescriptionId']) ? QubitTerm::getById($data['levelOfDescriptionId']) : null;
+            $levelOfDescription = isset($data['levelOfDescriptionId']) ? term_name($data['levelOfDescriptionId']) : null;
 
             $title = get_search_i18n($data, 'title', ['allowEmpty' => false]);
 
@@ -55,7 +55,7 @@ $response = ['results' => []];
                 'url' => url_for(['module' => 'informationobject', 'slug' => $data['slug'] ?? '']),
                 'title' => render_title($title),
                 'identifier' => isset($data['identifier']) && !empty($data['identifier']) ? render_value_inline($data['identifier']) . ' - ' : '',
-                'level' => null !== $levelOfDescription ? render_value_inline($levelOfDescription) : '',
+                'level' => $levelOfDescription ?: '',
             ];
 
             $response['results'][] = $responseItem;

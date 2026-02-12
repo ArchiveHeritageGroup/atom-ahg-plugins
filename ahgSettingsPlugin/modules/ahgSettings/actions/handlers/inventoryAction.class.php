@@ -71,7 +71,7 @@ class SettingsInventoryAction extends AhgEditController
 
                 if (false !== $value) {
                     foreach ($value as $key => $item) {
-                        if (null === QubitTerm::getById($item)) {
+                        if (!term_exists($item)) {
                             $this->unknownValueDetected = true;
                             unset($value[$key]);
                         }

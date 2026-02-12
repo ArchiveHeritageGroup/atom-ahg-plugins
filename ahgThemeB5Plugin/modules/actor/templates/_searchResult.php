@@ -55,13 +55,13 @@
 
         <?php if (
             !empty($doc['entityTypeId'])
-            && null !== $term = QubitTerm::getById($doc['entityTypeId'])
+            && null !== $termName = term_name($doc['entityTypeId'])
         ) { ?>
           <?php if ($showDash) { ?>
             <span class="text-muted mx-2"> · </span>
           <?php } ?>
           <span class="text-muted">
-            <?php echo render_value_inline($term); ?>
+            <?php echo $termName; ?>
           </span>
           <?php $showDash = true; ?>
         <?php } ?>

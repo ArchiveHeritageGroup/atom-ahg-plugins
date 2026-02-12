@@ -48,10 +48,7 @@
               </td>
               <td><?php echo link_to(render_value_inline(get_search_i18n($doc, 'title')), ['module' => 'informationobject', 'slug' => $doc['slug']]); ?></td>
               <td>
-                <?php $level = QubitTerm::getById($doc['levelOfDescriptionId']); ?>
-                <?php if (null !== $level) { ?>
-                  <?php echo $level->getName(); ?>
-                <?php } ?>
+                <?php echo term_name($doc['levelOfDescriptionId'] ?? null) ?: ''; ?>
               </td>
               <td>
                 <?php echo render_value_inline(render_search_result_date($doc['dates'])); ?>

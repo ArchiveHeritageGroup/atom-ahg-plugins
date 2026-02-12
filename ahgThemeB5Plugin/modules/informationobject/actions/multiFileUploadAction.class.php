@@ -91,9 +91,11 @@ class InformationObjectMultiFileUploadAction extends AhgController
                 ->get();
             
             foreach ($levels as $level) {
-                $term = QubitTerm::getById($level->id);
-                if ($term) {
-                    $choices[$this->context->routing->generate(null, [$term, 'module' => 'term'])] = $level->name;
+                if (term_exists($level->id)) {
+                    $slug = \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', $level->id)->value('slug');
+                    if ($slug) {
+                        $choices[$this->context->routing->generate(null, ['module' => 'term', 'slug' => $slug])] = $level->name;
+                    }
                 }
             }
         } else {

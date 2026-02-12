@@ -189,7 +189,7 @@ if ($sf_request->hasParameter('displayMode')) {
                   </h5>
                   <?php if (!empty($doc['entityTypeId'])): ?>
                     <p class="card-text small text-muted">
-                      <?php echo render_value(QubitTerm::getById($doc['entityTypeId'])); ?>
+                      <?php echo term_name($doc['entityTypeId']) ?: ''; ?>
                     </p>
                   <?php endif; ?>
                 </div>

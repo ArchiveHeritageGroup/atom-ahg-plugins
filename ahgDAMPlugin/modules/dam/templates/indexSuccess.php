@@ -149,7 +149,7 @@
       <?php } ?>
 
       <?php if ($resource->levelOfDescription) { ?>
-        <?php echo render_show(__('Level of description'), render_value_inline(QubitTerm::getById($resource->levelOfDescriptionId) ? QubitTerm::getById($resource->levelOfDescriptionId)->getName(['cultureFallback' => true]) : '')); ?>
+        <?php echo render_show(__('Level of description'), render_value_inline(term_name($resource->levelOfDescriptionId) ?: '')); ?>
       <?php } ?>
 
       <?php echo render_show(__('Extent and medium'), render_value($resource->getExtentAndMedium(['cultureFallback' => true]))); ?>

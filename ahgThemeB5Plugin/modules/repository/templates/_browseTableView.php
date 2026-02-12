@@ -72,7 +72,7 @@
         <td>
           <?php if (isset($doc['thematicAreas'])) { ?>
             <?php foreach ($doc['thematicAreas'] as $areaTerm) { ?>
-              <li><?php echo render_value_inline(QubitTerm::getById($areaTerm)); ?></li>
+              <li><?php echo term_name($areaTerm) ?: ''; ?></li>
             <?php } ?>
           <?php } ?>
         </td>

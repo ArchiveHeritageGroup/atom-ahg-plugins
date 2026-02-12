@@ -124,7 +124,7 @@ class VocabSyncService
             $termMap[$term->id] = $termData;
 
             // Determine root terms (parent is taxonomy root or null)
-            $taxonomyRootId = \QubitTerm::getById($taxonomyId)?->id;
+            $taxonomyRootId = DB::table('term')->where('id', $taxonomyId)->value('id');
             if ($term->parent_id === $taxonomyRootId || $term->parent_id === null) {
                 $rootTerms[] = $term->id;
             }

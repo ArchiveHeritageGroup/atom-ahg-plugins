@@ -144,9 +144,9 @@
 						<?php } elseif ('SECURITY_ID' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('SECURITY_ID', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>
 							<?php if ($strOlder != $strValues[$i]) { ?>
-								<?php echo '<td><i>Security Classification</i></td><td>'.QubitTerm::getById($strOlder)."</td><td bgcolor='#CCFF66'>".QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Security Classification</i></td><td>'.term_name($strOlder)."</td><td bgcolor='#CCFF66'>".term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } else { ?>
-								<?php echo '<td><i>Security Classification</i></td><td>'.QubitTerm::getById($strOlder).'</td><td>'.QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Security Classification</i></td><td>'.term_name($strOlder).'</td><td>'.term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } ?>
 
 						<?php } elseif ('ACTIVE' == trim($strFields[$i])) { ?>
@@ -164,25 +164,25 @@
 						<?php } elseif ('ENTITY_TYPE_ID' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('ENTITY_TYPE_ID', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>
 							<?php if ($strOlder != $strValues[$i]) { ?>
-								<?php echo '<td><i>Entity Type</i></td><td>'.QubitTerm::getById($strOlder)."</td><td bgcolor='#CCFF66'>".QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Entity Type</i></td><td>'.term_name($strOlder)."</td><td bgcolor='#CCFF66'>".term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } else { ?>
-								<?php echo '<td><i>Entity Type</i></td><td>'.QubitTerm::getById($strOlder).'</td><td>'.QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Entity Type</i></td><td>'.term_name($strOlder).'</td><td>'.term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } ?>
 
 						<?php } elseif ('DESCRIPTION_STATUS_ID' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('DESCRIPTION_STATUS_ID', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>
 							<?php if ($strOlder != $strValues[$i]) { ?>
-								<?php echo '<td><i>Status</i></td><td>'.QubitTerm::getById($strOlder)."</td><td bgcolor='#CCFF66'>".QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Status</i></td><td>'.term_name($strOlder)."</td><td bgcolor='#CCFF66'>".term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } else { ?>
-								<?php echo '<td><i>Status</i></td><td>'.QubitTerm::getById($strOlder).'</td><td>'.QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Status</i></td><td>'.term_name($strOlder).'</td><td>'.term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } ?>
 
 						<?php } elseif ('DESCRIPTION_DETAIL_ID' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('DESCRIPTION_DETAIL_ID', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>
 							<?php if ($strOlder != $strValues[$i]) { ?>
-								<?php echo '<td><i>Detail</i></td><td>'.QubitTerm::getById($strOlder)."</td><td bgcolor='#CCFF66'>".QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Detail</i></td><td>'.term_name($strOlder)."</td><td bgcolor='#CCFF66'>".term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } else { ?>
-								<?php echo '<td><i>Detail</i></td><td>'.QubitTerm::getById($strOlder).'</td><td>'.QubitTerm::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Detail</i></td><td>'.term_name($strOlder).'</td><td>'.term_name($strValues[$i]).'</td><tr>'; ?> 
 							<?php } ?>
 
 						<?php } elseif ('DESCRIPTION_IDENTIFIER' == trim($strFields[$i])) { ?>

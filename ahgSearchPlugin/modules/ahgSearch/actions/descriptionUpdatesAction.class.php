@@ -203,8 +203,8 @@ class ahgSearchDescriptionUpdatesAction extends AhgController
 
             case 'publicationStatus':
                 $choices = [
-                    QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID => QubitTerm::getById(QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID)->name,
-                    QubitTerm::PUBLICATION_STATUS_DRAFT_ID => QubitTerm::getById(QubitTerm::PUBLICATION_STATUS_DRAFT_ID)->name,
+                    QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID => term_name(QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID),
+                    QubitTerm::PUBLICATION_STATUS_DRAFT_ID => term_name(QubitTerm::PUBLICATION_STATUS_DRAFT_ID),
                     'all' => $this->context->i18n->__('All'),
                 ];
 

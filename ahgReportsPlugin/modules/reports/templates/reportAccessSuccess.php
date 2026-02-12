@@ -107,32 +107,32 @@ input[type="date"] {
             ?>
 
 			<?php if (isset($result->refusalId)) { ?> 
-				<?php if ('Please Select' == QubitTerm::getById($result->refusalId)) {?> <td>-</td> <?php } else { ?>
-				<td><?php echo __('%1%', ['%1%' => QubitTerm::getById($result->refusalId)]); ?></td> <?php } ?>
+				<?php if ('Please Select' == term_name($result->refusalId)) {?> <td>-</td> <?php } else { ?>
+				<td><?php echo __('%1%', ['%1%' => term_name($result->refusalId)]); ?></td> <?php } ?>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>
 			<?php if (isset($result->sensitivityId)) { ?> 
-				<?php if ('Please Select' == QubitTerm::getById($result->sensitivityId)) {?> <td>-</td> <?php } else { ?>
-				<td><?php echo __('%1%', ['%1%' => QubitTerm::getById($result->sensitivityId)]); ?></td> <?php } ?>
+				<?php if ('Please Select' == term_name($result->sensitivityId)) {?> <td>-</td> <?php } else { ?>
+				<td><?php echo __('%1%', ['%1%' => term_name($result->sensitivityId)]); ?></td> <?php } ?>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>
 			<?php if (isset($result->publishId)) { ?> 
-				<?php if ('Please Select' == QubitTerm::getById($result->publishId)) {?> <td>-</td> <?php } else { ?>
-				<td><?php echo __('%1%', ['%1%' => QubitTerm::getById($result->publishId)]); ?></td> <?php } ?>
+				<?php if ('Please Select' == term_name($result->publishId)) {?> <td>-</td> <?php } else { ?>
+				<td><?php echo __('%1%', ['%1%' => term_name($result->publishId)]); ?></td> <?php } ?>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>
 			<?php if (isset($result->classificationId)) { ?> 
-				<?php if ('Please Select' == QubitTerm::getById($result->publishId)) {?> <td>-</td> <?php } else { ?>
-				<td><?php echo __('%1%', ['%1%' => QubitTerm::getById($result->classificationId)]); ?></td> <?php } ?>
+				<?php if ('Please Select' == term_name($result->publishId)) {?> <td>-</td> <?php } else { ?>
+				<td><?php echo __('%1%', ['%1%' => term_name($result->classificationId)]); ?></td> <?php } ?>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>
 			<?php if (isset($result->restrictionId)) { ?> 
-				<?php if ('Please Select' == QubitTerm::getById($result->restrictionId)) {?> <td>-</td> <?php } else { ?>
-				<td><?php echo __('%1%', ['%1%' => QubitTerm::getById($result->restrictionId)]); ?></td> <?php } ?>
+				<?php if ('Please Select' == term_name($result->restrictionId)) {?> <td>-</td> <?php } else { ?>
+				<td><?php echo __('%1%', ['%1%' => term_name($result->restrictionId)]); ?></td> <?php } ?>
 			<?php } else { ?> 
 				<td>-</td> 
 			<?php }	?>

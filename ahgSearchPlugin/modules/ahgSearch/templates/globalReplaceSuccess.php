@@ -116,8 +116,7 @@
                 <td><?php echo isset($data['identifier']) ? render_value_inline($data['identifier']) : ''; ?></td>
                 <td>
                   <?php if (isset($data['levelOfDescriptionId'])) { ?>
-                    <?php $level = QubitTerm::getById($data['levelOfDescriptionId']); ?>
-                    <?php echo $level ? render_value_inline($level) : ''; ?>
+                    <?php echo term_name($data['levelOfDescriptionId']) ?: ''; ?>
                   <?php } ?>
                 </td>
               </tr>

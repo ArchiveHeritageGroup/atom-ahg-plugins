@@ -388,7 +388,7 @@
 							@if ('acl_group_i18n' == $item['DB_TABLE'])
 								@php $taxonomyObjectsAudit = QubitAclGroup::getById($item['RECORD_ID']); @endphp
 							@else
-								@php $taxonomyObjectsAudit = QubitTerm::getById($item['RECORD_ID']); @endphp
+								@php $taxonomyObjectsAudit = term_name($item['RECORD_ID']); @endphp
 							@endif
 							@if (null == $taxonomyObjectsAudit)
 								<td><a href="{{ url_for(['module' => '', 'action' => 'taxonomy', 'source' => $item['RECORD_ID']]) }}">Taxonomy/Term missing</a></td>

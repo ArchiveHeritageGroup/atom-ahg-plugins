@@ -376,7 +376,7 @@
 							<?php if ('acl_group_i18n' == $item['DB_TABLE']) { ?>
 								<?php $taxonomyObjectsAudit = QubitAclGroup::getById($item['RECORD_ID']); ?>
 							<?php } else { ?>
-								<?php $taxonomyObjectsAudit = QubitTerm::getById($item['RECORD_ID']); ?>
+								<?php $taxonomyObjectsAudit = term_name($item['RECORD_ID']); ?>
 							<?php } ?>
 							<?php if (null == $taxonomyObjectsAudit) { ?>
 								<td><?php echo link_to('Taxonomy/Term missing', ['module' => '', 'action' => 'taxonomy', 'source' => $item['RECORD_ID']]); ?></td> 

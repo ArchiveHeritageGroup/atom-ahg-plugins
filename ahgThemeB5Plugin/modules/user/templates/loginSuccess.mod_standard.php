@@ -23,6 +23,10 @@
         </div>
       </div>
     </div>
+    <div class="alert alert-info py-2 mb-3">
+      <i class="fas fa-info-circle me-1"></i><strong><?php echo __('Demo'); ?>:</strong>
+      <code>louise@theahg.co.za</code> / <code>Password@123</code>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <button type="submit" class="btn atom-btn-outline-success">
         <i class="fas fa-sign-in-alt me-1"></i><?php echo __('Log in'); ?>
@@ -32,13 +36,6 @@
       </a>
     </div>
   </form>
-
-  <!-- Demo Credentials -->
-  <div class="alert alert-info mt-3">
-    <h6 class="alert-heading"><i class="fas fa-info-circle me-1"></i><?php echo __('Demo Login'); ?></h6>
-    <p class="mb-1"><strong><?php echo __('Email'); ?>:</strong> <code>louise@theahg.co.za</code></p>
-    <p class="mb-0"><strong><?php echo __('Password'); ?>:</strong> <code>Password@123</code></p>
-  </div>
 
   <hr class="my-4">
 

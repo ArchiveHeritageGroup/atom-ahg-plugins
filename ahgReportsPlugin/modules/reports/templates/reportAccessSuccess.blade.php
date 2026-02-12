@@ -108,32 +108,32 @@ input[type="date"] {
             @endphp
 
 			@if (isset($result->refusalId))
-				@if ('Please Select' == QubitTerm::getById($result->refusalId)) <td>-</td> @else
-				<td>{{ __('%1%', ['%1%' => QubitTerm::getById($result->refusalId)]) }}</td> @endif
+				@if ('Please Select' == term_name($result->refusalId)) <td>-</td> @else
+				<td>{{ __('%1%', ['%1%' => term_name($result->refusalId)]) }}</td> @endif
 			@else
 				<td>-</td>
 			@endif
 			@if (isset($result->sensitivityId))
-				@if ('Please Select' == QubitTerm::getById($result->sensitivityId)) <td>-</td> @else
-				<td>{{ __('%1%', ['%1%' => QubitTerm::getById($result->sensitivityId)]) }}</td> @endif
+				@if ('Please Select' == term_name($result->sensitivityId)) <td>-</td> @else
+				<td>{{ __('%1%', ['%1%' => term_name($result->sensitivityId)]) }}</td> @endif
 			@else
 				<td>-</td>
 			@endif
 			@if (isset($result->publishId))
-				@if ('Please Select' == QubitTerm::getById($result->publishId)) <td>-</td> @else
-				<td>{{ __('%1%', ['%1%' => QubitTerm::getById($result->publishId)]) }}</td> @endif
+				@if ('Please Select' == term_name($result->publishId)) <td>-</td> @else
+				<td>{{ __('%1%', ['%1%' => term_name($result->publishId)]) }}</td> @endif
 			@else
 				<td>-</td>
 			@endif
 			@if (isset($result->classificationId))
-				@if ('Please Select' == QubitTerm::getById($result->publishId)) <td>-</td> @else
-				<td>{{ __('%1%', ['%1%' => QubitTerm::getById($result->classificationId)]) }}</td> @endif
+				@if ('Please Select' == term_name($result->publishId)) <td>-</td> @else
+				<td>{{ __('%1%', ['%1%' => term_name($result->classificationId)]) }}</td> @endif
 			@else
 				<td>-</td>
 			@endif
 			@if (isset($result->restrictionId))
-				@if ('Please Select' == QubitTerm::getById($result->restrictionId)) <td>-</td> @else
-				<td>{{ __('%1%', ['%1%' => QubitTerm::getById($result->restrictionId)]) }}</td> @endif
+				@if ('Please Select' == term_name($result->restrictionId)) <td>-</td> @else
+				<td>{{ __('%1%', ['%1%' => term_name($result->restrictionId)]) }}</td> @endif
 			@else
 				<td>-</td>
 			@endif
