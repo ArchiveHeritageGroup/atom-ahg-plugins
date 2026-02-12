@@ -1,5 +1,8 @@
 <?php
-class extendedRightsExportAction extends sfAction
+
+use AtomFramework\Http\Controllers\AhgController;
+
+class extendedRightsExportAction extends AhgController
 {
     public function execute($request)
     {

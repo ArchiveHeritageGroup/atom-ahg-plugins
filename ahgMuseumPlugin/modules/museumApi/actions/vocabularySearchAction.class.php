@@ -1,14 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * CCO Vocabulary Search API
- * 
+ *
  * Provides REST endpoint for vocabulary autocomplete.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgMuseumPlugin
  */
 
-class apiVocabularySearchAction extends sfAction
+class apiVocabularySearchAction extends AhgController
 {
     public function execute($request)
     {

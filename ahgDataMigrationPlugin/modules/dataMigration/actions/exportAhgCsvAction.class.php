@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Export transformed data to AHG Extended CSV format.
  * Includes standard ISAD fields PLUS AHG extended fields for:
@@ -8,7 +10,7 @@
  * - Provenance Events
  * - Digital Object metadata
  */
-class dataMigrationExportAhgCsvAction extends sfAction
+class dataMigrationExportAhgCsvAction extends AhgController
 {
     public function execute($request)
     {

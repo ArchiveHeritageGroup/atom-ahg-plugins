@@ -7,7 +7,7 @@
  * Displays a generic representation of a digital object.
  */
 
-class showGenericIconComponent extends sfComponent
+class showGenericIconComponent extends AhgComponents
 {
     public function execute($request)
     {

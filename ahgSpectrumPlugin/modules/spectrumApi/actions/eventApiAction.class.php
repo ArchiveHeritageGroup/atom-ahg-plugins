@@ -1,14 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Spectrum Event API Action
- * 
+ *
  * RESTful API for Spectrum procedure events.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgSpectrumPlugin
  */
 
-class eventApiAction extends sfAction
+class eventApiAction extends AhgController
 {
     public function execute($request)
     {

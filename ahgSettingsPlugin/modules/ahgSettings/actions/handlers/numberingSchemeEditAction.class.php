@@ -1,6 +1,7 @@
 <?php
 
 use AtomExtensions\Services\NumberingService;
+use AtomFramework\Http\Controllers\AhgController;
 
 /**
  * Numbering Scheme Edit Action
@@ -9,7 +10,7 @@ use AtomExtensions\Services\NumberingService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class AhgSettingsNumberingSchemeEditAction extends sfAction
+class AhgSettingsNumberingSchemeEditAction extends AhgController
 {
     public function execute($request)
     {

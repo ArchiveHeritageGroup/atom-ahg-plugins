@@ -3,7 +3,7 @@
  * Quick Links Menu Component - Hardcoded (no database)
  * Overrides core AtoM quickLinksMenuComponent
  */
-class quickLinksMenuComponent extends sfComponent
+class quickLinksMenuComponent extends AhgComponents
 {
     public function execute($request)
     {

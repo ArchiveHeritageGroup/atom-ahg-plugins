@@ -1,14 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Authority Search API Action
- * 
+ *
  * Provides AJAX endpoint for searching external authorities.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgMuseumPlugin
  */
 
-class apiAuthoritySearchAction extends sfAction
+class apiAuthoritySearchAction extends AhgController
 {
     public function execute($request)
     {

@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use AtomFramework\Http\Controllers\AhgController;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -7,10 +8,10 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Import Archival Package Action
  * Import exported archival packages (ZIP files) including metadata and digital objects
  * Pure Laravel Query Builder implementation.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class importArchivalPackageAction extends sfAction
+class importArchivalPackageAction extends AhgController
 {
     protected $tempDir;
     protected $importStats;

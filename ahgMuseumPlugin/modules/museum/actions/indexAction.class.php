@@ -9,12 +9,13 @@
  * @package ahgMuseumPlugin
  */
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Load AhgAccessGate for embargo checks
 require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Access/AhgAccessGate.php';
 
-class museumIndexAction extends sfAction
+class museumIndexAction extends AhgController
 {
     public function execute($request)
     {

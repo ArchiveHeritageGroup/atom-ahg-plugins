@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * AJAX endpoint for AI-powered subject suggestions.
  *
@@ -7,7 +9,7 @@
  * Returns ranked subject suggestions based on text matching, NER entities,
  * and usage patterns from the subject authority system.
  */
-class librarySuggestSubjectsAction extends sfAction
+class librarySuggestSubjectsAction extends AhgController
 {
     public function execute($request)
     {

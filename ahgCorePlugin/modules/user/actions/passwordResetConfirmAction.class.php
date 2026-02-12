@@ -1,6 +1,8 @@
 <?php
 
-class UserPasswordResetConfirmAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+
+class UserPasswordResetConfirmAction extends AhgController
 {
     public static $NAMES = [
         'password',

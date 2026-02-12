@@ -1,10 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Library Slug Preview Action
  * Mirrors core InformationObjectSlugPreviewAction for Library rename functionality
  */
-class librarySlugPreviewAction extends sfAction
+class librarySlugPreviewAction extends AhgController
 {
     public function execute($request)
     {

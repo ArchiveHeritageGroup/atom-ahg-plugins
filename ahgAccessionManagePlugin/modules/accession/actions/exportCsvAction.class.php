@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,7 +19,7 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class AccessionExportCsvAction extends sfAction
+class AccessionExportCsvAction extends AhgController
 {
     // Export CSV representation of descriptions occurring in search/browse results
     public function execute($request)

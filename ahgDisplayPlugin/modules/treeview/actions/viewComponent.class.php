@@ -4,7 +4,7 @@
  * Treeview component — sidebar vs full-width mode, ancestor loading.
  * Replaces base AtoM InformationObjectTreeViewComponent.
  */
-class treeviewViewComponent extends sfComponent
+class treeviewViewComponent extends AhgComponents
 {
     public function execute($request)
     {

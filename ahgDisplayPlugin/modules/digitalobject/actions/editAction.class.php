@@ -4,9 +4,10 @@
  * Digital Object Edit Action - Pure Laravel Implementation
  */
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class digitalobjectEditAction extends sfAction
+class digitalobjectEditAction extends AhgController
 {
     const TAXONOMY_MEDIA_TYPE = 46;
     const USAGE_REFERENCE = 141;

@@ -1,11 +1,13 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Webhook Management Action
  *
  * Provides UI for managing API webhooks - Issue #82
  */
-class settingsWebhooksAction extends sfAction
+class settingsWebhooksAction extends AhgController
 {
     public function execute($request)
     {

@@ -1,10 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Description updates — list of recently updated records.
  * Replaces base AtoM SearchDescriptionUpdatesAction.
  */
-class ahgSearchDescriptionUpdatesAction extends sfAction
+class ahgSearchDescriptionUpdatesAction extends AhgController
 {
     public static $NAMES = [
         'className',

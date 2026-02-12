@@ -1,6 +1,8 @@
 <?php
 
-class graphqlIndexAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+
+class graphqlIndexAction extends AhgController
 {
     protected $startTime;
     protected $apiKeyInfo = null;

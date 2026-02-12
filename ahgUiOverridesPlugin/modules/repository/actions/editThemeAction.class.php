@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\AclService;
 use AtomExtensions\Services\CacheService;
 
@@ -19,7 +20,7 @@ use AtomExtensions\Services\CacheService;
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RepositoryEditThemeAction extends sfAction
+class RepositoryEditThemeAction extends AhgController
 {
     public static $NAMES = [
         'backgroundColor',

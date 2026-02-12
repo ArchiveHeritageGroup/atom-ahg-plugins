@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Global search/replace for information object fields.
  * Replaces base AtoM SearchGlobalReplaceAction.
@@ -7,7 +9,7 @@
  * This action performs its own ES search rather than extending
  * SearchAdvancedAction (which is theme-dependent).
  */
-class ahgSearchGlobalReplaceAction extends sfAction
+class ahgSearchGlobalReplaceAction extends AhgController
 {
     public function execute($request)
     {

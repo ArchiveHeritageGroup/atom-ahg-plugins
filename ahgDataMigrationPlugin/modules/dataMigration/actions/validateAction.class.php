@@ -1,12 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Validation-only action for CSV imports.
  *
  * Validates a CSV file against sector-specific rules without importing any data.
  * Returns a detailed validation report with row/column error tracking.
  */
-class validateAction extends sfAction
+class validateAction extends AhgController
 {
     public function execute($request)
     {

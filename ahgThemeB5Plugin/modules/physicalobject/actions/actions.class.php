@@ -2,10 +2,10 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 // Include parent actions
-require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/editAction.class.php';
-require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
-require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/browseAction.class.php';
-require_once $this->config('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/deleteAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/editAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/browseAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/deleteAction.class.php';
 
 /**
  * Extended Physical Object Actions

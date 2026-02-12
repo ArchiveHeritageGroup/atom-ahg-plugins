@@ -1,9 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * ISBN Provider Edit Action
  */
-class libraryIsbnProviderEditAction extends sfAction
+class libraryIsbnProviderEditAction extends AhgController
 {
     public function execute($request)
     {

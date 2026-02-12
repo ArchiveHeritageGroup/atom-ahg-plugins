@@ -1,10 +1,6 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
-$frameworkBootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
-if (file_exists($frameworkBootstrap)) {
-    require_once $frameworkBootstrap;
-}
 
 class backupActions extends AhgController
 {

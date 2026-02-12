@@ -1,6 +1,6 @@
 <?php
 
-class showVideoComponent extends sfComponent
+class showVideoComponent extends AhgComponents
 {
     public function execute($request)
     {

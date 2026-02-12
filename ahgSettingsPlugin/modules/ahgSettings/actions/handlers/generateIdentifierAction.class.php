@@ -1,6 +1,7 @@
 <?php
 
 use AtomExtensions\Services\NumberingService;
+use AtomFramework\Http\Controllers\AhgController;
 
 /**
  * Generate Identifier API Action
@@ -12,7 +13,7 @@ use AtomExtensions\Services\NumberingService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class AhgSettingsGenerateIdentifierAction extends sfAction
+class AhgSettingsGenerateIdentifierAction extends AhgController
 {
     public function execute($request)
     {

@@ -8,9 +8,10 @@
  * @package ahgMuseumPlugin
  */
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class museumEditAction extends sfAction
+class museumEditAction extends AhgController
 {
     public static $NAMES = [
         'template',

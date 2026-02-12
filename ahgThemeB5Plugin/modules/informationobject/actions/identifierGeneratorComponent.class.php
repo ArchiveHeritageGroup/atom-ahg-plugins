@@ -10,7 +10,7 @@ use AtomExtensions\Services\NumberingService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class InformationobjectIdentifierGeneratorComponent extends sfComponent
+class InformationobjectIdentifierGeneratorComponent extends AhgComponents
 {
     public function execute($request)
     {

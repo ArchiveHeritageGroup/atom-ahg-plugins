@@ -5,7 +5,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class reportsMenuComponent extends sfComponent
+class reportsMenuComponent extends AhgComponents
 {
     public function execute($request)
     {

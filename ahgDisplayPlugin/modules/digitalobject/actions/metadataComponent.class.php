@@ -8,7 +8,7 @@
  * master file, reference copy, thumbnail, and preservation metadata.
  */
 
-class metadataComponent extends sfComponent
+class metadataComponent extends AhgComponents
 {
     public function execute($request)
     {

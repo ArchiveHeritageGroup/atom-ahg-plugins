@@ -1,6 +1,6 @@
 <?php
 
-class showAudioComponent extends sfComponent
+class showAudioComponent extends AhgComponents
 {
     public function execute($request)
     {

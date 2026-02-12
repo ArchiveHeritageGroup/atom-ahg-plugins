@@ -2,7 +2,7 @@
 /**
  * AHG Theme - Digital Object Show Component with 3D support
  */
-class DigitalObjectShowComponent extends sfComponent
+class DigitalObjectShowComponent extends AhgComponents
 {
     protected static $extensions3D = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'dae'];
 

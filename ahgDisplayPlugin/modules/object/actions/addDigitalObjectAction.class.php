@@ -1,5 +1,6 @@
 <?php
 use AtomExtensions\Services\AclService;
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /*
@@ -13,7 +14,7 @@ require_once sfConfig::get('sf_root_dir') . '/lib/arMetadataExtractionTrait.php'
 /**
  * Digital Object add component with metadata extraction.
  */
-class ObjectAddDigitalObjectAction extends sfAction
+class ObjectAddDigitalObjectAction extends AhgController
 {
     use arMetadataExtractionTrait;
 

@@ -47,6 +47,11 @@ class ActorBrowseService
 
     public function __construct(string $culture = 'en')
     {
+        // Ensure i18n helper __() is available for translations
+        if (!function_exists('__')) {
+            \sfContext::getInstance()->getConfiguration()->loadHelpers(['I18N']);
+        }
+
         $this->culture = $culture;
         $this->esHost = \sfConfig::get('app_opensearch_host', 'localhost');
         $this->esPort = (int) \sfConfig::get('app_opensearch_port', 9200);

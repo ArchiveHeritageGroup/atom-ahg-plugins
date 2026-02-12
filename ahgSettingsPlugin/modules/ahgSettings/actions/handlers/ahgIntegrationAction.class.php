@@ -1,12 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * AHG Central API Integration Settings Action
  *
  * Provides UI for configuring the AHG Central cloud API connection - Issue #52
  * This is for cloud services (NER training sync, future AI features) not local AI services.
  */
-class settingsAhgIntegrationAction extends sfAction
+class settingsAhgIntegrationAction extends AhgController
 {
     public function execute($request)
     {

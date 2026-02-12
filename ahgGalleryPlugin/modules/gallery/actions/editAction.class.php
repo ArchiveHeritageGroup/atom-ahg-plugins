@@ -1,8 +1,9 @@
 <?php
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 use AtomExtensions\Services\NumberingService;
 
-class galleryEditAction extends sfAction
+class galleryEditAction extends AhgController
 {
     protected $resource;
     protected $galleryData;

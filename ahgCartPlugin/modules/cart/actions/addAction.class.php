@@ -1,7 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
-require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
+require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 use Illuminate\Database\Capsule\Manager as DB;
 

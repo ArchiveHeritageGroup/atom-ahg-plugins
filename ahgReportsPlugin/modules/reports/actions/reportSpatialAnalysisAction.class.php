@@ -1,12 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Spatial Analysis Export Report Action
  *
  * Exports site records with GPS coordinates for GIS/spatial analysis.
  * Configurable filtering by place, subject, and coordinate source.
  */
-class reportsReportSpatialAnalysisAction extends sfAction
+class reportsReportSpatialAnalysisAction extends AhgController
 {
     public function execute($request)
     {

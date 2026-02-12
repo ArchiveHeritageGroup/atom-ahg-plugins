@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Load PHPMailer via framework autoloader or vendor path
@@ -17,7 +18,7 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
-class UserPasswordResetAction extends sfAction
+class UserPasswordResetAction extends AhgController
 {
     public static $NAMES = [
         'email',

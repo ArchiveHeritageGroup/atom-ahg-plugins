@@ -5,8 +5,9 @@
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgController;
 
-class digitalobjectEditAction extends sfAction
+class digitalobjectEditAction extends AhgController
 {
     const TAXONOMY_MEDIA_TYPE = 46;
     const USAGE_REFERENCE = 141;

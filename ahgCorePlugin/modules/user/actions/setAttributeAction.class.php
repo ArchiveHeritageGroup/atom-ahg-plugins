@@ -1,11 +1,13 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Set user attribute/preference action
  *
  * Allows setting user session attributes like preferred_iiif_viewer
  */
-class UserSetAttributeAction extends sfAction
+class UserSetAttributeAction extends AhgController
 {
     public function execute($request)
     {

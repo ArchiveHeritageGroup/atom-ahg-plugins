@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * AHG Term Taxonomy Plugin - Term Delete Action
  *
@@ -7,7 +9,7 @@
  * Follows the same pattern as other AHG manage plugin delete actions.
  */
 
-class TermTaxonomyDeleteAction extends sfAction
+class TermTaxonomyDeleteAction extends AhgController
 {
     public function execute($request)
     {

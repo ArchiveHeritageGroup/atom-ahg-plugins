@@ -1,10 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Access Filter Action - Integrates into ISAD detail view
  * Checks access before displaying content
  */
-class sfIsadPluginAccessFilterAction extends sfAction
+class sfIsadPluginAccessFilterAction extends AhgController
 {
     public function execute($request)
     {

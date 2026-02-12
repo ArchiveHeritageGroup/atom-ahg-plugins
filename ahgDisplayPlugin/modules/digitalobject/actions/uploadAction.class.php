@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * AHG Display Plugin - Digital Object Upload Action
  *
@@ -8,7 +10,7 @@
  * Validates against repository upload limits.
  */
 
-class DigitalObjectUploadAction extends sfAction
+class DigitalObjectUploadAction extends AhgController
 {
     public function execute($request)
     {

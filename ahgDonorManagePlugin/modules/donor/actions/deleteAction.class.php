@@ -1,6 +1,8 @@
 <?php
 
-class DonorDeleteAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+
+class DonorDeleteAction extends AhgController
 {
     public function execute($request)
     {

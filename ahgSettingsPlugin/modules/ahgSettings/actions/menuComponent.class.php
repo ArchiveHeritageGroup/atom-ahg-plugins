@@ -17,7 +17,7 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ahgSettingsMenuComponent extends sfComponent
+class ahgSettingsMenuComponent extends AhgComponents
 {
     public function execute($request)
     {

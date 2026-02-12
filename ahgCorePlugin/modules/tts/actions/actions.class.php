@@ -3,12 +3,6 @@
 use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-// Load PdfRedactionService if available
-$redactionServicePath = $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
-if (file_exists($redactionServicePath)) {
-    require_once $redactionServicePath;
-}
-
 /**
  * TTS Actions - Text-to-Speech API endpoints
  */
@@ -102,6 +96,12 @@ class ttsActions extends AhgController
 
         // Get the information object ID for redaction check
         $infoObjectId = $digitalObject->objectId;
+
+        // Load PdfRedactionService if available
+        $redactionServicePath = $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PdfRedactionService.php';
+        if (file_exists($redactionServicePath)) {
+            require_once $redactionServicePath;
+        }
 
         if (class_exists('ahgPrivacyPlugin\Service\PdfRedactionService')) {
             $redactionService = new \ahgPrivacyPlugin\Service\PdfRedactionService();

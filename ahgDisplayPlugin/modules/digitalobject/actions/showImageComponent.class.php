@@ -7,7 +7,7 @@
  * Displays an image representation of a digital object.
  */
 
-class showImageComponent extends sfComponent
+class showImageComponent extends AhgComponents
 {
     public function execute($request)
     {

@@ -3,6 +3,7 @@
 require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
 require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
 
+use AtomFramework\Http\Controllers\AhgController;
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;
 use AtomAhgPlugins\ahgCartPlugin\Services\EcommerceService;
 use Illuminate\Database\Capsule\Manager as DB;
@@ -14,7 +15,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartCheckoutAction extends sfAction
+class cartCheckoutAction extends AhgController
 {
     public function execute($request)
     {

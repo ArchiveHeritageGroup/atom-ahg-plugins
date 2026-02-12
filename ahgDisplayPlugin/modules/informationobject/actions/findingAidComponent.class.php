@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class findingAidComponent extends sfComponent
+class findingAidComponent extends AhgComponents
 {
     public function execute($request)
     {

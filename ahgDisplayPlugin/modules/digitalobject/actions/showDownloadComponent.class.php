@@ -7,7 +7,7 @@
  * Displays a download representation of a digital object.
  */
 
-class showDownloadComponent extends sfComponent
+class showDownloadComponent extends AhgComponents
 {
     public function execute($request)
     {

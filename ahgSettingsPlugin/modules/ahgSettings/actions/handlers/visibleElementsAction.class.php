@@ -1,6 +1,7 @@
 <?php
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
+use AtomFramework\Http\Controllers\AhgController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -24,7 +25,7 @@ use AtomExtensions\Services\CacheService;
  *
  * @author     Wu liu <wu.liu@usask.ca>
  */
-class SettingsVisibleElementsAction extends sfAction
+class SettingsVisibleElementsAction extends AhgController
 {
     public function execute($request)
     {

@@ -7,7 +7,7 @@
  * Displays a text/PDF representation of a digital object.
  */
 
-class showTextComponent extends sfComponent
+class showTextComponent extends AhgComponents
 {
     public function execute($request)
     {

@@ -7,8 +7,9 @@
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgController;
 
-class SettingsServicesAction extends sfAction
+class SettingsServicesAction extends AhgController
 {
     // Service status constants
     const STATUS_OK = 'ok';

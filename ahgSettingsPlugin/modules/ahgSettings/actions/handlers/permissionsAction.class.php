@@ -2,6 +2,7 @@
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\HtmlPurifierService;
 use AtomExtensions\Services\CacheService;
+use AtomFramework\Http\Controllers\AhgController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -27,7 +28,7 @@ use AtomExtensions\Services\CacheService;
  * @author     Jack Bates <jack@nottheoilrig.com>
  * @author     David Juhasz <david@artefactual.com>
  */
-class SettingsPermissionsAction extends sfAction
+class SettingsPermissionsAction extends AhgController
 {
     public function execute($request)
     {

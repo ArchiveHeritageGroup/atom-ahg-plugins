@@ -1,10 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Global autocomplete — multi-type header search using ES _msearch.
  * Replaces base AtoM SearchAutocompleteAction.
  */
-class ahgSearchAutocompleteAction extends sfAction
+class ahgSearchAutocompleteAction extends AhgController
 {
     public function execute($request)
     {

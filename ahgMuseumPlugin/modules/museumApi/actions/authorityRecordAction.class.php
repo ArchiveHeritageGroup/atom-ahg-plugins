@@ -1,14 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Authority Record API Action
- * 
+ *
  * Retrieves detailed record from an authority source.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgMuseumPlugin
  */
 
-class apiAuthorityRecordAction extends sfAction
+class apiAuthorityRecordAction extends AhgController
 {
     public function execute($request)
     {

@@ -1,10 +1,12 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Treeview sort action — drag-drop reordering via moveAfter/moveBefore.
  * Replaces base AtoM InformationObjectTreeViewSortAction.
  */
-class treeviewSortAction extends sfAction
+class treeviewSortAction extends AhgController
 {
     public function execute($request)
     {

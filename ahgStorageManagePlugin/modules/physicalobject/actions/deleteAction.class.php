@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -22,7 +24,7 @@
  *
  * @author     David Juhasz <david@artefactual.com>
  */
-class PhysicalObjectDeleteAction extends sfAction
+class PhysicalObjectDeleteAction extends AhgController
 {
     public function execute($request)
     {

@@ -1,10 +1,13 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Base Report Action - Common functionality for all report actions.
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-abstract class BaseReportAction extends sfAction
+abstract class BaseReportAction extends AhgController
 {
     /**
      * Check if user has report access.

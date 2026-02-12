@@ -1,6 +1,7 @@
 <?php
 
 use AtomExtensions\Services\NumberingService;
+use AtomFramework\Http\Controllers\AhgController;
 
 /**
  * Validate Identifier API Action
@@ -23,7 +24,7 @@ use AtomExtensions\Services\NumberingService;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class AhgSettingsValidateIdentifierAction extends sfAction
+class AhgSettingsValidateIdentifierAction extends AhgController
 {
     public function execute($request)
     {

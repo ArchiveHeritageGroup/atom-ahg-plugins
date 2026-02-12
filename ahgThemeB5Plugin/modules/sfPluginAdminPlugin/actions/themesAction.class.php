@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -25,7 +27,7 @@
  *
  * This override removes that path check so symlinked themes are displayed.
  */
-class sfPluginAdminPluginThemesAction extends sfAction
+class sfPluginAdminPluginThemesAction extends AhgController
 {
     public function execute($request)
     {

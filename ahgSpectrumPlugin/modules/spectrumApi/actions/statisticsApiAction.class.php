@@ -1,14 +1,17 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Spectrum Statistics API Action
- * 
+ *
  * RESTful API for Spectrum procedure statistics and reporting.
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgSpectrumPlugin
  */
 
-class statisticsApiAction extends sfAction
+class statisticsApiAction extends AhgController
 {
     public function execute($request)
     {

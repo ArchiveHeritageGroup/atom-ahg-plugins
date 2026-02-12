@@ -1,5 +1,7 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -17,7 +19,7 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class AccessionAddInformationObjectAction extends sfAction
+class AccessionAddInformationObjectAction extends AhgController
 {
     public function execute($request)
     {

@@ -10,10 +10,12 @@ use Illuminate\Database\Capsule\Manager as DB;
 // Include the metadata extraction trait from ahgMetadataExtractionPlugin
 require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgMetadataExtractionTrait.php';
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Digital Object add component with metadata extraction.
  */
-class ObjectAddDigitalObjectAction extends sfAction
+class ObjectAddDigitalObjectAction extends AhgController
 {
     use arMetadataExtractionTrait;
 

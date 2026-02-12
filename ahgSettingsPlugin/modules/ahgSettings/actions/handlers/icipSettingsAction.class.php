@@ -8,8 +8,9 @@
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgController;
 
-class SettingsIcipSettingsAction extends sfAction
+class SettingsIcipSettingsAction extends AhgController
 {
     public function execute($request)
     {

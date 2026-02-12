@@ -1,6 +1,8 @@
 <?php
 
-class settingsApiKeysAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+
+class settingsApiKeysAction extends AhgController
 {
     public function execute($request)
     {

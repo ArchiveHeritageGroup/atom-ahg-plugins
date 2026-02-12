@@ -1,12 +1,15 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Spectrum Procedure Update API
- * 
+ *
  * @author Johan Pieterse <johan@theahg.co.za>
  * @package ahgMuseumPlugin
  */
 
-class apiSpectrumUpdateProcedureAction extends sfAction
+class apiSpectrumUpdateProcedureAction extends AhgController
 {
     public function execute($request)
     {

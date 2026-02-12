@@ -10,7 +10,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class showCompoundComponent extends sfComponent
+class showCompoundComponent extends AhgComponents
 {
     public function execute($request)
     {

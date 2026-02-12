@@ -1,12 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Batch export existing AtoM records to sector-specific CSV format.
  *
  * Allows users to export records from AtoM using sector-specific CSV formats
  * that can be re-imported or used for reporting.
  */
-class dataMigrationBatchExportAction extends sfAction
+class dataMigrationBatchExportAction extends AhgController
 {
     public function execute($request)
     {

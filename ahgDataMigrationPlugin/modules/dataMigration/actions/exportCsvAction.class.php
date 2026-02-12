@@ -1,9 +1,11 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Export transformed data to sector-specific CSV format for AtoM import.
  */
-class dataMigrationExportCsvAction extends sfAction
+class dataMigrationExportCsvAction extends AhgController
 {
     public function execute($request)
     {

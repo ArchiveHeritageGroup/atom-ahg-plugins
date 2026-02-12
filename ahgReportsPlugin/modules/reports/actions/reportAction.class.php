@@ -1,12 +1,13 @@
 <?php
 use AtomExtensions\Services\AclService;
+use AtomFramework\Http\Controllers\AhgController;
 /**
  * Centralized Report Action
  * 
  * Reads report configuration from report_definition table
  * Dynamically generates reports based on code parameter
  */
-class reportsreportAction extends sfAction
+class reportsreportAction extends AhgController
 {
     protected $db;
     protected $reportDef;

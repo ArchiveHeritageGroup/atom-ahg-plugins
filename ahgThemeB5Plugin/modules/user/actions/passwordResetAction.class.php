@@ -9,8 +9,9 @@ require '/usr/share/nginx/phpmailer/src/Exception.php';
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
+use AtomFramework\Http\Controllers\AhgController;
 
-class UserPasswordResetAction extends sfAction
+class UserPasswordResetAction extends AhgController
 {
     public static $NAMES = [
         'email',

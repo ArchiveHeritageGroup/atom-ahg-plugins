@@ -1,4 +1,7 @@
 <?php
+
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Library item view action.
  */
@@ -6,7 +9,7 @@
 // Load AhgAccessGate for embargo checks
 require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Access/AhgAccessGate.php';
 
-class libraryIndexAction extends sfAction
+class libraryIndexAction extends AhgController
 {
     public function execute($request)
     {

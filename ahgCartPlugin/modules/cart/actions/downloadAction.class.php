@@ -2,6 +2,7 @@
 
 require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Repositories/EcommerceRepository.php';
 
+use AtomFramework\Http\Controllers\AhgController;
 use AtomAhgPlugins\ahgCartPlugin\Repositories\EcommerceRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -17,7 +18,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class cartDownloadAction extends sfAction
+class cartDownloadAction extends AhgController
 {
     public function execute($request)
     {

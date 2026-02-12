@@ -1,8 +1,9 @@
 <?php
 use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgController;
 
-class AhgSettingsExportAction extends sfAction
+class AhgSettingsExportAction extends AhgController
 {
     public function execute($request)
     {

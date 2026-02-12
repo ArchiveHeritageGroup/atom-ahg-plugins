@@ -3,6 +3,7 @@
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgController;
 
 /**
  * Sector-specific numbering settings (GLAM/DAM).
@@ -16,7 +17,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Empty value = inherit global setting.
  */
-class AhgSettingsSectorNumberingAction extends sfAction
+class AhgSettingsSectorNumberingAction extends AhgController
 {
     /**
      * Sector override keys.

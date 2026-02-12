@@ -10,7 +10,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class imageflowComponent extends sfComponent
+class imageflowComponent extends AhgComponents
 {
     public function execute($request)
     {

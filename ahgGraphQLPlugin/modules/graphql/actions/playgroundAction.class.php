@@ -1,6 +1,8 @@
 <?php
 
-class graphqlPlaygroundAction extends sfAction
+use AtomFramework\Http\Controllers\AhgController;
+
+class graphqlPlaygroundAction extends AhgController
 {
     public function execute($request)
     {

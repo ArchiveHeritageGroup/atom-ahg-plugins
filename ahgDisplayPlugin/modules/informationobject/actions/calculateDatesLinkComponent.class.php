@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class calculateDatesLinkComponent extends sfComponent
+class calculateDatesLinkComponent extends AhgComponents
 {
     public function execute($request)
     {

@@ -9,9 +9,10 @@
  * @package ahgMuseumPlugin
  */
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class cidocExportAction extends sfAction
+class cidocExportAction extends AhgController
 {
     public function execute($request)
     {

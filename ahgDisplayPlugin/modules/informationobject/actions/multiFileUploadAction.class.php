@@ -13,10 +13,12 @@
  * (at your option) any later version.
  */
 
+use AtomFramework\Http\Controllers\AhgController;
+
 // Include the metadata extraction trait (from lib/ - autoloaded by Symfony)
 require_once sfConfig::get('sf_root_dir') . '/lib/arMetadataExtractionTrait.php';
 
-class InformationObjectMultiFileUploadAction extends sfAction
+class InformationObjectMultiFileUploadAction extends AhgController
 {
     // Use the universal metadata extraction trait
     use arMetadataExtractionTrait;

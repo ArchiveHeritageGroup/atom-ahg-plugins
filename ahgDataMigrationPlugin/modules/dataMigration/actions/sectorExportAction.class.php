@@ -1,11 +1,13 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Sector-specific export action.
  *
  * Exports records from the database using sector-specific exporter.
  */
-class sectorExportAction extends sfAction
+class sectorExportAction extends AhgController
 {
     public function execute($request)
     {

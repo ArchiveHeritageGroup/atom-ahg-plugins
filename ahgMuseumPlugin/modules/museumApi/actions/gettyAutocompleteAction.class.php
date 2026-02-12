@@ -1,12 +1,14 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * Getty Autocomplete Action.
  *
  * AJAX endpoint for searching Getty vocabularies (AAT, TGN, ULAN).
  * Returns JSON results for use in form autocomplete fields.
  */
-class gettyAutocompleteAction extends sfAction
+class gettyAutocompleteAction extends AhgController
 {
     public function execute($request)
     {

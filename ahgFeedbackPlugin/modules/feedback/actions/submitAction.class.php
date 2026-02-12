@@ -1,5 +1,6 @@
 <?php
 
+use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
@@ -7,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @author Johan Pieterse <johan@plainsailingisystems.co.za>
  */
-class feedbackSubmitAction extends sfAction
+class feedbackSubmitAction extends AhgController
 {
     public static $NAMES = [
         'feed_name',
