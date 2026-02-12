@@ -25,11 +25,11 @@ class DonorIndexAction extends AhgController
 
         // ACL check — donors require authenticated editor/admin
         $user = $this->getUser();
-        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
 
         // For read access, allow all authenticated users (donors are not public)
         if (!$user->isAuthenticated()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $title = $this->donor['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');

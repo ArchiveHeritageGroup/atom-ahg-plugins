@@ -59,8 +59,8 @@ class TermTaxonomyEditAction extends AhgEditController
             }
 
             // Check authorization
-            if (QubitTerm::isProtected($this->resource->id) || (!QubitAcl::check($this->resource, 'update') && !QubitAcl::check($this->resource, 'translate'))) {
-                QubitAcl::forwardUnauthorized();
+            if (QubitTerm::isProtected($this->resource->id) || (!\AtomExtensions\Services\AclService::check($this->resource, 'update') && !\AtomExtensions\Services\AclService::check($this->resource, 'translate'))) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
 
             // Add optimistic lock
@@ -79,13 +79,13 @@ class TermTaxonomyEditAction extends AhgEditController
                 $params = $this->context->routing->parse(Qubit::pathInfo($this->request->taxonomy));
                 $taxonomy = $params['_sf_route']->resource;
 
-                $authorized = QubitAcl::check($taxonomy, 'createTerm');
+                $authorized = \AtomExtensions\Services\AclService::check($taxonomy, 'createTerm');
             } else {
-                $authorized = QubitAcl::check(QubitTerm::getRoot(), 'create');
+                $authorized = \AtomExtensions\Services\AclService::check(QubitTerm::getRoot(), 'create');
             }
 
             if (!$authorized) {
-                QubitAcl::forwardUnauthorized();
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         }
 
@@ -405,8 +405,8 @@ class TermTaxonomyEditAction extends AhgEditController
         parent::processForm();
 
         // Check authorization for new term
-        if (!isset($this->getRoute()->resource) && !QubitAcl::check($this->resource->taxonomy, 'createTerm')) {
-            QubitAcl::forwardUnauthorized();
+        if (!isset($this->getRoute()->resource) && !\AtomExtensions\Services\AclService::check($this->resource->taxonomy, 'createTerm')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $this->scopeNotesComponent->processForm();

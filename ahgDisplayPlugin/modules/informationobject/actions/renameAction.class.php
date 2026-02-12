@@ -57,10 +57,10 @@ class InformationObjectRenameAction extends AhgEditController
         $this->resource = $this->getRoute()->resource;
 
         if (
-            !QubitAcl::check($this->resource, 'update')
-            && !$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID)
+            !\AtomExtensions\Services\AclService::check($this->resource, 'update')
+            && !$this->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID)
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
     }
 

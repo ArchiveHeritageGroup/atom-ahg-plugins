@@ -18,9 +18,9 @@ class dcManageActions extends AhgController
         // ACL — require editor/admin
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Load IO data (forward() doesn't pass action variables)

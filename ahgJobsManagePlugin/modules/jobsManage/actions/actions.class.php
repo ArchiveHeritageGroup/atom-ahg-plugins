@@ -16,7 +16,7 @@ class jobsManageActions extends AhgController
 
         $user = $this->getUser();
         $userId = $this->userId();
-        $isAdmin = $user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID);
+        $isAdmin = $user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID);
 
         $this->response->setTitle(__('Jobs') . ' - ' . $this->response->getTitle());
 
@@ -68,7 +68,7 @@ class jobsManageActions extends AhgController
 
         $user = $this->getUser();
         $userId = $this->userId();
-        $isAdmin = $user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID);
+        $isAdmin = $user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID);
 
         $id = (int) $request->getParameter('id');
         if (!$id) {
@@ -84,7 +84,7 @@ class jobsManageActions extends AhgController
 
         // Non-admins can only see their own jobs
         if (!$isAdmin && $this->job->user_id != $userId) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Get notes
@@ -118,7 +118,7 @@ class jobsManageActions extends AhgController
 
         $user = $this->getUser();
         $userId = $this->userId();
-        $isAdmin = $user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID);
+        $isAdmin = $user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID);
 
         $service = new \AhgJobsManage\Services\JobsService();
 
@@ -148,7 +148,7 @@ class jobsManageActions extends AhgController
             }
             // Non-admins can only delete their own jobs
             if (!$isAdmin && $this->job->user_id != $userId) {
-                QubitAcl::forwardUnauthorized();
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         }
 
@@ -167,7 +167,7 @@ class jobsManageActions extends AhgController
 
         $user = $this->getUser();
         $userId = $this->userId();
-        $isAdmin = $user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID);
+        $isAdmin = $user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID);
 
         $service = new \AhgJobsManage\Services\JobsService();
         $jobs = $service->exportCsv($userId, $isAdmin);

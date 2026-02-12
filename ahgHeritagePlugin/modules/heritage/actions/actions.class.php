@@ -741,7 +741,7 @@ class heritageActions extends AhgController
             $groups = $user->getAclGroups();
             $isEditor = false;
             foreach ($groups as $group) {
-                if (in_array($group->id, [QubitAclGroup::ADMINISTRATOR_ID, QubitAclGroup::EDITOR_ID])) {
+                if (in_array($group->id, [\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID, \AtomExtensions\Constants\AclConstants::EDITOR_ID])) {
                     $isEditor = true;
                     break;
                 }

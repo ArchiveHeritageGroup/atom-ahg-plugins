@@ -17,8 +17,8 @@ class DonorEditAction extends AhgController
 
         // ACL check — donors require authenticated editor/admin
         $user = $this->context->user;
-        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
-            QubitAcl::forwardUnauthorized();
+        if (!$user->isAuthenticated() || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');

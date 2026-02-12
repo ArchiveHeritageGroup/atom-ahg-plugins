@@ -28,8 +28,8 @@ class TermTaxonomyDeleteAction extends AhgController
         }
 
         // Check user authorization
-        if (!QubitAcl::check($this->resource, 'delete')) {
-            QubitAcl::forwardUnauthorized();
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'delete')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         if ($request->isMethod('delete')) {

@@ -74,10 +74,10 @@ class donorManageActions extends AhgController
 
         // ACL — donors require authenticated editor/admin
         $user = $this->getUser();
-        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+        $isAdmin = $user->isAuthenticated() && ($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
 
         if (!$user->isAuthenticated()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $title = $this->donor['authorizedFormOfName'] ?: $this->context->i18n->__('Untitled');
@@ -113,8 +113,8 @@ class donorManageActions extends AhgController
 
         // ACL — donors require authenticated editor/admin
         $user = $this->getUser();
-        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
-            QubitAcl::forwardUnauthorized();
+        if (!$user->isAuthenticated() || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');
@@ -176,8 +176,8 @@ class donorManageActions extends AhgController
 
         // ACL
         $user = $this->getUser();
-        if (!$user->isAuthenticated() || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))) {
-            QubitAcl::forwardUnauthorized();
+        if (!$user->isAuthenticated() || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');

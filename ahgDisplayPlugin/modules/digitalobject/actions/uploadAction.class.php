@@ -28,13 +28,13 @@ class DigitalObjectUploadAction extends AhgController
         }
 
         // Check user authorization
-        if (!QubitAcl::check($this->object, 'update')) {
+        if (!\AtomExtensions\Services\AclService::check($this->object, 'update')) {
             throw new sfException();
         }
 
         // Check if uploads are allowed
         if (!QubitDigitalObject::isUploadAllowed()) {
-            QubitAcl::forwardToSecureAction();
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
         }
 
         $repo = $this->object->getRepository(['inherit' => true]);

@@ -153,7 +153,7 @@
                 $extraInputs = '<input class="list" type="hidden" value="'
                     .url_for(['module' => 'term', 'action' => 'autocomplete', 'taxonomy' => $taxonomyUrl])
                     .'">';
-                if (QubitAcl::check($taxonomy, 'createTerm')) {
+                if (\AtomExtensions\Services\AclService::check($taxonomy, 'createTerm')) {
                     $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
                         .url_for(['module' => 'term', 'action' => 'add', 'taxonomy' => $taxonomyUrl])
                         .' #name">';
@@ -171,7 +171,7 @@
                 $extraInputs = '<input class="list" type="hidden" value="'
                     .url_for(['module' => 'term', 'action' => 'autocomplete', 'taxonomy' => $taxonomyUrl])
                     .'">';
-                if (QubitAcl::check($taxonomy, 'createTerm')) {
+                if (\AtomExtensions\Services\AclService::check($taxonomy, 'createTerm')) {
                     $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
                         .url_for(['module' => 'term', 'action' => 'add', 'taxonomy' => $taxonomyUrl])
                         .' #name">';

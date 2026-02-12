@@ -19,7 +19,7 @@ class ricDashboardActions extends AhgController
             $this->redirect('user/login');
         }
 
-        // Check admin access - use isAdministrator() instead of QubitAcl::check()
+        // Check admin access - use isAdministrator() instead of AclService::check()
         if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }

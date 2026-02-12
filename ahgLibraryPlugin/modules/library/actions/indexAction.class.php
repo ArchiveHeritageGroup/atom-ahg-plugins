@@ -37,8 +37,8 @@ class libraryIndexAction extends AhgController
         }
 
         // Check read permission
-        if (!QubitAcl::check($this->resource, 'read')) {
-            QubitAcl::forwardToSecureAction();
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'read')) {
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
         }
 
         // Check embargo access

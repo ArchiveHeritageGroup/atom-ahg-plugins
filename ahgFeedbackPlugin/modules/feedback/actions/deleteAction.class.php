@@ -11,7 +11,7 @@ class feedbackDeleteAction extends AhgController
     public function execute($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $this->resource = QubitFeedback::getById($request->getParameter('id'));

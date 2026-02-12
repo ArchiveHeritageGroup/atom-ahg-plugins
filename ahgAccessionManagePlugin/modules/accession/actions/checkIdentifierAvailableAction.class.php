@@ -24,7 +24,7 @@ class AccessionCheckIdentifierAvailableAction extends AhgController
     public function execute($request)
     {
         // Check user authorization
-        if (!QubitAcl::check($this->resource, 'create') && !QubitAcl::check($this->resource, 'update')) {
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'create') && !\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             $this->getResponse()->setStatusCode(401);
 
             return sfView::NONE;

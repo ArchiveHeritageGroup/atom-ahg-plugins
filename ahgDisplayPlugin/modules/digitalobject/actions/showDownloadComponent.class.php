@@ -39,7 +39,7 @@ class showDownloadComponent extends AhgComponents
                 || QubitTerm::REFERENCE_ID == $this->usageType
             )
             && QubitTerm::OFFLINE_ID != $this->resource->usageId
-            && QubitAcl::check($this->resource->object, 'readMaster')
+            && \AtomExtensions\Services\AclService::check($this->resource->object, 'readMaster')
         ) {
             $this->link = $this->resource->getPublicPath();
         }

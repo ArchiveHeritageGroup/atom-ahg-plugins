@@ -45,7 +45,7 @@ class RequestToPublishBrowseAction extends AhgController
 	}
 	
     $criteria = new Criteria;
-	if (!$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID) && !$this->getUser()->isAdministrator()) {
+	if (!$this->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID) && !$this->getUser()->isAdministrator()) {
 		$criteria->add(QubitRequestToPublishI18n::UNIQUE_IDENTIFIER, $this->getUser()->getAttribute('user_id'));
 	}
 	if ('pending' === $this->filter) {

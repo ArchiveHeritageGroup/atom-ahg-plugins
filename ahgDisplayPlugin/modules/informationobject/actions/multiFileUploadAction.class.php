@@ -34,13 +34,13 @@ class InformationObjectMultiFileUploadAction extends AhgController
         }
 
         // Check user authorization
-        if (!QubitAcl::check($this->resource, 'update') && !$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID)) {
-            QubitAcl::forwardUnauthorized();
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'update') && !$this->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID)) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Check if uploads are allowed
         if (!QubitDigitalObject::isUploadAllowed()) {
-            QubitAcl::forwardToSecureAction();
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
         }
 
         // Get max upload size limits

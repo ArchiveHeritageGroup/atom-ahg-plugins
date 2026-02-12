@@ -15,7 +15,7 @@ class ahgSearchGlobalReplaceAction extends AhgController
     {
         // Admin-only
         if (!$this->context->user->isAdministrator()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $culture = $this->context->user->getCulture();

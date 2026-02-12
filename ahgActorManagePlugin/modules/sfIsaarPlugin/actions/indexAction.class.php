@@ -21,7 +21,7 @@ class sfIsaarPluginIndexAction extends ActorIndexAction
 
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
 
-        if (QubitAcl::check($this->resource, 'update')) {
+        if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             $validatorSchema = new sfValidatorSchema();
             $values = [];
 

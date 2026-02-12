@@ -45,7 +45,7 @@ class reportBuilderActions extends AhgController
         if (!$this->getUser()->isAdministrator() &&
             !$this->getUser()->hasCredential('editor') &&
             !$this->getUser()->hasCredential('contributor')) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
     }
 

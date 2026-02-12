@@ -20,9 +20,9 @@ class treeviewSortAction extends AhgController
         // ACL check + protect root object
         if (
             QubitInformationObject::ROOT_ID == $this->resource->id
-            || !QubitAcl::check($this->resource, 'update')
+            || !\AtomExtensions\Services\AclService::check($this->resource, 'update')
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Parse the target object reference

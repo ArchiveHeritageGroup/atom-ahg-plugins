@@ -2,6 +2,8 @@
 
 namespace AhgSearch\Services;
 
+use AtomExtensions\Constants\AclConstants;
+use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
 
 class SearchService
@@ -349,10 +351,10 @@ class SearchService
      */
     protected function buildDraftFilter(): ?array
     {
-        $repositoryViewDrafts = \QubitAcl::getRepositoryAccess('viewDraft');
+        $repositoryViewDrafts = AclService::getRepositoryAccess('viewDraft');
 
         if (1 === count($repositoryViewDrafts)) {
-            if (\QubitAcl::DENY === $repositoryViewDrafts[0]['access']) {
+            if (AclConstants::DENY === $repositoryViewDrafts[0]['access']) {
                 return ['term' => ['publicationStatusId' => \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID]];
             }
 
@@ -368,7 +370,7 @@ class SearchService
 
         $should[] = ['term' => ['publicationStatusId' => \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID]];
 
-        if (\QubitAcl::GRANT === $globalRule['access']) {
+        if (AclConstants::GRANT === $globalRule['access']) {
             return ['bool' => ['must_not' => [['bool' => ['should' => $should]]]]];
         }
 

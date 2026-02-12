@@ -22,7 +22,7 @@ class librarySlugPreviewAction extends AhgController
             return sfView::NONE;
         }
 
-        if ($this->resource && !QubitAcl::check($this->resource, 'read')) {
+        if ($this->resource && !\AtomExtensions\Services\AclService::check($this->resource, 'read')) {
             $this->response->setStatusCode(401);
             return sfView::NONE;
         }

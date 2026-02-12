@@ -11,9 +11,9 @@ class radManageActions extends AhgController
 
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         \IoFormHelper::loadIoData($this, $request, $culture);

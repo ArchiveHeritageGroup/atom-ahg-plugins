@@ -20,8 +20,8 @@ class libraryEditAction extends AhgController
             }
             
             // Check update permission
-            if (!QubitAcl::check($this->resource, 'update')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
             
             $this->loadLibraryData($this->resource->id);
@@ -31,8 +31,8 @@ class libraryEditAction extends AhgController
             $this->itemLocation = [];
             
             // Check create permission on root
-            if (!QubitAcl::check(QubitInformationObject::getRoot(), 'create')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'create')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         }
 

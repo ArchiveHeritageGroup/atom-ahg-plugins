@@ -24,7 +24,7 @@ class DonorAutocompleteAction extends AhgController
     {
         // Check user authorization
         if (!$this->getUser()->isAuthenticated()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         if (!isset($request->limit)) {

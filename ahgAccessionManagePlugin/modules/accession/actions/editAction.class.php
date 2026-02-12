@@ -52,13 +52,13 @@ class AccessionEditAction extends AhgEditController
             $this->resource = $this->getRoute()->resource;
 
             // Check user authorization
-            if (!QubitAcl::check($this->resource, 'update')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         } else {
             // Check user authorization
-            if (!QubitAcl::check($this->resource, 'create')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check($this->resource, 'create')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         }
 

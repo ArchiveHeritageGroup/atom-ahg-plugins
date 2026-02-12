@@ -20,7 +20,7 @@ class treeviewViewComponent extends AhgComponents
 
         // Sidebar mode: only sortable when sorting by lft and user has update access
         $this->sortable = 'none' === sfConfig::get('app_sort_treeview_informationobject')
-            && QubitAcl::check($this->resource, 'update');
+            && \AtomExtensions\Services\AclService::check($this->resource, 'update');
 
         // Load ancestors (no ACL check needed)
         $this->ancestors = $this->resource->getAncestors()->orderBy('lft');

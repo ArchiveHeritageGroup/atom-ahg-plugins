@@ -2,6 +2,7 @@
 
 namespace ahgExtendedRightsPlugin\Services;
 
+use AtomExtensions\Services\AclService;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Support\Collection;
 
@@ -445,7 +446,7 @@ class EmbargoService
         // Check if user has update permission on the object
         try {
             $resource = \QubitInformationObject::getById($objectId);
-            if ($resource && \QubitAcl::check($resource, 'update')) {
+            if ($resource && AclService::check($resource, 'update')) {
                 return true;
             }
         } catch (\Exception $e) {
@@ -499,7 +500,7 @@ class EmbargoService
 
         // If user can bypass, return all IDs
         if ($user && method_exists($user, 'isAuthenticated') && $user->isAuthenticated()) {
-            if (\QubitAcl::check('QubitInformationObject', 'update')) {
+            if (AclService::check('QubitInformationObject', 'update')) {
                 return $objectIds;
             }
         }

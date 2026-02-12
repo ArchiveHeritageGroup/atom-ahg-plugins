@@ -57,32 +57,32 @@ class metadataComponent extends AhgComponents
                 $this->resource->object->id,
                 'readMaster',
                 $this->masterFileDenyReason
-            ) && QubitAcl::check($this->resource->object, 'readMaster');
+            ) && \AtomExtensions\Services\AclService::check($this->resource->object, 'readMaster');
 
             $this->canAccessReferenceCopy = QubitGrantedRight::checkPremis(
                 $this->resource->object->id,
                 'readReference',
                 $this->referenceCopyDenyReason
-            ) && QubitAcl::check($this->resource->object, 'readReference');
+            ) && \AtomExtensions\Services\AclService::check($this->resource->object, 'readReference');
 
             $this->canAccessThumbnailCopy = QubitGrantedRight::checkPremis(
                 $this->resource->object->id,
                 'readThumbnail',
                 $this->thumbnailCopyDenyReason
-            ) && QubitAcl::check($this->resource->object, 'readThumbnail');
+            ) && \AtomExtensions\Services\AclService::check($this->resource->object, 'readThumbnail');
         } else {
             // Check ACL authorization
-            $this->canAccessMasterFile = QubitAcl::check(
+            $this->canAccessMasterFile = \AtomExtensions\Services\AclService::check(
                 $this->resource->object,
                 'readMaster'
             );
 
-            $this->canAccessReferenceCopy = QubitAcl::check(
+            $this->canAccessReferenceCopy = \AtomExtensions\Services\AclService::check(
                 $this->resource->object,
                 'readReference'
             );
 
-            $this->canAccessThumbnailCopy = QubitAcl::check(
+            $this->canAccessThumbnailCopy = \AtomExtensions\Services\AclService::check(
                 $this->resource->object,
                 'readThumbnail'
             );

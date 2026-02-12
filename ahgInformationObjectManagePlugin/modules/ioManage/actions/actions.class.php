@@ -19,9 +19,9 @@ class ioManageActions extends AhgController
         // ACL — require editor/admin
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Load IO data + detect standard
@@ -59,9 +59,9 @@ class ioManageActions extends AhgController
         // ACL
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');
@@ -188,7 +188,7 @@ class ioManageActions extends AhgController
         // Require authenticated editor/admin
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
@@ -434,9 +434,9 @@ class ioManageActions extends AhgController
         // ACL — require editor/admin
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Resolve the information object
@@ -550,9 +550,9 @@ class ioManageActions extends AhgController
         // ACL
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $doId = (int) $request->getParameter('id', 0);
@@ -648,9 +648,9 @@ class ioManageActions extends AhgController
         // ACL
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $doId = (int) $request->getParameter('id', 0);

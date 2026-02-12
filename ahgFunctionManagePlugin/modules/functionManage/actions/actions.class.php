@@ -62,8 +62,8 @@ class functionManageActions extends AhgController
         // ACL for add button visibility
         $user = $this->getUser();
         $this->canCreate = $user->isAuthenticated()
-            && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID)
-                || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+            && ($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
+                || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
     }
 
     /**
@@ -85,8 +85,8 @@ class functionManageActions extends AhgController
         // ACL
         $user = $this->getUser();
         $isAdmin = $user->isAuthenticated()
-            && ($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID)
-                || $user->hasGroup(QubitAclGroup::EDITOR_ID));
+            && ($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
+                || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
 
         $this->canEdit = $isAdmin;
         $this->canDelete = $isAdmin;
@@ -105,9 +105,9 @@ class functionManageActions extends AhgController
         // ACL — require editor/admin
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');
@@ -220,9 +220,9 @@ class functionManageActions extends AhgController
         // ACL
         $user = $this->getUser();
         if (!$user->isAuthenticated()
-            || !($user->hasGroup(QubitAclGroup::ADMINISTRATOR_ID) || $user->hasGroup(QubitAclGroup::EDITOR_ID))
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $slug = $request->getParameter('slug');

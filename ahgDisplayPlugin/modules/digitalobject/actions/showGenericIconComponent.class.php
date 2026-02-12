@@ -16,7 +16,7 @@ class showGenericIconComponent extends AhgComponents
             $this->resource->usageId
         );
 
-        $this->canReadMaster = QubitAcl::check(
+        $this->canReadMaster = \AtomExtensions\Services\AclService::check(
             $this->resource->object,
             'readMaster'
         );

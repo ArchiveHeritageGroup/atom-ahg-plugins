@@ -25,8 +25,8 @@ class DonorPrimaryContactAction extends AhgController
         $resource = $this->getRoute()->resource;
 
         // Check user authorization
-        if (!QubitAcl::check($resource, 'read')) {
-            QubitAcl::forwardToSecureAction();
+        if (!\AtomExtensions\Services\AclService::check($resource, 'read')) {
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
         }
 
         // Return 404 if the primary contact doesn't exist

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AhgDisplay\Registry;
 
+use AtomExtensions\Services\AclService;
+
 /**
  * Display Action Registry
  *
@@ -295,10 +297,10 @@ class DisplayActionRegistry
 
         $permission = $config['permission'];
 
-        // Use QubitAcl if available
-        if ($resource !== null && class_exists('QubitAcl')) {
+        // Use AclService if available
+        if ($resource !== null && class_exists(AclService::class)) {
             try {
-                return \QubitAcl::check($resource, $permission);
+                return AclService::check($resource, $permission);
             } catch (\Exception $e) {
                 return true; // Default to allowing if ACL check fails
             }

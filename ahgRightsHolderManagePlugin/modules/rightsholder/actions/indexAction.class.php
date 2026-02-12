@@ -8,8 +8,8 @@ class RightsHolderIndexAction extends AhgController
         $this->resource = $this->getRoute()->resource;
 
         // Check user authorization
-        if (!QubitAcl::check($this->resource, 'read')) {
-            QubitAcl::forwardUnauthorized();
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'read')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         if (1 > strlen($title = $this->resource->__toString())) {
@@ -18,7 +18,7 @@ class RightsHolderIndexAction extends AhgController
 
         $this->getResponse()->setTitle("{$title} - {$this->getResponse()->getTitle()}");
 
-        if (QubitAcl::check($this->resource, 'update')) {
+        if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             $validatorSchema = new sfValidatorSchema();
             $values = [];
 

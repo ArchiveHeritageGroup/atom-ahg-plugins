@@ -103,7 +103,7 @@ class identifierApiActions extends AhgController
         }
 
         $object = QubitInformationObject::getById($objectId);
-        if (!$object || !QubitAcl::check($object, 'read')) {
+        if (!$object || !\AtomExtensions\Services\AclService::check($object, 'read')) {
             return $this->jsonError('Object not found or access denied', 404);
         }
 

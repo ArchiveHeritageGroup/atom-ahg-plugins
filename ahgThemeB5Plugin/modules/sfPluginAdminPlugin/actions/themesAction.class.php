@@ -37,7 +37,7 @@ class sfPluginAdminPluginThemesAction extends AhgController
         $this->form = new sfForm();
 
         if (!$this->context->user->isAdministrator()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         $criteria = new Criteria();

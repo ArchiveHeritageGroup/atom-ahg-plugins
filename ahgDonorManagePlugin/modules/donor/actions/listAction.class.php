@@ -23,7 +23,7 @@ class DonorListAction extends AhgController
     public function execute($request)
     {
         if (!$this->getUser()->hasCredential(['contributor', 'editor', 'administrator'], false)) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         if (!isset($request->limit)) {

@@ -109,9 +109,9 @@
 						<?php } elseif ('GROUP_ID' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('GROUP_ID', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>
 							<?php if ($strOlder != $strValues[$i]) { ?>
-								<?php echo '<td><i>Group ID</i></td><td>'.QubitAclGroup::getById($strOlder)."</td><td bgcolor='#CCFF66'>".QubitAclGroup::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Group ID</i></td><td>'.\AtomExtensions\Services\AclGroupService::getById($strOlder)."</td><td bgcolor='#CCFF66'>".\AtomExtensions\Services\AclGroupService::getById($strValues[$i]).'</td><tr>'; ?>
 							<?php } else { ?>
-								<?php echo '<td><i>Group ID</i></td><td>'.QubitAclGroup::getById($strOlder).'</td><td>'.QubitAclGroup::getById($strValues[$i]).'</td><tr>'; ?> 
+								<?php echo '<td><i>Group ID</i></td><td>'.\AtomExtensions\Services\AclGroupService::getById($strOlder).'</td><td>'.\AtomExtensions\Services\AclGroupService::getById($strValues[$i]).'</td><tr>'; ?> 
 							<?php } ?>
 						<?php } elseif ('CLASS_NAME' == trim($strFields[$i])) { ?>
 							<?php $strOlder = doGetFieldValue('CLASS_NAME', $auditObjectsArr, $item[0], $item['ACTION_DATE_TIME'], $item['DB_TABLE']); ?>

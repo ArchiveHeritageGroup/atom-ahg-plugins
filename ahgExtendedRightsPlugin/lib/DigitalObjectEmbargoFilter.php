@@ -201,7 +201,7 @@ class DigitalObjectEmbargoFilter
 
         try {
             $resource = QubitInformationObject::getById($objectId);
-            if ($resource && QubitAcl::check($resource, 'update')) {
+            if ($resource && \AtomExtensions\Services\AclService::check($resource, 'update')) {
                 return true;
             }
         } catch (\Exception $e) {

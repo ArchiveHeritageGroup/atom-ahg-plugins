@@ -20,7 +20,7 @@ class metadataExtractionActions extends AhgController
             $this->redirect('user/login');
         }
 
-        if (!QubitAcl::check(QubitInformationObject::getRoot(), 'update')) {
+        if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'update')) {
             $this->forward('admin', 'secure');
         }
 
@@ -174,7 +174,7 @@ class metadataExtractionActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Unauthorized']));
         }
 
-        if (!QubitAcl::check(QubitInformationObject::getRoot(), 'update')) {
+        if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'update')) {
             $this->getResponse()->setStatusCode(403);
 
             return $this->renderText(json_encode(['error' => 'Forbidden']));
@@ -272,7 +272,7 @@ class metadataExtractionActions extends AhgController
             $this->redirect('user/login');
         }
 
-        if (!QubitAcl::check(QubitInformationObject::getRoot(), 'update')) {
+        if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'update')) {
             $this->forward('admin', 'secure');
         }
 
@@ -368,7 +368,7 @@ class metadataExtractionActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Unauthorized']));
         }
 
-        if (!QubitAcl::check(QubitInformationObject::getRoot(), 'delete')) {
+        if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'delete')) {
             $this->getResponse()->setStatusCode(403);
 
             return $this->renderText(json_encode(['error' => 'Forbidden']));

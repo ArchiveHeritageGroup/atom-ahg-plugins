@@ -14,7 +14,7 @@ class feedbackBrowseAction extends AhgController
     {
         // Check authentication
         if (!$this->getUser()->isAuthenticated()) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Initialize Laravel

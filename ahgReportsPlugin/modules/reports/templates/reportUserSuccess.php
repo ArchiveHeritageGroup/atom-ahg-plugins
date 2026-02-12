@@ -374,7 +374,7 @@
 							<td><?php echo 'N/A'; ?></td>
 						
 							<?php if ('acl_group_i18n' == $item['DB_TABLE']) { ?>
-								<?php $taxonomyObjectsAudit = QubitAclGroup::getById($item['RECORD_ID']); ?>
+								<?php $taxonomyObjectsAudit = \AtomExtensions\Services\AclGroupService::getById($item['RECORD_ID']); ?>
 							<?php } else { ?>
 								<?php $taxonomyObjectsAudit = term_name($item['RECORD_ID']); ?>
 							<?php } ?>

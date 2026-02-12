@@ -26,7 +26,7 @@ class sfIsdiahPluginIndexAction extends RepositoryIndexAction
 
         $this->htmlSnippet = $this->getPurifiedHtmlSnippet();
 
-        if (QubitAcl::check($this->resource, 'update')) {
+        if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             $validatorSchema = new sfValidatorSchema();
             $values = [];
 

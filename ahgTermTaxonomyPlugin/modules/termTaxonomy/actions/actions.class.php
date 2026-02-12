@@ -49,7 +49,7 @@ class termTaxonomyActions extends AhgController
 
         // Duplicate name check (errorSchema for editors)
         $this->errorSchema = null;
-        if (QubitAcl::check($this->resource, 'update')) {
+        if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             $validatorSchema = new sfValidatorSchema();
             $values = [];
 
@@ -183,7 +183,7 @@ class termTaxonomyActions extends AhgController
 
         // Restrict access (except to places, subjects, and genres)
         $unrestrictedTaxonomies = [QubitTaxonomy::GENRE_ID, QubitTaxonomy::PLACE_ID, QubitTaxonomy::SUBJECT_ID];
-        $allowedGroups = [QubitAclGroup::EDITOR_ID, QubitAclGroup::ADMINISTRATOR_ID];
+        $allowedGroups = [\AtomExtensions\Constants\AclConstants::EDITOR_ID, \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID];
 
         if (
             !in_array($this->resource->id, $unrestrictedTaxonomies)

@@ -15,7 +15,7 @@
       <li><?php echo link_to(__('Duplicate'), ['module' => 'informationobject', 'action' => 'copy', 'source' => $resource->id], ['class' => 'btn atom-btn-outline-light']); ?></li>
     <?php } ?>
 
-    <?php if (\AtomExtensions\Services\AclService::check($resource, 'update') || sfContext::getInstance()->getUser()->hasGroup(QubitAclGroup::EDITOR_ID)) { ?>
+    <?php if (\AtomExtensions\Services\AclService::check($resource, 'update') || sfContext::getInstance()->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID)) { ?>
 
       <li><?php echo link_to(__('Move'), [$resource, 'module' => 'default', 'action' => 'move'], ['class' => 'btn atom-btn-outline-light']); ?></li>
 

@@ -33,7 +33,7 @@
     </div>
   <?php } ?>
 
-  <?php if (isset($link) && QubitAcl::check($resource->object, 'readMaster')) { ?>
+  <?php if (isset($link) && \AtomExtensions\Services\AclService::check($resource->object, 'readMaster')) { ?>
     <div class="mt-2">
       <?php echo link_to(__('Download audio'), $link, ['class' => 'btn btn-sm btn-outline-secondary']); ?>
     </div>

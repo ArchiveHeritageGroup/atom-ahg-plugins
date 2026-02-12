@@ -91,7 +91,7 @@ class imageflowComponent extends AhgComponents
                         QubitTerm::THUMBNAIL_ID
                     );
                     $thumbnail->setParent($item);
-                } elseif (!QubitAcl::check($item->object, 'readThumbnail')) {
+                } elseif (!\AtomExtensions\Services\AclService::check($item->object, 'readThumbnail')) {
                     $thumbnail = QubitDigitalObject::getGenericRepresentation(
                         $item->mimeType,
                         QubitTerm::THUMBNAIL_ID
@@ -154,7 +154,7 @@ class imageflowComponent extends AhgComponents
             $criteria->setLimit($this->limit);
         }
 
-        $criteria = QubitAcl::addFilterDraftsCriteria($criteria);
+        $criteria = \AtomExtensions\Services\AclService::addFilterDraftsCriteria($criteria);
 
         foreach (QubitDigitalObject::get($criteria) as $item) {
             if (QubitTerm::OFFLINE_ID == $item->usageId) {
@@ -163,7 +163,7 @@ class imageflowComponent extends AhgComponents
                     QubitTerm::THUMBNAIL_ID
                 );
                 $thumbnail->setParent($item);
-            } elseif (!QubitAcl::check($item->object, 'readThumbnail')) {
+            } elseif (!\AtomExtensions\Services\AclService::check($item->object, 'readThumbnail')) {
                 $thumbnail = QubitDigitalObject::getGenericRepresentation(
                     $item->mimeType,
                     QubitTerm::THUMBNAIL_ID

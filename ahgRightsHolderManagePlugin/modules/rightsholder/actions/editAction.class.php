@@ -54,8 +54,8 @@ class RightsHolderEditAction extends AhgEditController
             $this->resource = $this->getRoute()->resource;
 
             // Check user authorization
-            if (!QubitAcl::check($this->resource, 'update')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
 
             // Add optimistic lock
@@ -64,8 +64,8 @@ class RightsHolderEditAction extends AhgEditController
             $this->form->setWidget('serialNumber', new sfWidgetFormInputHidden());
         } else {
             // Check user authorization
-            if (!QubitAcl::check($this->resource, 'create')) {
-                QubitAcl::forwardUnauthorized();
+            if (!\AtomExtensions\Services\AclService::check($this->resource, 'create')) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
             }
         }
 

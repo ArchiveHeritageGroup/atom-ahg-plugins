@@ -60,7 +60,7 @@ class findingAidComponent extends AhgComponents
                 $this->showDownload = true;
 
                 // Check ACL to show delete option
-                if (QubitAcl::check($this->resource, 'update')) {
+                if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
                     $this->showDelete = true;
                 }
 
@@ -131,7 +131,7 @@ class findingAidComponent extends AhgComponents
             }
 
             // Check ACL to show delete option
-            if (QubitAcl::check($this->resource, 'update')) {
+            if (\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
                 $this->showDelete = true;
             }
 
@@ -150,7 +150,7 @@ class findingAidComponent extends AhgComponents
     protected function showActions()
     {
         // Actions only allowed for users with update permissions
-        if (!QubitAcl::check($this->resource, 'update')) {
+        if (!\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
             return false;
         }
 

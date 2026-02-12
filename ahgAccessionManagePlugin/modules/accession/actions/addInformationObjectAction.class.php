@@ -27,8 +27,8 @@ class AccessionAddInformationObjectAction extends AhgController
 
         $this->resource = $this->getRoute()->resource;
 
-        if (!QubitAcl::check(QubitInformationObject::getRoot(), 'update')) {
-            QubitAcl::forwardUnauthorized();
+        if (!\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'update')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Create new information object

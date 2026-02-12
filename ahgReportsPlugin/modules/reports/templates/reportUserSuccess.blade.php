@@ -386,7 +386,7 @@
 							<td>{{ 'N/A' }}</td>
 
 							@if ('acl_group_i18n' == $item['DB_TABLE'])
-								@php $taxonomyObjectsAudit = QubitAclGroup::getById($item['RECORD_ID']); @endphp
+								@php $taxonomyObjectsAudit = \AtomExtensions\Services\AclGroupService::getById($item['RECORD_ID']); @endphp
 							@else
 								@php $taxonomyObjectsAudit = term_name($item['RECORD_ID']); @endphp
 							@endif

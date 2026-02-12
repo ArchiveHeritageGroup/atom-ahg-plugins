@@ -28,7 +28,7 @@ class museumIndexAction extends AhgController
         }
 
         // Check user authorization using Qubit ACL
-        if (!($this->getUser()->isAuthenticated() || QubitAcl::check($this->resource, 'read'))) {
+        if (!($this->getUser()->isAuthenticated() || \AtomExtensions\Services\AclService::check($this->resource, 'read'))) {
             $this->forward("admin", "secure");
         }
         

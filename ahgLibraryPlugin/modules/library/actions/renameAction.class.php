@@ -67,10 +67,10 @@ class libraryRenameAction extends AhgEditController
 
         // Check user authorization
         if (
-            !QubitAcl::check($this->resource, 'update')
-            && !$this->getUser()->hasGroup(QubitAclGroup::EDITOR_ID)
+            !\AtomExtensions\Services\AclService::check($this->resource, 'update')
+            && !$this->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID)
         ) {
-            QubitAcl::forwardUnauthorized();
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
     }
 

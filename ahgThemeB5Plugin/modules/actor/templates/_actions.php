@@ -14,7 +14,7 @@
     <li><?php echo link_to(__('Add new'), ['module' => 'actor', 'action' => 'add'], ['class' => 'btn atom-btn-outline-light']); ?></li>
   <?php } ?>
 
-  <?php if (\AtomExtensions\Services\AclService::check($resource, 'update') || sfContext::getInstance()->getUser()->hasGroup(QubitAclGroup::EDITOR_ID)) { ?>
+  <?php if (\AtomExtensions\Services\AclService::check($resource, 'update') || sfContext::getInstance()->getUser()->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID)) { ?>
     
     <li><?php echo link_to(__('Rename'), [$resource, 'module' => 'actor', 'action' => 'rename'], ['class' => 'btn atom-btn-outline-light']); ?></li>
 
