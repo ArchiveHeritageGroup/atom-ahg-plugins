@@ -133,7 +133,11 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">{{ __('Donor Name') }}</label>
-                                <input type="text" name="donor_name" class="form-control" value="{{ $formData['donor_name'] ?? '' }}">
+                                <select name="donor_name" id="donorSelect" class="form-control">
+                                    @if (!empty($formData['donor_name']))
+                                        <option value="{{ $formData['donor_name'] }}" selected>{{ $formData['donor_name'] }}</option>
+                                    @endif
+                                </select>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">{{ __('Donor Restrictions') }}</label>
@@ -275,6 +279,8 @@
 }
 </style>
 
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" {!! $csp_nonce !!}>
+
 <script {!! $csp_nonce !!}>
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('ioSearch');
@@ -323,6 +329,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#ioSearch') && !e.target.closest('#ioResults')) {
             resultsDiv.style.display = 'none';
+        }
+    });
+});
+</script>
+
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" {!! $csp_nonce !!}></script>
+<script {!! $csp_nonce !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('donorSelect');
+    if (!el) return;
+    new TomSelect(el, {
+        valueField: 'value',
+        labelField: 'label',
+        searchField: 'label',
+        create: true,
+        maxItems: 1,
+        load: function(query, callback) {
+            if (query.length < 2) return callback();
+            fetch('{{ url_for(["module" => "heritageApi", "action" => "actorAutocomplete"]) }}?term=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) { callback(data); })
+                .catch(function() { callback(); });
         }
     });
 });
