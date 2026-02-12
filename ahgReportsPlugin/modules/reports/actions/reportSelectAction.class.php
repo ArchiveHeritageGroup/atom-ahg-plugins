@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -21,7 +22,7 @@
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class reportsreportSelectAction extends DefaultEditAction
+class reportsreportSelectAction extends AhgEditController
 {
     // Arrays not allowed in class constants
     public static $NAMES = ['collection'];

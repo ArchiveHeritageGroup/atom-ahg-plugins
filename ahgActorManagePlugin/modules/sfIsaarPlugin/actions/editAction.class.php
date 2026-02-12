@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgActorEditController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -25,7 +26,7 @@ require_once sfConfig::get('sf_root_dir').'/apps/qubit/modules/actor/actions/edi
  *
  * @author     Peter Van Garderen <peter@artefactual.com>
  */
-class sfIsaarPluginEditAction extends ActorEditAction
+class sfIsaarPluginEditAction extends AhgActorEditController
 {
     // Arrays not allowed in class constants
     public static $NAMES = [

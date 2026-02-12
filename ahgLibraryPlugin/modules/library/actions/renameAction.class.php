@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /**
  * Library Rename Action - BUG FIX #60
  * Based on core InformationObjectRenameAction but preserves display_standard_id
  */
-class libraryRenameAction extends DefaultEditAction
+class libraryRenameAction extends AhgEditController
 {
     public static $NAMES = [
         'title',

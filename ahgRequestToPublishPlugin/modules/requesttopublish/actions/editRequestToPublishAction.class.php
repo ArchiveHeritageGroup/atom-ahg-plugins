@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgEditController;
 /*
  * This file is part of Qubit Toolkit.
  *
@@ -23,7 +24,7 @@
  * @author     Johan Pieterse <johan@plainsailingisystems.co.za> 
  * @version    SVN: $Id
  */
-class RequestToPublishEditRequestToPublishAction extends DefaultEditAction {
+class RequestToPublishEditRequestToPublishAction extends AhgEditController {
 	public static $NAMES = array(
 		'unique_identifier', 
 		'rtp_name', 

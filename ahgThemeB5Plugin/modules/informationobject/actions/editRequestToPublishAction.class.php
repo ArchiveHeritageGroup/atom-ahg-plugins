@@ -26,13 +26,14 @@ require '/usr/share/nginx/phpmailer/src/Exception.php';
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /**
  * Request to Publish edit component.
  *
  * @author     Johan Pieterse
  */
-class InformationObjectEditRequestToPublishAction extends DefaultEditAction
+class InformationObjectEditRequestToPublishAction extends AhgEditController
 {
     public static $NAMES = [
         'unique_identifier',

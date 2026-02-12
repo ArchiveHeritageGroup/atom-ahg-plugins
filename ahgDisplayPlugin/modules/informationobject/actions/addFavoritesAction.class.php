@@ -1,12 +1,13 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /**
  * Add to Favorites action
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class InformationObjectAddFavoritesAction extends DefaultEditAction
+class InformationObjectAddFavoritesAction extends AhgEditController
 {
     public function execute($request)
     {

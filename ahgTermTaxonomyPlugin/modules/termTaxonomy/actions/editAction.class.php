@@ -1,13 +1,14 @@
 <?php
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * AHG Term Taxonomy Plugin - Term Edit Action
  *
  * Migrates base AtoM TermEditAction to ahgTermTaxonomyPlugin.
- * Extends DefaultEditAction following the same pattern as base AtoM.
+ * Extends AhgEditController following the same pattern as base AtoM.
  */
 
-class TermTaxonomyEditAction extends DefaultEditAction
+class TermTaxonomyEditAction extends AhgEditController
 {
     public static $NAMES = [
         'code',

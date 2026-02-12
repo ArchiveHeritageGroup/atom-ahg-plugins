@@ -1,6 +1,7 @@
 <?php
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -19,7 +20,7 @@ use AtomExtensions\Services\CacheService;
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsEditAction extends DefaultEditAction
+class SettingsEditAction extends AhgEditController
 {
     // Arrays not allowed in class constants
     public static $I18N = [];

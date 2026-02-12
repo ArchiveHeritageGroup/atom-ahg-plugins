@@ -6,8 +6,9 @@
  */
 
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgEditController;
 
-class InformationObjectRenameAction extends DefaultEditAction
+class InformationObjectRenameAction extends AhgEditController
 {
     public static $NAMES = [
         'title',

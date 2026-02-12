@@ -1,12 +1,13 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /**
  * Add to Cart action
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
-class InformationObjectAddCartAction extends DefaultEditAction
+class InformationObjectAddCartAction extends AhgEditController
 {
     public function execute($request)
     {

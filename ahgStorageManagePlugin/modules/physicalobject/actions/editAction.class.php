@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -22,7 +23,7 @@
  *
  * @author     David Juhasz <david@artefactual.com>
  */
-class PhysicalObjectEditAction extends DefaultEditAction
+class PhysicalObjectEditAction extends AhgEditController
 {
     public static $NAMES = [
         'location',

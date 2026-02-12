@@ -11,6 +11,7 @@ require '/usr/share/nginx/phpmailer/src/Exception.php';
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * This file is part of Qubit Toolkit.
@@ -35,7 +36,7 @@ use PHPMailer\PHPMailer\SMTP;
  *
  * @version    SVN: $Id
  */
-class InformationObjectEditFeedbackAction extends DefaultEditAction
+class InformationObjectEditFeedbackAction extends AhgEditController
 {
     public static $NAMES = [
         'feed_name',

@@ -1,4 +1,5 @@
 <?php
+use AtomFramework\Http\Controllers\AhgActorEditController;
 
 /*
  * Extended sfIsaarPlugin edit action with contact information support.
@@ -10,7 +11,7 @@
 // Load custom component that fixes the sf_method error
 require_once dirname(__FILE__).'/relatedAuthorityRecordComponent.class.php';
 
-class sfIsaarPluginEditAction extends ActorEditAction
+class sfIsaarPluginEditAction extends AhgActorEditController
 {
     // Arrays not allowed in class constants
     public static $NAMES = [

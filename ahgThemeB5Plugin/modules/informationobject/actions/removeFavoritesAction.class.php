@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /*
  * This file is part of Qubit Toolkit.
@@ -24,7 +25,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * @version    SVN: $Id
  */
-class InformationObjectRemoveFavoritesAction extends DefaultEditAction
+class InformationObjectRemoveFavoritesAction extends AhgEditController
 {
     public function execute($request)
     {

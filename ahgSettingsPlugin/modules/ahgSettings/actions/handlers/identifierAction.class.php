@@ -2,6 +2,7 @@
 
 use AtomExtensions\Services\SettingService;
 use AtomExtensions\Services\CacheService;
+use AtomFramework\Http\Controllers\AhgEditController;
 
 /**
  * Global identifier settings (AHG settings module).
@@ -13,7 +14,7 @@ use AtomExtensions\Services\CacheService;
  *
  * For sector-specific numbering, see sectorNumberingAction.
  */
-class AhgSettingsIdentifierAction extends DefaultEditAction
+class AhgSettingsIdentifierAction extends AhgEditController
 {
     public static $NAMES = [
         'accession_mask_enabled',
