@@ -1,9 +1,10 @@
-# AtoM AHG Framework+ Roadmap
+# AtoM Heratio Roadmap
 
-> **Last Updated:** 2026-01-22
-> **Framework Version:** 2.1.13
-> **Plugins:** 36
+> **Last Updated:** 2026-02-13
+> **Framework Version:** 2.8.2
+> **Plugins:** 78
 > **SDKs:** Python (atom-ahg-python) + TypeScript (atom-client-js)
+> **Heratio Migration:** Phase 2 complete (12 WriteServices, Propel coupling 223→223)
 
 ---
 
@@ -37,8 +38,8 @@ ResourceSpace          ███████████████████
 
 | Repository | Purpose | Status |
 |------------|---------|--------|
-| [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework) | Core Laravel foundation, CLI, services | v2.1.13 |
-| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | 36 AHG plugins | v1.7.30 |
+| [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework) | Core Laravel foundation, CLI, services | v2.8.2 |
+| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | 78 AHG plugins | v1.7.30 |
 | [atom-extensions-catalog](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog) | Documentation & registry | v2.1.12 |
 | [atom-ahg-python](https://github.com/ArchiveHeritageGroup/atom-ahg-python) | Python SDK | v1.0.0 |
 | [atom-client-js](https://github.com/ArchiveHeritageGroup/atom-client-js) | TypeScript SDK | v1.0.0 |
@@ -262,7 +263,7 @@ php bin/semantic-search-cron.php export-es    # ES export
 
 ---
 
-## Plugin Inventory (36 Plugins)
+## Plugin Inventory (78 Plugins)
 
 ### Core Required (Locked)
 | Plugin | Purpose |
@@ -336,6 +337,35 @@ php bin/semantic-search-cron.php export-es    # ES export
 | ahgIiifCollectionPlugin | IIIF collections |
 | ahgSpectrumPlugin | SPECTRUM 5.0 |
 
+### Ingestion & Import
+| Plugin | Purpose |
+|--------|---------|
+| ahgIngestPlugin | OAIS-aligned 6-step ingest wizard |
+| ahgDataMigrationPlugin | GLAM/DAM CSV import/export |
+
+### Administration
+| Plugin | Purpose |
+|--------|---------|
+| ahgSettingsPlugin | Centralized settings hub |
+| ahgJobsManagePlugin | Background job management |
+| ahgMenuManagePlugin | Menu/navigation management |
+| ahgStaticPagePlugin | Static page management |
+| ahgInformationObjectManagePlugin | Information object management |
+
+### Browse & Discovery
+| Plugin | Purpose |
+|--------|---------|
+| ahgDisplayPlugin | GLAM display profiles, ZoomPan |
+| ahgSearchPlugin | Advanced search |
+| ahgUiOverridesPlugin | UI overrides, viewer dispatch |
+| ahgAccessionManagePlugin | Accession browse |
+| ahgActorManagePlugin | Actor browse, autocomplete |
+| ahgDonorManagePlugin | Donor browse |
+| ahgRepositoryManagePlugin | Repository browse |
+| ahgRightsHolderManagePlugin | Rights holder browse |
+| ahgStorageManagePlugin | Physical storage browse |
+| ahgTermTaxonomyPlugin | Term & taxonomy browse |
+
 ---
 
 ## Compliance Support
@@ -385,6 +415,7 @@ php bin/semantic-search-cron.php export-es    # ES export
 | 2026-01-20 | 1.5 | Speech-to-Text complete (95/100) |
 | 2026-01-21 | 1.6 | PII Detection complete (96/100) |
 | 2026-01-22 | 2.0 | SDKs created, Semantic Search plugin, renamed to ROADMAP.md (97/100) |
+| 2026-02-13 | 3.0 | Updated to 78 plugins, Heratio migration status, ahgIngestPlugin |
 
 ---
 

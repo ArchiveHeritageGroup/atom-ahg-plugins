@@ -1,6 +1,6 @@
 # AtoM AHG Plugin Architecture
 
-**Version:** 2.1.18
+**Version:** 2.8.2
 **Last Updated:** February 2026
 
 ---
@@ -77,6 +77,10 @@
 │  └────────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Heratio Dual-Mode
+
+The Heratio migration adds an alternative rendering path. When `.heratio_enabled` exists, AHG plugin routes are served by `heratio.php` (HTTP Kernel + Blade rendering) instead of Symfony. Base AtoM routes continue through `index.php` unchanged. See [HERATIO_MIGRATION.md](HERATIO_MIGRATION.md) for full details.
 
 ---
 
@@ -450,4 +454,4 @@ The `bin/check-architecture.sh` script enforces:
 
 ---
 
-*Part of the AtoM AHG Framework - v2.1.18*
+*Part of the AtoM AHG Framework - v2.8.2*

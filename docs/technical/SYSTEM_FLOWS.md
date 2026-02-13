@@ -1,7 +1,92 @@
 # AtoM AHG Framework - System Flows
 
-**Version:** 2.1.17
-**Last Updated:** January 2026
+**Version:** 2.8.2
+**Last Updated:** February 2026
+
+---
+
+## 0. Heratio Dual-Mode Request Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     HERATIO DUAL-MODE REQUEST FLOW                               │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────┐                                                                   │
+│  │  Client  │                                                                   │
+│  │ (Browser)│                                                                   │
+│  └────┬─────┘                                                                   │
+│       │ HTTP Request                                                            │
+│       ▼                                                                         │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                            NGINX                                          │  │
+│  │                                                                          │  │
+│  │   ┌──────────────────────────────┐  ┌─────────────────────────────────┐ │  │
+│  │   │ heratio.conf (if installed)  │  │ Standard AtoM config            │ │  │
+│  │   │                              │  │                                 │ │  │
+│  │   │ /ingest/*      → heratio.php │  │ /                → index.php   │ │  │
+│  │   │ /admin/ahg-*   → heratio.php │  │ /informationobj  → index.php   │ │  │
+│  │   │ /display/*     → heratio.php │  │ /actor           → index.php   │ │  │
+│  │   │ /privacy/*     → heratio.php │  │ /repository      → index.php   │ │  │
+│  │   │ /research/*    → heratio.php │  │ /user            → index.php   │ │  │
+│  │   │ (~40 plugin patterns)        │  │ (all base AtoM)                │ │  │
+│  │   └──────────────┬───────────────┘  └──────────────┬──────────────────┘ │  │
+│  └──────────────────┼──────────────────────────────────┼─────────────────────┘  │
+│                     │                                  │                         │
+│       ┌─────────────┘                                  └──────────────┐         │
+│       ▼                                                               ▼         │
+│  ┌────────────────────────┐                    ┌────────────────────────────┐  │
+│  │  HERATIO ENTRY POINT   │                    │  SYMFONY ENTRY POINT       │  │
+│  │  heratio.php           │                    │  index.php                 │  │
+│  │                        │                    │                            │  │
+│  │  1. Check kill-switch  │                    │  sfContext::getInstance()  │  │
+│  │  2. Boot Kernel        │                    │  dispatch()                │  │
+│  │  3. Middleware stack   │                    │  (unchanged AtoM)          │  │
+│  │  4. Route dispatch     │                    │                            │  │
+│  └───────────┬────────────┘                    └──────────────┬─────────────┘  │
+│              │                                                │                 │
+│              ▼                                                ▼                 │
+│  ┌────────────────────────┐                    ┌────────────────────────────┐  │
+│  │  HERATIO MIDDLEWARE    │                    │  SYMFONY FILTER CHAIN      │  │
+│  │                        │                    │                            │  │
+│  │  1. SessionMiddleware  │                    │  securityFilter            │  │
+│  │  2. AuthMiddleware     │                    │  accessFilter              │  │
+│  │  3. SettingsMiddleware │                    │  cacheFilter               │  │
+│  │  4. CspMiddleware      │                    │  executionFilter           │  │
+│  │  5. MetaMiddleware     │                    │                            │  │
+│  │  6. LimitsMiddleware   │                    │                            │  │
+│  └───────────┬────────────┘                    └──────────────┬─────────────┘  │
+│              │                                                │                 │
+│              ▼                                                ▼                 │
+│  ┌────────────────────────┐                    ┌────────────────────────────┐  │
+│  │  ACTION BRIDGE         │                    │  SYMFONY ACTION            │  │
+│  │                        │                    │                            │  │
+│  │  Dispatches to one of: │                    │  sfAction->execute()       │  │
+│  │  • AhgController       │                    │  Propel ORM               │  │
+│  │  • AhgActions (Blade)  │                    │  sfView rendering         │  │
+│  │  • sfActions (Bridge)  │                    │                            │  │
+│  └───────────┬────────────┘                    └──────────────┬─────────────┘  │
+│              │                                                │                 │
+│              ▼                                                ▼                 │
+│  ┌────────────────────────┐                    ┌────────────────────────────┐  │
+│  │  RENDERING             │                    │  RENDERING                 │  │
+│  │                        │                    │                            │  │
+│  │  BladeRenderer         │                    │  sfPHPView                 │  │
+│  │  heratio.blade.php     │                    │  layout.php                │  │
+│  │  (master layout)       │                    │  (theme layout)            │  │
+│  │  + 8 partials          │                    │                            │  │
+│  └───────────┬────────────┘                    └──────────────┬─────────────┘  │
+│              │                                                │                 │
+│              └────────────────────┬───────────────────────────┘                 │
+│                                   ▼                                             │
+│                          ┌─────────────┐                                        │
+│                          │   Client    │ ← HTML Response                        │
+│                          └─────────────┘                                        │
+│                                                                                  │
+│  KILL-SWITCH: Remove .heratio_enabled file → ALL routes go to index.php         │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -548,4 +633,51 @@
 
 ---
 
-*Part of the AtoM AHG Framework - v2.1.17*
+## 6. Ingest Pipeline Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          INGEST PIPELINE FLOW                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  STEP 1          STEP 2          STEP 3          STEP 4          STEP 5         │
+│  CONFIGURE  ───► UPLOAD     ───► MAP & ENRICH ──► VALIDATE   ───► PREVIEW       │
+│  (sector,        (CSV/ZIP/       (auto-map,       (required       (tree view,   │
+│   standard,       EAD, dir)       metadata,        fields,         approval)    │
+│   options)                        profiles)        checksums)                    │
+│                                                                                  │
+│  ──────────────────────────────────────────────────────────────────► STEP 6     │
+│                                                                     COMMIT      │
+│                                                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │ COMMIT FLOW (Background Job)                                            │   │
+│  │                                                                         │   │
+│  │  Browser ──POST──► Action ──► Create ingest_job (status=queued)         │   │
+│  │                      │                                                   │   │
+│  │                      ├──► nohup php symfony ingest:commit --job-id=X &   │   │
+│  │                      │                                                   │   │
+│  │                      └──► Return page (AJAX polling starts)              │   │
+│  │                                                                         │   │
+│  │  CLI Task ──► Mark running ──► For each row:                            │   │
+│  │                                  ├─ Create InformationObject            │   │
+│  │                                  ├─ Create DigitalObject (if DO path)   │   │
+│  │                                  ├─ Generate derivatives                │   │
+│  │                                  └─ Run AI processing (NER/OCR/etc)     │   │
+│  │                                                                         │   │
+│  │              ──► Build SIP package ──► Build AIP ──► Build DIP          │   │
+│  │              ──► Update search index                                     │   │
+│  │              ──► Generate manifest CSV                                   │   │
+│  │              ──► Mark completed                                          │   │
+│  │                                                                         │   │
+│  │  Browser ◄──poll every 2s──► /ingest/ajax/job-status?job_id=X          │   │
+│  │           ──► Show progress bar ──► On complete: show report card       │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                  │
+│  ROLLBACK: Deletes created IOs + DOs + packages, restores session state         │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+*Part of the AtoM AHG Framework - v2.8.2*

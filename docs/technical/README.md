@@ -2,8 +2,8 @@
 
 Detailed technical reference for all AHG plugins including architecture diagrams, ERD schemas, and API documentation.
 
-**Version:** 2.1.17
-**Last Updated:** January 2026
+**Version:** 2.8.2
+**Last Updated:** February 2026
 
 ---
 
@@ -15,6 +15,7 @@ Detailed technical reference for all AHG plugins including architecture diagrams
 | [DATABASE_ERD.md](DATABASE_ERD.md) | Entity-relationship diagrams for all plugin tables |
 | [SYSTEM_FLOWS.md](SYSTEM_FLOWS.md) | Request processing, installation, audit, IIIF, NER flows |
 | [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) | Comprehensive technical reference |
+| [HERATIO_MIGRATION.md](HERATIO_MIGRATION.md) | Heratio standalone migration roadmap, WriteServices, Propel decoupling |
 
 ---
 
@@ -28,6 +29,7 @@ Detailed technical reference for all AHG plugins including architecture diagrams
 | [ahgAuditTrailPlugin](ahgAuditTrailPlugin.md) | Compliance | Comprehensive audit logging |
 | [ahgBackupPlugin](ahgBackupPlugin.md) | Administration | Backup and restore |
 | [ahgDataMigrationPlugin](ahgDataMigrationPlugin.md) | Data Management | GLAM/DAM sector-specific import/export, validation |
+| [ahgIngestPlugin](ahgIngestPlugin.md) | Ingestion | OAIS-aligned batch ingest, 6-step wizard, SIP/AIP/DIP |
 
 ### Security & Compliance
 
