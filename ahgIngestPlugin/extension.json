@@ -1,0 +1,41 @@
+{
+    "name": "Ingestion Manager",
+    "machine_name": "ahgIngestPlugin",
+    "version": "1.0.0",
+    "description": "OAIS-aligned multi-stage ingestion pipeline: configure, upload, map, validate, preview, commit with rollback support",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgSecurityClearancePlugin"
+    ],
+    "tables": [
+        "ingest_session",
+        "ingest_file",
+        "ingest_mapping",
+        "ingest_validation",
+        "ingest_row",
+        "ingest_job"
+    ],
+    "category": "ingestion",
+    "features": [
+        "6-step wizard: configure, upload, map & enrich, validate, preview, commit",
+        "CSV/ZIP/EAD upload with auto-detection",
+        "Auto field mapping with confidence indicators",
+        "Embedded metadata extraction (EXIF/IPTC/XMP)",
+        "Hierarchical tree preview with approval workflow",
+        "OAIS-aligned SIP/DIP packaging",
+        "Real-time commit progress with rollback",
+        "SHA-256 checksum generation",
+        "Duplicate detection",
+        "Manifest download"
+    ],
+    "changelog": {
+        "1.0.0": "Initial release with full 6-step wizard pipeline"
+    }
+}
