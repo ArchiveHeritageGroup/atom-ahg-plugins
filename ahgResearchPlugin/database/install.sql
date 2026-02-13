@@ -793,6 +793,218 @@ CREATE TABLE IF NOT EXISTS `research_researcher_type_i18n` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- ISSUE 149: RESEARCH JOURNAL (Phase 1)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_journal_entry` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `project_id` INT DEFAULT NULL,
+  `entry_date` DATE NOT NULL,
+  `title` VARCHAR(500),
+  `content` TEXT NOT NULL,
+  `content_format` ENUM('text','html') DEFAULT 'html',
+  `entry_type` ENUM('manual','auto_booking','auto_material','auto_annotation',
+                    'auto_search','auto_collection','reflection','milestone') DEFAULT 'manual',
+  `time_spent_minutes` INT DEFAULT NULL,
+  `tags` VARCHAR(500) DEFAULT NULL,
+  `is_private` TINYINT(1) DEFAULT 1,
+  `related_entity_type` VARCHAR(50) DEFAULT NULL,
+  `related_entity_id` INT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_researcher` (`researcher_id`),
+  KEY `idx_project` (`project_id`),
+  KEY `idx_date` (`entry_date`),
+  FULLTEXT INDEX `idx_journal_fulltext` (`title`, `content`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 149: RESEARCH REPORTS (Phase 2)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_report` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `project_id` INT DEFAULT NULL,
+  `title` VARCHAR(500) NOT NULL,
+  `template_type` ENUM('research_summary','genealogical','historical',
+                       'source_analysis','finding_aid','custom') DEFAULT 'custom',
+  `description` TEXT,
+  `status` ENUM('draft','in_progress','review','completed','archived') DEFAULT 'draft',
+  `metadata` JSON,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_researcher` (`researcher_id`),
+  KEY `idx_project` (`project_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_report_section` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `report_id` INT NOT NULL,
+  `section_type` ENUM('title_page','toc','heading','text','bibliography',
+                      'collection_list','annotation_list','timeline','custom') DEFAULT 'text',
+  `title` VARCHAR(500),
+  `content` TEXT,
+  `content_format` ENUM('text','html') DEFAULT 'html',
+  `bibliography_id` INT DEFAULT NULL,
+  `collection_id` INT DEFAULT NULL,
+  `settings` JSON,
+  `sort_order` INT DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_report` (`report_id`),
+  KEY `idx_sort` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_report_template` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `code` VARCHAR(50) NOT NULL UNIQUE,
+  `description` TEXT,
+  `sections_config` JSON NOT NULL,
+  `is_system` TINYINT(1) DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `research_report_template` (`name`, `code`, `description`, `sections_config`, `is_system`) VALUES
+('Research Summary', 'research_summary', 'General research summary report',
+ '["title_page","toc","heading:Introduction","text:Background","text:Methodology","text:Findings","text:Conclusion","bibliography"]', 1),
+('Genealogical Report', 'genealogical', 'Family history research report',
+ '["title_page","toc","heading:Family Overview","text:Origins","text:Family Timeline","text:Notable Members","collection_list","bibliography"]', 1),
+('Historical Analysis', 'historical', 'Historical research analysis',
+ '["title_page","toc","heading:Historical Context","text:Primary Sources","text:Analysis","text:Interpretation","annotation_list","bibliography"]', 1),
+('Source Analysis', 'source_analysis', 'Archival source analysis report',
+ '["title_page","toc","heading:Source Description","text:Provenance","text:Content Analysis","text:Reliability Assessment","annotation_list","bibliography"]', 1),
+('Finding Aid', 'finding_aid', 'Collection finding aid',
+ '["title_page","toc","heading:Collection Overview","text:Administrative History","text:Scope and Content","collection_list","text:Access Conditions"]', 1),
+('Custom Report', 'custom', 'Blank report with no predefined sections',
+ '["title_page","text:Content"]', 1)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
+
+-- ============================================================
+-- ISSUE 149: NOTIFICATIONS (Phase 4)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_notification` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `type` ENUM('alert','invitation','comment','reply','system','reminder','collaboration') NOT NULL,
+  `title` VARCHAR(500) NOT NULL,
+  `message` TEXT,
+  `link` VARCHAR(1000) DEFAULT NULL,
+  `related_entity_type` VARCHAR(50) DEFAULT NULL,
+  `related_entity_id` INT DEFAULT NULL,
+  `is_read` TINYINT(1) DEFAULT 0,
+  `read_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_researcher` (`researcher_id`),
+  KEY `idx_read` (`is_read`),
+  KEY `idx_date` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_notification_preference` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `notification_type` VARCHAR(50) NOT NULL,
+  `email_enabled` TINYINT(1) DEFAULT 1,
+  `in_app_enabled` TINYINT(1) DEFAULT 1,
+  `digest_frequency` ENUM('immediate','daily','weekly','none') DEFAULT 'immediate',
+  UNIQUE KEY `uk_researcher_type` (`researcher_id`, `notification_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 149: INSTITUTIONAL SHARING (Phase 6)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_institution` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(500) NOT NULL,
+  `code` VARCHAR(100) NOT NULL UNIQUE,
+  `description` TEXT,
+  `url` VARCHAR(1000) DEFAULT NULL,
+  `contact_name` VARCHAR(255) DEFAULT NULL,
+  `contact_email` VARCHAR(255) DEFAULT NULL,
+  `logo_path` VARCHAR(500) DEFAULT NULL,
+  `is_active` TINYINT(1) DEFAULT 1,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_institutional_share` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `project_id` INT NOT NULL,
+  `institution_id` INT DEFAULT NULL,
+  `share_token` VARCHAR(64) NOT NULL UNIQUE,
+  `share_type` ENUM('view','contribute','full') DEFAULT 'view',
+  `shared_by` INT NOT NULL,
+  `accepted_by` INT DEFAULT NULL,
+  `status` ENUM('pending','active','revoked','expired') DEFAULT 'pending',
+  `message` TEXT,
+  `permissions` JSON,
+  `expires_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_project` (`project_id`),
+  KEY `idx_institution` (`institution_id`),
+  KEY `idx_token` (`share_token`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_external_collaborator` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `share_id` INT NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `institution` VARCHAR(500) DEFAULT NULL,
+  `orcid_id` VARCHAR(50) DEFAULT NULL,
+  `access_token` VARCHAR(64) NOT NULL UNIQUE,
+  `role` ENUM('viewer','contributor') DEFAULT 'viewer',
+  `last_accessed_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_share` (`share_id`),
+  KEY `idx_email` (`email`),
+  KEY `idx_token` (`access_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 149: COLLABORATION ENHANCEMENTS (Phase 7)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_comment` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `entity_type` ENUM('report','report_section','annotation','journal_entry','collection') NOT NULL,
+  `entity_id` INT NOT NULL,
+  `parent_id` INT DEFAULT NULL,
+  `content` TEXT NOT NULL,
+  `is_resolved` TINYINT(1) DEFAULT 0,
+  `resolved_by` INT DEFAULT NULL,
+  `resolved_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_entity` (`entity_type`, `entity_id`),
+  KEY `idx_researcher` (`researcher_id`),
+  KEY `idx_parent` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_peer_review` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `report_id` INT NOT NULL,
+  `requested_by` INT NOT NULL,
+  `reviewer_id` INT NOT NULL,
+  `status` ENUM('pending','in_progress','completed','declined') DEFAULT 'pending',
+  `feedback` TEXT,
+  `rating` INT DEFAULT NULL,
+  `requested_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` DATETIME DEFAULT NULL,
+  KEY `idx_report` (`report_id`),
+  KEY `idx_reviewer` (`reviewer_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- ALTER STATEMENTS FOR EXISTING INSTALLATIONS
 -- ============================================================
 

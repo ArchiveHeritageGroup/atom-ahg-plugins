@@ -594,4 +594,109 @@ class StatisticsService
 
         return $csv;
     }
+
+    // =========================================================================
+    // ISSUE 149: VISUALIZATION DATA
+    // =========================================================================
+
+    /**
+     * Get data for Chart.js visualizations.
+     */
+    public function getVisualizationData(string $type, array $params = []): array
+    {
+        switch ($type) {
+            case 'registrations_timeline':
+                return $this->getRegistrationsTimeline($params['months'] ?? 12);
+
+            case 'bookings_by_room':
+                return $this->getBookingsByRoom($params['date_from'] ?? null, $params['date_to'] ?? null);
+
+            case 'materials_by_type':
+                return $this->getMaterialsByType();
+
+            case 'activity_by_type':
+                return $this->getActivityByType($params['researcher_id'] ?? null);
+
+            case 'time_by_project':
+                return $this->getTimeByProject($params['researcher_id'] ?? null);
+
+            default:
+                return [];
+        }
+    }
+
+    protected function getRegistrationsTimeline(int $months): array
+    {
+        $data = [];
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $date = date('Y-m', strtotime("-{$i} months"));
+            $count = DB::table('research_researcher')
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$date])
+                ->count();
+            $data[] = ['month' => $date, 'count' => $count];
+        }
+        return $data;
+    }
+
+    protected function getBookingsByRoom(?string $dateFrom, ?string $dateTo): array
+    {
+        $query = DB::table('research_booking as b')
+            ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
+            ->groupBy('rm.name')
+            ->select('rm.name', DB::raw('COUNT(*) as count'));
+
+        if ($dateFrom) {
+            $query->where('b.booking_date', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->where('b.booking_date', '<=', $dateTo);
+        }
+
+        return $query->orderBy('count', 'desc')->get()->toArray();
+    }
+
+    protected function getMaterialsByType(): array
+    {
+        return DB::table('research_material_request')
+            ->groupBy('request_type')
+            ->select('request_type', DB::raw('COUNT(*) as count'))
+            ->orderBy('count', 'desc')
+            ->get()
+            ->toArray();
+    }
+
+    protected function getActivityByType(?int $researcherId): array
+    {
+        $query = DB::table('research_activity_log')
+            ->groupBy('activity_type')
+            ->select('activity_type', DB::raw('COUNT(*) as count'));
+
+        if ($researcherId) {
+            $query->where('researcher_id', $researcherId);
+        }
+
+        return $query->orderBy('count', 'desc')->get()->toArray();
+    }
+
+    protected function getTimeByProject(?int $researcherId): array
+    {
+        try {
+            $query = DB::table('research_journal_entry as j')
+                ->leftJoin('research_project as p', 'j.project_id', '=', 'p.id')
+                ->whereNotNull('j.time_spent_minutes')
+                ->groupBy('j.project_id', 'p.title')
+                ->select(
+                    DB::raw("COALESCE(p.title, 'No Project') as project"),
+                    DB::raw('SUM(j.time_spent_minutes) as minutes')
+                );
+
+            if ($researcherId) {
+                $query->where('j.researcher_id', $researcherId);
+            }
+
+            return $query->orderBy('minutes', 'desc')->get()->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 }

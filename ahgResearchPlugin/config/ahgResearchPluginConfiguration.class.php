@@ -11,7 +11,7 @@
 class ahgResearchPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Professional research support platform with ORCID integration, collaboration, and API access';
-    public static $version = '2.0.0';
+    public static $version = '2.1.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -169,6 +169,45 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_ajax_create_collection', '/research/ajax/create-collection', 'createCollectionAjax');
         $research->any('research_ajax_search_items', '/research/ajax/search-items', 'searchItems');
         $research->any('research_ajax_add_to_bibliography', '/research/ajax/add-to-bibliography', 'addToBibliographyAjax');
+
+        // Issue 149 Phase 7: Collaboration
+        $research->any('research_comment_api', '/research/api/comment', 'commentApi');
+        $research->any('research_submit_review', '/research/report/:id/review/:review_id', 'submitReview', ['id' => '\d+', 'review_id' => '\d+']);
+        $research->any('research_request_review', '/research/report/:id/review/request', 'requestReview', ['id' => '\d+']);
+
+        // Issue 149 Phase 6: Institutional Sharing
+        $research->any('research_institutions_edit', '/research/admin/institutions/edit/:id', 'editInstitution', ['id' => '\d+'], ['id' => null]);
+        $research->any('research_institutions', '/research/admin/institutions', 'institutions');
+        $research->any('research_share_project', '/research/project/:id/share', 'shareProject', ['id' => '\d+']);
+        $research->any('research_accept_share', '/research/share/:token/accept', 'acceptShare');
+        $research->any('research_external_access', '/research/share/:token', 'externalAccess');
+
+        // Issue 149 Phase 5: Visualization
+        $research->any('research_visualization_data', '/research/visualization-data', 'visualizationData');
+
+        // Issue 149 Phase 4: Notifications
+        $research->any('research_notifications_api', '/research/notifications/api', 'notificationsApi');
+        $research->any('research_notifications', '/research/notifications', 'notifications');
+
+        // Issue 149 Phase 3: Export + Import
+        $research->any('research_export_report', '/research/report/:id/export/:format', 'exportReport', ['id' => '\d+']);
+        $research->any('research_export_notes', '/research/notes/export/:format', 'exportNotes');
+        $research->any('research_export_finding_aid', '/research/collection/:id/export/:format', 'exportFindingAid', ['id' => '\d+']);
+        $research->any('research_export_journal', '/research/journal/export/:format', 'exportJournal');
+        $research->any('research_bibliography_import', '/research/bibliography/:id/import', 'importBibliography', ['id' => '\d+']);
+
+        // Issue 149 Phase 2: Reports
+        $research->any('research_report_section_edit', '/research/report/:id/section/:section_id', 'editReportSection', ['id' => '\d+', 'section_id' => '\d+']);
+        $research->any('research_report_reorder', '/research/report/:id/reorder', 'reorderReportSections', ['id' => '\d+']);
+        $research->any('research_report_new', '/research/report/new', 'newReport');
+        $research->any('research_report_edit', '/research/report/:id/edit', 'editReport', ['id' => '\d+']);
+        $research->any('research_view_report', '/research/report/:id', 'viewReport', ['id' => '\d+']);
+        $research->any('research_reports', '/research/reports', 'reports');
+
+        // Issue 149 Phase 1: Journal
+        $research->any('research_journal_new', '/research/journal/new', 'journalNew');
+        $research->any('research_journal_entry', '/research/journal/:id', 'journalEntry', ['id' => '\d+']);
+        $research->any('research_journal', '/research/journal', 'journal');
 
         // Dashboard
         $research->any('research_dashboard', '/research', 'dashboard');

@@ -782,4 +782,199 @@ class BibliographyService
 
         return $this->addEntry($bibliographyId, $entry);
     }
+
+    // =========================================================================
+    // ISSUE 149: BIBTEX / RIS IMPORT
+    // =========================================================================
+
+    /**
+     * Import entries from BibTeX format.
+     *
+     * @param int $bibliographyId Target bibliography
+     * @param string $bibtex Raw BibTeX content
+     * @return array Result with imported count and errors
+     */
+    public function importBibTeX(int $bibliographyId, string $bibtex): array
+    {
+        $entries = $this->parseBibTeX($bibtex);
+        $imported = 0;
+        $errors = [];
+
+        foreach ($entries as $entry) {
+            try {
+                $this->addEntry($bibliographyId, $entry);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = ($entry['title'] ?? 'Unknown') . ': ' . $e->getMessage();
+            }
+        }
+
+        return ['imported' => $imported, 'errors' => $errors, 'total' => count($entries)];
+    }
+
+    /**
+     * Import entries from RIS format.
+     *
+     * @param int $bibliographyId Target bibliography
+     * @param string $ris Raw RIS content
+     * @return array Result with imported count and errors
+     */
+    public function importRIS(int $bibliographyId, string $ris): array
+    {
+        $entries = $this->parseRIS($ris);
+        $imported = 0;
+        $errors = [];
+
+        foreach ($entries as $entry) {
+            try {
+                $this->addEntry($bibliographyId, $entry);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = ($entry['title'] ?? 'Unknown') . ': ' . $e->getMessage();
+            }
+        }
+
+        return ['imported' => $imported, 'errors' => $errors, 'total' => count($entries)];
+    }
+
+    /**
+     * Parse BibTeX string into array of entry data.
+     */
+    public function parseBibTeX(string $bibtex): array
+    {
+        $entries = [];
+        // Match @type{key, ... }
+        preg_match_all('/@(\w+)\s*\{([^,]*),\s*((?:[^{}]|\{[^{}]*\})*)\}/s', $bibtex, $matches, PREG_SET_ORDER);
+
+        $typeMap = [
+            'article' => 'article', 'book' => 'book', 'inbook' => 'chapter',
+            'incollection' => 'chapter', 'inproceedings' => 'article',
+            'mastersthesis' => 'thesis', 'phdthesis' => 'thesis',
+            'misc' => 'other', 'techreport' => 'other', 'unpublished' => 'other',
+        ];
+
+        foreach ($matches as $match) {
+            $type = strtolower($match[1]);
+            $fields = $this->parseBibTeXFields($match[3]);
+
+            $entry = [
+                'entry_type' => $typeMap[$type] ?? 'other',
+                'title' => $this->cleanBibTeXValue($fields['title'] ?? ''),
+                'authors' => $this->cleanBibTeXValue($fields['author'] ?? ''),
+                'date' => $this->cleanBibTeXValue($fields['year'] ?? ''),
+                'publisher' => $this->cleanBibTeXValue($fields['publisher'] ?? ''),
+                'container_title' => $this->cleanBibTeXValue($fields['journal'] ?? $fields['booktitle'] ?? ''),
+                'volume' => $this->cleanBibTeXValue($fields['volume'] ?? ''),
+                'issue' => $this->cleanBibTeXValue($fields['number'] ?? ''),
+                'pages' => $this->cleanBibTeXValue($fields['pages'] ?? ''),
+                'doi' => $this->cleanBibTeXValue($fields['doi'] ?? ''),
+                'url' => $this->cleanBibTeXValue($fields['url'] ?? ''),
+                'notes' => $this->cleanBibTeXValue($fields['note'] ?? ''),
+            ];
+
+            if (!empty($entry['title'])) {
+                $entries[] = $entry;
+            }
+        }
+
+        return $entries;
+    }
+
+    /**
+     * Parse BibTeX field block into key-value pairs.
+     */
+    protected function parseBibTeXFields(string $block): array
+    {
+        $fields = [];
+        // Match field = {value} or field = "value" or field = number
+        preg_match_all('/(\w+)\s*=\s*(?:\{((?:[^{}]|\{[^{}]*\})*)\}|"([^"]*)"|(\d+))/s', $block, $fieldMatches, PREG_SET_ORDER);
+
+        foreach ($fieldMatches as $fm) {
+            $key = strtolower($fm[1]);
+            $fields[$key] = $fm[2] ?? $fm[3] ?? $fm[4] ?? '';
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Clean BibTeX value (remove braces, trim).
+     */
+    protected function cleanBibTeXValue(string $value): string
+    {
+        $value = str_replace(['{', '}'], '', $value);
+        return trim($value);
+    }
+
+    /**
+     * Parse RIS string into array of entry data.
+     */
+    public function parseRIS(string $ris): array
+    {
+        $entries = [];
+        $current = null;
+        $authors = [];
+
+        $typeMap = [
+            'JOUR' => 'article', 'BOOK' => 'book', 'CHAP' => 'chapter',
+            'THES' => 'thesis', 'RPRT' => 'other', 'CONF' => 'article',
+            'ELEC' => 'website', 'GEN' => 'other', 'MGZN' => 'article',
+        ];
+
+        $lines = preg_split('/\r?\n/', $ris);
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) {
+                continue;
+            }
+
+            // Match RIS tag format: XX  - Value
+            if (preg_match('/^([A-Z][A-Z0-9])\s+-\s+(.*)$/', $line, $m)) {
+                $tag = $m[1];
+                $value = trim($m[2]);
+
+                if ($tag === 'TY') {
+                    $current = [
+                        'entry_type' => $typeMap[$value] ?? 'other',
+                        'title' => '', 'authors' => '', 'date' => '',
+                        'publisher' => '', 'container_title' => '',
+                        'volume' => '', 'issue' => '', 'pages' => '',
+                        'doi' => '', 'url' => '', 'notes' => '',
+                    ];
+                    $authors = [];
+                } elseif ($tag === 'ER') {
+                    if ($current && !empty($current['title'])) {
+                        $current['authors'] = implode('; ', $authors);
+                        $entries[] = $current;
+                    }
+                    $current = null;
+                    $authors = [];
+                } elseif ($current !== null) {
+                    switch ($tag) {
+                        case 'TI': case 'T1': $current['title'] = $value; break;
+                        case 'AU': case 'A1': $authors[] = $value; break;
+                        case 'PY': case 'Y1': case 'DA': $current['date'] = $value; break;
+                        case 'PB': $current['publisher'] = $value; break;
+                        case 'JO': case 'JF': case 'T2': $current['container_title'] = $value; break;
+                        case 'VL': $current['volume'] = $value; break;
+                        case 'IS': $current['issue'] = $value; break;
+                        case 'SP': $current['pages'] = $value; break;
+                        case 'EP': $current['pages'] .= '-' . $value; break;
+                        case 'DO': $current['doi'] = $value; break;
+                        case 'UR': case 'L1': $current['url'] = $value; break;
+                        case 'N1': $current['notes'] = $value; break;
+                    }
+                }
+            }
+        }
+
+        // Handle case where file doesn't end with ER
+        if ($current && !empty($current['title'])) {
+            $current['authors'] = implode('; ', $authors);
+            $entries[] = $current;
+        }
+
+        return $entries;
+    }
 }

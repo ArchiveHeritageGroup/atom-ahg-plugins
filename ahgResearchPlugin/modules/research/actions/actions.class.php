@@ -2721,4 +2721,904 @@ class researchActions extends AhgController
         }
     }
 
+    // =========================================================================
+    // ISSUE 149 PHASE 1: JOURNAL
+    // =========================================================================
+
+    protected function loadJournalService(): \JournalService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+        return new \JournalService();
+    }
+
+    public function executeJournal($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $journalService = $this->loadJournalService();
+        $filters = [
+            'project_id' => $request->getParameter('project_id') ?: null,
+            'entry_type' => $request->getParameter('entry_type') ?: null,
+            'date_from' => $request->getParameter('date_from') ?: null,
+            'date_to' => $request->getParameter('date_to') ?: null,
+            'search' => $request->getParameter('q') ?: null,
+        ];
+        $this->entries = $journalService->getEntries($this->researcher->id, $filters);
+        $this->projects = DB::table('research_project as p')
+            ->join('research_project_collaborator as pc', function ($j) use ($userId) {
+                $j->on('p.id', '=', 'pc.project_id');
+            })
+            ->where('pc.researcher_id', $this->researcher->id)
+            ->where('pc.status', 'accepted')
+            ->select('p.id', 'p.title')
+            ->orderBy('p.title')
+            ->get()->toArray();
+        $this->filters = $filters;
+
+        if ($request->isMethod('post') && $request->getParameter('do') === 'create') {
+            $content = $request->getParameter('content');
+            if ($content) {
+                $content = $this->service->sanitizeHtml($content);
+                $journalService->createEntry($this->researcher->id, [
+                    'title' => $request->getParameter('title'),
+                    'content' => $content,
+                    'content_format' => 'html',
+                    'project_id' => $request->getParameter('project_id') ?: null,
+                    'entry_type' => $request->getParameter('entry_type') ?: 'manual',
+                    'time_spent_minutes' => $request->getParameter('time_spent_minutes') ?: null,
+                    'tags' => $request->getParameter('tags'),
+                    'entry_date' => $request->getParameter('entry_date') ?: date('Y-m-d'),
+                ]);
+                $this->getUser()->setFlash('success', 'Journal entry created');
+            }
+            $this->redirect('research/journal');
+        }
+    }
+
+    public function executeJournalEntry($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $journalService = $this->loadJournalService();
+        $id = (int) $request->getParameter('id');
+        $this->entry = $journalService->getEntry($id);
+        if (!$this->entry || $this->entry->researcher_id != $this->researcher->id) {
+            $this->forward404('Entry not found');
+        }
+
+        $this->projects = DB::table('research_project as p')
+            ->join('research_project_collaborator as pc', 'p.id', '=', 'pc.project_id')
+            ->where('pc.researcher_id', $this->researcher->id)
+            ->where('pc.status', 'accepted')
+            ->select('p.id', 'p.title')->orderBy('p.title')->get()->toArray();
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+            if ($action === 'delete') {
+                $journalService->deleteEntry($id, $this->researcher->id);
+                $this->getUser()->setFlash('success', 'Entry deleted');
+                $this->redirect('research/journal');
+            }
+            $content = $this->service->sanitizeHtml($request->getParameter('content', ''));
+            $journalService->updateEntry($id, $this->researcher->id, [
+                'title' => $request->getParameter('title'),
+                'content' => $content,
+                'content_format' => 'html',
+                'project_id' => $request->getParameter('project_id') ?: null,
+                'time_spent_minutes' => $request->getParameter('time_spent_minutes') ?: null,
+                'tags' => $request->getParameter('tags'),
+                'entry_date' => $request->getParameter('entry_date') ?: $this->entry->entry_date,
+            ]);
+            $this->getUser()->setFlash('success', 'Entry updated');
+            $this->redirect('research/journal/entry/' . $id);
+        }
+    }
+
+    public function executeJournalNew($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $this->projects = DB::table('research_project as p')
+            ->join('research_project_collaborator as pc', 'p.id', '=', 'pc.project_id')
+            ->where('pc.researcher_id', $this->researcher->id)
+            ->where('pc.status', 'accepted')
+            ->select('p.id', 'p.title')->orderBy('p.title')->get()->toArray();
+
+        if ($request->isMethod('post')) {
+            $journalService = $this->loadJournalService();
+            $content = $this->service->sanitizeHtml($request->getParameter('content', ''));
+            if ($content) {
+                $entryId = $journalService->createEntry($this->researcher->id, [
+                    'title' => $request->getParameter('title'),
+                    'content' => $content,
+                    'content_format' => 'html',
+                    'project_id' => $request->getParameter('project_id') ?: null,
+                    'entry_type' => $request->getParameter('entry_type') ?: 'manual',
+                    'time_spent_minutes' => $request->getParameter('time_spent_minutes') ?: null,
+                    'tags' => $request->getParameter('tags'),
+                    'entry_date' => $request->getParameter('entry_date') ?: date('Y-m-d'),
+                ]);
+                $this->getUser()->setFlash('success', 'Journal entry created');
+                $this->redirect('research/journal/' . $entryId);
+            }
+        }
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 2: REPORTS
+    // =========================================================================
+
+    protected function loadReportService(): \ReportService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReportService.php';
+        return new \ReportService();
+    }
+
+    public function executeReports($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $reportService = $this->loadReportService();
+        $this->reports = $reportService->getReports($this->researcher->id, [
+            'status' => $request->getParameter('status') ?: null,
+            'project_id' => $request->getParameter('project_id') ?: null,
+        ]);
+        $this->currentStatus = $request->getParameter('status');
+    }
+
+    public function executeNewReport($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $reportService = $this->loadReportService();
+        $this->templates = $reportService->getTemplates();
+        $this->projects = DB::table('research_project as p')
+            ->join('research_project_collaborator as pc', 'p.id', '=', 'pc.project_id')
+            ->where('pc.researcher_id', $this->researcher->id)
+            ->where('pc.status', 'accepted')
+            ->select('p.id', 'p.title')->orderBy('p.title')->get()->toArray();
+
+        if ($request->isMethod('post')) {
+            $title = trim($request->getParameter('title'));
+            $templateCode = $request->getParameter('template_type', 'custom');
+            if ($title) {
+                $reportId = $reportService->createFromTemplate($this->researcher->id, $templateCode, [
+                    'title' => $title,
+                    'description' => $request->getParameter('description'),
+                    'project_id' => $request->getParameter('project_id') ?: null,
+                ]);
+                $this->getUser()->setFlash('success', 'Report created');
+                $this->redirect('research/report/' . $reportId);
+            }
+        }
+    }
+
+    public function executeViewReport($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $reportService = $this->loadReportService();
+        $id = (int) $request->getParameter('id');
+        $this->report = $reportService->getReport($id);
+        if (!$this->report || $this->report->researcher_id != $this->researcher->id) {
+            $this->forward404('Report not found');
+        }
+
+        // Load peer reviews
+        try {
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/PeerReviewService.php';
+            $prService = new \PeerReviewService();
+            $this->reviews = $prService->getReviews($id);
+        } catch (\Exception $e) {
+            $this->reviews = [];
+        }
+
+        // Load comments per section
+        try {
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CommentService.php';
+            $commentService = new \CommentService();
+            $this->sectionComments = [];
+            foreach ($this->report->sections as $section) {
+                $this->sectionComments[$section->id] = $commentService->getComments('report_section', $section->id);
+            }
+        } catch (\Exception $e) {
+            $this->sectionComments = [];
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+
+            if ($action === 'update_status') {
+                $reportService->updateReport($id, ['status' => $request->getParameter('status')]);
+                $this->getUser()->setFlash('success', 'Status updated');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'add_section') {
+                $reportService->addSection($id, [
+                    'section_type' => $request->getParameter('section_type', 'text'),
+                    'title' => $request->getParameter('section_title'),
+                ]);
+                $this->getUser()->setFlash('success', 'Section added');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'delete_section') {
+                $reportService->deleteSection((int) $request->getParameter('section_id'));
+                $this->getUser()->setFlash('success', 'Section deleted');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'delete_report') {
+                $reportService->deleteReport($id, $this->researcher->id);
+                $this->getUser()->setFlash('success', 'Report deleted');
+                $this->redirect('research/reports');
+            }
+
+            if ($action === 'auto_populate' && $this->report->project_id) {
+                $reportService->autoPopulateFromProject($id, $this->report->project_id);
+                $this->getUser()->setFlash('success', 'Report populated from project data');
+                $this->redirect('research/report/' . $id);
+            }
+        }
+    }
+
+    public function executeEditReport($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $reportService = $this->loadReportService();
+        $id = (int) $request->getParameter('id');
+        $report = $reportService->getReport($id);
+        if (!$report || $report->researcher_id != $researcher->id) {
+            $this->forward404('Report not found');
+        }
+
+        if ($request->isMethod('post')) {
+            $reportService->updateReport($id, [
+                'title' => $request->getParameter('title'),
+                'description' => $request->getParameter('description'),
+                'project_id' => $request->getParameter('project_id') ?: null,
+            ]);
+            $this->getUser()->setFlash('success', 'Report updated');
+        }
+        $this->redirect('research/report/' . $id);
+    }
+
+    public function executeEditReportSection($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $reportService = $this->loadReportService();
+        $sectionId = (int) $request->getParameter('section_id');
+        $content = $this->service->sanitizeHtml($request->getParameter('content', ''));
+
+        $reportService->updateSection($sectionId, [
+            'title' => $request->getParameter('title'),
+            'content' => $content,
+            'content_format' => 'html',
+        ]);
+
+        return $this->renderText(json_encode(['success' => true]));
+    }
+
+    public function executeReorderReportSections($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $reportService = $this->loadReportService();
+        $reportId = (int) $request->getParameter('id');
+        $sectionIds = $request->getParameter('sections', []);
+
+        if (is_string($sectionIds)) {
+            $sectionIds = json_decode($sectionIds, true) ?: [];
+        }
+
+        $reportService->reorderSections($reportId, $sectionIds);
+
+        return $this->renderText(json_encode(['success' => true]));
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 3: EXPORT + IMPORT
+    // =========================================================================
+
+    protected function loadExportService(): \ReportExportService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReportExportService.php';
+        return new \ReportExportService();
+    }
+
+    public function executeExportReport($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+
+        $id = (int) $request->getParameter('id');
+        $format = $request->getParameter('format', 'pdf');
+        $exportService = $this->loadExportService();
+
+        if ($format === 'docx') {
+            $file = $exportService->exportReportDocx($id);
+            $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            $ext = 'docx';
+        } else {
+            $file = $exportService->exportReportPdf($id);
+            $mime = 'application/pdf';
+            $ext = 'pdf';
+        }
+
+        if (!$file) {
+            $this->getUser()->setFlash('error', 'Export failed');
+            $this->redirect('research/reports');
+        }
+
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="report.' . $ext . '"');
+        $this->getResponse()->setContent(file_get_contents($file));
+        @unlink($file);
+        return sfView::NONE;
+    }
+
+    public function executeExportNotes($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $format = $request->getParameter('format', 'pdf');
+        $exportService = $this->loadExportService();
+
+        if ($format === 'docx') {
+            $file = $exportService->exportNotesDocx($researcher->id);
+            $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            $ext = 'docx';
+        } else {
+            $file = $exportService->exportNotesPdf($researcher->id);
+            $mime = 'application/pdf';
+            $ext = 'pdf';
+        }
+
+        if (!$file) {
+            $this->getUser()->setFlash('error', 'Export failed');
+            $this->redirect('research/annotations');
+        }
+
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="notes.' . $ext . '"');
+        $this->getResponse()->setContent(file_get_contents($file));
+        @unlink($file);
+        return sfView::NONE;
+    }
+
+    public function executeExportFindingAid($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $collectionId = (int) $request->getParameter('id');
+        $format = $request->getParameter('format', 'pdf');
+        $exportService = $this->loadExportService();
+
+        if ($format === 'docx') {
+            $file = $exportService->exportFindingAidDocx($collectionId, $researcher->id);
+            $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            $ext = 'docx';
+        } else {
+            $file = $exportService->exportFindingAidPdf($collectionId, $researcher->id);
+            $mime = 'application/pdf';
+            $ext = 'pdf';
+        }
+
+        if (!$file) {
+            $this->getUser()->setFlash('error', 'Export failed');
+            $this->redirect('research/collections');
+        }
+
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="finding-aid.' . $ext . '"');
+        $this->getResponse()->setContent(file_get_contents($file));
+        @unlink($file);
+        return sfView::NONE;
+    }
+
+    public function executeExportJournal($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $format = $request->getParameter('format', 'pdf');
+        $exportService = $this->loadExportService();
+
+        if ($format === 'docx') {
+            $file = $exportService->exportJournalDocx($researcher->id);
+            $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            $ext = 'docx';
+        } else {
+            $file = $exportService->exportJournalPdf($researcher->id);
+            $mime = 'application/pdf';
+            $ext = 'pdf';
+        }
+
+        if (!$file) {
+            $this->getUser()->setFlash('error', 'Export failed');
+            $this->redirect('research/journal');
+        }
+
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="journal.' . $ext . '"');
+        $this->getResponse()->setContent(file_get_contents($file));
+        @unlink($file);
+        return sfView::NONE;
+    }
+
+    public function executeImportBibliography($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $bibliographyId = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/BibliographyService.php';
+            $bibService = new \BibliographyService();
+
+            $format = $request->getParameter('import_format', 'bibtex');
+            $content = '';
+
+            // Handle file upload or pasted content
+            if (!empty($_FILES['import_file']['tmp_name'])) {
+                $content = file_get_contents($_FILES['import_file']['tmp_name']);
+            } else {
+                $content = $request->getParameter('import_content', '');
+            }
+
+            if (empty($content)) {
+                $this->getUser()->setFlash('error', 'No content provided');
+                $this->redirect('research/bibliography/' . $bibliographyId);
+            }
+
+            if ($format === 'ris') {
+                $result = $bibService->importRIS($bibliographyId, $content);
+            } else {
+                $result = $bibService->importBibTeX($bibliographyId, $content);
+            }
+
+            $msg = "Imported {$result['imported']} of {$result['total']} entries.";
+            if (!empty($result['errors'])) {
+                $msg .= ' Errors: ' . implode('; ', array_slice($result['errors'], 0, 3));
+            }
+            $this->getUser()->setFlash($result['imported'] > 0 ? 'success' : 'error', $msg);
+            $this->redirect('research/bibliography/' . $bibliographyId);
+        }
+
+        $this->redirect('research/bibliography/' . $bibliographyId);
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 4: NOTIFICATIONS + DASHBOARD
+    // =========================================================================
+
+    protected function loadNotificationService(): \NotificationService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/NotificationService.php';
+        return new \NotificationService();
+    }
+
+    public function executeNotifications($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $notifService = $this->loadNotificationService();
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+
+            if ($action === 'mark_read') {
+                $notifService->markAsRead((int) $request->getParameter('id'), $this->researcher->id);
+            } elseif ($action === 'mark_all_read') {
+                $notifService->markAllAsRead($this->researcher->id);
+                $this->getUser()->setFlash('success', 'All notifications marked as read');
+            } elseif ($action === 'update_preference') {
+                $notifService->updatePreference($this->researcher->id, $request->getParameter('notification_type'), [
+                    'email_enabled' => $request->getParameter('email_enabled') ? 1 : 0,
+                    'in_app_enabled' => $request->getParameter('in_app_enabled') ? 1 : 0,
+                    'digest_frequency' => $request->getParameter('digest_frequency', 'immediate'),
+                ]);
+                $this->getUser()->setFlash('success', 'Preferences updated');
+            }
+            $this->redirect('research/notifications');
+        }
+
+        $filters = [
+            'type' => $request->getParameter('type') ?: null,
+            'is_read' => $request->getParameter('filter') === 'unread' ? 0 : null,
+        ];
+        $this->notifications = $notifService->getNotifications($this->researcher->id, $filters);
+        $this->unreadCount = $notifService->getUnreadCount($this->researcher->id);
+        $this->preferences = $notifService->getPreferences($this->researcher->id);
+        $this->currentFilter = $request->getParameter('filter', 'all');
+    }
+
+    public function executeNotificationsApi($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['count' => 0]));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['count' => 0]));
+        }
+
+        $notifService = $this->loadNotificationService();
+
+        if ($request->isMethod('post') && $request->getParameter('do') === 'mark_read') {
+            $notifService->markAsRead((int) $request->getParameter('id'), $researcher->id);
+            return $this->renderText(json_encode(['success' => true]));
+        }
+
+        $count = $notifService->getUnreadCount($researcher->id);
+        $recent = $notifService->getNotifications($researcher->id, ['is_read' => 0, 'limit' => 5]);
+
+        return $this->renderText(json_encode(['count' => $count, 'notifications' => $recent]));
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 5: VISUALIZATION DATA
+    // =========================================================================
+
+    public function executeVisualizationData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/StatisticsService.php';
+        $statsService = new \StatisticsService();
+
+        $type = $request->getParameter('type', 'registrations_timeline');
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        $data = $statsService->getVisualizationData($type, [
+            'researcher_id' => $researcher ? $researcher->id : null,
+            'months' => (int) $request->getParameter('months', 12),
+            'date_from' => $request->getParameter('date_from'),
+            'date_to' => $request->getParameter('date_to'),
+        ]);
+
+        return $this->renderText(json_encode(['data' => $data]));
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 6: INSTITUTIONAL SHARING
+    // =========================================================================
+
+    protected function loadShareService(): \InstitutionalShareService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/InstitutionalShareService.php';
+        return new \InstitutionalShareService();
+    }
+
+    public function executeInstitutions($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $shareService = $this->loadShareService();
+        $this->institutions = $shareService->getInstitutions(false);
+    }
+
+    public function executeEditInstitution($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        $shareService = $this->loadShareService();
+        $id = (int) $request->getParameter('id');
+        $this->institution = $id ? $shareService->getInstitution($id) : null;
+        $this->isNew = !$this->institution;
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'name' => $request->getParameter('name'),
+                'code' => $request->getParameter('code'),
+                'description' => $request->getParameter('description'),
+                'url' => $request->getParameter('url'),
+                'contact_name' => $request->getParameter('contact_name'),
+                'contact_email' => $request->getParameter('contact_email'),
+                'is_active' => $request->getParameter('is_active') ? 1 : 0,
+            ];
+
+            if ($id && $this->institution) {
+                $shareService->updateInstitution($id, $data);
+                $this->getUser()->setFlash('success', 'Institution updated');
+            } else {
+                $shareService->createInstitution($data);
+                $this->getUser()->setFlash('success', 'Institution created');
+            }
+            $this->redirect('research/admin/institutions');
+        }
+    }
+
+    public function executeShareProject($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $shareService = $this->loadShareService();
+        $this->shares = $shareService->getShares($projectId);
+        $this->institutions = $shareService->getInstitutions();
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('do');
+
+            if ($action === 'create_share') {
+                $shareService->createShare($projectId, $this->researcher->id, [
+                    'share_type' => $request->getParameter('share_type', 'view'),
+                    'institution_id' => $request->getParameter('institution_id') ?: null,
+                    'message' => $request->getParameter('message'),
+                    'expires_at' => $request->getParameter('expires_at') ?: null,
+                ]);
+                $this->getUser()->setFlash('success', 'Share link created');
+            } elseif ($action === 'revoke_share') {
+                $shareService->revokeShare((int) $request->getParameter('share_id'));
+                $this->getUser()->setFlash('success', 'Share revoked');
+            }
+            $this->redirect('research/project/' . $projectId . '/share');
+        }
+    }
+
+    public function executeAcceptShare($request)
+    {
+        $token = $request->getParameter('token');
+        $shareService = $this->loadShareService();
+        $share = $shareService->getShareByToken($token);
+
+        if (!$share || $share->status === 'revoked' || $share->status === 'expired') {
+            $this->getUser()->setFlash('error', 'Share link is invalid, revoked, or expired');
+            $this->redirect('@homepage');
+        }
+
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId($userId);
+            if ($researcher) {
+                $shareService->acceptShare($share->id, $researcher->id);
+                $this->getUser()->setFlash('success', 'Share accepted');
+                $this->redirect('research/project/' . $share->project_id);
+            }
+        }
+
+        // For unauthenticated users, redirect to external access
+        $this->redirect('research/share/' . $token);
+    }
+
+    public function executeExternalAccess($request)
+    {
+        $token = $request->getParameter('token');
+        $shareService = $this->loadShareService();
+        $this->share = $shareService->getShareByToken($token);
+
+        if (!$this->share || !in_array($this->share->status, ['pending', 'active'])) {
+            $this->getUser()->setFlash('error', 'Share link is invalid or expired');
+            $this->redirect('@homepage');
+        }
+
+        // If posting registration as external collaborator
+        if ($request->isMethod('post') && $request->getParameter('do') === 'register_external') {
+            $collabId = $shareService->addExternalCollaborator($this->share->id, [
+                'name' => $request->getParameter('name'),
+                'email' => $request->getParameter('email'),
+                'institution' => $request->getParameter('institution'),
+                'orcid_id' => $request->getParameter('orcid_id'),
+                'role' => $this->share->share_type === 'view' ? 'viewer' : 'contributor',
+            ]);
+
+            // Activate share if still pending
+            if ($this->share->status === 'pending') {
+                $shareService->acceptShare($this->share->id, 0);
+            }
+
+            $collab = DB::table('research_external_collaborator')->where('id', $collabId)->first();
+            $this->getUser()->setFlash('success', 'Access granted');
+            $this->redirect('research/share/' . $token . '?access_token=' . $collab->access_token);
+        }
+
+        // If already has access token, load project data
+        $accessToken = $request->getParameter('access_token');
+        $this->externalUser = null;
+        $this->projectData = null;
+
+        if ($accessToken) {
+            $this->externalUser = $shareService->authenticateExternal($accessToken);
+            if ($this->externalUser) {
+                require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+                $projectService = new \ProjectService();
+                $this->projectData = $projectService->getProject($this->share->project_id);
+                if ($this->projectData) {
+                    $this->projectData->resources = $projectService->getResources($this->share->project_id);
+                    $this->projectData->milestones = $projectService->getMilestones($this->share->project_id);
+                }
+            }
+        }
+
+        $this->setLayout(false);
+    }
+
+    // =========================================================================
+    // ISSUE 149 PHASE 7: COMMENTS + PEER REVIEW
+    // =========================================================================
+
+    public function executeCommentApi($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not a researcher']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CommentService.php';
+        $commentService = new \CommentService();
+
+        $action = $request->getParameter('do', 'add');
+
+        if ($action === 'add') {
+            $id = $commentService->addComment(
+                $researcher->id,
+                $request->getParameter('entity_type'),
+                (int) $request->getParameter('entity_id'),
+                $request->getParameter('content'),
+                $request->getParameter('parent_id') ? (int) $request->getParameter('parent_id') : null
+            );
+            return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+        }
+
+        if ($action === 'resolve') {
+            $commentService->resolveComment((int) $request->getParameter('id'), $researcher->id);
+            return $this->renderText(json_encode(['success' => true]));
+        }
+
+        if ($action === 'delete') {
+            $commentService->deleteComment((int) $request->getParameter('id'), $researcher->id);
+            return $this->renderText(json_encode(['success' => true]));
+        }
+
+        if ($action === 'list') {
+            $comments = $commentService->getComments(
+                $request->getParameter('entity_type'),
+                (int) $request->getParameter('entity_id')
+            );
+            return $this->renderText(json_encode(['success' => true, 'comments' => $comments]));
+        }
+
+        return $this->renderText(json_encode(['success' => false, 'error' => 'Unknown action']));
+    }
+
+    public function executeRequestReview($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $reportId = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/PeerReviewService.php';
+            $prService = new \PeerReviewService();
+
+            $reviewerId = (int) $request->getParameter('reviewer_id');
+            if ($reviewerId && $reviewerId !== $researcher->id) {
+                $prService->requestReview($reportId, $researcher->id, $reviewerId);
+
+                // Create notification for reviewer
+                try {
+                    $notifService = $this->loadNotificationService();
+                    $report = DB::table('research_report')->where('id', $reportId)->first();
+                    $notifService->createNotification(
+                        $reviewerId,
+                        'collaboration',
+                        'Peer review requested',
+                        $researcher->first_name . ' ' . $researcher->last_name . ' requested your review of "' . ($report->title ?? 'Report') . '"',
+                        'research/report/' . $reportId,
+                        'report',
+                        $reportId
+                    );
+                } catch (\Exception $e) {
+                    // Notification is non-critical
+                }
+
+                $this->getUser()->setFlash('success', 'Review requested');
+            }
+        }
+        $this->redirect('research/report/' . $reportId);
+    }
+
+    public function executeSubmitReview($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $reportId = (int) $request->getParameter('id');
+        $reviewId = (int) $request->getParameter('review_id');
+
+        if ($request->isMethod('post')) {
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/PeerReviewService.php';
+            $prService = new \PeerReviewService();
+
+            $action = $request->getParameter('do', 'submit');
+
+            if ($action === 'decline') {
+                $prService->declineReview($reviewId, $researcher->id);
+                $this->getUser()->setFlash('success', 'Review declined');
+            } else {
+                $prService->submitReview($reviewId, $researcher->id, [
+                    'feedback' => $request->getParameter('feedback'),
+                    'rating' => $request->getParameter('rating') ?: null,
+                ]);
+                $this->getUser()->setFlash('success', 'Review submitted');
+            }
+        }
+        $this->redirect('research/report/' . $reportId);
+    }
 }

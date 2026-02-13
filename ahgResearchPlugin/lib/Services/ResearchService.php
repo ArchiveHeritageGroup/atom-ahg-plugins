@@ -309,6 +309,8 @@ class ResearchService
             'annotation_type' => $data['annotation_type'] ?? 'note',
             'title' => $data['title'] ?? null,
             'content' => $data['content'],
+            'content_format' => $data['content_format'] ?? 'text',
+            'visibility' => $data['visibility'] ?? 'private',
             'tags' => $data['tags'] ?? null,
             'is_private' => $data['is_private'] ?? 1,
             'created_at' => date('Y-m-d H:i:s'),
@@ -1166,5 +1168,122 @@ class ResearchService
             ->where('id', $keyId)
             ->where('researcher_id', $researcherId)
             ->update(['is_active' => 0]) > 0;
+    }
+
+    // =========================================================================
+    // ISSUE 149: ENHANCED ANNOTATIONS + DASHBOARD
+    // =========================================================================
+
+    /**
+     * Full-text search annotations.
+     */
+    public function searchAnnotations(int $researcherId, string $query): array
+    {
+        return DB::table('research_annotation as a')
+            ->leftJoin('information_object_i18n as i18n', function ($join) {
+                $join->on('a.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
+            ->where('a.researcher_id', $researcherId)
+            ->whereRaw('MATCH(a.title, a.content) AGAINST(? IN BOOLEAN MODE)', [$query])
+            ->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug')
+            ->orderBy('a.created_at', 'desc')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Sanitize HTML content from Quill editor.
+     * Strips dangerous tags/attributes while preserving formatting.
+     */
+    public function sanitizeHtml(string $html): string
+    {
+        $allowed = '<p><br><strong><em><u><s><ol><ul><li><h1><h2><h3><h4><h5><h6><blockquote><pre><code><a><img><span><sub><sup><table><thead><tbody><tr><th><td>';
+        $clean = strip_tags($html, $allowed);
+
+        // Remove event handlers and javascript: URLs
+        $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']/i', '', $clean);
+        $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']/i', 'href="#"', $clean);
+
+        return $clean;
+    }
+
+    /**
+     * Get enhanced dashboard data for Phase 4 notification + dashboard improvements.
+     */
+    public function getEnhancedDashboardData(int $researcherId): array
+    {
+        $data = [];
+
+        // Recent activity (last 10)
+        $data['recent_activity'] = DB::table('research_activity_log')
+            ->where('researcher_id', $researcherId)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->toArray();
+
+        // Recent notes (last 5)
+        $data['recent_notes'] = DB::table('research_annotation')
+            ->where('researcher_id', $researcherId)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->toArray();
+
+        // Recent journal entries (last 5)
+        try {
+            $data['recent_journal'] = DB::table('research_journal_entry')
+                ->where('researcher_id', $researcherId)
+                ->orderBy('entry_date', 'desc')
+                ->limit(5)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            $data['recent_journal'] = [];
+        }
+
+        // Saved search alert counts
+        $data['search_alerts'] = DB::table('research_saved_search')
+            ->where('researcher_id', $researcherId)
+            ->where('alert_enabled', 1)
+            ->where('new_results_count', '>', 0)
+            ->select('id', 'name', 'new_results_count')
+            ->get()
+            ->toArray();
+
+        // Pending invitations
+        $data['pending_invitations'] = DB::table('research_project_collaborator')
+            ->join('research_project as p', 'research_project_collaborator.project_id', '=', 'p.id')
+            ->where('research_project_collaborator.researcher_id', $researcherId)
+            ->where('research_project_collaborator.status', 'pending')
+            ->select('research_project_collaborator.*', 'p.title as project_title')
+            ->get()
+            ->toArray();
+
+        // Active projects
+        $data['active_projects'] = DB::table('research_project as p')
+            ->join('research_project_collaborator as pc', function ($join) use ($researcherId) {
+                $join->on('p.id', '=', 'pc.project_id')
+                    ->where('pc.researcher_id', '=', $researcherId)
+                    ->where('pc.status', '=', 'accepted');
+            })
+            ->where('p.status', 'active')
+            ->select('p.id', 'p.title', 'p.status', 'pc.role')
+            ->limit(10)
+            ->get()
+            ->toArray();
+
+        // Notification count
+        try {
+            $data['unread_notifications'] = DB::table('research_notification')
+                ->where('researcher_id', $researcherId)
+                ->where('is_read', 0)
+                ->count();
+        } catch (\Exception $e) {
+            $data['unread_notifications'] = 0;
+        }
+
+        return $data;
     }
 }

@@ -1,8 +1,8 @@
 {
     "name": "Research Portal",
     "machine_name": "ahgResearchPlugin",
-    "version": "2.0.0",
-    "description": "Professional research support platform with ORCID integration, multi-researcher collaboration, research projects, bibliography management, reproduction requests, private workspaces, and REST API access",
+    "version": "2.1.0",
+    "description": "Professional research support platform with ORCID integration, collaboration, research projects, bibliography management, reproduction requests, private workspaces, research journal, reports with templates, PDF/DOCX export, notification center, data visualization, inter-institutional sharing, peer review, and REST API access",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "research",
@@ -53,7 +53,18 @@
         "research_citation_log",
         "research_password_reset",
         "research_api_key",
-        "research_api_log"
+        "research_api_log",
+        "research_journal_entry",
+        "research_report",
+        "research_report_section",
+        "research_report_template",
+        "research_notification",
+        "research_notification_preference",
+        "research_institution",
+        "research_institutional_share",
+        "research_external_collaborator",
+        "research_comment",
+        "research_peer_review"
     ],
     "provides": {
         "admin_section": {
@@ -98,6 +109,16 @@
         "admin_configurable_types": true,
         "verification_system": true,
         "activity_tracking": true,
-        "analytics_dashboard": true
+        "analytics_dashboard": true,
+        "research_journal": true,
+        "research_reports": true,
+        "report_templates": true,
+        "pdf_docx_export": true,
+        "bibtex_ris_import": true,
+        "notification_center": true,
+        "data_visualization": true,
+        "institutional_sharing": true,
+        "peer_review": true,
+        "comments_threads": true
     }
 }

@@ -457,6 +457,8 @@ class ProjectService
             'resource_id' => $data['resource_id'] ?? null,
             'object_id' => $data['object_id'] ?? null,
             'external_url' => $data['external_url'] ?? null,
+            'link_type' => $data['link_type'] ?? null,
+            'link_metadata' => isset($data['link_metadata']) ? json_encode($data['link_metadata']) : null,
             'title' => $data['title'] ?? null,
             'description' => $data['description'] ?? null,
             'notes' => $data['notes'] ?? null,
