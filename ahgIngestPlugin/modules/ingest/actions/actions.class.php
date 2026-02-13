@@ -1,20 +1,30 @@
 <?php
 
-use AtomFramework\Http\Controllers\AhgController;
-use AhgIngestPlugin\Services\IngestService;
-use AhgIngestPlugin\Services\IngestCommitService;
-use Illuminate\Database\Capsule\Manager as DB;
-
-class ingestActions extends AhgController
+class ingestActions extends sfActions
 {
-    protected function getIngestService(): IngestService
+    protected function loadServices(): void
     {
-        return new IngestService();
+        static $loaded = false;
+        if (!$loaded) {
+            $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIngestPlugin';
+            require_once $pluginDir . '/lib/Services/IngestService.php';
+            require_once $pluginDir . '/lib/Services/IngestCommitService.php';
+            $loaded = true;
+        }
     }
 
-    protected function getCommitService(): IngestCommitService
+    protected function getIngestService(): \AhgIngestPlugin\Services\IngestService
     {
-        return new IngestCommitService();
+        $this->loadServices();
+
+        return new \AhgIngestPlugin\Services\IngestService();
+    }
+
+    protected function getCommitService(): \AhgIngestPlugin\Services\IngestCommitService
+    {
+        $this->loadServices();
+
+        return new \AhgIngestPlugin\Services\IngestCommitService();
     }
 
     protected function requireAuth(): void
@@ -44,7 +54,7 @@ class ingestActions extends AhgController
 
         // Admins see all sessions, others see only their own
         if ($this->getUser()->isAdministrator()) {
-            $this->sessions = DB::table('ingest_session')
+            $this->sessions = \Illuminate\Database\Capsule\Manager::table('ingest_session')
                 ->leftJoin('user', 'ingest_session.user_id', '=', 'user.id')
                 ->leftJoin('actor_i18n', 'user.id', '=', 'actor_i18n.id')
                 ->select('ingest_session.*', 'actor_i18n.authorized_form_of_name as user_name')
@@ -85,13 +95,24 @@ class ingestActions extends AhgController
                 'new_parent_level' => $request->getParameter('new_parent_level', ''),
                 'output_create_records' => $request->getParameter('output_create_records', 1),
                 'output_generate_sip' => $request->getParameter('output_generate_sip', 0),
+                'output_generate_aip' => $request->getParameter('output_generate_aip', 0),
                 'output_generate_dip' => $request->getParameter('output_generate_dip', 0),
                 'output_sip_path' => $request->getParameter('output_sip_path', ''),
+                'output_aip_path' => $request->getParameter('output_aip_path', ''),
                 'output_dip_path' => $request->getParameter('output_dip_path', ''),
                 'derivative_thumbnails' => $request->getParameter('derivative_thumbnails', 1),
                 'derivative_reference' => $request->getParameter('derivative_reference', 1),
                 'derivative_normalize_format' => $request->getParameter('derivative_normalize_format', ''),
                 'security_classification_id' => $request->getParameter('security_classification_id') ?: null,
+                'process_ner' => $request->getParameter('process_ner', 0),
+                'process_ocr' => $request->getParameter('process_ocr', 0),
+                'process_virus_scan' => $request->getParameter('process_virus_scan', 1),
+                'process_summarize' => $request->getParameter('process_summarize', 0),
+                'process_spellcheck' => $request->getParameter('process_spellcheck', 0),
+                'process_translate' => $request->getParameter('process_translate', 0),
+                'process_translate_lang' => $request->getParameter('process_translate_lang') ?: null,
+                'process_format_id' => $request->getParameter('process_format_id', 0),
+                'process_face_detect' => $request->getParameter('process_face_detect', 0),
             ];
 
             $userId = $this->getUser()->getAttribute('user_id');
@@ -109,7 +130,7 @@ class ingestActions extends AhgController
         }
 
         // Load data for dropdowns
-        $this->repositories = DB::table('repository')
+        $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository')
             ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
             ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->orderBy('actor_i18n.authorized_form_of_name')
@@ -122,6 +143,21 @@ class ingestActions extends AhgController
                 $this->classifications = \AtomExtensions\Services\SecurityClearanceService::getAllClassifications();
             } catch (\Exception $e) {
                 // Plugin not installed
+            }
+        }
+
+        // Load ingest defaults from ahg_settings (if no existing session)
+        $this->defaults = [];
+        if (!$id) {
+            try {
+                $rows = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                    ->where('setting_group', 'ingest')
+                    ->get(['setting_key', 'setting_value']);
+                foreach ($rows as $row) {
+                    $this->defaults[$row->setting_key] = $row->setting_value;
+                }
+            } catch (\Exception $e) {
+                // Table may not exist
             }
         }
     }
@@ -252,11 +288,11 @@ class ingestActions extends AhgController
         }
 
         $this->mappings = $svc->getMappings($id);
-        $this->targetFields = IngestService::getTargetFields($this->session->standard);
+        $this->targetFields = \AhgIngestPlugin\Services\IngestService::getTargetFields($this->session->standard);
         $this->savedProfiles = $svc->getSavedMappingProfiles();
 
         // Get sample data for preview
-        $this->sampleRows = DB::table('ingest_row')
+        $this->sampleRows = \Illuminate\Database\Capsule\Manager::table('ingest_row')
             ->where('session_id', $id)
             ->orderBy('row_number')
             ->limit(5)
@@ -344,7 +380,7 @@ class ingestActions extends AhgController
         $this->tree = $svc->buildHierarchyTree($id);
         $this->rowCount = $svc->getRowCount($id);
 
-        $doCount = DB::table('ingest_row')
+        $doCount = \Illuminate\Database\Capsule\Manager::table('ingest_row')
             ->where('session_id', $id)
             ->where('is_excluded', 0)
             ->where('digital_object_matched', 1)
@@ -373,7 +409,23 @@ class ingestActions extends AhgController
         if ($request->isMethod('post') && !$this->job) {
             // Start the commit job
             $jobId = $commitSvc->startJob($id);
-            $commitSvc->executeJob($jobId);
+
+            // Launch background task (non-blocking)
+            $atomRoot = sfConfig::get('sf_root_dir');
+            $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
+            $logDir = dirname($logFile);
+            if (!is_dir($logDir)) {
+                @mkdir($logDir, 0755, true);
+            }
+
+            $cmd = sprintf(
+                'nohup php %s/symfony ingest:commit --job-id=%d > %s 2>&1 &',
+                escapeshellarg($atomRoot),
+                $jobId,
+                escapeshellarg($logFile)
+            );
+            exec($cmd);
+
             $this->job = $commitSvc->getJobStatus($jobId);
         }
     }
@@ -388,7 +440,7 @@ class ingestActions extends AhgController
         $results = [];
 
         if (strlen($query) >= 2) {
-            $results = DB::table('information_object')
+            $results = \Illuminate\Database\Capsule\Manager::table('information_object')
                 ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
                 ->join('slug', 'information_object.id', '=', 'slug.object_id')
                 ->where('information_object_i18n.title', 'LIKE', '%' . $query . '%')

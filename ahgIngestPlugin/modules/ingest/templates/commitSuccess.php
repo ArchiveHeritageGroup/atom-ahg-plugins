@@ -150,13 +150,19 @@ $job = $sf_data->getRaw('job');
 
                 <?php if ($job->sip_package_id): ?>
                     <div class="alert alert-info mb-2">
-                        <i class="fas fa-box me-1"></i><?php echo __('SIP package generated') ?>
+                        <i class="fas fa-box me-1"></i><?php echo __('SIP (Submission Information Package) generated') ?>
+                    </div>
+                <?php endif ?>
+
+                <?php if (!empty($job->aip_package_id)): ?>
+                    <div class="alert alert-success mb-2">
+                        <i class="fas fa-archive me-1"></i><?php echo __('AIP (Archival Information Package) generated') ?>
                     </div>
                 <?php endif ?>
 
                 <?php if ($job->dip_package_id): ?>
                     <div class="alert alert-info mb-2">
-                        <i class="fas fa-box-open me-1"></i><?php echo __('DIP package generated') ?>
+                        <i class="fas fa-box-open me-1"></i><?php echo __('DIP (Dissemination Information Package) generated') ?>
                     </div>
                 <?php endif ?>
             </div>

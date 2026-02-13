@@ -2,9 +2,18 @@
 $session = isset($session) ? $sf_data->getRaw('session') : null;
 $repositories = $sf_data->getRaw('repositories') ?? [];
 $classifications = $sf_data->getRaw('classifications') ?? [];
+$defaults = $sf_data->getRaw('defaults') ?? [];
 
-$sectorVal = $session->sector ?? 'archive';
-$standardVal = $session->standard ?? 'isadg';
+// Helper: get value from session (edit) or defaults (new) or fallback
+$d = function($field, $fallback = '') use ($session, $defaults) {
+    if ($session && isset($session->{$field})) return $session->{$field};
+    $settingsKey = 'ingest_' . str_replace('process_', '', str_replace('output_', '', $field));
+    if (isset($defaults[$settingsKey])) return ($defaults[$settingsKey] === 'true') ? 1 : (($defaults[$settingsKey] === 'false') ? 0 : $defaults[$settingsKey]);
+    return $fallback;
+};
+
+$sectorVal = $session->sector ?? ($defaults['ingest_default_sector'] ?? 'archive');
+$standardVal = $session->standard ?? ($defaults['ingest_default_standard'] ?? 'isadg');
 $placementVal = $session->parent_placement ?? 'top_level';
 ?>
 
@@ -163,6 +172,11 @@ $placementVal = $session->parent_placement ?? 'top_level';
                             <?php echo ($session->output_generate_sip ?? 0) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="output_generate_sip"><?php echo __('Generate SIP package') ?></label>
                     </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="output_generate_aip" name="output_generate_aip" value="1"
+                            <?php echo ($session->output_generate_aip ?? 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="output_generate_aip"><?php echo __('Generate AIP package') ?></label>
+                    </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="output_generate_dip" name="output_generate_dip" value="1"
                             <?php echo ($session->output_generate_dip ?? 0) ? 'checked' : '' ?>>
@@ -206,6 +220,110 @@ $placementVal = $session->parent_placement ?? 'top_level';
         </div>
     </div>
 
+    <!-- Full-width: Processing Options -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-brain me-2"></i><?php echo __('Processing Options') ?></h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3"><?php echo __('Select AI and processing actions to run on ingested records after commit.') ?></p>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_virus_scan" name="process_virus_scan" value="1"
+                            <?php echo $d('process_virus_scan', 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_virus_scan">
+                            <i class="fas fa-shield-virus text-danger me-1"></i><?php echo __('Virus Scan') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('ClamAV malware scan') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_ocr" name="process_ocr" value="1"
+                            <?php echo $d('process_ocr', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_ocr">
+                            <i class="fas fa-file-alt text-primary me-1"></i><?php echo __('OCR') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Tesseract text extraction') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_ner" name="process_ner" value="1"
+                            <?php echo $d('process_ner', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_ner">
+                            <i class="fas fa-tags text-success me-1"></i><?php echo __('NER') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Named entity extraction') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_summarize" name="process_summarize" value="1"
+                            <?php echo $d('process_summarize', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_summarize">
+                            <i class="fas fa-compress-alt text-warning me-1"></i><?php echo __('Summarize') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Auto-generate summaries') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_spellcheck" name="process_spellcheck" value="1"
+                            <?php echo $d('process_spellcheck', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_spellcheck">
+                            <i class="fas fa-spell-check text-info me-1"></i><?php echo __('Spell Check') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('aspell grammar check') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_format_id" name="process_format_id" value="1"
+                            <?php echo $d('process_format_id', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_format_id">
+                            <i class="fas fa-fingerprint text-secondary me-1"></i><?php echo __('Format ID') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Siegfried PRONOM identification') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_face_detect" name="process_face_detect" value="1"
+                            <?php echo $d('process_face_detect', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_face_detect">
+                            <i class="fas fa-user-circle text-dark me-1"></i><?php echo __('Face Detection') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Detect & match faces') ?></small>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="process_translate" name="process_translate" value="1"
+                            <?php echo $d('process_translate', 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="process_translate">
+                            <i class="fas fa-language text-primary me-1"></i><?php echo __('Translate') ?>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block ms-4"><?php echo __('Argos offline translation') ?></small>
+                </div>
+            </div>
+
+            <!-- Translation language row (shown when translate checked) -->
+            <div id="translate-lang-panel" class="row mt-2" style="display:none;">
+                <div class="col-md-4">
+                    <label for="process_translate_lang" class="form-label"><?php echo __('Translate to') ?></label>
+                    <select class="form-select form-select-sm" id="process_translate_lang" name="process_translate_lang">
+                        <?php foreach (['af' => 'Afrikaans', 'en' => 'English', 'zu' => 'Zulu', 'xh' => 'Xhosa', 'fr' => 'French', 'de' => 'German', 'pt' => 'Portuguese', 'es' => 'Spanish'] as $code => $name): ?>
+                            <option value="<?php echo $code ?>" <?php echo ($session->process_translate_lang ?? ($defaults['ingest_translate_to'] ?? 'af')) === $code ? 'selected' : '' ?>><?php echo $name ?></option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between">
         <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard') ?>
@@ -231,6 +349,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     radios.forEach(function(r) { r.addEventListener('change', togglePanels); });
     togglePanels();
+
+    // Toggle translate language panel
+    var translateChk = document.getElementById('process_translate');
+    var translatePanel = document.getElementById('translate-lang-panel');
+    function toggleTranslate() {
+        translatePanel.style.display = translateChk.checked ? '' : 'none';
+    }
+    translateChk.addEventListener('change', toggleTranslate);
+    toggleTranslate();
 
     // Parent search autocomplete
     var searchInput = document.getElementById('parent_search');

@@ -121,11 +121,84 @@ class IngestCommitService
             }
         }
 
-        // Post-commit: derivatives, packaging, indexing
+        // Post-commit: processing, derivatives, packaging, indexing
+
+        // Virus scan (before anything else)
+        if ($session->process_virus_scan) {
+            try {
+                $this->runVirusScan($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'virus_scan', 'error' => $e->getMessage()];
+            }
+        }
+
         try {
             $this->generateDerivatives($jobId);
         } catch (\Exception $e) {
             $errors[] = ['stage' => 'derivatives', 'error' => $e->getMessage()];
+        }
+
+        // OCR
+        if ($session->process_ocr) {
+            try {
+                $this->runOcr($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'ocr', 'error' => $e->getMessage()];
+            }
+        }
+
+        // NER
+        if ($session->process_ner) {
+            try {
+                $this->runNer($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'ner', 'error' => $e->getMessage()];
+            }
+        }
+
+        // Summarize
+        if ($session->process_summarize) {
+            try {
+                $this->runSummarize($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'summarize', 'error' => $e->getMessage()];
+            }
+        }
+
+        // Spell check
+        if ($session->process_spellcheck) {
+            try {
+                $this->runSpellcheck($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'spellcheck', 'error' => $e->getMessage()];
+            }
+        }
+
+        // Format identification
+        if ($session->process_format_id) {
+            try {
+                $this->runFormatIdentification($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'format_id', 'error' => $e->getMessage()];
+            }
+        }
+
+        // Face detection
+        if ($session->process_face_detect) {
+            try {
+                $this->runFaceDetection($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'face_detect', 'error' => $e->getMessage()];
+            }
+        }
+
+        // Translation
+        if ($session->process_translate) {
+            try {
+                $this->runTranslation($jobId, $session);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'translate', 'error' => $e->getMessage()];
+            }
         }
 
         if ($session->output_generate_sip) {
@@ -133,6 +206,14 @@ class IngestCommitService
                 $this->buildSipPackage($jobId);
             } catch (\Exception $e) {
                 $errors[] = ['stage' => 'sip', 'error' => $e->getMessage()];
+            }
+        }
+
+        if ($session->output_generate_aip) {
+            try {
+                $this->buildAipPackage($jobId);
+            } catch (\Exception $e) {
+                $errors[] = ['stage' => 'aip', 'error' => $e->getMessage()];
             }
         }
 
@@ -680,6 +761,88 @@ class IngestCommitService
         return $session->id;
     }
 
+    public function buildAipPackage(int $jobId): ?int
+    {
+        $job = DB::table('ingest_job')->where('id', $jobId)->first();
+        if (!$job) {
+            return null;
+        }
+
+        $session = $this->ingestService->getSession($job->session_id);
+        $aipPath = $session->output_aip_path ?: (\sfConfig::get('sf_upload_dir') . '/aip');
+        if (!is_dir($aipPath)) {
+            @mkdir($aipPath, 0755, true);
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_atom_id')
+            ->get();
+
+        // AIP: long-term archival package with preservation metadata + original files
+        $aipDir = $aipPath . '/aip_' . $session->id . '_' . date('Ymd_His');
+        @mkdir($aipDir, 0755, true);
+        @mkdir($aipDir . '/metadata', 0755, true);
+        @mkdir($aipDir . '/objects', 0755, true);
+
+        $aipManifest = [
+            'type' => 'AIP',
+            'session_id' => $session->id,
+            'created_at' => date('c'),
+            'standard' => $session->standard,
+            'sector' => $session->sector,
+            'objects' => [],
+        ];
+
+        foreach ($rows as $row) {
+            $entry = [
+                'atom_id' => $row->created_atom_id,
+                'title' => $row->title,
+                'level' => $row->level_of_description,
+                'checksum_sha256' => $row->checksum_sha256,
+                'metadata' => json_decode($row->enriched_data, true),
+            ];
+
+            // Copy original digital object into AIP objects/ directory
+            if (!empty($row->digital_object_path) && file_exists($row->digital_object_path)) {
+                $destFile = $aipDir . '/objects/' . basename($row->digital_object_path);
+                @copy($row->digital_object_path, $destFile);
+                $entry['original_file'] = basename($row->digital_object_path);
+                $entry['mime_type'] = mime_content_type($row->digital_object_path);
+                $entry['file_size'] = filesize($row->digital_object_path);
+            }
+
+            // Copy extracted metadata if available
+            if (!empty($row->metadata_extracted)) {
+                $metaFile = $aipDir . '/metadata/' . ($row->legacy_id ?: $row->row_number) . '_metadata.json';
+                file_put_contents($metaFile, $row->metadata_extracted);
+                $entry['metadata_file'] = basename($metaFile);
+            }
+
+            $aipManifest['objects'][] = $entry;
+        }
+
+        // Write AIP manifest
+        file_put_contents($aipDir . '/manifest.json', json_encode($aipManifest, JSON_PRETTY_PRINT));
+
+        // Write METS-like preservation info
+        $premis = [
+            'package_type' => 'AIP',
+            'creation_date' => date('c'),
+            'creator' => 'ahgIngestPlugin',
+            'object_count' => count($rows),
+            'fixity_algorithm' => 'SHA-256',
+            'preservation_level' => 'full',
+        ];
+        file_put_contents($aipDir . '/metadata/premis.json', json_encode($premis, JSON_PRETTY_PRINT));
+
+        DB::table('ingest_job')->where('id', $jobId)->update([
+            'aip_package_id' => $session->id,
+        ]);
+
+        return $session->id;
+    }
+
     public function buildDipPackage(int $jobId): ?int
     {
         $job = DB::table('ingest_job')->where('id', $jobId)->first();
@@ -896,6 +1059,452 @@ class IngestCommitService
                 );
             } catch (\Exception $e) {
                 // Non-fatal
+            }
+        }
+    }
+
+    // ─── AI & Processing ────────────────────────────────────────────────
+
+    protected function runVirusScan(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin';
+        $serviceFile = $pluginDir . '/lib/PreservationService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        if (!class_exists('PreservationService')) {
+            return;
+        }
+
+        $svc = new \PreservationService();
+        if (!$svc->isClamAvAvailable()) {
+            return;
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_do_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            try {
+                $result = $svc->scanForVirus($row->created_do_id, true, 'ingest');
+                if (($result['status'] ?? '') === 'infected') {
+                    DB::table('ingest_validation')->insert([
+                        'session_id' => $session->id,
+                        'row_number' => $row->row_number,
+                        'severity' => 'error',
+                        'field_name' => 'digitalObjectPath',
+                        'message' => 'VIRUS DETECTED: ' . ($result['threat_name'] ?? 'unknown') . ' — file quarantined',
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Non-fatal per file
+            }
+        }
+    }
+
+    protected function runOcr(int $jobId, object $session): void
+    {
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_do_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            if (empty($row->digital_object_path) || !file_exists($row->digital_object_path)) {
+                continue;
+            }
+
+            $mime = mime_content_type($row->digital_object_path);
+            $text = null;
+
+            try {
+                if (strpos($mime, 'image/') === 0) {
+                    $text = shell_exec('tesseract ' . escapeshellarg($row->digital_object_path) . ' stdout 2>/dev/null');
+                } elseif ($mime === 'application/pdf') {
+                    $text = shell_exec('pdftotext -enc UTF-8 ' . escapeshellarg($row->digital_object_path) . ' - 2>/dev/null');
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            if (!empty(trim($text ?? ''))) {
+                // Store OCR text in enriched_data
+                $enriched = json_decode($row->enriched_data, true) ?: [];
+                $enriched['_ocr_text'] = trim($text);
+                DB::table('ingest_row')->where('id', $row->id)->update([
+                    'enriched_data' => json_encode($enriched),
+                ]);
+
+                // Also store in iiif_ocr_text if available
+                try {
+                    if (DB::getSchemaBuilder()->hasTable('iiif_ocr_text')) {
+                        DB::table('iiif_ocr_text')->updateOrInsert(
+                            ['information_object_id' => $row->created_atom_id],
+                            ['ocr_text' => trim($text), 'source' => 'ingest_ocr', 'updated_at' => date('Y-m-d H:i:s')]
+                        );
+                    }
+                } catch (\Exception $e) {
+                    // Table may not exist
+                }
+            }
+        }
+    }
+
+    protected function runNer(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
+        $serviceFile = $pluginDir . '/lib/Services/NerService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        if (!class_exists('ahgNerService')) {
+            return;
+        }
+
+        $svc = new \ahgNerService();
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_atom_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $enriched = json_decode($row->enriched_data, true) ?: [];
+            // Build text from title + scope + archival history + OCR
+            $text = implode('. ', array_filter([
+                $enriched['title'] ?? '',
+                $enriched['scopeAndContent'] ?? '',
+                $enriched['archivalHistory'] ?? '',
+                $enriched['_ocr_text'] ?? '',
+            ]));
+
+            if (strlen(trim($text)) < 20) {
+                continue;
+            }
+
+            try {
+                $result = $svc->extract($text);
+                if (!empty($result['entities'])) {
+                    // Create access points from extracted entities
+                    foreach ($result['entities'] as $entity) {
+                        $type = $entity['type'] ?? '';
+                        $value = $entity['text'] ?? '';
+                        if (empty($value)) continue;
+
+                        $taxonomyId = null;
+                        if ($type === 'PERSON' || $type === 'ORG') {
+                            // Name access point via relation
+                            $this->createNameAccessPoint($row->created_atom_id, $value);
+                        } elseif ($type === 'GPE') {
+                            $taxonomyId = \QubitTaxonomy::PLACE_ID ?? 42;
+                        }
+
+                        if ($taxonomyId) {
+                            $this->createTermAccessPoint($row->created_atom_id, $value, $taxonomyId);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Non-fatal per row
+            }
+        }
+    }
+
+    protected function createNameAccessPoint(int $ioId, string $name): void
+    {
+        $actor = DB::table('actor_i18n')->where('authorized_form_of_name', $name)->first();
+        if ($actor) {
+            try {
+                $relation = new \QubitRelation();
+                $relation->subjectId = $ioId;
+                $relation->objectId = $actor->id;
+                $relation->typeId = \QubitTerm::NAME_ACCESS_POINT_ID ?? 519;
+                $relation->save();
+            } catch (\Exception $e) {
+                // Duplicate
+            }
+        }
+    }
+
+    protected function createTermAccessPoint(int $ioId, string $value, int $taxonomyId): void
+    {
+        $term = DB::table('term_i18n')
+            ->join('term', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', $taxonomyId)
+            ->where('term_i18n.name', $value)
+            ->first();
+
+        $termId = $term ? $term->id : null;
+
+        if (!$termId) {
+            try {
+                $newTerm = new \QubitTerm();
+                $newTerm->taxonomyId = $taxonomyId;
+                $newTerm->parentId = \QubitTerm::ROOT_ID ?? 110;
+                $newTerm->name = $value;
+                $newTerm->sourceCulture = 'en';
+                $newTerm->save();
+                $termId = $newTerm->id;
+            } catch (\Exception $e) {
+                return;
+            }
+        }
+
+        try {
+            $relation = new \QubitObjectTermRelation();
+            $relation->objectId = $ioId;
+            $relation->termId = $termId;
+            $relation->save();
+        } catch (\Exception $e) {
+            // Duplicate
+        }
+    }
+
+    protected function runSummarize(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
+        $serviceFile = $pluginDir . '/lib/Services/NerService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        if (!class_exists('ahgNerService')) {
+            return;
+        }
+
+        $svc = new \ahgNerService();
+        if (!$svc->isSummarizerAvailable()) {
+            return;
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_atom_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $enriched = json_decode($row->enriched_data, true) ?: [];
+            $text = $enriched['scopeAndContent'] ?? $enriched['_ocr_text'] ?? '';
+
+            if (strlen(trim($text)) < 100) {
+                continue;
+            }
+
+            try {
+                $result = $svc->summarize($text);
+                if (!empty($result['summary'])) {
+                    // Store summary as scope and content if it was empty
+                    if (empty($enriched['scopeAndContent'])) {
+                        DB::table('information_object_i18n')
+                            ->where('id', $row->created_atom_id)
+                            ->update(['scope_and_content' => $result['summary']]);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Non-fatal
+            }
+        }
+    }
+
+    protected function runSpellcheck(int $jobId, object $session): void
+    {
+        $aspell = trim(shell_exec('which aspell 2>/dev/null') ?? '');
+        if (empty($aspell)) {
+            return;
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_atom_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $enriched = json_decode($row->enriched_data, true) ?: [];
+            $fieldsToCheck = ['title', 'scopeAndContent', 'archivalHistory'];
+            $allErrors = [];
+
+            foreach ($fieldsToCheck as $field) {
+                $text = $enriched[$field] ?? '';
+                if (strlen(trim($text)) < 5) continue;
+
+                $proc = proc_open(
+                    'aspell -a --lang=en 2>/dev/null',
+                    [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+                    $pipes
+                );
+                if (!is_resource($proc)) continue;
+
+                fwrite($pipes[0], $text);
+                fclose($pipes[0]);
+                $output = stream_get_contents($pipes[1]);
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                proc_close($proc);
+
+                // Parse aspell output for misspelled words
+                foreach (explode("\n", $output) as $line) {
+                    if (preg_match('/^& (\S+)/', $line, $m)) {
+                        $allErrors[] = ['field' => $field, 'word' => $m[1]];
+                    }
+                }
+            }
+
+            if (!empty($allErrors)) {
+                // Store spellcheck results as validation warnings
+                $words = array_column(array_slice($allErrors, 0, 10), 'word');
+                DB::table('ingest_validation')->insert([
+                    'session_id' => $session->id,
+                    'row_number' => $row->row_number,
+                    'severity' => 'warning',
+                    'field_name' => 'spellcheck',
+                    'message' => 'Possible misspellings: ' . implode(', ', $words),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        }
+    }
+
+    protected function runFormatIdentification(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin';
+        $serviceFile = $pluginDir . '/lib/PreservationService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        if (!class_exists('PreservationService')) {
+            return;
+        }
+
+        $svc = new \PreservationService();
+        if (!$svc->isSiegfriedAvailable()) {
+            return;
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_do_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            try {
+                $svc->identifyFormat($row->created_do_id, true);
+            } catch (\Exception $e) {
+                // Non-fatal
+            }
+        }
+    }
+
+    protected function runFaceDetection(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
+        $serviceFile = $pluginDir . '/lib/Services/ahgFaceDetectionService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        if (!class_exists('ahgFaceDetectionService')) {
+            return;
+        }
+
+        $svc = new \ahgFaceDetectionService();
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_do_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            if (empty($row->digital_object_path) || !file_exists($row->digital_object_path)) {
+                continue;
+            }
+
+            $mime = mime_content_type($row->digital_object_path);
+            if (strpos($mime, 'image/') !== 0) {
+                continue;
+            }
+
+            try {
+                $faces = $svc->detectFaces($row->digital_object_path);
+                if (!empty($faces)) {
+                    $matched = $svc->matchToAuthorities($faces, $row->digital_object_path);
+                    if (!empty($matched)) {
+                        $svc->linkFacesToInformationObject($matched, $row->created_atom_id);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Non-fatal
+            }
+        }
+    }
+
+    protected function runTranslation(int $jobId, object $session): void
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
+        $serviceFile = $pluginDir . '/lib/Services/JobQueueService.php';
+        if (!file_exists($serviceFile)) {
+            return;
+        }
+        require_once $serviceFile;
+
+        $targetLang = $session->process_translate_lang ?: 'af';
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_atom_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $enriched = json_decode($row->enriched_data, true) ?: [];
+            $title = $enriched['title'] ?? '';
+            $scope = $enriched['scopeAndContent'] ?? '';
+
+            if (empty(trim($title)) && empty(trim($scope))) {
+                continue;
+            }
+
+            // Use Python Argos Translate via CLI
+            $fieldsToTranslate = [
+                'title' => $title,
+                'scope_and_content' => $scope,
+            ];
+
+            foreach ($fieldsToTranslate as $dbField => $text) {
+                if (empty(trim($text))) continue;
+
+                $escaped = escapeshellarg($text);
+                $cmd = "python3 -c \"
+import sys
+try:
+    from argostranslate import translate
+    t = translate.get_translation_from_codes('en', '{$targetLang}')
+    if t: print(t.translate(sys.argv[1]))
+    else: print('')
+except: print('')
+\" {$escaped} 2>/dev/null";
+
+                $translated = trim(shell_exec($cmd) ?? '');
+                if (!empty($translated) && $translated !== $text) {
+                    // Store as i18n record for target culture
+                    try {
+                        DB::table('information_object_i18n')->updateOrInsert(
+                            ['id' => $row->created_atom_id, 'culture' => $targetLang],
+                            [$dbField => $translated]
+                        );
+                    } catch (\Exception $e) {
+                        // Non-fatal
+                    }
+                }
             }
         }
     }
