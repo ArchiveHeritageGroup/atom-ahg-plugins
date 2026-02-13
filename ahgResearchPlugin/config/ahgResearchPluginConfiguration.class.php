@@ -206,6 +206,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_report_new', '/research/report/new', 'newReport');
         $research->any('research_report_edit', '/research/report/:id/edit', 'editReport', ['id' => '\d+']);
         $research->any('research_view_report', '/research/report/:id', 'viewReport', ['id' => '\d+']);
+        $research->any('research_report_list', '/research/report', 'reports');
         $research->any('research_reports', '/research/reports', 'reports');
 
         // Issue 149 Phase 1: Journal

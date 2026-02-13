@@ -155,6 +155,7 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
 #entryEditor .ql-editor { min-height: 250px; }
 .ql-toolbar.ql-snow { background: #f8f9fa; border-color: #dee2e6; }
 .ql-container.ql-snow { border-color: #dee2e6; }
+.ql-editor img { max-width: 100%; height: auto; max-height: 300px; border-radius: 4px; margin: 4px 0; }
 </style>
 
 <!-- Quill.js -->

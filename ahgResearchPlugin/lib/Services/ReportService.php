@@ -207,6 +207,36 @@ class ReportService
     }
 
     /**
+     * Move a section up or down.
+     */
+    public function moveSection(int $sectionId, string $direction): void
+    {
+        $section = DB::table('research_report_section')->where('id', $sectionId)->first();
+        if (!$section) return;
+
+        $sections = DB::table('research_report_section')
+            ->where('report_id', $section->report_id)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $currentIndex = null;
+        foreach ($sections as $i => $s) {
+            if ($s->id == $sectionId) { $currentIndex = $i; break; }
+        }
+        if ($currentIndex === null) return;
+
+        $swapIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+        if ($swapIndex < 0 || $swapIndex >= count($sections)) return;
+
+        $currentOrder = $sections[$currentIndex]->sort_order;
+        $swapOrder = $sections[$swapIndex]->sort_order;
+
+        DB::table('research_report_section')->where('id', $sections[$currentIndex]->id)->update(['sort_order' => $swapOrder]);
+        DB::table('research_report_section')->where('id', $sections[$swapIndex]->id)->update(['sort_order' => $currentOrder]);
+    }
+
+    /**
      * Reorder sections via array of IDs.
      */
     public function reorderSections(int $reportId, array $sectionIds): void

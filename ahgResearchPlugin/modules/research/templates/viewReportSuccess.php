@@ -137,16 +137,17 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
 
           <!-- Comments per section -->
           <?php
-          $sectionComments = isset($commentsBySection[$section->id]) ? $commentsBySection[$section->id] : [];
+          $sComments = isset($sectionComments) && method_exists($sectionComments, 'getRawValue') ? $sectionComments->getRawValue() : (isset($sectionComments) && is_array($sectionComments) ? $sectionComments : []);
+          $thisSectionComments = isset($sComments[$section->id]) ? $sComments[$section->id] : [];
           ?>
-          <?php if (!empty($sectionComments) || true): ?>
+          <?php if (!empty($thisSectionComments) || true): ?>
           <div class="card-footer bg-transparent">
             <details>
               <summary class="text-muted small" style="cursor: pointer;">
-                <i class="fas fa-comments me-1"></i><?php echo __('Comments'); ?> (<?php echo count($sectionComments); ?>)
+                <i class="fas fa-comments me-1"></i><?php echo __('Comments'); ?> (<?php echo count($thisSectionComments); ?>)
               </summary>
               <div class="mt-2">
-                <?php foreach ($sectionComments as $comment): ?>
+                <?php foreach ($thisSectionComments as $comment): ?>
                 <div class="d-flex mb-2 ms-2">
                   <div class="flex-grow-1">
                     <strong class="small"><?php echo htmlspecialchars(($comment->first_name ?? '') . ' ' . ($comment->last_name ?? '')); ?></strong>
@@ -180,33 +181,86 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
       <?php endif; ?>
     </div>
 
-    <!-- Add Section -->
+    <!-- Add Sections -->
     <div class="card border-dashed mb-4">
       <div class="card-body">
-        <form method="post" class="row g-2 align-items-end">
-          <input type="hidden" name="form_action" value="add_section">
-          <div class="col-md-4">
-            <label class="form-label small"><?php echo __('Section Type'); ?></label>
-            <select name="section_type" class="form-select form-select-sm">
-              <option value="text"><?php echo __('Text'); ?></option>
-              <option value="heading"><?php echo __('Heading'); ?></option>
-              <option value="title_page"><?php echo __('Title Page'); ?></option>
-              <option value="toc"><?php echo __('Table of Contents'); ?></option>
-              <option value="bibliography"><?php echo __('Bibliography'); ?></option>
-              <option value="collection_list"><?php echo __('Collection List'); ?></option>
-              <option value="annotation_list"><?php echo __('Annotation List'); ?></option>
-              <option value="timeline"><?php echo __('Timeline'); ?></option>
-              <option value="custom"><?php echo __('Custom'); ?></option>
-            </select>
+        <ul class="nav nav-tabs nav-tabs-sm mb-3" role="tablist">
+          <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#addSingleSection"><?php echo __('Add Section'); ?></a></li>
+          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#addFromTemplate"><?php echo __('Load Template'); ?></a></li>
+          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#addMultipleSections"><?php echo __('Add Multiple'); ?></a></li>
+        </ul>
+        <div class="tab-content">
+          <!-- Single Section -->
+          <div class="tab-pane fade show active" id="addSingleSection">
+            <form method="post" class="row g-2 align-items-end">
+              <input type="hidden" name="form_action" value="add_section">
+              <div class="col-md-4">
+                <label class="form-label small"><?php echo __('Section Type'); ?></label>
+                <select name="section_type" class="form-select form-select-sm">
+                  <option value="text"><?php echo __('Text'); ?></option>
+                  <option value="heading"><?php echo __('Heading'); ?></option>
+                  <option value="title_page"><?php echo __('Title Page'); ?></option>
+                  <option value="toc"><?php echo __('Table of Contents'); ?></option>
+                  <option value="bibliography"><?php echo __('Bibliography'); ?></option>
+                  <option value="collection_list"><?php echo __('Collection List'); ?></option>
+                  <option value="annotation_list"><?php echo __('Annotation List'); ?></option>
+                  <option value="timeline"><?php echo __('Timeline'); ?></option>
+                  <option value="custom"><?php echo __('Custom'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label small"><?php echo __('Title'); ?></label>
+                <input type="text" name="title" class="form-control form-control-sm" placeholder="<?php echo __('Section title...'); ?>">
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100"><i class="fas fa-plus me-1"></i><?php echo __('Add'); ?></button>
+              </div>
+            </form>
           </div>
-          <div class="col-md-5">
-            <label class="form-label small"><?php echo __('Title'); ?></label>
-            <input type="text" name="title" class="form-control form-control-sm" placeholder="<?php echo __('Section title...'); ?>">
+          <!-- Load from Template -->
+          <div class="tab-pane fade" id="addFromTemplate">
+            <form method="post">
+              <input type="hidden" name="form_action" value="load_template">
+              <p class="small text-muted mb-2"><?php echo __('Load a predefined set of sections from a report template. Existing sections are kept.'); ?></p>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-8">
+                  <select name="template_code" class="form-select form-select-sm">
+                    <option value="research_summary"><?php echo __('Research Summary'); ?> (8 sections)</option>
+                    <option value="genealogical"><?php echo __('Genealogical Report'); ?> (8 sections)</option>
+                    <option value="historical"><?php echo __('Historical Analysis'); ?> (8 sections)</option>
+                    <option value="source_analysis"><?php echo __('Source Analysis'); ?> (8 sections)</option>
+                    <option value="finding_aid"><?php echo __('Finding Aid'); ?> (7 sections)</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <button type="submit" class="btn btn-sm btn-outline-success w-100"><i class="fas fa-layer-group me-1"></i><?php echo __('Load Sections'); ?></button>
+                </div>
+              </div>
+            </form>
           </div>
-          <div class="col-md-3">
-            <button type="submit" class="btn btn-sm btn-outline-primary w-100"><i class="fas fa-plus me-1"></i><?php echo __('Add Section'); ?></button>
+          <!-- Add Multiple -->
+          <div class="tab-pane fade" id="addMultipleSections">
+            <form method="post">
+              <input type="hidden" name="form_action" value="add_multiple">
+              <p class="small text-muted mb-2"><?php echo __('Select multiple section types to add at once.'); ?></p>
+              <div class="row g-2 mb-2">
+                <?php foreach ([
+                  'title_page' => 'Title Page', 'toc' => 'Table of Contents', 'heading' => 'Heading',
+                  'text' => 'Text', 'bibliography' => 'Bibliography', 'collection_list' => 'Collection List',
+                  'annotation_list' => 'Annotation List', 'timeline' => 'Timeline'
+                ] as $typeKey => $typeLabel): ?>
+                <div class="col-auto">
+                  <div class="form-check">
+                    <input type="checkbox" name="section_types[]" value="<?php echo $typeKey; ?>" class="form-check-input" id="multi_<?php echo $typeKey; ?>">
+                    <label class="form-check-label small" for="multi_<?php echo $typeKey; ?>"><?php echo __($typeLabel); ?></label>
+                  </div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+              <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus-circle me-1"></i><?php echo __('Add Selected'); ?></button>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
@@ -322,6 +376,9 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
 .section-editor .ql-editor { min-height: 150px; }
 .ql-toolbar.ql-snow { background: #f8f9fa; border-color: #dee2e6; }
 .ql-container.ql-snow { border-color: #dee2e6; }
+.ql-editor img { max-width: 100%; height: auto; max-height: 300px; border-radius: 4px; margin: 4px 0; }
+.section-display img { max-width: 300px; height: auto; max-height: 250px; border-radius: 4px; margin: 4px 0; cursor: pointer; }
+.section-display img:hover { max-width: 100%; max-height: none; }
 .border-dashed { border-style: dashed !important; }
 .modal-content { background-color: #fff !important; color: #212529 !important; }
 .modal-body .form-label { color: #212529 !important; }

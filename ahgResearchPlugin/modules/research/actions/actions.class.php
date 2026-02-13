@@ -3157,9 +3157,9 @@ class researchActions extends AhgController
         }
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('form_action');
 
-            if ($action === 'update_status') {
+            if ($action === 'update_header' || $action === 'update_status') {
                 $reportService->updateReport($id, ['status' => $request->getParameter('status')]);
                 $this->getUser()->setFlash('success', 'Status updated');
                 $this->redirect('research/report/' . $id);
@@ -3168,15 +3168,75 @@ class researchActions extends AhgController
             if ($action === 'add_section') {
                 $reportService->addSection($id, [
                     'section_type' => $request->getParameter('section_type', 'text'),
-                    'title' => $request->getParameter('section_title'),
+                    'title' => $request->getParameter('title'),
                 ]);
                 $this->getUser()->setFlash('success', 'Section added');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'update_section') {
+                $sectionId = (int) $request->getParameter('section_id');
+                $content = $this->service->sanitizeHtml($request->getParameter('content', ''));
+                $reportService->updateSection($sectionId, [
+                    'title' => $request->getParameter('title'),
+                    'content' => $content,
+                    'content_format' => 'html',
+                ]);
+                $this->getUser()->setFlash('success', 'Section updated');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'move_section') {
+                $sectionId = (int) $request->getParameter('section_id');
+                $direction = $request->getParameter('direction');
+                $reportService->moveSection($sectionId, $direction);
                 $this->redirect('research/report/' . $id);
             }
 
             if ($action === 'delete_section') {
                 $reportService->deleteSection((int) $request->getParameter('section_id'));
                 $this->getUser()->setFlash('success', 'Section deleted');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'load_template') {
+                $templateCode = $request->getParameter('template_code');
+                $template = DB::table('research_report_template')->where('code', $templateCode)->first();
+                if ($template) {
+                    $sectionsConfig = json_decode($template->sections_config, true) ?: [];
+                    $maxOrder = DB::table('research_report_section')
+                        ->where('report_id', $id)->max('sort_order') ?? -1;
+                    $count = 0;
+                    foreach ($sectionsConfig as $sectionDef) {
+                        $parts = explode(':', $sectionDef, 2);
+                        $type = $parts[0];
+                        $title = $parts[1] ?? ucwords(str_replace('_', ' ', $type));
+                        $reportService->addSection($id, [
+                            'section_type' => $type,
+                            'title' => $title,
+                            'sort_order' => ++$maxOrder,
+                        ]);
+                        $count++;
+                    }
+                    $this->getUser()->setFlash('success', $count . ' sections loaded from template');
+                }
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'add_multiple') {
+                $types = $request->getParameter('section_types');
+                if (is_array($types) && !empty($types)) {
+                    $maxOrder = DB::table('research_report_section')
+                        ->where('report_id', $id)->max('sort_order') ?? -1;
+                    foreach ($types as $type) {
+                        $reportService->addSection($id, [
+                            'section_type' => $type,
+                            'title' => ucwords(str_replace('_', ' ', $type)),
+                            'sort_order' => ++$maxOrder,
+                        ]);
+                    }
+                    $this->getUser()->setFlash('success', count($types) . ' sections added');
+                }
                 $this->redirect('research/report/' . $id);
             }
 
@@ -3189,6 +3249,21 @@ class researchActions extends AhgController
             if ($action === 'auto_populate' && $this->report->project_id) {
                 $reportService->autoPopulateFromProject($id, $this->report->project_id);
                 $this->getUser()->setFlash('success', 'Report populated from project data');
+                $this->redirect('research/report/' . $id);
+            }
+
+            if ($action === 'add_comment') {
+                $commentContent = trim($request->getParameter('comment_content', ''));
+                if ($commentContent) {
+                    try {
+                        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CommentService.php';
+                        $cs = new \CommentService();
+                        $cs->addComment($this->researcher->id, 'report_section', (int) $request->getParameter('section_id'), $commentContent);
+                        $this->getUser()->setFlash('success', 'Comment added');
+                    } catch (\Exception $e) {
+                        $this->getUser()->setFlash('error', 'Failed to add comment');
+                    }
+                }
                 $this->redirect('research/report/' . $id);
             }
         }

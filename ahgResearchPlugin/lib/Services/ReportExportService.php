@@ -360,11 +360,30 @@ class ReportExportService
         $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
         require_once $frameworkPath . '/vendor/autoload.php';
 
+        $rootDir = sfConfig::get('sf_root_dir');
+
         $dompdf = new \Dompdf\Dompdf([
             'defaultFont' => 'DejaVu Sans',
             'isRemoteEnabled' => false,
             'isHtml5ParserEnabled' => true,
+            'chroot' => $rootDir,
         ]);
+
+        // Convert relative image paths to absolute file paths for Dompdf
+        $html = preg_replace_callback(
+            '/(<img[^>]+src=["\'])(\/(uploads\/[^"\']+))(["\'])/i',
+            function ($matches) use ($rootDir) {
+                $localPath = $rootDir . $matches[2];
+                if (file_exists($localPath)) {
+                    return $matches[1] . $localPath . $matches[4];
+                }
+                return $matches[0];
+            },
+            $html
+        );
+
+        // Constrain images to fit page width
+        $html = preg_replace('/<img /i', '<img style="max-width:500px;height:auto;" ', $html);
 
         $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' . htmlspecialchars($title) . '</title></head><body>' . $html . '</body></html>';
         $dompdf->loadHtml($fullHtml);
@@ -513,9 +532,9 @@ class ReportExportService
         $rightCell = $footerTable->addCell(5000);
         $textRun = $rightCell->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT]);
         $textRun->addText('Page ', ['size' => 8, 'color' => '999999']);
-        $textRun->addField('PAGE', ['size' => 8, 'color' => '999999']);
+        $textRun->addField('PAGE');
         $textRun->addText(' of ', ['size' => 8, 'color' => '999999']);
-        $textRun->addField('NUMPAGES', ['size' => 8, 'color' => '999999']);
+        $textRun->addField('NUMPAGES');
     }
 
     protected function addSectionToDocx($docSection, object $section, object $report): void
@@ -624,9 +643,9 @@ class ReportExportService
         $footer = $section->addFooter();
         $footRun = $footer->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
         $footRun->addText('Page ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('PAGE', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('PAGE');
         $footRun->addText(' of ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('NUMPAGES', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('NUMPAGES');
 
         foreach ($annotations as $note) {
             $section->addTextBreak();
@@ -688,9 +707,9 @@ class ReportExportService
         $footer = $section->addFooter();
         $footRun = $footer->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
         $footRun->addText('Page ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('PAGE', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('PAGE');
         $footRun->addText(' of ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('NUMPAGES', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('NUMPAGES');
 
         foreach ($entries as $entry) {
             $section->addTextBreak();
@@ -762,9 +781,9 @@ class ReportExportService
         $footer = $section->addFooter();
         $footRun = $footer->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
         $footRun->addText('Page ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('PAGE', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('PAGE');
         $footRun->addText(' of ', ['size' => 8, 'color' => '999999']);
-        $footRun->addField('NUMPAGES', ['size' => 8, 'color' => '999999']);
+        $footRun->addField('NUMPAGES');
 
         if (!empty($collection->description)) {
             $section->addText('Description', ['size' => 14, 'bold' => true]);

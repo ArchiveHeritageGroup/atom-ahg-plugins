@@ -305,12 +305,21 @@ $activeTag = $sf_request->getParameter('tag', '');
 .modal-body { color: #212529 !important; }
 .modal-body .form-label { color: #212529 !important; }
 .modal-body .form-control { background-color: #fff !important; color: #212529 !important; }
+/* Image sizing in Quill editor and annotation cards */
+.ql-editor img { max-width: 100%; height: auto; max-height: 300px; cursor: pointer; border-radius: 4px; margin: 4px 0; }
+.card-text img { max-width: 300px; height: auto; max-height: 250px; border-radius: 4px; margin: 4px 0; cursor: pointer; transition: max-width 0.2s; }
+.card-text img:hover { max-width: 100%; max-height: none; }
+.card-text img.img-expanded { max-width: 100%; max-height: none; }
 </style>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+  // Click to expand/collapse images in annotation cards
+  document.querySelectorAll('.card-text img').forEach(function(img) {
+    img.addEventListener('click', function() { this.classList.toggle('img-expanded'); });
+  });
   var modal = document.getElementById('newAnnotationModal');
   var itemSelect;
   var quillEditor;
@@ -345,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       var formData = new FormData();
       formData.append('image', file);
-      fetch('/research/ajax/upload-note-image', {
+      fetch('<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>', {
         method: 'POST',
         body: formData
       })
