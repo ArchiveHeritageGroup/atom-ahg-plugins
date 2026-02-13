@@ -1,6 +1,6 @@
 # AtoM AHG Framework - User Documentation
 
-**Version:** 2.1.17
+**Version:** 2.8.2
 **Last Updated:** February 2026
 
 ## Documentation Index
@@ -16,6 +16,7 @@
 | [Privacy & POPIA Guide](privacy-user-guide.md) | ahgPrivacyPlugin | Data protection compliance |
 | [Research Portal Guide](research-portal-guide.md) | ahgResearchPlugin | Researcher registration, booking |
 | [GRAP 103 Guide](grap-user-guide.md) | ahgGrapPlugin | Heritage asset accounting |
+| [Data Ingest User Guide](data-ingest-user-guide.md) | ahgIngestPlugin | OAIS-aligned batch ingestion pipeline |
 
 ### Technical Documentation
 
@@ -32,6 +33,7 @@ For developers and system administrators:
 1. **Data Migration**: Admin > Data Migration > Upload CSV/Excel
 2. **Donor Agreements**: Admin > Donor Management > New Agreement
 3. **Spectrum Workflows**: Record > Spectrum > Start Workflow
+4. **Data Ingest**: Admin > Ingest > New Session
 
 ## Support
 

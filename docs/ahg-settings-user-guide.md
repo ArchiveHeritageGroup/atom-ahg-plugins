@@ -184,9 +184,11 @@ Manage AHG plugin settings organized by category:
 |                         |  +--------------------------+     |
 |  [ ] Condition Photos   |  | Card Header BG          |     |
 |                         |  | Button Colors           |     |
-|  [ ] Background Jobs    |  | Link Color              |     |
+|  [ ] Ingest             |  | Link Color              |     |
 |                         |  | Sidebar Colors          |     |
-|  [ ] Fuseki / RIC       |  +--------------------------+     |
+|  [ ] Background Jobs    |  +--------------------------+     |
+|                         |                                   |
+|  [ ] Fuseki / RIC       |                                   |
 |                         |                                   |
 +-------------------------+-----------------------------------+
 |  Quick Actions          |            [Save Settings]        |
@@ -209,6 +211,7 @@ Manage AHG plugin settings organized by category:
 | Face Detection | Facial recognition | Auto-match, blur settings |
 | Media Player | Audio/video | Autoplay, waveform, transcription |
 | Photos | Condition documentation | Thumbnails, EXIF, rotation |
+| Ingest | Data ingestion defaults | AI processing, output, derivatives |
 | Jobs | Background processing | Queue settings, notifications |
 | Fuseki / RIC | Linked data | RDF sync, cascade deletes |
 
@@ -648,6 +651,7 @@ Reset a section to factory defaults:
 | AI Services | Admin > AHG Settings > AI Services |
 | API Keys | Admin > AHG Settings > API Keys |
 | Email | Admin > AHG Settings > Email |
+| Ingest Defaults | Admin > AHG Settings > Section > Ingest |
 | Numbering | Admin > AHG Settings > Numbering Schemes |
 | Preservation | Admin > AHG Settings > Preservation |
 

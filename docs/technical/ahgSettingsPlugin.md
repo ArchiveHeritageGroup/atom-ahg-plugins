@@ -426,6 +426,7 @@ protected $sections = [
     'faces' => ['label' => 'Face Detection', 'icon' => 'fa-user-circle'],
     'media' => ['label' => 'Media Player', 'icon' => 'fa-play-circle'],
     'photos' => ['label' => 'Condition Photos', 'icon' => 'fa-camera'],
+    'ingest' => ['label' => 'Ingest Defaults', 'icon' => 'fa-upload'],
     'jobs' => ['label' => 'Background Jobs', 'icon' => 'fa-tasks'],
     'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
 ];
@@ -447,6 +448,14 @@ protected $checkboxFields = [
     'data_protection' => ['dp_enabled', 'dp_notify_overdue', 'dp_anonymize_on_delete'],
     'faces' => ['face_detect_enabled', 'face_auto_match', 'face_blur_unmatched'],
     'media' => ['media_autoplay', 'media_show_controls', 'media_loop'],
+    'ingest' => [
+        'ingest_process_ner', 'ingest_process_ocr', 'ingest_process_virus_scan',
+        'ingest_process_summarize', 'ingest_process_spellcheck', 'ingest_process_translate',
+        'ingest_process_format_id', 'ingest_process_face_detect',
+        'ingest_output_create_records', 'ingest_output_generate_sip',
+        'ingest_output_generate_aip', 'ingest_output_generate_dip',
+        'ingest_derivative_thumbnails', 'ingest_derivative_reference',
+    ],
     'jobs' => ['jobs_enabled', 'jobs_notify_failure'],
     'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save'],
 ];
@@ -462,6 +471,7 @@ protected $sectionPluginMap = [
     'data_protection' => 'ahgDataProtectionPlugin',
     'photos' => 'ahgConditionPlugin',
     'fuseki' => 'ahgRicExplorerPlugin',
+    'ingest' => 'ahgIngestPlugin',
     'audit' => 'ahgAuditTrailPlugin',
     'faces' => 'ahgFaceDetectionPlugin',
     'multi_tenant' => 'ahgMultiTenantPlugin',
