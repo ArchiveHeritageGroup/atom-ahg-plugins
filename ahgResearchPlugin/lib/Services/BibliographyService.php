@@ -977,4 +977,115 @@ class BibliographyService
 
         return $entries;
     }
+
+    // =========================================================================
+    // CITATION AUTO-GENERATION
+    // =========================================================================
+
+    /**
+     * Auto-generate a citation from an AtoM record.
+     */
+    public function generateCitationFromRecord(int $objectId, string $style = 'chicago'): ?string
+    {
+        $record = DB::table('information_object_i18n as ioi')
+            ->leftJoin('information_object as io', 'ioi.id', '=', 'io.id')
+            ->leftJoin('repository_i18n as ri', function ($join) {
+                $join->on('io.repository_id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->where('ioi.id', $objectId)
+            ->where('ioi.culture', 'en')
+            ->select('ioi.title', 'io.repository_id', 'ri.authorized_form_of_name as repository_name',
+                     'ioi.date as date_display', 'ioi.extent_and_medium', 'ioi.identifier as ref_code',
+                     'slug.slug')
+            ->first();
+
+        if (!$record) {
+            return null;
+        }
+
+        $formatters = [
+            'chicago' => [$this, 'formatChicago'],
+            'harvard' => [$this, 'formatHarvard'],
+            'turabian' => [$this, 'formatTurabian'],
+            'isadg' => [$this, 'formatIsadg'],
+        ];
+
+        $formatter = $formatters[$style] ?? $formatters['chicago'];
+        return call_user_func($formatter, $record);
+    }
+
+    /**
+     * Generate citations for multiple records.
+     */
+    public function generateCitationsFromRecords(array $objectIds, string $style = 'chicago'): array
+    {
+        $citations = [];
+        foreach ($objectIds as $id) {
+            $citation = $this->generateCitationFromRecord($id, $style);
+            if ($citation) {
+                $citations[$id] = $citation;
+            }
+        }
+        return $citations;
+    }
+
+    /**
+     * Get available citation styles.
+     */
+    public function getCitationStyles(): array
+    {
+        return [
+            'chicago' => 'Chicago Manual of Style (17th ed.)',
+            'harvard' => 'Harvard Referencing',
+            'turabian' => 'Turabian / Chicago Notes-Bibliography',
+            'isadg' => 'ISAD(G) Reference',
+        ];
+    }
+
+    protected function formatChicago(object $record): string
+    {
+        // Chicago Manual of Style format for archival sources
+        $parts = [];
+        if ($record->title) $parts[] = '"' . $record->title . '"';
+        if ($record->date_display) $parts[] = $record->date_display;
+        if ($record->ref_code) $parts[] = $record->ref_code;
+        if ($record->repository_name) $parts[] = $record->repository_name;
+        return implode(', ', $parts) . '.';
+    }
+
+    protected function formatHarvard(object $record): string
+    {
+        // Harvard format for archival sources
+        $parts = [];
+        if ($record->repository_name) $parts[] = $record->repository_name;
+        $year = $record->date_display ? preg_replace('/[^0-9\-]/', '', substr($record->date_display, 0, 4)) : 'n.d.';
+        $parts[] = '(' . $year . ')';
+        if ($record->title) $parts[] = '\'' . $record->title . '\'';
+        if ($record->ref_code) $parts[] = '[' . $record->ref_code . ']';
+        return implode(' ', $parts) . '.';
+    }
+
+    protected function formatTurabian(object $record): string
+    {
+        // Turabian / Chicago Notes-Bibliography variant
+        $parts = [];
+        if ($record->title) $parts[] = '"' . $record->title . ',"';
+        if ($record->date_display) $parts[] = $record->date_display . ',';
+        if ($record->ref_code) $parts[] = $record->ref_code . ',';
+        if ($record->repository_name) $parts[] = $record->repository_name;
+        return implode(' ', $parts) . '.';
+    }
+
+    protected function formatIsadg(object $record): string
+    {
+        // ISAD(G) standard reference format
+        $parts = [];
+        if ($record->repository_name) $parts[] = $record->repository_name;
+        if ($record->ref_code) $parts[] = $record->ref_code;
+        if ($record->title) $parts[] = $record->title;
+        if ($record->date_display) $parts[] = $record->date_display;
+        if ($record->extent_and_medium) $parts[] = $record->extent_and_medium;
+        return implode('. ', $parts) . '.';
+    }
 }

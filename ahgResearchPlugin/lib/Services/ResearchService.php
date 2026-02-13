@@ -324,9 +324,10 @@ class ResearchService
                 $join->on('a.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
+            ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
             ->where('a.researcher_id', $researcherId);
         if ($objectId) $query->where('a.object_id', $objectId);
-        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug')
+        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug', 'rc.name as collection_name')
             ->orderBy('a.created_at', 'desc')->get()->toArray();
     }
 

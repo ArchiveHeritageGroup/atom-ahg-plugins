@@ -809,4 +809,101 @@ class ProjectService
             'by_type' => $stats,
         ];
     }
+
+    // =========================================================================
+    // CLIPBOARD INTEGRATION
+    // =========================================================================
+
+    /**
+     * Add items from AtoM clipboard to a project.
+     */
+    public function addClipboardItems(int $projectId, int $researcherId, array $objectIds, ?string $notes = null): int
+    {
+        $added = 0;
+        foreach ($objectIds as $objectId) {
+            $objectId = (int) $objectId;
+            if ($objectId <= 0) continue;
+
+            // Skip duplicates
+            $exists = DB::table('research_clipboard_project')
+                ->where('project_id', $projectId)
+                ->where('researcher_id', $researcherId)
+                ->where('object_id', $objectId)
+                ->exists();
+
+            if (!$exists) {
+                DB::table('research_clipboard_project')->insert([
+                    'researcher_id' => $researcherId,
+                    'project_id' => $projectId,
+                    'object_id' => $objectId,
+                    'notes' => $notes,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                $added++;
+            }
+        }
+
+        if ($added > 0) {
+            $this->logActivity($researcherId, $projectId, 'clipboard_add', 'clipboard', null, $added . ' items added from clipboard');
+        }
+
+        return $added;
+    }
+
+    /**
+     * Get clipboard items for a project.
+     */
+    public function getClipboardItems(int $projectId): array
+    {
+        return DB::table('research_clipboard_project as cp')
+            ->leftJoin('information_object_i18n as i', function ($join) {
+                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', 'en');
+            })
+            ->leftJoin('slug', function ($join) {
+                $join->on('cp.object_id', '=', 'slug.object_id');
+            })
+            ->where('cp.project_id', $projectId)
+            ->select('cp.*', 'i.title as object_title', 'slug.slug as object_slug')
+            ->orderByDesc('cp.is_pinned')
+            ->orderByDesc('cp.created_at')
+            ->get()->toArray();
+    }
+
+    /**
+     * Toggle pin status of a clipboard item.
+     */
+    public function toggleClipboardPin(int $itemId, int $researcherId): bool
+    {
+        $item = DB::table('research_clipboard_project')
+            ->where('id', $itemId)
+            ->where('researcher_id', $researcherId)
+            ->first();
+        if (!$item) return false;
+
+        return DB::table('research_clipboard_project')
+            ->where('id', $itemId)
+            ->update(['is_pinned' => $item->is_pinned ? 0 : 1]) >= 0;
+    }
+
+    /**
+     * Remove a clipboard item from a project.
+     */
+    public function removeClipboardItem(int $itemId, int $researcherId): bool
+    {
+        return DB::table('research_clipboard_project')
+            ->where('id', $itemId)
+            ->where('researcher_id', $researcherId)
+            ->delete() > 0;
+    }
+
+    /**
+     * Update notes on a clipboard item.
+     */
+    public function updateClipboardNotes(int $itemId, int $researcherId, ?string $notes): bool
+    {
+        return DB::table('research_clipboard_project')
+            ->where('id', $itemId)
+            ->where('researcher_id', $researcherId)
+            ->update(['notes' => $notes]) >= 0;
+    }
 }

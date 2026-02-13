@@ -493,22 +493,26 @@ CREATE TABLE IF NOT EXISTS `research_annotation` (
     `researcher_id` INT NOT NULL,
     `project_id` INT DEFAULT NULL,
     `object_id` INT DEFAULT NULL,
+    `entity_type` VARCHAR(50) DEFAULT 'information_object',
     `digital_object_id` INT DEFAULT NULL,
     `annotation_type` ENUM('note','highlight','bookmark','tag','transcription','correction') DEFAULT 'note',
     `title` VARCHAR(255) DEFAULT NULL,
     `content` TEXT,
+    `content_format` ENUM('text','html') DEFAULT 'text',
     `target_selector` TEXT,
     `canvas_id` VARCHAR(500),
     `iiif_annotation_id` VARCHAR(255),
     `tags` VARCHAR(500) DEFAULT NULL,
     `is_private` TINYINT(1) DEFAULT 1,
+    `visibility` ENUM('private','shared','public') DEFAULT 'private',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_researcher` (`researcher_id`),
     KEY `idx_project` (`project_id`),
     KEY `idx_object` (`object_id`),
-    KEY `idx_type` (`annotation_type`)
+    KEY `idx_type` (`annotation_type`),
+    FULLTEXT INDEX `idx_annotation_fulltext` (`title`, `content`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -1005,6 +1009,23 @@ CREATE TABLE IF NOT EXISTS `research_peer_review` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- CLIPBOARD INTEGRATION
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_clipboard_project` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `researcher_id` INT NOT NULL,
+  `project_id` INT NOT NULL,
+  `object_id` INT NOT NULL,
+  `is_pinned` TINYINT(1) DEFAULT 0,
+  `notes` TEXT,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_researcher` (`researcher_id`),
+  KEY `idx_project` (`project_id`),
+  UNIQUE KEY `uk_project_object` (`project_id`, `researcher_id`, `object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- ALTER STATEMENTS FOR EXISTING INSTALLATIONS
 -- ============================================================
 
@@ -1148,6 +1169,21 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_annotation' AND column_name = 'iiif_annotation_id') THEN
         ALTER TABLE `research_annotation` ADD COLUMN `iiif_annotation_id` VARCHAR(255) AFTER `canvas_id`;
+    END IF;
+
+    -- Issue 149: entity_type for note linking
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_annotation' AND column_name = 'entity_type') THEN
+        ALTER TABLE `research_annotation` ADD COLUMN `entity_type` VARCHAR(50) DEFAULT 'information_object' AFTER `object_id`;
+    END IF;
+
+    -- Issue 149: content_format for rich text notes
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_annotation' AND column_name = 'content_format') THEN
+        ALTER TABLE `research_annotation` ADD COLUMN `content_format` ENUM('text','html') DEFAULT 'text' AFTER `content`;
+    END IF;
+
+    -- Issue 149: visibility for note sharing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_annotation' AND column_name = 'visibility') THEN
+        ALTER TABLE `research_annotation` ADD COLUMN `visibility` ENUM('private','shared','public') DEFAULT 'private' AFTER `is_private`;
     END IF;
 
 END//

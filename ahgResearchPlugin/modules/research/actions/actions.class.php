@@ -22,9 +22,17 @@ class researchActions extends AhgController
     {
         $this->stats = $this->service->getDashboardStats();
         $this->researcher = null;
+        $this->enhancedData = [];
+        $this->unreadNotifications = 0;
+        $this->recentActivity = [];
         if ($this->getUser()->isAuthenticated()) {
             $userId = $this->getUser()->getAttribute('user_id');
             $this->researcher = $this->service->getResearcherByUserId($userId);
+            if ($this->researcher && $this->researcher->status === 'approved') {
+                $this->enhancedData = $this->service->getEnhancedDashboardData($this->researcher->id);
+                $this->unreadNotifications = $this->enhancedData['unread_notifications'] ?? 0;
+                $this->recentActivity = $this->enhancedData['recent_activity'] ?? [];
+            }
         }
         $this->pendingResearchers = $this->service->getResearchers(['status' => 'pending']);
         $this->todayBookings = DB::table('research_booking as b')
@@ -204,6 +212,23 @@ class researchActions extends AhgController
                 $this->service->addMaterialRequest($bookingId, (int) $objectId);
             }
             $this->getUser()->setFlash('success', 'Booking submitted');
+
+            // Auto-journal: booking created
+            try {
+                require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+                $journal = new JournalService();
+                $bookingDate = $request->getParameter('booking_date');
+                $journal->createAutoEntry(
+                    $this->researcher->id,
+                    'auto_booking',
+                    'Booked visit for ' . $bookingDate,
+                    'Created reading room booking',
+                    null,
+                    'booking',
+                    $bookingId
+                );
+            } catch (\Exception $e) { /* silent */ }
+
             $this->redirect('research/viewBooking?id=' . $bookingId);
         }
     }
@@ -339,10 +364,26 @@ class researchActions extends AhgController
         if ($request->isMethod('post')) {
             $action = $request->getParameter('booking_action');
             if ($action === 'save') {
-                $this->service->saveSearch($this->researcher->id, [
-                    'name' => $request->getParameter('name'),
+                $searchName = $request->getParameter('name');
+                $searchId = $this->service->saveSearch($this->researcher->id, [
+                    'name' => $searchName,
                     'search_query' => $request->getParameter('search_query'),
                 ]);
+
+                // Auto-journal: saved search
+                try {
+                    require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+                    $journal = new JournalService();
+                    $journal->createAutoEntry(
+                        $this->researcher->id,
+                        'auto_search',
+                        'Saved search: ' . ($searchName ?: 'Untitled'),
+                        'Saved a search query',
+                        null,
+                        'search',
+                        $searchId
+                    );
+                } catch (\Exception $e) { /* silent */ }
             } elseif ($action === 'delete') {
                 $this->service->deleteSavedSearch((int) $request->getParameter('id'), $this->researcher->id);
             }
@@ -426,6 +467,22 @@ class researchActions extends AhgController
                     }
                     if ($addedCount > 0) {
                         $this->getUser()->setFlash('success', $addedCount . ' item(s) added to collection');
+
+                        // Auto-journal: items added to collection
+                        try {
+                            require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+                            $journal = new JournalService();
+                            $collectionName = $this->collection->name ?? 'Collection';
+                            $journal->createAutoEntry(
+                                $researcher->id,
+                                'auto_collection',
+                                'Added ' . $addedCount . ' item(s) to ' . $collectionName,
+                                'Added items to collection',
+                                null,
+                                'collection',
+                                $id
+                            );
+                        } catch (\Exception $e) { /* silent */ }
                     } else {
                         $this->getUser()->setFlash('error', 'Item(s) already in collection');
                     }
@@ -490,23 +547,57 @@ class researchActions extends AhgController
                 $title = trim($request->getParameter('title'));
                 $content = trim($request->getParameter('content'));
                 $objectId = (int) $request->getParameter('object_id') ?: null;
+                $collectionId = (int) $request->getParameter('collection_id') ?: null;
+                $entityType = $request->getParameter('entity_type', 'information_object');
+                $tags = trim($request->getParameter('tags', ''));
+                $visibility = $request->getParameter('visibility', 'private');
+                $contentFormat = $request->getParameter('content_format', 'text');
+                $validEntityTypes = ['information_object', 'actor', 'repository', 'accession', 'term'];
                 if ($content) {
                     DB::table('research_annotation')->insert([
                         'researcher_id' => $this->researcher->id,
                         'object_id' => $objectId,
+                        'entity_type' => in_array($entityType, $validEntityTypes) ? $entityType : 'information_object',
+                        'collection_id' => $collectionId,
                         'title' => $title,
                         'content' => $content,
+                        'tags' => $tags ?: null,
+                        'content_format' => in_array($contentFormat, ['text', 'html']) ? $contentFormat : 'text',
+                        'visibility' => in_array($visibility, ['private', 'shared', 'public']) ? $visibility : 'private',
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);
+                    $newId = DB::getPdo()->lastInsertId();
                     $this->getUser()->setFlash('success', 'Note created');
+
+                    // Auto-journal: annotation created
+                    try {
+                        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+                        $journal = new JournalService();
+                        $journal->createAutoEntry(
+                            $this->researcher->id,
+                            'auto_annotation',
+                            'Created note: ' . ($title ?: 'Untitled'),
+                            'Created research note',
+                            null,
+                            'annotation',
+                            (int) $newId
+                        );
+                    } catch (\Exception $e) { /* silent */ }
                 }
                 $this->redirect('research/annotations');
             }
-            
+
             if ($action === 'update') {
                 $id = (int) $request->getParameter('id');
                 $title = trim($request->getParameter('title'));
                 $content = trim($request->getParameter('content'));
+                $objectId = (int) $request->getParameter('object_id') ?: null;
+                $collectionId = (int) $request->getParameter('collection_id') ?: null;
+                $entityType = $request->getParameter('entity_type', 'information_object');
+                $tags = trim($request->getParameter('tags', ''));
+                $visibility = $request->getParameter('visibility', 'private');
+                $contentFormat = $request->getParameter('content_format', 'text');
+                $validEntityTypes = ['information_object', 'actor', 'repository', 'accession', 'term'];
                 if ($content) {
                     DB::table('research_annotation')
                         ->where('id', $id)
@@ -514,15 +605,64 @@ class researchActions extends AhgController
                         ->update([
                             'title' => $title,
                             'content' => $content,
-                            
+                            'object_id' => $objectId,
+                            'entity_type' => in_array($entityType, $validEntityTypes) ? $entityType : 'information_object',
+                            'collection_id' => $collectionId,
+                            'tags' => $tags ?: null,
+                            'content_format' => in_array($contentFormat, ['text', 'html']) ? $contentFormat : 'text',
+                            'visibility' => in_array($visibility, ['private', 'shared', 'public']) ? $visibility : 'private',
                         ]);
                     $this->getUser()->setFlash('success', 'Note updated');
+
+                    // Auto-journal: annotation updated
+                    try {
+                        require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
+                        $journal = new JournalService();
+                        $journal->createAutoEntry(
+                            $this->researcher->id,
+                            'auto_annotation',
+                            'Updated note: ' . ($title ?: 'Untitled'),
+                            'Updated research note',
+                            null,
+                            'annotation',
+                            $id
+                        );
+                    } catch (\Exception $e) { /* silent */ }
                 }
                 $this->redirect('research/annotations');
             }
         }
         
-        $this->annotations = $this->service->getAnnotations($this->researcher->id);
+        // Build annotations query with optional filters
+        $q = $request->getParameter('q');
+        $visibility = $request->getParameter('visibility');
+        $tag = $request->getParameter('tag');
+
+        if ($q) {
+            $this->annotations = $this->service->searchAnnotations($this->researcher->id, $q);
+        } else {
+            $this->annotations = $this->service->getAnnotations($this->researcher->id);
+        }
+
+        // Apply post-query filters
+        if ($visibility) {
+            $this->annotations = array_filter($this->annotations, function ($a) use ($visibility) {
+                return ($a->visibility ?? 'private') === $visibility;
+            });
+        }
+        if ($tag) {
+            $this->annotations = array_filter($this->annotations, function ($a) use ($tag) {
+                if (empty($a->tags)) return false;
+                $tags = array_map('trim', explode(',', $a->tags));
+                return in_array($tag, $tags);
+            });
+        }
+        $this->annotations = array_values($this->annotations);
+
+        $this->collections = DB::table('research_collection')
+            ->where('researcher_id', $this->researcher->id)
+            ->orderBy('name')
+            ->get();
     }
 
     public function executeCite($request)
@@ -1158,6 +1298,66 @@ class researchActions extends AhgController
     }
 
     /**
+     * AJAX: Search entities by type for Tom Select dropdown.
+     */
+    public function executeSearchEntities($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        $query = trim($request->getParameter('q', ''));
+        $type = $request->getParameter('type', 'information_object');
+        if (strlen($query) < 2) {
+            return $this->renderText(json_encode(['items' => []]));
+        }
+
+        $items = [];
+        if ($type === 'actor') {
+            $items = DB::table('actor_i18n as ai')
+                ->leftJoin('slug as s', 'ai.id', '=', 's.object_id')
+                ->where('ai.culture', 'en')
+                ->where('ai.authorized_form_of_name', 'LIKE', '%' . $query . '%')
+                ->select('ai.id', 'ai.authorized_form_of_name as title', 's.slug')
+                ->orderBy('ai.authorized_form_of_name')
+                ->limit(20)->get()->toArray();
+        } elseif ($type === 'repository') {
+            $items = DB::table('repository_i18n as ri')
+                ->leftJoin('slug as s', 'ri.id', '=', 's.object_id')
+                ->where('ri.culture', 'en')
+                ->where('ri.authorized_form_of_name', 'LIKE', '%' . $query . '%')
+                ->select('ri.id', 'ri.authorized_form_of_name as title', 's.slug')
+                ->orderBy('ri.authorized_form_of_name')
+                ->limit(20)->get()->toArray();
+        } elseif ($type === 'accession') {
+            $items = DB::table('accession as a')
+                ->leftJoin('accession_i18n as ai', function ($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en'); })
+                ->where(function ($q) use ($query) {
+                    $q->where('a.identifier', 'LIKE', '%' . $query . '%')
+                      ->orWhere('ai.title', 'LIKE', '%' . $query . '%');
+                })
+                ->select('a.id', 'a.identifier', 'ai.title')
+                ->orderBy('a.identifier')
+                ->limit(20)->get()->map(function ($i) {
+                    return (object) ['id' => $i->id, 'title' => $i->title ?: $i->identifier, 'slug' => null];
+                })->toArray();
+        } else {
+            // Default: information_object (use existing searchItems logic)
+            $items = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($j) { $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en'); })
+                ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                ->where('io.id', '!=', 1)
+                ->where(function ($q) use ($query) {
+                    $q->where('ioi.title', 'LIKE', '%' . $query . '%')
+                      ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
+                })
+                ->select('io.id', 'ioi.title', 's.slug')
+                ->orderBy('ioi.title')->limit(20)->get()->toArray();
+        }
+
+        return $this->renderText(json_encode(['items' => array_values(array_map(function ($i) {
+            return ['id' => $i->id ?? $i['id'], 'title' => $i->title ?? $i['title'] ?? 'Untitled', 'slug' => $i->slug ?? $i['slug'] ?? null];
+        }, $items))]));
+    }
+
+    /**
      * Request renewal of expired researcher status
      */
     public function executeRenewal($request)
@@ -1469,6 +1669,19 @@ class researchActions extends AhgController
             ->where('project_id', $projectId)
             ->orderBy('created_at', 'desc')
             ->limit(20)
+            ->get()->toArray();
+
+        $this->clipboardItems = DB::table('research_clipboard_project as cp')
+            ->leftJoin('information_object_i18n as i', function ($join) {
+                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', 'en');
+            })
+            ->leftJoin('slug', function ($join) {
+                $join->on('cp.object_id', '=', 'slug.object_id');
+            })
+            ->where('cp.project_id', $projectId)
+            ->select('cp.*', 'i.title as object_title', 'slug.slug as object_slug')
+            ->orderByDesc('cp.is_pinned')
+            ->orderByDesc('cp.created_at')
             ->get()->toArray();
     }
 
@@ -3094,14 +3307,20 @@ class researchActions extends AhgController
         if (!$researcher) { $this->redirect('research/register'); }
 
         $format = $request->getParameter('format', 'pdf');
+        $noteId = (int) $request->getParameter('id') ?: null;
+        $noteIds = $request->getParameter('ids') ? array_filter(array_map('intval', explode(',', $request->getParameter('ids')))) : null;
         $exportService = $this->loadExportService();
 
-        if ($format === 'docx') {
-            $file = $exportService->exportNotesDocx($researcher->id);
+        if ($format === 'csv') {
+            $file = $exportService->exportNotesCsv($researcher->id, $noteId, $noteIds);
+            $mime = 'text/csv';
+            $ext = 'csv';
+        } elseif ($format === 'docx') {
+            $file = $exportService->exportNotesDocx($researcher->id, $noteId, $noteIds);
             $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
             $ext = 'docx';
         } else {
-            $file = $exportService->exportNotesPdf($researcher->id);
+            $file = $exportService->exportNotesPdf($researcher->id, $noteId, $noteIds);
             $mime = 'application/pdf';
             $ext = 'pdf';
         }
@@ -3111,8 +3330,9 @@ class researchActions extends AhgController
             $this->redirect('research/annotations');
         }
 
+        $filename = $noteId ? 'note-' . $noteId : ($noteIds ? 'notes-selected' : 'notes');
         $this->getResponse()->setContentType($mime);
-        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="notes.' . $ext . '"');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '.' . $ext . '"');
         $this->getResponse()->setContent(file_get_contents($file));
         @unlink($file);
         return sfView::NONE;
@@ -3620,5 +3840,162 @@ class researchActions extends AhgController
             }
         }
         $this->redirect('research/report/' . $reportId);
+    }
+
+    /**
+     * AJAX: Add AtoM clipboard items to a project.
+     */
+    public function executeClipboardToProject($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $projectId = (int) $request->getParameter('project_id');
+        $slugsRaw = $request->getParameter('slugs', '');
+        $notes = trim($request->getParameter('notes', ''));
+
+        if (!$projectId || !$slugsRaw) {
+            return $this->renderText(json_encode(['error' => 'Missing project_id or slugs']));
+        }
+
+        // Resolve slugs to object IDs
+        $slugs = is_array($slugsRaw) ? $slugsRaw : array_filter(array_map('trim', explode(',', $slugsRaw)));
+        $objectIds = [];
+        if (!empty($slugs)) {
+            $objectIds = DB::table('slug')
+                ->whereIn('slug', $slugs)
+                ->pluck('object_id')
+                ->toArray();
+        }
+
+        if (empty($objectIds)) {
+            return $this->renderText(json_encode(['error' => 'No valid items found']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        // Verify access
+        if (!$projectService->canAccess($projectId, $researcher->id, 'contributor')) {
+            return $this->renderText(json_encode(['error' => 'Access denied']));
+        }
+
+        $added = $projectService->addClipboardItems($projectId, $researcher->id, $objectIds, $notes ?: null);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'added' => $added,
+            'total_slugs' => count($slugs),
+            'message' => $added . ' item(s) added to project',
+        ]));
+    }
+
+    /**
+     * AJAX: Manage clipboard items in a project (pin, remove, update notes).
+     */
+    public function executeManageClipboardItem($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $itemId = (int) $request->getParameter('item_id');
+        $action = $request->getParameter('do', '');
+
+        if (!$itemId) {
+            return $this->renderText(json_encode(['error' => 'Missing item_id']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        if ($action === 'pin') {
+            $projectService->toggleClipboardPin($itemId, $researcher->id);
+            return $this->renderText(json_encode(['success' => true, 'message' => 'Pin toggled']));
+        } elseif ($action === 'remove') {
+            $projectService->removeClipboardItem($itemId, $researcher->id);
+            return $this->renderText(json_encode(['success' => true, 'message' => 'Item removed']));
+        } elseif ($action === 'notes') {
+            $notes = trim($request->getParameter('notes', ''));
+            $projectService->updateClipboardNotes($itemId, $researcher->id, $notes ?: null);
+            return $this->renderText(json_encode(['success' => true, 'message' => 'Notes updated']));
+        }
+
+        return $this->renderText(json_encode(['error' => 'Invalid action']));
+    }
+
+    /**
+     * AJAX: Upload an image for a note (Quill editor).
+     */
+    public function executeUploadNoteImage($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            return $this->renderText(json_encode(['error' => 'No file uploaded']));
+        }
+
+        $file = $_FILES['image'];
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        if ($file['size'] > $maxSize) {
+            return $this->renderText(json_encode(['error' => 'File too large (max 5MB)']));
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return $this->renderText(json_encode(['error' => 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP']));
+        }
+
+        $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/research/notes';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = match ($mimeType) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            default => 'jpg',
+        };
+        $filename = 'note_' . $researcher->id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $filename)) {
+            return $this->renderText(json_encode(['error' => 'Failed to save file']));
+        }
+
+        return $this->renderText(json_encode([
+            'url' => '/uploads/research/notes/' . $filename,
+        ]));
     }
 }

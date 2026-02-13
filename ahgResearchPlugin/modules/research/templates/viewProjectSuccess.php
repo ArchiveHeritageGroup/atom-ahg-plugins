@@ -102,6 +102,90 @@
             </div>
         </div>
 
+        <!-- Timeline -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-stream me-2"></i>Project Timeline</h5>
+            </div>
+            <div class="card-body">
+                <?php
+                // Merge milestones and activities into timeline
+                $timelineItems = [];
+                if (!empty($milestones)) {
+                    foreach ($milestones as $ms) {
+                        $date = $ms->due_date ?: ($ms->created_at ?? date('Y-m-d'));
+                        $timelineItems[] = (object)[
+                            'date' => $date,
+                            'type' => 'milestone',
+                            'title' => $ms->title,
+                            'status' => $ms->status,
+                            'icon' => 'flag',
+                            'color' => $ms->status === 'completed' ? 'success' : ($ms->status === 'in_progress' ? 'primary' : 'secondary'),
+                        ];
+                    }
+                }
+                if (!empty($activities)) {
+                    foreach (array_slice($activities, 0, 20) as $act) {
+                        $timelineItems[] = (object)[
+                            'date' => $act->created_at,
+                            'type' => 'activity',
+                            'title' => ($act->entity_title ?: ucfirst($act->activity_type)),
+                            'status' => $act->activity_type,
+                            'icon' => match($act->activity_type) {
+                                'create' => 'plus-circle',
+                                'update', 'edit' => 'edit',
+                                'view', 'access' => 'eye',
+                                'delete', 'remove' => 'trash',
+                                'clipboard_add' => 'clipboard',
+                                'invite' => 'user-plus',
+                                default => 'circle',
+                            },
+                            'color' => match($act->activity_type) {
+                                'create' => 'success',
+                                'update', 'edit' => 'info',
+                                'delete', 'remove' => 'danger',
+                                'invite' => 'warning',
+                                default => 'secondary',
+                            },
+                        ];
+                    }
+                }
+                // Sort by date descending
+                usort($timelineItems, function ($a, $b) { return strcmp($b->date, $a->date); });
+                ?>
+                <?php if (!empty($timelineItems)): ?>
+                <div class="timeline-vertical">
+                    <?php
+                    $lastDate = '';
+                    foreach ($timelineItems as $item):
+                        $itemDate = date('M j, Y', strtotime($item->date));
+                        if ($itemDate !== $lastDate):
+                            $lastDate = $itemDate;
+                    ?>
+                        <div class="timeline-date text-muted fw-bold small mb-2 mt-3"><?php echo $itemDate; ?></div>
+                    <?php endif; ?>
+                    <div class="d-flex align-items-start mb-2 ms-3">
+                        <span class="badge bg-<?php echo $item->color; ?> rounded-circle p-1 me-2 mt-1" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-<?php echo $item->icon; ?> fa-xs"></i>
+                        </span>
+                        <div>
+                            <span class="<?php echo $item->type === 'milestone' ? 'fw-bold' : ''; ?>"><?php echo htmlspecialchars($item->title); ?></span>
+                            <?php if ($item->type === 'milestone'): ?>
+                                <span class="badge bg-<?php echo $item->color; ?> ms-1"><?php echo ucfirst($item->status); ?></span>
+                            <?php else: ?>
+                                <small class="text-muted ms-1"><?php echo ucfirst(str_replace('_', ' ', $item->status)); ?></small>
+                            <?php endif; ?>
+                            <br><small class="text-muted"><?php echo date('H:i', strtotime($item->date)); ?></small>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php else: ?>
+                    <p class="text-muted mb-0">No timeline events yet.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <!-- Resources -->
         <div class="card mb-4">
             <div class="card-header"><h5 class="mb-0">Linked Resources</h5></div>
@@ -114,12 +198,37 @@
                                     <div>
                                         <span class="badge bg-secondary me-2"><?php echo ucfirst($resource->resource_type); ?></span>
                                         <?php if (!empty($resource->link_type)): ?><span class="badge bg-<?php echo match($resource->link_type) { 'academic' => 'primary', 'archive' => 'info', 'database' => 'success', 'government' => 'dark', 'website' => 'warning', 'social_media' => 'danger', default => 'light text-dark' }; ?> me-1"><?php echo ucfirst(str_replace('_', ' ', $resource->link_type)); ?></span><?php endif; ?>
-                                        <?php echo htmlspecialchars($resource->title); ?>
+                                        <?php if (!empty($resource->external_url)): ?>
+                                            <a href="<?php echo htmlspecialchars($resource->external_url); ?>" target="_blank" rel="noopener noreferrer">
+                                                <?php echo htmlspecialchars($resource->title ?: $resource->external_url); ?>
+                                                <i class="fas fa-external-link-alt fa-xs ms-1"></i>
+                                            </a>
+                                        <?php elseif (!empty($resource->object_id)): ?>
+                                            <?php
+                                            $resSlug = DB::table('slug')->where('object_id', $resource->object_id)->value('slug');
+                                            ?>
+                                            <?php if ($resSlug): ?>
+                                                <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resSlug]); ?>">
+                                                    <?php echo htmlspecialchars($resource->title ?: 'View Item'); ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <?php echo htmlspecialchars($resource->title); ?>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($resource->title); ?>
+                                        <?php endif; ?>
                                     </div>
                                     <small class="text-muted"><?php echo date('M j, Y', strtotime($resource->added_at)); ?></small>
                                 </div>
+                                <?php if (!empty($resource->external_url) && !empty($resource->link_metadata)): ?>
+                                    <?php
+                                    $meta = is_string($resource->link_metadata) ? json_decode($resource->link_metadata) : $resource->link_metadata;
+                                    if ($meta && !empty($meta->description)): ?>
+                                        <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i><?php echo htmlspecialchars(substr($meta->description, 0, 200)); ?></small>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                                 <?php if ($resource->notes): ?>
-                                    <small class="text-muted"><?php echo htmlspecialchars($resource->notes); ?></small>
+                                    <small class="text-muted d-block"><?php echo htmlspecialchars($resource->notes); ?></small>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
@@ -127,6 +236,77 @@
                 <?php else: ?>
                     <p class="text-muted mb-0">No resources linked yet.</p>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Clipboard Items -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-clipboard me-2"></i>Clipboard Items</h5>
+                <span class="badge bg-primary"><?php echo count($clipboardItems ?? []); ?></span>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($clipboardItems)): ?>
+                    <div class="list-group list-group-flush mb-3" id="clipboard-items-list">
+                        <?php foreach ($clipboardItems as $item): ?>
+                            <div class="list-group-item" id="clipboard-item-<?php echo $item->id; ?>">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <?php if ($item->is_pinned): ?>
+                                            <i class="fas fa-thumbtack text-warning me-1" title="Pinned"></i>
+                                        <?php endif; ?>
+                                        <?php if ($item->object_slug): ?>
+                                            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'slug' => $item->object_slug]); ?>">
+                                                <?php echo htmlspecialchars($item->object_title ?? $item->object_slug); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted">Object #<?php echo $item->object_id; ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="btn-group btn-group-sm ms-2">
+                                        <button type="button" class="btn btn-outline-warning btn-sm clipboard-pin-btn"
+                                                data-item-id="<?php echo $item->id; ?>"
+                                                title="<?php echo $item->is_pinned ? 'Unpin' : 'Pin'; ?>">
+                                            <i class="fas fa-thumbtack"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm clipboard-remove-btn"
+                                                data-item-id="<?php echo $item->id; ?>"
+                                                title="Remove">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php if ($item->notes): ?>
+                                    <small class="text-muted d-block mt-1"><?php echo htmlspecialchars($item->notes); ?></small>
+                                <?php endif; ?>
+                                <small class="text-muted"><?php echo date('M j, Y H:i', strtotime($item->created_at)); ?></small>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="text-muted mb-3">No clipboard items linked to this project.</p>
+                <?php endif; ?>
+
+                <!-- Add from clipboard form -->
+                <hr>
+                <h6>Add Items from Clipboard</h6>
+                <div id="clipboard-add-form">
+                    <div class="mb-2">
+                        <label for="clipboard-slugs" class="form-label small">Slugs (comma-separated)</label>
+                        <textarea id="clipboard-slugs" class="form-control form-control-sm" rows="2"
+                                  placeholder="e.g. item-slug-1, item-slug-2"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label for="clipboard-notes" class="form-label small">Notes (optional)</label>
+                        <input type="text" id="clipboard-notes" class="form-control form-control-sm"
+                               placeholder="Optional notes for these items">
+                    </div>
+                    <button type="button" id="clipboard-add-btn" class="btn btn-sm btn-primary"
+                            data-project-id="<?php echo $project->id; ?>">
+                        <i class="fas fa-plus me-1"></i> Add to Project
+                    </button>
+                    <div id="clipboard-add-result" class="mt-2"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -186,3 +366,91 @@
         </div>
     </div>
 </div>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var manageUrl = '<?php echo url_for(['module' => 'research', 'action' => 'manageClipboardItem']); ?>';
+    var addUrl = '<?php echo url_for(['module' => 'research', 'action' => 'clipboardToProject']); ?>';
+
+    // Pin/Unpin clipboard item
+    document.querySelectorAll('.clipboard-pin-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var itemId = this.getAttribute('data-item-id');
+            var formData = new FormData();
+            formData.append('item_id', itemId);
+            formData.append('do', 'pin');
+            fetch(manageUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { location.reload(); }
+                    else { alert(data.error || 'Error toggling pin'); }
+                });
+        });
+    });
+
+    // Remove clipboard item
+    document.querySelectorAll('.clipboard-remove-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Remove this item from the project?')) return;
+            var itemId = this.getAttribute('data-item-id');
+            var formData = new FormData();
+            formData.append('item_id', itemId);
+            formData.append('do', 'remove');
+            fetch(manageUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        var el = document.getElementById('clipboard-item-' + itemId);
+                        if (el) el.remove();
+                    } else {
+                        alert(data.error || 'Error removing item');
+                    }
+                });
+        });
+    });
+
+    // Add items from clipboard
+    var addBtn = document.getElementById('clipboard-add-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            var slugs = document.getElementById('clipboard-slugs').value.trim();
+            var notes = document.getElementById('clipboard-notes').value.trim();
+            var projectId = this.getAttribute('data-project-id');
+            var resultDiv = document.getElementById('clipboard-add-result');
+
+            if (!slugs) {
+                resultDiv.innerHTML = '<div class="alert alert-warning alert-sm py-1 px-2 small">Please enter at least one slug.</div>';
+                return;
+            }
+
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+
+            var formData = new FormData();
+            formData.append('project_id', projectId);
+            formData.append('slugs', slugs);
+            if (notes) formData.append('notes', notes);
+
+            fetch(addUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        resultDiv.innerHTML = '<div class="alert alert-success py-1 px-2 small">' + data.message + '</div>';
+                        document.getElementById('clipboard-slugs').value = '';
+                        document.getElementById('clipboard-notes').value = '';
+                        setTimeout(function() { location.reload(); }, 1500);
+                    } else {
+                        resultDiv.innerHTML = '<div class="alert alert-danger py-1 px-2 small">' + (data.error || 'Error adding items') + '</div>';
+                    }
+                })
+                .catch(function() {
+                    resultDiv.innerHTML = '<div class="alert alert-danger py-1 px-2 small">Network error</div>';
+                })
+                .finally(function() {
+                    addBtn.disabled = false;
+                    addBtn.innerHTML = '<i class="fas fa-plus me-1"></i> Add to Project';
+                });
+        });
+    }
+});
+</script>

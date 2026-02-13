@@ -201,13 +201,18 @@
       </div>
     </div>
 
-    <?php if ($sf_user->isAuthenticated() && !empty($recentActivity)): ?>
+    <?php
+    $ed = isset($enhancedData) ? (is_array($enhancedData) ? $enhancedData : (method_exists($enhancedData, 'getRawValue') ? $enhancedData->getRawValue() : [])) : [];
+    $ra = is_array($recentActivity) ? $recentActivity : (method_exists($recentActivity, 'getRawValue') ? $recentActivity->getRawValue() : []);
+    ?>
+
+    <?php if ($sf_user->isAuthenticated() && !empty($ra)): ?>
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-stream me-2"></i><?php echo __('Recent Activity'); ?></span>
       </div>
       <ul class="list-group list-group-flush">
-        <?php foreach (array_slice(is_array($recentActivity) ? $recentActivity : [], 0, 5) as $activity): ?>
+        <?php foreach (array_slice($ra, 0, 5) as $activity): ?>
         <li class="list-group-item py-2">
           <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -216,6 +221,62 @@
             </div>
             <small class="text-muted"><?php echo date('M j, H:i', strtotime($activity->created_at)); ?></small>
           </div>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+    <?php endif; ?>
+
+    <?php $recentNotes = $ed['recent_notes'] ?? []; ?>
+    <?php if ($sf_user->isAuthenticated() && !empty($recentNotes)): ?>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-sticky-note me-2 text-warning"></i><?php echo __('Recent Notes'); ?></span>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-sm btn-outline-warning"><?php echo __('All Notes'); ?></a>
+      </div>
+      <ul class="list-group list-group-flush">
+        <?php foreach (array_slice($recentNotes, 0, 5) as $note): ?>
+        <li class="list-group-item py-2">
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>#note-<?php echo $note->id; ?>" class="text-decoration-none">
+            <strong><?php echo htmlspecialchars($note->title ?: __('Untitled Note')); ?></strong>
+          </a>
+          <br><small class="text-muted"><?php echo date('M j, Y H:i', strtotime($note->created_at)); ?></small>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+    <?php endif; ?>
+
+    <?php $searchAlerts = $ed['search_alerts'] ?? []; ?>
+    <?php if ($sf_user->isAuthenticated() && !empty($searchAlerts)): ?>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-search me-2 text-info"></i><?php echo __('Saved Search Alerts'); ?></span>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'savedSearches']); ?>" class="btn btn-sm btn-outline-info"><?php echo __('View All'); ?></a>
+      </div>
+      <ul class="list-group list-group-flush">
+        <?php foreach ($searchAlerts as $alert): ?>
+        <li class="list-group-item py-2 d-flex justify-content-between align-items-center">
+          <span><?php echo htmlspecialchars($alert->name); ?></span>
+          <span class="badge bg-info rounded-pill"><?php echo (int) $alert->new_results_count; ?> <?php echo __('new'); ?></span>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+    <?php endif; ?>
+
+    <?php $pendingInvites = $ed['pending_invitations'] ?? []; ?>
+    <?php if ($sf_user->isAuthenticated() && !empty($pendingInvites)): ?>
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <i class="fas fa-envelope me-2"></i><?php echo __('Pending Invitations'); ?>
+        <span class="badge bg-white text-info float-end"><?php echo count($pendingInvites); ?></span>
+      </div>
+      <ul class="list-group list-group-flush">
+        <?php foreach ($pendingInvites as $invite): ?>
+        <li class="list-group-item py-2 d-flex justify-content-between align-items-center">
+          <span><?php echo htmlspecialchars($invite->project_title ?? ''); ?></span>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewProject', 'id' => $invite->project_id]); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('View'); ?></a>
         </li>
         <?php endforeach; ?>
       </ul>

@@ -168,7 +168,11 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_ajax_add_to_collection', '/research/ajax/add-to-collection', 'addToCollection');
         $research->any('research_ajax_create_collection', '/research/ajax/create-collection', 'createCollectionAjax');
         $research->any('research_ajax_search_items', '/research/ajax/search-items', 'searchItems');
+        $research->any('research_ajax_search_entities', '/research/ajax/search-entities', 'searchEntities');
         $research->any('research_ajax_add_to_bibliography', '/research/ajax/add-to-bibliography', 'addToBibliographyAjax');
+        $research->any('research_ajax_upload_note_image', '/research/ajax/upload-note-image', 'uploadNoteImage');
+        $research->any('research_ajax_clipboard_to_project', '/research/ajax/clipboard-to-project', 'clipboardToProject');
+        $research->any('research_ajax_manage_clipboard_item', '/research/ajax/manage-clipboard-item', 'manageClipboardItem');
 
         // Issue 149 Phase 7: Collaboration
         $research->any('research_comment_api', '/research/api/comment', 'commentApi');
