@@ -5,9 +5,18 @@
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'workspace']); ?>" class="btn btn-outline-secondary btn-sm me-2"><i class="fas fa-arrow-left"></i></a>
     <i class="fas fa-sticky-note text-warning me-2"></i><?php echo __('My Notes & Annotations'); ?>
   </h1>
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAnnotationModal">
-    <i class="fas fa-plus me-1"></i><?php echo __('Add Note'); ?>
-  </button>
+  <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-file-export me-1"></i><?php echo __('Export'); ?></button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportNotes', 'format' => 'pdf']); ?>"><i class="fas fa-file-pdf me-2 text-danger"></i><?php echo __('PDF'); ?></a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportNotes', 'format' => 'docx']); ?>"><i class="fas fa-file-word me-2 text-primary"></i><?php echo __('DOCX'); ?></a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAnnotationModal">
+      <i class="fas fa-plus me-1"></i><?php echo __('Add Note'); ?>
+    </button>
+  </div>
 </div>
 <?php end_slot() ?>
 
@@ -23,15 +32,39 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
   <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 <?php endif; ?>
 
+<!-- Search Bar -->
+<div class="row mb-3">
+  <div class="col-md-6">
+    <form method="get" class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="<?php echo __('Search notes...'); ?>" value="<?php echo htmlspecialchars($sf_request->getParameter('q', '')); ?>">
+      <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+      <?php if ($sf_request->getParameter('q')): ?><a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-outline-secondary"><?php echo __('Clear'); ?></a><?php endif; ?>
+    </form>
+  </div>
+  <div class="col-md-6 text-md-end">
+    <div class="btn-group btn-group-sm">
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-outline-secondary <?php echo !$sf_request->getParameter('visibility') ? 'active' : ''; ?>"><?php echo __('All'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations', 'visibility' => 'private']); ?>" class="btn btn-outline-secondary <?php echo $sf_request->getParameter('visibility') === 'private' ? 'active' : ''; ?>"><?php echo __('Private'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations', 'visibility' => 'shared']); ?>" class="btn btn-outline-secondary <?php echo $sf_request->getParameter('visibility') === 'shared' ? 'active' : ''; ?>"><?php echo __('Shared'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations', 'visibility' => 'public']); ?>" class="btn btn-outline-secondary <?php echo $sf_request->getParameter('visibility') === 'public' ? 'active' : ''; ?>"><?php echo __('Public'); ?></a>
+    </div>
+  </div>
+</div>
+
 <?php if (!empty($annotations)): ?>
 <div class="row">
   <?php foreach ($annotations as $annotation): ?>
   <div class="col-md-6 col-lg-4 mb-4" id="note-<?php echo $annotation->id; ?>">
     <div class="card h-100">
       <div class="card-header bg-warning bg-opacity-25 d-flex justify-content-between align-items-center py-2">
-        <a href="#note-<?php echo $annotation->id; ?>" class="text-decoration-none text-dark">
-          <strong><i class="fas fa-sticky-note text-warning me-1"></i><?php echo htmlspecialchars($annotation->title ?: __('Untitled Note')); ?></strong>
-        </a>
+        <div>
+          <a href="#note-<?php echo $annotation->id; ?>" class="text-decoration-none text-dark">
+            <strong><i class="fas fa-sticky-note text-warning me-1"></i><?php echo htmlspecialchars($annotation->title ?: __('Untitled Note')); ?></strong>
+          </a>
+          <?php if (($annotation->visibility ?? 'private') !== 'private'): ?>
+            <span class="badge bg-<?php echo ($annotation->visibility ?? 'private') === 'shared' ? 'info' : 'success'; ?> ms-1"><?php echo ucfirst($annotation->visibility ?? 'private'); ?></span>
+          <?php endif; ?>
+        </div>
         <div class="dropdown">
           <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
@@ -51,7 +84,7 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
         </div>
       </div>
       <div class="card-body">
-        <p class="card-text"><?php echo nl2br(htmlspecialchars($annotation->content ?? '')); ?></p>
+        <div class="card-text"><?php if (($annotation->content_format ?? 'text') === 'html'): ?><?php echo $annotation->content; ?><?php else: ?><?php echo nl2br(htmlspecialchars($annotation->content ?? '')); ?><?php endif; ?></div>
       </div>
       <div class="card-footer bg-transparent small text-muted">
         <div class="d-flex justify-content-between align-items-start">
@@ -98,8 +131,18 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
             <input type="text" name="title" id="annotationTitle" class="form-control" placeholder="<?php echo __('Optional title...'); ?>">
           </div>
           <div class="mb-3">
+            <label class="form-label"><?php echo __('Visibility'); ?></label>
+            <select name="visibility" id="annotationVisibility" class="form-select">
+              <option value="private"><?php echo __('Private - only you'); ?></option>
+              <option value="shared"><?php echo __('Shared - project collaborators'); ?></option>
+              <option value="public"><?php echo __('Public - all researchers'); ?></option>
+            </select>
+          </div>
+          <input type="hidden" name="content_format" value="html">
+          <div class="mb-3">
             <label class="form-label"><?php echo __('Note Content'); ?> *</label>
-            <textarea name="content" id="annotationContent" class="form-control" rows="5" required placeholder="<?php echo __('Your notes...'); ?>"></textarea>
+            <textarea name="content" id="annotationContent" class="form-control d-none" rows="5"></textarea>
+            <div id="annotationQuillEditor" style="height: 200px; background: #fff; color: #212529;"></div>
           </div>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Link to Item (optional)'); ?></label>
@@ -119,6 +162,7 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
 
 <!-- Tom Select CSS & JS -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Fix Tom Select dropdown text visibility */
 .ts-dropdown { background: #fff !important; color: #212529 !important; }
@@ -151,11 +195,28 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
 .modal-body .form-control { background-color: #fff !important; color: #212529 !important; }
 </style>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var modal = document.getElementById('newAnnotationModal');
   var itemSelect;
+  var quillEditor;
+
+  // Initialize Quill
+  quillEditor = new Quill('#annotationQuillEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['blockquote', 'link'],
+        ['clean']
+      ]
+    },
+    placeholder: '<?php echo __("Your notes..."); ?>'
+  });
   
   // Initialize Tom Select for item search
   itemSelect = new TomSelect('#annotationObjectId', {
@@ -191,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('annotationTitle').value = '';
       document.getElementById('annotationContent').value = '';
       itemSelect.clear();
+      quillEditor.root.innerHTML = '';
       document.getElementById('annotationModalTitle').innerHTML = '<i class="fas fa-sticky-note me-2"></i><?php echo __("New Note"); ?>';
       document.getElementById('annotationSubmitBtn').innerHTML = '<i class="fas fa-save me-1"></i><?php echo __("Save Note"); ?>';
     }
@@ -209,10 +271,16 @@ document.addEventListener('DOMContentLoaded', function() {
         itemSelect.addOption({id: this.dataset.objectId, title: 'Item #' + this.dataset.objectId});
         itemSelect.setValue(this.dataset.objectId);
       }
+      quillEditor.root.innerHTML = this.dataset.content || '';
       document.getElementById('annotationModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i><?php echo __("Edit Note"); ?>';
       document.getElementById('annotationSubmitBtn').innerHTML = '<i class="fas fa-save me-1"></i><?php echo __("Update Note"); ?>';
       new bootstrap.Modal(document.getElementById('newAnnotationModal')).show();
     });
+  });
+
+  // Sync Quill content to hidden textarea on form submit
+  document.getElementById('annotationForm').addEventListener('submit', function() {
+    document.getElementById('annotationContent').value = quillEditor.root.innerHTML;
   });
 });
 </script>

@@ -6,7 +6,14 @@
     <i class="fas fa-folder-open text-primary me-2"></i><?php echo htmlspecialchars($collection->name); ?>
   </h1>
   <div>
-    <a href="<?php echo url_for(['module' => 'research', 'action' => 'generateFindingAid', 'id' => $collection->id]); ?>" class="btn btn-danger btn-sm me-1"><i class="fas fa-file-pdf me-1"></i><?php echo __('Finding Aid'); ?></a>
+    <div class="dropdown d-inline-block me-1">
+      <button class="btn btn-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-file-export me-1"></i><?php echo __('Export Finding Aid'); ?></button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportFindingAid', 'id' => $collection->id, 'format' => 'pdf']); ?>"><i class="fas fa-file-pdf me-2 text-danger"></i><?php echo __('PDF'); ?></a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportFindingAid', 'id' => $collection->id, 'format' => 'docx']); ?>"><i class="fas fa-file-word me-2 text-primary"></i><?php echo __('DOCX'); ?></a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'generateFindingAid', 'id' => $collection->id]); ?>"><i class="fas fa-file-code me-2 text-secondary"></i><?php echo __('HTML'); ?></a></li>
+      </ul>
+    </div>
     <button type="button" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editCollectionModal"><i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?></button>
     <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCollectionModal"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
   </div>

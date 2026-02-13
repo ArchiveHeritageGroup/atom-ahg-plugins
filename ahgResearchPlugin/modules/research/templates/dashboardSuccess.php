@@ -1,6 +1,16 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="fas fa-book-reader text-primary me-2"></i><?php echo __('Research Services'); ?></h1>
+<div class="d-flex justify-content-between align-items-center">
+  <h1><i class="fas fa-book-reader text-primary me-2"></i><?php echo __('Research Services'); ?></h1>
+  <?php if ($sf_user->isAuthenticated() && isset($unreadNotifications) && $unreadNotifications > 0): ?>
+  <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="btn btn-outline-primary position-relative">
+    <i class="fas fa-bell"></i>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?php echo $unreadNotifications; ?></span>
+  </a>
+  <?php elseif ($sf_user->isAuthenticated()): ?>
+  <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary"><i class="fas fa-bell"></i></a>
+  <?php endif; ?>
+</div>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -98,6 +108,19 @@
 </div>
 <?php endif; ?>
 
+<?php if ($sf_user->isAuthenticated() && isset($researcher) && $researcher && $researcher->status === 'approved'): ?>
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex flex-wrap gap-2">
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-outline-primary"><i class="fas fa-calendar-plus me-1"></i><?php echo __('Book Visit'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'journalNew']); ?>" class="btn btn-outline-success"><i class="fas fa-pen-fancy me-1"></i><?php echo __('New Journal Entry'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'newReport']); ?>" class="btn btn-outline-info"><i class="fas fa-file-alt me-1"></i><?php echo __('New Report'); ?></a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-outline-warning"><i class="fas fa-sticky-note me-1"></i><?php echo __('My Notes'); ?></a>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <!-- Statistics -->
 <div class="row mb-4">
   <div class="col-md-3">
@@ -177,6 +200,28 @@
         </table>
       </div>
     </div>
+
+    <?php if ($sf_user->isAuthenticated() && !empty($recentActivity)): ?>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-stream me-2"></i><?php echo __('Recent Activity'); ?></span>
+      </div>
+      <ul class="list-group list-group-flush">
+        <?php foreach (array_slice(is_array($recentActivity) ? $recentActivity : [], 0, 5) as $activity): ?>
+        <li class="list-group-item py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="badge bg-light text-dark me-1"><?php echo ucfirst(str_replace('_', ' ', $activity->activity_type ?? '')); ?></span>
+              <span class="small"><?php echo htmlspecialchars($activity->entity_title ?? ''); ?></span>
+            </div>
+            <small class="text-muted"><?php echo date('M j, H:i', strtotime($activity->created_at)); ?></small>
+          </div>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+    <?php endif; ?>
+
   </div>
 
   <!-- Quick Links / Pending Researchers -->
@@ -235,6 +280,15 @@
           </a>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>" class="list-group-item list-group-item-action">
             <i class="fas fa-copy me-2"></i><?php echo __('Reproduction Requests'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'journal']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-pen-fancy me-2"></i><?php echo __('Research Journal'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'reports']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-file-alt me-2"></i><?php echo __('Reports'); ?>
+          </a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="list-group-item list-group-item-action">
+            <i class="fas fa-bell me-2"></i><?php echo __('Notifications'); ?>
           </a>
           <?php endif; ?>
           <?php if ($sf_user->isAdministrator()): ?>

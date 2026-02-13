@@ -86,6 +86,22 @@
     </div>
 </div>
 
+<!-- Chart.js Visualizations -->
+<div class="row mb-4">
+  <div class="col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-line me-2"></i><?php echo __('Registrations Over Time'); ?></h5></div>
+      <div class="card-body"><canvas id="registrationsChart" height="250"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i><?php echo __('Bookings by Room'); ?></h5></div>
+      <div class="card-body"><canvas id="bookingsChart" height="250"></canvas></div>
+    </div>
+  </div>
+</div>
+
 <div class="row">
     <!-- Most Viewed Items -->
     <div class="col-md-6 mb-4">
@@ -241,3 +257,61 @@
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+  <?php
+  // Prepare chart data from visualization endpoint
+  $vizData = isset($vizData) && is_array($vizData) ? $vizData : (isset($vizData) && method_exists($vizData, 'getRawValue') ? $vizData->getRawValue() : []);
+  $regLabels = [];
+  $regData = [];
+  if (!empty($vizData['registrations'])) {
+    foreach ($vizData['registrations'] as $r) { $regLabels[] = $r->period ?? ''; $regData[] = (int)($r->count ?? 0); }
+  }
+  $roomLabels = [];
+  $roomData = [];
+  if (!empty($vizData['bookings_by_room'])) {
+    foreach ($vizData['bookings_by_room'] as $r) { $roomLabels[] = $r->room_name ?? ''; $roomData[] = (int)($r->count ?? 0); }
+  }
+  ?>
+
+  // Registrations Over Time
+  var regCtx = document.getElementById('registrationsChart');
+  if (regCtx) {
+    new Chart(regCtx, {
+      type: 'line',
+      data: {
+        labels: <?php echo json_encode($regLabels); ?>,
+        datasets: [{
+          label: '<?php echo __("Registrations"); ?>',
+          data: <?php echo json_encode($regData); ?>,
+          borderColor: '#0d6efd',
+          backgroundColor: 'rgba(13,110,253,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+  }
+
+  // Bookings by Room
+  var roomCtx = document.getElementById('bookingsChart');
+  if (roomCtx) {
+    new Chart(roomCtx, {
+      type: 'bar',
+      data: {
+        labels: <?php echo json_encode($roomLabels); ?>,
+        datasets: [{
+          label: '<?php echo __("Bookings"); ?>',
+          data: <?php echo json_encode($roomData); ?>,
+          backgroundColor: ['#198754', '#0dcaf0', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14']
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+  }
+});
+</script>

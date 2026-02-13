@@ -15,17 +15,22 @@
         <span class="badge bg-secondary"><?php echo count($entries); ?> entries</span>
         <span class="badge bg-light text-dark"><?php echo ucfirst($bibliography->citation_style ?? 'chicago'); ?> style</span>
     </div>
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            <i class="fas fa-download me-1"></i> Export
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importBibliographyModal">
+            <i class="fas fa-upload me-1"></i> <?php echo __('Import'); ?>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'ris']); ?>">RIS (EndNote, Zotero)</a></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'bibtex']); ?>">BibTeX (LaTeX)</a></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'zotero']); ?>">Zotero RDF</a></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'mendeley']); ?>">Mendeley JSON</a></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'csl']); ?>">CSL-JSON</a></li>
-        </ul>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-download me-1"></i> <?php echo __('Export'); ?>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'ris']); ?>">RIS (EndNote, Zotero)</a></li>
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'bibtex']); ?>">BibTeX (LaTeX)</a></li>
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'zotero']); ?>">Zotero RDF</a></li>
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'mendeley']); ?>">Mendeley JSON</a></li>
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'exportBibliography', 'id' => $bibliography->id, 'format' => 'csl']); ?>">CSL-JSON</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -134,6 +139,47 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Add Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Bibliography Modal -->
+<div class="modal fade" id="importBibliographyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data" action="<?php echo url_for(['module' => 'research', 'action' => 'importBibliography', 'id' => $bibliography->id]); ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-upload me-2"></i><?php echo __('Import Citations'); ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('Format'); ?> *</label>
+                        <select name="format" class="form-select" required>
+                            <option value="bibtex">BibTeX (.bib)</option>
+                            <option value="ris">RIS (.ris)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('Upload File'); ?></label>
+                        <input type="file" name="import_file" class="form-control" accept=".bib,.ris,.txt">
+                        <small class="text-muted"><?php echo __('Upload a .bib or .ris file'); ?></small>
+                    </div>
+                    <div class="text-center text-muted my-2">&mdash; <?php echo __('or'); ?> &mdash;</div>
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('Paste Content'); ?></label>
+                        <textarea name="import_content" class="form-control" rows="8" placeholder="<?php echo __('Paste BibTeX or RIS content here...'); ?>"></textarea>
+                    </div>
+                    <div class="alert alert-info small mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <?php echo __('Entries will be added to this bibliography. Duplicate titles will be skipped.'); ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-upload me-1"></i> <?php echo __('Import'); ?></button>
                 </div>
             </form>
         </div>

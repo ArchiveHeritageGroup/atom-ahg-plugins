@@ -12,11 +12,16 @@
         <span class="badge bg-<?php echo match($project->status) { 'active' => 'success', 'planning' => 'info', 'on_hold' => 'warning', 'completed' => 'secondary', default => 'dark' }; ?> me-2"><?php echo ucfirst($project->status); ?></span>
         <span class="badge bg-light text-dark"><?php echo ucfirst($project->project_type); ?></span>
     </div>
-    <?php if ($project->owner_id == $researcher->id): ?>
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'editProject', 'id' => $project->id]); ?>" class="btn btn-outline-primary">
-            <i class="fas fa-edit me-1"></i> Edit
+    <div class="d-flex gap-2">
+      <?php if ($project->owner_id == $researcher->id): ?>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'shareProject', 'id' => $project->id]); ?>" class="btn btn-outline-success">
+            <i class="fas fa-share-alt me-1"></i> <?php echo __('Share'); ?>
         </a>
-    <?php endif; ?>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'editProject', 'id' => $project->id]); ?>" class="btn btn-outline-primary">
+            <i class="fas fa-edit me-1"></i> <?php echo __('Edit'); ?>
+        </a>
+      <?php endif; ?>
+    </div>
 </div>
 
 <?php if ($sf_user->hasFlash('success')): ?>
@@ -108,6 +113,7 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <span class="badge bg-secondary me-2"><?php echo ucfirst($resource->resource_type); ?></span>
+                                        <?php if (!empty($resource->link_type)): ?><span class="badge bg-<?php echo match($resource->link_type) { 'academic' => 'primary', 'archive' => 'info', 'database' => 'success', 'government' => 'dark', 'website' => 'warning', 'social_media' => 'danger', default => 'light text-dark' }; ?> me-1"><?php echo ucfirst(str_replace('_', ' ', $resource->link_type)); ?></span><?php endif; ?>
                                         <?php echo htmlspecialchars($resource->title); ?>
                                     </div>
                                     <small class="text-muted"><?php echo date('M j, Y', strtotime($resource->added_at)); ?></small>

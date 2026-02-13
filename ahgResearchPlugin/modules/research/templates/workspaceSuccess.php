@@ -93,6 +93,19 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
   </div>
 </div>
 
+<!-- Weekly Activity -->
+<?php if ($sf_user->isAuthenticated() && isset($weeklyActivity)): ?>
+<?php $weeklyActivity = is_array($weeklyActivity) ? $weeklyActivity : (method_exists($weeklyActivity, 'getRawValue') ? $weeklyActivity->getRawValue() : []); ?>
+<div class="card mb-4">
+  <div class="card-body py-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <small class="text-muted"><i class="fas fa-chart-bar me-1"></i><?php echo __('Activity (last 7 days)'); ?></small>
+      <canvas id="weeklyActivityChart" width="300" height="40"></canvas>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <div class="row">
   <!-- Left Column: Bookings -->
   <div class="col-md-4 mb-4">
@@ -262,4 +275,34 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
     </div>
   </div>
 </div>
+
+<!-- Chart.js (activity sparkline) -->
+<?php if (isset($weeklyActivity)): ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+  <?php
+  $wLabels = [];
+  $wData = [];
+  $weeklyRaw = isset($weeklyActivity) && is_array($weeklyActivity) ? $weeklyActivity : [];
+  foreach ($weeklyRaw as $day) { $wLabels[] = date('D', strtotime($day->date ?? 'now')); $wData[] = (int)($day->count ?? 0); }
+  ?>
+  var ctx = document.getElementById('weeklyActivityChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: <?php echo json_encode($wLabels); ?>,
+        datasets: [{ data: <?php echo json_encode($wData); ?>, backgroundColor: '#0d6efd', borderRadius: 2 }]
+      },
+      options: {
+        responsive: false, plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { display: false }, y: { display: false, beginAtZero: true } }
+      }
+    });
+  }
+});
+</script>
+<?php endif; ?>
+
 <?php end_slot() ?>
