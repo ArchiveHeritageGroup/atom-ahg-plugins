@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 // Include parent actions
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/editAction.class.php';
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
@@ -34,7 +35,7 @@ class physicalobjectActions extends AhgController
         require_once $this->config('sf_root_dir') . '/atom-framework/src/Repositories/PhysicalObjectExtendedRepository.php';
 
         // Set up resource
-        $this->resource = new QubitPhysicalObject();
+        $this->resource = WriteServiceFactory::physicalObject()->newPhysicalObject();
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;
         }

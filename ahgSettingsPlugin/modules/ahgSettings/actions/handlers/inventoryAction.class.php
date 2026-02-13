@@ -38,10 +38,6 @@ class SettingsInventoryAction extends AhgEditController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                if (null !== $this->settingLevels->value) {
-                    $this->settingLevels->save();
-                }
-
                 CacheService::getInstance()->removePattern('settings:i18n:*');
 
                 $notice = sfContext::getInstance()->i18n->__('Inventory settings saved.');
@@ -110,10 +106,8 @@ class SettingsInventoryAction extends AhgEditController
             case 'levels':
                 $levels = $this->form->getValue('levels') ?? [];
 
-                $this->settingLevels->setValue(
-                    serialize($levels),
-                    ['sourceCulture' => true]
-                );
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->saveSerialized('inventory_levels', $levels);
 
                 break;
         }

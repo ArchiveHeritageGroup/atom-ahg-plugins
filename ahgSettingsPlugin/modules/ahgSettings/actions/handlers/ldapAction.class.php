@@ -84,13 +84,8 @@ class SettingsLdapAction extends AhgEditController
             case 'ldapPort':
             case 'ldapBaseDn':
             case 'ldapBindAttribute':
-                if (null === $this->{$name}) {
-                    $this->{$name} = new QubitSetting();
-                    $this->{$name}->name = $name;
-                    $this->{$name}->scope = 'ldap';
-                }
-                $this->{$name}->setValue($field->getValue(), ['sourceCulture' => true]);
-                $this->{$name}->save();
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->save($name, $field->getValue(), 'ldap');
 
                 break;
         }

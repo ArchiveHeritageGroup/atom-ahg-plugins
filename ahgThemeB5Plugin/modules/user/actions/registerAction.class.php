@@ -1,5 +1,6 @@
 <?php
 use AtomFramework\Http\Controllers\AhgEditController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -82,7 +83,7 @@ class UserRegisterAction extends AhgEditController
             new sfValidatorCallback(['callback' => [$this, 'exists']])
         );
 
-        $this->resource = new QubitUser();
+        $this->resource = WriteServiceFactory::user()->newUser();
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;
         }

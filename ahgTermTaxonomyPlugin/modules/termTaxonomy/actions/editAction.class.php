@@ -1,5 +1,6 @@
 <?php
 use AtomFramework\Http\Controllers\AhgEditController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * AHG Term Taxonomy Plugin - Term Edit Action
@@ -44,7 +45,7 @@ class TermTaxonomyEditAction extends AhgEditController
     {
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $this->resource = new QubitTerm();
+        $this->resource = WriteServiceFactory::term()->newTerm();
         $title = $this->context->i18n->__('Add new term');
 
         if (isset($this->getRoute()->resource)) {
@@ -271,7 +272,7 @@ class TermTaxonomyEditAction extends AhgEditController
                     }
 
                     // Add term as child
-                    $term = new QubitTerm();
+                    $term = WriteServiceFactory::term()->newTerm();
                     $term->name = $item;
                     $term->taxonomyId = $this->resource->taxonomyId;
 
@@ -303,14 +304,14 @@ class TermTaxonomyEditAction extends AhgEditController
                     $this->resource->save();
 
                     // Set self-reciprocal relation
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::term()->newRelation();
                     $relation->typeId = QubitTerm::CONVERSE_TERM_ID;
                     $relation->object = $this->resource;
 
                     $this->resource->relationsRelatedBysubjectId[] = $relation;
                 } elseif (isset($value) && '' != $value) {
                     // Create new converse relation
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::term()->newRelation();
                     $relation->typeId = QubitTerm::CONVERSE_TERM_ID;
 
                     // Get converse term, update parent and taxonomy (when it's created on the fly)
@@ -360,7 +361,7 @@ class TermTaxonomyEditAction extends AhgEditController
                 }
 
                 foreach ($filtered as $item) {
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::term()->newRelation();
                     $relation->object = $item;
                     $relation->typeId = QubitTerm::TERM_RELATION_ASSOCIATIVE_ID;
 
@@ -386,7 +387,7 @@ class TermTaxonomyEditAction extends AhgEditController
                         continue;
                     }
 
-                    $otherName = new QubitOtherName();
+                    $otherName = WriteServiceFactory::term()->newOtherName();
                     $otherName->name = $item;
                     $otherName->typeId = QubitTerm::ALTERNATIVE_LABEL_ID;
 

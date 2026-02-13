@@ -85,104 +85,66 @@ class SettingsPermissionsAction extends AhgController
                 return;
             }
 
-            // PREMIS access permissions
-            $premisAccessRight = SettingService::getByName('premisAccessRight');
-            $premisAccessRight->setValue($this->permissionsForm->getValue('granted_right'), ['sourceCulture' => true]);
-            $premisAccessRight->save();
+            $acl = \AtomFramework\Services\Write\WriteServiceFactory::acl();
 
-            $premisAccessRightValues = SettingService::getByName('premisAccessRightValues');
-            $premisAccessRightValues->setValue(serialize($this->permissionsForm->getValue('permissions')), ['sourceCulture' => true]);
-            $premisAccessRightValues->save();
+            // PREMIS access permissions
+            $grantedRight = $this->permissionsForm->getValue('granted_right');
+            $permissions = $this->permissionsForm->getValue('permissions');
+            $acl->savePremisRights(
+                is_array($grantedRight) ? $grantedRight : [$grantedRight],
+                is_array($permissions) ? $permissions : []
+            );
 
             // PREMIS access statements
+            // Build the statements array: form values to save + orphaned DB entries to delete
             $accessValues = $this->permissionsAccessStatementsForm->getValues();
+            $statements = [];
 
             foreach ($accessValues as $key => $value) {
-                $setting = SettingService::getByNameAndScope($key, 'access_statement');
-                if (null === $setting) {
-                    $setting = new QubitSetting();
-                    $setting->name = $key;
-                    $setting->scope = 'access_statement';
-                }
-                $setting->setValue($value);
-                $setting->save();
+                $statements[] = ['name' => $key, 'value' => $value];
             }
 
-            // Remove unused settings (e.g. a term of the basis taxonomy was
-            // deleted). We use array_key_exists because isset() returns false
-            // if the key is defined but its value is NULL.
+            // Mark orphaned settings (in DB but not in form) for deletion
             foreach (SettingService::getByScope('access_statement') as $setting) {
                 if (!array_key_exists($setting->name, $accessValues)) {
-                    $setting->delete();
+                    $statements[] = ['name' => $setting->name, 'value' => null];
                 }
             }
+
+            $acl->saveAccessStatements($statements);
 
             // Copyright statement
-            $setting = SettingService::getByName('digitalobject_copyright_statement_enabled');
-            if (null === $setting) {
-                $setting = new QubitSetting();
-                $setting->name = 'digitalobject_copyright_statement_enabled';
-                $setting->sourceCulture = sfConfig::get('sf_default_culture');
-            }
-            $setting->setValue($this->permissionsCopyrightStatementForm->getValue('copyrightStatementEnabled'), ['sourceCulture' => true]);
-            $setting->save();
+            $copyrightEnabled = (bool) $this->permissionsCopyrightStatementForm->getValue('copyrightStatementEnabled');
+            $copyrightText = $this->permissionsCopyrightStatementForm->getValue('copyrightStatement');
+            $copyrightText = HtmlPurifierService::getInstance()->purify($copyrightText);
+            $applyGlobally = (bool) $this->permissionsCopyrightStatementForm->getValue('copyrightStatementApplyGlobally');
 
-            $statement = $this->permissionsCopyrightStatementForm->getValue('copyrightStatement');
-            $statement = HtmlPurifierService::getInstance()->purify($statement);
-
-            if (!empty($statement)) {
-                $setting = SettingService::getByName('digitalobject_copyright_statement');
-                if (null === $setting) {
-                    $setting = new QubitSetting();
-                    $setting->name = 'digitalobject_copyright_statement';
-                }
-                $setting->setValue($statement);
-                $setting->save();
+            // Disable applying global copyright if the main setting is disabled too
+            if (!$copyrightEnabled) {
+                $applyGlobally = false;
             }
 
-            $setting = SettingService::getByName('digitalobject_copyright_statement_apply_globally');
-            if (null === $setting) {
-                $setting = new QubitSetting();
-                $setting->name = 'digitalobject_copyright_statement_apply_globally';
-                $setting->sourceCulture = sfConfig::get('sf_default_culture');
-            }
-            $value = $this->permissionsCopyrightStatementForm->getValue('copyrightStatementApplyGlobally');
-            if (!$this->permissionsCopyrightStatementForm->getValue('copyrightStatementEnabled')) {
-                // Disable applying global copyright if the main setting is disabled too
-                $value = '0';
-            }
-            $setting->setValue($value, ['sourceCulture' => true]);
-            $setting->save();
+            $acl->saveCopyrightStatement(
+                $copyrightEnabled,
+                !empty($copyrightText) ? $copyrightText : null,
+                $applyGlobally,
+                $this->context->user->getCulture()
+            );
 
             // Preservation system access statement
-            $setting = SettingService::getByName('digitalobject_preservation_system_access_statement_enabled');
-            if (null === $setting) {
-                $setting = new QubitSetting();
-                $setting->name = 'digitalobject_preservation_system_access_statement_enabled';
-                $setting->sourceCulture = sfConfig::get('sf_default_culture');
-            }
-            $setting->setValue(
-                $this->permissionsPreservationSystemAccessStatementForm->getValue(
-                    'preservationSystemAccessStatementEnabled'
-                ),
-                ['sourceCulture' => true]
+            $preservationEnabled = (bool) $this->permissionsPreservationSystemAccessStatementForm->getValue(
+                'preservationSystemAccessStatementEnabled'
             );
-            $setting->save();
-
-            $statement = $this->permissionsPreservationSystemAccessStatementForm->getValue(
+            $preservationText = $this->permissionsPreservationSystemAccessStatementForm->getValue(
                 'preservationSystemAccessStatement'
             );
-            $statement = HtmlPurifierService::getInstance()->purify($statement);
+            $preservationText = HtmlPurifierService::getInstance()->purify($preservationText);
 
-            if (!empty($statement)) {
-                $setting = SettingService::getByName('digitalobject_preservation_system_access_statement');
-                if (null === $setting) {
-                    $setting = new QubitSetting();
-                    $setting->name = 'digitalobject_preservation_system_access_statement';
-                }
-                $setting->setValue($statement);
-                $setting->save();
-            }
+            $acl->savePreservationStatement(
+                $preservationEnabled,
+                !empty($preservationText) ? $preservationText : null,
+                $this->context->user->getCulture()
+            );
 
             $notice = sfContext::getInstance()->i18n->__('Permissions saved.');
             $this->getUser()->setFlash('notice', $notice);

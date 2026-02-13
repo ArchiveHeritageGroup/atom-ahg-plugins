@@ -96,39 +96,25 @@ class SettingsOaiAction extends AhgController
     protected function updateOaiRepositorySettings()
     {
         $thisForm = $this->oaiRepositoryForm;
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
 
         // OAI API authentication enabled radio button
-        $oaiEnabledValue = $thisForm->getValue('oai_authentication_enabled');
-        $setting = SettingService::getByName('oai_authentication_enabled');
-        $setting->setValue($oaiEnabledValue, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('oai_authentication_enabled', $thisForm->getValue('oai_authentication_enabled'));
 
         // OAI repository code
-        $oaiRepositoryCodeValue = $thisForm->getValue('oai_repository_code');
-        $setting = SettingService::getByName('oai_repository_code');
-        $setting->setValue($oaiRepositoryCodeValue, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('oai_repository_code', $thisForm->getValue('oai_repository_code'));
 
         // OAI admin emails
-        $oaiAdminEmailsValue = $thisForm->getValue('oai_admin_emails');
-        $setting = SettingService::getByName('oai_admin_emails');
-        $setting->setValue($oaiAdminEmailsValue, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('oai_admin_emails', $thisForm->getValue('oai_admin_emails'));
 
-        // Hits per page
+        // Resumption token limit
         $resumptionTokenLimit = $thisForm->getValue('resumption_token_limit');
-
         if (intval($resumptionTokenLimit) && $resumptionTokenLimit > 0) {
-            $setting = SettingService::getByName('resumption_token_limit');
-            $setting->setValue($resumptionTokenLimit, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('resumption_token_limit', $resumptionTokenLimit);
         }
 
         // OAI additional sets enabled radio button
-        $oaiAdditionalSetsEnabledValue = $thisForm->getValue('oai_additional_sets_enabled');
-        $setting = SettingService::getByName('oai_additional_sets_enabled');
-        $setting->setValue($oaiAdditionalSetsEnabledValue, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('oai_additional_sets_enabled', $thisForm->getValue('oai_additional_sets_enabled'));
 
         return $this;
     }

@@ -89,14 +89,6 @@ class SettingsEditAction extends AhgEditController
         $name = $field->getName();
 
         if (in_array($name, $this::$NAMES)) {
-            if (null === $this->settings[$name]->id) {
-                $this->settings[$name]->name = $name;
-                $this->settings[$name]->sourceCulture = $this->culture;
-                $this->settings[$name]->culture = $this->culture;
-            }
-
-            $settingSetOptions = (in_array($name, $this::$I18N)) ? ['culture' => $this->culture] : ['sourceCulture' => true];
-
             // Checkbox submissions get handled differently
             if ($field->getWidget() instanceof sfWidgetFormInputCheckbox) {
                 $value = isset($this->request[$name]) ? $field->getValue() : '';
@@ -104,9 +96,13 @@ class SettingsEditAction extends AhgEditController
                 $value = $field->getValue();
             }
 
-            $this->settings[$name]->setValue($value, $settingSetOptions);
+            $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
 
-            $this->settings[$name]->save();
+            if (in_array($name, $this::$I18N)) {
+                $ws->saveLocalized($name, $value, $this->culture);
+            } else {
+                $ws->save($name, $value);
+            }
         }
     }
 }

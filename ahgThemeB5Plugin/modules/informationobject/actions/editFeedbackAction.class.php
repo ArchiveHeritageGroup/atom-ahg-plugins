@@ -242,73 +242,39 @@ class InformationObjectEditFeedbackAction extends AhgEditController
         || null !== $this->form->getValue('feed_phone')
         || null !== $this->form->getValue('feed_email')
         || null !== $this->form->getValue('feed_relationship')) {
-            $feedback = new QubitFeedback();
+            $feed_name = $this->form->getValue('feed_name') ?: '';
+            $feed_surname = $this->form->getValue('feed_surname') ?: '';
+            $feed_phone = $this->form->getValue('feed_phone') ?: '';
+            $feed_email = $this->form->getValue('feed_email') ?: '';
+            $feed_relationship = $this->form->getValue('feed_relationship') ?: '';
+            $remarks = $this->form->getValue('remarks') ?: '';
+            $feed_type = $this->form->getValue('feed_type') ?: 0;
+            $unique_identifier = $this->form->getValue('unique_identifier') ?: '';
 
-            $feedback->name = $this->form->getValue('name');
-
-            if (null == $this->form->getValue('remarks') || '' == $this->form->getValue('remarks')) {
-                $remarks = '';
-            } else {
-                $remarks = $this->form->getValue('remarks');
-            }
-            $feedback->remarks = $remarks;
-
-            if (null == $this->form->getValue('feed_name') || '' == $this->form->getValue('feed_name')) {
-                $feed_name = '';
-            } else {
-                $feed_name = $this->form->getValue('feed_name');
-            }
-            $feedback->feed_name = $feed_name;
-
-            if (null == $this->form->getValue('unique_identifier') || '' == $this->form->getValue('unique_identifier')) {
-                $unique_identifier = '';
-            } else {
-                $unique_identifier = $this->form->getValue('unique_identifier');
-            }
-            $feedback->parent_id = $unique_identifier; // Unique identifier
-
-            if (null == $this->form->getValue('feed_surname') || '' == $this->form->getValue('feed_surname')) {
-                $feed_surname = '';
-            } else {
-                $feed_surname = $this->form->getValue('feed_surname');
-            }
-            $feedback->feed_surname = $feed_surname; // new field
-
-            if (null == $this->form->getValue('feed_phone') || '' == $this->form->getValue('feed_phone')) {
-                $feed_phone = '';
-            } else {
-                $feed_phone = $this->form->getValue('feed_phone');
-            }
-            $feedback->feed_phone = $feed_phone; // new field
-
-            if (null == $this->form->getValue('feed_email') || '' == $this->form->getValue('feed_email')) {
-                $feed_email = '';
-            } else {
-                $feed_email = $this->form->getValue('feed_email');
-            }
-            $feedback->feed_email = $feed_email;
-
-            if (null == $this->form->getValue('feed_relationship') || '' == $this->form->getValue('feed_relationship')) {
-                $feed_relationship = '';
-            } else {
-                $feed_relationship = $this->form->getValue('feed_relationship');
-            }
-            $feedback->feed_relationship = $feed_relationship;
-
-            if (null == $this->form->getValue('feed_type') || '' == $this->form->getValue('feed_type')) {
-                $feed_type = 0;
-            } else {
-                $feed_type = $this->form->getValue('feed_type');
-            }
-            $feedback->feedTypeId = $feed_type;
-
-            $feedback->createdAt = date('Y-m-d H:i:s');
-            $feedback->statusId = QubitTerm::PENDING_ID;
             $informationObj = QubitInformationObject::getById($this->resource->id);
-            $feedback->object_id = $informationObj->id;
-            $feedback->save();
-            $this->feedback = $feedback->id;
-            $this->resource->addFeedback($feedback);
+
+            $feedbackId = \AtomFramework\Services\Write\WriteServiceFactory::feedback()->createFeedback([
+                'name' => $this->form->getValue('name'),
+                'remarks' => $remarks,
+                'feed_name' => $feed_name,
+                'feed_surname' => $feed_surname,
+                'feed_phone' => $feed_phone,
+                'feed_email' => $feed_email,
+                'feed_relationship' => $feed_relationship,
+                'feed_type_id' => $feed_type,
+                'parent_id' => $unique_identifier,
+                'object_id' => $informationObj->id,
+                'status_id' => QubitTerm::PENDING_ID,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $this->feedback = $feedbackId;
+
+            // Reload feedback object for relation binding
+            $feedback = QubitFeedback::getById($feedbackId);
+            if ($feedback) {
+                $this->resource->addFeedback($feedback);
+            }
 
             // send email
             $this->sendmail($this->informationObj, $feed_name, $feed_surname, $feed_phone, $feed_email, $feed_relationship, $remarks, $feed_type);

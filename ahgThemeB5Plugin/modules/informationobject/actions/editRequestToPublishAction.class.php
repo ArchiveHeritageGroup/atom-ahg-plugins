@@ -248,61 +248,47 @@ class InformationObjectEditRequestToPublishAction extends AhgEditController
 
     protected function processForm()
     {
-        $requesttopublish = new QubitRequestToPublish();
-
-        // Name
         $rtp_name = $this->form->getValue('rtp_name') ?: '';
-        $requesttopublish->rtp_name = $rtp_name;
-
-        // Unique identifier (logged-in user id, as captured in form)
-        $unique_identifier = $this->form->getValue('unique_identifier') ?: '';
-        $requesttopublish->parent_id = $unique_identifier; // match feedback pattern
-
-        // Surname
         $rtp_surname = $this->form->getValue('rtp_surname') ?: '';
-        $requesttopublish->rtp_surname = $rtp_surname;
-
-        // Phone
         $rtp_phone = $this->form->getValue('rtp_phone') ?: '';
-        $requesttopublish->rtp_phone = $rtp_phone;
-
-        // Email
         $rtp_email = $this->form->getValue('rtp_email') ?: '';
-        $requesttopublish->rtp_email = $rtp_email;
-
-        // Institution
         $rtp_institution = $this->form->getValue('rtp_institution') ?: '';
-        $requesttopublish->rtp_institution = $rtp_institution;
-
-        // Motivation
         $rtp_motivation = $this->form->getValue('rtp_motivation') ?: '';
-        $requesttopublish->rtp_motivation = $rtp_motivation;
-
-        // Planned use
         $rtp_planned_use = $this->form->getValue('rtp_planned_use') ?: '';
-        $requesttopublish->rtp_planned_use = $rtp_planned_use;
-
-        // Need image by
         $rtp_need_image_by = $this->form->getValue('rtp_need_image_by') ?: '';
-        $requesttopublish->rtp_need_image_by = $rtp_need_image_by;
-
-        // Also store logged-in user id in unique_identifier column if you want
-        if ($this->context->user->getAttribute('user_id')) {
-            $requesttopublish->unique_identifier = $this->context->user->getAttribute('user_id');
-        }
-
-        $requesttopublish->createdAt = date('Y-m-d H:i:s');
-        $requesttopublish->statusId  = QubitTerm::IN_REVIEW_ID;
+        $unique_identifier = $this->form->getValue('unique_identifier') ?: '';
 
         $informationObj = QubitInformationObject::getById($this->resource->id);
-        $requesttopublish->object_id = $informationObj->id;
 
-        $requesttopublish->save();
+        $rtpData = [
+            'rtp_name' => $rtp_name,
+            'rtp_surname' => $rtp_surname,
+            'rtp_phone' => $rtp_phone,
+            'rtp_email' => $rtp_email,
+            'rtp_institution' => $rtp_institution,
+            'rtp_motivation' => $rtp_motivation,
+            'rtp_planned_use' => $rtp_planned_use,
+            'rtp_need_image_by' => $rtp_need_image_by,
+            'parent_id' => $unique_identifier,
+            'object_id' => $informationObj->id,
+            'status_id' => QubitTerm::IN_REVIEW_ID,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
 
-        $this->requesttopublish = $requesttopublish->id;
+        // Also store logged-in user id in unique_identifier column
+        if ($this->context->user->getAttribute('user_id')) {
+            $rtpData['unique_identifier'] = $this->context->user->getAttribute('user_id');
+        }
+
+        $rtpId = \AtomFramework\Services\Write\WriteServiceFactory::requestToPublish()->createRequest($rtpData);
+
+        $this->requesttopublish = $rtpId;
 
         // Create relation IO <-> RequestToPublish using the model helper
-        $this->resource->addRequestToPublish($requesttopublish);
+        $requesttopublish = QubitRequestToPublish::getById($rtpId);
+        if ($requesttopublish) {
+            $this->resource->addRequestToPublish($requesttopublish);
+        }
 
         // Delete any marked relations if needed (leave this as-is)
         if (isset($this->request->delete_relations)) {
@@ -315,7 +301,7 @@ class InformationObjectEditRequestToPublishAction extends AhgEditController
         // Send email
         $this->informationObject = $informationObj;
         $this->sendmail(
-            $informationObj->id,   // pass ID, not entire object
+            $informationObj->id,
             $rtp_name,
             $rtp_surname,
             $rtp_phone,

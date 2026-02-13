@@ -92,6 +92,7 @@ class settingsAhgIntegrationAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
+                $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
                 foreach ($settings as $name => $config) {
                     $value = $this->form->getValue($name);
 
@@ -100,13 +101,7 @@ class settingsAhgIntegrationAction extends AhgController
                         continue;
                     }
 
-                    $setting = \AtomExtensions\Services\SettingService::getByName($name);
-                    if (!$setting) {
-                        $setting = new QubitSetting();
-                        $setting->name = $name;
-                    }
-                    $setting->setValue((string) $value, ['sourceCulture' => true]);
-                    $setting->save();
+                    $ws->save($name, (string) $value);
                 }
 
                 \AtomExtensions\Services\CacheService::getInstance()->removePattern('settings:i18n:*');

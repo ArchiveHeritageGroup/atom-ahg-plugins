@@ -86,17 +86,18 @@ class SettingsInterfaceLabelAction extends AhgController
      */
     protected function updateUiLabelSettings($form)
     {
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
+        $culture = $this->context->user->getCulture();
+
         foreach ($form->getSettings() as $setting) {
             if (null !== $value = $form->getValue($setting->getName())) {
-                $setting->setValue($value);
-                $setting->save();
+                $ws->saveLocalized($setting->getName(), $value, $culture, $form->getScope());
             }
         }
 
         // Add a new ui_label
         if (null !== ($newName = $form->getValue('new_setting_name')) && strlen($newValue = $form->getValue('new_setting_value'))) {
-            $setting = SettingService::createNewSetting($newName, $newValue, ['scope' => $form->getScope()]);
-            $setting->save();
+            $ws->save($newName, $newValue, $form->getScope());
         }
 
         return $this;

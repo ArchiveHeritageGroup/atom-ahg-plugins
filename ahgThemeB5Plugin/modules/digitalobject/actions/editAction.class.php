@@ -303,42 +303,12 @@ class digitalobjectEditAction extends AhgController
 
     protected function saveProperty(int $objectId, string $name, ?string $value): void
     {
-        $existing = DB::table('property')
-            ->where('object_id', $objectId)
-            ->where('name', $name)
-            ->first();
+        // Treat empty string as null (delete) to preserve original behavior
+        $value = ($value !== null && $value !== '') ? $value : null;
 
-        if ($existing) {
-            if ($value !== null && $value !== '') {
-                DB::table('property_i18n')
-                    ->updateOrInsert(
-                        ['id' => $existing->id, 'culture' => 'en'],
-                        ['value' => $value]
-                    );
-            } else {
-                DB::table('property_i18n')->where('id', $existing->id)->delete();
-                DB::table('property')->where('id', $existing->id)->delete();
-                DB::table('object')->where('id', $existing->id)->delete();
-            }
-        } elseif ($value !== null && $value !== '') {
-            $propId = DB::table('object')->insertGetId([
-                'class_name' => 'QubitProperty',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            DB::table('property')->insert([
-                'id' => $propId,
-                'object_id' => $objectId,
-                'name' => $name,
-            ]);
-
-            DB::table('property_i18n')->insert([
-                'id' => $propId,
-                'culture' => 'en',
-                'value' => $value,
-            ]);
-        }
+        // Delegate to WriteService — handles object→property→property_i18n lifecycle
+        \AtomFramework\Services\Write\WriteServiceFactory::digitalObject()
+            ->saveProperty($objectId, $name, $value, 'en');
     }
 
     protected function processForm()
@@ -352,9 +322,8 @@ class digitalobjectEditAction extends AhgController
         // Update media type
         $mediaType = $this->form->getValue('mediaType');
         if ($mediaType) {
-            DB::table('digital_object')
-                ->where('id', $this->resourceData->id)
-                ->update(['media_type_id' => $mediaType]);
+            \AtomFramework\Services\Write\WriteServiceFactory::digitalObject()
+                ->updateMetadata($this->resourceData->id, ['media_type_id' => $mediaType]);
         }
 
         // Save properties
@@ -539,13 +508,6 @@ class digitalobjectEditAction extends AhgController
 
     protected function saveDerivativeRecord(int $usageId, string $filename, string $content): void
     {
-        // Create object record
-        $objectId = DB::table('object')->insertGetId([
-            'class_name' => 'QubitDigitalObject',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
-
         // Use same path as master
         $path = $this->resourceData->path;
         if (strpos($path, '/uploads/') === 0) {
@@ -553,7 +515,7 @@ class digitalobjectEditAction extends AhgController
         }
         $path = rtrim($path, '/');
 
-        // Save file
+        // Save file to disk
         $fullDir = $this->uploadDir . '/' . ltrim($path, '/');
 
         if (!is_dir($fullDir)) {
@@ -568,20 +530,18 @@ class digitalobjectEditAction extends AhgController
 
         file_put_contents($fullDir . '/' . $newFilename, $content);
 
-        // Create digital object record
-        DB::table('digital_object')->insert([
-            'id' => $objectId,
-            'object_id' => null,
-            'parent_id' => $this->resourceData->id,
-            'usage_id' => $usageId,
-            'mime_type' => 'image/jpeg',
-            'media_type_id' => self::MEDIA_IMAGE,
-            'name' => $newFilename,
-            'path' => '/uploads/' . ltrim($path, '/') . '/',
-            'byte_size' => strlen($content),
-            'checksum' => md5($content),
-            'checksum_type' => 'md5',
-        ]);
+        // Create derivative record via WriteService (handles object + digital_object rows)
+        \AtomFramework\Services\Write\WriteServiceFactory::digitalObject()
+            ->createDerivative($this->resourceData->id, [
+                'usage_id' => $usageId,
+                'mime_type' => 'image/jpeg',
+                'media_type_id' => self::MEDIA_IMAGE,
+                'name' => $newFilename,
+                'path' => '/uploads/' . ltrim($path, '/') . '/',
+                'byte_size' => strlen($content),
+                'checksum' => md5($content),
+                'checksum_type' => 'md5',
+            ]);
     }
 
     protected function createTrack(int $usageId, $uploadFile, ?string $language = null): void
@@ -590,13 +550,6 @@ class digitalobjectEditAction extends AhgController
         $originalName = $uploadFile->getOriginalName();
         $content = file_get_contents($tempPath);
 
-        // Create object record
-        $objectId = DB::table('object')->insertGetId([
-            'class_name' => 'QubitDigitalObject',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
-
         // Use same path as master
         $path = $this->resourceData->path;
         if (strpos($path, '/uploads/') === 0) {
@@ -604,7 +557,7 @@ class digitalobjectEditAction extends AhgController
         }
         $path = rtrim($path, '/');
 
-        // Save file
+        // Save file to disk
         $fullDir = $this->uploadDir . '/' . ltrim($path, '/');
 
         if (!is_dir($fullDir)) {
@@ -617,11 +570,9 @@ class digitalobjectEditAction extends AhgController
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $mimeType = $ext === 'vtt' ? 'text/vtt' : 'application/x-subrip';
 
-        // Create digital object record
-        DB::table('digital_object')->insert([
-            'id' => $objectId,
-            'object_id' => null,
-            'parent_id' => $this->resourceData->id,
+        // Create derivative record via WriteService (handles object + digital_object rows)
+        $doWriteService = \AtomFramework\Services\Write\WriteServiceFactory::digitalObject();
+        $trackId = $doWriteService->createDerivative($this->resourceData->id, [
             'usage_id' => $usageId,
             'mime_type' => $mimeType,
             'media_type_id' => 137, // Text
@@ -634,7 +585,7 @@ class digitalobjectEditAction extends AhgController
 
         // Save language property if provided
         if ($language) {
-            $this->saveProperty($objectId, 'language', $language);
+            $doWriteService->saveProperty($trackId, 'language', $language, 'en');
         }
     }
 
@@ -683,17 +634,16 @@ class digitalobjectEditAction extends AhgController
         // Save new file
         file_put_contents($fullDir . $originalName, $content);
 
-        // Update digital object record
-        DB::table("digital_object")
-            ->where("id", $this->resourceData->id)
-            ->update([
-                "name" => $originalName,
-                "path" => $path,
-                "mime_type" => $mimeType,
-                "media_type_id" => $mediaTypeId,
-                "byte_size" => strlen($content),
-                "checksum" => md5($content),
-                "checksum_type" => "md5",
+        // Update digital object record via WriteService
+        \AtomFramework\Services\Write\WriteServiceFactory::digitalObject()
+            ->updateMetadata($this->resourceData->id, [
+                'name' => $originalName,
+                'path' => $path,
+                'mime_type' => $mimeType,
+                'media_type_id' => $mediaTypeId,
+                'byte_size' => strlen($content),
+                'checksum' => md5($content),
+                'checksum_type' => 'md5',
             ]);
     }
 

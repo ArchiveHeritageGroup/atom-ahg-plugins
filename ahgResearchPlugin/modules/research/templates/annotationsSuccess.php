@@ -26,14 +26,17 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
 <?php if (!empty($annotations)): ?>
 <div class="row">
   <?php foreach ($annotations as $annotation): ?>
-  <div class="col-md-6 col-lg-4 mb-4">
+  <div class="col-md-6 col-lg-4 mb-4" id="note-<?php echo $annotation->id; ?>">
     <div class="card h-100">
       <div class="card-header bg-warning bg-opacity-25 d-flex justify-content-between align-items-center py-2">
-        <strong><?php echo htmlspecialchars($annotation->title ?: __('Untitled Note')); ?></strong>
+        <a href="#note-<?php echo $annotation->id; ?>" class="text-decoration-none text-dark">
+          <strong><i class="fas fa-sticky-note text-warning me-1"></i><?php echo htmlspecialchars($annotation->title ?: __('Untitled Note')); ?></strong>
+        </a>
         <div class="dropdown">
           <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item edit-annotation" href="#" data-id="<?php echo $annotation->id; ?>" data-title="<?php echo htmlspecialchars($annotation->title ?? ''); ?>" data-content="<?php echo htmlspecialchars($annotation->content ?? ''); ?>" data-object-id="<?php echo $annotation->object_id ?? ''; ?>"><i class="fas fa-edit me-2"></i><?php echo __('Edit'); ?></a></li>
+            <li><a class="dropdown-item copy-note-link" href="#note-<?php echo $annotation->id; ?>" data-note-id="<?php echo $annotation->id; ?>"><i class="fas fa-copy me-2"></i><?php echo __('Copy Link'); ?></a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <form method="post" class="d-inline">
@@ -51,12 +54,17 @@ $annotations = is_array($annotations) ? $annotations : (method_exists($annotatio
         <p class="card-text"><?php echo nl2br(htmlspecialchars($annotation->content ?? '')); ?></p>
       </div>
       <div class="card-footer bg-transparent small text-muted">
-        <?php if (!empty($annotation->object_id)): ?>
-          <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $annotation->object_slug ?? $annotation->object_id]); ?>">
-            <i class="fas fa-link me-1"></i><?php echo htmlspecialchars($annotation->object_title ?? __('View Item')); ?>
-          </a><br>
-        <?php endif; ?>
-        <i class="fas fa-clock me-1"></i><?php echo date('M j, Y H:i', strtotime($annotation->created_at)); ?>
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <?php if (!empty($annotation->object_id)): ?>
+              <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $annotation->object_slug ?? $annotation->object_id]); ?>">
+                <i class="fas fa-archive me-1"></i><?php echo htmlspecialchars($annotation->object_title ?? __('View Item')); ?>
+              </a><br>
+            <?php endif; ?>
+            <i class="fas fa-clock me-1"></i><?php echo date('M j, Y H:i', strtotime($annotation->created_at)); ?>
+          </div>
+          <a href="#note-<?php echo $annotation->id; ?>" class="text-muted" title="<?php echo __('Permalink'); ?>"><i class="fas fa-hashtag"></i></a>
+        </div>
       </div>
     </div>
   </div>

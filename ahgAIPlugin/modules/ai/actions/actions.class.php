@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
@@ -245,25 +246,25 @@ class aiActions extends AhgController
         // Determine entity type ID
         $entityTypeId = ($entityType === 'ORG') ? QubitTerm::CORPORATE_BODY_ID : QubitTerm::PERSON_ID;
 
-        // Create actor using Propel
-        $actor = new QubitActor();
-        $actor->entityTypeId = $entityTypeId;
-        $actor->authorizedFormOfName = $entity->entity_value;
-        $actor->save();
+        // Create actor via WriteServiceFactory
+        $actorId = WriteServiceFactory::actor()->createActor([
+            'entity_type_id' => $entityTypeId,
+            'authorized_form_of_name' => $entity->entity_value,
+        ], $culture ?? 'en');
 
         // Link to information object
-        $this->linkActorToObject($entity->object_id, $actor->id);
+        $this->linkActorToObject($entity->object_id, $actorId);
 
         // Update entity status
         Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->where('id', $entityId)
             ->update([
                 'status' => 'linked',
-                'linked_actor_id' => $actor->id,
+                'linked_actor_id' => $actorId,
                 'reviewed_at' => date('Y-m-d H:i:s')
             ]);
 
-        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $actor->id]));
+        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $actorId]));
     }
 
     public function executeCreatePlace($request)
@@ -300,25 +301,23 @@ class aiActions extends AhgController
             return $this->renderText(json_encode(['success' => true, 'action' => 'linked_existing', 'id' => $existing->id]));
         }
 
-        // Create place term
-        $term = new QubitTerm();
-        $term->taxonomyId = QubitTaxonomy::PLACE_ID;
-        $term->name = $entity->entity_value;
-        $term->save();
+        // Create place term via WriteServiceFactory
+        $termObj = WriteServiceFactory::term()->createTerm(QubitTaxonomy::PLACE_ID, $entity->entity_value);
+        $termId = $termObj->id;
 
         // Link to information object
-        $this->linkPlaceToObject($entity->object_id, $term->id);
+        $this->linkPlaceToObject($entity->object_id, $termId);
 
         // Update entity status
         Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->where('id', $entityId)
             ->update([
                 'status' => 'linked',
-                'linked_actor_id' => $term->id,
+                'linked_actor_id' => $termId,
                 'reviewed_at' => date('Y-m-d H:i:s')
             ]);
 
-        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $term->id]));
+        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $termId]));
     }
 
     public function executeCreateSubject($request)
@@ -355,25 +354,23 @@ class aiActions extends AhgController
             return $this->renderText(json_encode(['success' => true, 'action' => 'linked_existing', 'id' => $existing->id]));
         }
 
-        // Create subject term
-        $term = new QubitTerm();
-        $term->taxonomyId = QubitTaxonomy::SUBJECT_ID;
-        $term->name = $entity->entity_value;
-        $term->save();
+        // Create subject term via WriteServiceFactory
+        $termObj = WriteServiceFactory::term()->createTerm(QubitTaxonomy::SUBJECT_ID, $entity->entity_value);
+        $termId = $termObj->id;
 
         // Link to information object
-        $this->linkSubjectToObject($entity->object_id, $term->id);
+        $this->linkSubjectToObject($entity->object_id, $termId);
 
         // Update entity status
         Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->where('id', $entityId)
             ->update([
                 'status' => 'linked',
-                'linked_actor_id' => $term->id,
+                'linked_actor_id' => $termId,
                 'reviewed_at' => date('Y-m-d H:i:s')
             ]);
 
-        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $term->id]));
+        return $this->renderText(json_encode(['success' => true, 'action' => 'created', 'id' => $termId]));
     }
 
     public function executeHealth($request)

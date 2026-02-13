@@ -324,7 +324,7 @@ class ResearchService
             ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
             ->where('a.researcher_id', $researcherId);
         if ($objectId) $query->where('a.object_id', $objectId);
-        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug')
+        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug')
             ->orderBy('a.created_at', 'desc')->get()->toArray();
     }
 

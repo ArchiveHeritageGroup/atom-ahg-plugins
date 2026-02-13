@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 class UserPasswordResetConfirmAction extends AhgController
 {

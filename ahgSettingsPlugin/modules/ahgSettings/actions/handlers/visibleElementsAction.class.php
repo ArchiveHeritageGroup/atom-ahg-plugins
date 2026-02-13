@@ -81,20 +81,10 @@ class SettingsVisibleElementsAction extends AhgController
     {
         $name = $field->getName();
 
-        // Search by name and scope (='element_visibility')
-        // Create if it does not exist
-        if (null === $setting = SettingService::getByNameAndScope($name, 'element_visibility')) {
-            $setting = new QubitSetting();
-            $setting->name = $name;
-            $setting->scope = 'element_visibility';
-            $setting->culture = 'en';
-        }
-
         // It may be better to use $this->form->getValue($name)
         $value = isset($this->request[$name]) ? 1 : 0;
 
-        $setting->setValue($value, ['sourceCulture' => true]);
-
-        $setting->save();
+        \AtomFramework\Services\Write\WriteServiceFactory::settings()
+            ->save($name, $value, 'element_visibility');
     }
 }

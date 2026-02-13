@@ -93,14 +93,9 @@ class SettingsPageElementsAction extends AhgController
                 return;
             }
 
+            $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
             foreach ($this::$NAMES as $name) {
-                if (null === $settings[$name]) {
-                    $settings[$name] = new QubitSetting();
-                    $settings[$name]->name = $name;
-                }
-
-                $settings[$name]->__set('value', filter_var($this->form->getValue($name), FILTER_VALIDATE_BOOLEAN), ['sourceCulture' => true]);
-                $settings[$name]->save();
+                $ws->save($name, filter_var($this->form->getValue($name), FILTER_VALIDATE_BOOLEAN));
             }
 
             CacheService::getInstance()->removePattern('settings:i18n:*');

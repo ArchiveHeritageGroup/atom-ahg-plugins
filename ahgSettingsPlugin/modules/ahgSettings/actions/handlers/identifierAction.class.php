@@ -113,13 +113,8 @@ class AhgSettingsIdentifierAction extends AhgEditController
             case 'inherit_code_informationobject':
             case 'inherit_code_dc_xml':
             case 'prevent_duplicate_actor_identifiers':
-                if (null === $this->{$name}) {
-                    $this->{$name} = new QubitSetting();
-                    $this->{$name}->name = $name;
-                }
-
-                $this->{$name}->setValue((string) $value, ['sourceCulture' => true]);
-                $this->{$name}->save();
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->save($name, (string) $value);
                 break;
         }
     }

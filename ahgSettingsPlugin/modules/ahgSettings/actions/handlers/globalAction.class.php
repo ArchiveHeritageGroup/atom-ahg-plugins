@@ -135,191 +135,95 @@ class SettingsGlobalAction extends AhgController
     protected function updateGlobalSettings()
     {
         $thisForm = $this->globalForm;
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
 
         if (null !== $generateReportsAsPubUser = $thisForm->getValue('generate_reports_as_pub_user')) {
-            $setting = SettingService::getByName('generate_reports_as_pub_user');
-            $setting->setValue($generateReportsAsPubUser, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('generate_reports_as_pub_user', $generateReportsAsPubUser);
         }
 
         // Check for updates
         if (null !== $checkForUpdates = $thisForm->getValue('check_for_updates')) {
-            $setting = SettingService::getByName('check_for_updates');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($checkForUpdates, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('check_for_updates', $checkForUpdates);
         }
 
         // Hits per page
         if (null !== $hitsPerPage = $thisForm->getValue('hits_per_page')) {
             if (intval($hitsPerPage) && $hitsPerPage > 0) {
-                $setting = SettingService::getByName('hits_per_page');
-
-                // Force sourceCulture update to prevent discrepency in settings between cultures
-                $setting->setValue($hitsPerPage, ['sourceCulture' => true]);
-                $setting->save();
+                $ws->save('hits_per_page', $hitsPerPage);
             }
         }
 
-        // Escape queries, add setting if it's not already created (to avoid adding it in a migration)
-        if (null === $setting = SettingService::getByName('escape_queries')) {
-            $setting = SettingService::createNewSetting('escape_queries', null);
-        }
-
-        // Force sourceCulture update to prevent discrepency in settings between cultures
-        $setting->setValue($thisForm->getValue('escape_queries'), ['sourceCulture' => true]);
-        $setting->save();
+        // Escape queries
+        $ws->save('escape_queries', $thisForm->getValue('escape_queries'));
 
         // Sort Browser (for users)
         if (null !== $sortBrowserUser = $thisForm->getValue('sort_browser_user')) {
-            $setting = SettingService::getByName('sort_browser_user');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($sortBrowserUser, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('sort_browser_user', $sortBrowserUser);
         }
 
         // Sort Browser (for anonymous)
         if (null !== $sortBrowserAnonymous = $thisForm->getValue('sort_browser_anonymous')) {
-            $setting = SettingService::getByName('sort_browser_anonymous');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($sortBrowserAnonymous, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('sort_browser_anonymous', $sortBrowserAnonymous);
         }
 
         // Default repository browse page view
         if (null !== $defaultRepositoryView = $thisForm->getValue('default_repository_browse_view')) {
-            $setting = SettingService::getByName('default_repository_browse_view');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($defaultRepositoryView, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('default_repository_browse_view', $defaultRepositoryView);
         }
 
         // Default archival description browse page view
         if (null !== $defaultArchivalDescriptionView = $thisForm->getValue('default_archival_description_browse_view')) {
-            $setting = SettingService::getByName('default_archival_description_browse_view');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($defaultArchivalDescriptionView, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('default_archival_description_browse_view', $defaultArchivalDescriptionView);
         }
 
         // Multi-repository radio button
         if (null !== $multiRepositoryValue = $thisForm->getValue('multi_repository')) {
-            $setting = SettingService::getByName('multi_repository');
-
-            // Add setting if it's not already in the sampleData.yml file for
-            // backwards compatiblity with v1.0.3 sampleData.yml file
-            if (null === $setting) {
-                $setting = SettingService::createNewSetting('multi_repository', null, ['deleteable' => false]);
-            }
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($multiRepositoryValue, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('multi_repository', $multiRepositoryValue);
         }
 
         // Audit log enabled
         if (null !== $auditLogEnabled = $thisForm->getValue('audit_log_enabled')) {
-            if (null === $setting = SettingService::getByName('audit_log_enabled')) {
-                $setting = new QubitSetting();
-                $setting->name = 'audit_log_enabled';
-            }
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($auditLogEnabled, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('audit_log_enabled', $auditLogEnabled);
         }
 
         if (null !== $slugTypeInformationObject = $thisForm->getValue('slug_basis_informationobject')) {
-            $setting = SettingService::getByName('slug_basis_informationobject');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($slugTypeInformationObject, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('slug_basis_informationobject', $slugTypeInformationObject);
         }
 
         if (null !== $permissiveSlugCreation = $thisForm->getValue('permissive_slug_creation')) {
-            $setting = SettingService::getByName('permissive_slug_creation');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($permissiveSlugCreation, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('permissive_slug_creation', $permissiveSlugCreation);
         }
 
         // Show tooltips
         if (null !== $showTooltips = $thisForm->getValue('show_tooltips')) {
-            $setting = SettingService::getByName('show_tooltips');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($showTooltips, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('show_tooltips', $showTooltips);
         }
 
         // Default publication status
         if (null !== $defaultPubStatus = $thisForm->getValue('defaultPubStatus')) {
-            $setting = SettingService::getByName('defaultPubStatus');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($defaultPubStatus, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('defaultPubStatus', $defaultPubStatus);
         }
 
         // Total drafts notification enabled
         if (null !== $draftNotificationEnabled = $thisForm->getValue('draft_notification_enabled')) {
-            if (null === $setting = SettingService::getByName('draft_notification_enabled')) {
-                $setting = new QubitSetting();
-                $setting->name = 'draft_notification_enabled';
-            }
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($draftNotificationEnabled, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('draft_notification_enabled', $draftNotificationEnabled);
         }
 
         // SWORD deposit directory
         if (null !== $swordDepositDir = $thisForm->getValue('sword_deposit_dir')) {
-            $setting = SettingService::getByName('sword_deposit_dir');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($swordDepositDir, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('sword_deposit_dir', $swordDepositDir);
         }
 
         // Google Maps Javascript API key
-        $googleMapsApiKey = $thisForm->getValue('google_maps_api_key');
-
-        if (null === $setting = SettingService::getByName('google_maps_api_key')) {
-            $setting = new QubitSetting();
-            $setting->name = 'google_maps_api_key';
-        }
-
-        // Force sourceCulture update to prevent discrepency in settings between cultures
-        $setting->setValue($googleMapsApiKey, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('google_maps_api_key', $thisForm->getValue('google_maps_api_key'));
 
         // Enable Institutional Scoping
         if (null !== $enableInstitutionalScoping = $thisForm->getValue('enable_institutional_scoping')) {
-            $setting = SettingService::getByName('enable_institutional_scoping');
-
-            // Force sourceCulture update to prevent discrepency in settings between cultures
-            $setting->setValue($enableInstitutionalScoping, ['sourceCulture' => true]);
-            $setting->save();
+            $ws->save('enable_institutional_scoping', $enableInstitutionalScoping);
         }
 
         // Cache XML on save
-        $cacheXmlOnSave = $thisForm->getValue('cache_xml_on_save');
-
-        if (null === $setting = SettingService::getByName('cache_xml_on_save')) {
-            $setting = new QubitSetting();
-            $setting->name = 'cache_xml_on_save';
-        }
-
-        $setting->setValue($cacheXmlOnSave, ['sourceCulture' => true]);
-        $setting->save();
+        $ws->save('cache_xml_on_save', $thisForm->getValue('cache_xml_on_save'));
 
         return $this;
     }

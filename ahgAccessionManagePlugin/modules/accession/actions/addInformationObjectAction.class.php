@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -31,60 +32,8 @@ class AccessionAddInformationObjectAction extends AhgController
             \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
-        // Create new information object
-        $informationObject = new QubitInformationObject();
-        $informationObject->setRoot();
-
-        // Populate fields
-        $informationObject->title = $this->resource->title;
-        $informationObject->physicalCharacteristics = $this->resource->physicalCharacteristics;
-        $informationObject->scopeAndContent = $this->resource->scopeAndContent;
-        $informationObject->archivalHistory = $this->resource->archivalHistory;
-
-        // Copy (not link) rights
-        foreach (QubitRelation::getRelationsBySubjectId($this->resource->id, ['typeId' => QubitTerm::RIGHT_ID]) as $item) {
-            $sourceRights = $item->object;
-
-            $newRights = $sourceRights->copy();
-
-            $relation = new QubitRelation();
-            $relation->object = $newRights;
-            $relation->typeId = QubitTerm::RIGHT_ID;
-
-            $informationObject->relationsRelatedBysubjectId[] = $relation;
-        }
-
-        // Populate creators (from QubitRelation to QubitEvent)
-        foreach (QubitRelation::getRelationsByObjectId($this->resource->id, ['typeId' => QubitTerm::CREATION_ID]) as $item) {
-            $event = new QubitEvent();
-            $event->actor = $item->subject;
-            $event->typeId = QubitTerm::CREATION_ID;
-
-            $informationObject->eventsRelatedByobjectId[] = $event;
-        }
-
-        // Populate dates
-        foreach ($this->resource->getDates() as $accessionEvent) {
-            $event = new QubitEvent();
-            $event->date = $accessionEvent->date;
-            $event->startDate = $accessionEvent->startDate;
-            $event->endDate = $accessionEvent->endDate;
-            $event->typeId = $accessionEvent->typeId;
-
-            $informationObject->eventsRelatedByobjectId[] = $event;
-        }
-
-        // Relationship between the information object and accession record
-        $relation = new QubitRelation();
-        $relation->object = $this->resource;
-        $relation->typeId = QubitTerm::ACCESSION_ID;
-
-        $informationObject->relationsRelatedBysubjectId[] = $relation;
-
-        // Set publication status
-        $informationObject->setPublicationStatus(sfConfig::get('app_defaultPubStatus', QubitTerm::PUBLICATION_STATUS_DRAFT_ID));
-
-        $informationObject->save();
+        // Create new information object from accession via write service
+        $informationObject = WriteServiceFactory::accession()->createRelatedInformationObject($this->resource);
 
         $this->redirect([$informationObject, 'module' => 'informationobject']);
     }

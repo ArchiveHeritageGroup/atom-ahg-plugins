@@ -1,5 +1,6 @@
 <?php
 use AtomFramework\Http\Controllers\AhgEditController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -53,7 +54,7 @@ class PhysicalObjectEditAction extends AhgEditController
 
     protected function earlyExecute()
     {
-        $this->resource = new QubitPhysicalObject();
+        $this->resource = WriteServiceFactory::physicalObject()->newPhysicalObject();
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;
         }

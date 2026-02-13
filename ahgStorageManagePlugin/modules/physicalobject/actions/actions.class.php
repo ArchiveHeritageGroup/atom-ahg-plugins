@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 /*
  * Physical Object module actions — ahgStorageManagePlugin
  *
@@ -58,7 +59,7 @@ class physicalobjectActions extends AhgController
         }
 
         // Set up resource
-        $this->resource = new QubitPhysicalObject();
+        $this->resource = WriteServiceFactory::physicalObject()->newPhysicalObject();
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;
         }

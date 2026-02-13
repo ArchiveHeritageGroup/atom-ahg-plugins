@@ -10,11 +10,15 @@ term_delete_override:
   param: { module: termTaxonomy, action: delete }
   requirements: { slug: "[a-zA-Z0-9_-]+" }
 
+term_add:
+  url: /term/add
+  param: { module: term, action: edit }
+
 term_browse_override:
   class: QubitResourceRoute
   url: /term/:slug
   param: { module: termTaxonomy, action: index }
-  requirements: { slug: "[a-zA-Z0-9_-]+" }
+  requirements: { slug: "(?!add$)[a-zA-Z0-9_-]+" }
 
 taxonomy_browse_override:
   url: /taxonomy/:id

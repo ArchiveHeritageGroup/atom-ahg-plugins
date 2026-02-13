@@ -179,6 +179,8 @@ class AhgSettingsSectorNumberingAction extends AhgController
      */
     private function processForm(): void
     {
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
+
         foreach (array_keys($this->sectors) as $sector) {
             foreach (self::SECTOR_KEYS as $baseKey) {
                 $fieldName = $this->makeSectorFieldName($sector, $baseKey);
@@ -187,22 +189,12 @@ class AhgSettingsSectorNumberingAction extends AhgController
 
                 // Empty = inherit global: remove sector setting if exists
                 if ($value === '' || $value === null) {
-                    if (null !== $existing = SettingService::getByName($settingName)) {
-                        if (method_exists($existing, 'delete')) {
-                            $existing->delete();
-                        }
-                    }
+                    $ws->delete($settingName);
                     continue;
                 }
 
                 // Save sector override
-                if (null === $setting = SettingService::getByName($settingName)) {
-                    $setting = new QubitSetting();
-                    $setting->name = $settingName;
-                }
-
-                $setting->setValue((string) $value, ['sourceCulture' => true]);
-                $setting->save();
+                $ws->save($settingName, (string) $value);
 
                 // Sync counter changes to numbering_scheme table (used by NumberingService)
                 if ($baseKey === 'identifier_counter') {

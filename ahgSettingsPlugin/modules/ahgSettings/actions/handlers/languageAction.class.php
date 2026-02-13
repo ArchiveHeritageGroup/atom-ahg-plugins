@@ -50,15 +50,8 @@ class SettingsLanguageAction extends AhgController
 
                 CacheService::getInstance()->removePattern('settings:i18n:*');
 
-                $setting = new QubitSetting();
-                $setting->name = $request->languageCode;
-                $setting->scope = 'i18n_languages';
-                $setting->value = $request->languageCode;
-                $setting->deleteable = true;
-                $setting->editable = true;
-                $setting->getCurrentSettingI18n()->setCulture('en');
-                $setting->sourceCulture = 'en';
-                $setting->save();
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->save($request->languageCode, $request->languageCode, 'i18n_languages');
 
                 $notice = sfContext::getInstance()->i18n->__('Language saved.');
                 $this->getUser()->setFlash('notice', $notice);

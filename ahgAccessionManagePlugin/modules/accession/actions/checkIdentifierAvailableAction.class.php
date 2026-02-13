@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -56,7 +57,7 @@ class AccessionCheckIdentifierAvailableAction extends AhgController
             }
         } else {
             // Create new accession so validator can be run
-            $resource = new QubitAccession();
+            $resource = WriteServiceFactory::accession()->newAccession();
         }
 
         $validator = new QubitValidatorAccessionIdentifier(['required' => true, 'resource' => $resource]);

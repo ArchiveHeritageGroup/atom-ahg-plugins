@@ -92,12 +92,10 @@ class sfPluginAdminPluginThemesAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                if (1 != count($query)) {
-                    $setting = new QubitSetting();
-                    $setting->name = 'plugins';
+                $settings = [];
+                if (1 == count($query)) {
+                    $settings = unserialize($setting->getValue(['sourceCulture' => true])) ?: [];
                 }
-
-                $settings = unserialize($setting->getValue(['sourceCulture' => true])) ?: [];
 
                 foreach (array_keys($this->plugins) as $item) {
                     if (in_array($item, (array) $this->form->getValue('enabled'))) {
@@ -109,8 +107,10 @@ class sfPluginAdminPluginThemesAction extends AhgController
                     }
                 }
 
-                $setting->setValue(serialize(array_unique($settings)), ['sourceCulture' => true]);
-                $setting->save();
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()->save(
+                    'plugins',
+                    serialize(array_unique($settings))
+                );
 
                 QubitCache::getInstance()->removePattern('settings:i18n:*');
 

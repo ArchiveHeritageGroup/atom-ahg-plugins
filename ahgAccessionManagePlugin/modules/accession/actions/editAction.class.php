@@ -1,5 +1,6 @@
 <?php
 use AtomFramework\Http\Controllers\AhgEditController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -46,7 +47,7 @@ class AccessionEditAction extends AhgEditController
     {
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $this->resource = new QubitAccession();
+        $this->resource = WriteServiceFactory::accession()->newAccession();
 
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;
@@ -130,7 +131,7 @@ class AccessionEditAction extends AhgEditController
 
                 // Relation between accesion will only be accepted if the object is new
                 if (!isset($this->resource->id) && isset($this->accession)) {
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::accession()->newRelation();
                     $relation->typeId = QubitTerm::ACCRUAL_ID;
                     $relation->object = $this->accession;
 
@@ -328,7 +329,7 @@ class AccessionEditAction extends AhgEditController
                 }
 
                 foreach ($filtered as $item) {
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::accession()->newRelation();
                     $relation->subject = $item;
                     $relation->typeId = QubitTerm::CREATION_ID;
 
@@ -374,7 +375,7 @@ class AccessionEditAction extends AhgEditController
                 }
 
                 foreach ($filtered as $item) {
-                    $relation = new QubitRelation();
+                    $relation = WriteServiceFactory::accession()->newRelation();
                     $relation->subject = $item;
                     $relation->typeId = QubitTerm::ACCESSION_ID;
                     $relation->indexOnSave = false;

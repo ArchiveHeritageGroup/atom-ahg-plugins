@@ -71,14 +71,8 @@ class SettingsMarkdownAction extends AhgEditController
     {
         switch ($field->getName()) {
             case 'enabled':
-                if (null === $this->settingEnabled) {
-                    $this->settingEnabled = new QubitSetting();
-                    $this->settingEnabled->name = 'markdown_enabled';
-                    $this->settingEnabled->sourceCulture = 'en';
-                }
-
-                $this->settingEnabled->setValue($field->getValue(), ['culture' => 'en']);
-                $this->settingEnabled->save();
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->save('markdown_enabled', $field->getValue());
 
                 break;
         }

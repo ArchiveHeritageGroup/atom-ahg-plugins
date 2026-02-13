@@ -335,14 +335,8 @@ class ahgSettingsActions extends AhgController
                                 $propelSetting->delete();
                             }
                         } else {
-                            // Save sector override - use Propel QubitSetting for persistence
-                            $setting = QubitSetting::getByName($fieldName);
-                            if (!$setting) {
-                                $setting = new QubitSetting();
-                                $setting->name = $fieldName;
-                            }
-                            $setting->setValue((string) $value, ['sourceCulture' => true]);
-                            $setting->save();
+                            // Save sector override via WriteServiceFactory
+                            \AtomFramework\Services\Write\WriteServiceFactory::settings()->save($fieldName, (string) $value);
 
                             // Sync counter changes to numbering_scheme table
                             if ($baseKey === 'identifier_counter') {

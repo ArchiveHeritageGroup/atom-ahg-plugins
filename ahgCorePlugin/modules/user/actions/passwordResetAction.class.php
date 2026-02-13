@@ -1,5 +1,6 @@
 <?php
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Write\WriteServiceFactory;
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Load PHPMailer via framework autoloader or vendor path
@@ -59,10 +60,12 @@ class UserPasswordResetAction extends AhgController
                     $token = bin2hex(random_bytes(32));
                     $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-                    // Store token in user object
-                    $user->resetToken = $token;
-                    $user->resetTokenExpiry = $expiry;
-                    $user->save();
+                    // Store token via WriteService
+                    WriteServiceFactory::user()->savePasswordResetToken(
+                        (int) $user->id,
+                        $token,
+                        $expiry
+                    );
 
                     // Send email
                     $this->sendResetEmail($user, $token);

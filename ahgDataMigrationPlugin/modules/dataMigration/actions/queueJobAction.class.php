@@ -85,12 +85,13 @@ class dataMigrationQueueJobAction extends AhgController
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
 
-            // Create AtoM job record
-            $job = new QubitJob();
-            $job->name = 'arMigrationImportJob';
-            $job->userId = $this->getUser()->getUserID();
-            $job->statusId = QubitTerm::JOB_STATUS_IN_PROGRESS_ID;
-            $job->save();
+            // Create AtoM job record via WriteServiceFactory
+            $jobId = \AtomFramework\Services\Write\WriteServiceFactory::job()->createJob([
+                'name' => 'arMigrationImportJob',
+                'user_id' => $this->getUser()->getUserID(),
+                'status_id' => QubitTerm::JOB_STATUS_IN_PROGRESS_ID,
+            ]);
+            $job = (object) ['id' => $jobId];
 
             // Update migration job with AtoM job ID
             $DB::table('atom_migration_job')

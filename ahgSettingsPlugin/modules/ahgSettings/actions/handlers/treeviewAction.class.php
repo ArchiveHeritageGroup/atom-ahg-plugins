@@ -168,44 +168,46 @@ class SettingsTreeviewAction extends AhgEditController
 
     protected function processField($field)
     {
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
+
         switch ($field->getName()) {
             case 'type':
-                $this->createOrUpdateSetting($this->typeSetting, 'treeview_type', $field->getValue());
+                $ws->save('treeview_type', $field->getValue());
 
                 break;
 
             case 'showBrowseHierarchyPage':
-                $this->createOrUpdateSetting($this->showBrowseHierarchyPageSetting, 'treeview_show_browse_hierarchy_page', $field->getValue());
+                $ws->save('treeview_show_browse_hierarchy_page', $field->getValue());
 
                 break;
 
             case 'allowFullWidthTreeviewCollapse':
-                $this->createOrUpdateSetting($this->allowFullWidthTreeviewCollapse, 'treeview_allow_full_width_collapse', $field->getValue());
+                $ws->save('treeview_allow_full_width_collapse', $field->getValue());
 
                 break;
 
             case 'ioSort':
-                $this->createOrUpdateSetting($this->ioSortSetting, 'sort_treeview_informationobject', $field->getValue());
+                $ws->save('sort_treeview_informationobject', $field->getValue());
 
                 break;
 
             case 'showIdentifier':
-                $this->createOrUpdateSetting($this->showIdentifierSetting, 'treeview_show_identifier', $field->getValue());
+                $ws->save('treeview_show_identifier', $field->getValue());
 
                 break;
 
             case 'showLevelOfDescription':
-                $this->createOrUpdateSetting($this->showLevelOfDescriptionSetting, 'treeview_show_level_of_description', $field->getValue());
+                $ws->save('treeview_show_level_of_description', $field->getValue());
 
                 break;
 
             case 'showDates':
-                $this->createOrUpdateSetting($this->showDatesSetting, 'treeview_show_dates', $field->getValue());
+                $ws->save('treeview_show_dates', $field->getValue());
 
                 break;
 
             case 'fullItemsPerPage':
-                $this->createOrUpdateSetting($this->fullItemsPerPageSetting, 'treeview_full_items_per_page', $field->getValue());
+                $ws->save('treeview_full_items_per_page', $field->getValue());
 
                 break;
         }
@@ -220,18 +222,5 @@ class SettingsTreeviewAction extends AhgEditController
         $this->form->setDefault($fieldName, $default);
         $this->form->setValidator($fieldName, new sfValidatorString(['required' => false]));
         $this->form->setWidget($fieldName, new sfWidgetFormSelectRadio(['choices' => $options], ['class' => 'radio']));
-    }
-
-    private function createOrUpdateSetting($setting, $name, $value)
-    {
-        if (!isset($setting)) {
-            $setting = new QubitSetting();
-            $setting->name = $name;
-            $setting->sourceCulture = sfConfig::get('sf_default_culture');
-            $setting->culture = sfConfig::get('sf_default_culture');
-        }
-
-        $setting->setValue($value, ['sourceCulture' => true]);
-        $setting->save();
     }
 }
