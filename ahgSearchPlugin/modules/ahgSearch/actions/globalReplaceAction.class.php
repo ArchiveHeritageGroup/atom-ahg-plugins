@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\SimplePager;
 
 /**
  * Global search/replace for information object fields.
@@ -133,11 +134,11 @@ class ahgSearchGlobalReplaceAction extends AhgController
             'collection' => $request->collection ?? null,
         ]);
 
-        $this->pager = new AhgSearchPager(
+        $this->pager = new SimplePager(
             $result['results'],
             $result['total'],
-            $limit,
-            $page
+            $page,
+            $limit
         );
     }
 

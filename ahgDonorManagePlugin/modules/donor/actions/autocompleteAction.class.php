@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\PaginationService;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -31,24 +32,30 @@ class DonorAutocompleteAction extends AhgController
             $request->limit = $this->config('app_hits_per_page');
         }
 
-        $criteria = new Criteria();
-        $criteria->addJoin(QubitActor::ID, QubitActorI18n::ID);
-        $criteria->add(QubitActorI18n::CULTURE, $this->culture());
-        $criteria->addJoin(QubitActor::ID, QubitObject::ID);
-        $criteria->add(QubitObject::CLASS_NAME, 'QubitDonor', Criteria::EQUAL);
+        if (class_exists('QubitPager')) {
+            // === Propel mode (existing code, unchanged) ===
+            $criteria = new Criteria();
+            $criteria->addJoin(QubitActor::ID, QubitActorI18n::ID);
+            $criteria->add(QubitActorI18n::CULTURE, $this->culture());
+            $criteria->addJoin(QubitActor::ID, QubitObject::ID);
+            $criteria->add(QubitObject::CLASS_NAME, 'QubitDonor', Criteria::EQUAL);
 
-        if (isset($request->query)) {
-            if ($this->config('app_markdown_enabled', true)) {
-                $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->query}%", Criteria::LIKE);
-            } else {
-                $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "{$request->query}%", Criteria::LIKE);
+            if (isset($request->query)) {
+                if ($this->config('app_markdown_enabled', true)) {
+                    $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->query}%", Criteria::LIKE);
+                } else {
+                    $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "{$request->query}%", Criteria::LIKE);
+                }
             }
-        }
 
-        $this->pager = new QubitPager('QubitDonor');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($request->limit);
-        $this->pager->setPage($request->page);
+            $this->pager = new QubitPager('QubitDonor');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setMaxPerPage($request->limit);
+            $this->pager->setPage($request->page);
+        } else {
+            // === Standalone mode — PaginationService ===
+            $this->pager = PaginationService::paginateActors('donor', $this->culture(), $request->query ?? null, 'name_asc', (int)($request->page ?? 1), (int)$request->limit);
+        }
 
         $this->donors = $this->pager->getResults();
 

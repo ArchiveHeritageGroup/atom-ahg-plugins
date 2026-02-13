@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\PaginationService;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -28,16 +29,27 @@ class BookoutObjectReceiptAction extends AhgController
         }
         
         $this->resource = $this->getRoute()->resource;
-        
-        $criteria = new Criteria;
-		BaseBookoutObject::addSelectColumns($criteria);
-		BaseBookoutObjectI18n::addSelectColumns($criteria);
-        $criteria->addJoin(QubitBookoutObject::ID, QubitBookoutObjectI18n::ID);
-        $criteria->add(QubitBookoutObject::ID, $request->source);
-        
-	    $this->pager = new QubitPager('QubitBookoutObject');
-	    $this->pager->setCriteria($criteria);
-	    $this->pager->setMaxPerPage(1);
-	    $this->pager->setPage(1);
+
+        if (class_exists('QubitPager')) {
+            // === Propel mode (existing code, unchanged) ===
+            $criteria = new Criteria;
+		    BaseBookoutObject::addSelectColumns($criteria);
+		    BaseBookoutObjectI18n::addSelectColumns($criteria);
+            $criteria->addJoin(QubitBookoutObject::ID, QubitBookoutObjectI18n::ID);
+            $criteria->add(QubitBookoutObject::ID, $request->source);
+
+	        $this->pager = new QubitPager('QubitBookoutObject');
+	        $this->pager->setCriteria($criteria);
+	        $this->pager->setMaxPerPage(1);
+	        $this->pager->setPage(1);
+        } else {
+            // === Standalone mode — PaginationService ===
+            $this->pager = PaginationService::paginate('bookout_object', [
+                'join' => [
+                    'bookout_object_i18n' => ['bookout_object.id', '=', 'bookout_object_i18n.id'],
+                ],
+                'where' => [['bookout_object.id', '=', $request->source]],
+            ], 1, 1);
+        }
     }
 }

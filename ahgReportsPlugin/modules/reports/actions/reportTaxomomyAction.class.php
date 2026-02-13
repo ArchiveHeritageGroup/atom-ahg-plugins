@@ -1,5 +1,7 @@
 <?php
+
 use AtomExtensions\Services\AclService;
+use AtomFramework\Services\Pagination\PaginationService;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -54,104 +56,141 @@ class reportsReportTaxonomyAction extends BaseReportAction
 
     public function doSearch()
     {
-        $criteria = new Criteria();
-        $this->sort = $this->request->getParameter('sort', 'updatedDown');
-        $nameColumn = 'name';
-        $this->nameColumnDisplay = 'Name';
-        // Show only editable taxonomies
-        $criteria = QubitTaxonomy::addEditableTaxonomyCriteria($criteria);
+        if (class_exists('QubitPager')) {
+            // === Propel mode ===
+            $criteria = new Criteria();
+            $this->sort = $this->request->getParameter('sort', 'updatedDown');
+            $nameColumn = 'name';
+            $this->nameColumnDisplay = 'Name';
+            // Show only editable taxonomies
+            $criteria = QubitTaxonomy::addEditableTaxonomyCriteria($criteria);
 
-        // Do source culture fallback
-        $criteria = QubitCultureFallback::addFallbackCriteria($criteria, 'QubitTaxonomy');
+            // Do source culture fallback
+            $criteria = QubitCultureFallback::addFallbackCriteria($criteria, 'QubitTaxonomy');
 
-        $criteria->addAscendingOrderByColumn('name');
+            $criteria->addAscendingOrderByColumn('name');
 
-        // End date at midnight
-        if (null != $this->form->getValue('dateEnd')) {
-            $vDay = substr($this->form->getValue('dateEnd'), 0, strpos($this->form->getValue('dateEnd'), '/'));
-            $vRes = substr($this->form->getValue('dateEnd'), strpos($this->form->getValue('dateEnd'), '/') + 1);
-            $vMonth = substr($vRes, 0, strpos($vRes, '/'));
-            $vYear = substr($vRes, strpos($vRes, '/') + 1, 4);
-            if (checkdate((int) $vDay, (int) $vMonth, (int) $vYear)) {
-                $dateEnd = date_create($vYear.'-'.$vMonth.'-'.$vDay.' 23.59.59');
-                $dateEnd = date_format($dateEnd, 'Y-m-d H:i:s');
-            } else {
-                $dateEnd = date('Y-m-d 23:59:59');
-            }
-        }
-
-        // Add date criteria
-        switch ($dateOf = $this->form->getValue('dateOf')) {
-        case 'CREATED_AT':
-        case 'UPDATED_AT':
-            if (null !== $this->form->getValue('dateStart')) {
-                $vDay = substr($this->form->getValue('dateStart'), 0, strpos($this->form->getValue('dateStart'), '/'));
-                $vRes = substr($this->form->getValue('dateStart'), strpos($this->form->getValue('dateStart'), '/') + 1);
+            // End date at midnight
+            if (null != $this->form->getValue('dateEnd')) {
+                $vDay = substr($this->form->getValue('dateEnd'), 0, strpos($this->form->getValue('dateEnd'), '/'));
+                $vRes = substr($this->form->getValue('dateEnd'), strpos($this->form->getValue('dateEnd'), '/') + 1);
                 $vMonth = substr($vRes, 0, strpos($vRes, '/'));
                 $vYear = substr($vRes, strpos($vRes, '/') + 1, 4);
-                $startDate2 = date_create('2001-01-01 23.59.59');
-                $startDate = date_format($startDate2, 'Y-m-d H:i:s');
-                $criteria->addAnd(constant('QubitObject::'.$dateOf), $startDate, Criteria::GREATER_EQUAL);
-            }
-            if (isset($dateEnd)) {
-                $criteria->addAnd(constant('QubitObject::'.$dateOf), $dateEnd, Criteria::LESS_EQUAL);
-            }
-
-            break;
-
-        default:
-            if (null !== $this->form->getValue('dateStart')) {
-                $vDay = substr($this->form->getValue('dateStart'), 0, strpos($this->form->getValue('dateStart'), '/'));
-                $vRes = substr($this->form->getValue('dateStart'), strpos($this->form->getValue('dateStart'), '/') + 1);
-                $vMonth = substr($vRes, 0, strpos($vRes, '/'));
-                $vYear = substr($vRes, strpos($vRes, '/') + 1);
-                $startDate = date_create($vYear.'-'.$vMonth.'-'.$vDay.' 00.00.00');
-                $startDate = date_format($startDate, 'Y-m-d H:i:s');
-                $c1 = $criteria->getNewCriterion(QubitObject::CREATED_AT, $startDate, Criteria::GREATER_EQUAL);
-                $c2 = $criteria->getNewCriterion(QubitObject::UPDATED_AT, $startDate, Criteria::GREATER_EQUAL);
-                $c1->addOr($c2);
-                $criteria->addAnd($c1);
-            }
-            if (isset($dateEnd)) {
-                $c3 = $criteria->getNewCriterion(QubitObject::CREATED_AT, $dateEnd, Criteria::LESS_EQUAL);
-                $c4 = $criteria->getNewCriterion(QubitObject::UPDATED_AT, $dateEnd, Criteria::LESS_EQUAL);
-                $c3->addOr($c4);
-                $criteria->addAnd($c3);
+                if (checkdate((int) $vDay, (int) $vMonth, (int) $vYear)) {
+                    $dateEnd = date_create($vYear.'-'.$vMonth.'-'.$vDay.' 23.59.59');
+                    $dateEnd = date_format($dateEnd, 'Y-m-d H:i:s');
+                } else {
+                    $dateEnd = date('Y-m-d 23:59:59');
+                }
             }
 
-            // Add sort criteria
-            switch ($this->sort) {
-            case 'nameDown':
-                $criteria->addDescendingOrderByColumn($nameColumn);
+            // Add date criteria
+            switch ($dateOf = $this->form->getValue('dateOf')) {
+            case 'CREATED_AT':
+            case 'UPDATED_AT':
+                if (null !== $this->form->getValue('dateStart')) {
+                    $vDay = substr($this->form->getValue('dateStart'), 0, strpos($this->form->getValue('dateStart'), '/'));
+                    $vRes = substr($this->form->getValue('dateStart'), strpos($this->form->getValue('dateStart'), '/') + 1);
+                    $vMonth = substr($vRes, 0, strpos($vRes, '/'));
+                    $vYear = substr($vRes, strpos($vRes, '/') + 1, 4);
+                    $startDate2 = date_create('2001-01-01 23.59.59');
+                    $startDate = date_format($startDate2, 'Y-m-d H:i:s');
+                    $criteria->addAnd(constant('QubitObject::'.$dateOf), $startDate, Criteria::GREATER_EQUAL);
+                }
+                if (isset($dateEnd)) {
+                    $criteria->addAnd(constant('QubitObject::'.$dateOf), $dateEnd, Criteria::LESS_EQUAL);
+                }
 
                 break;
 
-            case 'nameUp':
-                $criteria->addAscendingOrderByColumn($nameColumn);
-
-                break;
-
-            case 'updatedUp':
-                $criteria->addAscendingOrderByColumn(QubitObject::UPDATED_AT);
-
-                break;
-
-            case 'updatedDown':
             default:
-                $criteria->addDescendingOrderByColumn(QubitObject::UPDATED_AT);
-            }
-            // Add fallback criteria for name
-            if ('nameDown' == $this->sort || 'nameUp' == $this->sort) {
-                $criteria = QubitCultureFallback::addFallbackCriteria($criteria, $this->form->getValue('className'));
-            }
-        }
-        // Page results
-        $this->pager = new QubitPager('QubitTaxonomy');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($request->limit);
-        $this->pager->setPage($request->page);
+                if (null !== $this->form->getValue('dateStart')) {
+                    $vDay = substr($this->form->getValue('dateStart'), 0, strpos($this->form->getValue('dateStart'), '/'));
+                    $vRes = substr($this->form->getValue('dateStart'), strpos($this->form->getValue('dateStart'), '/') + 1);
+                    $vMonth = substr($vRes, 0, strpos($vRes, '/'));
+                    $vYear = substr($vRes, strpos($vRes, '/') + 1);
+                    $startDate = date_create($vYear.'-'.$vMonth.'-'.$vDay.' 00.00.00');
+                    $startDate = date_format($startDate, 'Y-m-d H:i:s');
+                    $c1 = $criteria->getNewCriterion(QubitObject::CREATED_AT, $startDate, Criteria::GREATER_EQUAL);
+                    $c2 = $criteria->getNewCriterion(QubitObject::UPDATED_AT, $startDate, Criteria::GREATER_EQUAL);
+                    $c1->addOr($c2);
+                    $criteria->addAnd($c1);
+                }
+                if (isset($dateEnd)) {
+                    $c3 = $criteria->getNewCriterion(QubitObject::CREATED_AT, $dateEnd, Criteria::LESS_EQUAL);
+                    $c4 = $criteria->getNewCriterion(QubitObject::UPDATED_AT, $dateEnd, Criteria::LESS_EQUAL);
+                    $c3->addOr($c4);
+                    $criteria->addAnd($c3);
+                }
 
-        $this->taxonomies = $this->pager->getResults();
+                // Add sort criteria
+                switch ($this->sort) {
+                case 'nameDown':
+                    $criteria->addDescendingOrderByColumn($nameColumn);
+
+                    break;
+
+                case 'nameUp':
+                    $criteria->addAscendingOrderByColumn($nameColumn);
+
+                    break;
+
+                case 'updatedUp':
+                    $criteria->addAscendingOrderByColumn(QubitObject::UPDATED_AT);
+
+                    break;
+
+                case 'updatedDown':
+                default:
+                    $criteria->addDescendingOrderByColumn(QubitObject::UPDATED_AT);
+                }
+                // Add fallback criteria for name
+                if ('nameDown' == $this->sort || 'nameUp' == $this->sort) {
+                    $criteria = QubitCultureFallback::addFallbackCriteria($criteria, $this->form->getValue('className'));
+                }
+            }
+            // Page results
+            $this->pager = new QubitPager('QubitTaxonomy');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setMaxPerPage($request->limit);
+            $this->pager->setPage($request->page);
+
+            $this->taxonomies = $this->pager->getResults();
+        } else {
+            // === Standalone mode ===
+            $sort = $this->request->getParameter('sort', 'updatedDown');
+            $this->sort = $sort;
+            $this->nameColumnDisplay = 'Name';
+            $limit = (int) ($this->request->getParameter('limit', 10));
+            $page = (int) ($this->request->getParameter('page', 1));
+
+            $sortMap = [
+                'nameUp' => ['taxonomy_i18n.name' => 'asc'],
+                'nameDown' => ['taxonomy_i18n.name' => 'desc'],
+                'updatedUp' => ['object.updated_at' => 'asc'],
+                'updatedDown' => ['object.updated_at' => 'desc'],
+            ];
+            $orderBy = $sortMap[$sort] ?? ['object.updated_at' => 'desc'];
+
+            $this->pager = PaginationService::paginate('taxonomy', [
+                'join' => [
+                    'object' => ['taxonomy.id', '=', 'object.id'],
+                    'taxonomy_i18n' => function ($join) {
+                        $join->on('taxonomy.id', '=', 'taxonomy_i18n.id')
+                            ->where('taxonomy_i18n.culture', '=', \sfContext::getInstance()->user->getCulture());
+                    },
+                ],
+                'where' => [
+                    // Exclude non-editable taxonomies (ROOT and the taxonomy of taxonomies)
+                    ['taxonomy.id', '!=', \QubitTaxonomy::ROOT_ID],
+                    ['taxonomy.parent_id', '=', \QubitTaxonomy::ROOT_ID],
+                ],
+                'orderBy' => $orderBy,
+                'select' => ['taxonomy.id', 'taxonomy_i18n.name', 'object.created_at', 'object.updated_at'],
+            ], $page, $limit);
+
+            $this->taxonomies = $this->pager->getResults();
+        }
     }
 
     protected function addField($name)

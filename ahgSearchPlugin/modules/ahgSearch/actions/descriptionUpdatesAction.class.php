@@ -1,6 +1,8 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\PaginationService;
+use AtomFramework\Services\Pagination\SimplePager;
 
 /**
  * Description updates — list of recently updated records.
@@ -64,56 +66,103 @@ class ahgSearchDescriptionUpdatesAction extends AhgController
 
     public function doAuditLogSearch()
     {
-        // Criteria to fetch user actions
-        $criteria = new Criteria();
-        $criteria->addJoin(QubitAuditLog::OBJECT_ID, QubitInformationObject::ID);
-
-        // Publication status filtering
-        if ('all' != $this->form->getValue('publicationStatus')) {
-            $criteria->addJoin(QubitAuditLog::OBJECT_ID, QubitStatus::OBJECT_ID);
-            $criteria->add(QubitStatus::STATUS_ID, $this->form->getValue('publicationStatus'));
-        }
-
-        // User action type filtering
-        if ('both' != $this->form->getValue('dateOf')) {
-            switch ($this->form->getValue('dateOf')) {
-                case 'CREATED_AT':
-                    $criteria->add(QubitAuditLog::ACTION_TYPE_ID, QubitTerm::USER_ACTION_CREATION_ID);
-                    break;
-
-                case 'UPDATED_AT':
-                    $criteria->add(QubitAuditLog::ACTION_TYPE_ID, QubitTerm::USER_ACTION_MODIFICATION_ID);
-                    break;
-            }
-        }
-
-        // Repository restriction
-        if (null !== $this->form->getValue('repository')) {
-            $criteria->add(QubitInformationObject::REPOSITORY_ID, $this->form->getValue('repository'));
-        }
-
-        // User restriction
-        if (isset($this->user) && $this->user instanceof QubitUser) {
-            $criteria->add(QubitAuditLog::USER_ID, $this->user->getId());
-        }
-
-        // Date restriction
-        $criteria->add(QubitAuditLog::CREATED_AT, $this->form->getValue('startDate'), Criteria::GREATER_EQUAL);
-        $endDateTime = new DateTime($this->form->getValue('endDate'));
-        $criteria->addAnd(QubitAuditLog::CREATED_AT, $endDateTime->modify('+1 day')->format('Y-m-d'), Criteria::LESS_THAN);
-
-        // Sort in reverse chronological order
-        $criteria->addDescendingOrderByColumn(QubitAuditLog::CREATED_AT);
-
-        // Page results
         $limit = sfConfig::get('app_hits_per_page');
         $page = (isset($this->request->page) && ctype_digit($this->request->page)) ? $this->request->page : 1;
 
-        $this->pager = new QubitPager('QubitAuditLog');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setPage($page);
-        $this->pager->setMaxPerPage($limit);
-        $this->pager->init();
+        if (class_exists('QubitPager')) {
+            // === Propel mode ===
+            $criteria = new Criteria();
+            $criteria->addJoin(QubitAuditLog::OBJECT_ID, QubitInformationObject::ID);
+
+            // Publication status filtering
+            if ('all' != $this->form->getValue('publicationStatus')) {
+                $criteria->addJoin(QubitAuditLog::OBJECT_ID, QubitStatus::OBJECT_ID);
+                $criteria->add(QubitStatus::STATUS_ID, $this->form->getValue('publicationStatus'));
+            }
+
+            // User action type filtering
+            if ('both' != $this->form->getValue('dateOf')) {
+                switch ($this->form->getValue('dateOf')) {
+                    case 'CREATED_AT':
+                        $criteria->add(QubitAuditLog::ACTION_TYPE_ID, QubitTerm::USER_ACTION_CREATION_ID);
+                        break;
+
+                    case 'UPDATED_AT':
+                        $criteria->add(QubitAuditLog::ACTION_TYPE_ID, QubitTerm::USER_ACTION_MODIFICATION_ID);
+                        break;
+                }
+            }
+
+            // Repository restriction
+            if (null !== $this->form->getValue('repository')) {
+                $criteria->add(QubitInformationObject::REPOSITORY_ID, $this->form->getValue('repository'));
+            }
+
+            // User restriction
+            if (isset($this->user) && $this->user instanceof QubitUser) {
+                $criteria->add(QubitAuditLog::USER_ID, $this->user->getId());
+            }
+
+            // Date restriction
+            $criteria->add(QubitAuditLog::CREATED_AT, $this->form->getValue('startDate'), Criteria::GREATER_EQUAL);
+            $endDateTime = new DateTime($this->form->getValue('endDate'));
+            $criteria->addAnd(QubitAuditLog::CREATED_AT, $endDateTime->modify('+1 day')->format('Y-m-d'), Criteria::LESS_THAN);
+
+            // Sort in reverse chronological order
+            $criteria->addDescendingOrderByColumn(QubitAuditLog::CREATED_AT);
+
+            // Page results
+            $this->pager = new QubitPager('QubitAuditLog');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setPage($page);
+            $this->pager->setMaxPerPage($limit);
+            $this->pager->init();
+        } else {
+            // === Standalone mode ===
+            $options = [
+                'join' => [
+                    'information_object' => ['audit_log.object_id', '=', 'information_object.id'],
+                ],
+                'where' => [],
+                'orderBy' => ['audit_log.created_at' => 'desc'],
+            ];
+
+            // Publication status
+            if ('all' != $this->form->getValue('publicationStatus')) {
+                $options['join']['status'] = ['audit_log.object_id', '=', 'status.object_id'];
+                $options['where'][] = ['status.status_id', '=', $this->form->getValue('publicationStatus')];
+            }
+
+            // Action type
+            if ('both' != $this->form->getValue('dateOf')) {
+                switch ($this->form->getValue('dateOf')) {
+                    case 'CREATED_AT':
+                        $options['where'][] = ['audit_log.action_type_id', '=', QubitTerm::USER_ACTION_CREATION_ID];
+                        break;
+
+                    case 'UPDATED_AT':
+                        $options['where'][] = ['audit_log.action_type_id', '=', QubitTerm::USER_ACTION_MODIFICATION_ID];
+                        break;
+                }
+            }
+
+            // Repository
+            if (null !== $this->form->getValue('repository')) {
+                $options['where'][] = ['information_object.repository_id', '=', $this->form->getValue('repository')];
+            }
+
+            // User
+            if (isset($this->user) && $this->user instanceof \QubitUser) {
+                $options['where'][] = ['audit_log.user_id', '=', $this->user->getId()];
+            }
+
+            // Date range
+            $options['where'][] = ['audit_log.created_at', '>=', $this->form->getValue('startDate')];
+            $endDateTime = new DateTime($this->form->getValue('endDate'));
+            $options['where'][] = ['audit_log.created_at', '<', $endDateTime->modify('+1 day')->format('Y-m-d')];
+
+            $this->pager = PaginationService::paginate('audit_log', $options, (int) $page, (int) $limit);
+        }
     }
 
     public function doSearch(\AhgSearch\Services\SearchService $service)
@@ -161,7 +210,7 @@ class ahgSearchDescriptionUpdatesAction extends AhgController
         $result = $service->descriptionUpdates($searchParams);
 
         // Build a pager-compatible object for templates
-        $this->pager = new AhgSearchPager($result['hits'], $result['total'], $limit, $page);
+        $this->pager = new SimplePager($result['hits'], $result['total'], $page, $limit);
     }
 
     protected function addField($name, \AhgSearch\Services\SearchService $service)
@@ -224,111 +273,5 @@ class ahgSearchDescriptionUpdatesAction extends AhgController
                 $this->form->setWidget($name, new sfWidgetFormSelect(['choices' => []], ['class' => 'form-autocomplete']));
                 break;
         }
-    }
-}
-
-/**
- * Simple pager for ES results to maintain template compatibility.
- */
-class AhgSearchPager
-{
-    protected array $hits;
-    protected int $total;
-    protected int $maxPerPage;
-    protected int $page;
-
-    public function __construct(array $hits, int $total, int $maxPerPage, int $page)
-    {
-        $this->hits = $hits;
-        $this->total = $total;
-        $this->maxPerPage = $maxPerPage;
-        $this->page = $page;
-    }
-
-    public function getNbResults(): int
-    {
-        return $this->total;
-    }
-
-    public function getResults(): array
-    {
-        return $this->hits;
-    }
-
-    public function getMaxPerPage(): int
-    {
-        return $this->maxPerPage;
-    }
-
-    public function getPage(): int
-    {
-        return $this->page;
-    }
-
-    public function getLastPage(): int
-    {
-        return max(1, (int) ceil($this->total / $this->maxPerPage));
-    }
-
-    public function haveToPaginate(): bool
-    {
-        return $this->total > $this->maxPerPage;
-    }
-
-    public function getFirstPage(): int
-    {
-        return 1;
-    }
-
-    public function getPreviousPage(): int
-    {
-        return max(1, $this->page - 1);
-    }
-
-    public function getNextPage(): int
-    {
-        return min($this->getLastPage(), $this->page + 1);
-    }
-
-    public function count(): int
-    {
-        return $this->total;
-    }
-
-    public function getFirstIndice(): int
-    {
-        if (0 === $this->total) {
-            return 0;
-        }
-
-        return ($this->page - 1) * $this->maxPerPage + 1;
-    }
-
-    public function getLastIndice(): int
-    {
-        if (0 === $this->total) {
-            return 0;
-        }
-
-        return min($this->page * $this->maxPerPage, $this->total);
-    }
-
-    /**
-     * Get array of page numbers for pagination links.
-     */
-    public function getLinks(int $nbLinks = 5): array
-    {
-        $lastPage = $this->getLastPage();
-        $links = [];
-
-        $start = max(1, $this->page - (int) floor($nbLinks / 2));
-        $end = min($lastPage, $start + $nbLinks - 1);
-        $start = max(1, $end - $nbLinks + 1);
-
-        for ($i = $start; $i <= $end; ++$i) {
-            $links[] = $i;
-        }
-
-        return $links;
     }
 }

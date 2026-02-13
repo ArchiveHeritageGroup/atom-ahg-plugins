@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\PaginationService;
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *
@@ -26,22 +27,27 @@ class RightsHolderListAction extends AhgController
             $request->limit = $this->config('app_hits_per_page');
         }
 
-        $criteria = new Criteria();
-        $criteria->addDescendingOrderByColumn(QubitObject::UPDATED_AT);
-
-        if (isset($request->subquery)) {
-            $criteria->addJoin(QubitRightsHolder::ID, QubitActorI18n::ID);
-            $criteria->add(QubitActorI18n::CULTURE, $this->culture());
-            $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->subquery}%", Criteria::LIKE);
-        } else {
+        if (!isset($request->subquery)) {
             $this->redirect(['module' => 'rightsholder', 'action' => 'browse']);
         }
 
-        // Page results
-        $this->pager = new QubitPager('QubitRightsHolder');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($request->limit);
-        $this->pager->setPage($request->page);
+        if (class_exists('QubitPager')) {
+            // === Propel mode (existing code, unchanged) ===
+            $criteria = new Criteria();
+            $criteria->addDescendingOrderByColumn(QubitObject::UPDATED_AT);
+            $criteria->addJoin(QubitRightsHolder::ID, QubitActorI18n::ID);
+            $criteria->add(QubitActorI18n::CULTURE, $this->culture());
+            $criteria->add(QubitActorI18n::AUTHORIZED_FORM_OF_NAME, "%{$request->subquery}%", Criteria::LIKE);
+
+            // Page results
+            $this->pager = new QubitPager('QubitRightsHolder');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setMaxPerPage($request->limit);
+            $this->pager->setPage($request->page);
+        } else {
+            // === Standalone mode — PaginationService ===
+            $this->pager = PaginationService::paginateActors('rights_holder', $this->culture(), $request->subquery ?? null, 'updated_at_desc', (int)($request->page ?? 1), (int)$request->limit);
+        }
 
         $this->rightsHolders = $this->pager->getResults();
     }

@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use AtomFramework\Services\Pagination\PaginationService;
 use AtomFramework\Services\Write\WriteServiceFactory;
 /*
  * Physical Object module actions — ahgStorageManagePlugin
@@ -185,22 +186,28 @@ class physicalobjectActions extends AhgController
             $request->limit = $this->config('app_hits_per_page');
         }
 
-        $criteria = new Criteria();
-        $criteria->addJoin(QubitPhysicalObject::ID, QubitPhysicalObjectI18n::ID);
-        $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->culture());
+        if (class_exists('QubitPager')) {
+            // === Propel mode (existing code, unchanged) ===
+            $criteria = new Criteria();
+            $criteria->addJoin(QubitPhysicalObject::ID, QubitPhysicalObjectI18n::ID);
+            $criteria->add(QubitPhysicalObjectI18n::CULTURE, $this->culture());
 
-        if ($this->config('app_markdown_enabled', true)) {
-            $criteria->add(QubitPhysicalObjectI18n::NAME, "%{$request->query}%", Criteria::LIKE);
+            if ($this->config('app_markdown_enabled', true)) {
+                $criteria->add(QubitPhysicalObjectI18n::NAME, "%{$request->query}%", Criteria::LIKE);
+            } else {
+                $criteria->add(QubitPhysicalObjectI18n::NAME, "{$request->query}%", Criteria::LIKE);
+            }
+
+            $criteria->addAscendingOrderByColumn(QubitPhysicalObjectI18n::NAME);
+
+            $this->pager = new QubitPager('QubitPhysicalObject');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setMaxPerPage($request->limit);
+            $this->pager->setPage(1);
         } else {
-            $criteria->add(QubitPhysicalObjectI18n::NAME, "{$request->query}%", Criteria::LIKE);
+            // === Standalone mode — PaginationService ===
+            $this->pager = PaginationService::paginatePhysicalObjects($this->culture(), $request->query, 'name_asc', 1, $request->limit);
         }
-
-        $criteria->addAscendingOrderByColumn(QubitPhysicalObjectI18n::NAME);
-
-        $this->pager = new QubitPager('QubitPhysicalObject');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($request->limit);
-        $this->pager->setPage(1);
 
         $this->physicalObjects = $this->pager->getResults();
     }
