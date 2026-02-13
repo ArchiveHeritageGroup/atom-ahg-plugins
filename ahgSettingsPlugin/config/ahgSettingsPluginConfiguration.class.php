@@ -25,6 +25,9 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         $router->any('admin_ahg_settings_ai_services', '/admin/ahg-settings/ai-services', 'aiServices');
         $router->any('admin_ahg_settings_email', '/admin/ahg-settings/email', 'email');
 
+        // Settings index (short URL alias)
+        $router->any('settings_index', '/settings', 'index');
+
         // Settings index and section
         $router->any('ahg_settings_index', '/ahgSettings/index', 'index');
 

@@ -47,6 +47,7 @@ $hasDedupe = isPluginActive('ahgDedupePlugin');
 $hasForms = isPluginActive('ahgFormsPlugin');
 $hasDoi = isPluginActive('ahgDoiPlugin');
 $hasHeritage2 = isPluginActive('ahgHeritagePlugin');
+$hasIngest = isPluginActive('ahgIngestPlugin');
 // Zimbabwe Compliance Plugins
 $hasCDPA = isPluginActive('ahgCDPAPlugin');
 $hasNAZ = isPluginActive('ahgNAZPlugin');
@@ -626,8 +627,8 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasDataMigration || $hasHeritage2): ?>
-    <!-- Data Migration & Heritage Row -->
+    <?php if ($hasDataMigration || $hasHeritage2 || $hasIngest): ?>
+    <!-- Data Migration, Ingest & Heritage Row -->
     <div class="row mb-4">
         <?php if ($hasDataMigration): ?>
         <!-- Data Migration -->
@@ -648,6 +649,28 @@ $canManage = $isAdmin || $isEditor;
                     </li>
                     <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Migration History'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasIngest): ?>
+        <!-- Data Ingest -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
+                    <h5 class="mb-0"><i class="fas fa-file-import me-2"></i><?php echo __('Data Ingest'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Ingest Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('New Ingest'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'downloadTemplate', 'sector' => 'archive']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('CSV Template'); ?></a>
                     </li>
                 </ul>
             </div>

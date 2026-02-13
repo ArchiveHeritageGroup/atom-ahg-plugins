@@ -29,6 +29,7 @@ class AhgSettingsSectionAction extends AhgController
         'jobs' => ['label' => 'Background Jobs', 'icon' => 'fa-tasks'],
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
 		'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
+        'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
     ];
 
     protected $checkboxFields = [
@@ -53,6 +54,12 @@ class AhgSettingsSectionAction extends AhgController
         'photos' => ['photo_create_thumbnails', 'photo_extract_exif', 'photo_auto_rotate'],
         'jobs' => ['jobs_enabled', 'jobs_notify_failure'],
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
+        'ingest' => [
+            'ingest_ner', 'ingest_ocr', 'ingest_virus_scan', 'ingest_summarize',
+            'ingest_spellcheck', 'ingest_translate', 'ingest_format_id', 'ingest_face_detect',
+            'ingest_create_records', 'ingest_generate_sip', 'ingest_generate_aip', 'ingest_generate_dip',
+            'ingest_thumbnails', 'ingest_reference',
+        ],
     ];
 
     
@@ -62,6 +69,7 @@ class AhgSettingsSectionAction extends AhgController
         'data_protection' => 'ahgDataProtectionPlugin',
         'photos' => 'ahgConditionPlugin',
         'fuseki' => 'ahgRicExplorerPlugin',
+        'ingest' => 'ahgIngestPlugin',
         'audit' => 'ahgAuditTrailPlugin',
         'faces' => 'ahgFaceDetectionPlugin',
         'multi_tenant' => 'ahgMultiTenantPlugin',

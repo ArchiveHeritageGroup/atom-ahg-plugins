@@ -268,6 +268,17 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // Ingest - show when ahgIngestPlugin is enabled
+        $hasIngest = in_array('ahgIngestPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasIngest) {
+            $this->sections['ingest'] = [
+                'label' => 'Data Ingest',
+                'icon' => 'fa-file-import',
+                'description' => 'Default processing options for batch ingest (NER, OCR, virus scan, summarize, etc.)',
+                'url' => 'admin/ahg-settings/section?section=ingest'
+            ];
+        }
+
         // Services Monitor - always available
         $this->sections['services'] = [
             'label' => 'Services Monitor',
