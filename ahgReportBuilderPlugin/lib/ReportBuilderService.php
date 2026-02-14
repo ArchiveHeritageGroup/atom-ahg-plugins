@@ -27,8 +27,6 @@ class ReportBuilderService
     {
         $query = DB::table('custom_report')
             ->select('*')
-            ->orderBy('category')
-            ->orderBy('sort_order')
             ->orderBy('name');
 
         if ($userId !== null) {

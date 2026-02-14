@@ -259,8 +259,8 @@ class ReportScheduler
         $sectionService = new SectionService();
         $sections = $sectionService->getSections($schedule->custom_report_id);
 
-        $exporter = new WordExporter();
-        $exporter->generate($report, $sections, $reportData, $allColumns, $filePath);
+        $exporter = new WordExporter($report, $sections, $reportData, $allColumns);
+        $exporter->generate($filePath);
     }
 
     /**
