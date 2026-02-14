@@ -219,6 +219,11 @@
         "name": "ahgVendorPlugin",
         "description": "Third-party vendor management",
         "category": "integration"
+      },
+      {
+        "name": "ahgPortableExportPlugin",
+        "description": "Standalone portable catalogue viewer for CD/USB/ZIP offline distribution",
+        "category": "export"
       }
     ]
   },
@@ -241,7 +246,8 @@
     "standards": "Archival standards (RiC, EAD, etc.)",
     "accounting": "Heritage asset accounting",
     "provenance": "Provenance tracking",
-    "user-engagement": "User engagement features"
+    "user-engagement": "User engagement features",
+    "export": "Data export and portable distribution"
   },
-  "updated_at": "2026-01-22T10:34:00Z"
+  "updated_at": "2026-02-14T12:00:00Z"
 }
