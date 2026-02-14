@@ -30,6 +30,7 @@ class AhgSettingsSectionAction extends AhgController
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
 		'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
         'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
+        'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'AES-256-GCM encryption for files and database fields'],
     ];
 
     protected $checkboxFields = [
@@ -59,6 +60,12 @@ class AhgSettingsSectionAction extends AhgController
             'ingest_spellcheck', 'ingest_translate', 'ingest_format_id', 'ingest_face_detect',
             'ingest_create_records', 'ingest_generate_sip', 'ingest_generate_aip', 'ingest_generate_dip',
             'ingest_thumbnails', 'ingest_reference',
+        ],
+        'encryption' => [
+            'encryption_enabled', 'encryption_encrypt_derivatives',
+            'encryption_field_contact_details', 'encryption_field_financial_data',
+            'encryption_field_donor_information', 'encryption_field_personal_notes',
+            'encryption_field_access_restrictions',
         ],
     ];
 

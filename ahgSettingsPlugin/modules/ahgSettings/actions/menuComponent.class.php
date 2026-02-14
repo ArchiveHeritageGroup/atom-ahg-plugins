@@ -57,6 +57,10 @@ class ahgSettingsMenuComponent extends AhgComponents
                 'action' => 'dipUpload',
             ],
             [
+                'label' => $i18n->__('Encryption'),
+                'action' => 'encryption',
+            ],
+            [
                 'label' => $i18n->__('Finding Aid'),
                 'action' => 'findingAid',
             ],

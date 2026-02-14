@@ -332,7 +332,12 @@ class ahgSettingsActions extends AhgController
                             // Empty = inherit: delete sector setting if exists
                             $propelSetting = QubitSetting::getByName($fieldName);
                             if ($propelSetting) {
-                                $propelSetting->delete();
+                                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                                    \Illuminate\Database\Capsule\Manager::table('setting_i18n')->where('id', $propelSetting->id)->delete();
+                                    \Illuminate\Database\Capsule\Manager::table('setting')->where('id', $propelSetting->id)->delete();
+                                } else {
+                                    $propelSetting->delete();
+                                }
                             }
                         } else {
                             // Save sector override via WriteServiceFactory
@@ -455,5 +460,11 @@ class ahgSettingsActions extends AhgController
     public function executeSystemInfo($request)
     {
         return $this->executeSettingsAction('systemInfoAction', $request);
+    }
+
+    public function executeEncryption($request)
+    {
+        // Redirect to AHG Settings section page with encryption section
+        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'encryption']);
     }
 }

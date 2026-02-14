@@ -89,7 +89,10 @@ class mediaActions extends AhgController
     }
 
     /**
-     * Get the full file path for a digital object
+     * Get the full file path for a digital object.
+     *
+     * If the file is encrypted (AHG-ENC-V1 header), it is transparently
+     * decrypted to a temp file and the temp path is returned.
      */
     protected function getFilePath($digitalObject): ?string
     {
@@ -116,6 +119,18 @@ class mediaActions extends AhgController
         // Security: ensure path is within web directory
         if (!$fullPath || !str_starts_with($fullPath, realpath($webDir))) {
             return null;
+        }
+
+        // Encryption hook: decrypt to temp if file is encrypted
+        if (class_exists('\\AtomFramework\\Core\\Security\\EncryptionService')
+            && \AtomFramework\Core\Security\EncryptionService::isEncryptedFile($fullPath)) {
+            try {
+                return \AtomFramework\Core\Security\FileEncryptionService::decryptToTemp($fullPath);
+            } catch (\Exception $e) {
+                error_log("Media decrypt failed for {$fullPath}: " . $e->getMessage());
+
+                return null;
+            }
         }
 
         return $fullPath;
@@ -427,7 +442,13 @@ class mediaActions extends AhgController
         }
 
         try {
-            DB::table('media_snippets')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('media_snippets')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM media_snippets WHERE id = ?');
+                $stmt->execute([$id]);
+            }
 
             echo json_encode(['success' => true]);
         } catch (Exception $e) {
@@ -637,7 +658,13 @@ PHP;
             $this->getResponse()->setContentType('application/json');
 
             try {
-                DB::table('media_transcription')->where('digital_object_id', $id)->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('media_transcription')->where('digital_object_id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM media_transcription WHERE digital_object_id = ?');
+                    $stmt->execute([$id]);
+                }
                 echo json_encode(['success' => true]);
             } catch (Exception $e) {
                 echo json_encode(['error' => $e->getMessage()]);

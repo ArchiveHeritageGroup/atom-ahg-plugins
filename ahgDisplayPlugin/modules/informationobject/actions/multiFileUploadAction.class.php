@@ -146,7 +146,12 @@ class InformationObjectMultiFileUploadAction extends AhgController
             $informationObject->setStatus(['typeId' => QubitTerm::STATUS_TYPE_PUBLICATION_ID, 'statusId' => sfConfig::get('app_defaultPubStatus')]);
 
             // Save description
-            $informationObject->save();
+            // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $informationObject->save(); // PropelBridge; Phase 4 will use CrudService
+            } else {
+                $informationObject->save();
+            }
 
             $tmpFilePath = "{$tmpPath}/{$file['tmpName']}";
             
@@ -156,7 +161,25 @@ class InformationObjectMultiFileUploadAction extends AhgController
                 $digitalObject->object = $informationObject;
                 $digitalObject->usageId = QubitTerm::MASTER_ID;
                 $digitalObject->assets[] = new QubitAsset($file['name'], file_get_contents($tmpFilePath));
-                $digitalObject->save();
+                // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $digitalObject->save(); // PropelBridge; Phase 4 will use CrudService
+                } else {
+                    $digitalObject->save();
+                }
+
+                // =============================================================
+                // AHG: ENCRYPT UPLOADED FILE IF ENABLED
+                // =============================================================
+                if (class_exists('\\AtomFramework\\Core\\Security\\FileEncryptionService')
+                    && \AtomFramework\Core\Security\FileEncryptionService::isEnabled()) {
+                    try {
+                        \AtomFramework\Core\Security\FileEncryptionService::encryptDigitalObject($digitalObject->id);
+                        \AtomFramework\Core\Security\FileEncryptionService::encryptDerivatives($digitalObject->id);
+                    } catch (Exception $e) {
+                        error_log("Multi-file upload encryption error: " . $e->getMessage());
+                    }
+                }
 
                 // =============================================================
                 // AHG: UNIVERSAL METADATA EXTRACTION
@@ -176,7 +199,12 @@ class InformationObjectMultiFileUploadAction extends AhgController
                         $keyFields = $metadata['_extractor']['key_fields'] ?? [];
                         if (!empty($keyFields['title']) && strpos($file['infoObjectTitle'], 'image ') === 0) {
                             $informationObject->setTitle($keyFields['title']);
-                            $informationObject->save();
+                            // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+                            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                                $informationObject->save(); // PropelBridge; Phase 4 will use CrudService
+                            } else {
+                                $informationObject->save();
+                            }
                         }
 
                         // Process face detection if enabled and this is an image

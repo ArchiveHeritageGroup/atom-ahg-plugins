@@ -30,7 +30,12 @@ class SettingsDeleteAction extends AhgController
 
         // check that the setting is deleteable
         if ($setting->isDeleteable()) {
-            $setting->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                \Illuminate\Database\Capsule\Manager::table('setting_i18n')->where('id', $setting->id)->delete();
+                \Illuminate\Database\Capsule\Manager::table('setting')->where('id', $setting->id)->delete();
+            } else {
+                $setting->delete();
+            }
         }
         // TODO: else populate an error?
 

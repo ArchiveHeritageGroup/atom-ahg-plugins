@@ -1410,6 +1410,180 @@
                                 </div>
                             @break
 
+                            @case('encryption')
+                                <!-- Encryption Master Toggle -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-dark text-white">
+                                        <h5 class="mb-0"><i class="fas fa-lock me-2"></i>{{ __('Encryption Configuration') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">{{ __('AES-256-GCM encryption for digital object files and sensitive database fields. Requires an encryption key at /etc/atom/encryption.key.') }}</p>
+
+                                        @php
+                                            $keyExists = file_exists('/etc/atom/encryption.key');
+                                            $keyPerms = $keyExists ? substr(sprintf('%o', fileperms('/etc/atom/encryption.key')), -4) : null;
+                                        @endphp
+
+                                        <!-- Key Status -->
+                                        <div class="alert {{ $keyExists ? 'alert-success' : 'alert-warning' }} mb-3">
+                                            <i class="fas {{ $keyExists ? 'fa-check-circle' : 'fa-exclamation-triangle' }} me-2"></i>
+                                            @if ($keyExists)
+                                                <strong>{{ __('Encryption key found') }}</strong>
+                                                <span class="ms-2 text-muted">{{ __('Path:') }} <code>/etc/atom/encryption.key</code> | {{ __('Permissions:') }} <code>{{ $keyPerms }}</code></span>
+                                                @if ($keyPerms !== '0600')
+                                                    <br><small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>{{ __('Permissions should be 0600 for security.') }}</small>
+                                                @endif
+                                            @else
+                                                <strong>{{ __('No encryption key found') }}</strong>
+                                                <br><small>{{ __('Generate with:') }} <code>php bin/atom encryption:key --generate</code></small>
+                                            @endif
+                                        </div>
+
+                                        <!-- Master Toggle -->
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="encryption_enabled"
+                                                   name="settings[encryption_enabled]" value="true"
+                                                   {{ ($settings['encryption_enabled'] ?? '') === 'true' ? 'checked' : '' }}
+                                                   {{ !$keyExists ? 'disabled' : '' }}>
+                                            <label class="form-check-label" for="encryption_enabled">
+                                                <strong>{{ __('Enable Encryption') }}</strong>
+                                            </label>
+                                        </div>
+                                        <div class="form-text mb-3">{{ __('Master toggle. When enabled, new file uploads will be encrypted automatically.') }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Layer 1: File Encryption -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-file-shield me-2"></i>{{ __('Layer 1: Digital Object Encryption') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">{{ __('Encrypts uploaded files (masters and derivatives) on disk using AES-256-GCM.') }}</p>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="encryption_encrypt_derivatives"
+                                                   name="settings[encryption_encrypt_derivatives]" value="true"
+                                                   {{ ($settings['encryption_encrypt_derivatives'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="encryption_encrypt_derivatives">
+                                                <strong>{{ __('Encrypt derivatives') }}</strong>
+                                            </label>
+                                        </div>
+                                        <div class="form-text mb-3">{{ __('Also encrypt thumbnails and reference images. Recommended for full protection.') }}</div>
+
+                                        @php
+                                            $totalDOs = 0;
+                                            try {
+                                                $totalDOs = \Illuminate\Database\Capsule\Manager::table('digital_object')
+                                                    ->whereNotNull('path')
+                                                    ->whereNotNull('name')
+                                                    ->count();
+                                            } catch (\Exception $e) {}
+                                        @endphp
+
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>{{ $totalDOs }}</strong> {{ __('digital objects on disk.') }}
+                                            <br><small>{{ __('To encrypt existing files:') }} <code>php bin/atom encryption:encrypt-files --limit=100</code></small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Layer 2: Field Encryption -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-database me-2"></i>{{ __('Layer 2: Database Field Encryption') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">{{ __('Transparent encryption of sensitive database columns. Toggle categories below, then run the CLI to encrypt existing data.') }}</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="encryption_field_contact_details"
+                                                           name="settings[encryption_field_contact_details]" value="true"
+                                                           {{ ($settings['encryption_field_contact_details'] ?? '') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="encryption_field_contact_details">
+                                                        <strong><i class="fas fa-address-card me-1 text-primary"></i>{{ __('Contact Details') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Email, address, telephone, fax, contact person (contact_information tables).') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="encryption_field_financial_data"
+                                                           name="settings[encryption_field_financial_data]" value="true"
+                                                           {{ ($settings['encryption_field_financial_data'] ?? '') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="encryption_field_financial_data">
+                                                        <strong><i class="fas fa-coins me-1 text-warning"></i>{{ __('Financial Data') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Appraisal values in accession records.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="encryption_field_donor_information"
+                                                           name="settings[encryption_field_donor_information]" value="true"
+                                                           {{ ($settings['encryption_field_donor_information'] ?? '') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="encryption_field_donor_information">
+                                                        <strong><i class="fas fa-user-shield me-1 text-success"></i>{{ __('Donor Information') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Actor history (biographical/administrative history for donors).') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="encryption_field_personal_notes"
+                                                           name="settings[encryption_field_personal_notes]" value="true"
+                                                           {{ ($settings['encryption_field_personal_notes'] ?? '') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="encryption_field_personal_notes">
+                                                        <strong><i class="fas fa-sticky-note me-1 text-info"></i>{{ __('Personal Notes') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Note content (internal staff notes on records).') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="encryption_field_access_restrictions"
+                                                           name="settings[encryption_field_access_restrictions]" value="true"
+                                                           {{ ($settings['encryption_field_access_restrictions'] ?? '') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="encryption_field_access_restrictions">
+                                                        <strong><i class="fas fa-ban me-1 text-danger"></i>{{ __('Access Restrictions') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Rights notes (access restriction details in rights statements).') }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="alert alert-secondary mt-3 mb-0">
+                                            <i class="fas fa-terminal me-2"></i>
+                                            <strong>{{ __('CLI Commands') }}</strong>
+                                            <br><code>php bin/atom encryption:encrypt-fields --category=contact_details</code> — {{ __('Encrypt a category') }}
+                                            <br><code>php bin/atom encryption:encrypt-fields --category=contact_details --reverse</code> — {{ __('Decrypt a category') }}
+                                            <br><code>php bin/atom encryption:encrypt-fields --list</code> — {{ __('Show category status') }}
+                                            <br><code>php bin/atom encryption:status</code> — {{ __('Full encryption dashboard') }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Compliance Note -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-gavel me-2"></i>{{ __('Compliance') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2">{{ __('Encryption at rest satisfies requirements from:') }}</p>
+                                        <ul class="mb-0">
+                                            <li><strong>POPIA</strong> — {{ __('Protection of Personal Information Act (South Africa), Section 19') }}</li>
+                                            <li><strong>GDPR</strong> — {{ __('General Data Protection Regulation (EU), Article 32') }}</li>
+                                            <li><strong>CCPA</strong> — {{ __('California Consumer Privacy Act, reasonable security measures') }}</li>
+                                            <li><strong>NARSSA</strong> — {{ __('National Archives and Record Service of South Africa') }}</li>
+                                            <li><strong>PAIA</strong> — {{ __('Promotion of Access to Information Act, secure record keeping') }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->
