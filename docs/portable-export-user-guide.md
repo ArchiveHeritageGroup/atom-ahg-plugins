@@ -10,7 +10,7 @@ Export your catalogue as a self-contained, portable HTML/JS application on CD, U
 ```
 +-------------------------------------------------------------+
 |                   PORTABLE EXPORT                            |
-|              ahgPortableExportPlugin v1.0.0                  |
+|              ahgPortableExportPlugin v1.1.0                  |
 +-------------------------------------------------------------+
 |                                                              |
 |  SERVER SIDE                                                 |
@@ -47,29 +47,40 @@ Export your catalogue as a self-contained, portable HTML/JS application on CD, U
 +-------------------------------------------------------------+
 |                   CAPABILITIES                               |
 +-------------------------------------------------------------+
-|  [Browse]   Tree Navigation   - Hierarchical tree mirroring  |
-|                                 AtoM fonds/series/file/item  |
-|  [Search]   Full-Text Search  - FlexSearch-powered instant   |
-|                                 client-side search           |
-|  [View]     Detail View       - All ISAD(G) fields, access  |
-|                                 points, dates, creators      |
-|  [Images]   Digital Objects   - Inline image + PDF viewing   |
-|  [Scope]    Flexible Scope    - Entire catalogue, by fonds,  |
-|                                 or by repository             |
-|  [Edit]     Edit Mode         - Add notes, import files,     |
-|                                 export researcher exchange   |
-|  [Brand]    Custom Branding   - Title, subtitle, footer      |
-|  [Share]    Download Tokens   - Secure shareable links with  |
-|                                 expiry and download limits   |
-|  [CLI]      Command Line      - Scriptable via CLI command   |
-|  [Offline]  Zero Server       - Works from any filesystem,   |
-|                                 no internet required         |
+|  [Browse]     Tree Navigation    - Hierarchical tree         |
+|                                    mirroring AtoM hierarchy  |
+|  [Search]     Full-Text Search   - FlexSearch-powered        |
+|                                    instant client-side search|
+|  [View]       Detail View        - All ISAD(G) fields,      |
+|                                    access points, dates      |
+|  [Images]     Digital Objects    - Inline image + PDF viewing|
+|  [Scope]      Flexible Scope     - Entire catalogue, fonds, |
+|                                    repository, or clipboard  |
+|  [Edit]       Edit Mode          - Add notes, import files,  |
+|                                    export researcher exchange|
+|  [Brand]      Custom Branding    - Title, subtitle, footer   |
+|  [Share]      Download Tokens    - Secure shareable links    |
+|                                    with expiry & limits      |
+|  [Clipboard]  Clipboard Export   - Export clipboard items as |
+|                                    portable catalogue        |
+|  [Quick]      Quick Export       - One-click export from any |
+|                                    description page          |
+|  [Wizard]     Step-by-Step UI    - 4-step guided wizard for  |
+|                                    configuring exports       |
+|  [Retention]  Auto-Cleanup       - Automatic deletion of     |
+|                                    expired exports           |
+|  [Settings]   Admin Settings     - Configurable defaults at  |
+|                                    Admin > AHG Settings      |
+|  [CLI]        Command Line       - Scriptable via CLI        |
+|  [Offline]    Zero Server        - Works from any filesystem |
 +-------------------------------------------------------------+
 ```
 
 ---
 
 ## How to Access
+
+### Main Export Page
 ```
   Admin Menu
       |
@@ -82,65 +93,139 @@ Export your catalogue as a self-contained, portable HTML/JS application on CD, U
       v
    /portable-export
       |
-      +---> New Export form
+      +---> 4-step wizard for new exports
       |       |
-      |       +---> Select scope (All / Fonds / Repository)
-      |       +---> Choose mode (Read Only / Editable)
-      |       +---> Set branding (title, subtitle, footer)
-      |       +---> Select objects (thumbs, refs, masters)
-      |       +---> Start Export
-      |               |
-      |               +---> Progress bar (real-time polling)
-      |               +---> Download ZIP when complete
+      |       +---> Step 1: Scope (All / Fonds / Repository)
+      |       +---> Step 2: Content (objects, mode)
+      |       +---> Step 3: Configure (title, language, branding)
+      |       +---> Step 4: Review & Generate
       |
       +---> Past Exports table
       |       |
       |       +---> Download completed exports
       |       +---> Generate share links
       |       +---> Delete old exports
+      |       +---> View expiry dates
       |
       +---> CLI: php symfony portable:export
+      +---> CLI: php symfony portable:cleanup
+```
+
+### Quick Export from Description Pages
+```
+  Any Information Object page
+      |
+      v
+   Sidebar > Export section
+      |
+      v
+   "Portable Viewer" link
+      |
+      +---> One click starts fonds-level export
+      +---> Redirects to /portable-export when started
+```
+
+### Clipboard Export
+```
+  Clipboard > Export page
+      |
+      v
+   "Portable Catalogue" button (next to Export/Cancel)
+      |
+      +---> Exports all clipboard items as portable viewer
+      +---> Items + their descendants included
+      +---> Redirects to /portable-export when started
 ```
 
 ---
 
-## Creating an Export (Web UI)
+## Creating an Export (Web UI — 4-Step Wizard)
 
-### Step 1: Open the Export Page
-```
-  AHG Settings > Portable Export tile
-  or navigate directly to /portable-export
-```
-
-### Step 2: Configure the Export
+### Step 1: Scope — What to Export
 ```
   +-----------------------------------------------------------+
-  |  New Export                                                 |
+  |  Step 1 of 4: Scope                                        |
   +-----------------------------------------------------------+
   |                                                             |
-  |  Export Title:    [ Portable Catalogue          ]           |
+  |  What would you like to export?                            |
+  |                                                             |
+  |  (o) Entire Catalogue                                       |
+  |  ( ) Specific Fonds  [ enter slug__________________ ]      |
+  |  ( ) By Repository   [ select repository_________ v ]      |
+  |                                                             |
+  |                                   [ Next > ]               |
+  +-----------------------------------------------------------+
+```
+
+### Step 2: Content — Digital Objects & Mode
+```
+  +-----------------------------------------------------------+
+  |  Step 2 of 4: Content                                      |
+  +-----------------------------------------------------------+
+  |                                                             |
+  |  Digital Objects:                                           |
+  |  [x] Include digital objects                                |
+  |                                                             |
+  |  Image Derivatives:                                         |
+  |  [x] Thumbnails   (small previews, ~150px)                 |
+  |  [x] References   (medium display, ~480-800px)             |
+  |  [ ] Masters      (original files — can be very large!)    |
+  |                                                             |
+  |  Viewer Mode:                                               |
+  |  [x] Read Only    (browse + search only)                    |
+  |  [ ] Editable     (adds notes + file import)                |
+  |                                                             |
+  |                        [ < Back ] [ Next > ]               |
+  +-----------------------------------------------------------+
+```
+
+**About image derivatives:**
+- **Thumbnails** — Small preview images (~150px wide) used in search results and tree navigation
+- **References** — Medium-sized images (~480-800px) used for on-screen viewing in the detail panel
+- **Masters** — Original full-resolution files as uploaded. These can be very large (10-50+ MB each for high-res scans/TIFFs). Only include if you need print-quality originals for offline use. Excluding masters is recommended for most use cases.
+
+### Step 3: Configure — Title, Language, Branding
+```
+  +-----------------------------------------------------------+
+  |  Step 3 of 4: Configure                                    |
+  +-----------------------------------------------------------+
+  |                                                             |
+  |  Export Title:    [ Portable Catalogue              ]       |
   |  Language:        [ English         v ]                     |
-  |  Viewer Mode:     [ Read Only       v ]                     |
   |                                                             |
-  |  Scope:           [ Entire Catalogue v ]                    |
-  |                   [ Specific Fonds     ]  <- enter slug     |
-  |                   [ By Repository      ]  <- select repo    |
+  |  Branding (Optional):                                       |
+  |    Viewer Title:  [ My Archive Collection            ]      |
+  |    Subtitle:      [ Special Collections              ]      |
+  |    Footer:        [ (c) 2026 My Institution          ]      |
   |                                                             |
-  |  Digital Objects: [x] Digital Objects                        |
-  |                   [x] Thumbnails                            |
-  |                   [x] Reference Images                      |
-  |                   [ ] Master Files (large!)                  |
-  |                                                             |
-  |  Branding:                                                  |
-  |    Viewer Title:  [ My Archive Collection     ]             |
-  |    Subtitle:      [ Special Collections       ]             |
-  |    Footer:        [ (c) 2026 My Institution   ]             |
-  |                                                             |
-  |  [ Start Export ]                                           |
+  |                        [ < Back ] [ Next > ]               |
   +-----------------------------------------------------------+
 ```
 
-### Step 3: Wait for Processing
+### Step 4: Review & Generate
+```
+  +-----------------------------------------------------------+
+  |  Step 4 of 4: Review & Generate                            |
+  +-----------------------------------------------------------+
+  |                                                             |
+  |  +-------------------------------------------------------+ |
+  |  | Setting              | Value                          | |
+  |  +-------------------------------------------------------+ |
+  |  | Scope                | Entire Catalogue               | |
+  |  | Digital Objects      | Yes                            | |
+  |  | Thumbnails           | Yes                            | |
+  |  | References           | Yes                            | |
+  |  | Masters              | No                             | |
+  |  | Mode                 | Read Only                      | |
+  |  | Title                | Portable Catalogue             | |
+  |  | Language             | en                             | |
+  |  +-------------------------------------------------------+ |
+  |                                                             |
+  |  [ < Back ] [ Start Export ]                                |
+  +-----------------------------------------------------------+
+```
+
+### Progress
 ```
   +-----------------------------------------------------------+
   |  Export Progress                                            |
@@ -159,14 +244,53 @@ Progress stages:
 - 80-90%: Packaging viewer
 - 90-100%: Creating ZIP archive
 
-### Step 4: Download
+### Download
 ```
   +-----------------------------------------------------------+
   |  Export complete! 1,234 descriptions, 567 objects (45 MB)  |
+  |  Expires: 2026-03-16                                       |
   |                                                             |
   |  [ Download ZIP ]   [ Share Link ]                          |
   +-----------------------------------------------------------+
 ```
+
+---
+
+## Quick Export from Description Pages
+
+When viewing any information object (fonds, series, file, or item), the sidebar "Export" section includes a **Portable Viewer** link:
+
+```
+  Export
+  +---------------------------------------+
+  |  Dublin Core 1.1 XML                   |
+  |  EAD 2002 XML                          |
+  |  Portable Viewer  <-- click this       |
+  +---------------------------------------+
+```
+
+Clicking starts a fonds-level export using default settings from Admin > AHG Settings > Portable Export. The export title is set to the description's title and you are redirected to `/portable-export` to monitor progress.
+
+This button can be hidden via: Admin > AHG Settings > Portable Export > "Show export button on description pages".
+
+---
+
+## Clipboard Export
+
+The clipboard export page (`/clipboard/export`) includes a **Portable Catalogue** button when the plugin is enabled:
+
+```
+  +-----------------------------------------------------------+
+  |  Export options                                             |
+  |  [type] [format] [include drafts] ...                      |
+  |                                                             |
+  |  [ Export ]  [ Portable Catalogue ]  [ Cancel ]            |
+  +-----------------------------------------------------------+
+```
+
+This exports all items currently in the clipboard as a portable viewer. Each item and its descendants are included.
+
+This button can be hidden via: Admin > AHG Settings > Portable Export > "Show export button on clipboard page".
 
 ---
 
@@ -216,6 +340,45 @@ php symfony portable:export --scope=all --title="My Collection" --culture=af
 | --export-id       | Process an existing export job by ID             |
 +-------------------+--------------------------------------------------+
 ```
+
+### Cleanup Command
+```bash
+# Delete expired exports
+php symfony portable:cleanup
+
+# Preview what would be deleted (no actual deletion)
+php symfony portable:cleanup --dry-run
+
+# Override retention period (delete exports older than N days)
+php symfony portable:cleanup --older-than=7
+```
+
+---
+
+## Admin Settings
+
+Navigate to **Admin > AHG Settings > Portable Export** to configure defaults.
+
+### Available Settings
+```
++--------------------------------------+------------------+---------------------------+
+| Setting                              | Default          | Description               |
++--------------------------------------+------------------+---------------------------+
+| Enable Portable Export               | true             | Master on/off toggle      |
+| Retention Period (days)              | 30               | Auto-delete after N days  |
+| Max Export Size (MB)                 | 2048             | Size limit per export     |
+| Default Mode                        | read_only        | Read Only or Editable     |
+| Include Digital Objects              | true             | Include objects by default |
+| Include Thumbnails                   | true             | Include thumbs by default |
+| Include Reference Images            | true             | Include refs by default   |
+| Include Master Files                | false            | Include originals         |
+| Default Language                     | en               | Default export language   |
+| Show on Description Pages           | true             | Portable Viewer sidebar   |
+| Show on Clipboard Page              | true             | Portable Catalogue button |
++--------------------------------------+------------------+---------------------------+
+```
+
+These defaults are used when starting exports from description pages or the clipboard. The full wizard allows overriding any default per export.
 
 ---
 
@@ -331,6 +494,29 @@ Tokens support:
 
 ---
 
+## Export Retention & Auto-Cleanup
+
+Exports are automatically assigned an expiry date based on the retention period setting (default: 30 days). The "Expires" column in the Past Exports table shows when each export will be eligible for deletion.
+
+### Automatic Cleanup
+
+Run the cleanup command periodically (e.g., via cron) to delete expired exports:
+
+```bash
+# Add to crontab — runs daily at 2am
+0 2 * * * cd /usr/share/nginx/archive && php symfony portable:cleanup >> /var/log/portable-cleanup.log 2>&1
+```
+
+The cleanup task:
+1. Finds exports where `expires_at` has passed
+2. Finds completed/failed exports older than the retention period
+3. Deletes the ZIP file, output directory, and database records
+4. Logs what was deleted
+
+Use `--dry-run` to preview without deleting.
+
+---
+
 ## Output Structure
 ```
   portable-export.zip
@@ -387,7 +573,7 @@ Tokens support:
   -> Browses catalogue, adds notes to descriptions
   -> Imports photos from field work
   -> Exports researcher-exchange.json
-  -> Submits back to archive on return
+  -> Submits back to archive via ahgResearcherPlugin
 ```
 
 ### Disaster Recovery Copy
@@ -402,6 +588,14 @@ Tokens support:
   Export specific repository holdings
   -> Include all metadata and reference images
   -> Provide as self-contained package to NARSSA
+```
+
+### Clipboard-Based Delivery
+```
+  Researcher adds specific items to clipboard
+  -> Clipboard > Export > Portable Catalogue
+  -> Only selected items + descendants exported
+  -> Lightweight, targeted delivery
 ```
 
 ---
@@ -423,5 +617,14 @@ Tokens support:
 +-------------------------------------------------------------+
 |  TIP: Share links expire after 7 days by default.            |
 |  Set a longer expiry for permanent sharing.                  |
++-------------------------------------------------------------+
+|  TIP: Set up portable:cleanup as a daily cron job to         |
+|  automatically remove expired exports and save disk space.   |
++-------------------------------------------------------------+
+|  TIP: Use the clipboard export for targeted deliveries —     |
+|  add specific items to clipboard, then export as portable.   |
++-------------------------------------------------------------+
+|  TIP: Configure default settings at Admin > AHG Settings >   |
+|  Portable Export to avoid repeating options each time.        |
 +-------------------------------------------------------------+
 ```
