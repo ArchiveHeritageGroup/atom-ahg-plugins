@@ -126,8 +126,8 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                     </div>
                     <?php if ($section->section_type === 'narrative'): ?>
                     <div class="section-body">
-                        <div id="quill_<?php echo $section->id; ?>" class="quill-editor"></div>
-                        <input type="hidden" id="quill_content_<?php echo $section->id; ?>" value="<?php echo htmlspecialchars($section->content ?? ''); ?>">
+                        <div id="quill_<?php echo $section->id; ?>" class="section-quill-editor" data-section-id="<?php echo $section->id; ?>"></div>
+                        <input type="hidden" id="sectionContent_<?php echo $section->id; ?>" value="<?php echo htmlspecialchars($section->content ?? ''); ?>">
                     </div>
                     <?php else: ?>
                     <div class="section-body">
@@ -440,7 +440,14 @@ window.reportBuilder = {
     allColumns: <?php echo json_encode($rawAllColumns); ?>,
     apiSaveUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiSave'])); ?>,
     apiDataUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiData'])); ?>,
-    apiChartUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiChartData'])); ?>
+    apiChartUrl: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiChartData'])); ?>,
+    apiUrls: {
+        sectionSave: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiSectionSave'])); ?>,
+        sectionDelete: '/api/report-builder/section/:id/delete',
+        sectionReorder: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiSectionReorder'])); ?>,
+        comment: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiComment'])); ?>,
+        statusChange: <?php echo json_encode(url_for(['module' => 'reportBuilder', 'action' => 'apiStatusChange'])); ?>
+    }
 };
 </script>
 
@@ -464,10 +471,193 @@ window.reportBuilder = {
 #previewHeaders th.sortable-chosen { background-color: #e3f2fd !important; }
 </style>
 
-<!-- Load CDN libraries first -->
+<!-- Section editor styles -->
+<link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/report-sections.css">
+
+<!-- Quill.js CDN -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+
+<!-- Load CDN libraries -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<!-- Load designer.js (handles all Sortable init for columns + layout + headers) -->
+<!-- Quill init (must load after Quill CDN) -->
+<script src="/plugins/ahgReportBuilderPlugin/web/js/quill-init.js"></script>
+
+<!-- Load designer.js (handles all Sortable init for columns + layout + headers + sections) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js"></script>
+
+<!-- Wire up section/comment UI -->
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle section editor panel
+    var btnAddSection = document.getElementById('btnAddSection');
+    if (btnAddSection) {
+        btnAddSection.addEventListener('click', function() {
+            var el = document.getElementById('sectionEditor');
+            if (el) {
+                var bsCollapse = bootstrap.Collapse.getOrCreateInstance(el);
+                bsCollapse.toggle();
+            }
+        });
+    }
+
+    // Toggle comment panel
+    var btnComments = document.getElementById('btnComments');
+    if (btnComments) {
+        btnComments.addEventListener('click', function() {
+            var el = document.getElementById('commentPanel');
+            if (el) {
+                var bsCollapse = bootstrap.Collapse.getOrCreateInstance(el);
+                bsCollapse.toggle();
+            }
+            loadComments();
+        });
+    }
+
+    // Add section buttons
+    document.querySelectorAll('.btn-add-section').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var sectionType = this.dataset.type;
+            if (typeof addReportSection === 'function') {
+                addReportSection(sectionType);
+            }
+        });
+    });
+
+    // Delete section buttons
+    document.querySelectorAll('.btn-delete-section').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var sectionEl = this.closest('.report-section');
+            if (sectionEl && typeof deleteReportSection === 'function') {
+                deleteReportSection(parseInt(sectionEl.dataset.sectionId, 10));
+            }
+        });
+    });
+
+    // Edit section buttons (toggle body visibility)
+    document.querySelectorAll('.btn-edit-section').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var sectionEl = this.closest('.report-section');
+            if (sectionEl) {
+                var body = sectionEl.querySelector('.section-body');
+                if (body) {
+                    body.style.display = body.style.display === 'none' ? '' : 'none';
+                }
+            }
+        });
+    });
+
+    // Section title auto-save
+    document.querySelectorAll('.section-title-input').forEach(function(input) {
+        var saveTimer = null;
+        input.addEventListener('input', function() {
+            clearTimeout(saveTimer);
+            var sectionEl = this.closest('.report-section');
+            if (!sectionEl) return;
+            var sectionId = parseInt(sectionEl.dataset.sectionId, 10);
+            var value = this.value;
+            saveTimer = setTimeout(function() {
+                if (typeof saveSectionContent === 'function') {
+                    saveSectionContent(sectionId, undefined, value);
+                }
+            }, 1500);
+        });
+    });
+
+    // Section sortable (drag-drop reorder)
+    var sectionsContainer = document.getElementById('sectionsContainer');
+    if (sectionsContainer && typeof Sortable !== 'undefined') {
+        new Sortable(sectionsContainer, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            draggable: '.report-section',
+            onEnd: function() {
+                var ids = [];
+                sectionsContainer.querySelectorAll('.report-section').forEach(function(el) {
+                    var id = parseInt(el.dataset.sectionId, 10);
+                    if (id) ids.push(id);
+                });
+                if (ids.length > 0 && window.reportBuilder && window.reportBuilder.apiUrls) {
+                    fetch(window.reportBuilder.apiUrls.sectionReorder, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ report_id: window.reportBuilder.reportId, section_ids: ids })
+                    });
+                }
+            }
+        });
+    }
+
+    // Add comment
+    var btnAddComment = document.getElementById('btnAddComment');
+    if (btnAddComment) {
+        btnAddComment.addEventListener('click', function() {
+            var input = document.getElementById('newCommentInput');
+            var content = input ? input.value.trim() : '';
+            if (!content || !window.reportBuilder || !window.reportBuilder.apiUrls) return;
+
+            fetch(window.reportBuilder.apiUrls.comment, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    form_action: 'create',
+                    report_id: window.reportBuilder.reportId,
+                    content: content
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    input.value = '';
+                    loadComments();
+                }
+            });
+        });
+    }
+
+    // Load comments
+    function loadComments() {
+        if (!window.reportBuilder || !window.reportBuilder.apiUrls) return;
+        var container = document.getElementById('commentsContainer');
+        if (!container) return;
+
+        fetch(window.reportBuilder.apiUrls.comment, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                form_action: 'list',
+                report_id: window.reportBuilder.reportId
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success && data.comments) {
+                if (data.comments.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center small mb-0">No comments yet</p>';
+                    return;
+                }
+                var html = '';
+                data.comments.forEach(function(c) {
+                    html += '<div class="comment-item ' + (c.is_resolved ? 'resolved' : '') + '">';
+                    html += '<div>' + escapeHtml(c.content) + '</div>';
+                    html += '<div class="comment-meta">' + (c.created_at || '') + '</div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            }
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+});
+</script>
 <?php end_slot() ?>
