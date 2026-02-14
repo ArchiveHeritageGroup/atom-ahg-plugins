@@ -1,0 +1,35 @@
+{
+    "name": "Portable Export",
+    "machine_name": "ahgPortableExportPlugin",
+    "version": "1.0.0",
+    "description": "Standalone portable HTML/JS viewer for offline catalogue access on CD, USB, or downloadable ZIP. Zero server required.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "requires": {
+        "atom_framework": ">=2.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "portable_export",
+        "portable_export_token"
+    ],
+    "category": "export",
+    "features": [
+        "Self-contained HTML/JS viewer for offline catalogue access",
+        "Export full or partial catalogue (fonds, repository, custom scope)",
+        "Client-side search with FlexSearch",
+        "Hierarchical tree navigation (MPPT-ordered)",
+        "Digital object inline viewing (images, PDFs)",
+        "Edit mode with researcher exchange format (v1.0)",
+        "CLI command: php symfony portable:export",
+        "Admin UI with background processing and progress tracking",
+        "Secure download tokens for sharing"
+    ],
+    "changelog": {
+        "1.0.0": "Initial release with full export pipeline and static viewer"
+    }
+}

@@ -70,6 +70,20 @@ $allCards['Preservation & Backup'] = [
     'btn_icon' => 'fa-cog',
 ];
 
+$hasPortableExport = in_array('ahgPortableExportPlugin', \sfProjectConfiguration::getActive()->getPlugins());
+if ($hasPortableExport) {
+    $allCards['Portable Export'] = [
+        'label' => 'Portable Export',
+        'icon' => 'fa-compact-disc',
+        'icon_prefix' => 'fas',
+        'description' => 'Export catalogue to CD, USB, or ZIP for offline viewing in any browser',
+        'url' => url_for(['module' => 'portableExport', 'action' => 'index']),
+        'color' => 'info',
+        'btn_text' => 'Export',
+        'btn_icon' => 'fa-box-arrow-up-right',
+    ];
+}
+
 // Sort alphabetically by label
 ksort($allCards);
 @endphp

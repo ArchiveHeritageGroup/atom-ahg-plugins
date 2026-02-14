@@ -1,0 +1,157 @@
+/**
+ * Portable Catalogue Viewer — Styles
+ * Built on Bootstrap 5, extending with viewer-specific styles.
+ */
+
+/* Tree navigation */
+.tree-root {
+  font-size: 0.875rem;
+}
+
+.tree-item {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tree-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.tree-item.active {
+  font-weight: 600;
+}
+
+.tree-toggle {
+  cursor: pointer;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.tree-toggle:hover {
+  opacity: 1;
+}
+
+.tree-label {
+  color: #333;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-label:hover {
+  color: #0d6efd;
+}
+
+/* Description detail */
+#description-detail .card-header h4 {
+  font-size: 1.25rem;
+}
+
+#description-detail h6.text-primary {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Search results */
+#search-results .list-group-item h6 {
+  font-size: 0.95rem;
+}
+
+#search-results mark {
+  background-color: #fff3cd;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Welcome screen */
+#welcome-screen .display-1 {
+  font-size: 4rem;
+  opacity: 0.3;
+}
+
+/* Print styles */
+@media print {
+  #main-nav,
+  #subtitle-bar,
+  #panel-tree,
+  #main-footer,
+  .btn {
+    display: none !important;
+  }
+
+  #panel-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  #description-detail .card {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #panel-tree {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+  }
+
+  .tree-item {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+  }
+}
+
+/* Import panel */
+.import-dropzone {
+  border: 2px dashed #dee2e6;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.import-dropzone:hover,
+.import-dropzone.drag-over {
+  border-color: #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.import-dropzone i {
+  font-size: 2rem;
+  opacity: 0.4;
+}
+
+/* Scrollbar styling for tree */
+#tree-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#tree-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#tree-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+#tree-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
