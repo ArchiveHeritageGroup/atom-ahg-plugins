@@ -117,6 +117,19 @@
   }
 }
 
+/* Edit toolbar — floating bottom bar */
+#edit-toolbar .position-fixed {
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+body.edit-mode {
+  padding-bottom: 60px;
+}
+
+body.edit-mode #main-footer {
+  margin-bottom: 60px;
+}
+
 /* Import panel */
 .import-dropzone {
   border: 2px dashed #dee2e6;
