@@ -190,6 +190,15 @@ class ReportBuilderService
             throw new InvalidArgumentException("Report not found: {$reportId}");
         }
 
+        // Data binding: if report uses snapshot mode and has cached data, return it
+        $dataMode = $report->data_mode ?? 'live';
+        if ($dataMode === 'snapshot' && !empty($report->snapshot_data)) {
+            $snapshot = json_decode($report->snapshot_data, true);
+            if (is_array($snapshot)) {
+                return $snapshot;
+            }
+        }
+
         return $this->executeReportDefinition(
             $report->data_source,
             $report->columns,

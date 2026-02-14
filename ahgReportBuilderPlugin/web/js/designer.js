@@ -868,4 +868,118 @@
         return div.innerHTML;
     }
 
+    // ─── Section Management ────────────────────────────────────────
+
+    /**
+     * Initialize section drag-drop ordering via SortableJS.
+     */
+    function initSectionSortable() {
+        var container = document.getElementById('sectionsList');
+        if (!container || typeof Sortable === 'undefined') return;
+
+        if (container._sortable) container._sortable.destroy();
+        container._sortable = new Sortable(container, {
+            animation: 150,
+            handle: '.section-drag-handle',
+            ghostClass: 'opacity-50',
+            onEnd: function() {
+                var ids = [];
+                container.querySelectorAll('.section-item').forEach(function(el) {
+                    var id = parseInt(el.dataset.sectionId, 10);
+                    if (id) ids.push(id);
+                });
+                if (ids.length > 0 && config.apiUrls && config.apiUrls.sectionReorder) {
+                    fetch(config.apiUrls.sectionReorder, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ report_id: config.reportId, order: ids })
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Add a new section to the report.
+     */
+    window.addReportSection = function(sectionType) {
+        if (!config.apiUrls || !config.apiUrls.sectionSave) return;
+
+        fetch(config.apiUrls.sectionSave, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                report_id: config.reportId,
+                section_type: sectionType,
+                title: sectionType.charAt(0).toUpperCase() + sectionType.slice(1).replace('_', ' ') + ' Section'
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) { window.location.reload(); }
+            else { alert(data.error || 'Failed to add section'); }
+        })
+        .catch(function(err) { alert('Error: ' + err.message); });
+    };
+
+    /**
+     * Delete a section from the report.
+     */
+    window.deleteReportSection = function(sectionId) {
+        if (!confirm('Delete this section?')) return;
+        if (!config.apiUrls || !config.apiUrls.sectionDelete) return;
+
+        var url = config.apiUrls.sectionDelete.replace(':id', sectionId);
+        fetch(url, { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var el = document.querySelector('[data-section-id="' + sectionId + '"]');
+                if (el) el.remove();
+            } else {
+                alert(data.error || 'Failed to delete section');
+            }
+        })
+        .catch(function(err) { alert('Error: ' + err.message); });
+    };
+
+    /**
+     * Save a section's content (used by Quill auto-save).
+     */
+    window.saveSectionContent = function(sectionId, content, title) {
+        if (!config.apiUrls || !config.apiUrls.sectionSave) return;
+
+        var payload = { id: sectionId, report_id: config.reportId };
+        if (content !== undefined) payload.content = content;
+        if (title !== undefined) payload.title = title;
+
+        fetch(config.apiUrls.sectionSave, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    };
+
+    // Initialize section sortable after DOM load
+    document.addEventListener('DOMContentLoaded', function() {
+        initSectionSortable();
+
+        // Initialize Quill editors for narrative sections
+        document.querySelectorAll('.section-quill-editor').forEach(function(container) {
+            var sectionId = container.dataset.sectionId;
+            var hiddenInput = document.getElementById('sectionContent_' + sectionId);
+            if (typeof QuillManager !== 'undefined' && hiddenInput) {
+                var editor = QuillManager.init(container.id, hiddenInput.id, { placeholder: 'Write your narrative...' });
+                // Auto-save on text change with debounce
+                var saveTimer = null;
+                editor.on('text-change', function() {
+                    clearTimeout(saveTimer);
+                    saveTimer = setTimeout(function() {
+                        saveSectionContent(sectionId, hiddenInput.value);
+                    }, 2000);
+                });
+            }
+        });
+    });
+
 })();

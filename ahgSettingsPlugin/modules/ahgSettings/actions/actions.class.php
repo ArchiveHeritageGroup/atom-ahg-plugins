@@ -462,9 +462,4 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('systemInfoAction', $request);
     }
 
-    public function executeEncryption($request)
-    {
-        // Redirect to AHG Settings section page with encryption section
-        $this->redirect(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'encryption']);
-    }
 }

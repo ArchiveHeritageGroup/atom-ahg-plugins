@@ -31,6 +31,8 @@
                 <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'csv']); ?>"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
                 <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'xlsx']); ?>"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Excel (XLSX)</a></li>
                 <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'pdf']); ?>"><i class="bi bi-filetype-pdf me-2"></i>PDF</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'docx']); ?>"><i class="bi bi-filetype-docx me-2"></i>Word (DOCX)</a></li>
             </ul>
         </div>
     </div>
@@ -192,4 +194,56 @@
     </div>
     <?php endif; ?>
 </div>
+
+<!-- Workflow Approval Bar -->
+<?php $rawReport = $sf_data->getRaw('report'); ?>
+<?php if (isset($rawReport->status) && in_array($rawReport->status, ['in_review', 'approved'])): ?>
+<div class="card mt-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <strong><?php echo __('Status:'); ?></strong>
+            <?php
+            $statusBadges = [
+                'in_review' => 'bg-warning text-dark',
+                'approved' => 'bg-info',
+            ];
+            $badge = $statusBadges[$rawReport->status] ?? 'bg-secondary';
+            ?>
+            <span class="badge <?php echo $badge; ?> ms-1"><?php echo ucfirst(str_replace('_', ' ', $rawReport->status)); ?></span>
+        </div>
+        <div class="btn-group">
+            <?php if ($rawReport->status === 'in_review'): ?>
+                <button class="btn btn-success btn-sm" onclick="updateReportStatus('approved')">
+                    <i class="bi bi-check-circle me-1"></i><?php echo __('Approve'); ?>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="updateReportStatus('draft')">
+                    <i class="bi bi-arrow-return-left me-1"></i><?php echo __('Return to Draft'); ?>
+                </button>
+            <?php elseif ($rawReport->status === 'approved'): ?>
+                <button class="btn btn-primary btn-sm" onclick="updateReportStatus('published')">
+                    <i class="bi bi-globe me-1"></i><?php echo __('Publish'); ?>
+                </button>
+                <button class="btn btn-outline-warning btn-sm" onclick="updateReportStatus('in_review')">
+                    <i class="bi bi-arrow-repeat me-1"></i><?php echo __('Request Revision'); ?>
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+function updateReportStatus(newStatus) {
+    fetch('/api/report-builder/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_id: <?php echo (int) $rawReport->id; ?>, status: newStatus })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) { window.location.reload(); }
+        else { alert(data.error || 'Status update failed'); }
+    })
+    .catch(function(err) { alert('Error: ' + err.message); });
+}
+</script>
+<?php endif; ?>
 <?php end_slot() ?>

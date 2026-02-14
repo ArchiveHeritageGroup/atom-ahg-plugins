@@ -1424,11 +1424,13 @@ slot('title', $title);
                                         <h5 class="mb-0"><i class="fas fa-lock me-2"></i><?php echo __('Encryption Configuration') ?></h5>
                                     </div>
                                     <div class="card-body">
-                                        <p class="text-muted mb-3"><?php echo __('AES-256-GCM encryption for digital object files and sensitive database fields. Requires an encryption key at /etc/atom/encryption.key.') ?></p>
+                                        <p class="text-muted mb-3"><?php echo __('Encryption for digital object files and sensitive database fields using') ?> <strong><?php echo $algoName ?></strong>. <?php echo __('Requires an encryption key at /etc/atom/encryption.key.') ?></p>
 
                                         <?php
                                             $keyExists = file_exists('/etc/atom/encryption.key');
                                             $keyPerms = $keyExists ? substr(sprintf('%o', fileperms('/etc/atom/encryption.key')), -4) : null;
+                                            $hasSodium = extension_loaded('sodium') && function_exists('sodium_crypto_secretstream_xchacha20poly1305_init_push');
+                                            $algoName = $hasSodium ? 'XChaCha20-Poly1305 (libsodium)' : 'AES-256-GCM (OpenSSL)';
                                         ?>
 
                                         <!-- Key Status -->
@@ -1436,7 +1438,7 @@ slot('title', $title);
                                             <i class="fas <?php echo $keyExists ? 'fa-check-circle' : 'fa-exclamation-triangle' ?> me-2"></i>
                                             <?php if ($keyExists): ?>
                                                 <strong><?php echo __('Encryption key found') ?></strong>
-                                                <span class="ms-2 text-muted"><?php echo __('Path:') ?> <code>/etc/atom/encryption.key</code> | <?php echo __('Permissions:') ?> <code><?php echo $keyPerms ?></code></span>
+                                                <span class="ms-2 text-muted"><?php echo __('Path:') ?> <code>/etc/atom/encryption.key</code> | <?php echo __('Permissions:') ?> <code><?php echo $keyPerms ?></code> | <?php echo __('Algorithm:') ?> <code><?php echo $algoName ?></code></span>
                                                 <?php if ($keyPerms !== '0600'): ?>
                                                     <br><small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i><?php echo __('Permissions should be 0600 for security.') ?></small>
                                                 <?php endif ?>
@@ -1466,7 +1468,7 @@ slot('title', $title);
                                         <h5 class="mb-0"><i class="fas fa-file-shield me-2"></i><?php echo __('Layer 1: Digital Object Encryption') ?></h5>
                                     </div>
                                     <div class="card-body">
-                                        <p class="text-muted mb-3"><?php echo __('Encrypts uploaded files (masters and derivatives) on disk using AES-256-GCM.') ?></p>
+                                        <p class="text-muted mb-3"><?php echo __('Encrypts uploaded files (masters and derivatives) on disk using') ?> <?php echo $algoName ?>.</p>
 
                                         <div class="form-check form-switch mb-3">
                                             <input class="form-check-input" type="checkbox" id="encryption_encrypt_derivatives"

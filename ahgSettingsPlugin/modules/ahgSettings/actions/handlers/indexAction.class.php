@@ -279,6 +279,14 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // Encryption - always available
+        $this->sections['encryption'] = [
+            'label' => 'Encryption',
+            'icon' => 'fa-lock',
+            'description' => 'XChaCha20-Poly1305 encryption for digital object files and sensitive database fields',
+            'url' => 'admin/ahg-settings/section?section=encryption'
+        ];
+
         // Services Monitor - always available
         $this->sections['services'] = [
             'label' => 'Services Monitor',

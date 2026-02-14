@@ -27,9 +27,28 @@ class reportBuilderActions extends AhgController
         require_once $pluginDir . '/DataSourceRegistry.php';
         require_once $pluginDir . '/ColumnDiscovery.php';
         require_once $pluginDir . '/ReportBuilderService.php';
+        require_once $pluginDir . '/HtmlSanitizer.php';
+        require_once $pluginDir . '/SectionService.php';
 
         $culture = $this->culture();
         $this->service = new ReportBuilderService($culture);
+    }
+
+    /**
+     * Lazy-load a service class.
+     */
+    private function loadService(string $className): void
+    {
+        if (!class_exists($className, false)) {
+            $pluginDir = $this->config('sf_plugins_dir') . '/ahgReportBuilderPlugin/lib';
+            $file = $pluginDir . '/' . $className . '.php';
+            if (!file_exists($file)) {
+                $file = $pluginDir . '/Export/' . $className . '.php';
+            }
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
     }
 
     /**
@@ -131,6 +150,20 @@ class reportBuilderActions extends AhgController
         $this->dataSource = DataSourceRegistry::get($this->report->data_source);
         $this->columnsGrouped = ColumnDiscovery::getColumnsGrouped($this->report->data_source);
         $this->allColumns = ColumnDiscovery::getColumns($this->report->data_source);
+
+        // Load sections for section-based editing
+        $sectionService = new SectionService();
+        $this->sections = $sectionService->getSections($id);
+
+        // Load comments count
+        try {
+            $this->commentCount = DB::table('report_comment')
+                ->where('report_id', $id)
+                ->where('is_resolved', 0)
+                ->count();
+        } catch (\Exception $e) {
+            $this->commentCount = 0;
+        }
     }
 
     /**
@@ -250,6 +283,10 @@ class reportBuilderActions extends AhgController
         $results = $this->service->executeReport($id, [], 1, 10000);
         $allColumns = ColumnDiscovery::getColumns($report->data_source);
 
+        // Load sections for enhanced export
+        $sectionService = new SectionService();
+        $sections = $sectionService->getSections($id);
+
         switch ($format) {
             case 'csv':
                 $this->exportCsv($report, $results, $allColumns);
@@ -258,7 +295,14 @@ class reportBuilderActions extends AhgController
                 $this->exportXlsx($report, $results, $allColumns);
                 break;
             case 'pdf':
-                $this->exportPdf($report, $results, $allColumns);
+                $this->loadService('PdfExporter');
+                $exporter = new PdfExporter($report, $sections, $results, $allColumns, $this->culture());
+                $exporter->generate();
+                break;
+            case 'docx':
+                $this->loadService('WordExporter');
+                $exporter = new WordExporter($report, $sections, $results, $allColumns, $this->culture());
+                $exporter->generate();
                 break;
             default:
                 $this->forward404('Invalid export format');
@@ -882,6 +926,816 @@ class reportBuilderActions extends AhgController
         }
 
         return $this->renderText(json_encode(['success' => true]));
+    }
+
+    // ===================
+    // Section API Actions (Phase 1)
+    // ===================
+
+    /**
+     * API: Save a report section.
+     */
+    public function executeApiSectionSave($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $sectionService = new SectionService();
+
+            // Sanitize HTML content
+            if (isset($data['content'])) {
+                $data['content'] = HtmlSanitizer::sanitize($data['content']);
+            }
+
+            if (isset($data['id']) && $data['id']) {
+                $sectionService->update((int) $data['id'], $data);
+                $id = $data['id'];
+            } else {
+                $id = $sectionService->create($data);
+            }
+
+            return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Delete a report section.
+     */
+    public function executeApiSectionDelete($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $id = (int) $request->getParameter('id');
+            $sectionService = new SectionService();
+            $sectionService->delete($id);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Reorder report sections.
+     */
+    public function executeApiSectionReorder($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $reportId = (int) ($data['report_id'] ?? 0);
+            $sectionIds = $data['section_ids'] ?? [];
+
+            $sectionService = new SectionService();
+            $sectionService->reorder($reportId, $sectionIds);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    // ===================
+    // Link API Actions (Phase 3)
+    // ===================
+
+    /**
+     * API: Save a link.
+     */
+    public function executeApiLinkSave($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $this->loadService('LinkService');
+            $linkService = new LinkService($this->culture());
+
+            if (isset($data['id']) && $data['id']) {
+                $linkService->update((int) $data['id'], $data);
+                $id = $data['id'];
+            } else {
+                $id = $linkService->create($data);
+            }
+
+            return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Delete a link.
+     */
+    public function executeApiLinkDelete($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $id = (int) $request->getParameter('id');
+            $this->loadService('LinkService');
+            $linkService = new LinkService($this->culture());
+            $linkService->delete($id);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Fetch OpenGraph metadata from a URL.
+     */
+    public function executeApiOgFetch($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $url = $data['url'] ?? '';
+
+            $this->loadService('LinkService');
+            $linkService = new LinkService($this->culture());
+            $ogData = $linkService->fetchOpenGraph($url);
+
+            return $this->renderText(json_encode(['success' => true, 'data' => $ogData]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Search AtoM entities for cross-references.
+     */
+    public function executeApiEntitySearch($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $query = $request->getParameter('q', '');
+            $type = $request->getParameter('type', 'information_object');
+
+            $this->loadService('LinkService');
+            $linkService = new LinkService($this->culture());
+            $results = $linkService->searchEntities($query, $type);
+
+            return $this->renderText(json_encode(['success' => true, 'results' => $results]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    // ===================
+    // Template Actions (Phase 4)
+    // ===================
+
+    /**
+     * View template library.
+     */
+    public function executeTemplates($request)
+    {
+        $this->checkAdminAccess();
+
+        $this->loadService('TemplateService');
+        $templateService = new TemplateService();
+        $this->templates = $templateService->getTemplates();
+    }
+
+    /**
+     * API: Create report from template.
+     */
+    public function executeApiTemplateApply($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $templateId = (int) ($data['template_id'] ?? 0);
+            $reportName = $data['name'] ?? 'New Report';
+
+            $this->loadService('TemplateService');
+            $templateService = new TemplateService();
+            $template = $templateService->getTemplate($templateId);
+
+            if (!$template) {
+                throw new InvalidArgumentException('Template not found');
+            }
+
+            $structure = $template->structure;
+            $dataSource = $structure['data_source'] ?? 'information_object';
+
+            // Create report
+            $reportId = $this->service->createReport([
+                'name' => $reportName,
+                'description' => $template->description,
+                'user_id' => $this->getUserId(),
+                'data_source' => $dataSource,
+                'columns' => ['id'],
+                'layout' => ['blocks' => []],
+            ]);
+
+            // Apply template sections
+            $templateService->applyToReport($templateId, $reportId);
+
+            return $this->renderText(json_encode(['success' => true, 'id' => $reportId]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Save report as template.
+     */
+    public function executeApiTemplateSave($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $this->loadService('TemplateService');
+            $templateService = new TemplateService();
+
+            if (isset($data['report_id'])) {
+                // Create template from existing report
+                $id = $templateService->createFromReport(
+                    (int) $data['report_id'],
+                    $data['name'] ?? 'Custom Template',
+                    $data['category'] ?? 'custom',
+                    $data['scope'] ?? 'user',
+                    $this->getUserId()
+                );
+            } else {
+                // Create/update template directly
+                if (isset($data['id']) && $data['id']) {
+                    $templateService->update((int) $data['id'], $data);
+                    $id = $data['id'];
+                } else {
+                    $data['created_by'] = $this->getUserId();
+                    $id = $templateService->create($data);
+                }
+            }
+
+            return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Delete template.
+     */
+    public function executeApiTemplateDelete($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $id = (int) $request->getParameter('id');
+            $this->loadService('TemplateService');
+            $templateService = new TemplateService();
+            $templateService->delete($id);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    // ===================
+    // Workflow Actions (Phase 5)
+    // ===================
+
+    /**
+     * API: Change report status.
+     */
+    public function executeApiStatusChange($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $reportId = (int) ($data['report_id'] ?? 0);
+            $newStatus = $data['status'] ?? '';
+
+            $this->loadService('WorkflowService');
+            $workflowService = new WorkflowService();
+            $workflowService->transition($reportId, $newStatus, $this->getUserId());
+
+            return $this->renderText(json_encode(['success' => true, 'status' => $newStatus]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Add a comment.
+     */
+    public function executeApiComment($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $this->loadService('CommentService');
+            $commentService = new CommentService();
+
+            $action = $data['form_action'] ?? 'create';
+
+            switch ($action) {
+                case 'create':
+                    $id = $commentService->create([
+                        'report_id' => (int) ($data['report_id'] ?? 0),
+                        'section_id' => isset($data['section_id']) ? (int) $data['section_id'] : null,
+                        'user_id' => $this->getUserId(),
+                        'content' => $data['content'] ?? '',
+                    ]);
+
+                    return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+
+                case 'resolve':
+                    $commentService->resolve((int) $data['comment_id'], $this->getUserId());
+
+                    return $this->renderText(json_encode(['success' => true]));
+
+                case 'unresolve':
+                    $commentService->unresolve((int) $data['comment_id']);
+
+                    return $this->renderText(json_encode(['success' => true]));
+
+                case 'delete':
+                    $commentService->delete((int) $data['comment_id']);
+
+                    return $this->renderText(json_encode(['success' => true]));
+
+                case 'list':
+                    $comments = $commentService->getComments(
+                        (int) ($data['report_id'] ?? 0),
+                        isset($data['section_id']) ? (int) $data['section_id'] : null
+                    );
+
+                    return $this->renderText(json_encode(['success' => true, 'comments' => $comments]));
+            }
+
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Unknown action']));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Get version history.
+     */
+    public function executeApiVersions($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $reportId = (int) $request->getParameter('id', 0);
+
+            if (!$reportId) {
+                $data = json_decode($request->getContent(), true);
+                $reportId = (int) ($data['report_id'] ?? 0);
+            }
+
+            $this->loadService('VersionService');
+            $versionService = new VersionService();
+            $versions = $versionService->getVersions($reportId);
+
+            return $this->renderText(json_encode(['success' => true, 'versions' => $versions]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Create a version snapshot.
+     */
+    public function executeApiVersionCreate($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $reportId = (int) ($data['report_id'] ?? 0);
+            $summary = $data['change_summary'] ?? null;
+
+            $this->loadService('VersionService');
+            $versionService = new VersionService();
+            $versionId = $versionService->createVersion($reportId, $this->getUserId(), $summary);
+
+            return $this->renderText(json_encode(['success' => true, 'version_id' => $versionId]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Restore a version.
+     */
+    public function executeApiVersionRestore($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $versionId = (int) ($data['version_id'] ?? 0);
+
+            $this->loadService('VersionService');
+            $versionService = new VersionService();
+            $versionService->restoreVersion($versionId, $this->getUserId());
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * View version history page.
+     */
+    public function executeHistory($request)
+    {
+        $this->checkAdminAccess();
+
+        $id = (int) $request->getParameter('id');
+        $this->report = $this->service->getReport($id);
+
+        if (!$this->report) {
+            $this->forward404('Report not found');
+        }
+
+        $this->loadService('VersionService');
+        $versionService = new VersionService();
+        $this->versions = $versionService->getVersions($id);
+    }
+
+    // ===================
+    // Query Actions (Phase 6)
+    // ===================
+
+    /**
+     * Query builder page.
+     */
+    public function executeQuery($request)
+    {
+        $this->checkAdminAccess();
+
+        $id = (int) $request->getParameter('id');
+        $this->report = $this->service->getReport($id);
+
+        if (!$this->report) {
+            $this->forward404('Report not found');
+        }
+
+        $this->isAdmin = $this->getUser()->isAdministrator();
+    }
+
+    /**
+     * API: Execute a query.
+     */
+    public function executeApiQueryExecute($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+
+            if (($data['query_type'] ?? 'visual') === 'raw_sql') {
+                // Admin-only raw SQL
+                if (!$this->getUser()->isAdministrator()) {
+                    throw new RuntimeException('Raw SQL execution requires administrator access');
+                }
+                $results = $queryBuilder->executeRawSql(
+                    $data['sql'] ?? '',
+                    $data['params'] ?? [],
+                    $this->getUserId()
+                );
+            } else {
+                $results = $queryBuilder->executeVisualQuery($data, $this->getUserId());
+            }
+
+            return $this->renderText(json_encode(['success' => true, 'data' => $results]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Save a query.
+     */
+    public function executeApiQuerySave($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $data['created_by'] = $this->getUserId();
+
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+            $id = $queryBuilder->saveQuery($data);
+
+            return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Validate a SQL query.
+     */
+    public function executeApiQueryValidate($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $sql = $data['sql'] ?? '';
+
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+            $issues = $queryBuilder->validateSql($sql);
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'valid' => empty($issues),
+                'issues' => $issues,
+            ]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Get available tables for query builder.
+     */
+    public function executeApiQueryTables($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+            $tables = $queryBuilder->getAvailableTables();
+
+            return $this->renderText(json_encode(['success' => true, 'tables' => $tables]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Get columns for a table.
+     */
+    public function executeApiQueryColumns($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $table = $request->getParameter('table', '');
+
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+            $columns = $queryBuilder->getTableColumns($table);
+
+            return $this->renderText(json_encode(['success' => true, 'columns' => $columns]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    // ===================
+    // Share Actions (Phase 7)
+    // ===================
+
+    /**
+     * API: Create a share link.
+     */
+    public function executeApiShareCreate($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $this->loadService('ShareService');
+            $shareService = new ShareService();
+
+            $expiresAt = !empty($data['expires_at']) ? $data['expires_at'] : null;
+            $emailRecipients = $data['email_recipients'] ?? null;
+
+            $share = $shareService->createShare(
+                (int) ($data['report_id'] ?? 0),
+                $this->getUserId(),
+                $expiresAt,
+                $emailRecipients
+            );
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'share' => $share,
+                'url' => $shareService->getShareUrl($share['token']),
+            ]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Deactivate a share.
+     */
+    public function executeApiShareDeactivate($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $id = (int) $request->getParameter('id');
+            $this->loadService('ShareService');
+            $shareService = new ShareService();
+            $shareService->deactivateShare($id);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * View a shared report (public access via token).
+     */
+    public function executeSharedView($request)
+    {
+        $token = $request->getParameter('token', '');
+
+        $this->loadService('ShareService');
+        $shareService = new ShareService();
+        $share = $shareService->getShare($token);
+
+        if (!$share) {
+            $this->expired = true;
+            $this->setTemplate('shareSuccess');
+
+            return;
+        }
+
+        $this->share = $share;
+        $this->report = $this->service->getReport($share->report_id);
+
+        if (!$this->report) {
+            $this->expired = true;
+            $this->setTemplate('shareSuccess');
+
+            return;
+        }
+
+        $this->expired = false;
+
+        // Load sections
+        $sectionService = new SectionService();
+        $this->sections = $sectionService->getSections($share->report_id);
+
+        // Load report data
+        $this->reportData = $this->service->executeReport($share->report_id, [], 1, 100);
+        $this->allColumns = ColumnDiscovery::getColumns($this->report->data_source);
+
+        $this->setTemplate('shareSuccess');
+    }
+
+    // ===================
+    // Attachment Actions (Phase 7)
+    // ===================
+
+    /**
+     * API: Upload attachment.
+     */
+    public function executeApiAttachmentUpload($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $reportId = (int) $request->getParameter('report_id');
+            $sectionId = $request->getParameter('section_id') ? (int) $request->getParameter('section_id') : null;
+
+            if (empty($_FILES['file'])) {
+                throw new InvalidArgumentException('No file uploaded');
+            }
+
+            $this->loadService('AttachmentService');
+            $attachmentService = new AttachmentService();
+            $attachment = $attachmentService->upload($reportId, $sectionId, $_FILES['file']);
+
+            return $this->renderText(json_encode(['success' => true, 'attachment' => $attachment]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Delete attachment.
+     */
+    public function executeApiAttachmentDelete($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $id = (int) $request->getParameter('id');
+            $this->loadService('AttachmentService');
+            $attachmentService = new AttachmentService();
+            $attachmentService->delete($id);
+
+            return $this->renderText(json_encode(['success' => true]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
+     * API: Get attachments for a report/section.
+     */
+    public function executeApiAttachments($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $reportId = (int) $request->getParameter('report_id');
+            $sectionId = $request->getParameter('section_id') ? (int) $request->getParameter('section_id') : null;
+
+            $this->loadService('AttachmentService');
+            $attachmentService = new AttachmentService();
+            $attachments = $attachmentService->getAttachments($reportId, $sectionId);
+
+            return $this->renderText(json_encode(['success' => true, 'attachments' => $attachments]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    // ===================
+    // Data Binding Actions (Phase 6)
+    // ===================
+
+    /**
+     * API: Create a data snapshot.
+     */
+    public function executeApiSnapshot($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $data = json_decode($request->getContent(), true);
+            $reportId = (int) ($data['report_id'] ?? 0);
+            $action = $data['form_action'] ?? 'create';
+
+            $this->loadService('DataBindingService');
+            $dataBindingService = new DataBindingService($this->culture());
+
+            if ($action === 'clear') {
+                $dataBindingService->clearSnapshot($reportId);
+
+                return $this->renderText(json_encode(['success' => true, 'mode' => 'live']));
+            }
+
+            $dataBindingService->createSnapshot($reportId);
+
+            return $this->renderText(json_encode(['success' => true, 'mode' => 'snapshot']));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
     }
 
     // ===================

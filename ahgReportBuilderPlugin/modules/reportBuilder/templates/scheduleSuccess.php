@@ -35,6 +35,15 @@
             <div class="card-body">
                 <form method="post" action="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'schedule', 'id' => $report->id]); ?>">
                     <div class="mb-3">
+                        <label class="form-label"><?php echo __('Schedule Type'); ?></label>
+                        <select class="form-select" name="schedule_type" id="scheduleType">
+                            <option value="recurring"><?php echo __('Recurring'); ?></option>
+                            <option value="trigger"><?php echo __('Trigger-based'); ?></option>
+                        </select>
+                    </div>
+
+                    <div id="recurringOptions">
+                    <div class="mb-3">
                         <label class="form-label"><?php echo __('Frequency'); ?></label>
                         <select class="form-select" name="frequency" id="frequency" required>
                             <option value="daily"><?php echo __('Daily'); ?></option>
@@ -72,10 +81,29 @@
                         <input type="time" class="form-control" name="time_of_day" value="08:00" required>
                     </div>
 
+                    </div><!-- end recurringOptions -->
+
+                    <div id="triggerOptions" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo __('Trigger Event'); ?></label>
+                            <select class="form-select" name="trigger_event">
+                                <option value="new_accession"><?php echo __('New Accession Created'); ?></option>
+                                <option value="status_change"><?php echo __('Report Status Changed'); ?></option>
+                                <option value="threshold"><?php echo __('Record Count Threshold'); ?></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo __('Threshold Value'); ?></label>
+                            <input type="number" class="form-control" name="trigger_threshold" min="1" placeholder="<?php echo __('e.g., 100'); ?>">
+                            <div class="form-text"><?php echo __('Only used for threshold triggers.'); ?></div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label"><?php echo __('Output Format'); ?></label>
                         <select class="form-select" name="output_format">
                             <option value="pdf">PDF</option>
+                            <option value="docx">Word (DOCX)</option>
                             <option value="xlsx">Excel (XLSX)</option>
                             <option value="csv">CSV</option>
                         </select>
@@ -188,6 +216,12 @@
 document.getElementById('frequency').addEventListener('change', function() {
     document.getElementById('weeklyOptions').style.display = this.value === 'weekly' ? 'block' : 'none';
     document.getElementById('monthlyOptions').style.display = this.value === 'monthly' ? 'block' : 'none';
+});
+document.getElementById('scheduleType').addEventListener('change', function() {
+    var isRecurring = this.value === 'recurring';
+    document.getElementById('recurringOptions').style.display = isRecurring ? 'block' : 'none';
+    document.getElementById('triggerOptions').style.display = isRecurring ? 'none' : 'block';
+    document.getElementById('frequency').required = isRecurring;
 });
 </script>
 <?php end_slot() ?>

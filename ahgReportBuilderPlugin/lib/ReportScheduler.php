@@ -105,6 +105,9 @@ class ReportScheduler
             case 'xlsx':
                 $this->generateXlsx($filePath, $schedule, $reportData, $allColumns);
                 break;
+            case 'docx':
+                $this->generateDocx($filePath, $schedule, $reportData, $allColumns);
+                break;
             case 'pdf':
             default:
                 $this->generatePdf($filePath, $schedule, $reportData, $allColumns);
@@ -237,6 +240,27 @@ class ReportScheduler
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save($filePath);
+    }
+
+    /**
+     * Generate DOCX file using WordExporter.
+     */
+    private function generateDocx(string $filePath, object $schedule, array $reportData, array $allColumns): void
+    {
+        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgReportBuilderPlugin';
+        require_once $pluginDir . '/lib/Export/WordExporter.php';
+        require_once $pluginDir . '/lib/SectionService.php';
+
+        $report = $this->reportService->getReport($schedule->custom_report_id);
+        if (!$report) {
+            throw new RuntimeException('Report not found');
+        }
+
+        $sectionService = new SectionService();
+        $sections = $sectionService->getSections($schedule->custom_report_id);
+
+        $exporter = new WordExporter();
+        $exporter->generate($report, $sections, $reportData, $allColumns, $filePath);
     }
 
     /**

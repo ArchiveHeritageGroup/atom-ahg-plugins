@@ -56,11 +56,110 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'csv']); ?>"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
                     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'xlsx']); ?>"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Excel</a></li>
                     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'pdf']); ?>"><i class="bi bi-filetype-pdf me-2"></i>PDF</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'docx']); ?>"><i class="bi bi-file-earmark-word me-2"></i>Word (DOCX)</a></li>
                 </ul>
             </div>
+            <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'history', 'id' => $report->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Version History'); ?>">
+                <i class="bi bi-clock-history me-1"></i><?php echo __('History'); ?>
+            </a>
+            <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'query', 'id' => $report->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Query Builder'); ?>">
+                <i class="bi bi-database me-1"></i><?php echo __('Query'); ?>
+            </a>
             <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'schedule', 'id' => $report->id]); ?>" class="btn btn-outline-secondary">
                 <i class="bi bi-clock me-1"></i><?php echo __('Schedule'); ?>
             </a>
+        </div>
+    </div>
+</div>
+
+<!-- Status Bar -->
+<div class="report-status-bar mb-3">
+    <span class="small fw-bold"><?php echo __('Status:'); ?></span>
+    <span class="status-badge <?php echo $report->status ?? 'draft'; ?>"><?php echo ucfirst(str_replace('_', ' ', $report->status ?? 'draft')); ?></span>
+    <span class="small text-muted ms-2">v<?php echo $report->version ?? 1; ?></span>
+    <?php if ($commentCount > 0): ?>
+    <span class="badge bg-warning text-dark ms-2"><i class="bi bi-chat-dots me-1"></i><?php echo $commentCount; ?> <?php echo __('comments'); ?></span>
+    <?php endif; ?>
+    <div class="ms-auto d-flex gap-1">
+        <button class="btn btn-sm btn-outline-secondary" id="btnAddSection" title="<?php echo __('Add Section'); ?>">
+            <i class="bi bi-plus-lg me-1"></i><?php echo __('Add Section'); ?>
+        </button>
+        <button class="btn btn-sm btn-outline-info" id="btnComments" title="<?php echo __('Comments'); ?>">
+            <i class="bi bi-chat-dots me-1"></i><?php echo __('Comments'); ?>
+        </button>
+    </div>
+</div>
+
+<!-- Section Editor (collapsible) -->
+<div class="collapse mb-3" id="sectionEditor">
+    <div class="card">
+        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-layers me-1"></i><?php echo __('Report Sections'); ?></span>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary btn-add-section" data-type="narrative"><i class="bi bi-body-text me-1"></i><?php echo __('Narrative'); ?></button>
+                <button class="btn btn-outline-success btn-add-section" data-type="table"><i class="bi bi-table me-1"></i><?php echo __('Table'); ?></button>
+                <button class="btn btn-outline-warning btn-add-section" data-type="chart"><i class="bi bi-bar-chart me-1"></i><?php echo __('Chart'); ?></button>
+                <button class="btn btn-outline-info btn-add-section" data-type="summary_card"><i class="bi bi-card-text me-1"></i><?php echo __('Summary'); ?></button>
+                <button class="btn btn-outline-secondary btn-add-section" data-type="links"><i class="bi bi-link-45deg me-1"></i><?php echo __('Links'); ?></button>
+            </div>
+        </div>
+        <div class="card-body" id="sectionsContainer">
+            <?php
+            $rawSections = $sf_data->getRaw('sections');
+            if (empty($rawSections)):
+            ?>
+            <p class="text-muted text-center py-3 mb-0"><?php echo __('No sections yet. Add sections to create a rich report with narrative, tables, charts, and more.'); ?></p>
+            <?php else: ?>
+                <?php foreach ($rawSections as $section): ?>
+                <div class="report-section" data-section-id="<?php echo $section->id; ?>" data-section-type="<?php echo $section->section_type; ?>">
+                    <div class="section-header">
+                        <div class="drag-handle">
+                            <i class="bi bi-grip-vertical"></i>
+                            <span class="section-type-badge <?php echo $section->section_type; ?>"><?php echo ucfirst(str_replace('_', ' ', $section->section_type)); ?></span>
+                            <input type="text" class="section-title-input" value="<?php echo htmlspecialchars($section->title ?? ''); ?>" placeholder="<?php echo __('Section title...'); ?>">
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-sm btn-outline-primary btn-edit-section" title="<?php echo __('Edit'); ?>"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete-section" title="<?php echo __('Delete'); ?>"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                    <?php if ($section->section_type === 'narrative'): ?>
+                    <div class="section-body">
+                        <div id="quill_<?php echo $section->id; ?>" class="quill-editor"></div>
+                        <input type="hidden" id="quill_content_<?php echo $section->id; ?>" value="<?php echo htmlspecialchars($section->content ?? ''); ?>">
+                    </div>
+                    <?php else: ?>
+                    <div class="section-body">
+                        <div class="section-placeholder">
+                            <i class="bi <?php echo $section->section_type === 'table' ? 'bi-table' : ($section->section_type === 'chart' ? 'bi-bar-chart' : 'bi-card-text'); ?> me-2"></i>
+                            <?php echo ucfirst(str_replace('_', ' ', $section->section_type)); ?> section
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Comment Panel (collapsible) -->
+<div class="collapse mb-3" id="commentPanel">
+    <div class="card">
+        <div class="card-header py-2">
+            <i class="bi bi-chat-dots me-1"></i><?php echo __('Comments'); ?>
+        </div>
+        <div class="card-body">
+            <div class="comment-panel" id="commentsContainer">
+                <p class="text-muted text-center small"><?php echo __('Loading comments...'); ?></p>
+            </div>
+            <div class="mt-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" id="newCommentInput" placeholder="<?php echo __('Add a comment...'); ?>">
+                    <button class="btn btn-primary" id="btnAddComment"><i class="bi bi-send"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

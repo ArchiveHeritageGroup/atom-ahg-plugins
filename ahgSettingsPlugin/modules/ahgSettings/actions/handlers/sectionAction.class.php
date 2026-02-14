@@ -30,7 +30,7 @@ class AhgSettingsSectionAction extends AhgController
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
 		'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
         'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
-        'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'AES-256-GCM encryption for files and database fields'],
+        'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'XChaCha20-Poly1305 encryption for digital object files and sensitive database fields'],
     ];
 
     protected $checkboxFields = [

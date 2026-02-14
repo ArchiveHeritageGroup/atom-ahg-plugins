@@ -57,6 +57,9 @@
         <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'create']); ?>" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i><?php echo __('Create New Report'); ?>
         </a>
+        <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'templates']); ?>" class="btn btn-outline-primary">
+            <i class="bi bi-copy me-1"></i><?php echo __('From Template'); ?>
+        </a>
         <a href="/admin/dashboard" class="btn btn-outline-secondary">
             <i class="bi bi-speedometer2 me-1"></i><?php echo __('Central Dashboard'); ?>
         </a>
@@ -119,6 +122,7 @@ foreach ($reports as $report) {
                         <th width="40"></th>
                         <th><?php echo __('Name'); ?></th>
                         <th><?php echo __('Data Source'); ?></th>
+                        <th><?php echo __('Status'); ?></th>
                         <th><?php echo __('Visibility'); ?></th>
                         <th><?php echo __('Last Updated'); ?></th>
                         <th width="200"><?php echo __('Actions'); ?></th>
@@ -142,6 +146,19 @@ foreach ($reports as $report) {
                             <span class="badge bg-light text-dark">
                                 <?php echo $dataSources[$report->data_source]['label'] ?? $report->data_source; ?>
                             </span>
+                        </td>
+                        <td>
+                            <?php
+                            $reportStatus = $report->status ?? 'draft';
+                            $statusStyles = [
+                                'draft' => 'bg-secondary',
+                                'in_review' => 'bg-warning text-dark',
+                                'approved' => 'bg-info',
+                                'published' => 'bg-success',
+                                'archived' => 'bg-dark',
+                            ];
+                            ?>
+                            <span class="badge <?php echo $statusStyles[$reportStatus] ?? 'bg-secondary'; ?>"><?php echo ucfirst(str_replace('_', ' ', $reportStatus)); ?></span>
                         </td>
                         <td>
                             <?php if ($report->is_public): ?>
@@ -173,6 +190,8 @@ foreach ($reports as $report) {
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'csv']); ?>"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'xlsx']); ?>"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Excel</a></li>
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'pdf']); ?>"><i class="bi bi-filetype-pdf me-2"></i>PDF</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'docx']); ?>"><i class="bi bi-filetype-docx me-2"></i>Word</a></li>
                                     </ul>
                                 </div>
                                 <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'delete', 'id' => $report->id, 'confirm' => 1]); ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure you want to delete this report?'); ?>');">
