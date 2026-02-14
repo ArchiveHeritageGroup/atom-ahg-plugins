@@ -77,7 +77,26 @@ class ObjectAddDigitalObjectAction extends AhgController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                $this->resource->save();
+                // Dual-mode: Propel save (works via PropelBridge in both modes)
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge still available; Phase 4 will replace
+                } else {
+                    $this->resource->save();
+                }
+
+                // Encrypt uploaded file if encryption is enabled
+                if (class_exists('\\AtomFramework\\Core\\Security\\FileEncryptionService')
+                    && \AtomFramework\Core\Security\FileEncryptionService::isEnabled()) {
+                    try {
+                        $do = $this->resource->getDigitalObject();
+                        if ($do) {
+                            \AtomFramework\Core\Security\FileEncryptionService::encryptDigitalObject($do->id);
+                            \AtomFramework\Core\Security\FileEncryptionService::encryptDerivatives($do->id);
+                        }
+                    } catch (\Exception $e) {
+                        error_log("Upload encryption error: " . $e->getMessage());
+                    }
+                }
 
                 // Extract and apply metadata AFTER digital object is created
                 // Wrapped in try-catch to ensure upload succeeds even if metadata fails
@@ -99,6 +118,7 @@ class ObjectAddDigitalObjectAction extends AhgController
      */
     public function processForm()
     {
+        // DEFERRED: new QubitDigitalObject is part of complex Propel asset pipeline — not wrapped
         $digitalObject = new QubitDigitalObject();
 
         if (null !== $this->form->getValue('file')) {

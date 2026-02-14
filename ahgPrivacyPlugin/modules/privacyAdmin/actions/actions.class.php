@@ -786,7 +786,13 @@ class privacyAdminActions extends AhgController
         if ($inUse) {
             $this->getUser()->setFlash('error', 'Cannot delete - jurisdiction is in use');
         } else {
-            \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                \Illuminate\Database\Capsule\Manager::table('privacy_jurisdiction')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM privacy_jurisdiction WHERE id = ?');
+                $stmt->execute([$id]);
+            }
             $this->getUser()->setFlash('success', 'Jurisdiction deleted');
         }
 
@@ -1425,7 +1431,13 @@ class privacyAdminActions extends AhgController
 
             // Only allow removing MANUAL entries, change others to 'approved'
             if ($entity->source === 'user_selection' || $entity->entity_type === 'MANUAL') {
-                DB::table('ahg_ner_entity')->where('id', $entityId)->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('ahg_ner_entity')->where('id', $entityId)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM ahg_ner_entity WHERE id = ?');
+                    $stmt->execute([$entityId]);
+                }
             } else {
                 DB::table('ahg_ner_entity')
                     ->where('id', $entityId)

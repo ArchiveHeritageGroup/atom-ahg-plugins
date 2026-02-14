@@ -216,9 +216,15 @@ if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()
      */
     public function executeClearQueue($request)
     {
-        DB::table('media_processing_queue')
-            ->whereIn('status', ['completed', 'failed'])
-            ->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            DB::table('media_processing_queue')
+                ->whereIn('status', ['completed', 'failed'])
+                ->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare("DELETE FROM media_processing_queue WHERE status IN ('completed', 'failed')");
+            $stmt->execute();
+        }
 
         $this->getUser()->setFlash('notice', 'Queue cleared.');
         $this->redirect(['module' => 'mediaSettings', 'action' => 'queue']);

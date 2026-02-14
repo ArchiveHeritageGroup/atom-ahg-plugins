@@ -40,7 +40,12 @@ class UserRegisterAction extends AhgEditController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                $this->resource->save();
+                // Dual-mode: Propel save (works via PropelBridge in both modes)
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge still available; Phase 4 will replace
+                } else {
+                    $this->resource->save();
+                }
 
                 if (null !== $this->context->getViewCacheManager()) {
                     // We just need to remove the cache for this user but sf_cache_key
@@ -55,14 +60,26 @@ class UserRegisterAction extends AhgEditController
 
     public function exists($validator, $values)
     {
-        $criteria = new Criteria();
+        // Dual-mode: check for existing user by username or email
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $db = \Illuminate\Database\Capsule\Manager::class;
+            $exists = $db::table('user')
+                ->where('username', $values['username'])
+                ->orWhere('email', $values['email'])
+                ->exists();
+            if ($exists) {
+                throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            }
+        } else {
+            $criteria = new Criteria();
 
-        $criterion1 = $criteria->getNewCriterion(QubitUser::USERNAME, $values['username']);
-        $criterion2 = $criteria->getNewCriterion(QubitUser::EMAIL, $values['email']);
-        $criteria->add($criterion1->addOr($criterion2));
+            $criterion1 = $criteria->getNewCriterion(QubitUser::USERNAME, $values['username']);
+            $criterion2 = $criteria->getNewCriterion(QubitUser::EMAIL, $values['email']);
+            $criteria->add($criterion1->addOr($criterion2));
 
-        if (0 < count(QubitUser::get($criteria))) {
-            throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            if (0 < count(QubitUser::get($criteria))) {
+                throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            }
         }
 
         return $values;

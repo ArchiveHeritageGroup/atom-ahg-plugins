@@ -519,8 +519,16 @@ class researchActions extends AhgController
             }
             
             if ($action === 'delete') {
-                DB::table('research_collection_item')->where('collection_id', $id)->delete();
-                DB::table('research_collection')->where('id', $id)->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('research_collection_item')->where('collection_id', $id)->delete();
+                    DB::table('research_collection')->where('id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM research_collection_item WHERE collection_id = ?');
+                    $stmt->execute([$id]);
+                    $stmt = $conn->prepare('DELETE FROM research_collection WHERE id = ?');
+                    $stmt->execute([$id]);
+                }
                 $this->getUser()->setFlash('success', 'Collection deleted');
                 $this->redirect('research/collections');
             }
@@ -917,7 +925,13 @@ class researchActions extends AhgController
                 'password_hash' => $passwordHash,
                 'salt' => $salt,
             ]);
-            DB::table('research_password_reset')->where('user_id', $reset->user_id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('research_password_reset')->where('user_id', $reset->user_id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM research_password_reset WHERE user_id = ?');
+                $stmt->execute([$reset->user_id]);
+            }
             $this->getUser()->setFlash('success', 'Password updated. You can now log in.');
             $this->redirect('user/login');
         }
@@ -1039,8 +1053,14 @@ class researchActions extends AhgController
         ]);
         
         // Delete from main table
-        DB::table('research_researcher')->where('id', $id)->delete();
-        
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            DB::table('research_researcher')->where('id', $id)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM research_researcher WHERE id = ?');
+            $stmt->execute([$id]);
+        }
+
         // Deactivate the user account
         DB::table('user')->where('id', $researcher->user_id)->update(['active' => 0]);
         
@@ -1771,10 +1791,16 @@ class researchActions extends AhgController
         // Handle remove collaborator
         if ($request->isMethod('post') && $request->getParameter('form_action') === 'remove') {
             $collaboratorId = (int) $request->getParameter('collaborator_id');
-            DB::table('research_project_collaborator')
-                ->where('id', $collaboratorId)
-                ->where('project_id', $projectId)
-                ->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('research_project_collaborator')
+                    ->where('id', $collaboratorId)
+                    ->where('project_id', $projectId)
+                    ->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM research_project_collaborator WHERE id = ? AND project_id = ?');
+                $stmt->execute([$collaboratorId, $projectId]);
+            }
             $this->getUser()->setFlash('success', 'Collaborator removed');
             $this->redirect('research/projectCollaborators?id=' . $projectId);
         }
@@ -2083,17 +2109,31 @@ class researchActions extends AhgController
 
             if ($action === 'remove_entry') {
                 $entryId = (int) $request->getParameter('entry_id');
-                DB::table('research_bibliography_entry')
-                    ->where('id', $entryId)
-                    ->where('bibliography_id', $bibliographyId)
-                    ->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('research_bibliography_entry')
+                        ->where('id', $entryId)
+                        ->where('bibliography_id', $bibliographyId)
+                        ->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM research_bibliography_entry WHERE id = ? AND bibliography_id = ?');
+                    $stmt->execute([$entryId, $bibliographyId]);
+                }
                 $this->getUser()->setFlash('success', 'Entry removed');
                 $this->redirect('research/viewBibliography?id=' . $bibliographyId);
             }
 
             if ($action === 'delete') {
-                DB::table('research_bibliography_entry')->where('bibliography_id', $bibliographyId)->delete();
-                DB::table('research_bibliography')->where('id', $bibliographyId)->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('research_bibliography_entry')->where('bibliography_id', $bibliographyId)->delete();
+                    DB::table('research_bibliography')->where('id', $bibliographyId)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM research_bibliography_entry WHERE bibliography_id = ?');
+                    $stmt->execute([$bibliographyId]);
+                    $stmt = $conn->prepare('DELETE FROM research_bibliography WHERE id = ?');
+                    $stmt->execute([$bibliographyId]);
+                }
                 $this->getUser()->setFlash('success', 'Bibliography deleted');
                 $this->redirect('research/bibliographies');
             }

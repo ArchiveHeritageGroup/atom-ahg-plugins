@@ -352,28 +352,64 @@ class donorAgreementActions extends AhgController
             $oldValues = $this->captureAgreementValues($id);
 
             try {
-                DB::beginTransaction();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::beginTransaction();
 
-                DB::table('donor_agreement_right')->where('donor_agreement_id', $id)->delete();
-                DB::table('donor_agreement_restriction')->where('donor_agreement_id', $id)->delete();
-                DB::table('donor_agreement_document')->where('donor_agreement_id', $id)->delete();
-                
-                $reminderIds = DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->pluck('id');
-                if ($reminderIds->count() > 0) {
-                    DB::table('donor_agreement_reminder_log')->whereIn('donor_agreement_reminder_id', $reminderIds)->delete();
+                    DB::table('donor_agreement_right')->where('donor_agreement_id', $id)->delete();
+                    DB::table('donor_agreement_restriction')->where('donor_agreement_id', $id)->delete();
+                    DB::table('donor_agreement_document')->where('donor_agreement_id', $id)->delete();
+
+                    $reminderIds = DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->pluck('id');
+                    if ($reminderIds->count() > 0) {
+                        DB::table('donor_agreement_reminder_log')->whereIn('donor_agreement_reminder_id', $reminderIds)->delete();
+                    }
+                    DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->delete();
+                    DB::table('donor_agreement_i18n')->where('id', $id)->delete();
+                    DB::table('donor_agreement')->where('id', $id)->delete();
+
+                    DB::commit();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $conn->beginTransaction();
+
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement_right WHERE donor_agreement_id = ?');
+                    $stmt->execute([$id]);
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement_restriction WHERE donor_agreement_id = ?');
+                    $stmt->execute([$id]);
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement_document WHERE donor_agreement_id = ?');
+                    $stmt->execute([$id]);
+
+                    $stmt = $conn->prepare('SELECT id FROM donor_agreement_reminder WHERE donor_agreement_id = ?');
+                    $stmt->execute([$id]);
+                    $reminderIds = [];
+                    while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                        $reminderIds[] = $row['id'];
+                    }
+                    if (!empty($reminderIds)) {
+                        $placeholders = implode(',', array_fill(0, count($reminderIds), '?'));
+                        $stmt = $conn->prepare("DELETE FROM donor_agreement_reminder_log WHERE donor_agreement_reminder_id IN ($placeholders)");
+                        $stmt->execute($reminderIds);
+                    }
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement_reminder WHERE donor_agreement_id = ?');
+                    $stmt->execute([$id]);
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement_i18n WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $stmt = $conn->prepare('DELETE FROM donor_agreement WHERE id = ?');
+                    $stmt->execute([$id]);
+
+                    $conn->commit();
                 }
-                DB::table('donor_agreement_reminder')->where('donor_agreement_id', $id)->delete();
-                DB::table('donor_agreement_i18n')->where('id', $id)->delete();
-                DB::table('donor_agreement')->where('id', $id)->delete();
-
-                DB::commit();
 
                 // Log delete audit
                 $this->logAudit('delete', $id, $oldValues, []);
 
                 $this->getUser()->setFlash('notice', 'Agreement deleted.');
             } catch (Exception $e) {
-                DB::rollBack();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::rollBack();
+                } else {
+                    \Propel::getConnection()->rollBack();
+                }
                 $this->getUser()->setFlash('error', 'Error deleting: ' . $e->getMessage());
             }
         }

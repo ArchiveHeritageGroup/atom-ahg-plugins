@@ -38,31 +38,35 @@ class apiv2DescriptionsDeleteAction extends AhgApiController
         $title = $i18n->title ?? null;
 
         try {
-            DB::beginTransaction();
+            if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                \AtomFramework\Services\Delete\EntityDeleteService::delete($objectId);
+            } else {
+                DB::beginTransaction();
 
-            // Delete related records
-            DB::table('status')->where('object_id', $objectId)->delete();
-            DB::table('slug')->where('object_id', $objectId)->delete();
-            DB::table('information_object_i18n')->where('id', $objectId)->delete();
-            DB::table('event')->where('object_id', $objectId)->delete();
-            DB::table('relation')->where('object_id', $objectId)->orWhere('subject_id', $objectId)->delete();
-            DB::table('note')->where('object_id', $objectId)->delete();
-            DB::table('property')->where('object_id', $objectId)->delete();
+                // Delete related records
+                DB::table('status')->where('object_id', $objectId)->delete();
+                DB::table('slug')->where('object_id', $objectId)->delete();
+                DB::table('information_object_i18n')->where('id', $objectId)->delete();
+                DB::table('event')->where('object_id', $objectId)->delete();
+                DB::table('relation')->where('object_id', $objectId)->orWhere('subject_id', $objectId)->delete();
+                DB::table('note')->where('object_id', $objectId)->delete();
+                DB::table('property')->where('object_id', $objectId)->delete();
 
-            // Update nested set
-            $width = $io->rgt - $io->lft + 1;
-            DB::table('information_object')
-                ->where('lft', '>', $io->rgt)
-                ->decrement('lft', $width);
-            DB::table('information_object')
-                ->where('rgt', '>', $io->rgt)
-                ->decrement('rgt', $width);
+                // Update nested set
+                $width = $io->rgt - $io->lft + 1;
+                DB::table('information_object')
+                    ->where('lft', '>', $io->rgt)
+                    ->decrement('lft', $width);
+                DB::table('information_object')
+                    ->where('rgt', '>', $io->rgt)
+                    ->decrement('rgt', $width);
 
-            // Delete information_object
-            DB::table('information_object')->where('id', $objectId)->delete();
-            DB::table('object')->where('id', $objectId)->delete();
+                // Delete information_object
+                DB::table('information_object')->where('id', $objectId)->delete();
+                DB::table('object')->where('id', $objectId)->delete();
 
-            DB::commit();
+                DB::commit();
+            }
 
             // Trigger webhook for item.deleted
             try {

@@ -441,17 +441,35 @@ class metadataExtractionActions extends AhgController
             ->get();
 
         foreach ($properties as $property) {
-            Illuminate\Database\Capsule\Manager::table('property_i18n')
-                ->where('id', $property->id)
-                ->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Illuminate\Database\Capsule\Manager::table('property_i18n')
+                    ->where('id', $property->id)
+                    ->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM property_i18n WHERE id = ?');
+                $stmt->execute([$property->id]);
+            }
 
-            Illuminate\Database\Capsule\Manager::table('object')
-                ->where('id', $property->id)
-                ->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Illuminate\Database\Capsule\Manager::table('object')
+                    ->where('id', $property->id)
+                    ->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM object WHERE id = ?');
+                $stmt->execute([$property->id]);
+            }
 
-            Illuminate\Database\Capsule\Manager::table('property')
-                ->where('id', $property->id)
-                ->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Illuminate\Database\Capsule\Manager::table('property')
+                    ->where('id', $property->id)
+                    ->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM property WHERE id = ?');
+                $stmt->execute([$property->id]);
+            }
         }
     }
 

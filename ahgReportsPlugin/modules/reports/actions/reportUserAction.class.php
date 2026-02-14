@@ -1,6 +1,7 @@
 <?php
 use AtomExtensions\Services\AclService;
 use AtomExtensions\Services\SettingService;
+use AtomFramework\Services\Pagination\PaginationService;
 
 /*
  * This file is part of the Access to Memory (AtoM) software.
@@ -367,7 +368,11 @@ class reportsReportUserAction extends BaseReportAction
             $criteria->addAnd($criteria4);
 
             if (!$this->context->user->isAdministrator()) {
-                $repos = new QubitUser();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $repos = \AtomFramework\Services\Write\WriteServiceFactory::user()->newUser();
+                } else {
+                    $repos = new QubitUser();
+                }
                 $userRepos = $repos->getRepositoriesById($this->context->user->getAttribute('user_id'));
                 QubitUser::addSelectColumns($criteria);
                 $criteria->add(QubitAuditObject::REPOSITORY_ID, $userRepos, Criteria::IN);
@@ -424,7 +429,11 @@ class reportsReportUserAction extends BaseReportAction
             // filter users per users linked to repository
             if (!$this->context->user->isAdministrator()) { // if not administrator only filter users in linked to repository
                 $criteriaUsers = new Criteria();
-                $repos = new QubitUser();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $repos = \AtomFramework\Services\Write\WriteServiceFactory::user()->newUser();
+                } else {
+                    $repos = new QubitUser();
+                }
                 $userRepos = $repos->getRepositoriesById($this->context->user->getAttribute('user_id'));
                 if (isset($userRepos[0]) && 6 == $userRepos[0]) { // remove repo from user list
                     unset($userRepos[0]);
@@ -492,12 +501,17 @@ class reportsReportUserAction extends BaseReportAction
         }
 
         // Page results
-        $this->pager = new QubitPagerAudit('QubitUserActions');
-        $this->pager->setCriteria($criteria);
-        $this->pager->setMaxPerPage($limit);
-        $this->pager->setPage($page ? $page : 1);
-
-        // echo $criteria->toString()."<br>";
+        if (class_exists('QubitPagerAudit')) {
+            $this->pager = new QubitPagerAudit('QubitUserActions');
+            $this->pager->setCriteria($criteria);
+            $this->pager->setMaxPerPage($limit);
+            $this->pager->setPage($page ? $page : 1);
+        } else {
+            $this->pager = \AtomFramework\Services\Pagination\PaginationService::paginate('audit_object', [
+                'where' => [],
+                'orderBy' => ['action_date_time' => 'desc'],
+            ], (int) ($page ?: 1), (int) $limit);
+        }
     }
 
     protected function addField($name)
@@ -572,7 +586,11 @@ class reportsReportUserAction extends BaseReportAction
             $criteria = new Criteria();
             // filter users per users linked to repository
             if (!$this->context->user->isAdministrator()) {
-                $repos = new QubitUser();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $repos = \AtomFramework\Services\Write\WriteServiceFactory::user()->newUser();
+                } else {
+                    $repos = new QubitUser();
+                }
                 $userRepos = $repos->getRepositoriesById($this->context->user->getAttribute('user_id'));
                 if (isset($userRepos[0]) && 6 == $userRepos[0]) { // remove repo from user list
                     unset($userRepos[0]);

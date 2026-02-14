@@ -53,7 +53,11 @@ class damEditAction extends sfIsadPluginEditAction
             $this->form->bind($request->getPostParameters());
             if ($this->form->isValid()) {
                 $this->processForm();
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 // Save IPTC and location data AFTER resource has ID
                 error_log("DAM execute: about to save IPTC, resourceId=" . $this->resource->id);

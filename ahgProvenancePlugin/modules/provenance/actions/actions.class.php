@@ -150,7 +150,13 @@ class provenanceActions extends AhgController
     protected function processEvents(sfWebRequest $request, int $recordId, $service, string $culture, ?int $userId)
     {
         // Delete existing events first to avoid duplicates
-        \Illuminate\Database\Capsule\Manager::table('provenance_event')->where('provenance_record_id', $recordId)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            \Illuminate\Database\Capsule\Manager::table('provenance_event')->where('provenance_record_id', $recordId)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM provenance_event WHERE provenance_record_id = ?');
+            $stmt->execute([$recordId]);
+        }
         $eventTypes = $request->getParameter('event_type', []);
         $eventDates = $request->getParameter('event_date', []);
         $eventDateTexts = $request->getParameter('event_date_text', []);
@@ -342,7 +348,13 @@ class provenanceActions extends AhgController
             }
         }
 
-        \Illuminate\Database\Capsule\Manager::table('provenance_document')->where('id', $docId)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            \Illuminate\Database\Capsule\Manager::table('provenance_document')->where('id', $docId)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM provenance_document WHERE id = ?');
+            $stmt->execute([$docId]);
+        }
 
         return $this->renderJsonSuccess();
     }

@@ -74,7 +74,12 @@ class physicalobjectActions extends AhgController
                 $this->resource->type = $params['_sf_route']->resource;
             }
             
-            $this->resource->save();
+            // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $this->resource->save(); // PropelBridge; Phase 4 will use CrudService
+            } else {
+                $this->resource->save();
+            }
 
             // Save extended data
             $repo = new \AtomFramework\Repositories\PhysicalObjectExtendedRepository();

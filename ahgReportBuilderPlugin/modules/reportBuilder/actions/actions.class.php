@@ -481,10 +481,16 @@ class reportBuilderActions extends AhgController
         $id = (int) $request->getParameter('id');
         $scheduleId = (int) $request->getParameter('scheduleId');
 
-        DB::table('report_schedule')
-            ->where('id', $scheduleId)
-            ->where('custom_report_id', $id)
-            ->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            DB::table('report_schedule')
+                ->where('id', $scheduleId)
+                ->where('custom_report_id', $id)
+                ->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM report_schedule WHERE id = ? AND custom_report_id = ?');
+            $stmt->execute([$scheduleId, $id]);
+        }
 
         $this->getUser()->setFlash('success', 'Schedule deleted');
         $this->redirect("admin/report-builder/{$id}/schedule");
@@ -864,10 +870,16 @@ class reportBuilderActions extends AhgController
 
         $id = (int) $request->getParameter('id');
 
-        DB::table('dashboard_widget')
-            ->where('id', $id)
-            ->where('user_id', $userId)
-            ->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            DB::table('dashboard_widget')
+                ->where('id', $id)
+                ->where('user_id', $userId)
+                ->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM dashboard_widget WHERE id = ? AND user_id = ?');
+            $stmt->execute([$id, $userId]);
+        }
 
         return $this->renderText(json_encode(['success' => true]));
     }

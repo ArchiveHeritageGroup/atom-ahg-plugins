@@ -40,7 +40,11 @@ class UserRegisterAction extends AhgEditController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 if (null !== $this->context->getViewCacheManager()) {
                     // We just need to remove the cache for this user but sf_cache_key

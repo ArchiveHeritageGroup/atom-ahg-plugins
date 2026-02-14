@@ -37,7 +37,11 @@ class RightsHolderEditAction extends AhgEditController
 
                 $this->processForm();
 
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 $this->redirect([$this->resource, 'module' => 'rightsholder']);
             }
@@ -48,7 +52,11 @@ class RightsHolderEditAction extends AhgEditController
     {
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
 
-        $this->resource = new QubitRightsHolder();
+        if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+            $this->resource = \AtomFramework\Services\Write\WriteServiceFactory::rightsHolder()->newRightsHolder();
+        } else {
+            $this->resource = new QubitRightsHolder();
+        }
 
         if (isset($this->getRoute()->resource)) {
             $this->resource = $this->getRoute()->resource;

@@ -130,8 +130,12 @@ class InformationObjectMultiFileUploadAction extends AhgController
 
             ++$i;
 
-            // Create an information object for this digital object
-            $informationObject = new QubitInformationObject();
+            // Dual-mode: create information object (Propel model, works via PropelBridge in both modes)
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $informationObject = \AtomFramework\Services\Write\WriteServiceFactory::informationObject()->newInformationObject();
+            } else {
+                $informationObject = new QubitInformationObject();
+            }
             $informationObject->parentId = $this->resource->id;
 
             if (0 < strlen($title = $file['infoObjectTitle'])) {
@@ -145,8 +149,12 @@ class InformationObjectMultiFileUploadAction extends AhgController
 
             $informationObject->setStatus(['typeId' => QubitTerm::STATUS_TYPE_PUBLICATION_ID, 'statusId' => sfConfig::get('app_defaultPubStatus')]);
 
-            // Save description
-            $informationObject->save();
+            // Dual-mode: Propel save (works via PropelBridge in both modes)
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $informationObject->save(); // PropelBridge still available; Phase 4 will replace
+            } else {
+                $informationObject->save();
+            }
 
             $tmpFilePath = "{$tmpPath}/{$file['tmpName']}";
             
@@ -176,7 +184,12 @@ class InformationObjectMultiFileUploadAction extends AhgController
                         $keyFields = $metadata['_extractor']['key_fields'] ?? [];
                         if (!empty($keyFields['title']) && strpos($file['infoObjectTitle'], 'image ') === 0) {
                             $informationObject->setTitle($keyFields['title']);
-                            $informationObject->save();
+                            // Dual-mode: Propel save (works via PropelBridge in both modes)
+                            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                                $informationObject->save(); // PropelBridge still available; Phase 4 will replace
+                            } else {
+                                $informationObject->save();
+                            }
                         }
 
                         // Process face detection if enabled and this is an image

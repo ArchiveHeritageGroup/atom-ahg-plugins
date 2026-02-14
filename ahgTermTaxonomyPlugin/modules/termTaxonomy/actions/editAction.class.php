@@ -34,7 +34,11 @@ class TermTaxonomyEditAction extends AhgEditController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 $this->redirect([$this->resource, 'module' => 'term']);
             }
@@ -295,13 +299,21 @@ class TermTaxonomyEditAction extends AhgEditController
             case 'converseTerm':
                 // Remove converse relations for this term
                 foreach (QubitRelation::getBySubjectOrObjectId($this->resource->id, ['typeId' => QubitTerm::CONVERSE_TERM_ID]) as $converseRelation) {
-                    $converseRelation->delete();
+                    if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                        \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $converseRelation->id)->delete();
+                    } else {
+                        $converseRelation->delete();
+                    }
                 }
 
                 $value = $this->form->getValue('converseTerm');
 
                 if (true === $this->form->getValue('selfReciprocal')) {
-                    $this->resource->save();
+                    if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                        $this->resource->save(); // PropelBridge; Phase 4 replaces
+                    } else {
+                        $this->resource->save();
+                    }
 
                     // Set self-reciprocal relation
                     $relation = WriteServiceFactory::term()->newRelation();
@@ -319,11 +331,19 @@ class TermTaxonomyEditAction extends AhgEditController
                     $converseTerm = $params['_sf_route']->resource;
                     $converseTerm->parentId = $this->resource->parentId;
                     $converseTerm->taxonomyId = $this->resource->taxonomyId;
-                    $converseTerm->save();
+                    if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                        $converseTerm->save(); // PropelBridge; Phase 4 replaces
+                    } else {
+                        $converseTerm->save();
+                    }
 
                     // Remove converse relations for the converse term
                     foreach (QubitRelation::getBySubjectOrObjectId($converseTerm->id, ['typeId' => QubitTerm::CONVERSE_TERM_ID]) as $converseRelation) {
-                        $converseRelation->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $converseRelation->id)->delete();
+                        } else {
+                            $converseRelation->delete();
+                        }
                     }
 
                     $relation->object = $converseTerm;
@@ -356,7 +376,11 @@ class TermTaxonomyEditAction extends AhgEditController
                     if (isset($value[$item->objectId])) {
                         unset($filtered[$item->objectId]);
                     } else {
-                        $item->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $item->id)->delete();
+                        } else {
+                            $item->delete();
+                        }
                     }
                 }
 
@@ -378,7 +402,11 @@ class TermTaxonomyEditAction extends AhgEditController
                         $item->name = $value[$item->id];
                         unset($filtered[$item->id]);
                     } else {
-                        $item->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('other_name')->where('id', $item->id)->delete();
+                        } else {
+                            $item->delete();
+                        }
                     }
                 }
 

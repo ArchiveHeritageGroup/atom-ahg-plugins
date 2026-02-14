@@ -87,7 +87,12 @@ class RepositoryEditThemeAction extends AhgController
                     $logo->save($this->resource->getBannerPath(true));
                 }
 
-                $this->resource->save();
+                // Dual-mode: Propel save (works via PropelBridge in both modes)
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge still available; Phase 4 will replace
+                } else {
+                    $this->resource->save();
+                }
 
                 // Invalidate cached htmlSnippet
                 if (!$this->new && null !== $cache = CacheService::getInstance()) {

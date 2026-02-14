@@ -123,7 +123,11 @@ class libraryRenameAction extends AhgEditController
                 $slug->slug = InformationObjectSlugPreviewAction::determineAvailableSlug(
                     $postedSlug, $this->resource->id
                 );
-                $slug->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $slug->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $slug->save();
+                }
 
                 // Set $resource->slug so the new slug is used to generate the new Finding Aid filename
                 $this->resource->slug = $slug->slug;
@@ -152,7 +156,11 @@ class libraryRenameAction extends AhgEditController
 
             // Change name in database
             $digitalObject->name = $filename;
-            $digitalObject->save();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $digitalObject->save(); // PropelBridge; Phase 4 replaces
+            } else {
+                $digitalObject->save();
+            }
 
             // Regenerate derivatives
             digitalObjectRegenDerivativesTask::regenerateDerivatives(
@@ -160,7 +168,11 @@ class libraryRenameAction extends AhgEditController
             );
         }
 
-        $this->resource->save();
+        if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+            $this->resource->save(); // PropelBridge; Phase 4 replaces
+        } else {
+            $this->resource->save();
+        }
 
         // BUG FIX #60: Restore display_standard_id if it was changed during save
         if ($preservedDisplayStandardId !== null) {

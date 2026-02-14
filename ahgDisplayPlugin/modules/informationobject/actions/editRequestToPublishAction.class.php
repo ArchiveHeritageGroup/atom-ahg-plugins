@@ -66,7 +66,12 @@ class InformationObjectEditRequestToPublishAction extends AhgEditController
 
             if ($this->form->isValid()) {
                 $this->processForm();
-                $this->resource->save(); // saves relations added in processForm()
+                // Dual-mode: PropelBridge available in both modes; Phase 4 will replace standalone branch
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 will use CrudService
+                } else {
+                    $this->resource->save();
+                }
                 $this->informationObject = QubitInformationObject::getById($this->resource->id);
 
                 $this->redirect([$this->resource, 'module' => 'informationobject']);
@@ -297,11 +302,15 @@ class InformationObjectEditRequestToPublishAction extends AhgEditController
             $this->resource->addRequestToPublish($requesttopublish);
         }
 
-        // Delete any marked relations if needed (leave this as-is)
+        // Delete any marked relations if needed
         if (isset($this->request->delete_relations)) {
             foreach ($this->request->delete_relations as $item) {
                 $params = $this->context->routing->parse(Qubit::pathInfo($item));
-                $params['_sf_route']->resource->delete();
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($params['_sf_route']->resource->id);
+                } else {
+                    $params['_sf_route']->resource->delete();
+                }
             }
         }
 

@@ -98,7 +98,11 @@ class physicalobjectActions extends AhgController
                 $this->resource->type = $params['_sf_route']->resource;
             }
 
-            $this->resource->save();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $this->resource->save(); // PropelBridge; Phase 4 replaces
+            } else {
+                $this->resource->save();
+            }
 
             // Save extended data
             if (class_exists('\AtomFramework\Repositories\PhysicalObjectExtendedRepository')) {
@@ -165,7 +169,11 @@ class physicalobjectActions extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                $this->resource->delete();
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+                } else {
+                    $this->resource->delete();
+                }
 
                 $next = $this->form->getValue('next');
                 if (isset($next)) {

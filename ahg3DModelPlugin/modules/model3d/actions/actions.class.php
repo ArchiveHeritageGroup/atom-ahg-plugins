@@ -442,9 +442,15 @@ class model3dActions extends AhgController
             );
 
         // Clear manifest cache
-        $db::table('iiif_3d_manifest')
-            ->where('model_id', $modelId)
-            ->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $db::table('iiif_3d_manifest')
+                ->where('model_id', $modelId)
+                ->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM iiif_3d_manifest WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+        }
 
         // Log action
         $this->logAction($modelId, 'update');
@@ -500,33 +506,58 @@ class model3dActions extends AhgController
         $this->logAction($modelId, 'delete', ['filename' => $model->original_filename]);
 
         // Delete related records
-        $hotspotIds = $db::table('object_3d_hotspot')
-            ->where('model_id', $modelId)
-            ->pluck('id');
-        
-        $db::table('object_3d_hotspot_i18n')
-            ->whereIn('hotspot_id', $hotspotIds)
-            ->delete();
-        
-        $db::table('object_3d_hotspot')
-            ->where('model_id', $modelId)
-            ->delete();
-        
-        $db::table('object_3d_texture')
-            ->where('model_id', $modelId)
-            ->delete();
-        
-        $db::table('object_3d_model_i18n')
-            ->where('model_id', $modelId)
-            ->delete();
-        
-        $db::table('iiif_3d_manifest')
-            ->where('model_id', $modelId)
-            ->delete();
-        
-        $db::table('object_3d_model')
-            ->where('id', $modelId)
-            ->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $hotspotIds = $db::table('object_3d_hotspot')
+                ->where('model_id', $modelId)
+                ->pluck('id');
+
+            $db::table('object_3d_hotspot_i18n')
+                ->whereIn('hotspot_id', $hotspotIds)
+                ->delete();
+
+            $db::table('object_3d_hotspot')
+                ->where('model_id', $modelId)
+                ->delete();
+
+            $db::table('object_3d_texture')
+                ->where('model_id', $modelId)
+                ->delete();
+
+            $db::table('object_3d_model_i18n')
+                ->where('model_id', $modelId)
+                ->delete();
+
+            $db::table('iiif_3d_manifest')
+                ->where('model_id', $modelId)
+                ->delete();
+
+            $db::table('object_3d_model')
+                ->where('id', $modelId)
+                ->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $hotspotIds = [];
+            $stmt = $conn->prepare('SELECT id FROM object_3d_hotspot WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $hotspotIds[] = $row['id'];
+            }
+            if (!empty($hotspotIds)) {
+                $placeholders = implode(',', array_fill(0, count($hotspotIds), '?'));
+                $stmt = $conn->prepare("DELETE FROM object_3d_hotspot_i18n WHERE hotspot_id IN ($placeholders)");
+                $stmt->execute($hotspotIds);
+            }
+            $stmt = $conn->prepare('DELETE FROM object_3d_hotspot WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+            $stmt = $conn->prepare('DELETE FROM object_3d_texture WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+            $stmt = $conn->prepare('DELETE FROM object_3d_model_i18n WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+            $stmt = $conn->prepare('DELETE FROM iiif_3d_manifest WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+            $stmt = $conn->prepare('DELETE FROM object_3d_model WHERE id = ?');
+            $stmt->execute([$modelId]);
+        }
 
         $this->getUser()->setFlash('notice', '3D model deleted');
         // Get the slug for redirect
@@ -737,7 +768,13 @@ class model3dActions extends AhgController
         $this->logAction($modelId, 'hotspot_add', ['hotspot_id' => $hotspotId]);
 
         // Clear manifest cache
-        $db::table('iiif_3d_manifest')->where('model_id', $modelId)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $db::table('iiif_3d_manifest')->where('model_id', $modelId)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM iiif_3d_manifest WHERE model_id = ?');
+            $stmt->execute([$modelId]);
+        }
 
         $this->getResponse()->setContentType('application/json');
         echo json_encode(['success' => true, 'id' => $hotspotId, 'color' => $color]);
@@ -774,11 +811,23 @@ class model3dActions extends AhgController
         $this->logAction($hotspot->model_id, 'hotspot_delete', ['hotspot_id' => $hotspotId]);
 
         // Delete
-        $db::table('object_3d_hotspot_i18n')->where('hotspot_id', $hotspotId)->delete();
-        $db::table('object_3d_hotspot')->where('id', $hotspotId)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $db::table('object_3d_hotspot_i18n')->where('hotspot_id', $hotspotId)->delete();
+            $db::table('object_3d_hotspot')->where('id', $hotspotId)->delete();
 
-        // Clear manifest cache
-        $db::table('iiif_3d_manifest')->where('model_id', $hotspot->model_id)->delete();
+            // Clear manifest cache
+            $db::table('iiif_3d_manifest')->where('model_id', $hotspot->model_id)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM object_3d_hotspot_i18n WHERE hotspot_id = ?');
+            $stmt->execute([$hotspotId]);
+            $stmt = $conn->prepare('DELETE FROM object_3d_hotspot WHERE id = ?');
+            $stmt->execute([$hotspotId]);
+
+            // Clear manifest cache
+            $stmt = $conn->prepare('DELETE FROM iiif_3d_manifest WHERE model_id = ?');
+            $stmt->execute([$hotspot->model_id]);
+        }
 
         $this->getResponse()->setContentType('application/json');
         echo json_encode(['success' => true]);

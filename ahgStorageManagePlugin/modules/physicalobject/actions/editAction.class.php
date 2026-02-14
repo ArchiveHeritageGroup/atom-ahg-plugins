@@ -41,7 +41,11 @@ class PhysicalObjectEditAction extends AhgEditController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 if (null !== $next = $this->form->getValue('next')) {
                     $this->redirect($next);

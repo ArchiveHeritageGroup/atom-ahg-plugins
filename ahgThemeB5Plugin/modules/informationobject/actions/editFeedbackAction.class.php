@@ -65,7 +65,12 @@ class InformationObjectEditFeedbackAction extends AhgEditController
 				// Feedback saving + relation creation happens in processForm()
 				$this->processForm();
 
-				$this->resource->save();
+				// Dual-mode: Propel save (works via PropelBridge in both modes)
+				if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+				    $this->resource->save(); // PropelBridge still available; Phase 4 will replace
+				} else {
+				    $this->resource->save();
+				}
 				$this->informationObject = QubitInformationObject::getById($this->resource->id);
 
 				$this->redirect([$this->resource, 'module' => 'informationobject']);
@@ -283,7 +288,12 @@ class InformationObjectEditFeedbackAction extends AhgEditController
         if (isset($this->request->delete_relations)) {
             foreach ($this->request->delete_relations as $item) {
                 $params = $this->context->routing->parse(Qubit::pathInfo($item));
-                $params['_sf_route']->resource->delete();
+                // Dual-mode: delete relation record
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($params['_sf_route']->resource->id);
+                } else {
+                    $params['_sf_route']->resource->delete();
+                }
             }
         }
     }

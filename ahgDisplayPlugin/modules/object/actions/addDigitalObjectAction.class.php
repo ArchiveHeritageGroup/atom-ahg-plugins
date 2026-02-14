@@ -83,7 +83,12 @@ class ObjectAddDigitalObjectAction extends AhgController
 
                 $this->processForm();
 
-                $this->resource->save();
+                // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 will use CrudService
+                } else {
+                    $this->resource->save();
+                }
 
                 // BUG FIX #60: Restore display_standard_id if it was changed during save
                 if ($preservedDisplayStandardId !== null) {
@@ -94,6 +99,20 @@ class ObjectAddDigitalObjectAction extends AhgController
                         DB::table('information_object')
                             ->where('id', $this->resource->id)
                             ->update(['display_standard_id' => $preservedDisplayStandardId]);
+                    }
+                }
+
+                // Encrypt uploaded file if encryption is enabled
+                if (class_exists('\\AtomFramework\\Core\\Security\\FileEncryptionService')
+                    && \AtomFramework\Core\Security\FileEncryptionService::isEnabled()) {
+                    try {
+                        $do = $this->resource->getDigitalObject();
+                        if ($do) {
+                            \AtomFramework\Core\Security\FileEncryptionService::encryptDigitalObject($do->id);
+                            \AtomFramework\Core\Security\FileEncryptionService::encryptDerivatives($do->id);
+                        }
+                    } catch (\Exception $e) {
+                        error_log("Upload encryption error: " . $e->getMessage());
                     }
                 }
 

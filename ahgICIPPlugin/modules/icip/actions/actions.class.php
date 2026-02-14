@@ -200,7 +200,13 @@ class icipActions extends AhgController
         if ($linkedConsents > 0 || $linkedNotices > 0) {
             $this->getUser()->setFlash('error', 'Cannot delete community with linked records. Deactivate instead.');
         } else {
-            DB::table('icip_community')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('icip_community')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM icip_community WHERE id = ?');
+                $stmt->execute([$id]);
+            }
             $this->getUser()->setFlash('notice', 'Community deleted successfully.');
         }
 
@@ -939,10 +945,16 @@ class icipActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('notice', 'Cultural notice added.');
             } elseif ($action === 'remove') {
-                DB::table('icip_cultural_notice')
-                    ->where('id', $request->getParameter('notice_id'))
-                    ->where('information_object_id', $this->object->id)
-                    ->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('icip_cultural_notice')
+                        ->where('id', $request->getParameter('notice_id'))
+                        ->where('information_object_id', $this->object->id)
+                        ->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM icip_cultural_notice WHERE id = ? AND information_object_id = ?');
+                    $stmt->execute([$request->getParameter('notice_id'), $this->object->id]);
+                }
                 $this->getUser()->setFlash('notice', 'Cultural notice removed.');
             }
 
@@ -994,10 +1006,16 @@ class icipActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('notice', 'TK Label added.');
             } elseif ($action === 'remove') {
-                DB::table('icip_tk_label')
-                    ->where('id', $request->getParameter('label_id'))
-                    ->where('information_object_id', $this->object->id)
-                    ->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('icip_tk_label')
+                        ->where('id', $request->getParameter('label_id'))
+                        ->where('information_object_id', $this->object->id)
+                        ->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM icip_tk_label WHERE id = ? AND information_object_id = ?');
+                    $stmt->execute([$request->getParameter('label_id'), $this->object->id]);
+                }
                 $this->getUser()->setFlash('notice', 'TK Label removed.');
             }
 
@@ -1047,10 +1065,16 @@ class icipActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('notice', 'Restriction added.');
             } elseif ($action === 'remove') {
-                DB::table('icip_access_restriction')
-                    ->where('id', $request->getParameter('restriction_id'))
-                    ->where('information_object_id', $this->object->id)
-                    ->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('icip_access_restriction')
+                        ->where('id', $request->getParameter('restriction_id'))
+                        ->where('information_object_id', $this->object->id)
+                        ->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM icip_access_restriction WHERE id = ? AND information_object_id = ?');
+                    $stmt->execute([$request->getParameter('restriction_id'), $this->object->id]);
+                }
                 $this->getUser()->setFlash('notice', 'Restriction removed.');
             }
 

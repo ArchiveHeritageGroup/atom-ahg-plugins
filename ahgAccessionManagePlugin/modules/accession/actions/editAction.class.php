@@ -125,7 +125,11 @@ class AccessionEditAction extends AhgEditController
                 if (isset($this->request->deleteRelations)) {
                     foreach ($this->request->deleteRelations as $item) {
                         $params = $this->context->routing->parse(Qubit::pathInfo($item));
-                        $params['_sf_route']->resource->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $params['_sf_route']->resource->id)->delete();
+                        } else {
+                            $params['_sf_route']->resource->delete();
+                        }
                     }
                 }
 
@@ -142,7 +146,11 @@ class AccessionEditAction extends AhgEditController
 
                 // Postpone search indexing until alternative IDs are added
                 $this->resource->indexOnSave = false;
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 $this->alternativeIdentifiersComponent->processForm();
                 $this->eventsComponent->processForm();
@@ -324,7 +332,11 @@ class AccessionEditAction extends AhgEditController
                     if (isset($value[$item->objectId])) {
                         unset($filtered[$item->objectId]);
                     } else {
-                        $item->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $item->id)->delete();
+                        } else {
+                            $item->delete();
+                        }
                     }
                 }
 
@@ -370,7 +382,11 @@ class AccessionEditAction extends AhgEditController
                     if (isset($value[$item->subjectId])) {
                         unset($filtered[$item->subjectId]);
                     } else {
-                        $item->delete();
+                        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                            \Illuminate\Database\Capsule\Manager::table('relation')->where('id', $item->id)->delete();
+                        } else {
+                            $item->delete();
+                        }
                     }
                 }
 

@@ -55,12 +55,7 @@ class ccoEditAction extends InformationObjectEditAction
     public function execute($request)
     {
         parent::execute($request);
-    }
 
-	public function execute($request)
-    {
-        parent::execute($request);
-        
         // Load actors for creator dropdown
         $this->actors = $this->getActors();
     }

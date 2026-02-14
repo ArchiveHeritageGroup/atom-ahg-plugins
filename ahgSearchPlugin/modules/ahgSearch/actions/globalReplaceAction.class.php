@@ -94,7 +94,11 @@ class ahgSearchGlobalReplaceAction extends AhgController
                 }
 
                 $io->__set($request->column, $replaced);
-                $io->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $io->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $io->save();
+                }
             }
 
             // Force refresh of ES index

@@ -266,7 +266,13 @@ class heritageAdminActions extends AhgController
         if ($inUse) {
             $this->getUser()->setFlash('error', 'Cannot delete - standard is in use by heritage assets');
         } else {
-            DB::table('heritage_accounting_standard')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('heritage_accounting_standard')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM heritage_accounting_standard WHERE id = ?');
+                $stmt->execute([$id]);
+            }
             $this->getUser()->setFlash('success', 'Accounting standard deleted');
         }
         
@@ -400,7 +406,13 @@ class heritageAdminActions extends AhgController
         $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
         $standardId = $rule->standard_id ?? null;
 
-        \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM heritage_compliance_rule WHERE id = ?');
+            $stmt->execute([$id]);
+        }
 
         $this->getUser()->setFlash('success', 'Compliance rule deleted');
         $this->redirect(['module' => 'heritageAdmin', 'action' => 'ruleList', 'standard_id' => $standardId]);

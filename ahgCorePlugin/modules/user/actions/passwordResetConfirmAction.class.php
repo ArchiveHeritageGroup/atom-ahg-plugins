@@ -13,11 +13,22 @@ class UserPasswordResetConfirmAction extends AhgController
     public function execute($request)
     {
         $token = $request->getParameter('token');
-        
+
         // Validate token
-        $criteria = new Criteria();
-        $criteria->add(QubitUser::RESET_TOKEN, $token);
-        $this->resource = QubitUser::getOne($criteria);
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $row = \Illuminate\Database\Capsule\Manager::table('user')
+                ->where('reset_token', $token)
+                ->first();
+            if ($row) {
+                $this->resource = QubitUser::getById($row->id);
+            } else {
+                $this->resource = null;
+            }
+        } else {
+            $criteria = new Criteria();
+            $criteria->add(QubitUser::RESET_TOKEN, $token);
+            $this->resource = QubitUser::getOne($criteria);
+        }
 
         if (!$this->resource || 
             !$this->resource->resetTokenExpiry || 
@@ -60,7 +71,11 @@ class UserPasswordResetConfirmAction extends AhgController
                 // Clear reset token
                 $this->resource->resetToken = null;
                 $this->resource->resetTokenExpiry = null;
-                $this->resource->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $this->resource->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $this->resource->save();
+                }
 
                 $this->getUser()->setFlash('notice', $this->context->i18n->__('Your password has been reset successfully. You can now log in with your new password.'));
                 $this->redirect(['module' => 'user', 'action' => 'login']);

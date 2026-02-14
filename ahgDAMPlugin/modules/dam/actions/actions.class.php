@@ -140,7 +140,11 @@ class damActions extends AhgController
             }
 
             // Use Propel ORM to create the information object properly (handles nested set)
-            $informationObject = new QubitInformationObject();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $informationObject = \AtomFramework\Services\Write\WriteServiceFactory::informationObject()->newInformationObject();
+            } else {
+                $informationObject = new QubitInformationObject();
+            }
             $informationObject->parentId = $parentId;
             $informationObject->identifier = $identifier;
             $informationObject->setTitle($title);
@@ -158,7 +162,11 @@ class damActions extends AhgController
 
             // Set publication status (published)
             $informationObject->setPublicationStatus(DAMConstants::PUBLICATION_STATUS_PUBLISHED_ID);
-            $informationObject->save();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $informationObject->save(); // PropelBridge; Phase 4 replaces
+            } else {
+                $informationObject->save();
+            }
 
             $objectId = $informationObject->id;
 

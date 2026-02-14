@@ -145,7 +145,13 @@ class extendedRightsActions extends AhgController
 
         if ($request->isMethod('post')) {
             $rsId = $request->getParameter('rights_statement_id');
-            Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM object_rights_statement WHERE object_id = ?');
+                $stmt->execute([$oid]);
+            }
             if ($rsId) {
                 Capsule::table('object_rights_statement')->insert([
                     'object_id' => $oid,
@@ -161,7 +167,13 @@ class extendedRightsActions extends AhgController
             );
 
             $tkIds = $request->getParameter('tk_label_ids', []);
-            Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM rights_object_tk_label WHERE object_id = ?');
+                $stmt->execute([$oid]);
+            }
             if (is_array($tkIds)) {
                 foreach ($tkIds as $tkId) {
                     Capsule::table('rights_object_tk_label')->insert([
@@ -173,7 +185,13 @@ class extendedRightsActions extends AhgController
             }
 
             $donorId = $request->getParameter('rights_holder_id');
-            Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM object_rights_holder WHERE object_id = ?');
+                $stmt->execute([$oid]);
+            }
             if ($donorId) {
                 Capsule::table('object_rights_holder')->insert([
                     'object_id' => $oid,
@@ -254,7 +272,13 @@ class extendedRightsActions extends AhgController
             foreach ($objectIds as $objId) {
                 $objId = (int) $objId;
                 if ($rightsType === 'rights_statement') {
-                    Capsule::table('object_rights_statement')->where('object_id', '=', $objId)->delete();
+                    if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                        Capsule::table('object_rights_statement')->where('object_id', '=', $objId)->delete();
+                    } else {
+                        $conn = \Propel::getConnection();
+                        $stmt = $conn->prepare('DELETE FROM object_rights_statement WHERE object_id = ?');
+                        $stmt->execute([$objId]);
+                    }
                     Capsule::table('object_rights_statement')->insert([
                         'object_id' => $objId,
                         'rights_statement_id' => (int) $valueId,
@@ -435,10 +459,22 @@ class extendedRightsActions extends AhgController
         $oid = (int) $object->object_id;
 
         // Clear all extended rights
-        Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->delete();
-        Capsule::table('extended_rights')->where('object_id', '=', $oid)->delete();
-        Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->delete();
-        Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->delete();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            Capsule::table('object_rights_statement')->where('object_id', '=', $oid)->delete();
+            Capsule::table('extended_rights')->where('object_id', '=', $oid)->delete();
+            Capsule::table('rights_object_tk_label')->where('object_id', '=', $oid)->delete();
+            Capsule::table('object_rights_holder')->where('object_id', '=', $oid)->delete();
+        } else {
+            $conn = \Propel::getConnection();
+            $stmt = $conn->prepare('DELETE FROM object_rights_statement WHERE object_id = ?');
+            $stmt->execute([$oid]);
+            $stmt = $conn->prepare('DELETE FROM extended_rights WHERE object_id = ?');
+            $stmt->execute([$oid]);
+            $stmt = $conn->prepare('DELETE FROM rights_object_tk_label WHERE object_id = ?');
+            $stmt->execute([$oid]);
+            $stmt = $conn->prepare('DELETE FROM object_rights_holder WHERE object_id = ?');
+            $stmt->execute([$oid]);
+        }
         // Lift any active embargoes
         Capsule::table('rights_embargo')
             ->where('object_id', '=', $oid)

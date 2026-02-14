@@ -141,10 +141,14 @@ class apiv2BatchAction extends AhgApiController
         }
 
         // Simplified delete - production would need full cascade
-        DB::table('slug')->where('object_id', $slugRecord->object_id)->delete();
-        DB::table('information_object_i18n')->where('id', $slugRecord->object_id)->delete();
-        DB::table('information_object')->where('id', $slugRecord->object_id)->delete();
-        DB::table('object')->where('id', $slugRecord->object_id)->delete();
+        if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+            \AtomFramework\Services\Delete\EntityDeleteService::delete($slugRecord->object_id);
+        } else {
+            DB::table('slug')->where('object_id', $slugRecord->object_id)->delete();
+            DB::table('information_object_i18n')->where('id', $slugRecord->object_id)->delete();
+            DB::table('information_object')->where('id', $slugRecord->object_id)->delete();
+            DB::table('object')->where('id', $slugRecord->object_id)->delete();
+        }
 
         return ['success' => true, 'id' => $slugRecord->object_id];
     }

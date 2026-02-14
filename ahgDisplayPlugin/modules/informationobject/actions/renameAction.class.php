@@ -106,7 +106,12 @@ class InformationObjectRenameAction extends AhgEditController
                 $slug->slug = InformationObjectSlugPreviewAction::determineAvailableSlug(
                     $postedSlug, $this->resource->id
                 );
-                $slug->save();
+                // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $slug->save(); // PropelBridge; Phase 4 will use CrudService
+                } else {
+                    $slug->save();
+                }
 
                 $this->resource->slug = $slug->slug;
                 $this->renameFindingAid($oldFindingAidPath);
@@ -130,14 +135,24 @@ class InformationObjectRenameAction extends AhgEditController
             chmod($newFilePath, 0644);
 
             $digitalObject->name = $filename;
-            $digitalObject->save();
+            // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $digitalObject->save(); // PropelBridge; Phase 4 will use CrudService
+            } else {
+                $digitalObject->save();
+            }
 
             digitalObjectRegenDerivativesTask::regenerateDerivatives(
                 $digitalObject, ['keepTranscript' => true]
             );
         }
 
-        $this->resource->save();
+        // Dual-mode: PropelBridge available in both modes; Phase 4 will use CrudService
+        if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+            $this->resource->save(); // PropelBridge; Phase 4 will use CrudService
+        } else {
+            $this->resource->save();
+        }
 
         // BUG FIX #60: Restore display_standard_id if it was changed during save
         if ($preservedDisplayStandardId !== null) {

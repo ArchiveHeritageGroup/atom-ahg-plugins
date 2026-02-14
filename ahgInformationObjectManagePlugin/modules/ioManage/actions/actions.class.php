@@ -509,11 +509,19 @@ class ioManageActions extends AhgController
                 $tmpFilePath = $movedFile['tmp_name'];
 
                 // Create QubitDigitalObject via Propel (handles derivatives + filesystem)
-                $do = new \QubitDigitalObject();
-                $do->objectId = $ioId;
-                $do->usageId = \QubitTerm::MASTER_ID;
-                $do->assets[] = new \QubitAsset($tmpFilePath);
-                $do->save();
+                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                    $do = new \QubitDigitalObject();
+                    $do->objectId = $ioId;
+                    $do->usageId = \QubitTerm::MASTER_ID;
+                    $do->assets[] = new \QubitAsset($tmpFilePath);
+                    $do->save(); // PropelBridge; Phase 4 replaces
+                } else {
+                    $do = new \QubitDigitalObject();
+                    $do->objectId = $ioId;
+                    $do->usageId = \QubitTerm::MASTER_ID;
+                    $do->assets[] = new \QubitAsset($tmpFilePath);
+                    $do->save();
+                }
 
                 // Update search index
                 $ioObject = \QubitInformationObject::getById($ioId);

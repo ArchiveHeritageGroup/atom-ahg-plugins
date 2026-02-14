@@ -1287,10 +1287,16 @@ class spectrumActions extends AhgController
                 }
             }
             
-            DB::table('spectrum_condition_photo')
-                ->where('id', $photoId)
-                ->delete();
-            
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('spectrum_condition_photo')
+                    ->where('id', $photoId)
+                    ->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM spectrum_condition_photo WHERE id = ?');
+                $stmt->execute([$photoId]);
+            }
+
             return $this->renderText(json_encode(['success' => true]));
         } catch (\Exception $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
@@ -1783,7 +1789,13 @@ class spectrumActions extends AhgController
             if ($template->file_path && file_exists($template->file_path)) {
                 unlink($template->file_path);
             }
-            DB::table('privacy_template')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('privacy_template')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM privacy_template WHERE id = ?');
+                $stmt->execute([$id]);
+            }
         }
         
         $this->redirect('/admin/privacy/templates');

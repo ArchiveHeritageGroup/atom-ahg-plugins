@@ -229,14 +229,22 @@ class RequestToPublishEditRequestToPublishAction extends AhgEditController {
 			$requesttopublish->completedAt = date('Y-m-d H:i:s');
 			$requesttopublish->statusId = $outcome; //QubitTerm::IN_REVIEW_ID;
 			$informationObj = QubitInformationObject::getById($this->resource->id);
-			$requesttopublish->save();
+			if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+				$requesttopublish->save(); // PropelBridge; Phase 4 replaces
+			} else {
+				$requesttopublish->save();
+			}
 			$this->requesttopublish =  $requesttopublish->id;
 		}
 		
 		if (isset($this->request->delete_relations)) {
 			foreach ($this->request->delete_relations as $item) {
 				$params = $this->context->routing->parse(Qubit::pathInfo($item));
-				$params['_sf_route']->resource->delete();
+				if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+					\AtomFramework\Services\Delete\EntityDeleteService::delete($params['_sf_route']->resource->id);
+				} else {
+					$params['_sf_route']->resource->delete();
+				}
 			}
 		}
 	}
@@ -250,7 +258,11 @@ class RequestToPublishEditRequestToPublishAction extends AhgEditController {
 				if ($this->form->getValue('outcome') != 1) {
 					$this->redirect(array($this->resource, 'module' => 'requesttopublish', 'action' => 'browse'));
 				}
-				$this->resource->save();
+				if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+					$this->resource->save(); // PropelBridge; Phase 4 replaces
+				} else {
+					$this->resource->save();
+				}
 				$this->redirect(array($this->resource, 'module' => 'requesttopublish', 'action' => 'browse'));
 			}
 		}

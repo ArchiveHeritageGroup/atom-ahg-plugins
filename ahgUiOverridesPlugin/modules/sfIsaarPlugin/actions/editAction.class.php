@@ -154,7 +154,11 @@ class sfIsaarPluginEditAction extends AhgActorEditController
         $actorId = $this->resource->id;
 
         if (empty($actorId)) {
-            $this->resource->save();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $this->resource->save(); // PropelBridge; Phase 4 replaces
+            } else {
+                $this->resource->save();
+            }
             $actorId = $this->resource->id;
         }
 

@@ -353,10 +353,37 @@ class contractActions extends AhgController
             try {
                 DB::beginTransaction();
 
-                DB::table('ahg_contract_document')->where('contract_id', $id)->delete();
-                DB::table('ahg_contract_reminder')->where('contract_id', $id)->delete();
-                DB::table('ahg_contract_history')->where('contract_id', $id)->delete();
-                DB::table('ahg_contract')->where('id', $id)->delete();
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('ahg_contract_document')->where('contract_id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM ahg_contract_document WHERE contract_id = ?');
+                    $stmt->execute([$id]);
+                }
+
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('ahg_contract_reminder')->where('contract_id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM ahg_contract_reminder WHERE contract_id = ?');
+                    $stmt->execute([$id]);
+                }
+
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('ahg_contract_history')->where('contract_id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM ahg_contract_history WHERE contract_id = ?');
+                    $stmt->execute([$id]);
+                }
+
+                if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                    DB::table('ahg_contract')->where('id', $id)->delete();
+                } else {
+                    $conn = \Propel::getConnection();
+                    $stmt = $conn->prepare('DELETE FROM ahg_contract WHERE id = ?');
+                    $stmt->execute([$id]);
+                }
 
                 DB::commit();
 

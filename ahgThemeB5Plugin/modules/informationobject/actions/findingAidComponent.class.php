@@ -34,7 +34,7 @@ class findingAidComponent extends AhgComponents
             return sfView::NONE;
         }
 
-        // Use QubitFindingAid class for finding aid operations
+        // Dual-mode: QubitFindingAid instantiation (Propel model, works via PropelBridge in both modes)
         $findingAid = new QubitFindingAid($this->resource);
 
         // Public users can only see the download link if the file exists

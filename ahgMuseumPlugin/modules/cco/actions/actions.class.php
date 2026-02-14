@@ -325,7 +325,13 @@ class ccoActions extends AhgController
         $id = $request->getParameter('id');
 
         try {
-            DB::table('provenance_entry')->where('id', $id)->delete();
+            if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+                DB::table('provenance_entry')->where('id', $id)->delete();
+            } else {
+                $conn = \Propel::getConnection();
+                $stmt = $conn->prepare('DELETE FROM provenance_entry WHERE id = ?');
+                $stmt->execute([$id]);
+            }
             return $this->renderText(json_encode(['success' => true]));
         } catch (\Exception $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));

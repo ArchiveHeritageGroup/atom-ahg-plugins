@@ -27,7 +27,11 @@ class libraryEditAction extends AhgController
             $this->loadLibraryData($this->resource->id);
         } else {
             // Creating new resource
-            $this->resource = new QubitInformationObject();
+            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+                $this->resource = \AtomFramework\Services\Write\WriteServiceFactory::informationObject()->newInformationObject();
+            } else {
+                $this->resource = new QubitInformationObject();
+            }
             $this->itemLocation = [];
             
             // Check create permission on root
@@ -124,7 +128,11 @@ class libraryEditAction extends AhgController
         }
 
         // Save the information object
-        $this->resource->save();
+        if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
+            $this->resource->save(); // PropelBridge; Phase 4 replaces
+        } else {
+            $this->resource->save();
+        }
         $savedId = $this->resource->id;
 
         // Save library_item
