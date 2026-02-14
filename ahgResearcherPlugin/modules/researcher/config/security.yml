@@ -1,0 +1,8 @@
+all:
+  is_secure: true
+
+apiUpload:
+  is_secure: true
+
+apiDeleteFile:
+  is_secure: true

@@ -1,0 +1,33 @@
+{
+    "name": "Researcher Collection Upload",
+    "machine_name": "ahgResearcherPlugin",
+    "version": "1.0.0",
+    "description": "Researcher collection upload and approval workflow — online submissions and offline exchange import with two-step archivist review",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgResearchPlugin",
+            "ahgWorkflowPlugin",
+            "ahgPortableExportPlugin"
+        ]
+    },
+    "tables": [
+        "researcher_submission",
+        "researcher_submission_item",
+        "researcher_submission_file",
+        "researcher_submission_review"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "category": "research",
+    "load_order": 55
+}
