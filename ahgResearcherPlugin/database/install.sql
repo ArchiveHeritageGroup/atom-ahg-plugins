@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS researcher_submission (
     description TEXT,
     repository_id INT DEFAULT NULL,              -- Target repository for publishing
     parent_object_id INT DEFAULT NULL,           -- Target parent IO for placement (NULL = root)
+    project_id INT DEFAULT NULL,                 -- FK to research_project.id (link to research project)
     source_type ENUM('online','offline') NOT NULL DEFAULT 'online',
     source_file VARCHAR(255) DEFAULT NULL,       -- Original exchange JSON filename
     include_images TINYINT(1) DEFAULT 1,         -- Whether offline export included images
@@ -29,7 +30,8 @@ CREATE TABLE IF NOT EXISTS researcher_submission (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_researcher (researcher_id),
     INDEX idx_user (user_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_project (project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. Items within a submission (each becomes an IO on publish)

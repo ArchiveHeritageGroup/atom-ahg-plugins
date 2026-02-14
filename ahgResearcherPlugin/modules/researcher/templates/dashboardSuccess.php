@@ -77,69 +77,194 @@
     </div>
   </div>
 
-  <!-- Recent Submissions -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Submissions</h6>
-      <a href="<?php echo url_for(['module' => 'researcher', 'action' => 'submissions']) ?>" class="btn btn-sm btn-outline-primary">
-        View All
-      </a>
+  <div class="row">
+    <!-- Recent Submissions (main column) -->
+    <div class="<?php echo $hasResearch ? 'col-lg-8' : 'col-12' ?>">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Submissions</h6>
+          <a href="<?php echo url_for(['module' => 'researcher', 'action' => 'submissions']) ?>" class="btn btn-sm btn-outline-primary">
+            View All
+          </a>
+        </div>
+        <div class="card-body p-0">
+          <?php if (empty($recent)): ?>
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+              <p class="mt-2 mb-0">No submissions yet. Create your first submission to get started.</p>
+            </div>
+          <?php else: ?>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Title</th>
+                    <th>Source</th>
+                    <th>Items</th>
+                    <th>Files</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($recent as $sub): ?>
+                  <tr class="cursor-pointer" onclick="window.location='<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>'">
+                    <td>
+                      <strong><?php echo htmlspecialchars($sub->title) ?></strong>
+                      <?php if ($isAdmin && !empty($sub->user_name)): ?>
+                        <br><small class="text-muted"><?php echo htmlspecialchars($sub->user_name) ?></small>
+                      <?php endif ?>
+                    </td>
+                    <td>
+                      <?php if ($sub->source_type === 'offline'): ?>
+                        <span class="badge bg-secondary"><i class="bi bi-hdd me-1"></i>Offline</span>
+                      <?php else: ?>
+                        <span class="badge bg-primary"><i class="bi bi-cloud me-1"></i>Online</span>
+                      <?php endif ?>
+                    </td>
+                    <td><?php echo $sub->total_items ?></td>
+                    <td><?php echo $sub->total_files ?></td>
+                    <td>
+                      <?php
+                        $statusColors = [
+                          'draft' => 'secondary', 'submitted' => 'warning', 'under_review' => 'info',
+                          'approved' => 'success', 'published' => 'primary', 'returned' => 'danger', 'rejected' => 'dark',
+                        ];
+                        $color = $statusColors[$sub->status] ?? 'secondary';
+                      ?>
+                      <span class="badge bg-<?php echo $color ?>"><?php echo ucfirst(str_replace('_', ' ', $sub->status)) ?></span>
+                    </td>
+                    <td><small class="text-muted"><?php echo date('d M Y', strtotime($sub->updated_at)) ?></small></td>
+                  </tr>
+                  <?php endforeach ?>
+                </tbody>
+              </table>
+            </div>
+          <?php endif ?>
+        </div>
+      </div>
     </div>
-    <div class="card-body p-0">
-      <?php if (empty($recent)): ?>
-        <div class="text-center text-muted py-5">
-          <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-          <p class="mt-2 mb-0">No submissions yet. Create your first submission to get started.</p>
+
+    <?php if ($hasResearch): ?>
+    <!-- Research Sidebar -->
+    <div class="col-lg-4">
+
+      <!-- Researcher Profile -->
+      <?php if ($researcherProfile): ?>
+      <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Researcher Profile</h6>
         </div>
-      <?php else: ?>
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Title</th>
-                <th>Source</th>
-                <th>Items</th>
-                <th>Files</th>
-                <th>Status</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($recent as $sub): ?>
-              <tr class="cursor-pointer" onclick="window.location='<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>'">
-                <td>
-                  <strong><?php echo htmlspecialchars($sub->title) ?></strong>
-                  <?php if ($isAdmin && !empty($sub->user_name)): ?>
-                    <br><small class="text-muted"><?php echo htmlspecialchars($sub->user_name) ?></small>
-                  <?php endif ?>
-                </td>
-                <td>
-                  <?php if ($sub->source_type === 'offline'): ?>
-                    <span class="badge bg-secondary"><i class="bi bi-hdd me-1"></i>Offline</span>
-                  <?php else: ?>
-                    <span class="badge bg-primary"><i class="bi bi-cloud me-1"></i>Online</span>
-                  <?php endif ?>
-                </td>
-                <td><?php echo $sub->total_items ?></td>
-                <td><?php echo $sub->total_files ?></td>
-                <td>
-                  <?php
-                    $statusColors = [
-                      'draft' => 'secondary', 'submitted' => 'warning', 'under_review' => 'info',
-                      'approved' => 'success', 'published' => 'primary', 'returned' => 'danger', 'rejected' => 'dark',
-                    ];
-                    $color = $statusColors[$sub->status] ?? 'secondary';
-                  ?>
-                  <span class="badge bg-<?php echo $color ?>"><?php echo ucfirst(str_replace('_', ' ', $sub->status)) ?></span>
-                </td>
-                <td><small class="text-muted"><?php echo date('d M Y', strtotime($sub->updated_at)) ?></small></td>
-              </tr>
-              <?php endforeach ?>
-            </tbody>
-          </table>
+        <div class="card-body py-2">
+          <strong><?php echo htmlspecialchars($researcherProfile->first_name . ' ' . $researcherProfile->last_name) ?></strong>
+          <?php if (!empty($researcherProfile->institution)): ?>
+            <br><small class="text-muted"><?php echo htmlspecialchars($researcherProfile->institution) ?></small>
+          <?php endif ?>
+          <span class="badge bg-<?php echo $researcherProfile->status === 'approved' ? 'success' : 'warning' ?> ms-1"><?php echo ucfirst($researcherProfile->status) ?></span>
+          <div class="mt-2">
+            <a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']) ?>" class="btn btn-sm btn-outline-info w-100">
+              <i class="bi bi-folder-open me-1"></i>My Research Workspace
+            </a>
+          </div>
         </div>
+      </div>
       <?php endif ?>
+
+      <!-- Research Projects -->
+      <?php if (!empty($projects)): ?>
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-journal-text me-2"></i>My Projects</h6>
+          <span class="badge bg-secondary"><?php echo count($projects) ?></span>
+        </div>
+        <div class="list-group list-group-flush">
+          <?php foreach ($projects as $proj): ?>
+          <div class="list-group-item py-2">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong class="small"><?php echo htmlspecialchars($proj->title) ?></strong>
+                <?php
+                  $projStatusColors = ['active' => 'success', 'planning' => 'info', 'on_hold' => 'warning', 'completed' => 'secondary'];
+                  $pc = $projStatusColors[$proj->status] ?? 'secondary';
+                ?>
+                <br><span class="badge bg-<?php echo $pc ?>" style="font-size:0.65rem;"><?php echo ucfirst($proj->status) ?></span>
+                <?php if (!empty($proj->project_type)): ?>
+                  <span class="badge bg-light text-dark" style="font-size:0.65rem;"><?php echo ucfirst($proj->project_type) ?></span>
+                <?php endif ?>
+              </div>
+            </div>
+          </div>
+          <?php endforeach ?>
+        </div>
+      </div>
+      <?php endif ?>
+
+      <!-- Research Collections -->
+      <?php if (!empty($collections)): ?>
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-collection me-2"></i>My Collections</h6>
+          <span class="badge bg-secondary"><?php echo count($collections) ?></span>
+        </div>
+        <div class="list-group list-group-flush">
+          <?php foreach ($collections as $col): ?>
+          <div class="list-group-item py-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong class="small"><?php echo htmlspecialchars($col->name) ?></strong>
+                <br><small class="text-muted"><?php echo $col->item_count ?> item<?php echo $col->item_count !== 1 ? 's' : '' ?></small>
+              </div>
+              <?php if ($col->item_count > 0): ?>
+              <a href="<?php echo url_for(['module' => 'researcher', 'action' => 'createFromCollection', 'collectionId' => $col->id]) ?>"
+                 class="btn btn-sm btn-outline-success" title="Create submission from this collection">
+                <i class="bi bi-box-arrow-in-right"></i>
+              </a>
+              <?php endif ?>
+            </div>
+          </div>
+          <?php endforeach ?>
+        </div>
+      </div>
+      <?php endif ?>
+
+      <!-- Recent Annotations -->
+      <?php if (!empty($annotations)): ?>
+      <div class="card mb-3">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="bi bi-sticky me-2"></i>Recent Notes</h6>
+        </div>
+        <div class="list-group list-group-flush">
+          <?php foreach ($annotations as $ann): ?>
+          <div class="list-group-item py-2">
+            <small>
+              <strong><?php echo htmlspecialchars($ann->title ?? $ann->annotation_type) ?></strong>
+              <?php if (!empty($ann->object_title)): ?>
+                <br><span class="text-muted">on: <?php echo htmlspecialchars($ann->object_title) ?></span>
+              <?php endif ?>
+              <br><span class="text-muted"><?php echo date('d M Y', strtotime($ann->created_at)) ?></span>
+            </small>
+          </div>
+          <?php endforeach ?>
+        </div>
+      </div>
+      <?php endif ?>
+
+      <!-- No research profile -->
+      <?php if (!$researcherProfile): ?>
+      <div class="card mb-3">
+        <div class="card-body text-center text-muted">
+          <i class="bi bi-person-plus" style="font-size: 1.5rem;"></i>
+          <p class="small mt-2 mb-2">Register as a researcher to link your research workspace.</p>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']) ?>" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-person-plus me-1"></i>Register
+          </a>
+        </div>
+      </div>
+      <?php endif ?>
+
     </div>
+    <?php endif ?>
+
   </div>
 
 </div>

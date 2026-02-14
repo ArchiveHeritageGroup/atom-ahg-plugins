@@ -47,10 +47,25 @@
               <small class="text-muted">The archival institution where this collection will be placed.</small>
             </div>
 
+            <?php if (!empty($projects)): ?>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Linked Research Project</label>
+              <select name="project_id" class="form-select">
+                <option value="">-- None --</option>
+                <?php foreach ($projects as $proj): ?>
+                  <option value="<?php echo $proj->id ?>"><?php echo htmlspecialchars($proj->title) ?> (<?php echo ucfirst($proj->status) ?>)</option>
+                <?php endforeach ?>
+              </select>
+              <small class="text-muted">Link this submission to an existing research project.</small>
+            </div>
+            <?php endif ?>
+
             <div class="mb-3">
               <label class="form-label fw-bold">Parent Record (optional)</label>
-              <input type="text" name="parent_object_id" class="form-control" placeholder="AtoM object ID (leave blank for root level)">
-              <small class="text-muted">If this submission should be placed under an existing record, enter its ID.</small>
+              <input type="hidden" name="parent_object_id" id="parentObjectId" value="">
+              <input type="text" class="form-control" id="parentSearch" placeholder="Type to search for a parent record..." autocomplete="off">
+              <small class="text-muted">Place this submission under an existing archival record. Leave blank for root level.</small>
+              <div id="parentResults" class="list-group mt-1" style="display:none; position:absolute; z-index:999; max-height:200px; overflow-y:auto;"></div>
             </div>
 
             <hr>
@@ -73,3 +88,65 @@
   </div>
 
 </div>
+
+<script <?php echo $nattr ?>>
+(function() {
+  var searchInput = document.getElementById('parentSearch');
+  var hiddenInput = document.getElementById('parentObjectId');
+  var resultsDiv = document.getElementById('parentResults');
+  var debounceTimer = null;
+
+  searchInput.addEventListener('input', function() {
+    var q = this.value.trim();
+    clearTimeout(debounceTimer);
+    if (q.length < 2) { resultsDiv.style.display = 'none'; return; }
+
+    debounceTimer = setTimeout(function() {
+      fetch('/index.php/informationobject/autocomplete?query=' + encodeURIComponent(q) + '&limit=10')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var results = data.results || data;
+          if (!results || results.length === 0) {
+            resultsDiv.innerHTML = '<div class="list-group-item text-muted small">No results found</div>';
+            resultsDiv.style.display = '';
+            return;
+          }
+          var html = '';
+          results.forEach(function(item) {
+            var id = item.identifier || item.id || '';
+            var title = item.title || item.name || item.label || '';
+            var objectId = item.id || item.object_id || '';
+            html += '<a href="#" class="list-group-item list-group-item-action small parent-result" data-id="' + objectId + '">'
+              + '<strong>' + title + '</strong>'
+              + (id ? ' <span class="text-muted">(' + id + ')</span>' : '')
+              + '</a>';
+          });
+          resultsDiv.innerHTML = html;
+          resultsDiv.style.display = '';
+        })
+        .catch(function() { resultsDiv.style.display = 'none'; });
+    }, 300);
+  });
+
+  resultsDiv.addEventListener('click', function(e) {
+    var item = e.target.closest('.parent-result');
+    if (!item) return;
+    e.preventDefault();
+    hiddenInput.value = item.getAttribute('data-id');
+    searchInput.value = item.textContent.trim();
+    resultsDiv.style.display = 'none';
+  });
+
+  // Clear selection
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { resultsDiv.style.display = 'none'; }
+    if (e.key === 'Backspace' && this.value === '') { hiddenInput.value = ''; }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
+      resultsDiv.style.display = 'none';
+    }
+  });
+})();
+</script>

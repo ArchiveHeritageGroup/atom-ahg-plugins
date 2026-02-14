@@ -108,6 +108,23 @@ class researcherActions extends AhgController
         // Limit to 10 most recent
         $this->recent = array_slice($this->recent, 0, 10);
         $this->isAdmin = $this->isAdmin();
+
+        // Research integration — load projects, collections, annotations
+        $this->hasResearch = $service->hasResearchPlugin();
+        $this->researcherProfile = null;
+        $this->projects = [];
+        $this->collections = [];
+        $this->annotations = [];
+
+        if ($this->hasResearch) {
+            $this->researcherProfile = $service->getResearcherProfile($userId);
+            if ($this->researcherProfile) {
+                $rid = (int) $this->researcherProfile->id;
+                $this->projects = $service->getResearchProjects($rid, 5);
+                $this->collections = $service->getResearchCollections($rid, 5);
+                $this->annotations = $service->getResearchAnnotations($rid, 5);
+            }
+        }
     }
 
     // ─── 2. SUBMISSIONS LIST ────────────────────────────────────
@@ -144,12 +161,22 @@ class researcherActions extends AhgController
         $service = $this->getSubmissionService();
         $this->repositories = $service->getRepositories($this->culture());
 
+        // Load research projects for linking dropdown
+        $this->projects = [];
+        if ($service->hasResearchPlugin()) {
+            $profile = $service->getResearcherProfile($this->userId());
+            if ($profile) {
+                $this->projects = $service->getResearchProjects((int) $profile->id, 50);
+            }
+        }
+
         if ($request->isMethod('post')) {
             $id = $service->createSubmission($this->userId(), [
                 'title'           => $request->getParameter('title'),
                 'description'     => $request->getParameter('description'),
                 'repository_id'   => $request->getParameter('repository_id'),
                 'parent_object_id' => $request->getParameter('parent_object_id'),
+                'project_id'      => $request->getParameter('project_id'),
             ]);
 
             $this->getUser()->setFlash('notice', 'Submission created. Add items to your collection.');
@@ -198,6 +225,13 @@ class researcherActions extends AhgController
                 ->value('authorized_form_of_name');
             $this->repositoryName = $repo;
         }
+
+        // Get linked project name
+        $this->projectName = null;
+        if ($this->submission->project_id) {
+            $project = $service->getResearchProject((int) $this->submission->project_id);
+            $this->projectName = $project ? $project->title : null;
+        }
     }
 
     // ─── 5. EDIT SUBMISSION ─────────────────────────────────────
@@ -224,12 +258,22 @@ class researcherActions extends AhgController
         $this->submission = $data['submission'];
         $this->repositories = $service->getRepositories($this->culture());
 
+        // Load research projects for linking dropdown
+        $this->projects = [];
+        if ($service->hasResearchPlugin()) {
+            $profile = $service->getResearcherProfile($this->userId());
+            if ($profile) {
+                $this->projects = $service->getResearchProjects((int) $profile->id, 50);
+            }
+        }
+
         if ($request->isMethod('post')) {
             $service->updateSubmission($id, [
                 'title'           => $request->getParameter('title'),
                 'description'     => $request->getParameter('description'),
                 'repository_id'   => $request->getParameter('repository_id'),
                 'parent_object_id' => $request->getParameter('parent_object_id'),
+                'project_id'      => $request->getParameter('project_id'),
             ]);
 
             $this->getUser()->setFlash('notice', 'Submission updated.');
@@ -470,6 +514,33 @@ class researcherActions extends AhgController
         }
     }
 
+    // ─── 11b. CREATE FROM RESEARCH COLLECTION ──────────────────
+
+    public function executeCreateFromCollection($request)
+    {
+        $this->requireAuth();
+
+        $collectionId = (int) $request->getParameter('collectionId');
+        $service = $this->getSubmissionService();
+
+        if (!$service->hasResearchPlugin()) {
+            $this->getUser()->setFlash('error', 'Research plugin is not installed.');
+            $this->redirect(['module' => 'researcher', 'action' => 'dashboard']);
+        }
+
+        $projectId = $request->getParameter('project_id') ?: null;
+
+        $submissionId = $service->createFromCollection($this->userId(), $collectionId, $projectId);
+
+        if (!$submissionId) {
+            $this->getUser()->setFlash('error', 'Could not create submission from collection. Check ownership and collection content.');
+            $this->redirect(['module' => 'researcher', 'action' => 'dashboard']);
+        }
+
+        $this->getUser()->setFlash('notice', 'Submission created from research collection. Review the imported items and add files.');
+        $this->redirect(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $submissionId]);
+    }
+
     // ─── 12. PUBLISH ────────────────────────────────────────────
 
     public function executePublish($request)
@@ -601,5 +672,64 @@ class researcherActions extends AhgController
         return $this->renderText(json_encode([
             'success' => true,
         ]));
+    }
+
+    // ─── 15. AJAX: AUTOCOMPLETE (terms + actors) ────────────────
+
+    public function executeApiAutocomplete($request)
+    {
+        $this->requireAuth();
+
+        $this->getResponse()->setContentType('application/json');
+
+        $query = trim($request->getParameter('query', ''));
+        $source = $request->getParameter('source', 'term'); // 'term' or 'actor'
+        $taxonomyId = (int) $request->getParameter('taxonomy', 0);
+        $limit = min((int) $request->getParameter('limit', 10), 25);
+
+        if (strlen($query) < 1) {
+            return $this->renderText(json_encode([]));
+        }
+
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        if ($source === 'actor') {
+            // Search actors by name
+            $results = $DB::table('actor_i18n')
+                ->where('culture', 'en')
+                ->where('authorized_form_of_name', 'LIKE', '%' . $query . '%')
+                ->whereNotNull('authorized_form_of_name')
+                ->orderBy('authorized_form_of_name')
+                ->limit($limit)
+                ->select('id', 'authorized_form_of_name as name')
+                ->get()
+                ->toArray();
+
+            return $this->renderText(json_encode(array_map(function ($r) {
+                return ['id' => $r->id, 'name' => $r->name];
+            }, $results)));
+        }
+
+        // Search terms by taxonomy
+        if ($taxonomyId < 1) {
+            return $this->renderText(json_encode([]));
+        }
+
+        $results = $DB::table('term')
+            ->join('term_i18n', function ($j) {
+                $j->on('term.id', '=', 'term_i18n.id')
+                    ->where('term_i18n.culture', '=', 'en');
+            })
+            ->where('term.taxonomy_id', $taxonomyId)
+            ->where('term_i18n.name', 'LIKE', '%' . $query . '%')
+            ->orderBy('term_i18n.name')
+            ->limit($limit)
+            ->select('term.id', 'term_i18n.name')
+            ->get()
+            ->toArray();
+
+        return $this->renderText(json_encode(array_map(function ($r) {
+            return ['id' => $r->id, 'name' => $r->name];
+        }, $results)));
     }
 }

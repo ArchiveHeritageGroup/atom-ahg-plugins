@@ -11,6 +11,7 @@ $routing = sfContext::getInstance()->getRouting();
 $hasAccessRequest = $routing->hasRouteName('access_request_my');
 $hasResearch = $routing->hasRouteName('research_workspace');
 $hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
+$hasResearcher = $routing->hasRouteName('researcher_dashboard');
 
 // Get pending counts only if plugins exist
 $pendingCount = 0;
@@ -146,6 +147,16 @@ if ($isAuthenticated && $hasSpectrum) {
     <li>
       <a class="dropdown-item" href="<?php echo url_for('@research_dashboard'); ?>">
         <i class="fas fa-folder-open me-2"></i><?php echo __('My Workspace'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
+
+    <?php if ($hasResearcher): ?>
+    <!-- Researcher Submissions -->
+    <?php if (!$hasResearch): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+    <li>
+      <a class="dropdown-item" href="<?php echo url_for(['module' => 'researcher', 'action' => 'dashboard']); ?>">
+        <i class="fas fa-cloud-upload-alt me-2"></i><?php echo __('My Submissions'); ?>
       </a>
     </li>
     <?php endif; ?>

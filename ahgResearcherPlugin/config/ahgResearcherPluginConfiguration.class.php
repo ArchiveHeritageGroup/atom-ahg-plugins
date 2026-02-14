@@ -56,6 +56,9 @@ class ahgResearcherPluginConfiguration extends sfPluginConfiguration
         $r->any('researcher_submit', '/researcher/submission/:id/submit', 'submit', ['id' => '\d+']);
         $r->any('researcher_resubmit', '/researcher/submission/:id/resubmit', 'resubmit', ['id' => '\d+']);
 
+        // Create from research collection
+        $r->any('researcher_from_collection', '/researcher/from-collection/:collectionId', 'createFromCollection', ['collectionId' => '\d+']);
+
         // Exchange import
         $r->any('researcher_import_exchange', '/researcher/import', 'importExchange');
 
@@ -65,6 +68,7 @@ class ahgResearcherPluginConfiguration extends sfPluginConfiguration
         // AJAX endpoints
         $r->any('researcher_api_upload', '/researcher/api/upload', 'apiUpload');
         $r->any('researcher_api_delete_file', '/researcher/api/delete-file', 'apiDeleteFile');
+        $r->any('researcher_api_autocomplete', '/researcher/api/autocomplete', 'apiAutocomplete');
 
         $r->register($routing);
     }

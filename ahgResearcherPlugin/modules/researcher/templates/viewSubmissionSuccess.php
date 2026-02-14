@@ -217,6 +217,13 @@
             <dt class="col-5">Repository</dt>
             <dd class="col-7"><?php echo htmlspecialchars($repositoryName ?? 'Not set') ?></dd>
 
+            <?php if ($projectName): ?>
+            <dt class="col-5">Project</dt>
+            <dd class="col-7">
+              <i class="bi bi-journal-text me-1"></i><?php echo htmlspecialchars($projectName) ?>
+            </dd>
+            <?php endif ?>
+
             <dt class="col-5">Items</dt>
             <dd class="col-7"><?php echo $submission->total_items ?></dd>
 

@@ -34,6 +34,7 @@ $hasFormsPlugin = ahgIsPluginEnabled('ahgFormsPlugin');
 $hasDoiPlugin = ahgIsPluginEnabled('ahgDoiPlugin');
 $hasDedupePlugin = ahgIsPluginEnabled('ahgDedupePlugin');
 $hasHeritage = ahgIsPluginEnabled('ahgHeritagePlugin');
+$hasResearcher = ahgIsPluginEnabled('ahgResearcherPlugin');
 
 // Get pending counts for badges
 $pendingBookings = 0;
@@ -66,6 +67,16 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
     try {
         $pendingDois = (int) \Illuminate\Database\Capsule\Manager::table('ahg_doi_queue')
             ->where('status', 'pending')
+            ->count();
+    } catch (Exception $e) {}
+}
+
+// Pending researcher submissions count
+$pendingSubmissions = 0;
+if ($isAdmin && $hasResearcher) {
+    try {
+        $pendingSubmissions = (int) \Illuminate\Database\Capsule\Manager::table('researcher_submission')
+            ->whereIn('status', ['submitted', 'under_review'])
             ->count();
     } catch (Exception $e) {}
 }
@@ -106,6 +117,14 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><span><i class="fas fa-users fa-fw me-1"></i><?php echo __('Researchers'); ?></span><?php if ($pendingResearchers > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingResearchers; ?></span><?php endif; ?></a></li>
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><span><i class="fas fa-calendar-alt fa-fw me-1"></i><?php echo __('Bookings'); ?></span><?php if ($pendingBookings > 0): ?><span class="badge bg-danger rounded-pill"><?php echo $pendingBookings; ?></span><?php endif; ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'rooms']); ?>"><i class="fas fa-door-open fa-fw me-1"></i><?php echo __('Rooms'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasResearcher): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Researcher Submissions'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'researcher', 'action' => 'dashboard']); ?>"><i class="fas fa-cloud-upload-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
+    <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'researcher', 'action' => 'submissions', 'status' => 'submitted']); ?>"><span><i class="fas fa-inbox fa-fw me-1"></i><?php echo __('Pending Review'); ?></span><?php if ($pendingSubmissions > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingSubmissions; ?></span><?php endif; ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'researcher', 'action' => 'importExchange']); ?>"><i class="fas fa-file-import fa-fw me-1"></i><?php echo __('Import Exchange'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasAccessRequest): ?>

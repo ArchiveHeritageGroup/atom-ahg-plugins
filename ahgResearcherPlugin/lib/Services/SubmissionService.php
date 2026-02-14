@@ -33,8 +33,9 @@ class SubmissionService
             'user_id'         => $userId,
             'title'           => $data['title'],
             'description'     => $data['description'] ?? null,
-            'repository_id'   => $data['repository_id'] ?: null,
-            'parent_object_id' => $data['parent_object_id'] ?: null,
+            'repository_id'   => !empty($data['repository_id']) ? (int) $data['repository_id'] : null,
+            'parent_object_id' => !empty($data['parent_object_id']) && is_numeric($data['parent_object_id']) ? (int) $data['parent_object_id'] : null,
+            'project_id'      => !empty($data['project_id']) && is_numeric($data['project_id']) ? (int) $data['project_id'] : null,
             'source_type'     => $data['source_type'] ?? 'online',
             'source_file'     => $data['source_file'] ?? null,
             'include_images'  => $data['include_images'] ?? 1,
@@ -143,11 +144,15 @@ class SubmissionService
      */
     public function updateSubmission(int $id, array $data): void
     {
-        $allowed = ['title', 'description', 'repository_id', 'parent_object_id'];
+        $allowed = ['title', 'description', 'repository_id', 'parent_object_id', 'project_id'];
         $update = [];
         foreach ($allowed as $key) {
             if (array_key_exists($key, $data)) {
-                $update[$key] = $data[$key] ?: null;
+                $val = $data[$key] ?: null;
+                if ($val !== null && in_array($key, ['repository_id', 'parent_object_id', 'project_id'])) {
+                    $val = is_numeric($val) ? (int) $val : null;
+                }
+                $update[$key] = $val;
             }
         }
         $update['updated_at'] = date('Y-m-d H:i:s');
@@ -587,6 +592,235 @@ class SubmissionService
             'rejected'     => $rejected,
             'pending'      => $submitted + $underReview,
         ];
+    }
+
+    // ─── RESEARCH INTEGRATION ───────────────────────────────────
+
+    /**
+     * Check if ahgResearchPlugin is installed (research tables exist).
+     */
+    public function hasResearchPlugin(): bool
+    {
+        static $has = null;
+        if ($has === null) {
+            try {
+                DB::table('research_researcher')->limit(1)->first();
+                $has = true;
+            } catch (\Exception $e) {
+                $has = false;
+            }
+        }
+
+        return $has;
+    }
+
+    /**
+     * Get the researcher profile for a user.
+     */
+    public function getResearcherProfile(int $userId): ?object
+    {
+        if (!$this->hasResearchPlugin()) {
+            return null;
+        }
+
+        try {
+            return DB::table('research_researcher')
+                ->where('user_id', $userId)
+                ->first();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get research projects for a researcher (active + recent completed).
+     */
+    public function getResearchProjects(int $researcherId, int $limit = 10): array
+    {
+        if (!$this->hasResearchPlugin()) {
+            return [];
+        }
+
+        try {
+            return DB::table('research_project')
+                ->where('owner_id', $researcherId)
+                ->whereIn('status', ['planning', 'active', 'on_hold', 'completed'])
+                ->orderByRaw("FIELD(status, 'active', 'planning', 'on_hold', 'completed')")
+                ->orderBy('updated_at', 'desc')
+                ->limit($limit)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get research collections for a researcher.
+     */
+    public function getResearchCollections(int $researcherId, int $limit = 10): array
+    {
+        if (!$this->hasResearchPlugin()) {
+            return [];
+        }
+
+        try {
+            $collections = DB::table('research_collection')
+                ->where('researcher_id', $researcherId)
+                ->orderBy('updated_at', 'desc')
+                ->limit($limit)
+                ->get()
+                ->toArray();
+
+            // Get item counts per collection
+            foreach ($collections as &$col) {
+                $col->item_count = DB::table('research_collection_item')
+                    ->where('collection_id', $col->id)
+                    ->count();
+            }
+
+            return $collections;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get recent research annotations for a researcher.
+     */
+    public function getResearchAnnotations(int $researcherId, int $limit = 5): array
+    {
+        if (!$this->hasResearchPlugin()) {
+            return [];
+        }
+
+        try {
+            return DB::table('research_annotation as a')
+                ->leftJoin('information_object_i18n as io', function ($j) {
+                    $j->on('a.object_id', '=', 'io.id')->where('io.culture', '=', 'en');
+                })
+                ->where('a.researcher_id', $researcherId)
+                ->select('a.*', 'io.title as object_title')
+                ->orderBy('a.created_at', 'desc')
+                ->limit($limit)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get collection items with their linked information objects.
+     */
+    public function getCollectionItems(int $collectionId): array
+    {
+        if (!$this->hasResearchPlugin()) {
+            return [];
+        }
+
+        try {
+            return DB::table('research_collection_item as ci')
+                ->leftJoin('information_object_i18n as io', function ($j) {
+                    $j->on('ci.object_id', '=', 'io.id')->where('io.culture', '=', 'en');
+                })
+                ->leftJoin('information_object as iobj', 'ci.object_id', '=', 'iobj.id')
+                ->leftJoin('slug', function ($j) {
+                    $j->on('ci.object_id', '=', 'slug.object_id');
+                })
+                ->where('ci.collection_id', $collectionId)
+                ->select(
+                    'ci.*',
+                    'io.title as object_title',
+                    'io.scope_and_content',
+                    'io.extent_and_medium',
+                    'slug.slug'
+                )
+                ->orderBy('ci.sort_order')
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Create a submission pre-populated from a research collection.
+     */
+    public function createFromCollection(int $userId, int $collectionId, ?int $projectId = null): ?int
+    {
+        if (!$this->hasResearchPlugin()) {
+            return null;
+        }
+
+        $researcherId = $this->resolveResearcherId($userId);
+
+        // Get the collection
+        $collection = null;
+        try {
+            $collection = DB::table('research_collection')
+                ->where('id', $collectionId)
+                ->first();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        if (!$collection) {
+            return null;
+        }
+
+        // Verify ownership
+        if ($researcherId && (int) $collection->researcher_id !== $researcherId) {
+            return null;
+        }
+
+        // Create the submission
+        $submissionId = $this->createSubmission($userId, [
+            'title'       => $collection->name ?? 'Collection Submission',
+            'description' => $collection->description ?? null,
+            'source_type' => 'online',
+        ]);
+
+        // Link project if provided
+        if ($projectId) {
+            DB::table('researcher_submission')->where('id', $submissionId)->update([
+                'project_id' => $projectId,
+            ]);
+        }
+
+        // Import collection items as submission items
+        $items = $this->getCollectionItems($collectionId);
+        foreach ($items as $ci) {
+            $this->addItem($submissionId, [
+                'title'               => $ci->object_title ?? ('Item from collection #' . $ci->id),
+                'scope_and_content'   => $ci->scope_and_content ?? null,
+                'extent_and_medium'   => $ci->extent_and_medium ?? null,
+                'reference_object_id' => $ci->object_id ?? null,
+                'reference_slug'      => $ci->slug ?? null,
+                'notes'               => $ci->notes ?? null,
+                'item_type'           => 'description',
+            ]);
+        }
+
+        return $submissionId;
+    }
+
+    /**
+     * Get a single research project by ID.
+     */
+    public function getResearchProject(int $projectId): ?object
+    {
+        if (!$this->hasResearchPlugin()) {
+            return null;
+        }
+
+        try {
+            return DB::table('research_project')
+                ->where('id', $projectId)
+                ->first();
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     // ─── HELPERS ────────────────────────────────────────────────
