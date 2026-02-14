@@ -21,7 +21,12 @@ class feedbackDeleteAction extends AhgController
         }
 
         if ($request->isMethod('delete') || $request->getParameter('confirm')) {
-            $this->resource->delete();
+            // Dual-mode delete (WP18)
+            if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+            } else {
+                $this->resource->delete();
+            }
             $this->getUser()->setFlash('notice', $this->context->i18n->__('Feedback deleted.'));
             $this->redirect(['module' => 'feedback', 'action' => 'browse']);
         }

@@ -44,7 +44,12 @@ class PhysicalObjectDeleteAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                $this->resource->delete();
+                // Dual-mode delete (WP18)
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+                } else {
+                    $this->resource->delete();
+                }
 
                 $next = $this->form->getValue('next');
                 if (isset($next)) {

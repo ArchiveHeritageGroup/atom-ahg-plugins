@@ -43,15 +43,18 @@ class AccessionDeleteAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                foreach ($this->resource->deaccessions as $item) {
-                    $item->delete();
+                // Dual-mode delete (WP18) — CrudService handles cascade cleanup
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+                } else {
+                    foreach ($this->resource->deaccessions as $item) {
+                        $item->delete();
+                    }
+                    foreach (QubitRelation::getBySubjectOrObjectId($this->resource->id) as $item) {
+                        $item->delete();
+                    }
+                    $this->resource->delete();
                 }
-
-                foreach (QubitRelation::getBySubjectOrObjectId($this->resource->id) as $item) {
-                    $item->delete();
-                }
-
-                $this->resource->delete();
 
                 $this->redirect('@accession_browse_override');
             }

@@ -36,7 +36,12 @@ class TermTaxonomyDeleteAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                $this->resource->deleteFullHierarchy();
+                // Dual-mode delete (WP18) — handles MPTT tree cleanup
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+                } else {
+                    $this->resource->deleteFullHierarchy();
+                }
 
                 if (isset($this->resource->taxonomy)) {
                     $this->redirect([$this->resource->taxonomy, 'module' => 'taxonomy']);

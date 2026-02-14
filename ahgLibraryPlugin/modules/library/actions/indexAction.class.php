@@ -22,13 +22,19 @@ class libraryIndexAction extends AhgController
             $this->forward404('No slug provided');
         }
 
-        // Load the information object by slug
-        $this->resource = QubitInformationObject::getBySlug($slug);
-
-        if (!$this->resource) {
-            // Try to find by ID if slug looks like a number
-            if (is_numeric($slug)) {
-                $this->resource = QubitInformationObject::getById((int)$slug);
+        // Dual-mode: EntityQueryService (standalone) or Propel (legacy)
+        if (class_exists('\\AtomFramework\\Services\\EntityQueryService')) {
+            $entity = \AtomFramework\Services\EntityQueryService::findBySlug($slug);
+            if (!$entity && is_numeric($slug)) {
+                $entity = \AtomFramework\Services\EntityQueryService::findById((int) $slug, 'QubitInformationObject');
+            }
+            if ($entity) {
+                $this->resource = new \AtomFramework\Services\LightweightResource($entity);
+            }
+        } else {
+            $this->resource = QubitInformationObject::getBySlug($slug);
+            if (!$this->resource && is_numeric($slug)) {
+                $this->resource = QubitInformationObject::getById((int) $slug);
             }
         }
 

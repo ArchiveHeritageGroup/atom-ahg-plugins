@@ -41,7 +41,12 @@ class sfIsaarPluginDeleteAction extends AhgController
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
-                $this->resource->delete();
+                // Dual-mode delete (WP18)
+                if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
+                    \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);
+                } else {
+                    $this->resource->delete();
+                }
 
                 $this->redirect('@actor_browse_override');
             }
