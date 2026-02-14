@@ -6,8 +6,12 @@ namespace AhgPortableExportPlugin\Services;
  * Collects digital object files (thumbnails, references, masters, PDFs)
  * for portable export.
  *
- * Resolves file paths from the AtoM uploads directory and copies them
- * to the export output directory with SHA-256 checksums.
+ * AtoM stores digital objects as:
+ * - Master (usage_id=140): {atomRoot}{path}{name}
+ * - Reference (usage_id=141): {atomRoot}{path}{name}_141.{ext} (same dir)
+ * - Thumbnail (usage_id=142): {atomRoot}{path}{name}_142.{ext} (same dir)
+ *
+ * The path column already includes /uploads/ prefix.
  */
 class AssetCollector
 {
@@ -30,7 +34,7 @@ class AssetCollector
      * @param string $outputDir     Export output directory
      * @param array  $options       include_thumbnails, include_references, include_masters
      *
-     * @return array{files: array, total_size: int}
+     * @return array{files: array, total_size: int, descriptions: array}
      */
     public function collect(array $descriptions, string $outputDir, array $options = []): array
     {
@@ -56,45 +60,25 @@ class AssetCollector
         $totalFiles = $this->countFiles($descriptions);
         $processed = 0;
 
-        $uploadsDir = $this->atomRoot . '/uploads';
-
         foreach ($descriptions as &$desc) {
             if (empty($desc['digital_objects'])) {
                 continue;
             }
 
             foreach ($desc['digital_objects'] as &$do) {
-                $masterPath = $this->resolveMasterPath($uploadsDir, $do);
+                // Resolve base directory: atomRoot + path (path already includes /uploads/)
+                $baseDir = $this->resolveBaseDir($do);
 
                 // Copy master / original
-                if ($includeMasters && $masterPath && file_exists($masterPath)) {
-                    $destName = $this->safeFilename($do['id'], $do['name']);
-                    $dest = $objectsDir . '/master/' . $destName;
-                    if ($this->copyFile($masterPath, $dest)) {
-                        $size = filesize($dest);
-                        $manifest[] = [
-                            'type' => 'master',
-                            'object_id' => $desc['id'],
-                            'digital_object_id' => $do['id'],
-                            'filename' => $destName,
-                            'size' => $size,
-                            'checksum' => hash_file('sha256', $dest),
-                        ];
-                        $totalSize += $size;
-                        $do['master_file'] = 'objects/master/' . $destName;
-                    }
-                }
-
-                // Copy thumbnail
-                if ($includeThumbnails) {
-                    $thumbPath = $this->resolveDerivativePath($uploadsDir, $do, 'thumbnails');
-                    if ($thumbPath && file_exists($thumbPath)) {
-                        $destName = $this->safeFilename($do['id'], basename($thumbPath));
-                        $dest = $objectsDir . '/thumb/' . $destName;
-                        if ($this->copyFile($thumbPath, $dest)) {
+                if ($includeMasters && $baseDir && !empty($do['name'])) {
+                    $masterPath = $baseDir . $do['name'];
+                    if (file_exists($masterPath)) {
+                        $destName = $this->safeFilename($do['id'], $do['name']);
+                        $dest = $objectsDir . '/master/' . $destName;
+                        if ($this->copyFile($masterPath, $dest)) {
                             $size = filesize($dest);
                             $manifest[] = [
-                                'type' => 'thumbnail',
+                                'type' => 'master',
                                 'object_id' => $desc['id'],
                                 'digital_object_id' => $do['id'],
                                 'filename' => $destName,
@@ -102,49 +86,88 @@ class AssetCollector
                                 'checksum' => hash_file('sha256', $dest),
                             ];
                             $totalSize += $size;
-                            $do['thumbnail_file'] = 'objects/thumb/' . $destName;
+                            $do['master_file'] = 'objects/master/' . $destName;
                         }
                     }
                 }
 
-                // Copy reference image
-                if ($includeReferences) {
-                    $refPath = $this->resolveDerivativePath($uploadsDir, $do, 'previews');
-                    if ($refPath && file_exists($refPath)) {
-                        $destName = $this->safeFilename($do['id'], basename($refPath));
-                        $dest = $objectsDir . '/ref/' . $destName;
-                        if ($this->copyFile($refPath, $dest)) {
-                            $size = filesize($dest);
-                            $manifest[] = [
-                                'type' => 'reference',
-                                'object_id' => $desc['id'],
-                                'digital_object_id' => $do['id'],
-                                'filename' => $destName,
-                                'size' => $size,
-                                'checksum' => hash_file('sha256', $dest),
-                            ];
-                            $totalSize += $size;
-                            $do['reference_file'] = 'objects/ref/' . $destName;
+                // Copy thumbnail (usage_id=142)
+                if ($includeThumbnails && $baseDir) {
+                    $thumbName = $do['thumbnail_name'] ?? null;
+                    if (!$thumbName) {
+                        // Fallback: derive name from master with _142 suffix
+                        $thumbName = $this->deriveFilename($do['name'], 142);
+                    }
+                    if ($thumbName) {
+                        $thumbPath = $baseDir . $thumbName;
+                        if (file_exists($thumbPath)) {
+                            $destName = $this->safeFilename($do['id'], $thumbName);
+                            $dest = $objectsDir . '/thumb/' . $destName;
+                            if ($this->copyFile($thumbPath, $dest)) {
+                                $size = filesize($dest);
+                                $manifest[] = [
+                                    'type' => 'thumbnail',
+                                    'object_id' => $desc['id'],
+                                    'digital_object_id' => $do['id'],
+                                    'filename' => $destName,
+                                    'size' => $size,
+                                    'checksum' => hash_file('sha256', $dest),
+                                ];
+                                $totalSize += $size;
+                                $do['thumbnail_file'] = 'objects/thumb/' . $destName;
+                            }
+                        }
+                    }
+                }
+
+                // Copy reference image (usage_id=141)
+                if ($includeReferences && $baseDir) {
+                    $refName = $do['reference_name'] ?? null;
+                    if (!$refName) {
+                        // Fallback: derive name from master with _141 suffix
+                        $refName = $this->deriveFilename($do['name'], 141);
+                    }
+                    if ($refName) {
+                        $refPath = $baseDir . $refName;
+                        if (file_exists($refPath)) {
+                            $destName = $this->safeFilename($do['id'], $refName);
+                            $dest = $objectsDir . '/ref/' . $destName;
+                            if ($this->copyFile($refPath, $dest)) {
+                                $size = filesize($dest);
+                                $manifest[] = [
+                                    'type' => 'reference',
+                                    'object_id' => $desc['id'],
+                                    'digital_object_id' => $do['id'],
+                                    'filename' => $destName,
+                                    'size' => $size,
+                                    'checksum' => hash_file('sha256', $dest),
+                                ];
+                                $totalSize += $size;
+                                $do['reference_file'] = 'objects/ref/' . $destName;
+                            }
                         }
                     }
                 }
 
                 // Copy PDF access copies
-                if ($masterPath && $do['mime_type'] === 'application/pdf' && file_exists($masterPath)) {
-                    $destName = $this->safeFilename($do['id'], $do['name']);
-                    $dest = $objectsDir . '/pdf/' . $destName;
-                    if ($this->copyFile($masterPath, $dest)) {
-                        $size = filesize($dest);
-                        $manifest[] = [
-                            'type' => 'pdf',
-                            'object_id' => $desc['id'],
-                            'digital_object_id' => $do['id'],
-                            'filename' => $destName,
-                            'size' => $size,
-                            'checksum' => hash_file('sha256', $dest),
-                        ];
-                        $totalSize += $size;
-                        $do['pdf_file'] = 'objects/pdf/' . $destName;
+                if (!empty($do['name']) && $do['mime_type'] === 'application/pdf' && $baseDir) {
+                    $pdfPath = $baseDir . $do['name'];
+                    if (file_exists($pdfPath)) {
+                        $destName = $this->safeFilename($do['id'], $do['name']);
+                        $dest = $objectsDir . '/pdf/' . $destName;
+                        if ($this->copyFile($pdfPath, $dest)) {
+                            $size = filesize($dest);
+                            $manifest[] = [
+                                'type' => 'pdf',
+                                'object_id' => $desc['id'],
+                                'digital_object_id' => $do['id'],
+                                'filename' => $destName,
+                                'size' => $size,
+                                'checksum' => hash_file('sha256', $dest),
+                            ];
+                            $totalSize += $size;
+                            $do['pdf_file'] = 'objects/pdf/' . $destName;
+                        }
                     }
                 }
 
@@ -163,52 +186,38 @@ class AssetCollector
     }
 
     /**
-     * Resolve the master/original file path for a digital object.
+     * Resolve the base directory for a digital object.
+     *
+     * AtoM's digital_object.path already includes /uploads/ prefix,
+     * e.g. /uploads/r/repo-name/a/b/c/hash/
+     * Full path = atomRoot + path
      */
-    protected function resolveMasterPath(string $uploadsDir, array $do): ?string
+    protected function resolveBaseDir(array $do): ?string
     {
-        if (empty($do['path']) || empty($do['name'])) {
+        if (empty($do['path'])) {
             return null;
         }
 
-        // AtoM stores path relative to uploads directory
-        $path = $uploadsDir . '/' . ltrim($do['path'], '/') . $do['name'];
+        $dir = $this->atomRoot . $do['path'];
 
-        return file_exists($path) ? $path : null;
+        return is_dir($dir) ? $dir : null;
     }
 
     /**
-     * Resolve the derivative file path (thumbnail or reference/preview).
+     * Derive a derivative filename from the master name.
+     *
+     * AtoM convention: master = "photo.jpg", reference = "photo_141.jpg", thumbnail = "photo_142.jpg"
      */
-    protected function resolveDerivativePath(string $uploadsDir, array $do, string $derivativeType): ?string
+    protected function deriveFilename(?string $masterName, int $usageId): ?string
     {
-        if (empty($do['name'])) {
+        if (!$masterName) {
             return null;
         }
 
-        // Common derivative naming: same name in derivatives/{type}/ directory
-        // AtoM uses: uploads/r/{objectPath}/derivatives/{type}/{name}
-        $basePath = '';
-        if (!empty($do['path'])) {
-            $basePath = ltrim($do['path'], '/');
-        }
+        $ext = pathinfo($masterName, PATHINFO_EXTENSION);
+        $base = pathinfo($masterName, PATHINFO_FILENAME);
 
-        // Try standard AtoM derivative path
-        $derivPath = $uploadsDir . '/' . $basePath . $do['name'];
-        $dir = dirname($derivPath);
-        $derivDir = $dir . '/../' . $derivativeType;
-        $derivDir = realpath($derivDir) ?: $derivDir;
-
-        if (is_dir($derivDir)) {
-            // Look for files matching the digital object name pattern
-            $baseName = pathinfo($do['name'], PATHINFO_FILENAME);
-            $files = @glob($derivDir . '/' . $baseName . '.*');
-            if (!empty($files)) {
-                return $files[0];
-            }
-        }
-
-        return null;
+        return $base . '_' . $usageId . ($ext ? '.' . $ext : '');
     }
 
     /**

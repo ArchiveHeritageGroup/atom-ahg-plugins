@@ -341,13 +341,21 @@ class CatalogueExtractor
 
     /**
      * Enrich descriptions with digital object references.
+     *
+     * AtoM stores digital objects as:
+     * - Master (usage_id=140): object_id = IO.id, parent_id = NULL
+     * - Reference (usage_id=141): object_id = NULL, parent_id = master.id
+     * - Thumbnail (usage_id=142): object_id = NULL, parent_id = master.id
+     *
+     * All derivatives are in the same directory as the master, with _141/_142 suffixes.
      */
     protected function enrichWithDigitalObjects(array &$descriptions, array $ids): void
     {
         $chunks = array_chunk($ids, 500);
 
         foreach ($chunks as $chunk) {
-            $rows = DB::table('digital_object as do2')
+            // Get master digital objects for these IOs
+            $masters = DB::table('digital_object as do2')
                 ->whereIn('do2.object_id', $chunk)
                 ->select(
                     'do2.id',
@@ -360,20 +368,46 @@ class CatalogueExtractor
                 )
                 ->get();
 
-            foreach ($rows as $row) {
+            if ($masters->isEmpty()) {
+                continue;
+            }
+
+            // Get derivative digital objects (reference + thumbnail) for these masters
+            $masterIds = $masters->pluck('id')->toArray();
+            $derivatives = DB::table('digital_object')
+                ->whereIn('parent_id', $masterIds)
+                ->select('id', 'parent_id', 'name', 'path', 'usage_id')
+                ->get()
+                ->groupBy('parent_id');
+
+            foreach ($masters as $row) {
                 $oid = (int) $row->object_id;
                 if (!isset($descriptions[$oid])) {
                     continue;
                 }
 
-                $descriptions[$oid]['digital_objects'][] = [
+                $doEntry = [
                     'id' => (int) $row->id,
                     'name' => $row->name,
                     'path' => $row->path,
                     'mime_type' => $row->mime_type,
                     'byte_size' => $row->byte_size ? (int) $row->byte_size : null,
                     'usage_id' => $row->usage_id ? (int) $row->usage_id : null,
+                    'reference_name' => null,
+                    'thumbnail_name' => null,
                 ];
+
+                // Attach derivative filenames
+                $derivs = $derivatives->get($row->id, collect());
+                foreach ($derivs as $deriv) {
+                    if ((int) $deriv->usage_id === 141) {
+                        $doEntry['reference_name'] = $deriv->name;
+                    } elseif ((int) $deriv->usage_id === 142) {
+                        $doEntry['thumbnail_name'] = $deriv->name;
+                    }
+                }
+
+                $descriptions[$oid]['digital_objects'][] = $doEntry;
             }
         }
     }
