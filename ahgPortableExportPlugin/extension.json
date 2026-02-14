@@ -1,7 +1,7 @@
 {
     "name": "Portable Export",
     "machine_name": "ahgPortableExportPlugin",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Standalone portable HTML/JS viewer for offline catalogue access on CD, USB, or downloadable ZIP. Zero server required.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0",

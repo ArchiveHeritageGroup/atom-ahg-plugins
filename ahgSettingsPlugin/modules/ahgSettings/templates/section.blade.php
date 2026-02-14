@@ -1410,6 +1410,128 @@
                                 </div>
                             @break
 
+                            @case('portable_export')
+                                <!-- Portable Export Settings -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-compact-disc me-2"></i>{{ __('Portable Export Configuration') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">{{ __('Configure defaults for standalone portable catalogue exports (CD/USB/ZIP distribution).') }}</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_enabled"
+                                                           name="settings[portable_export_enabled]" value="true"
+                                                           {{ ($settings['portable_export_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_enabled">
+                                                        <strong>{{ __('Enable Portable Export') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Allow creation of offline portable catalogues from Admin UI.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">{{ __('Retention (days)') }}</label>
+                                                <input type="number" class="form-control" name="settings[portable_export_retention_days]"
+                                                       value="{{ $settings['portable_export_retention_days'] ?? '30' }}" min="1" max="365">
+                                                <div class="form-text">{{ __('Completed exports are auto-deleted after this many days. Run portable:cleanup.') }}</div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3">{{ __('Default Content Options') }}</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_objects"
+                                                           name="settings[portable_export_include_objects]" value="true"
+                                                           {{ ($settings['portable_export_include_objects'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_include_objects">{{ __('Digital Objects') }}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_thumbnails"
+                                                           name="settings[portable_export_include_thumbnails]" value="true"
+                                                           {{ ($settings['portable_export_include_thumbnails'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_include_thumbnails">{{ __('Thumbnails') }}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_references"
+                                                           name="settings[portable_export_include_references]" value="true"
+                                                           {{ ($settings['portable_export_include_references'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_include_references">{{ __('Reference Images') }}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_masters"
+                                                           name="settings[portable_export_include_masters]" value="true"
+                                                           {{ ($settings['portable_export_include_masters'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_include_masters">{{ __('Master Files') }}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3">{{ __('Default Settings') }}</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label">{{ __('Default Viewer Mode') }}</label>
+                                                <select class="form-select" name="settings[portable_export_default_mode]">
+                                                    <option value="read_only" {{ ($settings['portable_export_default_mode'] ?? 'read_only') === 'read_only' ? 'selected' : '' }}>{{ __('Read Only') }}</option>
+                                                    <option value="editable" {{ ($settings['portable_export_default_mode'] ?? '') === 'editable' ? 'selected' : '' }}>{{ __('Editable') }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">{{ __('Default Language') }}</label>
+                                                <select class="form-select" name="settings[portable_export_default_culture]">
+                                                    <option value="en" {{ ($settings['portable_export_default_culture'] ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
+                                                    <option value="fr" {{ ($settings['portable_export_default_culture'] ?? '') === 'fr' ? 'selected' : '' }}>French</option>
+                                                    <option value="af" {{ ($settings['portable_export_default_culture'] ?? '') === 'af' ? 'selected' : '' }}>Afrikaans</option>
+                                                    <option value="pt" {{ ($settings['portable_export_default_culture'] ?? '') === 'pt' ? 'selected' : '' }}>Portuguese</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">{{ __('Max Export Size (MB)') }}</label>
+                                                <input type="number" class="form-control" name="settings[portable_export_max_size_mb]"
+                                                       value="{{ $settings['portable_export_max_size_mb'] ?? '2048' }}" min="100" max="10240">
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3">{{ __('Integration') }}</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_description_button"
+                                                           name="settings[portable_export_description_button]" value="true"
+                                                           {{ ($settings['portable_export_description_button'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_description_button">
+                                                        {{ __('Show export button on description pages') }}
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Adds "Portable Viewer" to the Export section on archival description pages.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_clipboard_button"
+                                                           name="settings[portable_export_clipboard_button]" value="true"
+                                                           {{ ($settings['portable_export_clipboard_button'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="portable_export_clipboard_button">
+                                                        {{ __('Show export button on clipboard page') }}
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Adds "Portable Catalogue" option to the clipboard export page.') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @break
+
                             @case('encryption')
                                 <!-- Encryption Master Toggle -->
                                 <div class="card mb-4">

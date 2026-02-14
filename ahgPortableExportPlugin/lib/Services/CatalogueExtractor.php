@@ -28,11 +28,12 @@ class CatalogueExtractor
     /**
      * Extract catalogue data for the given scope.
      *
+     * @param array|null $itemIds Optional array of specific object IDs (for custom/clipboard scope)
      * @return array{descriptions: array, hierarchy: array, taxonomies: array, repositories: array}
      */
-    public function extract(string $scopeType, ?string $scopeSlug = null, ?int $repositoryId = null): array
+    public function extract(string $scopeType, ?string $scopeSlug = null, ?int $repositoryId = null, ?array $itemIds = null): array
     {
-        $descriptions = $this->extractDescriptions($scopeType, $scopeSlug, $repositoryId);
+        $descriptions = $this->extractDescriptions($scopeType, $scopeSlug, $repositoryId, $itemIds);
         $hierarchy = $this->buildHierarchy($descriptions);
         $taxonomies = $this->extractTaxonomies($descriptions);
         $repositories = $this->extractRepositories($descriptions);
@@ -47,8 +48,10 @@ class CatalogueExtractor
 
     /**
      * Extract all information objects matching the scope.
+     *
+     * @param array|null $itemIds Optional array of specific object IDs (for custom/clipboard scope)
      */
-    protected function extractDescriptions(string $scopeType, ?string $scopeSlug, ?int $repositoryId): array
+    protected function extractDescriptions(string $scopeType, ?string $scopeSlug, ?int $repositoryId, ?array $itemIds = null): array
     {
         $query = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
@@ -103,16 +106,35 @@ class CatalogueExtractor
                 break;
 
             case 'custom':
-                // Custom scope uses fonds slug with repository filter
-                if ($scopeSlug) {
-                    $root = $this->resolveSlug($scopeSlug);
-                    if ($root) {
-                        $query->where('io.lft', '>=', $root->lft)
-                            ->where('io.rgt', '<=', $root->rgt);
+                // Custom scope: item IDs (clipboard), or slug+repository filter
+                if (!empty($itemIds)) {
+                    // Include specified items AND their descendants
+                    $lftRgt = DB::table('information_object')
+                        ->whereIn('id', $itemIds)
+                        ->select('lft', 'rgt')
+                        ->get();
+
+                    if ($lftRgt->isNotEmpty()) {
+                        $query->where(function ($q) use ($lftRgt) {
+                            foreach ($lftRgt as $range) {
+                                $q->orWhere(function ($q2) use ($range) {
+                                    $q2->where('io.lft', '>=', $range->lft)
+                                        ->where('io.rgt', '<=', $range->rgt);
+                                });
+                            }
+                        });
                     }
-                }
-                if ($repositoryId) {
-                    $query->where('io.repository_id', '=', $repositoryId);
+                } else {
+                    if ($scopeSlug) {
+                        $root = $this->resolveSlug($scopeSlug);
+                        if ($root) {
+                            $query->where('io.lft', '>=', $root->lft)
+                                ->where('io.rgt', '<=', $root->rgt);
+                        }
+                    }
+                    if ($repositoryId) {
+                        $query->where('io.repository_id', '=', $repositoryId);
+                    }
                 }
                 break;
 

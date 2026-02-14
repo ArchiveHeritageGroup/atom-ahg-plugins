@@ -97,7 +97,9 @@ class portableExportActions extends sfActions
             $branding['footer'] = $request->getParameter('branding_footer');
         }
 
-        // Create export record
+        // Create export record with retention
+        $expiresAt = $this->calculateExpiresAt();
+
         $exportId = DB::table('portable_export')->insertGetId([
             'user_id' => (int) $this->getUser()->getAttribute('user_id'),
             'title' => $title,
@@ -112,22 +114,12 @@ class portableExportActions extends sfActions
             'branding' => !empty($branding) ? json_encode($branding) : null,
             'culture' => $culture,
             'status' => 'pending',
+            'expires_at' => $expiresAt,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         // Launch background process
-        $atomRoot = sfConfig::get('sf_root_dir');
-        $cmd = sprintf(
-            'nohup php %s/symfony portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',
-            escapeshellarg($atomRoot),
-            $exportId,
-            $atomRoot,
-            $exportId
-        );
-
-        // Ensure downloads dir exists
-        @mkdir($atomRoot . '/downloads/portable-exports', 0755, true);
-        exec($cmd);
+        $this->launchBackground($exportId);
 
         return $this->jsonResponse([
             'success' => true,
@@ -346,5 +338,215 @@ class portableExportActions extends sfActions
             'download_url' => $downloadUrl,
             'expires_at' => $expiresAt,
         ]);
+    }
+
+    // ─── API: Quick Start Export (from description page) ──────────
+
+    public function executeApiQuickStart(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+        $this->loadServices();
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['error' => 'POST required'], 405);
+        }
+
+        $slug = $request->getParameter('slug');
+        if (!$slug) {
+            return $this->jsonResponse(['error' => 'Missing slug parameter'], 400);
+        }
+
+        // Resolve slug to get the title
+        $io = DB::table('slug as s')
+            ->join('information_object_i18n as ioi', function ($join) {
+                $join->on('s.object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->where('s.slug', $slug)
+            ->select('s.object_id', 'ioi.title')
+            ->first();
+
+        if (!$io) {
+            return $this->jsonResponse(['error' => 'Description not found'], 404);
+        }
+
+        $title = $io->title ?: 'Portable Export - ' . $slug;
+        $expiresAt = $this->calculateExpiresAt();
+
+        // Load defaults from settings
+        $defaults = $this->getSettingsDefaults();
+
+        $exportId = DB::table('portable_export')->insertGetId([
+            'user_id' => (int) $this->getUser()->getAttribute('user_id'),
+            'title' => $title,
+            'scope_type' => 'fonds',
+            'scope_slug' => $slug,
+            'mode' => $defaults['mode'],
+            'include_objects' => $defaults['include_objects'],
+            'include_thumbnails' => $defaults['include_thumbnails'],
+            'include_references' => $defaults['include_references'],
+            'include_masters' => $defaults['include_masters'],
+            'culture' => $defaults['culture'],
+            'status' => 'pending',
+            'expires_at' => $expiresAt,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Launch background process
+        $this->launchBackground($exportId);
+
+        return $this->jsonResponse([
+            'success' => true,
+            'export_id' => $exportId,
+            'message' => 'Export started for "' . $title . '"',
+        ]);
+    }
+
+    // ─── API: Clipboard Export ────────────────────────────────────
+
+    public function executeApiClipboardExport(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+        $this->loadServices();
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['error' => 'POST required'], 405);
+        }
+
+        $slugsParam = $request->getParameter('slugs');
+        if (!$slugsParam) {
+            return $this->jsonResponse(['error' => 'No items provided'], 400);
+        }
+
+        $slugs = is_array($slugsParam) ? $slugsParam : explode(',', $slugsParam);
+        $slugs = array_filter(array_map('trim', $slugs));
+
+        if (empty($slugs)) {
+            return $this->jsonResponse(['error' => 'No valid items provided'], 400);
+        }
+
+        // Resolve slugs to IDs
+        $items = DB::table('slug')
+            ->whereIn('slug', $slugs)
+            ->pluck('object_id', 'slug')
+            ->toArray();
+
+        if (empty($items)) {
+            return $this->jsonResponse(['error' => 'No matching descriptions found'], 404);
+        }
+
+        $title = $request->getParameter('title', 'Clipboard Export (' . count($items) . ' items)');
+        $expiresAt = $this->calculateExpiresAt();
+        $defaults = $this->getSettingsDefaults();
+
+        $exportId = DB::table('portable_export')->insertGetId([
+            'user_id' => (int) $this->getUser()->getAttribute('user_id'),
+            'title' => $title,
+            'scope_type' => 'custom',
+            'scope_items' => json_encode(array_values($items)),
+            'mode' => $defaults['mode'],
+            'include_objects' => $defaults['include_objects'],
+            'include_thumbnails' => $defaults['include_thumbnails'],
+            'include_references' => $defaults['include_references'],
+            'include_masters' => $defaults['include_masters'],
+            'culture' => $defaults['culture'],
+            'status' => 'pending',
+            'expires_at' => $expiresAt,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Launch background process
+        $this->launchBackground($exportId);
+
+        return $this->jsonResponse([
+            'success' => true,
+            'export_id' => $exportId,
+            'item_count' => count($items),
+            'message' => 'Clipboard export started with ' . count($items) . ' items',
+        ]);
+    }
+
+    // ─── API: Fonds Autocomplete ─────────────────────────────────
+
+    public function executeApiFondsSearch(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        $query = trim($request->getParameter('q', ''));
+        if (strlen($query) < 2) {
+            return $this->jsonResponse(['results' => []]);
+        }
+
+        // Search top-level descriptions (parent_id = 1 = root) by title or identifier
+        $results = DB::table('information_object as io')
+            ->join('information_object_i18n as ioi', function ($join) {
+                $join->on('io.id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', 'en');
+            })
+            ->join('slug as s', 'io.id', '=', 's.object_id')
+            ->where('io.parent_id', 1)
+            ->where(function ($q) use ($query) {
+                $q->where('ioi.title', 'LIKE', '%' . $query . '%')
+                  ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
+            })
+            ->orderBy('ioi.title')
+            ->limit(15)
+            ->select('io.id', 'ioi.title', 'io.identifier', 's.slug')
+            ->get()
+            ->toArray();
+
+        return $this->jsonResponse(['results' => $results]);
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────
+
+    /**
+     * Calculate expiry date from settings retention period.
+     */
+    protected function calculateExpiresAt(): ?string
+    {
+        $days = (int) (DB::table('ahg_settings')
+            ->where('setting_key', 'portable_export_retention_days')
+            ->value('setting_value') ?: 30);
+
+        return date('Y-m-d H:i:s', strtotime("+{$days} days"));
+    }
+
+    /**
+     * Get default export settings from ahg_settings.
+     */
+    protected function getSettingsDefaults(): array
+    {
+        $settings = DB::table('ahg_settings')
+            ->where('setting_group', 'portable_export')
+            ->pluck('setting_value', 'setting_key')
+            ->toArray();
+
+        return [
+            'mode' => $settings['portable_export_default_mode'] ?? 'read_only',
+            'culture' => $settings['portable_export_default_culture'] ?? 'en',
+            'include_objects' => ($settings['portable_export_include_objects'] ?? 'true') === 'true' ? 1 : 0,
+            'include_thumbnails' => ($settings['portable_export_include_thumbnails'] ?? 'true') === 'true' ? 1 : 0,
+            'include_references' => ($settings['portable_export_include_references'] ?? 'true') === 'true' ? 1 : 0,
+            'include_masters' => ($settings['portable_export_include_masters'] ?? 'false') === 'true' ? 1 : 0,
+        ];
+    }
+
+    /**
+     * Launch background export process.
+     */
+    protected function launchBackground(int $exportId): void
+    {
+        $atomRoot = sfConfig::get('sf_root_dir');
+        $cmd = sprintf(
+            'nohup php %s/symfony portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',
+            escapeshellarg($atomRoot),
+            $exportId,
+            $atomRoot,
+            $exportId
+        );
+
+        @mkdir($atomRoot . '/downloads/portable-exports', 0755, true);
+        exec($cmd);
     }
 }

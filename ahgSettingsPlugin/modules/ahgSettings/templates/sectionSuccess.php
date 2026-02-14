@@ -1417,6 +1417,128 @@ slot('title', $title);
                             </div>
                             <?php break; ?>
 
+                        <?php case 'portable_export': ?>
+                                <!-- Portable Export Settings -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-compact-disc me-2"></i><?php echo __('Portable Export Configuration') ?></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3"><?php echo __('Configure defaults for standalone portable catalogue exports (CD/USB/ZIP distribution).') ?></p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_enabled"
+                                                           name="settings[portable_export_enabled]" value="true"
+                                                           <?php echo ($settings['portable_export_enabled'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_enabled">
+                                                        <strong><?php echo __('Enable Portable Export') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Allow creation of offline portable catalogues from Admin UI.') ?></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label"><?php echo __('Retention (days)') ?></label>
+                                                <input type="number" class="form-control" name="settings[portable_export_retention_days]"
+                                                       value="<?php echo htmlspecialchars($settings['portable_export_retention_days'] ?? '30') ?>" min="1" max="365">
+                                                <div class="form-text"><?php echo __('Completed exports are auto-deleted after this many days. Run portable:cleanup.') ?></div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3"><?php echo __('Default Content Options') ?></h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_objects"
+                                                           name="settings[portable_export_include_objects]" value="true"
+                                                           <?php echo ($settings['portable_export_include_objects'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_include_objects"><?php echo __('Digital Objects') ?></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_thumbnails"
+                                                           name="settings[portable_export_include_thumbnails]" value="true"
+                                                           <?php echo ($settings['portable_export_include_thumbnails'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_include_thumbnails"><?php echo __('Thumbnails') ?></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_references"
+                                                           name="settings[portable_export_include_references]" value="true"
+                                                           <?php echo ($settings['portable_export_include_references'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_include_references"><?php echo __('Reference Images') ?></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_include_masters"
+                                                           name="settings[portable_export_include_masters]" value="true"
+                                                           <?php echo ($settings['portable_export_include_masters'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_include_masters"><?php echo __('Master Files') ?></label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3"><?php echo __('Default Settings') ?></h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label"><?php echo __('Default Viewer Mode') ?></label>
+                                                <select class="form-select" name="settings[portable_export_default_mode]">
+                                                    <option value="read_only" <?php echo ($settings['portable_export_default_mode'] ?? 'read_only') === 'read_only' ? 'selected' : '' ?>><?php echo __('Read Only') ?></option>
+                                                    <option value="editable" <?php echo ($settings['portable_export_default_mode'] ?? '') === 'editable' ? 'selected' : '' ?>><?php echo __('Editable') ?></option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label"><?php echo __('Default Language') ?></label>
+                                                <select class="form-select" name="settings[portable_export_default_culture]">
+                                                    <option value="en" <?php echo ($settings['portable_export_default_culture'] ?? 'en') === 'en' ? 'selected' : '' ?>>English</option>
+                                                    <option value="fr" <?php echo ($settings['portable_export_default_culture'] ?? '') === 'fr' ? 'selected' : '' ?>>French</option>
+                                                    <option value="af" <?php echo ($settings['portable_export_default_culture'] ?? '') === 'af' ? 'selected' : '' ?>>Afrikaans</option>
+                                                    <option value="pt" <?php echo ($settings['portable_export_default_culture'] ?? '') === 'pt' ? 'selected' : '' ?>>Portuguese</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label"><?php echo __('Max Export Size (MB)') ?></label>
+                                                <input type="number" class="form-control" name="settings[portable_export_max_size_mb]"
+                                                       value="<?php echo htmlspecialchars($settings['portable_export_max_size_mb'] ?? '2048') ?>" min="100" max="10240">
+                                            </div>
+                                        </div>
+
+                                        <hr>
+                                        <h6 class="mb-3"><?php echo __('Integration') ?></h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_description_button"
+                                                           name="settings[portable_export_description_button]" value="true"
+                                                           <?php echo ($settings['portable_export_description_button'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_description_button">
+                                                        <?php echo __('Show export button on description pages') ?>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Adds "Portable Viewer" to the Export section on archival description pages.') ?></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="portable_export_clipboard_button"
+                                                           name="settings[portable_export_clipboard_button]" value="true"
+                                                           <?php echo ($settings['portable_export_clipboard_button'] ?? 'true') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="portable_export_clipboard_button">
+                                                        <?php echo __('Show export button on clipboard page') ?>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Adds "Portable Catalogue" option to the clipboard export page.') ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php break; ?>
+
                         <?php case 'encryption': ?>
                                 <!-- Encryption Master Toggle -->
                                 <div class="card mb-4">

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS portable_export (
     scope_type ENUM('all','fonds','repository','custom') NOT NULL DEFAULT 'all',
     scope_slug VARCHAR(255) DEFAULT NULL,
     scope_repository_id INT DEFAULT NULL,
+    scope_items JSON DEFAULT NULL,
     mode ENUM('read_only','editable') DEFAULT 'read_only',
     include_objects TINYINT(1) DEFAULT 1,
     include_masters TINYINT(1) DEFAULT 0,
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS portable_export (
     error_message TEXT DEFAULT NULL,
     started_at DATETIME DEFAULT NULL,
     completed_at DATETIME DEFAULT NULL,
+    expires_at DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_portable_export_user (user_id),
     INDEX idx_portable_export_status (status)
@@ -70,3 +72,20 @@ SELECT m.id, 'en', 'Portable Export', 'Export catalogue to CD/USB/ZIP for offlin
 FROM menu m WHERE m.name = 'portableExport' AND NOT EXISTS (
     SELECT 1 FROM menu_i18n mi WHERE mi.id = m.id AND mi.culture = 'en'
 );
+
+-- =====================================================
+-- Settings defaults for portable export
+-- =====================================================
+INSERT IGNORE INTO ahg_settings (setting_key, setting_value, setting_group, created_at, updated_at)
+VALUES
+('portable_export_enabled', 'true', 'portable_export', NOW(), NOW()),
+('portable_export_retention_days', '30', 'portable_export', NOW(), NOW()),
+('portable_export_max_size_mb', '2048', 'portable_export', NOW(), NOW()),
+('portable_export_default_mode', 'read_only', 'portable_export', NOW(), NOW()),
+('portable_export_include_objects', 'true', 'portable_export', NOW(), NOW()),
+('portable_export_include_thumbnails', 'true', 'portable_export', NOW(), NOW()),
+('portable_export_include_references', 'true', 'portable_export', NOW(), NOW()),
+('portable_export_include_masters', 'false', 'portable_export', NOW(), NOW()),
+('portable_export_default_culture', 'en', 'portable_export', NOW(), NOW()),
+('portable_export_description_button', 'true', 'portable_export', NOW(), NOW()),
+('portable_export_clipboard_button', 'true', 'portable_export', NOW(), NOW());

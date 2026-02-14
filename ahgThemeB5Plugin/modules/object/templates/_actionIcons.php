@@ -201,6 +201,17 @@ $showInventory = ahg_show_inventory($resource);
         </a>
       </li>
     <?php } ?>
+
+    <?php if ($sf_context->getConfiguration()->isPluginEnabled('ahgPortableExportPlugin')) { ?>
+      <li>
+        <a class="atom-icon-link portable-export-link" href="#"
+           data-slug="<?php echo htmlspecialchars($slug); ?>"
+           title="<?php echo __('Generate a standalone portable catalogue viewer for offline access'); ?>">
+          <i class="fas fa-fw fa-compact-disc me-1" aria-hidden="true">
+          </i><?php echo __('Portable Viewer'); ?>
+        </a>
+      </li>
+    <?php } ?>
   </ul>
 
   <?php echo get_component('informationobject', 'findingAid', ['resource' => $resource, 'contextMenu' => true]); ?>
@@ -208,3 +219,39 @@ $showInventory = ahg_show_inventory($resource);
   <?php echo get_component('informationobject', 'calculateDatesLink', ['resource' => $resource, 'contextMenu' => true]); ?>
 
 </section>
+
+<?php if ($sf_context->getConfiguration()->isPluginEnabled('ahgPortableExportPlugin')): ?>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function() {
+  var link = document.querySelector('.portable-export-link');
+  if (!link) return;
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    var slug = this.getAttribute('data-slug');
+    if (!slug) return;
+    var origHtml = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-fw fa-spinner fa-spin me-1"></i>Starting...';
+    fetch('/portable-export/api/quick-start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'slug=' + encodeURIComponent(slug)
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          link.innerHTML = '<i class="fas fa-fw fa-check me-1 text-success"></i>Export started';
+          link.href = '/portable-export';
+          link.removeEventListener('click', arguments.callee);
+          link.addEventListener('click', function() { window.location = '/portable-export'; });
+        } else {
+          alert(data.error || 'Failed to start export');
+          link.innerHTML = origHtml;
+        }
+      })
+      .catch(function(err) {
+        alert('Error: ' + err.message);
+        link.innerHTML = origHtml;
+      });
+  });
+})();
+</script>
+<?php endif; ?>

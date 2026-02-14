@@ -30,6 +30,7 @@ class AhgSettingsSectionAction extends AhgController
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
 		'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
         'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
+        'portable_export' => ['label' => 'Portable Export', 'icon' => 'fa-compact-disc', 'description' => 'Standalone portable catalogue viewer for offline access'],
         'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'XChaCha20-Poly1305 encryption for digital object files and sensitive database fields'],
     ];
 
@@ -61,6 +62,12 @@ class AhgSettingsSectionAction extends AhgController
             'ingest_create_records', 'ingest_generate_sip', 'ingest_generate_aip', 'ingest_generate_dip',
             'ingest_thumbnails', 'ingest_reference',
         ],
+        'portable_export' => [
+            'portable_export_enabled', 'portable_export_include_objects',
+            'portable_export_include_thumbnails', 'portable_export_include_references',
+            'portable_export_include_masters', 'portable_export_description_button',
+            'portable_export_clipboard_button',
+        ],
         'encryption' => [
             'encryption_enabled', 'encryption_encrypt_derivatives',
             'encryption_field_contact_details', 'encryption_field_financial_data',
@@ -80,6 +87,7 @@ class AhgSettingsSectionAction extends AhgController
         'audit' => 'ahgAuditTrailPlugin',
         'faces' => 'ahgFaceDetectionPlugin',
         'multi_tenant' => 'ahgMultiTenantPlugin',
+        'portable_export' => 'ahgPortableExportPlugin',
     ];
 
     // Check if a plugin is enabled

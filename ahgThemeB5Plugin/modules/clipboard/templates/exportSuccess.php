@@ -92,9 +92,75 @@
 
     <ul class="actions mb-3 nav gap-2">
       <li><input class="btn atom-btn-outline-success" type="submit" id="exportSubmit" value="<?php echo __('Export'); ?>"></li>
+      <?php if ($sf_context->getConfiguration()->isPluginEnabled('ahgPortableExportPlugin')): ?>
+        <li>
+          <button type="button" class="btn btn-outline-primary" id="portableExportBtn"
+                  title="<?php echo __('Generate a standalone portable catalogue viewer from clipboard items'); ?>">
+            <i class="fas fa-compact-disc me-1"></i><?php echo __('Portable Catalogue'); ?>
+          </button>
+        </li>
+      <?php endif; ?>
       <li><a href="/admin/dashboard" class="btn atom-btn-outline-light"><?php echo __('Cancel'); ?></a></li>
     </ul>
 
   </form>
+
+<?php if ($sf_context->getConfiguration()->isPluginEnabled('ahgPortableExportPlugin')): ?>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function() {
+  var btn = document.getElementById('portableExportBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    // Collect clipboard slugs from localStorage
+    var slugs = [];
+    try {
+      var stored = localStorage.getItem('atom-clipboard-informationObject');
+      if (stored) {
+        var items = JSON.parse(stored);
+        if (Array.isArray(items)) slugs = items;
+      }
+    } catch(e) {}
+
+    // Fallback: try getting slugs from hidden form fields
+    if (slugs.length === 0) {
+      document.querySelectorAll('input[name="slugs[]"], input[name="slug"]').forEach(function(el) {
+        if (el.value) slugs.push(el.value);
+      });
+    }
+
+    if (slugs.length === 0) {
+      alert('<?php echo __('No items found in clipboard. Add items first.') ?>');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><?php echo __('Starting export...') ?>';
+
+    fetch('/portable-export/api/clipboard-export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'slugs=' + encodeURIComponent(slugs.join(','))
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          btn.innerHTML = '<i class="fas fa-check me-1 text-success"></i><?php echo __('Export started') ?>';
+          btn.classList.remove('btn-outline-primary');
+          btn.classList.add('btn-outline-success');
+          setTimeout(function() { window.location = '/portable-export'; }, 1500);
+        } else {
+          alert(data.error || '<?php echo __('Export failed') ?>');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-compact-disc me-1"></i><?php echo __('Portable Catalogue') ?>';
+        }
+      })
+      .catch(function(err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-compact-disc me-1"></i><?php echo __('Portable Catalogue') ?>';
+      });
+  });
+})();
+</script>
+<?php endif; ?>
 
 <?php end_slot(); ?>

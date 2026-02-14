@@ -40,6 +40,9 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
 
         // API endpoints
         $r->any('portable_export_api_start', '/portable-export/api/start', 'apiStartExport');
+        $r->any('portable_export_api_quick_start', '/portable-export/api/quick-start', 'apiQuickStart');
+        $r->any('portable_export_api_clipboard', '/portable-export/api/clipboard-export', 'apiClipboardExport');
+        $r->any('portable_export_api_fonds_search', '/portable-export/api/fonds-search', 'apiFondsSearch');
         $r->any('portable_export_api_progress', '/portable-export/api/progress', 'apiProgress');
         $r->any('portable_export_api_list', '/portable-export/api/list', 'apiList');
         $r->any('portable_export_api_delete', '/portable-export/api/delete', 'apiDelete');

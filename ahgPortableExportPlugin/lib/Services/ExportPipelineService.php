@@ -88,10 +88,16 @@ class ExportPipelineService
             $this->updateProgress($exportId, min($pct, 40));
         });
 
+        $itemIds = null;
+        if ($export->scope_items) {
+            $itemIds = json_decode($export->scope_items, true);
+        }
+
         $catalogueData = $extractor->extract(
             $export->scope_type,
             $export->scope_slug,
-            $export->scope_repository_id ? (int) $export->scope_repository_id : null
+            $export->scope_repository_id ? (int) $export->scope_repository_id : null,
+            $itemIds
         );
 
         $descriptions = $catalogueData['descriptions'];
@@ -183,6 +189,9 @@ class ExportPipelineService
             'output_size' => $zipSize,
             'completed_at' => date('Y-m-d H:i:s'),
         ]);
+
+        // Insert notification for the user who started the export
+        $this->notifyCompletion($export, $totalDescriptions, $totalObjects, $zipSize);
     }
 
     /**
@@ -230,6 +239,39 @@ class ExportPipelineService
 
         // Delete database records (tokens cascade)
         DB::table('portable_export')->where('id', $exportId)->delete();
+    }
+
+    /**
+     * Notify user that export is complete.
+     * Uses audit_trail if available, otherwise logs to error_log.
+     */
+    protected function notifyCompletion(object $export, int $totalDescriptions, int $totalObjects, int $zipSize): void
+    {
+        $sizeMB = round($zipSize / 1048576, 1);
+        $message = sprintf(
+            'Portable export "%s" completed: %d descriptions, %d objects (%s MB)',
+            $export->title,
+            $totalDescriptions,
+            $totalObjects,
+            $sizeMB
+        );
+
+        // Log to audit trail if the plugin is enabled
+        try {
+            if (DB::getSchemaBuilder()->hasTable('audit_trail')) {
+                DB::table('audit_trail')->insert([
+                    'user_id' => (int) $export->user_id,
+                    'object_type' => 'portable_export',
+                    'object_id' => (int) $export->id,
+                    'action' => 'export_completed',
+                    'description' => $message,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Audit trail not available — just log
+            error_log('[PortableExport] ' . $message);
+        }
     }
 
     /**
