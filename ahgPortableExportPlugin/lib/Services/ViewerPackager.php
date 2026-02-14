@@ -33,10 +33,11 @@ class ViewerPackager
         // Copy viewer HTML/JS/CSS files
         $this->copyViewerFiles($viewerSource, $exportDir);
 
-        // Write config.json
-        $configPath = $exportDir . '/data/config.json';
-        @mkdir(dirname($configPath), 0755, true);
-        file_put_contents($configPath, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // Write config as both JSON and JS (JS for file:// compatibility)
+        @mkdir($exportDir . '/data', 0755, true);
+        $configJson = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents($exportDir . '/data/config.json', $configJson);
+        file_put_contents($exportDir . '/data/config.js', 'window.DATA_CONFIG=' . $configJson . ';');
     }
 
     /**

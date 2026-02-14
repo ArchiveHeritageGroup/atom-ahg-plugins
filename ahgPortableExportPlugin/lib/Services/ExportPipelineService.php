@@ -97,17 +97,14 @@ class ExportPipelineService
         $descriptions = $catalogueData['descriptions'];
         $totalDescriptions = count($descriptions);
 
-        // Write catalogue.json
-        file_put_contents(
-            $outputDir . '/data/catalogue.json',
-            json_encode($descriptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
+        // Write catalogue data as both JSON and JS (JS for file:// compatibility)
+        $catalogueJson = json_encode($descriptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents($outputDir . '/data/catalogue.json', $catalogueJson);
+        file_put_contents($outputDir . '/data/catalogue.js', 'window.DATA_CATALOGUE=' . $catalogueJson . ';');
 
-        // Write taxonomies.json
-        file_put_contents(
-            $outputDir . '/data/taxonomies.json',
-            json_encode($catalogueData['taxonomies'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
+        $taxonomiesJson = json_encode($catalogueData['taxonomies'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents($outputDir . '/data/taxonomies.json', $taxonomiesJson);
+        file_put_contents($outputDir . '/data/taxonomies.js', 'window.DATA_TAXONOMIES=' . $taxonomiesJson . ';');
 
         $this->updateProgress($exportId, 40);
 
@@ -130,11 +127,10 @@ class ExportPipelineService
             // Update descriptions with file paths from asset collector
             $descriptions = $assetResult['descriptions'];
 
-            // Re-write catalogue.json with updated file paths
-            file_put_contents(
-                $outputDir . '/data/catalogue.json',
-                json_encode($descriptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-            );
+            // Re-write catalogue data with updated file paths
+            $catalogueJson = json_encode($descriptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            file_put_contents($outputDir . '/data/catalogue.json', $catalogueJson);
+            file_put_contents($outputDir . '/data/catalogue.js', 'window.DATA_CATALOGUE=' . $catalogueJson . ';');
 
             // Write manifest
             file_put_contents(
@@ -148,10 +144,9 @@ class ExportPipelineService
         // Step 3: Build search index (70-80%)
         $indexBuilder = new SearchIndexBuilder();
         $indexData = $indexBuilder->buildIndex($descriptions);
-        file_put_contents(
-            $outputDir . '/data/search-index.json',
-            json_encode($indexData, JSON_UNESCAPED_UNICODE)
-        );
+        $indexJson = json_encode($indexData, JSON_UNESCAPED_UNICODE);
+        file_put_contents($outputDir . '/data/search-index.json', $indexJson);
+        file_put_contents($outputDir . '/data/search-index.js', 'window.DATA_SEARCH_INDEX=' . $indexJson . ';');
         $this->updateProgress($exportId, 80);
 
         // Step 4: Package viewer (80-90%)

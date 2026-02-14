@@ -17,16 +17,19 @@
 
     /**
      * Initialize the application.
+     * Uses window.DATA_* globals (loaded via script tags) for file:// compatibility.
+     * Falls back to XHR for http:// serving.
      */
     init: function () {
       var self = this;
 
-      // Load config first, then data
-      this.loadJSON('data/config.json', function (config) {
+      // Load config
+      this.loadData('config', 'data/config.json', function (config) {
         self.config = config || {};
         self.applyBranding();
 
-        self.loadJSON('data/catalogue.json', function (catalogue) {
+        // Load catalogue
+        self.loadData('catalogue', 'data/catalogue.json', function (catalogue) {
           self.catalogue = catalogue || [];
           self.buildLookup();
           self.updateStats();
@@ -39,7 +42,7 @@
           }
 
           // Load search index
-          self.loadJSON('data/search-index.json', function (indexData) {
+          self.loadData('search_index', 'data/search-index.json', function (indexData) {
             if (window.SearchEngine) {
               SearchEngine.init(indexData, function (id) {
                 self.showDescription(id);
@@ -56,6 +59,25 @@
       });
 
       this.bindNavigation();
+    },
+
+    /**
+     * Load data — use embedded JS globals first, XHR as fallback.
+     * Global names: DATA_CONFIG, DATA_CATALOGUE, DATA_SEARCH_INDEX
+     */
+    loadData: function (key, xhrPath, callback) {
+      var globalMap = {
+        config: 'DATA_CONFIG',
+        catalogue: 'DATA_CATALOGUE',
+        search_index: 'DATA_SEARCH_INDEX'
+      };
+      var globalName = globalMap[key];
+      if (globalName && window[globalName]) {
+        callback(window[globalName]);
+        return;
+      }
+      // Fallback to XHR (works over http://)
+      this.loadJSON(xhrPath, callback);
     },
 
     /**
