@@ -319,6 +319,21 @@ class spectrumActions extends AhgController
         
         // Prepare assignment data
         $assignedToInt = $assignedTo ? (int) $assignedTo : null;
+
+        // On rejection, auto-assign back to the originator (who submitted for review)
+        if ($transitionKey === 'reject' && !$assignedToInt) {
+            $originator = DB::table('spectrum_workflow_history')
+                ->where('procedure_type', $procedureType)
+                ->where('record_id', $resource->id)
+                ->where('transition_key', 'submit_for_review')
+                ->orderBy('created_at', 'desc')
+                ->value('user_id');
+
+            if ($originator) {
+                $assignedToInt = (int) $originator;
+            }
+        }
+
         $assignmentData = [];
         if ($assignedToInt) {
             $assignmentData = [
