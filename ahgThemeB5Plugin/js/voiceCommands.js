@@ -32,6 +32,10 @@ class AHGVoiceCommands {
     this._isAutoRestart = false; // True during auto-restart cycle (skip "Listening" speech)
     this._isSpeaking = false;    // True while system is speaking (prevents self-hearing)
 
+    // Mouseover read-aloud settings (loaded from server, can be toggled)
+    this._hoverReadEnabled = true;
+    this._hoverReadDelay = 400;
+
     // UI elements (set after DOM ready)
     this.navbarBtn = null;
     this.floatingBtn = null;
@@ -112,6 +116,9 @@ class AHGVoiceCommands {
 
     // Show UI
     document.querySelectorAll('.voice-ui').forEach(el => el.style.display = '');
+
+    // Mouseover read-aloud for buttons and links (accessibility)
+    this._initMouseoverRead();
 
     // Auto-restart if continuous mode was active before page navigation
     var self = this;
@@ -1292,6 +1299,94 @@ class AHGVoiceCommands {
   }
 
   /**
+   * Mouseover read-aloud for buttons, links, and interactive elements.
+   * Only active when voice mode is on. Debounced to avoid rapid-fire speech.
+   */
+  _initMouseoverRead() {
+    var self = this;
+    var lastSpoken = '';
+    var hoverTimer = null;
+
+    document.addEventListener('mouseover', function (e) {
+      // Check if hover read is enabled
+      if (!self._hoverReadEnabled) return;
+      // Only read when voice is active
+      if (!sessionStorage.getItem('ahg_voice_active')) return;
+      // Don't interrupt ongoing speech from commands
+      if (self._isSpeaking) return;
+
+      // Find the nearest interactive element
+      var el = e.target.closest('a, button, [role="button"], input[type="submit"], input[type="button"], .btn, .nav-link, .dropdown-item, [role="tab"], [role="menuitem"]');
+      if (!el) return;
+
+      // Skip voice UI controls themselves
+      if (el.closest('.voice-ui, #voice-help-modal, .voice-toast-container')) return;
+
+      // Get readable text
+      var text = '';
+      // aria-label takes priority
+      if (el.getAttribute('aria-label')) {
+        text = el.getAttribute('aria-label');
+      } else if (el.getAttribute('title')) {
+        text = el.getAttribute('title');
+      } else {
+        // Get visible text, strip icons
+        text = (el.textContent || '').replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+
+      // For inputs, use value
+      if (!text && (el.tagName === 'INPUT')) {
+        text = el.value || el.getAttribute('placeholder') || '';
+      }
+
+      // Skip empty or very short (icon-only buttons without labels)
+      if (!text || text.length < 2) return;
+
+      // Truncate very long text
+      if (text.length > 80) text = text.substring(0, 80);
+
+      // Don't repeat the same element
+      if (text === lastSpoken) return;
+
+      // Clear previous hover timer
+      if (hoverTimer) clearTimeout(hoverTimer);
+
+      // Delay before reading — user must hover intentionally (configurable in settings)
+      hoverTimer = setTimeout(function () {
+        if (self._isSpeaking) return;
+        lastSpoken = text;
+
+        // Use a quick, short utterance (don't go through full speak() which pauses recognition)
+        if (self.synthesis) {
+          self.synthesis.cancel();
+          var u = new SpeechSynthesisUtterance(text);
+          u.rate = Math.min(self.speechRate + 0.2, 2.0); // Slightly faster for hover reads
+          u.volume = 0.8;
+          u.lang = self.language;
+          var voices = self.synthesis.getVoices();
+          var preferred = voices.find(function (v) { return v.lang.startsWith('en') && v.localService; });
+          if (preferred) u.voice = preferred;
+          self.synthesis.speak(u);
+        }
+      }, self._hoverReadDelay);
+    });
+
+    // Clear on mouseout to cancel pending reads
+    document.addEventListener('mouseout', function (e) {
+      var el = e.target.closest('a, button, [role="button"], input[type="submit"], input[type="button"], .btn, .nav-link, .dropdown-item, [role="tab"], [role="menuitem"]');
+      if (el && hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+        // Cancel hover speech if still queued
+        if (self.synthesis && !self._isSpeaking) {
+          self.synthesis.cancel();
+        }
+        lastSpoken = '';
+      }
+    });
+  }
+
+  /**
    * Adjust speech rate.
    */
   adjustSpeechRate(delta) {
@@ -1897,15 +1992,28 @@ class AHGVoiceCommands {
       return cmd.pattern.test(text);
     }
     if (typeof cmd.pattern === 'string') {
-      return text === cmd.pattern;
+      if (text === cmd.pattern) return true;
     }
     if (Array.isArray(cmd.patterns)) {
-      for (const p of cmd.patterns) {
+      // Get patterns with translations merged in
+      var patterns = this._getTranslatedPatterns(cmd.patterns);
+      for (var i = 0; i < patterns.length; i++) {
+        var p = patterns[i];
         if (p instanceof RegExp && p.test(text)) return true;
         if (typeof p === 'string' && text === p) return true;
       }
     }
     return false;
+  }
+
+  /**
+   * Get command patterns merged with translations for the current language.
+   * Caches per language to avoid rebuilding every match.
+   */
+  _getTranslatedPatterns(originalPatterns) {
+    if (typeof AHGVoiceTranslations === 'undefined') return originalPatterns;
+    if (!this.language || this.language === 'en-US' || this.language === 'en-GB') return originalPatterns;
+    return AHGVoiceTranslations.mergePatterns(originalPatterns, this.language);
   }
 
   _escHtml(str) {
@@ -1930,6 +2038,8 @@ class AHGVoiceCommands {
         if (s.voice_speech_rate) self.speechRate = parseFloat(s.voice_speech_rate);
         if (s.voice_show_floating_btn === 'false' && self.floatingBtn) self.floatingBtn.style.display = 'none';
         if (s.voice_continuous_listening === 'true') self._continuousMode = true;
+        if (s.voice_hover_read_enabled !== undefined) self._hoverReadEnabled = s.voice_hover_read_enabled !== 'false';
+        if (s.voice_hover_read_delay) self._hoverReadDelay = parseInt(s.voice_hover_read_delay, 10) || 400;
         console.log('[Voice] Settings loaded:', s);
     })
     .catch(function(err) { console.log('[Voice] Settings not available, using defaults'); });

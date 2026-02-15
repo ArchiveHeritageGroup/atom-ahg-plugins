@@ -3,7 +3,7 @@
 /**
  * Spectrum Workflow Integration Service
  *
- * Connects CCO cataloguing with Spectrum 5.0 procedures.
+ * Connects CCO cataloguing with Spectrum 5.1 procedures.
  * Provides shared status tracking, procedure timelines, and workflow triggers.
  *
  * @author Johan Pieterse <johan@theahg.co.za>
@@ -15,7 +15,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class ahgSpectrumWorkflowService
 {
-    // Spectrum 5.0 Primary Procedures
+    // Spectrum 5.1 Primary Procedures
     const PROC_OBJECT_ENTRY = 'object_entry';
     const PROC_ACQUISITION = 'acquisition';
     const PROC_LOCATION = 'location_movement';
@@ -100,7 +100,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-sign-in',
                 'requiredFields' => ['object_number', 'entry_date', 'entry_reason', 'depositor'],
                 'triggers' => [self::PROC_ACQUISITION, self::PROC_LOCATION],
-                'spectrumRef' => 'Spectrum 5.0 - Object Entry',
+                'spectrumRef' => 'Spectrum 5.1 - Object Entry',
             ],
             self::PROC_ACQUISITION => [
                 'label' => 'Acquisition',
@@ -109,7 +109,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-plus-circle',
                 'requiredFields' => ['accession_number', 'acquisition_date', 'acquisition_method', 'source'],
                 'triggers' => [self::PROC_CATALOGUING, self::PROC_LOCATION, self::PROC_VALUATION],
-                'spectrumRef' => 'Spectrum 5.0 - Acquisition',
+                'spectrumRef' => 'Spectrum 5.1 - Acquisition',
             ],
             self::PROC_LOCATION => [
                 'label' => 'Location & Movement',
@@ -118,7 +118,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-map-marker',
                 'requiredFields' => ['current_location', 'movement_date', 'handler'],
                 'triggers' => [self::PROC_CONDITION],
-                'spectrumRef' => 'Spectrum 5.0 - Location and Movement Control',
+                'spectrumRef' => 'Spectrum 5.1 - Location and Movement Control',
             ],
             self::PROC_INVENTORY => [
                 'label' => 'Inventory Control',
@@ -127,7 +127,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-list-alt',
                 'requiredFields' => ['inventory_date', 'location_verified', 'inventoried_by'],
                 'triggers' => [],
-                'spectrumRef' => 'Spectrum 5.0 - Inventory Control',
+                'spectrumRef' => 'Spectrum 5.1 - Inventory Control',
             ],
             self::PROC_CATALOGUING => [
                 'label' => 'Cataloguing',
@@ -136,7 +136,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-book',
                 'requiredFields' => ['title', 'creator', 'date', 'medium', 'dimensions'],
                 'triggers' => [self::PROC_RIGHTS],
-                'spectrumRef' => 'Spectrum 5.0 - Cataloguing',
+                'spectrumRef' => 'Spectrum 5.1 - Cataloguing',
                 'ccoIntegration' => true,
             ],
             self::PROC_CONDITION => [
@@ -146,7 +146,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-heartbeat',
                 'requiredFields' => ['condition_date', 'condition_summary', 'examiner'],
                 'triggers' => [self::PROC_CONSERVATION],
-                'spectrumRef' => 'Spectrum 5.0 - Condition Checking and Technical Assessment',
+                'spectrumRef' => 'Spectrum 5.1 - Condition Checking and Technical Assessment',
             ],
             self::PROC_CONSERVATION => [
                 'label' => 'Conservation',
@@ -155,7 +155,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-medkit',
                 'requiredFields' => ['treatment_proposal', 'conservator', 'treatment_date'],
                 'triggers' => [self::PROC_CONDITION],
-                'spectrumRef' => 'Spectrum 5.0 - Conservation and Collections Care',
+                'spectrumRef' => 'Spectrum 5.1 - Conservation and Collections Care',
             ],
             self::PROC_VALUATION => [
                 'label' => 'Valuation',
@@ -164,7 +164,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-dollar-sign',
                 'requiredFields' => ['valuation_amount', 'valuation_date', 'valuer', 'valuation_type'],
                 'triggers' => [self::PROC_INSURANCE],
-                'spectrumRef' => 'Spectrum 5.0 - Valuation Control',
+                'spectrumRef' => 'Spectrum 5.1 - Valuation Control',
                 'grapIntegration' => true,
             ],
             self::PROC_INSURANCE => [
@@ -174,7 +174,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-shield-alt',
                 'requiredFields' => ['insurance_value', 'policy_number', 'coverage_dates'],
                 'triggers' => [],
-                'spectrumRef' => 'Spectrum 5.0 - Insurance and Indemnity Management',
+                'spectrumRef' => 'Spectrum 5.1 - Insurance and Indemnity Management',
             ],
             self::PROC_LOAN_IN => [
                 'label' => 'Loans In',
@@ -183,7 +183,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-arrow-circle-down',
                 'requiredFields' => ['lender', 'loan_dates', 'loan_purpose', 'insurance_value'],
                 'triggers' => [self::PROC_LOCATION, self::PROC_CONDITION],
-                'spectrumRef' => 'Spectrum 5.0 - Loans In',
+                'spectrumRef' => 'Spectrum 5.1 - Loans In',
             ],
             self::PROC_LOAN_OUT => [
                 'label' => 'Loans Out',
@@ -192,7 +192,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-arrow-circle-up',
                 'requiredFields' => ['borrower', 'loan_dates', 'loan_purpose', 'facility_report'],
                 'triggers' => [self::PROC_LOCATION, self::PROC_CONDITION, self::PROC_INSURANCE],
-                'spectrumRef' => 'Spectrum 5.0 - Loans Out',
+                'spectrumRef' => 'Spectrum 5.1 - Loans Out',
             ],
             self::PROC_LOSS => [
                 'label' => 'Loss & Damage',
@@ -201,7 +201,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-exclamation-triangle',
                 'requiredFields' => ['incident_date', 'description', 'reported_by'],
                 'triggers' => [self::PROC_INSURANCE, self::PROC_CONSERVATION],
-                'spectrumRef' => 'Spectrum 5.0 - Loss and Damage',
+                'spectrumRef' => 'Spectrum 5.1 - Loss and Damage',
             ],
             self::PROC_DEACCESSION => [
                 'label' => 'Deaccession',
@@ -210,7 +210,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-minus-circle',
                 'requiredFields' => ['deaccession_date', 'reason', 'authorization'],
                 'triggers' => [self::PROC_DISPOSAL],
-                'spectrumRef' => 'Spectrum 5.0 - Deaccession and Disposal',
+                'spectrumRef' => 'Spectrum 5.1 - Deaccession and Disposal',
             ],
             self::PROC_DISPOSAL => [
                 'label' => 'Disposal',
@@ -219,7 +219,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-trash',
                 'requiredFields' => ['disposal_date', 'disposal_method', 'recipient'],
                 'triggers' => [self::PROC_EXIT],
-                'spectrumRef' => 'Spectrum 5.0 - Deaccession and Disposal',
+                'spectrumRef' => 'Spectrum 5.1 - Deaccession and Disposal',
             ],
             self::PROC_EXIT => [
                 'label' => 'Object Exit',
@@ -228,7 +228,7 @@ class ahgSpectrumWorkflowService
                 'icon' => 'fa-sign-out',
                 'requiredFields' => ['exit_date', 'exit_reason', 'recipient', 'authorization'],
                 'triggers' => [],
-                'spectrumRef' => 'Spectrum 5.0 - Object Exit',
+                'spectrumRef' => 'Spectrum 5.1 - Object Exit',
             ],
         ];
     }

@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php // Voice Commands JS ?>
 <script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandTranslations.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 </body>
 </html>

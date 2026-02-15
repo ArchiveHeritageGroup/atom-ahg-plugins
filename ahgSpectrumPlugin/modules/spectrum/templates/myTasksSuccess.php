@@ -145,7 +145,7 @@ $procedureTypesRaw = $sf_data->getRaw('procedureTypes');
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="/<?php echo esc_entities($task->slug); ?>/spectrum?procedure_type=<?php echo urlencode($task->procedure_type); ?>"
+                                <a href="/index.php/spectrum/<?php echo esc_entities($task->slug); ?>/workflow?procedure_type=<?php echo urlencode($task->procedure_type); ?>"
                                    class="btn btn-sm btn-outline-primary" title="<?php echo __('View Workflow'); ?>">
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>

@@ -76,7 +76,7 @@ class AhgSettingsSectionAction extends AhgController
             'encryption_field_access_restrictions',
         ],
         'voice_ai' => [
-            'voice_enabled', 'voice_continuous_listening', 'voice_show_floating_btn', 'voice_audit_ai_calls',
+            'voice_enabled', 'voice_continuous_listening', 'voice_show_floating_btn', 'voice_hover_read_enabled', 'voice_audit_ai_calls',
         ],
     ];
 

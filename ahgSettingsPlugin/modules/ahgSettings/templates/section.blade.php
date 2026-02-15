@@ -1787,6 +1787,29 @@
                                             <div class="form-text">{{ __('Display a floating microphone button on all pages for quick voice activation.') }}</div>
                                         </div>
                                     </div>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="voice_hover_read_enabled"
+                                                       name="settings[voice_hover_read_enabled]" value="true"
+                                                       {{ ($settings['voice_hover_read_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="voice_hover_read_enabled">
+                                                    <strong>{{ __('Mouseover Read-Aloud') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Read button and link text aloud when hovering with the mouse (when voice mode is active).') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_hover_read_delay">{{ __('Hover Read Delay') }}: <span id="voice_hover_read_delay_val">{{ $settings['voice_hover_read_delay'] ?? '400' }}</span>ms</label>
+                                            <input type="range" class="form-range" id="voice_hover_read_delay"
+                                                   name="settings[voice_hover_read_delay]"
+                                                   min="100" max="1000" step="50"
+                                                   value="{{ $settings['voice_hover_read_delay'] ?? '400' }}"
+                                                   oninput="document.getElementById('voice_hover_read_delay_val').textContent=this.value">
+                                            <div class="form-text">{{ __('Milliseconds to wait before reading (100 = instant, 1000 = slow). Lower values are more responsive.') }}</div>
+                                        </div>
+                                    </div>
                                 </fieldset>
 
                                 <!-- AI Image Description -->

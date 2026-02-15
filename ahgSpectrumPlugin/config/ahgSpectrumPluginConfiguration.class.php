@@ -1,7 +1,7 @@
 <?php
 class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
 {
-    public static $summary = 'Spectrum 5.0 Museum Procedures Plugin';
+    public static $summary = 'Spectrum 5.1 Museum Procedures Plugin';
     public static $version = '1.1.5';
     public static $dependencies = [];
     public static $dependents = [];

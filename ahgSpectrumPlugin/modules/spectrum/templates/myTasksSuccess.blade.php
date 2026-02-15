@@ -145,7 +145,7 @@ $procedureTypesRaw = $procedureTypes ?? [];
                                 @endif
                             </td>
                             <td>
-                                <a href="/{{ $task->slug }}/spectrum?procedure_type={{ urlencode($task->procedure_type) }}"
+                                <a href="/index.php/spectrum/{{ $task->slug }}/workflow?procedure_type={{ urlencode($task->procedure_type) }}"
                                    class="btn btn-sm btn-outline-primary" title="{{ __('View Workflow') }}">
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>

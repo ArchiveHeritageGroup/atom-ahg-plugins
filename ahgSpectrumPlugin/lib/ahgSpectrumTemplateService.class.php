@@ -69,8 +69,8 @@ class ahgSpectrumTemplateService
     {
         return [
             'id' => self::DEFAULT_TEMPLATE,
-            'name' => 'Spectrum 5.0 Standard',
-            'description' => 'Standard Spectrum 5.0 procedure configuration',
+            'name' => 'Spectrum 5.1 Standard',
+            'description' => 'Standard Spectrum 5.1 procedure configuration',
             'version' => '5.0',
             'repository_id' => null,
             'procedures' => $this->getDefaultProcedureConfig(),

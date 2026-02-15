@@ -495,7 +495,7 @@ class ahgSpectrumExportService
     </div>
 
     <div class="footer">
-        Spectrum 5.0 Procedure History Report | Generated: <?php echo $generatedAt; ?> | ahgSpectrumPlugin for AtoM
+        Spectrum 5.1 Procedure History Report | Generated: <?php echo $generatedAt; ?> | ahgSpectrumPlugin for AtoM
     </div>
 </body>
 </html>
@@ -637,7 +637,7 @@ class ahgSpectrumExportService
     </div>
 
     <div class="footer">
-        Spectrum 5.0 Audit Report | Generated: <?php echo $generatedAt; ?> | ahgSpectrumPlugin for AtoM
+        Spectrum 5.1 Audit Report | Generated: <?php echo $generatedAt; ?> | ahgSpectrumPlugin for AtoM
     </div>
 </body>
 </html>

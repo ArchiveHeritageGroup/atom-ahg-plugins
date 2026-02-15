@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 /**
  * Spectrum Reports Module
- * Reports for Spectrum 5.0 procedures
+ * Reports for Spectrum 5.1 procedures
  */
 
 use Illuminate\Database\Capsule\Manager as DB;

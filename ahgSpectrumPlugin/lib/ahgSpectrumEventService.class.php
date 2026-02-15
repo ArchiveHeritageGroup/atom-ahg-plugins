@@ -67,7 +67,7 @@ class ahgSpectrumEventService
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_OVERDUE = 'overdue';
 
-    // Spectrum 5.0 Procedures
+    // Spectrum 5.1 Procedures
     public static $procedures = [
         'object_entry' => [
             'name' => 'Object Entry',
