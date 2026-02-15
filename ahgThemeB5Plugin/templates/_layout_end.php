@@ -7,8 +7,6 @@ if (file_exists($dynamicStylesPath)) {
 ?>
 <!-- D3.js for visualizations -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-</body>
-</html>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Override mediaelement CSS that hides native video controls */
 .ahg-media-player video::-webkit-media-controls,
@@ -34,3 +32,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<?php // Voice Commands CSS ?>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css">
+
+<?php // Voice Commands UI (partial) ?>
+<?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
+
+<?php // Voice Commands JS ?>
+<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js"></script>
+</body>
+</html>
