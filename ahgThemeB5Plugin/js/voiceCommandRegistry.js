@@ -353,6 +353,41 @@ var AHGVoiceRegistry = (function () {
       description: 'Scroll to bottom'
     },
 
+    // -- Dictation --------------------------------------------------------
+    {
+      patterns: ['start dictating', 'start dictation', 'dictate'],
+      action: function () {
+        var v = window.ahgVoice;
+        if (!v) return;
+        var field = document.activeElement;
+        if (field && (field.tagName === 'INPUT' && field.type === 'text' || field.tagName === 'TEXTAREA')) {
+          v.startDictation(field);
+        } else {
+          // Try to find the first visible text field on the page
+          var firstField = document.querySelector('form#editForm textarea, form.form-edit textarea, form#editForm input[type="text"], form.form-edit input[type="text"]');
+          if (firstField) {
+            v.startDictation(firstField);
+          } else {
+            v.speak('No text field found. Focus a field first.');
+            v.showToast('No text field found', 'warning');
+          }
+        }
+      },
+      mode: 'dictation',
+      description: 'Start dictating into focused field',
+      contextCheck: function () { return !!document.querySelector('form#editForm, form.form-edit, textarea, input[type="text"]'); }
+    },
+    {
+      patterns: ['stop dictating', 'stop dictation'],
+      action: function () {
+        var v = window.ahgVoice;
+        if (v && v.mode === 'dictation') { v.stopDictation(); }
+        else if (v) { v.speak('Not in dictation mode'); }
+      },
+      mode: 'dictation',
+      description: 'Stop dictating'
+    },
+
     // -- Help -------------------------------------------------------------
     {
       patterns: ['help', 'show commands', 'voice help', 'what can you do', 'list commands'],

@@ -49,7 +49,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
                 echo '<span class="voice-cmd-phrase">"' . esc_specialchars($phrase) . '"</span>';
                 echo '<span class="voice-cmd-desc">' . esc_specialchars(__($desc));
                 if ($ctxClass) {
-                    $labels = ['edit' => 'edit pages', 'view' => 'view pages', 'browse' => 'browse pages'];
+                    $labels = ['edit' => 'edit pages', 'view' => 'view pages', 'browse' => 'browse pages', 'dictation' => 'dictation mode'];
                     echo ' <span class="voice-ctx-badge voice-ctx-' . $ctxClass . '">' . ($labels[$ctxClass] ?? $ctxClass) . '</span>';
                 }
                 echo '</span></li>';
@@ -110,6 +110,28 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'scroll to top' => 'Scroll to top',
             'scroll to bottom' => 'Scroll to bottom',
         ], 'global'); ?>
+
+        <h6><i class="bi bi-keyboard me-1"></i><?php echo __('Dictation'); ?></h6>
+        <?php $renderSection([
+            'start dictating' => 'Start dictating into focused field',
+            'stop dictating' => 'Stop dictation, return to command mode',
+        ], 'dictation'); ?>
+        <p class="text-muted small mt-1 mb-2"><?php echo __('While dictating, say these for punctuation:'); ?></p>
+        <?php $renderSection([
+            'period / full stop' => 'Insert .',
+            'comma' => 'Insert ,',
+            'question mark' => 'Insert ?',
+            'exclamation mark' => 'Insert !',
+            'colon / semicolon' => 'Insert : or ;',
+            'new line' => 'Insert line break',
+            'new paragraph' => 'Insert double line break',
+            'open quote / close quote' => 'Insert curly quotes',
+            'open bracket / close bracket' => 'Insert ( or )',
+            'dash / hyphen' => 'Insert dash or hyphen',
+            'undo last' => 'Remove last dictated segment',
+            'clear field' => 'Clear the entire field (with confirmation)',
+            'read back' => 'Read the field content aloud',
+        ], 'dictation'); ?>
 
         <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>
         <?php $renderSection([

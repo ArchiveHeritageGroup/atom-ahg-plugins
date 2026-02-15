@@ -17,6 +17,11 @@ class AHGVoiceCommands {
     this.language = 'en-US';
     this.speechRate = 1.0;
 
+    // Dictation state
+    this.dictationField = null;        // Currently focused field
+    this.dictationHistory = [];        // Segments for undo
+    this.dictationConfirmClear = false; // Waiting for yes/no after "clear field"
+
     // UI elements (set after DOM ready)
     this.navbarBtn = null;
     this.floatingBtn = null;
@@ -67,6 +72,9 @@ class AHGVoiceCommands {
       });
     }
 
+    // Inject field mic icons on edit pages
+    this._injectFieldMics();
+
     // Show UI
     document.querySelectorAll('.voice-ui').forEach(el => el.style.display = '');
   }
@@ -111,6 +119,322 @@ class AHGVoiceCommands {
     }
     this.isListening = false;
     this._updateUI(false);
+  }
+
+  // ---------------------------------------------------------------
+  //  Dictation Mode (Phase 3)
+  // ---------------------------------------------------------------
+
+  /**
+   * Start dictation into a specific text field.
+   */
+  startDictation(field) {
+    if (!this.isSupported || !field) return;
+
+    this.dictationField = field;
+    this.dictationHistory = [];
+    this.dictationConfirmClear = false;
+    this.mode = 'dictation';
+
+    // Switch recognition to continuous + interim
+    try { this.recognition.stop(); } catch (e) { /* ignore */ }
+
+    const self = this;
+    setTimeout(function () {
+      self.recognition.continuous = true;
+      self.recognition.interimResults = true;
+
+      // Mark field active
+      field.classList.add('voice-dictation-active');
+      field.focus();
+
+      // Update field mic icon if present
+      var mic = field.parentElement && field.parentElement.querySelector('.voice-field-mic');
+      if (mic) mic.classList.add('active');
+
+      try {
+        self.recognition.start();
+        self.isListening = true;
+        self._updateUI(true);
+        self.showToast('Dictation started — speak into field', 'info');
+      } catch (e) {
+        console.warn('Voice: could not start dictation', e);
+      }
+    }, 200);
+  }
+
+  /**
+   * Stop dictation and return to command mode.
+   */
+  stopDictation() {
+    if (this.mode !== 'dictation') return;
+
+    // Remove interim text
+    this._clearInterim();
+
+    // Clean up field state
+    if (this.dictationField) {
+      this.dictationField.classList.remove('voice-dictation-active');
+      var mic = this.dictationField.parentElement &&
+        this.dictationField.parentElement.querySelector('.voice-field-mic');
+      if (mic) mic.classList.remove('active');
+    }
+
+    this.mode = 'command';
+    this.dictationField = null;
+    this.dictationHistory = [];
+    this.dictationConfirmClear = false;
+
+    // Revert recognition to one-shot
+    try { this.recognition.stop(); } catch (e) { /* ignore */ }
+
+    const self = this;
+    setTimeout(function () {
+      self.recognition.continuous = false;
+      self.recognition.interimResults = false;
+      self.isListening = false;
+      self._updateUI(false);
+    }, 200);
+
+    this.showToast('Dictation stopped', 'info');
+    this.speak('Dictation stopped');
+  }
+
+  /**
+   * Punctuation/sub-command map for dictation mode.
+   */
+  static get DICTATION_SUBS() {
+    return {
+      'new line': '\n',
+      'newline': '\n',
+      'new paragraph': '\n\n',
+      'period': '. ',
+      'full stop': '. ',
+      'comma': ', ',
+      'question mark': '? ',
+      'exclamation mark': '! ',
+      'exclamation point': '! ',
+      'colon': ': ',
+      'semicolon': '; ',
+      'open quote': '\u201C',
+      'close quote': '\u201D',
+      'open bracket': '(',
+      'close bracket': ')',
+      'dash': ' \u2013 ',
+      'hyphen': '-'
+    };
+  }
+
+  /**
+   * Process a dictation transcript segment.
+   */
+  _processDictation(transcript, isFinal) {
+    if (!this.dictationField) return;
+
+    var text = transcript.trim();
+    var lower = text.toLowerCase();
+
+    // Handle "clear field" confirmation flow
+    if (this.dictationConfirmClear) {
+      this.dictationConfirmClear = false;
+      if (isFinal && (lower === 'yes' || lower === 'yeah' || lower === 'yep')) {
+        this.dictationField.value = '';
+        this.dictationHistory = [];
+        this.showToast('Field cleared', 'success');
+        this.speak('Field cleared');
+      } else if (isFinal) {
+        this.showToast('Clear cancelled', 'info');
+        this.speak('Clear cancelled');
+      }
+      return;
+    }
+
+    // Check for dictation sub-commands (only on final results)
+    if (isFinal) {
+      // Stop dictating
+      if (lower === 'stop dictating' || lower === 'stop dictation') {
+        this.stopDictation();
+        return;
+      }
+
+      // Undo last
+      if (lower === 'undo' || lower === 'undo last' || lower === 'undo that') {
+        if (this.dictationHistory.length > 0) {
+          var last = this.dictationHistory.pop();
+          var val = this.dictationField.value;
+          if (val.endsWith(last)) {
+            this.dictationField.value = val.slice(0, -last.length);
+          }
+          this.showToast('Undone: "' + last.trim().substring(0, 30) + '"', 'info');
+        } else {
+          this.speak('Nothing to undo');
+        }
+        return;
+      }
+
+      // Clear field
+      if (lower === 'clear field' || lower === 'clear the field') {
+        this.dictationConfirmClear = true;
+        this.speak('Are you sure? Say yes or no');
+        this.showToast('Say "yes" to clear or "no" to cancel', 'warning');
+        return;
+      }
+
+      // Read back
+      if (lower === 'read back' || lower === 'read it back' || lower === 'read field') {
+        var content = this.dictationField.value.trim();
+        if (content) {
+          this.speak(content);
+          this.showToast('Reading back...', 'info');
+        } else {
+          this.speak('Field is empty');
+        }
+        return;
+      }
+
+      // Check for punctuation sub-commands
+      var subs = AHGVoiceCommands.DICTATION_SUBS;
+      if (subs[lower] !== undefined) {
+        this._clearInterim();
+        var punct = subs[lower];
+        this._insertAtCursor(this.dictationField, punct);
+        this.dictationHistory.push(punct);
+        return;
+      }
+
+      // Final text — insert it
+      this._clearInterim();
+      // Capitalize first letter of sentence
+      var insertText = this._smartCapitalize(text);
+      // Add trailing space
+      insertText += ' ';
+      this._insertAtCursor(this.dictationField, insertText);
+      this.dictationHistory.push(insertText);
+    } else {
+      // Interim result — show grayed preview
+      this._showInterim(text);
+    }
+  }
+
+  /**
+   * Insert text at cursor position in a field.
+   */
+  _insertAtCursor(field, text) {
+    var start = field.selectionStart;
+    var end = field.selectionEnd;
+    var val = field.value;
+
+    if (typeof start === 'number') {
+      field.value = val.substring(0, start) + text + val.substring(end);
+      var newPos = start + text.length;
+      field.selectionStart = newPos;
+      field.selectionEnd = newPos;
+    } else {
+      // Fallback: append
+      field.value += text;
+    }
+
+    // Trigger input event for any listeners
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  /**
+   * Capitalize first letter if preceding context suggests start of sentence.
+   */
+  _smartCapitalize(text) {
+    if (!text) return text;
+    if (!this.dictationField) return text;
+
+    var val = this.dictationField.value;
+    // Capitalize at start of field or after sentence-ending punctuation
+    if (!val || /[.!?]\s*$/.test(val) || /\n\s*$/.test(val)) {
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+    return text;
+  }
+
+  /**
+   * Show interim (not-yet-final) text as a grayed span after the field.
+   */
+  _showInterim(text) {
+    if (!this.dictationField) return;
+
+    var container = this.dictationField.parentElement;
+    if (!container) return;
+
+    var span = container.querySelector('.voice-interim-text');
+    if (!span) {
+      span = document.createElement('span');
+      span.className = 'voice-interim-text';
+      container.appendChild(span);
+    }
+    span.textContent = text;
+  }
+
+  /**
+   * Remove interim text display.
+   */
+  _clearInterim() {
+    if (!this.dictationField || !this.dictationField.parentElement) return;
+    var span = this.dictationField.parentElement.querySelector('.voice-interim-text');
+    if (span) span.remove();
+  }
+
+  /**
+   * Inject small mic icons into text inputs and textareas on edit pages.
+   */
+  _injectFieldMics() {
+    // Only inject on edit pages
+    var form = document.querySelector('form#editForm, form.form-edit');
+    if (!form) return;
+
+    var self = this;
+    var fields = form.querySelectorAll('input[type="text"], textarea');
+
+    fields.forEach(function (field) {
+      // Skip hidden/readonly fields
+      if (field.type === 'hidden' || field.readOnly || field.disabled) return;
+      // Skip fields that are too small (like date pickers)
+      if (field.offsetWidth < 100) return;
+
+      // Ensure parent has relative positioning
+      var parent = field.parentElement;
+      if (!parent) return;
+      var pos = window.getComputedStyle(parent).position;
+      if (pos === 'static') {
+        parent.style.position = 'relative';
+      }
+
+      // Create mic icon
+      var mic = document.createElement('button');
+      mic.type = 'button';
+      mic.className = 'voice-field-mic';
+      mic.setAttribute('aria-label', 'Dictate into this field');
+      mic.title = 'Dictate';
+      mic.innerHTML = '<i class="bi bi-mic"></i>';
+      mic.tabIndex = -1;
+
+      // Position differently for textarea vs input
+      if (field.tagName === 'TEXTAREA') {
+        mic.classList.add('voice-field-mic-textarea');
+      }
+
+      // Click handler
+      mic.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (self.mode === 'dictation' && self.dictationField === field) {
+          self.stopDictation();
+        } else {
+          if (self.mode === 'dictation') {
+            self.stopDictation();
+          }
+          self.startDictation(field);
+        }
+      });
+
+      parent.appendChild(mic);
+    });
   }
 
   /**
@@ -291,14 +615,24 @@ class AHGVoiceCommands {
   _bindRecognitionEvents() {
     this.recognition.addEventListener('result', (event) => {
       const result = event.results[event.results.length - 1];
-      if (result.isFinal) {
-        const transcript = result[0].transcript;
-        const confidence = result[0].confidence;
+      const transcript = result[0].transcript;
+      const confidence = result[0].confidence;
+
+      if (this.mode === 'dictation') {
+        // In dictation mode, handle interim + final results
+        this._processDictation(transcript, result.isFinal);
+      } else if (result.isFinal) {
+        // In command mode, only process final results
         this.processCommand(transcript, confidence);
       }
     });
 
     this.recognition.addEventListener('end', () => {
+      if (this.mode === 'dictation' && this.isListening) {
+        // In dictation mode, auto-restart recognition (continuous listening)
+        try { this.recognition.start(); } catch (e) { /* ignore */ }
+        return;
+      }
       this.isListening = false;
       this._updateUI(false);
     });
@@ -333,14 +667,16 @@ class AHGVoiceCommands {
     if (this.floatingBtn) {
       if (listening) {
         this.floatingBtn.classList.add('voice-active');
+        this.floatingBtn.classList.toggle('voice-dictating', this.mode === 'dictation');
       } else {
-        this.floatingBtn.classList.remove('voice-active');
+        this.floatingBtn.classList.remove('voice-active', 'voice-dictating');
       }
     }
 
-    // Indicator bar
+    // Indicator bar — blue for command mode, green for dictation
     if (this.indicator) {
-      this.indicator.classList.toggle('voice-indicator-active', listening);
+      this.indicator.classList.toggle('voice-indicator-active', listening && this.mode !== 'dictation');
+      this.indicator.classList.toggle('voice-indicator-dictation', listening && this.mode === 'dictation');
     }
   }
 
