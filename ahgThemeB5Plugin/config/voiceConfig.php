@@ -6,12 +6,12 @@
  */
 return [
     // LLM provider: 'local' | 'cloud' | 'hybrid'
-    'llm_provider'      => 'hybrid',
+    'llm_provider'      => 'local',
 
     // Local LLM (Ollama)
     'local_llm_url'     => 'http://localhost:11434',
     'local_llm_model'   => 'llava:7b',
-    'local_llm_timeout' => 30,
+    'local_llm_timeout' => 120,
 
     // Cloud LLM (Anthropic)
     'anthropic_api_key'  => '', // Set via AHG Settings or here

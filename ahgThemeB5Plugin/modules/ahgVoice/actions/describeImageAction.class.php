@@ -17,6 +17,10 @@ class ahgVoiceDescribeImageAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
 
+        // Initialize Laravel DB
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        \AhgCore\Core\AhgDb::init();
+
         // Auth check
         if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required'], 401);
@@ -27,27 +31,94 @@ class ahgVoiceDescribeImageAction extends sfAction
         }
 
         $doId = (int) $request->getParameter('digital_object_id');
-        if ($doId <= 0) {
-            return $this->renderJson(['success' => false, 'error' => 'Invalid digital object ID']);
+        $infoObjectId = (int) $request->getParameter('information_object_id');
+        $slug = trim($request->getParameter('slug', ''));
+
+        // Temporary debug log
+        $debugLog = '/tmp/voice_debug.log';
+        file_put_contents($debugLog, date('Y-m-d H:i:s') . " === describeImage request ===\n", FILE_APPEND);
+        file_put_contents($debugLog, "  doId=$doId, infoObjectId=$infoObjectId, slug=$slug\n", FILE_APPEND);
+
+        $digitalObject = null;
+        $informationObject = null;
+        $objectId = null;
+
+        // Strategy 1: Direct digital object ID
+        if ($doId > 0) {
+            $digitalObject = DB::table('digital_object')->where('id', $doId)->first();
+            file_put_contents($debugLog, "  Strategy1: doId=$doId => " . ($digitalObject ? 'FOUND' : 'null') . "\n", FILE_APPEND);
         }
 
-        // Load digital object from DB
-        $digitalObject = DB::table('digital_object')->where('id', $doId)->first();
+        // Strategy 2: Information object ID → find its digital object
+        if (!$digitalObject && $infoObjectId > 0) {
+            $informationObject = DB::table('information_object')->where('id', $infoObjectId)->first();
+            if ($informationObject) {
+                $digitalObject = DB::table('digital_object')
+                    ->where('object_id', $infoObjectId)
+                    ->orderBy('id', 'asc')
+                    ->first();
+            }
+            file_put_contents($debugLog, "  Strategy2: infoObjectId=$infoObjectId => io=" . ($informationObject ? 'FOUND' : 'null') . ", do=" . ($digitalObject ? 'FOUND' : 'null') . "\n", FILE_APPEND);
+        }
+
+        // Strategy 3: Slug → resolve information object → find digital object
+        if (!$digitalObject && $slug !== '') {
+            // Slug may include module prefix (e.g., "museum/test-opensearch" or "library/my-item")
+            // Try the last segment first, then the full slug
+            $slugParts = explode('/', $slug);
+            $slugCandidates = [$slug];
+            if (count($slugParts) > 1) {
+                $slugCandidates[] = end($slugParts); // Last segment
+            }
+
+            file_put_contents($debugLog, "  Strategy3: candidates=" . json_encode($slugCandidates) . "\n", FILE_APPEND);
+
+            foreach ($slugCandidates as $candidate) {
+                $slugRow = DB::table('slug')->where('slug', $candidate)->first();
+                file_put_contents($debugLog, "    candidate='$candidate' => slugRow=" . ($slugRow ? json_encode(['object_id' => $slugRow->object_id]) : 'null') . "\n", FILE_APPEND);
+                if ($slugRow) {
+                    $informationObject = DB::table('information_object')
+                        ->where('id', $slugRow->object_id)
+                        ->first();
+                    file_put_contents($debugLog, "    io=" . ($informationObject ? 'FOUND(id=' . $informationObject->id . ')' : 'null') . "\n", FILE_APPEND);
+                    if ($informationObject) {
+                        $digitalObject = DB::table('digital_object')
+                            ->where('object_id', $informationObject->id)
+                            ->orderBy('id', 'asc')
+                            ->first();
+                        file_put_contents($debugLog, "    do=" . ($digitalObject ? 'FOUND(id=' . $digitalObject->id . ', name=' . $digitalObject->name . ')' : 'null') . "\n", FILE_APPEND);
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!$digitalObject) {
+            file_put_contents($debugLog, "  RESULT: Digital object not found!\n\n", FILE_APPEND);
             return $this->renderJson(['success' => false, 'error' => 'Digital object not found']);
         }
 
-        // Get the information object for context
+        file_put_contents($debugLog, "  RESULT: Found DO id=" . $digitalObject->id . ", name=" . $digitalObject->name . "\n\n", FILE_APPEND);
+
+        $doId = $digitalObject->id;
         $objectId = $digitalObject->object_id ?? null;
-        $informationObject = null;
-        if ($objectId) {
+        if (!$informationObject && $objectId) {
             $informationObject = DB::table('information_object')->where('id', $objectId)->first();
         }
 
-        // Resolve image file path
-        $path = $this->resolveFilePath($digitalObject);
+        // Resolve image file — prefer reference/thumbnail derivative (already JPEG)
+        // over converting a potentially large master TIFF
+        $useObject = $this->findBestDerivative($digitalObject) ?? $digitalObject;
+        $path = $this->resolveFilePath($useObject);
         if (!$path || !file_exists($path)) {
-            return $this->renderJson(['success' => false, 'error' => 'Image file not accessible']);
+            // Fall back to master if derivative path doesn't resolve
+            if ($useObject->id !== $digitalObject->id) {
+                $path = $this->resolveFilePath($digitalObject);
+            }
+            if (!$path || !file_exists($path)) {
+                return $this->renderJson(['success' => false, 'error' => 'Image file not accessible']);
+            }
+            $useObject = $digitalObject; // Reset to master
         }
 
         // Determine context/standard for prompt
@@ -57,7 +128,7 @@ class ahgVoiceDescribeImageAction extends sfAction
         $config = $this->loadConfig();
 
         // Attempt LLM description
-        $result = $this->callLlm($path, $digitalObject->mime_type ?? 'image/jpeg', $context, $config);
+        $result = $this->callLlm($path, $useObject->mime_type ?? 'image/jpeg', $context, $config);
 
         // Audit logging
         if ($config['audit_ai_calls']) {
@@ -81,33 +152,27 @@ class ahgVoiceDescribeImageAction extends sfAction
             return null;
         }
 
-        // Try standard AtoM upload path
-        $uploadsDir = sfConfig::get('sf_upload_dir', sfConfig::get('sf_web_dir') . '/uploads');
-        $fullPath = $uploadsDir . '/' . ltrim($path, '/');
+        $webDir = sfConfig::get('sf_web_dir', sfConfig::get('sf_root_dir'));
 
-        if (is_dir($fullPath)) {
-            // Path is directory — look for the file inside
-            $candidate = $fullPath . '/' . $name;
-            if (file_exists($candidate)) {
-                return $candidate;
-            }
-            // Try reference copy
-            $refPath = str_replace('/master/', '/reference/', $fullPath);
-            $candidate = $refPath . '/' . $name;
-            if (file_exists($candidate)) {
-                return $candidate;
-            }
+        // DB path is typically /uploads/r/... (relative to web root)
+        // Build full path: webDir + dbPath + name
+        $fullDir = rtrim($webDir, '/') . '/' . trim($path, '/');
+        $candidate = $fullDir . '/' . $name;
+        if (file_exists($candidate)) {
+            return $candidate;
         }
 
-        // Direct path
-        if (file_exists($fullPath)) {
-            return $fullPath;
+        // Try without trailing slash on dir (path already includes name separator)
+        $candidate = rtrim($fullDir, '/') . $name;
+        if (file_exists($candidate)) {
+            return $candidate;
         }
 
-        // Try web dir relative
-        $webPath = sfConfig::get('sf_web_dir') . '/' . ltrim($path, '/') . '/' . $name;
-        if (file_exists($webPath)) {
-            return $webPath;
+        // Try reference copy instead of master
+        $refDir = str_replace('/master/', '/reference/', $fullDir);
+        $candidate = $refDir . '/' . $name;
+        if (file_exists($candidate)) {
+            return $candidate;
         }
 
         return null;
@@ -142,11 +207,122 @@ class ahgVoiceDescribeImageAction extends sfAction
     }
 
     /**
+     * Find the best derivative for LLM processing.
+     * Prefers: reference copy (usage_id=141) > thumbnail (usage_id=142).
+     * Returns null if no derivative exists.
+     */
+    protected function findBestDerivative($digitalObject)
+    {
+        $doId = $digitalObject->id;
+
+        // Look for child derivatives (parent_id = this DO's id)
+        // Prefer reference (141) over thumbnail (142) — better quality for LLM
+        $derivative = DB::table('digital_object')
+            ->where('parent_id', $doId)
+            ->whereIn('usage_id', [141, 142])
+            ->orderByRaw('FIELD(usage_id, 141, 142)')
+            ->first();
+
+        return $derivative;
+    }
+
+    /**
+     * Convert unsupported image formats (TIFF, BMP, etc.) to JPEG for LLM processing.
+     * Resizes large images to max 1024px. Uses ImageMagick, then ffmpeg, then GD as fallbacks.
+     * Returns [filePath, mimeType] — original if already supported, converted otherwise.
+     */
+    protected function ensureSupportedFormat($filePath, $mimeType)
+    {
+        $supported = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (in_array($mimeType, $supported)) {
+            // Even supported formats may need resizing for very large images
+            $size = @getimagesize($filePath);
+            if ($size && ($size[0] > 2048 || $size[1] > 2048)) {
+                return $this->resizeImage($filePath, $mimeType);
+            }
+            return [$filePath, $mimeType];
+        }
+
+        // Convert to JPEG
+        $tmpPath = sys_get_temp_dir() . '/voice_convert_' . md5($filePath) . '.jpg';
+
+        // Re-use cached conversion if recent (< 1 hour)
+        if (file_exists($tmpPath) && (time() - filemtime($tmpPath)) < 3600) {
+            return [$tmpPath, 'image/jpeg'];
+        }
+
+        // Strategy 1: ImageMagick with resize (handles most formats + large images)
+        $cmd = sprintf(
+            'convert %s[0] -resize 1024x1024\\> -quality 85 %s 2>&1',
+            escapeshellarg($filePath),
+            escapeshellarg($tmpPath)
+        );
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode === 0 && file_exists($tmpPath) && filesize($tmpPath) > 0) {
+            return [$tmpPath, 'image/jpeg'];
+        }
+
+        // Strategy 2: ffmpeg (handles very large TIFFs that exceed ImageMagick pixel limits)
+        $cmd = sprintf(
+            'ffmpeg -y -i %s -vf "scale=\'min(1024,iw)\':\'min(1024,ih)\':force_original_aspect_ratio=decrease" -q:v 3 -frames:v 1 -update 1 %s 2>&1',
+            escapeshellarg($filePath),
+            escapeshellarg($tmpPath)
+        );
+        exec($cmd, $output2, $exitCode2);
+
+        if ($exitCode2 === 0 && file_exists($tmpPath) && filesize($tmpPath) > 0) {
+            return [$tmpPath, 'image/jpeg'];
+        }
+
+        // Strategy 3: PHP GD (last resort — may fail on large files)
+        $img = @imagecreatefromstring(file_get_contents($filePath));
+        if ($img) {
+            imagejpeg($img, $tmpPath, 85);
+            imagedestroy($img);
+            if (file_exists($tmpPath) && filesize($tmpPath) > 0) {
+                return [$tmpPath, 'image/jpeg'];
+            }
+        }
+
+        // Return original if all conversion fails — LLM will handle or reject
+        return [$filePath, $mimeType];
+    }
+
+    /**
+     * Resize a large supported-format image to max 1024px for LLM processing.
+     */
+    protected function resizeImage($filePath, $mimeType)
+    {
+        $tmpPath = sys_get_temp_dir() . '/voice_resize_' . md5($filePath) . '.jpg';
+
+        if (file_exists($tmpPath) && (time() - filemtime($tmpPath)) < 3600) {
+            return [$tmpPath, 'image/jpeg'];
+        }
+
+        $cmd = sprintf(
+            'convert %s[0] -resize 1024x1024\\> -quality 85 %s 2>&1',
+            escapeshellarg($filePath),
+            escapeshellarg($tmpPath)
+        );
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode === 0 && file_exists($tmpPath) && filesize($tmpPath) > 0) {
+            return [$tmpPath, 'image/jpeg'];
+        }
+
+        return [$filePath, $mimeType];
+    }
+
+    /**
      * Call LLM (local first, then cloud fallback if hybrid).
      */
     protected function callLlm($filePath, $mimeType, $context, $config)
     {
         $provider = $config['llm_provider'] ?? 'local';
+
+        // Convert unsupported formats (TIFF, BMP, etc.) to JPEG
+        [$filePath, $mimeType] = $this->ensureSupportedFormat($filePath, $mimeType);
 
         // Read and encode image
         $imageData = file_get_contents($filePath);

@@ -80,6 +80,11 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'go to digital objects' => 'Browse digital objects',
             'go to accessions' => 'Browse accessions',
             'go to repositories' => 'Browse repositories',
+            'browse archive' => 'Browse archive records',
+            'browse library' => 'Browse library records',
+            'browse museum' => 'Browse museum records',
+            'browse gallery' => 'Browse gallery records',
+            'browse dam / browse photos' => 'Browse DAM/photo records',
         ]); ?>
 
         <h6><i class="bi bi-pencil me-1"></i><?php echo __('Actions (Edit)'); ?></h6>
@@ -112,14 +117,19 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'scroll up' => 'Scroll up',
             'scroll to top' => 'Scroll to top',
             'scroll to bottom' => 'Scroll to bottom',
+            'keep listening / continuous listening' => 'Stay on after each command',
+            'stop continuous / single command' => 'Stop after each command',
         ], 'global'); ?>
 
         <h6><i class="bi bi-image me-1"></i><?php echo __('Image & Reading'); ?></h6>
         <?php $renderSection([
-            'read image info' => 'Read image metadata aloud',
+            'read metadata / read all fields' => 'Read all populated fields aloud',
             'read title' => 'Read the record title',
             'read description' => 'Read the description aloud',
-            'stop reading / shut up' => 'Stop speech output',
+            'describe object / what is this' => 'AI describe what is in the image',
+            'what type of file / file type' => 'Report the file type in plain English',
+            'read pdf / read document' => 'Read PDF content aloud',
+            'stop reading / shut up' => 'Stop all speech output',
             'slower / faster' => 'Adjust speech rate',
         ], 'view'); ?>
 
@@ -156,8 +166,6 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
 
         <h6><i class="bi bi-universal-access me-1"></i><?php echo __('Accessibility'); ?></h6>
         <?php $renderSection([
-            'list commands / read all commands' => 'Read all commands aloud (say "stop" to stop)',
-            'list [group] commands' => 'Read commands for a group (e.g. "list navigation commands")',
             'where am I' => 'Announce current page and available actions',
             'how many results' => 'Announce the number of results on browse pages',
         ]); ?>
@@ -165,6 +173,9 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
         <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>
         <?php $renderSection([
             'help / show commands' => 'Show this help modal',
+            'list commands / list sections' => 'Read available sections aloud, then say a section name',
+            'navigation / edit / view / browse / global / dictation' => 'Read commands for that section',
+            'read all commands' => 'Read every command aloud (say "stop" to stop)',
         ]); ?>
       </div>
       <div class="modal-footer">

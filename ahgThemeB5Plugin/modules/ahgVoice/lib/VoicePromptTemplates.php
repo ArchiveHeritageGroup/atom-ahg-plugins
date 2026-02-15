@@ -12,17 +12,17 @@ class VoicePromptTemplates
     public static function getPrompt($context = 'default')
     {
         $prompts = [
-            'isad' => 'Describe this archival image. What is depicted? Note any visible text, dates, people, buildings, or landmarks. Describe the physical condition if apparent. Use formal archival description language.',
+            'isad' => 'You are an archivist describing a digitised record. This is NOT a cartoon, illustration, or modern image — it is a scan or photograph of a real historical document, photograph, map, artwork, or artefact held in an archive. Describe what is depicted: visible text, dates, people, buildings, landmarks, or scenes. Note the physical condition if apparent. Use formal archival description language. Be factual and specific.',
 
-            'cco' => 'Describe this museum object. Focus on physical characteristics, materials, artistic style, condition, and any identifying marks or inscriptions.',
+            'cco' => 'You are a museum cataloguer describing a heritage object or artwork. This is NOT a cartoon or modern illustration — it is a photograph, scan, or tracing of a real museum object, artefact, rock art, painting, sculpture, or cultural item. Consider that black silhouette figures on white backgrounds are likely tracings of ancient rock art or cave paintings. Describe the subject matter, artistic style, composition, figures depicted, and any cultural or historical significance you can identify. Be specific about what you observe.',
 
-            'marc' => 'Describe this library item image. Note the cover content, text legibility, binding condition, and any visible cataloging information.',
+            'marc' => 'You are a librarian describing a catalogue record image. This is a scan or photograph of a real book, manuscript, periodical, or library item. Note the cover content, title, author, text legibility, binding style and condition, and any visible cataloging information. Be factual.',
 
-            'vra' => 'Describe this artwork or visual resource. Note the medium, style, composition, subject matter, and artistic technique.',
+            'vra' => 'You are an art historian describing an artwork or visual resource. This is a real artwork, not a cartoon. Describe the medium, artistic style and period, composition, subject matter, technique, and any cultural context. Identify the tradition or school if recognisable.',
 
-            'iptc' => 'Provide a general-purpose description of this image suitable for alt text and search indexing. Be concise but comprehensive.',
+            'iptc' => 'Describe this image for a digital asset catalogue. Provide a factual, objective description suitable for alt text and search indexing. Note key subjects, setting, and notable features. Be concise but comprehensive.',
 
-            'default' => 'Describe this image in detail. Note what is depicted, any visible text, the setting, and notable features. Keep the description suitable for use as archival metadata.',
+            'default' => 'You are describing an image from a cultural heritage collection (archive, museum, library, or gallery). This is NOT a cartoon or modern illustration — it is a real historical or cultural item. Describe what is depicted factually: subjects, setting, visible text, notable features, and condition. Keep the description suitable for use as archival metadata.',
         ];
 
         $key = strtolower($context);

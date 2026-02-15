@@ -7,6 +7,10 @@ class ahgVoiceGetSettingsAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
 
+        // Initialize Laravel DB
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        \AhgCore\Core\AhgDb::init();
+
         $settings = [];
         try {
             $rows = DB::table('ahg_settings')

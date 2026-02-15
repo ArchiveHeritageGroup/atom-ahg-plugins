@@ -26,6 +26,12 @@ class AHGVoiceCommands {
     this._suggestedCommand = null;     // The suggested command object
     this._suggestedText = null;        // The suggested pattern text
 
+    // Continuous listening mode (stays on after each command) — restore from session
+    this._continuousMode = false;
+    try { this._continuousMode = sessionStorage.getItem('ahg_voice_continuous') === '1'; } catch (e) { /* ignore */ }
+    this._isAutoRestart = false; // True during auto-restart cycle (skip "Listening" speech)
+    this._isSpeaking = false;    // True while system is speaking (prevents self-hearing)
+
     // UI elements (set after DOM ready)
     this.navbarBtn = null;
     this.floatingBtn = null;
@@ -107,8 +113,16 @@ class AHGVoiceCommands {
     // Show UI
     document.querySelectorAll('.voice-ui').forEach(el => el.style.display = '');
 
-    // Accessibility: announce page context after a short delay
+    // Auto-restart if continuous mode was active before page navigation
     var self = this;
+    if (this._continuousMode && sessionStorage.getItem('ahg_voice_active')) {
+      setTimeout(function () {
+        self._isAutoRestart = true;
+        self.startListening();
+      }, 800);
+    }
+
+    // Accessibility: announce page context after a short delay
     setTimeout(function () { self._announcePageContext(); }, 1500);
   }
 
@@ -133,12 +147,17 @@ class AHGVoiceCommands {
       this.recognition.start();
       this.isListening = true;
       this._updateUI(true);
-      this.speak('Listening');
+      // Only speak "Listening" on initial activation, not on auto-restarts
+      if (!this._isAutoRestart) {
+        this.speak('Listening');
+      }
+      this._isAutoRestart = false;
       // Mark session as voice-active for auto-announcements on page navigation
       try { sessionStorage.setItem('ahg_voice_active', '1'); } catch (e) { /* ignore */ }
     } catch (e) {
       // Already started or permission denied
       console.warn('Voice: could not start recognition', e);
+      this._isAutoRestart = false;
     }
   }
 
@@ -147,6 +166,11 @@ class AHGVoiceCommands {
    */
   stopListening() {
     if (!this.isSupported || !this.isListening) return;
+
+    // Disable continuous mode on deliberate stop
+    this._continuousMode = false;
+    this._isAutoRestart = false;
+    try { sessionStorage.setItem('ahg_voice_continuous', '0'); } catch (e) { /* ignore */ }
 
     this.speak('Stopped listening');
 
@@ -591,6 +615,14 @@ class AHGVoiceCommands {
     // Cancel any current speech
     this.synthesis.cancel();
 
+    // Pause recognition while speaking to prevent self-hearing
+    var wasListening = this.isListening;
+    if (wasListening && this.recognition) {
+      this._isSpeaking = true;
+      try { this.recognition.stop(); } catch (e) { /* ignore */ }
+    }
+
+    var self = this;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = this.speechRate;
     utterance.pitch = 1.0;
@@ -603,6 +635,28 @@ class AHGVoiceCommands {
     if (preferred) {
       utterance.voice = preferred;
     }
+
+    // Resume recognition after speech ends
+    utterance.onend = function () {
+      self._isSpeaking = false;
+      if (wasListening && self.isListening !== false) {
+        setTimeout(function () {
+          if (!self._isSpeaking) {
+            try { self.recognition.start(); } catch (e) { /* ignore */ }
+          }
+        }, 300);
+      }
+    };
+    utterance.onerror = function () {
+      self._isSpeaking = false;
+      if (wasListening && self.isListening !== false) {
+        setTimeout(function () {
+          if (!self._isSpeaking) {
+            try { self.recognition.start(); } catch (e) { /* ignore */ }
+          }
+        }, 300);
+      }
+    };
 
     this.synthesis.speak(utterance);
   }
@@ -645,51 +699,117 @@ class AHGVoiceCommands {
    * Read image/digital object metadata from the current page.
    */
   readImageMetadata() {
-    var meta = this._gatherPageMetadata();
+    // Read ALL populated fields on the page, grouped by section.
+    // Supports both ISAD layout (.field h3 + div) and CCO/Gallery layout (.row .col-md-3 + .col-md-9).
+    if (!this.synthesis) return;
 
-    if (!meta.hasDigitalObject) {
-      this.speak('No digital object found on this page');
-      this.showToast('No digital object on this page', 'warning');
+    // Cancel any previous speech
+    this.synthesis.cancel();
+
+    var utterances = [];
+    var self = this;
+    var fieldCount = 0;
+
+    // Try TTS content area first (wraps the main metadata), then fall back to #content or #wrapper
+    var contentArea = document.querySelector('#tts-content-area, #content, #wrapper');
+    if (!contentArea) {
+      this.speak('No metadata found on this page');
       return;
     }
 
-    // Build natural language description
-    var parts = [];
-    if (meta.mediaType) {
-      parts.push('This is a ' + meta.mediaType);
-    }
-    if (meta.title) {
-      parts.push('titled "' + meta.title + '"');
-    }
-    if (parts.length) {
-      var sentence = parts.join(' ') + '.';
-      sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-      this.speak(sentence);
-    }
-    if (meta.description) {
-      // Pause briefly, then read description
-      var self = this;
-      setTimeout(function () { self.speak(meta.description); }, 500);
-    }
-    if (meta.fileSize || meta.dimensions) {
-      var details = [];
-      if (meta.fileSize) details.push('File size is ' + meta.fileSize);
-      if (meta.dimensions) details.push('dimensions ' + meta.dimensions);
-      var detailSentence = details.join(', ') + '.';
-      var self = this;
-      setTimeout(function () { self.speak(detailSentence); }, meta.description ? 3000 : 1000);
-    }
-    if (meta.rights) {
-      var self = this;
-      setTimeout(function () { self.speak(meta.rights); }, meta.description ? 5000 : 2000);
-    }
-    if (!meta.description) {
-      var self = this;
-      var hint = 'No description available.';
-      setTimeout(function () { self.speak(hint); }, 1500);
+    // Find all sections (card headers for CCO/Gallery, atom-section-header for ISAD)
+    var sections = contentArea.querySelectorAll('section, .card.mb-4');
+
+    if (sections.length > 0) {
+      // Read section by section
+      sections.forEach(function (section) {
+        // Get section header
+        var header = section.querySelector('.card-header h5, .atom-section-header, h2');
+        var sectionName = header ? header.textContent.trim() : '';
+        var sectionFields = [];
+
+        // Pattern 1: CCO/Gallery — .row.mb-3 > .col-md-3 (label) + .col-md-9 (value)
+        section.querySelectorAll('.row.mb-3').forEach(function (row) {
+          var label = row.querySelector('.col-md-3');
+          var value = row.querySelector('.col-md-9');
+          if (label && value) {
+            var valText = value.textContent.trim();
+            if (valText) {
+              sectionFields.push(label.textContent.trim() + ': ' + valText);
+            }
+          }
+        });
+
+        // Pattern 2: ISAD — .field .col-3 (label h3) + .col-9 (value)
+        section.querySelectorAll('.field.row').forEach(function (row) {
+          var label = row.querySelector('h3, .col-3');
+          var value = row.querySelector('.col-9');
+          if (label && value) {
+            var valText = value.textContent.trim();
+            if (valText) {
+              sectionFields.push(label.textContent.trim() + ': ' + valText);
+            }
+          }
+        });
+
+        // Pattern 3: Simple .field with nested label + value
+        section.querySelectorAll('.field:not(.row)').forEach(function (field) {
+          var label = field.querySelector('.field-label, dt, strong');
+          var value = field.querySelector('.field-value, dd, span:not(.field-label)');
+          if (label && value) {
+            var valText = value.textContent.trim();
+            if (valText) {
+              sectionFields.push(label.textContent.trim() + ': ' + valText);
+            }
+          }
+        });
+
+        if (sectionFields.length > 0) {
+          if (sectionName) {
+            utterances.push(sectionName + '.');
+          }
+          sectionFields.forEach(function (f) {
+            utterances.push(f);
+            fieldCount++;
+          });
+          utterances.push(''); // pause between sections
+        }
+      });
     }
 
-    this.showToast('Reading metadata...', 'info');
+    // If no sections found, try flat field extraction
+    if (fieldCount === 0) {
+      // Try list-group items (Quick Info sidebar)
+      contentArea.querySelectorAll('.list-group-item').forEach(function (li) {
+        var text = li.textContent.trim();
+        if (text && !li.querySelector('a')) { // Skip link items
+          utterances.push(text);
+          fieldCount++;
+        }
+      });
+    }
+
+    if (fieldCount === 0) {
+      this.speak('No populated fields found on this page');
+      this.showToast('No metadata to read', 'warning');
+      return;
+    }
+
+    this.showToast('Reading ' + fieldCount + ' fields. Say "stop" to stop.', 'info');
+
+    // Queue each utterance separately so cancel() stops mid-read
+    utterances.forEach(function (text) {
+      if (!text) return; // skip empty pause markers
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = self.speechRate;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      u.lang = self.language;
+      var voices = self.synthesis.getVoices();
+      var preferred = voices.find(function (v) { return v.lang.startsWith('en') && v.localService; });
+      if (preferred) u.voice = preferred;
+      self.synthesis.speak(u);
+    });
   }
 
   /**
@@ -721,11 +841,42 @@ class AHGVoiceCommands {
   }
 
   /**
+   * Read the content of a text/plain digital object aloud.
+   * Finds text in the text viewer (<pre id="text-content-{ID}">) or
+   * the archive-content viewer (<pre id="archive-content-{ID}">).
+   */
+  readTextFile() {
+    var textEl = document.querySelector('[id^="text-content-"], [id^="archive-content-"]');
+    if (!textEl) {
+      this.speak('No text file found on this page');
+      this.showToast('No text file on this page', 'warning');
+      return;
+    }
+
+    var text = (textEl.textContent || '').trim();
+
+    // Check if content is still loading
+    if (!text || /loading|spinner/i.test(text)) {
+      this.speak('Text file is still loading. Please try again in a moment.');
+      this.showToast('Text still loading...', 'info');
+      return;
+    }
+
+    if (text.length > 10000) {
+      this.speak('This is a long file, ' + Math.round(text.length / 1000) + ' thousand characters. Reading now.');
+    }
+
+    this.speak(text);
+    this.showToast('Reading text file (' + text.length + ' characters)', 'info');
+  }
+
+  /**
    * Stop any current speech synthesis.
    */
   stopSpeaking() {
     if (this.synthesis) {
       this.synthesis.cancel();
+      this._isSpeaking = false;
       this.showToast('Speech stopped', 'info');
     }
   }
@@ -733,6 +884,58 @@ class AHGVoiceCommands {
   // ---------------------------------------------------------------
   //  Accessibility — Screen Reader Mode
   // ---------------------------------------------------------------
+
+  /**
+   * Group labels used by listSections and listCommands.
+   */
+  static get groupLabels() {
+    return {
+      'nav': 'Navigation',
+      'action_edit': 'Edit Actions',
+      'action_view': 'View Actions',
+      'action_browse': 'Browse Actions',
+      'global': 'Global',
+      'dictation': 'Dictation'
+    };
+  }
+
+  /**
+   * Read available command sections aloud and prompt user to pick one.
+   */
+  listSections() {
+    if (!this.synthesis) return;
+    if (typeof AHGVoiceRegistry === 'undefined') {
+      this.speak('Voice registry not loaded');
+      return;
+    }
+
+    this.synthesis.cancel();
+
+    var grouped = AHGVoiceRegistry.getGrouped();
+    var labels = AHGVoiceCommands.groupLabels;
+    var self = this;
+
+    var sectionNames = [];
+    Object.keys(grouped).forEach(function (key) {
+      var label = labels[key] || key;
+      var count = grouped[key].length;
+      sectionNames.push(label + ', ' + count + ' commands');
+    });
+
+    if (sectionNames.length === 0) {
+      this.speak('No command sections found');
+      return;
+    }
+
+    this.showToast('Say a section name to hear its commands', 'info');
+
+    // Build speech: list sections then prompt
+    var speech = 'There are ' + sectionNames.length + ' command sections. ';
+    speech += sectionNames.join('. ') + '. ';
+    speech += 'Say a section name to hear its commands. For example, say "navigation commands".';
+
+    this._speakQueued(speech);
+  }
 
   /**
    * Read all available commands aloud, grouped by category.
@@ -749,21 +952,14 @@ class AHGVoiceCommands {
     this.synthesis.cancel();
 
     var grouped = AHGVoiceRegistry.getGrouped();
-    var groupLabels = {
-      'nav': 'Navigation',
-      'action_edit': 'Edit Page Actions',
-      'action_view': 'View Page Actions',
-      'action_browse': 'Browse Page Actions',
-      'global': 'Global',
-      'dictation': 'Dictation'
-    };
+    var labels = AHGVoiceCommands.groupLabels;
 
     var self = this;
     var utterances = [];
 
     // Build list of utterances
     Object.keys(grouped).forEach(function (groupKey) {
-      var label = groupLabels[groupKey] || groupKey;
+      var label = labels[groupKey] || groupKey;
 
       // If filter specified, only read that group
       if (filterGroup && label.toLowerCase().indexOf(filterGroup.toLowerCase()) === -1) {
@@ -790,32 +986,172 @@ class AHGVoiceCommands {
     });
 
     if (utterances.length === 0) {
-      this.speak('No commands found');
+      this.speak('No commands found for that section. Say "list sections" to hear available sections.');
       return;
     }
 
     // Announce start
     var totalCount = 0;
     Object.keys(grouped).forEach(function (k) {
-      if (!filterGroup || (groupLabels[k] || k).toLowerCase().indexOf(filterGroup.toLowerCase()) !== -1) {
+      if (!filterGroup || (labels[k] || k).toLowerCase().indexOf(filterGroup.toLowerCase()) !== -1) {
         totalCount += grouped[k].length;
       }
     });
     this.showToast('Reading ' + totalCount + ' commands. Say "stop" to stop.', 'info');
 
     // Queue each utterance separately so cancel() stops mid-list
-    utterances.forEach(function (text) {
-      if (!text) return; // skip empty pause markers
+    this._speakQueuedList(utterances);
+  }
+
+  /**
+   * Speak a single text as queued sentences.
+   */
+  _speakQueued(text) {
+    var self = this;
+    var sentences = text.split(/(?<=\.)\s+/).filter(function (s) { return s.trim(); });
+    if (!sentences.length) return;
+
+    // Pause recognition while speaking
+    var wasListening = this.isListening;
+    if (wasListening && this.recognition) {
+      this._isSpeaking = true;
+      try { this.recognition.stop(); } catch (e) { /* ignore */ }
+    }
+
+    sentences.forEach(function (s, i) {
+      var u = new SpeechSynthesisUtterance(s);
+      u.rate = self.speechRate;
+      u.lang = self.language;
+      var voices = self.synthesis.getVoices();
+      var preferred = voices.find(function (v) { return v.lang.startsWith('en') && v.localService; });
+      if (preferred) u.voice = preferred;
+      // Resume recognition after last sentence
+      if (i === sentences.length - 1) {
+        u.onend = function () {
+          self._isSpeaking = false;
+          if (wasListening) {
+            setTimeout(function () { if (!self._isSpeaking) { try { self.recognition.start(); } catch (e) {} } }, 300);
+          }
+        };
+      }
+      self.synthesis.speak(u);
+    });
+  }
+
+  /**
+   * Speak an array of text strings as queued utterances.
+   */
+  _speakQueuedList(utterances) {
+    var self = this;
+    var items = utterances.filter(function (t) { return !!t; });
+    if (!items.length) return;
+
+    // Pause recognition while speaking
+    var wasListening = this.isListening;
+    if (wasListening && this.recognition) {
+      this._isSpeaking = true;
+      try { this.recognition.stop(); } catch (e) { /* ignore */ }
+    }
+
+    items.forEach(function (text, i) {
       var u = new SpeechSynthesisUtterance(text);
       u.rate = self.speechRate;
       u.pitch = 1.0;
       u.volume = 1.0;
       u.lang = self.language;
       var voices = self.synthesis.getVoices();
-      var preferred = voices.find(function(v) { return v.lang.startsWith('en') && v.localService; });
+      var preferred = voices.find(function (v) { return v.lang.startsWith('en') && v.localService; });
       if (preferred) u.voice = preferred;
+      // Resume recognition after last item
+      if (i === items.length - 1) {
+        u.onend = function () {
+          self._isSpeaking = false;
+          if (wasListening) {
+            setTimeout(function () { if (!self._isSpeaking) { try { self.recognition.start(); } catch (e) {} } }, 300);
+          }
+        };
+      }
       self.synthesis.speak(u);
     });
+  }
+
+  /**
+   * Detect the specific page type from URL for voice announcements.
+   * Returns a human-readable page name.
+   */
+  _detectPageName() {
+    var path = window.location.pathname.replace(/\/index\.php/, '');
+    var search = window.location.search || '';
+
+    // Browse pages
+    if (/^\/informationobject\/browse/.test(path)) return 'Archival Descriptions';
+    if (/^\/actor\/browse/.test(path)) return 'Authority Records';
+    if (/^\/repository\/browse/.test(path)) return 'Archival Institutions';
+    if (/^\/function\/browse/.test(path)) return 'Functions';
+    if (/^\/digitalobject\/browse/.test(path)) return 'Digital Objects';
+    if (/^\/term\/browse/.test(path)) {
+      // Check taxonomy parameter for Subject vs Places
+      var taxMatch = search.match(/taxonomy=(\d+)/);
+      if (taxMatch) {
+        var taxId = parseInt(taxMatch[1], 10);
+        if (taxId === 35) return 'Subjects';
+        if (taxId === 42) return 'Places';
+        return 'Terms';
+      }
+      return 'Terms';
+    }
+
+    // GLAM sector browse
+    if (/^\/library\/?$/.test(path)) return 'Library';
+    if (/^\/museum\/?$/.test(path)) return 'Museum';
+    if (/^\/gallery\/?$/.test(path)) return 'Gallery';
+    if (/^\/dam\/?$/.test(path)) return 'Digital Assets';
+    if (/^\/(glam|display)\/browse/.test(path)) return 'Browse';
+
+    // Manage pages
+    if (/^\/accession\/browse/.test(path)) return 'Accessions';
+    if (/^\/donor\/browse/.test(path)) return 'Donors';
+    if (/^\/rightsHolder\/browse/.test(path)) return 'Rights Holders';
+    if (/^\/physicalobject\/browse/.test(path)) return 'Physical Storage';
+
+    // Admin pages
+    if (/^\/admin\/settings/.test(path)) return 'Settings';
+    if (/^\/admin\/menus/.test(path)) return 'Menus';
+    if (/^\/admin\/plugins/.test(path)) return 'Plugins';
+    if (/^\/admin\/themes/.test(path)) return 'Themes';
+    if (/^\/ahgSettings/.test(path)) return 'AHG Settings';
+    if (/^\/admin/.test(path)) return 'Administration';
+
+    // User pages
+    if (/^\/user\/login/.test(path)) return 'Login';
+    if (/^\/user\/browse/.test(path)) return 'Users';
+    if (/^\/user/.test(path)) return 'User Profile';
+
+    // Research/reading room
+    if (/^\/research/.test(path)) return 'Research Reading Room';
+
+    // Clipboard
+    if (/^\/clipboard/.test(path)) return 'Clipboard';
+
+    // Reports
+    if (/^\/reports/.test(path) || /^\/ahgReports/.test(path)) return 'Reports';
+
+    // Privacy
+    if (/^\/privacy/.test(path)) return 'Privacy';
+
+    // Spectrum
+    if (/^\/spectrum/.test(path)) return 'Spectrum Procedures';
+
+    // Heritage
+    if (/^\/heritage/.test(path)) return 'Heritage Discovery';
+
+    // Sector-specific record view (library/museum/gallery/dam with slug)
+    if (/^\/library\//.test(path)) return 'Library Record';
+    if (/^\/museum\//.test(path)) return 'Museum Record';
+    if (/^\/gallery\//.test(path)) return 'Gallery Record';
+    if (/^\/dam\//.test(path)) return 'Digital Asset Record';
+
+    return null;
   }
 
   /**
@@ -826,26 +1162,26 @@ class AHGVoiceCommands {
     var title = this._getPageTitle();
     var ctx = AHGVoiceCommands.detectContext();
     var path = window.location.pathname;
+    var pageName = this._detectPageName();
 
-    // Determine page type
+    // Determine page type (view/edit checked before browse — view pages may contain browse-like elements)
     if (ctx.admin) {
-      parts.push('You are on an admin page');
+      parts.push('You are on ' + (pageName || 'an admin page'));
     } else if (ctx.edit) {
-      parts.push('You are editing a record');
+      parts.push('You are editing a ' + (pageName || 'record'));
+    } else if (ctx.view) {
+      parts.push('You are viewing ' + (pageName || 'a record'));
     } else if (ctx.browse) {
-      parts.push('You are on a browse page');
+      parts.push('You are browsing ' + (pageName || 'records'));
       // Count results
-      var countEl = document.querySelector('.result-count');
-      if (countEl) {
-        var countText = countEl.textContent.trim();
+      var countText = this._getResultCount();
+      if (countText) {
         parts.push(countText);
       }
-    } else if (ctx.view) {
-      parts.push('You are viewing a record');
-    } else if (path === '/' || path === '/index.php') {
+    } else if (path === '/' || path === '/index.php' || path === '/index.php/') {
       parts.push('You are on the homepage');
     } else {
-      parts.push('You are on ' + document.title);
+      parts.push('You are on ' + (pageName || document.title));
     }
 
     // Add title
@@ -853,11 +1189,11 @@ class AHGVoiceCommands {
       parts.push('Title: ' + title);
     }
 
-    // Check for digital object
-    var hasImage = !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer');
+    // Check for digital object (broad detection including metadata-only pages)
+    var hasImage = typeof AHGVoiceRegistry !== 'undefined' ? AHGVoiceRegistry._hasDigitalObject() : !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer');
     var hasVideo = !!document.querySelector('video');
     var hasAudio = !!document.querySelector('audio');
-    if (hasImage) parts.push('This record has an image.');
+    if (hasImage) parts.push('This record has a digital object.');
     if (hasVideo) parts.push('This record has a video.');
     if (hasAudio) parts.push('This record has an audio file.');
 
@@ -882,15 +1218,40 @@ class AHGVoiceCommands {
    * Announce the number of results on a browse page.
    */
   howManyResults() {
-    var countEl = document.querySelector('.result-count');
-    if (countEl) {
-      var text = countEl.textContent.trim();
+    var text = this._getResultCount();
+    if (text) {
       this.speak(text);
       this.showToast(text, 'info');
     } else {
       this.speak('No result count found on this page');
       this.showToast('Not on a browse page', 'warning');
     }
+  }
+
+  /**
+   * Extract result count text from the page DOM.
+   * Supports both base AtoM (.result-count) and AHG Display browse.
+   */
+  _getResultCount() {
+    // Base AtoM
+    var el = document.querySelector('.result-count');
+    if (el) return el.textContent.trim();
+
+    // AHG Display: "Showing N results" in h1
+    var h1s = document.querySelectorAll('h1');
+    for (var i = 0; i < h1s.length; i++) {
+      var t = h1s[i].textContent.trim();
+      if (/showing\s+\d+\s+result/i.test(t)) return t;
+    }
+
+    // AHG Display: "Results X to Y of Z"
+    var smalls = document.querySelectorAll('.text-muted.small, .text-muted small');
+    for (var i = 0; i < smalls.length; i++) {
+      var t = smalls[i].textContent.trim();
+      if (/results?\s+\d+\s+to\s+\d+/i.test(t)) return t;
+    }
+
+    return null;
   }
 
   /**
@@ -903,20 +1264,26 @@ class AHGVoiceCommands {
 
     var path = window.location.pathname;
     var ctx = AHGVoiceCommands.detectContext();
+    var pageName = this._detectPageName();
     var announcement = '';
 
-    if (path === '/' || path === '/index.php') {
+    var title = this._getPageTitle();
+
+    if (path === '/' || path === '/index.php' || path === '/index.php/') {
       announcement = 'Homepage loaded. Say a command or say help for options.';
-    } else if (ctx.browse) {
-      var countEl = document.querySelector('.result-count');
-      var count = countEl ? countEl.textContent.trim() : '';
-      announcement = 'Browse page loaded. ' + count + '. Say "first result" to open the first item.';
     } else if (ctx.edit) {
-      var title = this._getPageTitle();
-      announcement = 'Edit page loaded' + (title ? ' for ' + title : '') + '. Say "save" when done.';
+      announcement = (pageName || 'Edit page') + ' loaded' + (title ? ', ' + title : '') + '. Say "save" when done.';
     } else if (ctx.view) {
-      var title = this._getPageTitle();
-      announcement = 'Record loaded' + (title ? ': ' + title : '') + '.';
+      announcement = (pageName || 'Record') + ' loaded' + (title ? ', ' + title : '') + '.';
+    } else if (ctx.browse) {
+      var count = this._getResultCount() || '';
+      announcement = (pageName || 'Browse') + ' loaded.' + (count ? ' ' + count + '.' : '') + ' Say "first result" to open the first item.';
+    } else if (ctx.admin) {
+      announcement = (pageName || 'Admin page') + ' loaded.';
+    } else if (title) {
+      announcement = (pageName ? pageName + ', ' : '') + title + ' loaded.';
+    } else if (pageName) {
+      announcement = pageName + ' loaded.';
     }
 
     if (announcement) {
@@ -946,16 +1313,44 @@ class AHGVoiceCommands {
       dimensions: null,
       rights: null,
       altText: null,
-      digitalObjectId: null
+      digitalObjectId: null,
+      informationObjectId: null
     };
 
-    // Check for digital object viewer
-    var img = document.querySelector('.digital-object-reference img, .converted-image-viewer img.img-fluid, #content img.img-fluid, .digital-object-viewer img');
-    var video = document.querySelector('#content video, .digital-object-viewer video');
-    var audio = document.querySelector('#content audio, .digital-object-viewer audio');
+    // Check for digital object viewer (broad selectors — gallery/museum/archive/library templates all differ)
+    var img = document.querySelector('.digital-object-reference img, .converted-image-viewer img.img-fluid, #content img.img-fluid, #sidebar img.img-fluid, .digital-object-viewer img, #wrapper img.img-fluid');
+    var video = document.querySelector('#content video, #wrapper video, .digital-object-viewer video');
+    var audio = document.querySelector('#content audio, #wrapper audio, .digital-object-viewer audio');
 
     if (img || video || audio) {
       meta.hasDigitalObject = true;
+    }
+
+    // Also detect via IIIF viewer, OpenSeadragon, or 3D viewer containers
+    if (!meta.hasDigitalObject) {
+      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="viewer-3d-"]')) {
+        meta.hasDigitalObject = true;
+        if (!meta.mediaType) meta.mediaType = 'image';
+      }
+    }
+
+    // Digital object metadata section
+    if (!meta.hasDigitalObject) {
+      var doMeta = document.querySelector('.digitalObjectMetadata, #digitalObjectMetadata, .digital-object-metadata');
+      if (doMeta) {
+        meta.hasDigitalObject = true;
+      }
+    }
+    // Check for field labels that indicate a digital object is present
+    if (!meta.hasDigitalObject) {
+      var allFields = document.querySelectorAll('#content .field, #content tr, #content dt, #content h3, #content .row, #wrapper .field, #wrapper tr');
+      for (var fi = 0; fi < allFields.length; fi++) {
+        var ft = allFields[fi].textContent || '';
+        if (/master\s*file|media\s*type|mime[\s-]*type|original\s*file/i.test(ft)) {
+          meta.hasDigitalObject = true;
+          break;
+        }
+      }
     }
 
     // Alt text from image
@@ -971,6 +1366,22 @@ class AHGVoiceCommands {
     if (doIdEl) {
       var idMatch = doIdEl.id.match(/(\d+)$/);
       if (idMatch) meta.digitalObjectId = parseInt(idMatch[1], 10);
+    }
+
+    // Try data-do-id attribute (ahgIiifPlugin media player)
+    if (!meta.digitalObjectId) {
+      var doIdAttr = document.querySelector('[data-do-id]');
+      if (doIdAttr) meta.digitalObjectId = parseInt(doIdAttr.getAttribute('data-do-id'), 10);
+    }
+
+    // IIIF viewer container IDs contain the INFORMATION OBJECT ID (not digital object ID).
+    // Do NOT store as digitalObjectId — describeImage() handles this in Strategy 4b.
+    if (!meta.digitalObjectId) {
+      var iiifContainer = document.querySelector('[id^="container-iiif-viewer-"]');
+      if (iiifContainer) {
+        var iiifMatch = iiifContainer.id.match(/container-iiif-viewer-(\d+)/);
+        if (iiifMatch) meta.informationObjectId = parseInt(iiifMatch[1], 10);
+      }
     }
 
     // Card header may show media type label
@@ -1022,9 +1433,31 @@ class AHGVoiceCommands {
    * Get the page title from DOM.
    */
   _getPageTitle() {
-    var titleEl = document.querySelector('h1.mb-0, .multiline-header h1, #content > h1, h1[property="dc:title"]');
+    // Standard h1 title (base AtoM, Display browse, library/museum/gallery/dam)
+    var titleEl = document.querySelector('h1.mb-0, .multiline-header h1, #content > h1, #main-column > h1, [role="main"] > h1, h1[property="dc:title"]');
     if (titleEl) return titleEl.textContent.trim();
-    // Fallback to document title
+
+    // CCO/Gallery: Title field in row layout (.col-md-3 "Title" + .col-md-9 value)
+    var rows = document.querySelectorAll('#tts-content-area .row.mb-3, #wrapper .row.mb-3');
+    for (var i = 0; i < rows.length; i++) {
+      var label = rows[i].querySelector('.col-md-3');
+      if (label && /^title$/i.test(label.textContent.trim())) {
+        var val = rows[i].querySelector('.col-md-9');
+        if (val) { var t = val.textContent.trim(); if (t) return t; }
+      }
+    }
+
+    // ISAD: Title field in .field.row layout (h3 "Title" + .col-9 value)
+    var fields = document.querySelectorAll('#tts-content-area .field.row, #content .field.row');
+    for (var i = 0; i < fields.length; i++) {
+      var label = fields[i].querySelector('h3, .col-3');
+      if (label && /^title$/i.test(label.textContent.trim())) {
+        var val = fields[i].querySelector('.col-9');
+        if (val) { var t = val.textContent.trim(); if (t) return t; }
+      }
+    }
+
+    // Fallback to document title (strip site name suffix)
     var docTitle = document.title.replace(/\s*[-|].*$/, '').trim();
     return docTitle || null;
   }
@@ -1057,6 +1490,7 @@ class AHGVoiceCommands {
    */
   describeImage() {
     var meta = this._gatherPageMetadata();
+    console.log('[Voice] describeImage: hasDigitalObject=' + meta.hasDigitalObject + ', digitalObjectId=' + meta.digitalObjectId + ', informationObjectId=' + meta.informationObjectId);
 
     if (!meta.hasDigitalObject) {
       this.speak('No digital object found on this page');
@@ -1064,25 +1498,84 @@ class AHGVoiceCommands {
       return;
     }
 
-    // We need the digital object ID — try DOM, then URL
+    // Try multiple strategies to find digital object ID
     var doId = meta.digitalObjectId;
+    console.log('[Voice] Strategy 0 (metadata): doId=' + doId + ', infoObjId=' + meta.informationObjectId);
+
+    // Strategy 1: data-do-id attribute (ahgIiifPlugin media player)
     if (!doId) {
-      // Try to find from the page URL or data attributes
+      var doIdEl = document.querySelector('[data-do-id]');
+      if (doIdEl) doId = parseInt(doIdEl.getAttribute('data-do-id'), 10);
+      console.log('[Voice] Strategy 1 (data-do-id): doId=' + doId);
+    }
+
+    // Strategy 2: media player container ID (media-player-{ID})
+    if (!doId) {
+      var playerEl = document.querySelector('.ahg-media-player[id^="media-player-"]');
+      if (playerEl) {
+        var pidMatch = playerEl.id.match(/(\d+)$/);
+        if (pidMatch) doId = parseInt(pidMatch[1], 10);
+      }
+      console.log('[Voice] Strategy 2 (media-player): doId=' + doId);
+    }
+
+    // Strategy 3: links to digitalobject or download links
+    if (!doId) {
       var doLink = document.querySelector('a[href*="digitalobject/"], a[download]');
       if (doLink) {
-        var hrefMatch = doLink.href.match(/digitalobject\/(\d+)|\/uploads\/.*?(\d+)/);
-        if (hrefMatch) doId = parseInt(hrefMatch[1] || hrefMatch[2], 10);
+        // Match: digitalobject/{ID}, digitalobject/edit/id/{ID}, /uploads/...{ID}
+        var hrefMatch = doLink.href.match(/digitalobject\/(\d+)|digitalobject\/edit\/id\/(\d+)|\/uploads\/.*?(\d+)/);
+        if (hrefMatch) doId = parseInt(hrefMatch[1] || hrefMatch[2] || hrefMatch[3], 10);
+      }
+      console.log('[Voice] Strategy 3 (DO link): doId=' + doId + (doLink ? ', href=' + doLink.href : ''));
+    }
+
+    // Strategy 4: data-object-id (information object ID — server can resolve DO from this)
+    var infoObjectId = meta.informationObjectId || null;
+    if (!doId && !infoObjectId) {
+      var ioEl = document.querySelector('[data-object-id], #tpmInformationObjectId');
+      if (ioEl) {
+        infoObjectId = ioEl.getAttribute('data-object-id') || ioEl.value;
+      }
+      console.log('[Voice] Strategy 4 (data-object-id): infoObjectId=' + infoObjectId);
+    }
+
+    // Strategy 4b: IIIF viewer container IDs contain the information object ID
+    // Patterns: container-iiif-viewer-{objectId}-{hash}, osd-iiif-viewer-{objectId}-{hash}, osd-{objectId}, mirador-{objectId}-wrapper
+    if (!doId && !infoObjectId) {
+      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"]');
+      if (iiifEl) {
+        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|osd|mirador)-(\d+)/);
+        if (idMatch) infoObjectId = parseInt(idMatch[1], 10);
+        console.log('[Voice] Strategy 4b (IIIF container): id=' + iiifEl.id + ', infoObjectId=' + infoObjectId);
+      } else {
+        console.log('[Voice] Strategy 4b (IIIF container): no IIIF element found');
       }
     }
 
-    if (!doId) {
+    // Strategy 5: extract slug from URL as final fallback — server resolves DO
+    var slug = null;
+    if (!doId && !infoObjectId) {
+      var path = window.location.pathname.replace(/\/index\.php/, '');
+      // Remove known non-slug paths
+      if (path && path !== '/' && !/^\/(admin|user|search|glam|display|clipboard|donor|accession|repository|actor|taxonomy|function|research)/.test(path)) {
+        slug = path.replace(/^\//, '').replace(/\?.*$/, '');
+        // Strip template parameter from slug (e.g., /museum/test-opensearch?template=isad → museum/test-opensearch)
+        if (slug) slug = slug.split('?')[0];
+      }
+      console.log('[Voice] Strategy 5 (URL slug): slug=' + slug);
+    }
+
+    console.log('[Voice] Final: doId=' + doId + ', infoObjectId=' + infoObjectId + ', slug=' + slug);
+
+    if (!doId && !infoObjectId && !slug) {
       this.speak('Cannot identify the digital object. Try from a record view page.');
       this.showToast('Digital object ID not found', 'warning');
       return;
     }
 
     var self = this;
-    this.speak('Analyzing image, please wait');
+    this.speak('Analyzing image, please wait. This may take up to a minute.');
     this.showToast('AI analyzing image...', 'info');
 
     // Show processing state on indicator
@@ -1090,13 +1583,30 @@ class AHGVoiceCommands {
       this.indicator.classList.add('voice-indicator-processing');
     }
 
+    // Periodic patience reminders while waiting
+    var waitMessages = [
+      'Still analyzing, almost there.',
+      'Processing the image, please hold on.',
+      'AI is working on the description.'
+    ];
+    var waitIdx = 0;
+    var patienceTimer = setInterval(function () {
+      if (waitIdx < waitMessages.length) {
+        self.showToast(waitMessages[waitIdx], 'info');
+        self.speak(waitMessages[waitIdx]);
+        waitIdx++;
+      }
+    }, 15000);
+
     // Get CSRF token if available
     var csrfMeta = document.querySelector('meta[name="csrf-token"]');
     var csrfInput = document.querySelector('input[name="csrf_token"], input[name="_csrf_token"]');
     var csrfToken = (csrfMeta && csrfMeta.content) || (csrfInput && csrfInput.value) || '';
 
     var formData = new FormData();
-    formData.append('digital_object_id', doId);
+    if (doId) formData.append('digital_object_id', doId);
+    if (infoObjectId) formData.append('information_object_id', infoObjectId);
+    if (slug) formData.append('slug', slug);
     if (csrfToken) formData.append('csrf_token', csrfToken);
 
     fetch('/index.php/ahgVoice/describeImage', {
@@ -1106,6 +1616,7 @@ class AHGVoiceCommands {
     })
     .then(function (response) { return response.json(); })
     .then(function (data) {
+      clearInterval(patienceTimer);
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
 
       if (data.success) {
@@ -1128,6 +1639,7 @@ class AHGVoiceCommands {
       }
     })
     .catch(function (err) {
+      clearInterval(patienceTimer);
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
       console.error('[Voice] AI describe error:', err);
       self.speak('Failed to contact AI service');
@@ -1244,10 +1756,11 @@ class AHGVoiceCommands {
    * Returns an object with boolean flags for each context type.
    */
   static detectContext() {
+    // Note: #counts-block is the clipboard counter in the navbar (on every page) — do NOT use for browse detection
     return {
       edit: !!document.querySelector('form#editForm, form.form-edit, body.edit form'),
-      view: !!document.querySelector('.informationObject, .section, #content .field, body.index .h2, body.show'),
-      browse: !!document.querySelector('.result-count, .pager, .pagination, .browse-results, #facets'),
+      view: !!document.querySelector('.informationObject, .section, #tts-content-area, body.show'),
+      browse: !!document.querySelector('.result-count, .pager, .pagination, .browse-results, .display.browse'),
       admin: /\/admin|\/ahgSettings/.test(window.location.pathname)
     };
   }
@@ -1277,6 +1790,9 @@ class AHGVoiceCommands {
 
   _bindRecognitionEvents() {
     this.recognition.addEventListener('result', (event) => {
+      // Ignore results while system is speaking (prevents self-hearing)
+      if (this._isSpeaking) return;
+
       const result = event.results[event.results.length - 1];
       const transcript = result[0].transcript;
       const confidence = result[0].confidence;
@@ -1291,9 +1807,24 @@ class AHGVoiceCommands {
     });
 
     this.recognition.addEventListener('end', () => {
+      // If recognition stopped because we're speaking, don't auto-restart here
+      // (the speak() onend handler will restart it)
+      if (this._isSpeaking) return;
+
       if (this.mode === 'dictation' && this.isListening) {
         // In dictation mode, auto-restart recognition (continuous listening)
         try { this.recognition.start(); } catch (e) { /* ignore */ }
+        return;
+      }
+      if (this._continuousMode && this.isListening) {
+        // Continuous command mode — auto-restart after each command.
+        // Use _isAutoRestart flag so startListening() doesn't speak "Listening" again.
+        var self = this;
+        this.isListening = false; // Temporarily set to false so startListening() works
+        setTimeout(function () {
+          self._isAutoRestart = true;
+          self.startListening();
+        }, 300);
         return;
       }
       this.isListening = false;
@@ -1301,15 +1832,30 @@ class AHGVoiceCommands {
     });
 
     this.recognition.addEventListener('error', (event) => {
+      // Non-fatal errors that can occur naturally during pauses
+      var nonFatal = (event.error === 'no-speech' || event.error === 'aborted');
+
       if (event.error === 'not-allowed') {
         this.showToast('Microphone access denied. Please enable it in browser settings.', 'danger');
+        this.isListening = false;
+        this._updateUI(false);
+      } else if (nonFatal && (this._continuousMode || this.mode === 'dictation')) {
+        // In continuous/dictation mode, non-fatal errors should NOT kill listening.
+        // The 'end' event will fire next and handle auto-restart.
+        console.log('[Voice] Non-fatal error in continuous mode: ' + event.error + ' — will auto-restart');
       } else if (event.error === 'no-speech') {
         this.showToast('No speech detected', 'warning');
+        this.isListening = false;
+        this._updateUI(false);
       } else if (event.error !== 'aborted') {
         this.showToast('Recognition error: ' + event.error, 'danger');
+        this.isListening = false;
+        this._updateUI(false);
+      } else {
+        // 'aborted' in non-continuous mode
+        this.isListening = false;
+        this._updateUI(false);
       }
-      this.isListening = false;
-      this._updateUI(false);
     });
   }
 

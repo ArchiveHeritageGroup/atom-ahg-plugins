@@ -95,7 +95,7 @@
                 <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
               </label>
               <input type="text" class="form-control" id="title" name="title"
-                     value="<?php echo esc_specialchars($rawIo['title']); ?>" required>
+                     value="<?php echo esc_specialchars($rawIo['title']); ?>">
             </div>
 
             <!-- Events (dates) multi-row -->
@@ -150,7 +150,7 @@
                 <?php echo __('Level of description'); ?>
                 <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
               </label>
-              <select class="form-select" id="levelOfDescriptionId" name="levelOfDescriptionId" required>
+              <select class="form-select" id="levelOfDescriptionId" name="levelOfDescriptionId">
                 <option value=""><?php echo __('- Select -'); ?></option>
                 <?php foreach ($rawLevels as $level) { ?>
                   <option value="<?php echo $level->id; ?>"
@@ -1155,6 +1155,56 @@
       '<input type="hidden" name="' + fieldName + '" value="' + termId + '">' +
       '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
     list.appendChild(div);
+  }
+
+  // ── Form validation with notification ──────────────────────────────
+  var editForm = document.getElementById('editForm');
+  if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+      var missing = [];
+      var titleField = document.getElementById('title');
+      var levelField = document.getElementById('levelOfDescriptionId');
+
+      if (titleField && !titleField.value.trim()) {
+        missing.push('Title');
+        titleField.classList.add('is-invalid');
+      } else if (titleField) {
+        titleField.classList.remove('is-invalid');
+      }
+
+      if (levelField && !levelField.value) {
+        missing.push('Level of description');
+        levelField.classList.add('is-invalid');
+      } else if (levelField) {
+        levelField.classList.remove('is-invalid');
+      }
+
+      if (missing.length > 0) {
+        e.preventDefault();
+        // Show notification
+        var msg = 'Required fields missing: ' + missing.join(', ');
+        var toast = document.createElement('div');
+        toast.className = 'alert alert-warning alert-dismissible fade show position-fixed';
+        toast.style.cssText = 'top:80px;right:20px;z-index:9999;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,.15);';
+        toast.innerHTML = '<strong><i class="fas fa-exclamation-triangle me-2"></i>Validation</strong><br>' +
+          msg + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        document.body.appendChild(toast);
+        setTimeout(function() { if (toast.parentNode) toast.remove(); }, 6000);
+
+        // Scroll to first invalid field
+        var firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstInvalid.focus();
+        }
+      }
+    });
+
+    // Clear invalid state on change
+    document.querySelectorAll('#title, #levelOfDescriptionId').forEach(function(el) {
+      el.addEventListener('input', function() { this.classList.remove('is-invalid'); });
+      el.addEventListener('change', function() { this.classList.remove('is-invalid'); });
+    });
   }
 
 })();

@@ -63,7 +63,10 @@ class EventService
                 $baseData['source_culture'] = $culture;
             }
 
-            $id = DB::table('event')->insertGetId($baseData);
+            // event.id is a FK to object.id (entity inheritance) — create object first
+            $id = ObjectService::create('QubitEvent');
+            $baseData['id'] = $id;
+            DB::table('event')->insert($baseData);
         }
 
         // Save i18n data
@@ -81,6 +84,8 @@ class EventService
     {
         I18nService::delete('event_i18n', $id);
         DB::table('event')->where('id', $id)->delete();
+        // Clean up the parent object row (entity inheritance)
+        DB::table('object')->where('id', $id)->delete();
     }
 
     /**

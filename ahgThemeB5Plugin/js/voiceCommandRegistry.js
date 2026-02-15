@@ -20,7 +20,7 @@ var AHGVoiceRegistry = (function () {
     },
     {
       patterns: [/^(?:go to )?browse(?: records)?$/, 'browse'],
-      action: function () { window.location.href = '/informationobject/browse'; },
+      action: function () { window.location.href = '/index.php/glam/browse'; },
       mode: 'nav',
       description: 'Browse archival records',
       feedback: 'Opening archival records'
@@ -88,7 +88,7 @@ var AHGVoiceRegistry = (function () {
           input.value = term;
           setTimeout(function() { form.submit(); }, 800);
         } else {
-          setTimeout(function() { window.location.href = '/informationobject/browse?query=' + encodeURIComponent(term); }, 800);
+          setTimeout(function() { window.location.href = '/index.php/glam/browse?query=' + encodeURIComponent(term); }, 800);
         }
       },
       mode: 'nav',
@@ -132,11 +132,49 @@ var AHGVoiceRegistry = (function () {
     },
     {
       patterns: ['go to digital objects', 'digital objects', 'browse digital objects'],
-      action: function () { window.location.href = '/digitalobject/browse'; },
+      action: function () { window.location.href = '/index.php/display/browse?hasDigital=1&topLevel=0&view=grid'; },
       mode: 'nav',
       description: 'Browse digital objects',
       feedback: 'Browsing digital objects'
     },
+
+    // -- Sector-specific Browse -----------------------------------------------
+    {
+      patterns: ['browse archive', 'browse archives', 'go to archives'],
+      action: function () { window.location.href = '/index.php/display/browse?type=archive'; },
+      mode: 'nav',
+      description: 'Browse archive records',
+      feedback: 'Browsing archive records'
+    },
+    {
+      patterns: ['browse library', 'go to library', 'library records'],
+      action: function () { window.location.href = '/index.php/display/browse?type=library'; },
+      mode: 'nav',
+      description: 'Browse library records',
+      feedback: 'Browsing library records'
+    },
+    {
+      patterns: ['browse museum', 'go to museum', 'museum records'],
+      action: function () { window.location.href = '/index.php/display/browse?type=museum'; },
+      mode: 'nav',
+      description: 'Browse museum records',
+      feedback: 'Browsing museum records'
+    },
+    {
+      patterns: ['browse gallery', 'go to gallery', 'gallery records'],
+      action: function () { window.location.href = '/index.php/display/browse?type=gallery'; },
+      mode: 'nav',
+      description: 'Browse gallery records',
+      feedback: 'Browsing gallery records'
+    },
+    {
+      patterns: ['browse dam', 'browse photos', 'go to dam', 'photo dam'],
+      action: function () { window.location.href = '/index.php/display/browse?type=dam'; },
+      mode: 'nav',
+      description: 'Browse DAM/photo records',
+      feedback: 'Browsing photo and D A M records'
+    },
+
     {
       patterns: ['go to accessions', 'accessions', 'browse accessions'],
       action: function () { window.location.href = '/accession/browse'; },
@@ -270,7 +308,7 @@ var AHGVoiceRegistry = (function () {
       patterns: ['first result', 'open first', 'click first'],
       action: function () {
         var v = window.ahgVoice;
-        var link = document.querySelector('.search-results article a, .result-count ~ * a, #content .search-result a, td a[href]');
+        var link = document.querySelector('.search-results article a, .result-count ~ * a, #content .search-result a, td a[href], #content .col-md-2 a[href*="/index.php/"], #content a.text-success.text-decoration-none');
         if (link && v) {
           v.highlightElement(link);
           setTimeout(function () { link.click(); }, 150);
@@ -281,7 +319,7 @@ var AHGVoiceRegistry = (function () {
       mode: 'action_browse',
       description: 'Open the first result',
       feedback: 'Opening first result',
-      contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .browse-results'); }
+      contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .browse-results, .card-title a.text-success'); }
     },
     {
       patterns: ['sort by title', 'sort title'],
@@ -388,13 +426,13 @@ var AHGVoiceRegistry = (function () {
 
     // -- Metadata Reading (Phase 4) --------------------------------------
     {
-      patterns: ['read image info', 'what is this image', 'read metadata', 'image details'],
+      patterns: ['read metadata', 'read all fields', 'read image info', 'what is this image', 'image details', 'read record', 'read all'],
       action: function () { var v = window.ahgVoice; if (v) v.readImageMetadata(); },
       mode: 'action_view',
-      description: 'Read image metadata aloud',
+      description: 'Read all populated fields aloud',
       feedback: null, // action speaks the metadata directly
       contextCheck: function () {
-        return !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer, video, audio');
+        return AHGVoiceRegistry._hasDigitalObject();
       }
     },
     {
@@ -412,8 +450,103 @@ var AHGVoiceRegistry = (function () {
       feedback: null // action speaks the description directly
     },
     {
+      patterns: ['describe object', 'describe the object', 'what is this', 'what is this object', 'what do i see', 'what is in the image', 'what is in the picture'],
+      action: function () { var v = window.ahgVoice; if (v) v.describeImage(); },
+      mode: 'action_view',
+      description: 'AI describe what is in the image',
+      feedback: null,
+      contextCheck: function () {
+        return AHGVoiceRegistry._hasDigitalObject();
+      }
+    },
+    {
+      patterns: ['what type of file', 'what is the file type', 'file type', 'what type of object', 'what format'],
+      action: function () {
+        var v = window.ahgVoice;
+        if (!v) return;
+        var meta = v._gatherPageMetadata();
+        var mimeType = meta.mimeType || '';
+        var mediaType = meta.mediaType || '';
+
+        // Try DOM metadata fields
+        if (!mimeType) {
+          var mimeFields = document.querySelectorAll('.digital-object-metadata .field.row, .digital-object-metadata-body .field');
+          for (var i = 0; i < mimeFields.length; i++) {
+            var label = mimeFields[i].querySelector('h3, .col-3');
+            var value = mimeFields[i].querySelector('.col-9, p');
+            if (!label || !value) continue;
+            var lt = label.textContent.trim().toLowerCase();
+            var vt = value.textContent.trim();
+            if (/mime[\s-]*type/i.test(lt) && !mimeType) mimeType = vt;
+            if (/media\s*type/i.test(lt) && !mediaType) mediaType = vt;
+          }
+        }
+
+        // Detect from elements
+        if (!mimeType) {
+          if (document.querySelector('[data-tts-action="read-pdf"], .pdf-viewer-container')) { mimeType = 'application/pdf'; mediaType = 'Text'; }
+          else if (document.querySelector('video')) { mimeType = 'video'; mediaType = 'Video'; }
+          else if (document.querySelector('audio')) { mimeType = 'audio'; mediaType = 'Audio'; }
+          else if (document.querySelector('.iiif-viewer-container, [id^="container-iiif-viewer"]')) { mimeType = 'image'; mediaType = 'Image'; }
+          else if (document.querySelector('#wrapper img.img-fluid, #sidebar img.img-fluid, #content img.img-fluid')) { mimeType = 'image'; mediaType = 'Image'; }
+        }
+
+        if (!mimeType && !mediaType) { v.speak('No digital object found on this page'); return; }
+
+        var map = {
+          'application/pdf': 'a PDF document', 'image/jpeg': 'a JPEG image', 'image/jpg': 'a JPEG image',
+          'image/png': 'a PNG image', 'image/tiff': 'a TIFF image', 'image/gif': 'a GIF image',
+          'video/mp4': 'an MP4 video', 'video/webm': 'a WebM video',
+          'audio/mpeg': 'an MP3 audio file', 'audio/wav': 'a WAV audio file'
+        };
+        var friendly = map[mimeType.toLowerCase()] || (mediaType ? 'a ' + mediaType.toLowerCase() + ' file' : 'a ' + mimeType + ' file');
+        v.speak('This is ' + friendly);
+      },
+      mode: 'action_view',
+      description: 'Report the file type in plain English',
+      feedback: null
+    },
+    {
+      patterns: ['read text', 'read the text', 'read file', 'read the file', 'read text file', 'read it'],
+      action: function () { var v = window.ahgVoice; if (v) v.readTextFile(); },
+      mode: 'action_view',
+      description: 'Read plain text file content aloud',
+      feedback: 'Reading text file',
+      contextCheck: function () {
+        return !!document.querySelector('[id^="text-content-"], [id^="archive-content-"]');
+      }
+    },
+    {
+      patterns: ['read pdf', 'read the pdf', 'read document', 'read the document'],
+      action: function () {
+        var pdfBtn = document.querySelector('[data-tts-action="read-pdf"]');
+        if (pdfBtn) {
+          pdfBtn.click();
+        } else {
+          // Fall back to reading text file if available
+          var v = window.ahgVoice;
+          if (v && document.querySelector('[id^="text-content-"], [id^="archive-content-"]')) {
+            v.readTextFile();
+          } else if (v) {
+            v.showToast('No PDF or text file found on this page', 'warning');
+          }
+        }
+      },
+      mode: 'action_view',
+      description: 'Read PDF content aloud',
+      feedback: 'Reading PDF',
+      contextCheck: function () {
+        return !!document.querySelector('[data-tts-action="read-pdf"], [id^="text-content-"], [id^="archive-content-"]');
+      }
+    },
+    {
       patterns: ['stop reading', 'stop speaking', 'shut up', 'be quiet', 'silence'],
-      action: function () { var v = window.ahgVoice; if (v) v.stopSpeaking(); },
+      action: function () {
+        var v = window.ahgVoice;
+        if (v) v.stopSpeaking();
+        // Also stop the AhgTTS component (PDF reader, metadata reader)
+        if (window.AhgTTS && window.AhgTTS.isPlaying) window.AhgTTS.stop();
+      },
       mode: 'global',
       description: 'Stop speech output',
       feedback: null // can't speak while stopping speech
@@ -441,7 +574,7 @@ var AHGVoiceRegistry = (function () {
       description: 'AI-generate image description',
       feedback: null, // action speaks its own feedback
       contextCheck: function () {
-        return !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer');
+        return AHGVoiceRegistry._hasDigitalObject();
       }
     },
     {
@@ -509,6 +642,36 @@ var AHGVoiceRegistry = (function () {
       feedback: null // action speaks its own feedback
     },
 
+    // -- Listening Mode ---------------------------------------------------
+    {
+      patterns: ['keep listening', 'continuous listening', 'stay on', 'always listen'],
+      action: function () {
+        var v = window.ahgVoice;
+        if (!v) return;
+        v._continuousMode = true;
+        try { sessionStorage.setItem('ahg_voice_continuous', '1'); } catch (e) { /* ignore */ }
+        v.speak('Continuous listening enabled. I will keep listening after each command. Say stop listening to turn off.');
+        v.showToast('Continuous listening ON', 'success');
+      },
+      mode: 'global',
+      description: 'Enable continuous listening mode',
+      feedback: null
+    },
+    {
+      patterns: ['stop continuous', 'single command', 'one at a time', 'stop listening'],
+      action: function () {
+        var v = window.ahgVoice;
+        if (!v) return;
+        v._continuousMode = false;
+        try { sessionStorage.setItem('ahg_voice_continuous', '0'); } catch (e) { /* ignore */ }
+        v.speak('Continuous listening disabled. I will stop after each command.');
+        v.showToast('Continuous listening OFF', 'info');
+      },
+      mode: 'global',
+      description: 'Disable continuous listening mode',
+      feedback: null
+    },
+
     // -- Accessibility & Help ---------------------------------------------
     {
       patterns: ['help', 'show commands', 'voice help', 'what can you do'],
@@ -520,27 +683,80 @@ var AHGVoiceRegistry = (function () {
         }
       },
       mode: 'nav',
-      description: 'Show voice commands help',
+      description: 'Show voice commands help modal',
       feedback: 'Here are the available commands'
     },
     {
-      patterns: ['list commands', 'list help commands', 'list all commands', 'read commands', 'read all commands', 'read help'],
+      patterns: [
+        'list commands', 'list command', 'list sections', 'commands',
+        'what commands', 'what commands are available', 'available commands',
+        'read sections', 'command sections', 'which commands'
+      ],
+      action: function () { var v = window.ahgVoice; if (v) v.listSections(); },
+      mode: 'nav',
+      description: 'Read available command sections aloud',
+      feedback: null
+    },
+    {
+      patterns: ['read all commands', 'list all commands', 'read everything', 'all commands'],
       action: function () { var v = window.ahgVoice; if (v) v.listCommands(); },
       mode: 'nav',
       description: 'Read all commands aloud',
-      feedback: null // action handles its own speech
+      feedback: null
     },
     {
-      patterns: [/^list (\w+) commands$/, /^read (\w+) commands$/],
+      patterns: ['navigation commands', 'navigation', 'list navigation', 'read navigation', 'nav commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('navigation'); },
+      mode: 'nav',
+      description: 'Read navigation commands',
+      feedback: null
+    },
+    {
+      patterns: ['edit commands', 'edit actions', 'list edit', 'read edit', 'editing commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('edit'); },
+      mode: 'nav',
+      description: 'Read edit page commands',
+      feedback: null
+    },
+    {
+      patterns: ['view commands', 'view actions', 'list view', 'read view', 'viewing commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('view'); },
+      mode: 'nav',
+      description: 'Read view page commands',
+      feedback: null
+    },
+    {
+      patterns: ['browse commands', 'browse actions', 'list browse', 'read browse', 'browsing commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('browse'); },
+      mode: 'nav',
+      description: 'Read browse page commands',
+      feedback: null
+    },
+    {
+      patterns: ['global commands', 'list global', 'read global'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('global'); },
+      mode: 'nav',
+      description: 'Read global commands',
+      feedback: null
+    },
+    {
+      patterns: ['dictation commands', 'list dictation', 'read dictation'],
+      action: function () { var v = window.ahgVoice; if (v) v.listCommands('dictation'); },
+      mode: 'nav',
+      description: 'Read dictation commands',
+      feedback: null
+    },
+    {
+      patterns: [/^list (\w+) commands?$/, /^read (\w+) commands?$/, /^(\w+) commands$/],
       action: function (text) {
         var v = window.ahgVoice;
         if (!v) return;
-        var match = text.match(/(?:list|read) (\w+) commands/);
+        var match = text.match(/(?:list |read )?(\w+) commands?/);
         if (match) { v.listCommands(match[1]); }
-        else { v.listCommands(); }
+        else { v.listSections(); }
       },
       mode: 'nav',
-      description: 'Read commands for a specific group',
+      description: 'Read commands for a specific section',
       feedback: null
     },
     {
@@ -556,12 +772,40 @@ var AHGVoiceRegistry = (function () {
       mode: 'action_browse',
       description: 'Announce the number of results',
       feedback: null, // action handles its own speech
-      contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination'); }
+      contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .display.browse, #counts-block'); }
     }
   ];
 
   return {
     getCommands: function () { return commands; },
+
+    /**
+     * Check if the current page has a digital object (image, video, audio, or metadata).
+     * Used by contextCheck for "describe image" and "read image info" commands.
+     */
+    _hasDigitalObject: function () {
+      // Direct media elements (broad — gallery/museum templates don't use #content)
+      if (document.querySelector('#wrapper img.img-fluid, #sidebar img.img-fluid, #content img.img-fluid, .digital-object-viewer, .converted-image-viewer, video, audio')) {
+        return true;
+      }
+      // IIIF viewer / OpenSeadragon / 3D viewer
+      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="viewer-3d-"]')) {
+        return true;
+      }
+      // Digital object metadata section
+      if (document.querySelector('.digitalObjectMetadata, #digitalObjectMetadata, .digital-object-metadata')) {
+        return true;
+      }
+      // Check for field labels indicating digital object metadata
+      var fields = document.querySelectorAll('#content .field, #content tr, #content dt, #content h3, #content .row, #wrapper .field, #wrapper tr');
+      for (var i = 0; i < fields.length; i++) {
+        var t = fields[i].textContent || '';
+        if (/master\s*file|media\s*type|mime[\s-]*type|original\s*file/i.test(t)) {
+          return true;
+        }
+      }
+      return false;
+    },
 
     /**
      * Get commands grouped by mode for the help modal.

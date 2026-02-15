@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
 
 <?php // Voice Commands JS ?>
-<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 </body>
 </html>

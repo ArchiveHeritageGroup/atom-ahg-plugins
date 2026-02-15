@@ -29,7 +29,7 @@ class InformationObjectCrudService
     const NOTE_TYPE_LANGUAGE = 174;
 
     // Taxonomy IDs
-    const TAXONOMY_LEVELS_OF_DESCRIPTION = 32;
+    const TAXONOMY_LEVELS_OF_DESCRIPTION = 34;
     const TAXONOMY_DESCRIPTION_STATUSES = 33;
     const TAXONOMY_DESCRIPTION_DETAIL_LEVELS = 31;
     const TAXONOMY_EVENT_TYPES = 40;

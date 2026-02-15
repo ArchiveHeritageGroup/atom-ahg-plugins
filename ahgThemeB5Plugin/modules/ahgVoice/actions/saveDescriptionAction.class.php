@@ -17,6 +17,10 @@ class ahgVoiceSaveDescriptionAction extends sfAction
     {
         $this->getResponse()->setContentType('application/json');
 
+        // Initialize Laravel DB
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
+        \AhgCore\Core\AhgDb::init();
+
         // Auth check
         if (!$this->getUser()->isAuthenticated()) {
             return $this->renderJson(['success' => false, 'error' => 'Authentication required'], 401);
