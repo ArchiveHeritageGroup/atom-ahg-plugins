@@ -136,6 +136,14 @@ class AHGVoiceCommands {
     for (const cmd of commands) {
       if (this._matchCommand(text, cmd)) {
         matched = true;
+
+        // Context check — block if command not available on this page
+        if (typeof cmd.contextCheck === 'function' && !cmd.contextCheck()) {
+          this.showToast(cmd.description + ' — not available here', 'warning');
+          this.speak('That command is not available on this page');
+          break;
+        }
+
         this.showToast(cmd.description, 'success');
         try {
           cmd.action(text);
@@ -238,6 +246,46 @@ class AHGVoiceCommands {
     navbarNav.insertBefore(li, navbarNav.firstChild);
 
     this.navbarBtn = btn;
+  }
+
+  // ---------------------------------------------------------------
+  //  Context Detection (Phase 2)
+  // ---------------------------------------------------------------
+
+  /**
+   * Detect the current page context.
+   * Returns an object with boolean flags for each context type.
+   */
+  static detectContext() {
+    return {
+      edit: !!document.querySelector('form#editForm, form.form-edit, body.edit form'),
+      view: !!document.querySelector('.informationObject, .section, #content .field, body.index .h2, body.show'),
+      browse: !!document.querySelector('.result-count, .pager, .pagination, .browse-results, #facets'),
+      admin: /\/admin|\/ahgSettings/.test(window.location.pathname)
+    };
+  }
+
+  /**
+   * Briefly highlight an element to give visual feedback.
+   */
+  highlightElement(el) {
+    if (!el) return;
+    el.classList.add('voice-highlight');
+    setTimeout(() => el.classList.remove('voice-highlight'), 600);
+  }
+
+  /**
+   * Find and click an element, with highlight feedback.
+   * Returns true if element was found and clicked.
+   */
+  clickElement(selector) {
+    var el = document.querySelector(selector);
+    if (el) {
+      this.highlightElement(el);
+      setTimeout(() => el.click(), 150);
+      return true;
+    }
+    return false;
   }
 
   _bindRecognitionEvents() {

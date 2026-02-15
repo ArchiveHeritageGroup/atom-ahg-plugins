@@ -1,8 +1,8 @@
 /**
- * AHG Voice Command Registry — Phase 1: Navigation Commands
+ * AHG Voice Command Registry — Navigation + Action Commands
  *
- * Command definitions for voice-driven navigation.
- * Each command has: patterns (string[] or RegExp[]), action, mode, description.
+ * Command definitions for voice-driven navigation and context-aware actions.
+ * Each command has: patterns, action, mode, description, contextCheck (optional).
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
@@ -132,6 +132,225 @@ var AHGVoiceRegistry = (function () {
       action: function () { window.location.href = '/repository/browse'; },
       mode: 'nav',
       description: 'Browse repositories'
+    },
+
+    // -- Actions: Edit screens --------------------------------------------
+    {
+      patterns: ['save', 'save record', 'save this'],
+      action: function () {
+        var v = window.ahgVoice;
+        var btn = document.querySelector('form#editForm .btn-success[type="submit"], form.form-edit .btn-success[type="submit"], form#editForm button[type="submit"], form.form-edit button[type="submit"]');
+        if (btn && v) {
+          v.highlightElement(btn);
+          setTimeout(function () { btn.click(); }, 150);
+        } else if (v) {
+          v.speak('No save button found');
+        }
+      },
+      mode: 'action_edit',
+      description: 'Save the current record',
+      contextCheck: function () { return !!document.querySelector('form#editForm, form.form-edit'); }
+    },
+    {
+      patterns: ['cancel', 'cancel edit'],
+      action: function () {
+        var v = window.ahgVoice;
+        var btn = document.querySelector('form#editForm a.btn-secondary, form.form-edit a.btn-secondary, a.btn[href*="cancel"], .actions a.btn-secondary');
+        if (btn && v) {
+          v.highlightElement(btn);
+          setTimeout(function () { btn.click(); }, 150);
+        } else if (v) {
+          v.speak('No cancel button found');
+        }
+      },
+      mode: 'action_edit',
+      description: 'Cancel editing',
+      contextCheck: function () { return !!document.querySelector('form#editForm, form.form-edit'); }
+    },
+    {
+      patterns: ['delete', 'delete record', 'delete this'],
+      action: function () {
+        var v = window.ahgVoice;
+        var btn = document.querySelector('a.btn-danger[href*="delete"], button.btn-danger, a.btn-danger, input[value="Delete"]');
+        if (btn && v) {
+          v.highlightElement(btn);
+          setTimeout(function () { btn.click(); }, 150);
+        } else if (v) {
+          v.speak('No delete button found');
+        }
+      },
+      mode: 'action_edit',
+      description: 'Delete the current record',
+      contextCheck: function () { return !!document.querySelector('form#editForm, form.form-edit'); }
+    },
+
+    // -- Actions: View screens --------------------------------------------
+    {
+      patterns: ['edit', 'edit record', 'edit this'],
+      action: function () {
+        var v = window.ahgVoice;
+        var btn = document.querySelector('a[href*="/edit"], a.btn[href*="edit"], .actions a[href*="edit"]');
+        if (btn && v) {
+          v.highlightElement(btn);
+          setTimeout(function () { btn.click(); }, 150);
+        } else if (v) {
+          v.speak('No edit button found');
+        }
+      },
+      mode: 'action_view',
+      description: 'Edit the current record',
+      contextCheck: function () { return !document.querySelector('form#editForm, form.form-edit'); }
+    },
+    {
+      patterns: ['print', 'print page', 'print this'],
+      action: function () { window.print(); },
+      mode: 'action_view',
+      description: 'Print the current page'
+    },
+    {
+      patterns: ['export csv', 'export to csv', 'download csv'],
+      action: function () {
+        var v = window.ahgVoice;
+        var link = document.querySelector('a[href*="csv"], a[href*="CSV"]');
+        if (link && v) {
+          v.highlightElement(link);
+          setTimeout(function () { link.click(); }, 150);
+        } else if (v) {
+          v.speak('No CSV export link found');
+        }
+      },
+      mode: 'action_view',
+      description: 'Export as CSV',
+      contextCheck: function () { return !!document.querySelector('a[href*="csv"], a[href*="CSV"]'); }
+    },
+    {
+      patterns: ['export ead', 'export to ead', 'download ead'],
+      action: function () {
+        var v = window.ahgVoice;
+        var link = document.querySelector('a[href*="ead"], a[href*="EAD"]');
+        if (link && v) {
+          v.highlightElement(link);
+          setTimeout(function () { link.click(); }, 150);
+        } else if (v) {
+          v.speak('No EAD export link found');
+        }
+      },
+      mode: 'action_view',
+      description: 'Export as EAD',
+      contextCheck: function () { return !!document.querySelector('a[href*="ead"], a[href*="EAD"]'); }
+    },
+
+    // -- Actions: Browse screens ------------------------------------------
+    {
+      patterns: ['first result', 'open first', 'click first'],
+      action: function () {
+        var v = window.ahgVoice;
+        var link = document.querySelector('.search-results article a, .result-count ~ * a, #content .search-result a, td a[href]');
+        if (link && v) {
+          v.highlightElement(link);
+          setTimeout(function () { link.click(); }, 150);
+        } else if (v) {
+          v.speak('No results found');
+        }
+      },
+      mode: 'action_browse',
+      description: 'Open the first result',
+      contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .browse-results'); }
+    },
+    {
+      patterns: ['sort by title', 'sort title'],
+      action: function () {
+        var v = window.ahgVoice;
+        var opt = document.querySelector('select[name="sort"] option[value="alphabetic"], select[name="sort"] option[value="title"]');
+        if (opt) {
+          opt.parentElement.value = opt.value;
+          if (v) v.highlightElement(opt.parentElement);
+          var evt = new Event('change', { bubbles: true });
+          opt.parentElement.dispatchEvent(evt);
+          // Submit the form if there is one
+          var form = opt.parentElement.closest('form');
+          if (form) setTimeout(function () { form.submit(); }, 200);
+        } else if (v) {
+          v.speak('No sort option found');
+        }
+      },
+      mode: 'action_browse',
+      description: 'Sort results by title',
+      contextCheck: function () { return !!document.querySelector('select[name="sort"]'); }
+    },
+    {
+      patterns: ['sort by date', 'sort date'],
+      action: function () {
+        var v = window.ahgVoice;
+        var opt = document.querySelector('select[name="sort"] option[value="date"], select[name="sort"] option[value="startDate"]');
+        if (opt) {
+          opt.parentElement.value = opt.value;
+          if (v) v.highlightElement(opt.parentElement);
+          var evt = new Event('change', { bubbles: true });
+          opt.parentElement.dispatchEvent(evt);
+          var form = opt.parentElement.closest('form');
+          if (form) setTimeout(function () { form.submit(); }, 200);
+        } else if (v) {
+          v.speak('No date sort option found');
+        }
+      },
+      mode: 'action_browse',
+      description: 'Sort results by date',
+      contextCheck: function () { return !!document.querySelector('select[name="sort"]'); }
+    },
+
+    // -- Global actions ---------------------------------------------------
+    {
+      patterns: ['toggle advanced search', 'advanced search', 'show advanced search'],
+      action: function () {
+        var v = window.ahgVoice;
+        var toggle = document.querySelector('#toggle-advanced-search, a[href*="advanced"], .advanced-search-toggle, button[data-bs-target*="advanced"]');
+        if (toggle && v) {
+          v.highlightElement(toggle);
+          setTimeout(function () { toggle.click(); }, 150);
+        } else if (v) {
+          v.speak('No advanced search toggle found');
+        }
+      },
+      mode: 'global',
+      description: 'Toggle advanced search'
+    },
+    {
+      patterns: ['clear search', 'clear the search'],
+      action: function () {
+        var input = document.querySelector('#search-form-wrapper input[type="text"], input[name="query"]');
+        var form = document.querySelector('#search-form-wrapper form, form[action*="search"]');
+        if (input && form) {
+          input.value = '';
+          form.submit();
+        }
+      },
+      mode: 'global',
+      description: 'Clear search and reload'
+    },
+    {
+      patterns: ['scroll down', 'page down'],
+      action: function () { window.scrollBy({ top: 500, behavior: 'smooth' }); },
+      mode: 'global',
+      description: 'Scroll down'
+    },
+    {
+      patterns: ['scroll up', 'page up'],
+      action: function () { window.scrollBy({ top: -500, behavior: 'smooth' }); },
+      mode: 'global',
+      description: 'Scroll up'
+    },
+    {
+      patterns: ['scroll to top', 'go to top', 'top of page'],
+      action: function () { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+      mode: 'global',
+      description: 'Scroll to top'
+    },
+    {
+      patterns: ['scroll to bottom', 'go to bottom', 'bottom of page'],
+      action: function () { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); },
+      mode: 'global',
+      description: 'Scroll to bottom'
     },
 
     // -- Help -------------------------------------------------------------

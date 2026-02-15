@@ -40,44 +40,81 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
       <div class="modal-body">
         <p class="text-muted small"><?php echo __('Click the mic button and speak a command. Commands are not case-sensitive.'); ?></p>
 
+        <?php
+        // Helper to render a command list section
+        $renderSection = function ($commands, $ctxClass = '') {
+            echo '<ul class="voice-cmd-list">';
+            foreach ($commands as $phrase => $desc) {
+                echo '<li>';
+                echo '<span class="voice-cmd-phrase">"' . esc_specialchars($phrase) . '"</span>';
+                echo '<span class="voice-cmd-desc">' . esc_specialchars(__($desc));
+                if ($ctxClass) {
+                    $labels = ['edit' => 'edit pages', 'view' => 'view pages', 'browse' => 'browse pages'];
+                    echo ' <span class="voice-ctx-badge voice-ctx-' . $ctxClass . '">' . ($labels[$ctxClass] ?? $ctxClass) . '</span>';
+                }
+                echo '</span></li>';
+            }
+            echo '</ul>';
+        };
+        ?>
+
         <h6><i class="bi bi-signpost-2 me-1"></i><?php echo __('Navigation'); ?></h6>
-        <ul class="voice-cmd-list">
-          <?php
-          $navCommands = [
-              'go home' => 'Go to homepage',
-              'browse / go to browse' => 'Browse archival records',
-              'go to admin' => 'Go to admin panel',
-              'go to settings' => 'Go to settings',
-              'go to clipboard' => 'Go to clipboard',
-              'go back' => 'Go back',
-              'next page' => 'Next page',
-              'previous page' => 'Previous page',
-              'search for [term]' => 'Search for a term',
-              'go to donors' => 'Browse donors',
-              'go to research / reading room' => 'Go to research / reading room',
-              'go to authorities' => 'Browse authority records',
-              'go to places' => 'Browse places',
-              'go to subjects' => 'Browse subjects',
-              'go to digital objects' => 'Browse digital objects',
-              'go to accessions' => 'Browse accessions',
-              'go to repositories' => 'Browse repositories',
-          ];
-          foreach ($navCommands as $phrase => $desc) {
-              echo '<li>';
-              echo '<span class="voice-cmd-phrase">"' . esc_specialchars($phrase) . '"</span>';
-              echo '<span class="voice-cmd-desc">' . esc_specialchars(__($desc)) . '</span>';
-              echo '</li>';
-          }
-          ?>
-        </ul>
+        <?php $renderSection([
+            'go home' => 'Go to homepage',
+            'browse / go to browse' => 'Browse archival records',
+            'go to admin' => 'Go to admin panel',
+            'go to settings' => 'Go to settings',
+            'go to clipboard' => 'Go to clipboard',
+            'go back' => 'Go back',
+            'next page' => 'Next page',
+            'previous page' => 'Previous page',
+            'search for [term]' => 'Search for a term',
+            'go to donors' => 'Browse donors',
+            'go to research / reading room' => 'Go to research / reading room',
+            'go to authorities' => 'Browse authority records',
+            'go to places' => 'Browse places',
+            'go to subjects' => 'Browse subjects',
+            'go to digital objects' => 'Browse digital objects',
+            'go to accessions' => 'Browse accessions',
+            'go to repositories' => 'Browse repositories',
+        ]); ?>
+
+        <h6><i class="bi bi-pencil me-1"></i><?php echo __('Actions (Edit)'); ?></h6>
+        <?php $renderSection([
+            'save / save record' => 'Save the current record',
+            'cancel' => 'Cancel editing',
+            'delete / delete record' => 'Delete the current record',
+        ], 'edit'); ?>
+
+        <h6><i class="bi bi-eye me-1"></i><?php echo __('Actions (View)'); ?></h6>
+        <?php $renderSection([
+            'edit / edit record' => 'Edit the current record',
+            'print' => 'Print the current page',
+            'export csv' => 'Export as CSV',
+            'export ead' => 'Export as EAD',
+        ], 'view'); ?>
+
+        <h6><i class="bi bi-list-ul me-1"></i><?php echo __('Actions (Browse)'); ?></h6>
+        <?php $renderSection([
+            'first result / open first' => 'Open the first result',
+            'sort by title' => 'Sort results by title',
+            'sort by date' => 'Sort results by date',
+        ], 'browse'); ?>
+
+        <h6><i class="bi bi-globe me-1"></i><?php echo __('Global'); ?></h6>
+        <?php $renderSection([
+            'toggle advanced search' => 'Toggle advanced search',
+            'clear search' => 'Clear search and reload',
+            'scroll down' => 'Scroll down',
+            'scroll up' => 'Scroll up',
+            'scroll to top' => 'Scroll to top',
+            'scroll to bottom' => 'Scroll to bottom',
+        ], 'global'); ?>
 
         <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>
-        <ul class="voice-cmd-list">
-          <li>
-            <span class="voice-cmd-phrase">"help" / "show commands"</span>
-            <span class="voice-cmd-desc"><?php echo __('Show this help modal'); ?></span>
-          </li>
-        </ul>
+        <?php $renderSection([
+            'help / show commands' => 'Show this help modal',
+        ]); ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>

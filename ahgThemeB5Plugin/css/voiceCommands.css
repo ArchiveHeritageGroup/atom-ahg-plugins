@@ -139,6 +139,32 @@
   color: var(--bs-secondary-color, #6c757d);
 }
 
+/* -- Element highlight (Phase 2) ------------------------------ */
+.voice-highlight {
+  outline: 3px solid rgba(255, 193, 7, 0.8) !important;
+  background-color: rgba(255, 193, 7, 0.15) !important;
+  animation: voice-highlight-flash 0.6s ease-out;
+}
+@keyframes voice-highlight-flash {
+  0%   { outline-color: rgba(255, 193, 7, 1); background-color: rgba(255, 193, 7, 0.3); }
+  100% { outline-color: rgba(255, 193, 7, 0); background-color: rgba(255, 193, 7, 0); }
+}
+
+/* -- Context badges in help modal ----------------------------- */
+.voice-ctx-badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.voice-ctx-edit   { background: #ffc107; color: #000; }
+.voice-ctx-view   { background: #0dcaf0; color: #000; }
+.voice-ctx-browse { background: #198754; color: #fff; }
+.voice-ctx-global { background: #6c757d; color: #fff; }
+
 /* -- Responsive ----------------------------------------------- */
 @media (max-width: 575.98px) {
   .voice-navbar-btn {
