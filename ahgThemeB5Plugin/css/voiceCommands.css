@@ -165,6 +165,17 @@
 .voice-ctx-browse { background: #198754; color: #fff; }
 .voice-ctx-global { background: #6c757d; color: #fff; }
 
+/* -- Processing indicator (Phase 5 — AI describe) ------------- */
+.voice-indicator-processing {
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, #ffc107, transparent);
+  background-size: 200% 100%;
+  animation: voice-indicator-slide 1s linear infinite;
+}
+
+/* Context badge for AI */
+.voice-ctx-ai { background: #6f42c1; color: #fff; }
+
 /* -- Dictation mode (Phase 3) --------------------------------- */
 .voice-dictation-active {
   box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.4) !important;

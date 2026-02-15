@@ -49,7 +49,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
                 echo '<span class="voice-cmd-phrase">"' . esc_specialchars($phrase) . '"</span>';
                 echo '<span class="voice-cmd-desc">' . esc_specialchars(__($desc));
                 if ($ctxClass) {
-                    $labels = ['edit' => 'edit pages', 'view' => 'view pages', 'browse' => 'browse pages', 'dictation' => 'dictation mode'];
+                    $labels = ['edit' => 'edit pages', 'view' => 'view pages', 'browse' => 'browse pages', 'dictation' => 'dictation mode', 'ai' => 'requires AI'];
                     echo ' <span class="voice-ctx-badge voice-ctx-' . $ctxClass . '">' . ($labels[$ctxClass] ?? $ctxClass) . '</span>';
                 }
                 echo '</span></li>';
@@ -110,6 +110,24 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'scroll to top' => 'Scroll to top',
             'scroll to bottom' => 'Scroll to bottom',
         ], 'global'); ?>
+
+        <h6><i class="bi bi-image me-1"></i><?php echo __('Image & Reading'); ?></h6>
+        <?php $renderSection([
+            'read image info' => 'Read image metadata aloud',
+            'read title' => 'Read the record title',
+            'read description' => 'Read the description aloud',
+            'stop reading / shut up' => 'Stop speech output',
+            'slower / faster' => 'Adjust speech rate',
+        ], 'view'); ?>
+
+        <h6><i class="bi bi-robot me-1"></i><?php echo __('AI Image Description'); ?></h6>
+        <?php $renderSection([
+            'describe image / AI describe' => 'Generate AI description of image',
+            'save to description' => 'Save AI description to record',
+            'save to alt text' => 'Save as image alt text',
+            'save to both' => 'Save to description and alt text',
+            'discard' => 'Discard AI description',
+        ], 'ai'); ?>
 
         <h6><i class="bi bi-keyboard me-1"></i><?php echo __('Dictation'); ?></h6>
         <?php $renderSection([

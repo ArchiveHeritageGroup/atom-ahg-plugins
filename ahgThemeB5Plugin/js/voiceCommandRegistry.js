@@ -353,6 +353,82 @@ var AHGVoiceRegistry = (function () {
       description: 'Scroll to bottom'
     },
 
+    // -- Metadata Reading (Phase 4) --------------------------------------
+    {
+      patterns: ['read image info', 'what is this image', 'read metadata', 'image details'],
+      action: function () { var v = window.ahgVoice; if (v) v.readImageMetadata(); },
+      mode: 'action_view',
+      description: 'Read image metadata aloud',
+      contextCheck: function () {
+        return !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer, video, audio');
+      }
+    },
+    {
+      patterns: ['read title', 'what is the title'],
+      action: function () { var v = window.ahgVoice; if (v) v.readTitle(); },
+      mode: 'action_view',
+      description: 'Read the record title aloud'
+    },
+    {
+      patterns: ['read description', 'read scope and content', 'read the description'],
+      action: function () { var v = window.ahgVoice; if (v) v.readDescription(); },
+      mode: 'action_view',
+      description: 'Read the description aloud'
+    },
+    {
+      patterns: ['stop reading', 'stop speaking', 'shut up', 'be quiet', 'silence'],
+      action: function () { var v = window.ahgVoice; if (v) v.stopSpeaking(); },
+      mode: 'global',
+      description: 'Stop speech output'
+    },
+    {
+      patterns: ['slower', 'speak slower', 'slow down'],
+      action: function () { var v = window.ahgVoice; if (v) v.adjustSpeechRate(-0.2); },
+      mode: 'global',
+      description: 'Decrease speech rate'
+    },
+    {
+      patterns: ['faster', 'speak faster', 'speed up'],
+      action: function () { var v = window.ahgVoice; if (v) v.adjustSpeechRate(0.2); },
+      mode: 'global',
+      description: 'Increase speech rate'
+    },
+
+    // -- AI Image Description (Phase 5) ----------------------------------
+    {
+      patterns: ['describe image', 'ai describe', 'what do you see', 'generate description', 'generate alt text'],
+      action: function () { var v = window.ahgVoice; if (v) v.describeImage(); },
+      mode: 'action_view',
+      description: 'AI-generate image description',
+      contextCheck: function () {
+        return !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer');
+      }
+    },
+    {
+      patterns: ['save to description', 'save description'],
+      action: function () { var v = window.ahgVoice; if (v) v.saveDescription('description'); },
+      mode: 'action_view',
+      description: 'Save AI description to record'
+    },
+    {
+      patterns: ['save to alt text', 'save alt text'],
+      action: function () { var v = window.ahgVoice; if (v) v.saveDescription('alt_text'); },
+      mode: 'action_view',
+      description: 'Save AI description as alt text'
+    },
+    {
+      patterns: ['save to both'],
+      action: function () { var v = window.ahgVoice; if (v) v.saveDescription('both'); },
+      mode: 'action_view',
+      description: 'Save AI description to both fields'
+    },
+    {
+      patterns: ['discard', 'discard description', 'nevermind', 'never mind'],
+      action: function () { var v = window.ahgVoice; if (v) v.discardDescription(); },
+      mode: 'action_view',
+      description: 'Discard the AI description'
+    },
+
     // -- Dictation --------------------------------------------------------
     {
       patterns: ['start dictating', 'start dictation', 'dictate'],
