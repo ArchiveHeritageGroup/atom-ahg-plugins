@@ -440,14 +440,30 @@
             fetch(self.apiUrls.tables)
             .then(function(response) { return response.json(); })
             .then(function(result) {
-                var tables = result.data || result.tables || [];
-                tables.forEach(function(table) {
-                    var name = typeof table === 'object' ? table.name : table;
-                    var option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    tableSelect.appendChild(option);
-                });
+                var data = result.data || result.tables || [];
+                // Check if sector-grouped response
+                if (data.length > 0 && data[0].sector && data[0].tables) {
+                    data.forEach(function(group) {
+                        var optgroup = document.createElement('optgroup');
+                        optgroup.label = group.sector;
+                        group.tables.forEach(function(table) {
+                            var opt = document.createElement('option');
+                            opt.value = table.name;
+                            opt.textContent = table.name + (table.rows ? ' (' + table.rows + ' rows)' : '');
+                            optgroup.appendChild(opt);
+                        });
+                        tableSelect.appendChild(optgroup);
+                    });
+                } else {
+                    // Flat list fallback
+                    data.forEach(function(table) {
+                        var name = typeof table === 'object' ? table.name : table;
+                        var option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        tableSelect.appendChild(option);
+                    });
+                }
             })
             .catch(function(err) {
                 console.error('QueryBuilderUI: load tables error', err);
