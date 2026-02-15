@@ -38,6 +38,9 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
       </div>
       <div class="modal-body">
+        <div class="mb-2">
+            <input type="text" class="form-control form-control-sm" id="voice-help-search" placeholder="<?php echo __('Filter commands...'); ?>" autocomplete="off">
+        </div>
         <p class="text-muted small"><?php echo __('Click the mic button and speak a command. Commands are not case-sensitive.'); ?></p>
 
         <?php
@@ -150,6 +153,14 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'clear field' => 'Clear the entire field (with confirmation)',
             'read back' => 'Read the field content aloud',
         ], 'dictation'); ?>
+
+        <h6><i class="bi bi-universal-access me-1"></i><?php echo __('Accessibility'); ?></h6>
+        <?php $renderSection([
+            'list commands / read all commands' => 'Read all commands aloud (say "stop" to stop)',
+            'list [group] commands' => 'Read commands for a group (e.g. "list navigation commands")',
+            'where am I' => 'Announce current page and available actions',
+            'how many results' => 'Announce the number of results on browse pages',
+        ]); ?>
 
         <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>
         <?php $renderSection([

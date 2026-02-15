@@ -51,6 +51,9 @@ class AHGVoiceCommands {
       return;
     }
 
+    // Load settings from server
+    this._loadSettings();
+
     this.floatingBtn = document.getElementById('voice-floating-btn');
     this.indicator = document.getElementById('voice-indicator');
     this.toastContainer = document.getElementById('voice-toast-container');
@@ -75,19 +78,45 @@ class AHGVoiceCommands {
     // Inject field mic icons on edit pages
     this._injectFieldMics();
 
+    // Keyboard shortcuts: Ctrl+Shift+V = toggle voice, Ctrl+Shift+H = help modal
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'V') { e.preventDefault(); this.toggle(); }
+        if (e.ctrlKey && e.shiftKey && e.key === 'H') {
+            e.preventDefault();
+            var modal = document.getElementById('voice-help-modal');
+            if (modal && typeof bootstrap !== 'undefined') bootstrap.Modal.getOrCreateInstance(modal).show();
+        }
+    });
+
+    // Help modal search filter
+    var helpSearch = document.getElementById('voice-help-search');
+    if (helpSearch) {
+        helpSearch.addEventListener('input', function() {
+            var query = this.value.toLowerCase();
+            document.querySelectorAll('#voice-help-modal .voice-cmd-list li').forEach(function(li) {
+                var text = li.textContent.toLowerCase();
+                li.style.display = text.indexOf(query) !== -1 ? '' : 'none';
+            });
+        });
+    }
+
     // Show UI
     document.querySelectorAll('.voice-ui').forEach(el => el.style.display = '');
+
+    // Accessibility: announce page context after a short delay
+    var self = this;
+    setTimeout(function () { self._announcePageContext(); }, 1500);
   }
 
   /**
    * Toggle listening on/off.
    */
   toggle() {
-    if (this.isListening) {
-      this.stopListening();
-    } else {
-      this.startListening();
-    }
+    if (this._toggleDebounce) return;
+    this._toggleDebounce = true;
+    var self = this;
+    setTimeout(function() { self._toggleDebounce = false; }, 500);
+    if (this.isListening) { this.stopListening(); } else { this.startListening(); }
   }
 
   /**
@@ -100,6 +129,9 @@ class AHGVoiceCommands {
       this.recognition.start();
       this.isListening = true;
       this._updateUI(true);
+      this.speak('Listening');
+      // Mark session as voice-active for auto-announcements on page navigation
+      try { sessionStorage.setItem('ahg_voice_active', '1'); } catch (e) { /* ignore */ }
     } catch (e) {
       // Already started or permission denied
       console.warn('Voice: could not start recognition', e);
@@ -111,6 +143,8 @@ class AHGVoiceCommands {
    */
   stopListening() {
     if (!this.isSupported || !this.isListening) return;
+
+    this.speak('Stopped listening');
 
     try {
       this.recognition.stop();
@@ -471,8 +505,23 @@ class AHGVoiceCommands {
         }
 
         this.showToast(cmd.description, 'success');
+
+        // Speak audible feedback if defined (talk back to the user)
+        if (cmd.feedback) {
+          this.speak(cmd.feedback);
+        }
+
         try {
-          cmd.action(text);
+          // For navigation commands, delay action slightly so speech starts first
+          if (cmd.feedback && cmd.mode === 'nav') {
+            var self = this;
+            var cmdRef = cmd;
+            setTimeout(function () {
+              try { cmdRef.action(text); } catch (e) { console.error('Voice command error:', e); }
+            }, 600);
+          } else {
+            cmd.action(text);
+          }
         } catch (e) {
           console.error('Voice command error:', e);
           this.showToast('Command failed', 'danger');
@@ -483,7 +532,16 @@ class AHGVoiceCommands {
 
     if (!matched) {
       console.log('[Voice] No match for: "' + text + '" — tried ' + commands.length + ' commands');
-      this.showToast('Not recognized: "' + transcript + '"', 'warning');
+      // Suggest closest match
+      var suggestion = this._findClosestCommand(text, commands);
+      if (suggestion) {
+        console.log('[Voice] Closest match: "' + suggestion + '"');
+        this.showToast('Not recognized: "' + transcript + '". Did you mean "' + suggestion + '"?', 'warning');
+        this.speak('Did you mean, ' + suggestion + '?');
+      } else {
+        this.showToast('Not recognized: "' + transcript + '"', 'warning');
+        this.speak('Sorry, I did not understand that. Say help for available commands.');
+      }
     }
   }
 
@@ -632,6 +690,200 @@ class AHGVoiceCommands {
     if (this.synthesis) {
       this.synthesis.cancel();
       this.showToast('Speech stopped', 'info');
+    }
+  }
+
+  // ---------------------------------------------------------------
+  //  Accessibility — Screen Reader Mode
+  // ---------------------------------------------------------------
+
+  /**
+   * Read all available commands aloud, grouped by category.
+   * Each command is queued as a separate utterance so "stop" cancels mid-list.
+   */
+  listCommands(filterGroup) {
+    if (!this.synthesis) return;
+    if (typeof AHGVoiceRegistry === 'undefined') {
+      this.speak('Voice registry not loaded');
+      return;
+    }
+
+    // Cancel any previous reading
+    this.synthesis.cancel();
+
+    var grouped = AHGVoiceRegistry.getGrouped();
+    var groupLabels = {
+      'nav': 'Navigation',
+      'action_edit': 'Edit Page Actions',
+      'action_view': 'View Page Actions',
+      'action_browse': 'Browse Page Actions',
+      'global': 'Global',
+      'dictation': 'Dictation'
+    };
+
+    var self = this;
+    var utterances = [];
+
+    // Build list of utterances
+    Object.keys(grouped).forEach(function (groupKey) {
+      var label = groupLabels[groupKey] || groupKey;
+
+      // If filter specified, only read that group
+      if (filterGroup && label.toLowerCase().indexOf(filterGroup.toLowerCase()) === -1) {
+        return;
+      }
+
+      // Group header
+      utterances.push(label + ' commands.');
+
+      // Each command in the group
+      grouped[groupKey].forEach(function (cmd) {
+        var phrases = [];
+        if (cmd.patterns) {
+          cmd.patterns.forEach(function (p) {
+            if (typeof p === 'string') phrases.push(p);
+          });
+        }
+        var phraseText = phrases.length > 0 ? phrases[0] : 'pattern command';
+        utterances.push('"' + phraseText + '". ' + cmd.description + '.');
+      });
+
+      // Pause between groups
+      utterances.push('');
+    });
+
+    if (utterances.length === 0) {
+      this.speak('No commands found');
+      return;
+    }
+
+    // Announce start
+    var totalCount = 0;
+    Object.keys(grouped).forEach(function (k) {
+      if (!filterGroup || (groupLabels[k] || k).toLowerCase().indexOf(filterGroup.toLowerCase()) !== -1) {
+        totalCount += grouped[k].length;
+      }
+    });
+    this.showToast('Reading ' + totalCount + ' commands. Say "stop" to stop.', 'info');
+
+    // Queue each utterance separately so cancel() stops mid-list
+    utterances.forEach(function (text) {
+      if (!text) return; // skip empty pause markers
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = self.speechRate;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      u.lang = self.language;
+      var voices = self.synthesis.getVoices();
+      var preferred = voices.find(function(v) { return v.lang.startsWith('en') && v.localService; });
+      if (preferred) u.voice = preferred;
+      self.synthesis.speak(u);
+    });
+  }
+
+  /**
+   * Announce what page the user is currently on.
+   */
+  whereAmI() {
+    var parts = [];
+    var title = this._getPageTitle();
+    var ctx = AHGVoiceCommands.detectContext();
+    var path = window.location.pathname;
+
+    // Determine page type
+    if (ctx.admin) {
+      parts.push('You are on an admin page');
+    } else if (ctx.edit) {
+      parts.push('You are editing a record');
+    } else if (ctx.browse) {
+      parts.push('You are on a browse page');
+      // Count results
+      var countEl = document.querySelector('.result-count');
+      if (countEl) {
+        var countText = countEl.textContent.trim();
+        parts.push(countText);
+      }
+    } else if (ctx.view) {
+      parts.push('You are viewing a record');
+    } else if (path === '/' || path === '/index.php') {
+      parts.push('You are on the homepage');
+    } else {
+      parts.push('You are on ' + document.title);
+    }
+
+    // Add title
+    if (title && !ctx.admin) {
+      parts.push('Title: ' + title);
+    }
+
+    // Check for digital object
+    var hasImage = !!document.querySelector('img.img-fluid, .digital-object-viewer, .converted-image-viewer');
+    var hasVideo = !!document.querySelector('video');
+    var hasAudio = !!document.querySelector('audio');
+    if (hasImage) parts.push('This record has an image.');
+    if (hasVideo) parts.push('This record has a video.');
+    if (hasAudio) parts.push('This record has an audio file.');
+
+    // Available actions
+    var actions = [];
+    if (ctx.view && document.querySelector('a[href*="/edit"]')) actions.push('say "edit" to edit');
+    if (ctx.edit) actions.push('say "save" to save');
+    if (ctx.browse) actions.push('say "first result" to open the first item');
+    if (hasImage) actions.push('say "describe image" for AI description');
+    actions.push('say "help" to list all commands');
+
+    if (actions.length) {
+      parts.push('You can ' + actions.join(', or '));
+    }
+
+    var announcement = parts.join('. ') + '.';
+    this.speak(announcement);
+    this.showToast(announcement, 'info');
+  }
+
+  /**
+   * Announce the number of results on a browse page.
+   */
+  howManyResults() {
+    var countEl = document.querySelector('.result-count');
+    if (countEl) {
+      var text = countEl.textContent.trim();
+      this.speak(text);
+      this.showToast(text, 'info');
+    } else {
+      this.speak('No result count found on this page');
+      this.showToast('Not on a browse page', 'warning');
+    }
+  }
+
+  /**
+   * Auto-announce page context on load (for blind users).
+   * Only speaks if voice was recently active (not on every cold page load).
+   */
+  _announcePageContext() {
+    // Only auto-announce if the user has previously activated voice in this session
+    if (!sessionStorage.getItem('ahg_voice_active')) return;
+
+    var path = window.location.pathname;
+    var ctx = AHGVoiceCommands.detectContext();
+    var announcement = '';
+
+    if (path === '/' || path === '/index.php') {
+      announcement = 'Homepage loaded. Say a command or say help for options.';
+    } else if (ctx.browse) {
+      var countEl = document.querySelector('.result-count');
+      var count = countEl ? countEl.textContent.trim() : '';
+      announcement = 'Browse page loaded. ' + count + '. Say "first result" to open the first item.';
+    } else if (ctx.edit) {
+      var title = this._getPageTitle();
+      announcement = 'Edit page loaded' + (title ? ' for ' + title : '') + '. Say "save" when done.';
+    } else if (ctx.view) {
+      var title = this._getPageTitle();
+      announcement = 'Record loaded' + (title ? ': ' + title : '') + '.';
+    }
+
+    if (announcement) {
+      this.speak(announcement);
     }
   }
 
@@ -1077,6 +1329,54 @@ class AHGVoiceCommands {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
+  }
+
+  _loadSettings() {
+    var self = this;
+    fetch('/index.php/ahgVoice/getSettings', { credentials: 'same-origin' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (!data.success) return;
+        var s = data.settings;
+        if (s.voice_enabled === 'false') {
+            document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
+            return;
+        }
+        if (s.voice_language) { self.language = s.voice_language; if (self.recognition) self.recognition.lang = s.voice_language; }
+        if (s.voice_confidence_threshold) self.confidenceThreshold = parseFloat(s.voice_confidence_threshold);
+        if (s.voice_speech_rate) self.speechRate = parseFloat(s.voice_speech_rate);
+        if (s.voice_show_floating_btn === 'false' && self.floatingBtn) self.floatingBtn.style.display = 'none';
+        if (s.voice_continuous_listening === 'true') self._continuousMode = true;
+        console.log('[Voice] Settings loaded:', s);
+    })
+    .catch(function(err) { console.log('[Voice] Settings not available, using defaults'); });
+  }
+
+  _findClosestCommand(text, commands) {
+    var bestMatch = null;
+    var bestScore = 0;
+    for (var i = 0; i < commands.length; i++) {
+        var cmd = commands[i];
+        var patterns = cmd.patterns || (cmd.pattern ? [cmd.pattern] : []);
+        for (var j = 0; j < patterns.length; j++) {
+            var p = patterns[j];
+            if (typeof p !== 'string') continue;
+            // Simple contains check
+            if (p.indexOf(text) !== -1 || text.indexOf(p) !== -1) {
+                var score = p.length;
+                if (score > bestScore) { bestScore = score; bestMatch = p; }
+            }
+            // Check word overlap
+            var pWords = p.split(' ');
+            var tWords = text.split(' ');
+            var overlap = 0;
+            for (var k = 0; k < tWords.length; k++) {
+                if (pWords.indexOf(tWords[k]) !== -1) overlap++;
+            }
+            if (overlap > 0 && overlap > bestScore) { bestScore = overlap; bestMatch = p; }
+        }
+    }
+    return bestMatch;
   }
 }
 

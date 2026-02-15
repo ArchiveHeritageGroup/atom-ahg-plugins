@@ -32,6 +32,7 @@ class AhgSettingsSectionAction extends AhgController
         'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
         'portable_export' => ['label' => 'Portable Export', 'icon' => 'fa-compact-disc', 'description' => 'Standalone portable catalogue viewer for offline access'],
         'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'XChaCha20-Poly1305 encryption for digital object files and sensitive database fields'],
+        'voice_ai' => ['label' => 'Voice & AI', 'icon' => 'fa-microphone', 'description' => 'Voice commands, speech recognition, and AI image description settings'],
     ];
 
     protected $checkboxFields = [
@@ -73,6 +74,9 @@ class AhgSettingsSectionAction extends AhgController
             'encryption_field_contact_details', 'encryption_field_financial_data',
             'encryption_field_donor_information', 'encryption_field_personal_notes',
             'encryption_field_access_restrictions',
+        ],
+        'voice_ai' => [
+            'voice_enabled', 'voice_continuous_listening', 'voice_show_floating_btn', 'voice_audit_ai_calls',
         ],
     ];
 

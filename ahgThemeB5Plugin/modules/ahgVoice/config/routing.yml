@@ -9,3 +9,7 @@ ahg_voice_save_description:
   param: { module: ahgVoice, action: saveDescription }
   requirements:
     sf_method: [POST]
+
+ahg_voice_get_settings:
+  url: /ahgVoice/getSettings
+  param: { module: ahgVoice, action: getSettings }

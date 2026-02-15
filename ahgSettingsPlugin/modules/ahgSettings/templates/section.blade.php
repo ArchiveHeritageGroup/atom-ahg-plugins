@@ -1708,6 +1708,172 @@
                                 </div>
                             @break
 
+                            @case('voice_ai')
+                                <!-- Voice Commands -->
+                                <fieldset class="mb-4">
+                                    <legend><i class="fas fa-microphone me-2"></i>{{ __('Voice Commands') }}</legend>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="voice_enabled"
+                                                       name="settings[voice_enabled]" value="true"
+                                                       {{ ($settings['voice_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="voice_enabled">
+                                                    <strong>{{ __('Enable Voice Commands') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Allow users to navigate and control the application using voice commands.') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_language">{{ __('Voice Language') }}</label>
+                                            <select class="form-select" id="voice_language" name="settings[voice_language]">
+                                                <option value="en-US" {{ ($settings['voice_language'] ?? 'en-US') === 'en-US' ? 'selected' : '' }}>English (US)</option>
+                                                <option value="en-GB" {{ ($settings['voice_language'] ?? '') === 'en-GB' ? 'selected' : '' }}>English (UK)</option>
+                                                <option value="af-ZA" {{ ($settings['voice_language'] ?? '') === 'af-ZA' ? 'selected' : '' }}>Afrikaans</option>
+                                                <option value="zu-ZA" {{ ($settings['voice_language'] ?? '') === 'zu-ZA' ? 'selected' : '' }}>isiZulu</option>
+                                                <option value="xh-ZA" {{ ($settings['voice_language'] ?? '') === 'xh-ZA' ? 'selected' : '' }}>isiXhosa</option>
+                                                <option value="st-ZA" {{ ($settings['voice_language'] ?? '') === 'st-ZA' ? 'selected' : '' }}>Sesotho</option>
+                                                <option value="fr-FR" {{ ($settings['voice_language'] ?? '') === 'fr-FR' ? 'selected' : '' }}>French</option>
+                                                <option value="pt-PT" {{ ($settings['voice_language'] ?? '') === 'pt-PT' ? 'selected' : '' }}>Portuguese</option>
+                                                <option value="es-ES" {{ ($settings['voice_language'] ?? '') === 'es-ES' ? 'selected' : '' }}>Spanish</option>
+                                                <option value="de-DE" {{ ($settings['voice_language'] ?? '') === 'de-DE' ? 'selected' : '' }}>German</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_confidence_threshold">{{ __('Confidence Threshold') }}: <span id="voice_confidence_threshold_val">{{ $settings['voice_confidence_threshold'] ?? '0.4' }}</span></label>
+                                            <input type="range" class="form-range" id="voice_confidence_threshold"
+                                                   name="settings[voice_confidence_threshold]"
+                                                   min="0.3" max="0.95" step="0.05"
+                                                   value="{{ $settings['voice_confidence_threshold'] ?? '0.4' }}"
+                                                   oninput="document.getElementById('voice_confidence_threshold_val').textContent=this.value">
+                                            <div class="form-text">{{ __('Minimum confidence score for voice recognition (0.3 = lenient, 0.95 = strict).') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_speech_rate">{{ __('Speech Rate') }}: <span id="voice_speech_rate_val">{{ $settings['voice_speech_rate'] ?? '1.0' }}</span></label>
+                                            <input type="range" class="form-range" id="voice_speech_rate"
+                                                   name="settings[voice_speech_rate]"
+                                                   min="0.5" max="2.0" step="0.1"
+                                                   value="{{ $settings['voice_speech_rate'] ?? '1.0' }}"
+                                                   oninput="document.getElementById('voice_speech_rate_val').textContent=this.value">
+                                            <div class="form-text">{{ __('Text-to-speech playback rate (0.5 = slow, 2.0 = fast).') }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="voice_continuous_listening"
+                                                       name="settings[voice_continuous_listening]" value="true"
+                                                       {{ ($settings['voice_continuous_listening'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="voice_continuous_listening">
+                                                    <strong>{{ __('Continuous Listening') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Keep microphone active after each command (no need to re-activate).') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="voice_show_floating_btn"
+                                                       name="settings[voice_show_floating_btn]" value="true"
+                                                       {{ ($settings['voice_show_floating_btn'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="voice_show_floating_btn">
+                                                    <strong>{{ __('Show Floating Mic Button') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Display a floating microphone button on all pages for quick voice activation.') }}</div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- AI Image Description -->
+                                <fieldset class="mb-4">
+                                    <legend><i class="fas fa-brain me-2"></i>{{ __('AI Image Description') }}</legend>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_llm_provider">{{ __('LLM Provider') }}</label>
+                                            <select class="form-select" id="voice_llm_provider" name="settings[voice_llm_provider]">
+                                                <option value="local" {{ ($settings['voice_llm_provider'] ?? '') === 'local' ? 'selected' : '' }}>{{ __('Local Only') }}</option>
+                                                <option value="cloud" {{ ($settings['voice_llm_provider'] ?? '') === 'cloud' ? 'selected' : '' }}>{{ __('Cloud Only') }}</option>
+                                                <option value="hybrid" {{ ($settings['voice_llm_provider'] ?? 'hybrid') === 'hybrid' ? 'selected' : '' }}>{{ __('Hybrid (Local + Cloud Fallback)') }}</option>
+                                            </select>
+                                            <div class="form-text">{{ __('Choose where AI image descriptions are processed.') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="voice_daily_cloud_limit">{{ __('Daily Cloud Limit') }}</label>
+                                            <input type="number" class="form-control" id="voice_daily_cloud_limit"
+                                                   name="settings[voice_daily_cloud_limit]"
+                                                   value="{{ e($settings['voice_daily_cloud_limit'] ?? '50') }}" min="0" max="10000">
+                                            <div class="form-text">{{ __('Maximum cloud API calls per day (0 = unlimited).') }}</div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    <h6 class="mb-3">{{ __('Local LLM Settings') }}</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="voice_local_llm_url">{{ __('Local LLM URL') }}</label>
+                                            <input type="text" class="form-control" id="voice_local_llm_url"
+                                                   name="settings[voice_local_llm_url]"
+                                                   value="{{ e($settings['voice_local_llm_url'] ?? 'http://localhost:11434') }}"
+                                                   placeholder="http://localhost:11434">
+                                            <div class="form-text">{{ __('Ollama or compatible API endpoint.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="voice_local_llm_model">{{ __('Local LLM Model') }}</label>
+                                            <input type="text" class="form-control" id="voice_local_llm_model"
+                                                   name="settings[voice_local_llm_model]"
+                                                   value="{{ e($settings['voice_local_llm_model'] ?? 'llava:7b') }}"
+                                                   placeholder="llava:7b">
+                                            <div class="form-text">{{ __('Vision-capable model name (e.g. llava:7b, bakllava).') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="voice_local_llm_timeout">{{ __('Timeout (seconds)') }}</label>
+                                            <input type="number" class="form-control" id="voice_local_llm_timeout"
+                                                   name="settings[voice_local_llm_timeout]"
+                                                   value="{{ e($settings['voice_local_llm_timeout'] ?? '30') }}" min="5" max="300">
+                                            <div class="form-text">{{ __('Request timeout for local LLM API calls.') }}</div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    <h6 class="mb-3">{{ __('Cloud LLM Settings') }}</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="voice_anthropic_api_key">{{ __('Anthropic API Key') }}</label>
+                                            <input type="password" class="form-control" id="voice_anthropic_api_key"
+                                                   name="settings[voice_anthropic_api_key]"
+                                                   value="{{ e($settings['voice_anthropic_api_key'] ?? '') }}"
+                                                   placeholder="sk-ant-...">
+                                            <div class="form-text">{{ __('API key for Claude cloud vision. Stored encrypted.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="voice_cloud_model">{{ __('Cloud Model') }}</label>
+                                            <input type="text" class="form-control" id="voice_cloud_model"
+                                                   name="settings[voice_cloud_model]"
+                                                   value="{{ e($settings['voice_cloud_model'] ?? 'claude-sonnet-4-20250514') }}"
+                                                   placeholder="claude-sonnet-4-20250514">
+                                            <div class="form-text">{{ __('Anthropic model ID for image descriptions.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mt-4">
+                                                <input class="form-check-input" type="checkbox" id="voice_audit_ai_calls"
+                                                       name="settings[voice_audit_ai_calls]" value="true"
+                                                       {{ ($settings['voice_audit_ai_calls'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="voice_audit_ai_calls">
+                                                    <strong>{{ __('Audit AI Calls') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Log all AI image description requests to the audit trail.') }}</div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->
