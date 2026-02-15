@@ -26,15 +26,28 @@ CREATE TABLE IF NOT EXISTS dam_iptc_metadata (
     keywords TEXT,
     iptc_subject_code VARCHAR(255) DEFAULT NULL,
     intellectual_genre VARCHAR(255) DEFAULT NULL,
+    asset_type VARCHAR(100) DEFAULT NULL COMMENT 'PBCore: Documentary, Feature, Short, News, etc.',
+    genre VARCHAR(255) DEFAULT NULL COMMENT 'Film genre: Documentary, Drama, etc.',
+    contributors_json JSON DEFAULT NULL COMMENT 'Structured credits: [{role, name}]',
+    color_type ENUM('color','black_and_white','mixed','colorized') DEFAULT NULL COMMENT 'Color or B&W',
+    audio_language VARCHAR(255) DEFAULT NULL COMMENT 'Audio language(s) - ISO codes',
+    subtitle_language VARCHAR(255) DEFAULT NULL COMMENT 'Subtitle language(s)',
+    production_company VARCHAR(500) DEFAULT NULL COMMENT 'Production company/studio',
+    distributor VARCHAR(500) DEFAULT NULL COMMENT 'Distributor/Broadcaster',
+    broadcast_date VARCHAR(100) DEFAULT NULL,
+    awards TEXT COMMENT 'Awards and nominations',
+    series_title VARCHAR(500) DEFAULT NULL COMMENT 'If part of a series',
+    episode_number VARCHAR(50) DEFAULT NULL COMMENT 'Episode number if applicable',
+    season_number VARCHAR(50) DEFAULT NULL COMMENT 'Season number if applicable',
     iptc_scene VARCHAR(255) DEFAULT NULL,
     date_created DATE DEFAULT NULL,
     city VARCHAR(255) DEFAULT NULL,
     state_province VARCHAR(255) DEFAULT NULL,
     country VARCHAR(255) DEFAULT NULL,
     country_code VARCHAR(10) DEFAULT NULL,
-    sublocation VARCHAR(500) DEFAULT NULL,
     production_country VARCHAR(100) DEFAULT NULL COMMENT 'Country where film/video was produced',
     production_country_code CHAR(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 production country code',
+    sublocation VARCHAR(500) DEFAULT NULL,
     title VARCHAR(500) DEFAULT NULL,
     job_id VARCHAR(255) DEFAULT NULL,
     instructions TEXT,
@@ -54,19 +67,6 @@ CREATE TABLE IF NOT EXISTS dam_iptc_metadata (
     artwork_date VARCHAR(100) DEFAULT NULL,
     artwork_source VARCHAR(500) DEFAULT NULL,
     artwork_copyright TEXT,
-    asset_type VARCHAR(50) DEFAULT NULL,
-    genre VARCHAR(255) DEFAULT NULL,
-    color_type VARCHAR(50) DEFAULT NULL,
-    audio_language VARCHAR(255) DEFAULT NULL,
-    subtitle_language VARCHAR(255) DEFAULT NULL,
-    production_company VARCHAR(255) DEFAULT NULL,
-    distributor VARCHAR(255) DEFAULT NULL,
-    broadcast_date DATE DEFAULT NULL,
-    awards TEXT,
-    series_title VARCHAR(255) DEFAULT NULL,
-    season_number INT DEFAULT NULL,
-    episode_number INT DEFAULT NULL,
-    contributors_json JSON DEFAULT NULL,
     persons_shown TEXT,
     camera_make VARCHAR(100) DEFAULT NULL,
     camera_model VARCHAR(100) DEFAULT NULL,
@@ -93,7 +93,11 @@ CREATE TABLE IF NOT EXISTS dam_iptc_metadata (
     UNIQUE KEY object_id (object_id),
     KEY idx_creator (creator),
     KEY idx_keywords (keywords(255)),
-    KEY idx_date_created (date_created)
+    KEY idx_date_created (date_created),
+    KEY idx_asset_type (asset_type),
+    KEY idx_genre (genre),
+    KEY idx_production_company (production_company(100)),
+    KEY idx_broadcast_date (broadcast_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -361,3 +365,83 @@ INSERT INTO term_i18n (id, culture, name)
 SELECT @data_id, 'en', 'Dataset' FROM DUAL WHERE @data_exists IS NULL;
 INSERT IGNORE INTO slug (object_id, slug) VALUES (@data_id, 'level-dataset');
 INSERT IGNORE INTO level_of_description_sector (term_id, sector, display_order) VALUES (@data_id, 'dam', 70);
+
+-- =====================================================
+-- DAM External Links
+-- =====================================================
+CREATE TABLE IF NOT EXISTS dam_external_links (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    object_id INT NOT NULL,
+    link_type ENUM(
+        'ESAT','IMDb','SAFILM','NFVSA','Wikipedia','Wikidata','VIAF',
+        'YouTube','Vimeo','Archive_org','BFI','AFI','Letterboxd','MUBI',
+        'Filmography','Review','Academic','Press','Other'
+    ) NOT NULL DEFAULT 'Other',
+    url VARCHAR(500) NOT NULL,
+    title VARCHAR(255) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    person_name VARCHAR(255) DEFAULT NULL,
+    person_role VARCHAR(100) DEFAULT NULL,
+    verified_date DATE DEFAULT NULL,
+    is_primary TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_object (object_id),
+    KEY idx_link_type (link_type),
+    KEY idx_person (person_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- DAM Format Holdings
+-- =====================================================
+CREATE TABLE IF NOT EXISTS dam_format_holdings (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    object_id INT NOT NULL,
+    format_type ENUM(
+        '35mm','16mm','8mm','Super8','VHS','Betacam','U-matic','DV','DVD',
+        'Blu-ray','LaserDisc','Digital_File','DCP','ProRes','Nitrate','Safety',
+        'Polyester','Audio_Reel','Audio_Cassette','Vinyl','CD','Other'
+    ) NOT NULL DEFAULT 'Other',
+    format_details VARCHAR(255) DEFAULT NULL,
+    holding_institution VARCHAR(255) DEFAULT NULL,
+    holding_location VARCHAR(255) DEFAULT NULL,
+    accession_number VARCHAR(100) DEFAULT NULL,
+    condition_status ENUM('excellent','good','fair','poor','deteriorating','unknown') DEFAULT 'unknown',
+    access_status ENUM('available','restricted','preservation_only','digitized_available','on_request','staff_only','unknown') DEFAULT 'unknown',
+    access_url VARCHAR(500) DEFAULT NULL,
+    access_notes TEXT DEFAULT NULL,
+    is_primary TINYINT(1) DEFAULT 0,
+    verified_date DATE DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_object (object_id),
+    KEY idx_format_type (format_type),
+    KEY idx_institution (holding_institution),
+    KEY idx_condition (condition_status),
+    KEY idx_access (access_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- DAM Version Links
+-- =====================================================
+CREATE TABLE IF NOT EXISTS dam_version_links (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    object_id INT NOT NULL,
+    related_object_id INT NOT NULL,
+    version_type ENUM('language','format','restoration','directors_cut','censored','other') NOT NULL DEFAULT 'language',
+    title VARCHAR(255) DEFAULT NULL,
+    language_code CHAR(3) DEFAULT NULL,
+    language_name VARCHAR(50) DEFAULT NULL,
+    year VARCHAR(10) DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_object (object_id),
+    KEY idx_related (related_object_id),
+    KEY idx_version_type (version_type),
+    KEY idx_language (language_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

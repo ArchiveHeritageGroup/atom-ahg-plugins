@@ -136,15 +136,14 @@ CREATE TABLE IF NOT EXISTS ahg_semantic_search_log (
 -- DEFAULT SETTINGS
 -- =====================================================
 
-INSERT INTO ahg_semantic_search_settings (setting_key, setting_value, setting_type, description) VALUES
-('semantic_search_enabled', '1', 'bool', 'Enable semantic search functionality'),
+INSERT IGNORE INTO ahg_semantic_search_settings (setting_key, setting_value, setting_type, description) VALUES
+('semantic_search_enabled', 'true', 'bool', 'Enable semantic search functionality'),
 ('default_expansion_limit', '5', 'int', 'Maximum number of synonyms to expand per term'),
 ('min_synonym_weight', '0.6', 'string', 'Minimum weight threshold for synonym inclusion'),
-('datamuse_rate_limit_ms', '100', 'int', 'Rate limit for Datamuse API calls in milliseconds'),
-('wikidata_rate_limit_ms', '500', 'int', 'Rate limit for Wikidata API calls in milliseconds'),
 ('ollama_endpoint', 'http://localhost:11434', 'string', 'Ollama API endpoint'),
 ('ollama_model', 'nomic-embed-text', 'string', 'Ollama model for embeddings'),
-('elasticsearch_synonyms_path', '/etc/elasticsearch/synonyms/ahg_synonyms.txt', 'string', 'Path to Elasticsearch synonyms file'),
 ('show_expansion_info', '1', 'bool', 'Show query expansion info to users'),
-('cache_ttl_seconds', '86400', 'int', 'Cache TTL for API responses (24 hours)')
-ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
+('cache_ttl_seconds', '86400', 'int', 'Cache TTL for API responses'),
+('wordnet_enabled', 'true', 'boolean', NULL),
+('wikidata_enabled', 'true', 'boolean', NULL),
+('embedding_enabled', 'true', 'boolean', NULL);

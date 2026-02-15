@@ -53,6 +53,15 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         // API Keys
         $router->any('ahg_settings_api_keys', '/admin/ahg-settings/api-keys', 'apiKeys');
 
+        // Webhooks
+        $router->any('admin_ahg_settings_webhooks', '/admin/ahg-settings/webhooks', 'webhooks');
+
+        // TTS
+        $router->any('admin_ahg_settings_tts', '/admin/ahg-settings/tts', 'tts');
+
+        // AHG Integration
+        $router->any('admin_ahg_settings_ahg_integration', '/admin/ahg-settings/ahg-integration', 'ahgIntegration');
+
         // Preservation settings
         $router->any('ahg_settings_preservation', '/ahgSettings/preservation', 'preservation');
 
