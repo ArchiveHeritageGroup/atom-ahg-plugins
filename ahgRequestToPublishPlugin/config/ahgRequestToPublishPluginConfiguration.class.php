@@ -42,6 +42,10 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
         // Admin browse route (most specific, prepend last = matched first)
         $router->any('requesttopublish_browse', '/requesttopublish/browse', 'browse');
 
+        // Default route: /requesttopublish and /requesttopublish/ → browse
+        $router->any('requesttopublish_index', '/requesttopublish', 'browse');
+        $router->any('requesttopublish_index_slash', '/requesttopublish/', 'browse');
+
         $router->register($event->getSubject());
     }
 }

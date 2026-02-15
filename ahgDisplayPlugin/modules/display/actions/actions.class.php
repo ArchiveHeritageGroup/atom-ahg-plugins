@@ -53,13 +53,15 @@ class displayActions extends AhgController
     {
         // Check if user is authenticated (can see drafts)
         $this->isAuthenticated = $this->getContext()->getUser()->isAuthenticated();
-        
+
         // Get all filter parameters
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
         $this->topLevelOnly = $request->getParameter('topLevel', '1');
         $this->page = max(1, (int) $request->getParameter('page', 1));
-        $this->limit = (int) $request->getParameter('limit', $this->config('app_hits_per_page', 30));
+        // Read limit from raw GET: QubitLimitResults filter caps $request->limit
+        // to app_hits_per_page, but display browse has its own 10-100 range control.
+        $this->limit = isset($_GET['limit']) ? (int) $_GET['limit'] : (int) $this->config('app_hits_per_page', 30);
         if ($this->limit < 10) $this->limit = 10;
         if ($this->limit > 100) $this->limit = 100;
         $this->sort = $request->getParameter('sort', 'date');

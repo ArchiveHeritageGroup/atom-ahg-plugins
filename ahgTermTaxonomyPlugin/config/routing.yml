@@ -12,6 +12,7 @@ term_delete_override:
 
 term_add:
   url: /term/add
+  class: AddActionRoute
   param: { module: term, action: edit }
 
 term_browse_override:

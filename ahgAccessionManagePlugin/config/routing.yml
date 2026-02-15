@@ -20,6 +20,7 @@ accession_edit_override:
 # Specific routes LAST in file = checked FIRST after prepending
 accession_add_override:
   url: /accession/add
+  class: AddActionRoute
   param: { module: accession, action: edit }
 
 accession_browse_override:

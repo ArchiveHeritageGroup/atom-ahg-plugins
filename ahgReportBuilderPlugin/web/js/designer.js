@@ -15,6 +15,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         initColumnSelection();
         initColumnOrdering();
+        initRemoveButtons();
         initLayoutBlocks();
         initSaveButton();
         initQuickPreview();
@@ -52,6 +53,28 @@
                 });
             });
         }
+    }
+
+    /**
+     * Initialize remove buttons for server-rendered column items
+     */
+    function initRemoveButtons() {
+        var container = document.getElementById('selectedColumns');
+        if (!container) return;
+        container.querySelectorAll('.btn-remove-column').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var li = this.closest('li');
+                if (!li) return;
+                var column = li.dataset.column;
+                removeSelectedColumn(column);
+                var checkbox = document.querySelector('.column-checkbox[value="' + column + '"]');
+                if (checkbox) checkbox.checked = false;
+                markDirty();
+                updatePreviewHeaders();
+            });
+        });
     }
 
     /**
@@ -115,16 +138,20 @@
 
     /**
      * Initialize column ordering with SortableJS
-     * Uses retry mechanism to wait for SortableJS CDN to load
      */
+    var _sortableRetries = 0;
     function initColumnOrdering() {
         const container = document.getElementById('selectedColumns');
         if (!container) return;
 
-        // Retry if Sortable is not loaded yet
+        // Retry if Sortable is not loaded yet (max 30 retries = 3 seconds)
         if (typeof Sortable === 'undefined') {
-            console.log('SortableJS not loaded yet, retrying...');
-            setTimeout(initColumnOrdering, 100);
+            _sortableRetries++;
+            if (_sortableRetries < 30) {
+                setTimeout(initColumnOrdering, 100);
+            } else {
+                console.error('SortableJS failed to load after 3 seconds');
+            }
             return;
         }
 

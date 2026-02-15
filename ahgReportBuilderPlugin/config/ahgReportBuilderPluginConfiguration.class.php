@@ -46,6 +46,7 @@ class ahgReportBuilderPluginConfiguration extends sfPluginConfiguration
         // ========================================
         // Query API routes
         // ========================================
+        $router->any('report_builder_api_query_relationships', '/api/report-builder/query/relationships/:table', 'apiQueryRelationships');
         $router->any('report_builder_api_query_columns', '/api/report-builder/query/columns/:table', 'apiQueryColumns');
         $router->any('report_builder_api_query_tables', '/api/report-builder/query/tables', 'apiQueryTables');
         $router->any('report_builder_api_query_validate', '/api/report-builder/query/validate', 'apiQueryValidate');

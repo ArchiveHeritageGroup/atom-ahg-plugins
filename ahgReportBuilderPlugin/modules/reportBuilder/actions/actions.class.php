@@ -1533,6 +1533,27 @@ class reportBuilderActions extends AhgController
         }
     }
 
+    /**
+     * API: Get relationships for a table.
+     */
+    public function executeApiQueryRelationships($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        try {
+            $table = $request->getParameter('table', '');
+
+            $this->loadService('QueryBuilder');
+            $queryBuilder = new QueryBuilder();
+            $relationships = $queryBuilder->getRelationships($table);
+
+            return $this->renderText(json_encode(['success' => true, 'relationships' => $relationships]));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
     // ===================
     // Share Actions (Phase 7)
     // ===================

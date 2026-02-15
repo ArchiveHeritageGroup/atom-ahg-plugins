@@ -44,8 +44,13 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         $accession->any('accession_view_override', '/accession/:slug', 'index', ['slug' => '[a-zA-Z0-9_.-]+']);
         $accession->any('accession_delete_override', '/accession/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_.-]+']);
         $accession->any('accession_edit_override', '/accession/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_.-]+']);
-        $accession->any('accession_add_override', '/accession/add', 'edit');
         $accession->register($routing);
+
+        // Add route uses AddActionRoute to prevent stealing edit/view URLs
+        $routing->prependRoute('accession_add_override', new \AddActionRoute(
+            '/accession/add',
+            ['module' => 'accession', 'action' => 'edit']
+        ));
 
         // accessionManage module routes (specific routes registered last = checked first)
         $manage = new \AtomFramework\Routing\RouteLoader('accessionManage');

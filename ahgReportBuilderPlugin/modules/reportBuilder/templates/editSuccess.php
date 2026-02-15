@@ -474,13 +474,13 @@ window.reportBuilder = {
 <!-- Section editor styles -->
 <link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/report-sections.css">
 
-<!-- Quill.js CDN -->
-<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+<!-- Quill.js (local copies) -->
+<link href="/plugins/ahgReportBuilderPlugin/web/css/quill.snow.css" rel="stylesheet">
+<script src="/plugins/ahgReportBuilderPlugin/web/js/quill.js"></script>
 
-<!-- Load CDN libraries -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Load libraries (local copies to avoid CDN/CSP issues) -->
+<script src="/plugins/ahgReportBuilderPlugin/web/js/sortable.min.js"></script>
+<script src="/plugins/ahgReportBuilderPlugin/web/js/chart.umd.min.js"></script>
 
 <!-- Quill init (must load after Quill CDN) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/quill-init.js"></script>

@@ -31,16 +31,20 @@ $rawReport = $sf_data->getRaw('report');
 <!-- Query Builder Container -->
 <div id="queryBuilderContainer"></div>
 
+<!-- Load query builder JS -->
+<script src="/plugins/ahgReportBuilderPlugin/web/js/query-builder.js"></script>
+
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.QueryBuilderUI !== 'undefined') {
         window.QueryBuilderUI.init('queryBuilderContainer', {
-            tables: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiTables']); ?>',
-            columns: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiColumns']); ?>',
-            execute: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiExecuteQuery']); ?>',
-            save: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiSaveQuery']); ?>',
-            load: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiSavedQueries', 'report_id' => $rawReport->id]); ?>',
-            delete: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiDeleteQuery']); ?>'
+            tables: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiQueryTables']); ?>',
+            columns: '/index.php/api/report-builder/query/columns',
+            relationships: '/index.php/api/report-builder/query/relationships',
+            execute: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiQueryExecute']); ?>',
+            save: '<?php echo url_for(['module' => 'reportBuilder', 'action' => 'apiQuerySave']); ?>',
+            load: '',
+            delete: ''
         });
     } else {
         console.error('QueryBuilderUI not loaded. Ensure query-builder.js is included.');
