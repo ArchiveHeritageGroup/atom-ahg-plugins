@@ -1,0 +1,11 @@
+ahg_voice_describe:
+  url: /ahgVoice/describeImage
+  param: { module: ahgVoice, action: describeImage }
+  requirements:
+    sf_method: [POST]
+
+ahg_voice_save_description:
+  url: /ahgVoice/saveDescription
+  param: { module: ahgVoice, action: saveDescription }
+  requirements:
+    sf_method: [POST]

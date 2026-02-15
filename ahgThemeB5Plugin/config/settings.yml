@@ -23,6 +23,7 @@ all:
       - taxonomy
       - term
       - user
+      - ahgVoice
 
 vendor:
   enabled_modules: [vendor]
