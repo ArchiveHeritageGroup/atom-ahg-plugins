@@ -169,13 +169,11 @@ class QueryBuilder
      */
     public function executeRawSql(string $sql, array $params = [], ?int $userId = null): array
     {
-        // Validate user is administrator
+        // Validate user is administrator (group_id 100 = administrator)
         if ($userId !== null) {
-            $isAdmin = DB::table('user')
-                ->join('aclUserGroup as aug', 'user.id', '=', 'aug.userId')
-                ->join('aclGroup as ag', 'aug.groupId', '=', 'ag.id')
-                ->where('user.id', $userId)
-                ->where('ag.name', 'administrator')
+            $isAdmin = DB::table('acl_user_group')
+                ->where('user_id', $userId)
+                ->where('group_id', 100)
                 ->exists();
 
             if (!$isAdmin) {
@@ -258,6 +256,124 @@ class QueryBuilder
     }
 
     /**
+     * Known table relationships for visual join builder.
+     * Format: 'table' => [ ['table' => 'target', 'from' => 'local_col', 'to' => 'remote_col', 'type' => 'left|inner', 'label' => 'description'] ]
+     *
+     * @var array<string, array>
+     */
+    private static array $relationships = [
+        'information_object' => [
+            ['table' => 'information_object_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'digital_object', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Digital objects'],
+            ['table' => 'slug', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'URL slug'],
+            ['table' => 'status', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Publication status'],
+            ['table' => 'event', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Events (dates)'],
+            ['table' => 'note', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Notes'],
+            ['table' => 'relation', 'from' => 'id', 'to' => 'subject_id', 'type' => 'left', 'label' => 'Relations (subject)'],
+            ['table' => 'property', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Properties'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object (timestamps)'],
+        ],
+        'actor' => [
+            ['table' => 'actor_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'slug', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'URL slug'],
+            ['table' => 'contact_information', 'from' => 'id', 'to' => 'actor_id', 'type' => 'left', 'label' => 'Contact info'],
+            ['table' => 'event', 'from' => 'id', 'to' => 'actor_id', 'type' => 'left', 'label' => 'Events'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'repository' => [
+            ['table' => 'repository_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'slug', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'URL slug'],
+            ['table' => 'contact_information', 'from' => 'id', 'to' => 'actor_id', 'type' => 'left', 'label' => 'Contact info'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'accession' => [
+            ['table' => 'accession_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'slug', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'URL slug'],
+            ['table' => 'relation', 'from' => 'id', 'to' => 'subject_id', 'type' => 'left', 'label' => 'Relations'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'term' => [
+            ['table' => 'term_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'taxonomy', 'from' => 'taxonomy_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Taxonomy'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'taxonomy' => [
+            ['table' => 'taxonomy_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'term', 'from' => 'id', 'to' => 'taxonomy_id', 'type' => 'left', 'label' => 'Terms'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'digital_object' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Parent description'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'event' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'actor', 'from' => 'actor_id', 'to' => 'id', 'type' => 'left', 'label' => 'Actor'],
+            ['table' => 'term', 'from' => 'type_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Event type'],
+        ],
+        'relation' => [
+            ['table' => 'term', 'from' => 'type_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Relation type'],
+        ],
+        'note' => [
+            ['table' => 'note_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'term', 'from' => 'type_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Note type'],
+        ],
+        'rights' => [
+            ['table' => 'rights_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'rights_holder', 'from' => 'rights_holder_id', 'to' => 'id', 'type' => 'left', 'label' => 'Rights holder'],
+        ],
+        'physical_object' => [
+            ['table' => 'physical_object_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'relation', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Linked records'],
+            ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object'],
+        ],
+        'property' => [
+            ['table' => 'property_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+        ],
+        'status' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'term', 'from' => 'status_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Status term'],
+        ],
+        'user' => [
+            ['table' => 'actor', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Actor record'],
+        ],
+        'donor' => [
+            ['table' => 'actor', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Actor record'],
+            ['table' => 'contact_information', 'from' => 'id', 'to' => 'actor_id', 'type' => 'left', 'label' => 'Contact info'],
+        ],
+        'rights_holder' => [
+            ['table' => 'actor', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Actor record'],
+        ],
+        'contact_information' => [
+            ['table' => 'actor', 'from' => 'actor_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Actor'],
+        ],
+    ];
+
+    /**
+     * Get relationships for a specific table.
+     *
+     * @param string $tableName The table name
+     *
+     * @return array The relationships
+     */
+    public function getRelationships(string $tableName): array
+    {
+        return self::$relationships[$tableName] ?? [];
+    }
+
+    /**
+     * Get all relationships (for relationship diagram).
+     *
+     * @return array All table relationships
+     */
+    public function getAllRelationships(): array
+    {
+        return self::$relationships;
+    }
+
+    /**
      * Get the list of available database tables for querying.
      *
      * @return array The available tables
@@ -291,17 +407,17 @@ class QueryBuilder
     }
 
     /**
-     * Get columns for a specific table.
+     * Get columns for a specific table, enriched with friendly labels from ColumnDiscovery.
      *
      * @param string $tableName The table name
      *
-     * @return array The column definitions
+     * @return array The column definitions with labels
      */
     public function getTableColumns(string $tableName): array
     {
         $dbName = DB::connection()->getDatabaseName();
 
-        return DB::select(
+        $columns = DB::select(
             'SELECT COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, IS_NULLABLE,
                     COLUMN_DEFAULT, COLUMN_KEY, COLUMN_COMMENT
              FROM information_schema.COLUMNS
@@ -309,6 +425,65 @@ class QueryBuilder
              ORDER BY ORDINAL_POSITION',
             [$dbName, $tableName]
         );
+
+        // Enrich with friendly labels from ColumnDiscovery
+        $labels = $this->getColumnLabels($tableName);
+        foreach ($columns as &$col) {
+            $colName = $col->COLUMN_NAME;
+            $col->label = $labels[$colName] ?? null;
+        }
+
+        return $columns;
+    }
+
+    /**
+     * Get friendly column labels for a table from ColumnDiscovery.
+     *
+     * Maps table names to their ColumnDiscovery data source definitions.
+     * For i18n tables (e.g. information_object_i18n), looks up the 'i18n' section
+     * of the parent table.
+     *
+     * @param string $tableName The database table name
+     *
+     * @return array<string, string> Map of column_name => friendly label
+     */
+    private function getColumnLabels(string $tableName): array
+    {
+        if (!class_exists('ColumnDiscovery')) {
+            $path = dirname(__FILE__) . '/ColumnDiscovery.php';
+            if (file_exists($path)) {
+                require_once $path;
+            } else {
+                return [];
+            }
+        }
+
+        $labels = [];
+
+        // Check if this is an i18n table (e.g. information_object_i18n → information_object)
+        $isI18n = str_ends_with($tableName, '_i18n');
+        $baseTable = $isI18n ? substr($tableName, 0, -5) : $tableName;
+
+        try {
+            $columns = ColumnDiscovery::getColumns($baseTable);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        if (empty($columns)) {
+            return [];
+        }
+
+        foreach ($columns as $colName => $config) {
+            $source = $config['source'] ?? 'main';
+            if ($isI18n && $source === 'i18n') {
+                $labels[$colName] = $config['label'] ?? null;
+            } elseif (!$isI18n && ($source === 'main' || $source === 'object')) {
+                $labels[$colName] = $config['label'] ?? null;
+            }
+        }
+
+        return $labels;
     }
 
     /**
@@ -404,13 +579,11 @@ class QueryBuilder
             return false;
         }
 
-        // Check ownership or admin
+        // Check ownership or admin (group_id 100 = administrator)
         if ((int) $query->created_by !== $userId) {
-            $isAdmin = DB::table('user')
-                ->join('aclUserGroup as aug', 'user.id', '=', 'aug.userId')
-                ->join('aclGroup as ag', 'aug.groupId', '=', 'ag.id')
-                ->where('user.id', $userId)
-                ->where('ag.name', 'administrator')
+            $isAdmin = DB::table('acl_user_group')
+                ->where('user_id', $userId)
+                ->where('group_id', 100)
                 ->exists();
 
             if (!$isAdmin) {

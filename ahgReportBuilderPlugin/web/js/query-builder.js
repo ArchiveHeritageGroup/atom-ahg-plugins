@@ -50,11 +50,15 @@
             this.loadSavedQueries();
         },
 
+        // Track active joins
+        _activeJoins: [],
+
         /**
          * Render the visual query builder panel.
          */
         renderVisualBuilder: function() {
             var self = this;
+            self._activeJoins = [];
             var panel = document.getElementById('qb-visual-panel');
             if (!panel) return;
 
@@ -63,7 +67,7 @@
                     '<div class="card-body">' +
                         '<div class="row g-3">' +
                             '<div class="col-md-6">' +
-                                '<label class="form-label fw-bold">Table</label>' +
+                                '<label class="form-label fw-bold"><i class="bi bi-table me-1"></i>Primary Table</label>' +
                                 '<select class="form-select" id="qb-table-select">' +
                                     '<option value="">-- Select table --</option>' +
                                 '</select>' +
@@ -73,15 +77,20 @@
                                 '<input type="number" class="form-control" id="qb-limit" value="100" min="1" max="10000">' +
                             '</div>' +
                         '</div>' +
+                        // Related Tables panel
+                        '<div class="mt-3" id="qb-relations-wrapper" style="display:none;">' +
+                            '<label class="form-label fw-bold"><i class="bi bi-diagram-3 me-1"></i>Related Tables (Joins)</label>' +
+                            '<div id="qb-relations-list" class="border rounded p-2"></div>' +
+                        '</div>' +
                         '<div class="mt-3">' +
-                            '<label class="form-label fw-bold">Columns</label>' +
-                            '<div id="qb-columns-list" class="border rounded p-2" style="max-height:200px;overflow-y:auto;">' +
+                            '<label class="form-label fw-bold"><i class="bi bi-columns-gap me-1"></i>Columns</label>' +
+                            '<div id="qb-columns-list" class="border rounded p-2" style="max-height:250px;overflow-y:auto;">' +
                                 '<span class="text-muted small">Select a table first</span>' +
                             '</div>' +
                         '</div>' +
                         '<div class="mt-3">' +
                             '<label class="form-label fw-bold d-flex justify-content-between">' +
-                                '<span>Filters</span>' +
+                                '<span><i class="bi bi-funnel me-1"></i>Filters</span>' +
                                 '<button class="btn btn-sm btn-outline-primary" id="qb-add-filter"><i class="bi bi-plus me-1"></i>Add Filter</button>' +
                             '</label>' +
                             '<div id="qb-filters-container"></div>' +
@@ -116,12 +125,15 @@
             // Load tables
             self._loadTables();
 
-            // Bind table change -> load columns
+            // Bind table change -> load columns + relationships
             document.getElementById('qb-table-select').addEventListener('change', function() {
+                self._activeJoins = [];
                 if (this.value) {
                     self._loadColumns(this.value);
+                    self._loadRelationships(this.value);
                 } else {
                     document.getElementById('qb-columns-list').innerHTML = '<span class="text-muted small">Select a table first</span>';
+                    document.getElementById('qb-relations-wrapper').style.display = 'none';
                 }
             });
 
@@ -142,7 +154,6 @@
             document.getElementById('qb-visual-generate-sql').addEventListener('click', function() {
                 var query = self._buildVisualQuery();
                 if (query) {
-                    // Switch to SQL tab and populate
                     var sqlTab = document.getElementById('qb-sql-tab');
                     if (sqlTab) {
                         var tab = new bootstrap.Tab(sqlTab);
@@ -226,7 +237,7 @@
             fetch(self.apiUrls.execute, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: query })
+                body: JSON.stringify({ query_type: 'raw_sql', sql: query })
             })
             .then(function(response) { return response.json(); })
             .then(function(result) {
@@ -462,7 +473,7 @@
 
             columnsContainer.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-            fetch(self.apiUrls.columns + '?table=' + encodeURIComponent(tableName))
+            fetch(self.apiUrls.columns + '/' + encodeURIComponent(tableName))
             .then(function(response) { return response.json(); })
             .then(function(result) {
                 var columns = result.data || result.columns || [];
@@ -485,23 +496,27 @@
                 }
 
                 columns.forEach(function(col) {
-                    var colName = typeof col === 'object' ? col.name : col;
+                    var colName = typeof col === 'object' ? (col.COLUMN_NAME || col.name || col.column_name) : col;
+                    if (!colName) return;
+                    var friendlyLabel = (typeof col === 'object' && col.label) ? col.label : null;
+                    var displayText = friendlyLabel ? friendlyLabel + ' <span class="text-muted">(' + self._escHtml(colName) + ')</span>' : self._escHtml(colName);
+                    var selectText = friendlyLabel ? friendlyLabel + ' (' + colName + ')' : colName;
                     html +=
                         '<div class="form-check mb-1">' +
                             '<input class="form-check-input qb-col-check" type="checkbox" id="qb-col-' + colName + '" value="' + colName + '" checked>' +
-                            '<label class="form-check-label small" for="qb-col-' + colName + '">' + colName + '</label>' +
+                            '<label class="form-check-label small" for="qb-col-' + colName + '">' + displayText + '</label>' +
                         '</div>';
 
                     if (groupBySelect) {
                         var opt = document.createElement('option');
                         opt.value = colName;
-                        opt.textContent = colName;
+                        opt.textContent = selectText;
                         groupBySelect.appendChild(opt);
                     }
                     if (orderBySelect) {
                         var opt2 = document.createElement('option');
                         opt2.value = colName;
-                        opt2.textContent = colName;
+                        opt2.textContent = selectText;
                         orderBySelect.appendChild(opt2);
                     }
                 });
@@ -519,6 +534,192 @@
             .catch(function(err) {
                 columnsContainer.innerHTML = '<span class="text-danger small">Error loading columns</span>';
                 console.error('QueryBuilderUI: load columns error', err);
+            });
+        },
+
+        /**
+         * Load relationships for a table and render the join panel.
+         * @private
+         * @param {string} tableName
+         */
+        _loadRelationships: function(tableName) {
+            var self = this;
+            var wrapper = document.getElementById('qb-relations-wrapper');
+            var container = document.getElementById('qb-relations-list');
+            if (!wrapper || !container || !self.apiUrls.relationships) {
+                if (wrapper) wrapper.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            wrapper.style.display = '';
+
+            fetch(self.apiUrls.relationships + '/' + encodeURIComponent(tableName))
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                var rels = result.relationships || [];
+                if (rels.length === 0) {
+                    wrapper.style.display = 'none';
+                    return;
+                }
+
+                var html = '<div class="d-flex flex-wrap gap-2">';
+                rels.forEach(function(rel, idx) {
+                    var joinType = rel.type === 'inner' ? 'INNER' : 'LEFT';
+                    var badgeClass = rel.type === 'inner' ? 'bg-primary' : 'bg-info text-dark';
+                    html +=
+                        '<div class="form-check form-check-inline mb-0">' +
+                            '<input class="form-check-input qb-join-check" type="checkbox" ' +
+                                'id="qb-join-' + idx + '" ' +
+                                'data-table="' + self._escAttr(rel.table) + '" ' +
+                                'data-from="' + self._escAttr(tableName + '.' + rel.from) + '" ' +
+                                'data-to="' + self._escAttr(rel.table + '.' + rel.to) + '" ' +
+                                'data-join-type="' + joinType + '">' +
+                            '<label class="form-check-label small" for="qb-join-' + idx + '">' +
+                                '<span class="badge ' + badgeClass + ' me-1" style="font-size:0.65rem;">' + joinType + '</span>' +
+                                '<strong>' + self._escHtml(rel.table) + '</strong>' +
+                                '<span class="text-muted ms-1">(' + self._escHtml(rel.label) + ')</span>' +
+                                '<br><code class="text-muted" style="font-size:0.7rem;">' +
+                                    self._escHtml(tableName + '.' + rel.from) + ' = ' + self._escHtml(rel.table + '.' + rel.to) +
+                                '</code>' +
+                            '</label>' +
+                        '</div>';
+                });
+                html += '</div>';
+                container.innerHTML = html;
+
+                // Bind join checkboxes — reload columns when joins change
+                container.querySelectorAll('.qb-join-check').forEach(function(cb) {
+                    cb.addEventListener('change', function() {
+                        self._updateActiveJoins();
+                        self._reloadAllColumns();
+                    });
+                });
+            })
+            .catch(function(err) {
+                wrapper.style.display = 'none';
+                console.error('QueryBuilderUI: load relationships error', err);
+            });
+        },
+
+        /**
+         * Update the active joins array from checked join checkboxes.
+         * @private
+         */
+        _updateActiveJoins: function() {
+            var self = this;
+            self._activeJoins = [];
+            document.querySelectorAll('.qb-join-check:checked').forEach(function(cb) {
+                self._activeJoins.push({
+                    table: cb.dataset.table,
+                    from: cb.dataset.from,
+                    to: cb.dataset.to,
+                    type: cb.dataset.joinType
+                });
+            });
+        },
+
+        /**
+         * Reload columns for primary + all joined tables.
+         * @private
+         */
+        _reloadAllColumns: function() {
+            var self = this;
+            var primaryTable = document.getElementById('qb-table-select').value;
+            if (!primaryTable) return;
+
+            var tables = [primaryTable];
+            self._activeJoins.forEach(function(j) {
+                if (tables.indexOf(j.table) === -1) tables.push(j.table);
+            });
+
+            var columnsContainer = document.getElementById('qb-columns-list');
+            var groupBySelect = document.getElementById('qb-group-by');
+            var orderBySelect = document.getElementById('qb-order-by');
+            if (!columnsContainer) return;
+            columnsContainer.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            // Clear selects
+            if (groupBySelect) groupBySelect.innerHTML = '<option value="">-- None --</option>';
+            if (orderBySelect) orderBySelect.innerHTML = '<option value="">-- None --</option>';
+
+            // Fetch columns for all tables in parallel
+            var promises = tables.map(function(tbl) {
+                return fetch(self.apiUrls.columns + '/' + encodeURIComponent(tbl))
+                    .then(function(r) { return r.json(); })
+                    .then(function(result) {
+                        return { table: tbl, columns: result.columns || [] };
+                    });
+            });
+
+            Promise.all(promises).then(function(results) {
+                var html = '';
+                results.forEach(function(r) {
+                    var isPrimary = r.table === primaryTable;
+                    var badgeClass = isPrimary ? 'bg-primary' : 'bg-info text-dark';
+                    html += '<div class="mb-2">' +
+                        '<div class="d-flex align-items-center mb-1">' +
+                            '<span class="badge ' + badgeClass + ' me-1" style="font-size:0.65rem;">' + (isPrimary ? 'PRIMARY' : 'JOINED') + '</span>' +
+                            '<strong class="small">' + self._escHtml(r.table) + '</strong>' +
+                        '</div>';
+
+                    // Select all toggle per table
+                    var tableId = r.table.replace(/[^a-zA-Z0-9_]/g, '_');
+                    html += '<div class="form-check mb-1">' +
+                        '<input class="form-check-input qb-table-select-all" type="checkbox" id="qb-selall-' + tableId + '" data-table="' + self._escAttr(r.table) + '" checked>' +
+                        '<label class="form-check-label small fw-bold" for="qb-selall-' + tableId + '">Select All</label>' +
+                        '</div>';
+
+                    r.columns.forEach(function(col) {
+                        var colName = typeof col === 'object' ? (col.COLUMN_NAME || col.name || col.column_name) : col;
+                        if (!colName) return;
+                        var qualifiedName = r.table + '.' + colName;
+                        var friendlyLabel = (typeof col === 'object' && col.label) ? col.label : null;
+                        var displayText = friendlyLabel
+                            ? self._escHtml(friendlyLabel) + ' <span class="text-muted">(' + self._escHtml(colName) + ')</span>'
+                            : self._escHtml(colName);
+                        var selectText = friendlyLabel ? friendlyLabel + ' (' + qualifiedName + ')' : qualifiedName;
+                        html += '<div class="form-check mb-1">' +
+                            '<input class="form-check-input qb-col-check" type="checkbox" ' +
+                                'id="qb-col-' + tableId + '-' + colName + '" ' +
+                                'value="' + self._escAttr(qualifiedName) + '" ' +
+                                'data-table="' + self._escAttr(r.table) + '" checked>' +
+                            '<label class="form-check-label small" for="qb-col-' + tableId + '-' + colName + '">' +
+                                displayText +
+                            '</label>' +
+                            '</div>';
+
+                        if (groupBySelect) {
+                            var opt = document.createElement('option');
+                            opt.value = qualifiedName;
+                            opt.textContent = selectText;
+                            groupBySelect.appendChild(opt);
+                        }
+                        if (orderBySelect) {
+                            var opt2 = document.createElement('option');
+                            opt2.value = qualifiedName;
+                            opt2.textContent = selectText;
+                            orderBySelect.appendChild(opt2);
+                        }
+                    });
+                    html += '</div>';
+                });
+
+                columnsContainer.innerHTML = html;
+
+                // Bind table-level select-all toggles
+                columnsContainer.querySelectorAll('.qb-table-select-all').forEach(function(sa) {
+                    sa.addEventListener('change', function() {
+                        var tbl = this.dataset.table;
+                        var checked = this.checked;
+                        columnsContainer.querySelectorAll('.qb-col-check[data-table="' + tbl + '"]').forEach(function(cb) {
+                            cb.checked = checked;
+                        });
+                    });
+                });
+            }).catch(function(err) {
+                columnsContainer.innerHTML = '<span class="text-danger small">Error loading columns</span>';
+                console.error('QueryBuilderUI: reload columns error', err);
             });
         },
 
@@ -572,13 +773,14 @@
          * @returns {string|null}
          */
         _buildVisualQuery: function() {
+            var self = this;
             var table = document.getElementById('qb-table-select').value;
             if (!table) {
                 alert('Please select a table.');
                 return null;
             }
 
-            // Selected columns
+            // Selected columns (now potentially qualified with table.column)
             var columns = [];
             document.querySelectorAll('.qb-col-check:checked').forEach(function(cb) {
                 columns.push(cb.value);
@@ -589,6 +791,14 @@
             }
 
             var sql = 'SELECT ' + columns.join(', ') + ' FROM ' + table;
+
+            // Add JOINs from active joins
+            if (self._activeJoins && self._activeJoins.length > 0) {
+                self._activeJoins.forEach(function(join) {
+                    sql += ' ' + join.type + ' JOIN ' + join.table +
+                           ' ON ' + join.from + ' = ' + join.to;
+                });
+            }
 
             // Filters
             var filters = [];
