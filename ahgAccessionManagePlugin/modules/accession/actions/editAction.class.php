@@ -295,14 +295,22 @@ class AccessionEditAction extends AhgEditController
                 break;
 
             case 'informationObjects':
-                $criteria = new Criteria();
-                $criteria->add(QubitRelation::OBJECT_ID, $this->resource->id);
-                $criteria->add(QubitRelation::TYPE_ID, QubitTerm::ACCESSION_ID);
+                if (class_exists('Criteria')) {
+                    $criteria = new Criteria();
+                    $criteria->add(QubitRelation::OBJECT_ID, $this->resource->id);
+                    $criteria->add(QubitRelation::TYPE_ID, QubitTerm::ACCESSION_ID);
+                    $this->informationObjects = QubitRelation::get($criteria);
+                } else {
+                    $this->informationObjects = \Illuminate\Database\Capsule\Manager::table('relation')
+                        ->where('object_id', $this->resource->id)
+                        ->where('type_id', QubitTerm::ACCESSION_ID)
+                        ->get();
+                }
 
                 ProjectConfiguration::getActive()->loadHelpers('Qubit');
 
                 $value = $choices = [];
-                foreach ($this->informationObjects = QubitRelation::get($criteria) as $item) {
+                foreach ($this->informationObjects as $item) {
                     $choices[$value[] = $this->context->routing->generate(null, [$item->subject, 'module' => 'informationobject'])] = render_title($item->subject, false);
                 }
 

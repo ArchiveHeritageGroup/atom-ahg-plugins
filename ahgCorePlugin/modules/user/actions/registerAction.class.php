@@ -59,14 +59,24 @@ class UserRegisterAction extends AhgEditController
 
     public function exists($validator, $values)
     {
-        $criteria = new Criteria();
+        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
+            $exists = \Illuminate\Database\Capsule\Manager::table('user')
+                ->where('username', $values['username'])
+                ->orWhere('email', $values['email'])
+                ->exists();
+            if ($exists) {
+                throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            }
+        } else {
+            $criteria = new Criteria();
 
-        $criterion1 = $criteria->getNewCriterion(QubitUser::USERNAME, $values['username']);
-        $criterion2 = $criteria->getNewCriterion(QubitUser::EMAIL, $values['email']);
-        $criteria->add($criterion1->addOr($criterion2));
+            $criterion1 = $criteria->getNewCriterion(QubitUser::USERNAME, $values['username']);
+            $criterion2 = $criteria->getNewCriterion(QubitUser::EMAIL, $values['email']);
+            $criteria->add($criterion1->addOr($criterion2));
 
-        if (0 < count(QubitUser::get($criteria))) {
-            throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            if (0 < count(QubitUser::get($criteria))) {
+                throw new sfValidatorError($validator, $this->context->i18n->__('The username or e-mail address you entered is already in use'));
+            }
         }
 
         return $values;

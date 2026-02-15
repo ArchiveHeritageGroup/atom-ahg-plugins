@@ -203,12 +203,20 @@ class TermTaxonomyEditAction extends AhgEditController
                 break;
 
             case 'useFor':
-                $criteria = new Criteria();
-                $criteria->add(QubitOtherName::OBJECT_ID, $this->resource->id);
-                $criteria->add(QubitOtherName::TYPE_ID, QubitTerm::ALTERNATIVE_LABEL_ID);
+                if (class_exists('Criteria')) {
+                    $criteria = new Criteria();
+                    $criteria->add(QubitOtherName::OBJECT_ID, $this->resource->id);
+                    $criteria->add(QubitOtherName::TYPE_ID, QubitTerm::ALTERNATIVE_LABEL_ID);
+                    $this->useFor = QubitOtherName::get($criteria);
+                } else {
+                    $this->useFor = \Illuminate\Database\Capsule\Manager::table('other_name')
+                        ->where('object_id', $this->resource->id)
+                        ->where('type_id', QubitTerm::ALTERNATIVE_LABEL_ID)
+                        ->get();
+                }
 
                 $value = $defaults = [];
-                foreach ($this->useFor = QubitOtherName::get($criteria) as $item) {
+                foreach ($this->useFor as $item) {
                     $defaults[$value[] = $item->id] = $item;
                 }
 
@@ -241,12 +249,22 @@ class TermTaxonomyEditAction extends AhgEditController
                     && $this->resource->name != $this->form->getValue('name')) {
                     // Avoid duplicates (used in autocomplete.js)
                     if (filter_var($this->request->getPostParameter('linkExisting'), FILTER_VALIDATE_BOOLEAN)) {
-                        $criteria = new Criteria();
-                        $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
-                        $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
-                        $criteria->add(QubitTermI18n::CULTURE, $this->context->user->getCulture());
-                        $criteria->add(QubitTermI18n::NAME, $this->form->getValue('name'));
-                        if (null !== $term = QubitTerm::getOne($criteria)) {
+                        if (class_exists('Criteria')) {
+                            $criteria = new Criteria();
+                            $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
+                            $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
+                            $criteria->add(QubitTermI18n::CULTURE, $this->context->user->getCulture());
+                            $criteria->add(QubitTermI18n::NAME, $this->form->getValue('name'));
+                            $term = QubitTerm::getOne($criteria);
+                        } else {
+                            $term = \Illuminate\Database\Capsule\Manager::table('term')
+                                ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                                ->where('term.taxonomy_id', $this->resource->taxonomyId)
+                                ->where('term_i18n.culture', $this->context->user->getCulture())
+                                ->where('term_i18n.name', $this->form->getValue('name'))
+                                ->first();
+                        }
+                        if (null !== $term) {
                             $this->redirect([$term, 'module' => 'term']);
 
                             return;
@@ -266,12 +284,22 @@ class TermTaxonomyEditAction extends AhgEditController
                     }
 
                     // Test to make sure term doesn't already exist
-                    $criteria = new Criteria();
-                    $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
-                    $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
-                    $criteria->add(QubitTermI18n::CULTURE, $this->context->user->getCulture());
-                    $criteria->add(QubitTermI18n::NAME, $item);
-                    if (0 < count(QubitTermI18n::get($criteria))) {
+                    if (class_exists('Criteria')) {
+                        $criteria = new Criteria();
+                        $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
+                        $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
+                        $criteria->add(QubitTermI18n::CULTURE, $this->context->user->getCulture());
+                        $criteria->add(QubitTermI18n::NAME, $item);
+                        $duplicateExists = 0 < count(QubitTermI18n::get($criteria));
+                    } else {
+                        $duplicateExists = \Illuminate\Database\Capsule\Manager::table('term')
+                            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                            ->where('term.taxonomy_id', $this->resource->taxonomyId)
+                            ->where('term_i18n.culture', $this->context->user->getCulture())
+                            ->where('term_i18n.name', $item)
+                            ->exists();
+                    }
+                    if ($duplicateExists) {
                         continue;
                     }
 
@@ -474,7 +502,9 @@ class TermTaxonomyEditAction extends AhgEditController
             'updateDescendants' => false,
             'objectId' => $this->resource->id,
         ];
-        QubitJob::runJob('arUpdateEsIoDocumentsJob', $jobOptions);
+        if (class_exists('QubitJob') && method_exists('QubitJob', 'runJob')) {
+            QubitJob::runJob('arUpdateEsIoDocumentsJob', $jobOptions);
+        }
 
         // Let user know related descriptions update has started
         $jobsUrl = $this->context->routing->generate(null, ['module' => 'jobs', 'action' => 'browse']);

@@ -25,9 +25,16 @@ class ThreeDThumbnailObserver
         }
 
         // Check if derivatives already exist
-        $criteria = new Criteria();
-        $criteria->add(QubitDigitalObject::PARENT_ID, $digitalObject->id);
-        if (QubitDigitalObject::getOne($criteria)) {
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitDigitalObject::PARENT_ID, $digitalObject->id);
+            $hasDerivatives = (null !== QubitDigitalObject::getOne($criteria));
+        } else {
+            $hasDerivatives = \Illuminate\Database\Capsule\Manager::table('digital_object')
+                ->where('parent_id', $digitalObject->id)
+                ->exists();
+        }
+        if ($hasDerivatives) {
             return; // Already has derivatives
         }
 

@@ -51,9 +51,14 @@ class UserPasswordResetAction extends AhgController
                 $email = $this->form->getValue('email');
 
                 // Find user by email
-                $criteria = new Criteria();
-                $criteria->add(QubitUser::EMAIL, $email);
-                $user = QubitUser::getOne($criteria);
+                if (class_exists('Criteria')) {
+                    $criteria = new Criteria();
+                    $criteria->add(QubitUser::EMAIL, $email);
+                    $user = QubitUser::getOne($criteria);
+                } else {
+                    $row = DB::table('user')->where('email', $email)->first();
+                    $user = $row ? QubitUser::getById($row->id) : null;
+                }
 
                 if ($user) {
                     // Generate reset token

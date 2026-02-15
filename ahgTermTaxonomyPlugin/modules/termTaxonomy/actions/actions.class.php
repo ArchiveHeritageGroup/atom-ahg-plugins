@@ -492,14 +492,26 @@ EOF;
      */
     public function checkForRepeatedNames($validator, $value)
     {
-        $criteria = new Criteria();
-        $criteria->add(QubitTerm::ID, $this->resource->id, Criteria::NOT_EQUAL);
-        $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
-        $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
-        $criteria->add(QubitTermI18n::CULTURE, $this->culture);
-        $criteria->add(QubitTermI18n::NAME, $value);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitTerm::ID, $this->resource->id, Criteria::NOT_EQUAL);
+            $criteria->add(QubitTerm::TAXONOMY_ID, $this->resource->taxonomyId);
+            $criteria->addJoin(QubitTerm::ID, QubitTermI18n::ID);
+            $criteria->add(QubitTermI18n::CULTURE, $this->culture);
+            $criteria->add(QubitTermI18n::NAME, $value);
 
-        if (0 < intval(BasePeer::doCount($criteria)->fetchColumn(0))) {
+            $count = intval(BasePeer::doCount($criteria)->fetchColumn(0));
+        } else {
+            $count = \Illuminate\Database\Capsule\Manager::table('term')
+                ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                ->where('term.id', '!=', $this->resource->id)
+                ->where('term.taxonomy_id', $this->resource->taxonomyId)
+                ->where('term_i18n.culture', $this->culture)
+                ->where('term_i18n.name', $value)
+                ->count();
+        }
+
+        if (0 < $count) {
             throw new sfValidatorError($validator, $this->context->i18n->__('Name - A term with this name already exists.'));
         }
     }

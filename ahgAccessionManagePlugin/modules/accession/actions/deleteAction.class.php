@@ -33,11 +33,20 @@ class AccessionDeleteAction extends AhgController
         }
 
         // Accruals
-        $criteria = new Criteria();
-        $criteria->add(QubitRelation::TYPE_ID, QubitTerm::ACCRUAL_ID);
-        $criteria->add(QubitRelation::OBJECT_ID, $this->resource->id);
-        $criteria->addJoin(QubitRelation::SUBJECT_ID, QubitAccession::ID);
-        $this->accruals = QubitAccession::get($criteria);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitRelation::TYPE_ID, QubitTerm::ACCRUAL_ID);
+            $criteria->add(QubitRelation::OBJECT_ID, $this->resource->id);
+            $criteria->addJoin(QubitRelation::SUBJECT_ID, QubitAccession::ID);
+            $this->accruals = QubitAccession::get($criteria);
+        } else {
+            $this->accruals = \Illuminate\Database\Capsule\Manager::table('relation')
+                ->join('accession', 'relation.subject_id', '=', 'accession.id')
+                ->where('relation.type_id', QubitTerm::ACCRUAL_ID)
+                ->where('relation.object_id', $this->resource->id)
+                ->select('accession.*')
+                ->get();
+        }
 
         if ($request->isMethod('delete')) {
             $this->form->bind($request->getPostParameters());

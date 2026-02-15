@@ -251,11 +251,22 @@ EOF;
 
         // Check 7: Database state
         $this->log('[7] Checking database state...');
-        $conn = Propel::getConnection();
-        $sql = "SELECT name, is_enabled, is_core, is_locked FROM atom_plugin WHERE name LIKE '%Theme%'";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $dbThemes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (class_exists('Propel') && method_exists('Propel', 'getConnection')) {
+            $conn = Propel::getConnection();
+            $sql = "SELECT name, is_enabled, is_core, is_locked FROM atom_plugin WHERE name LIKE '%Theme%'";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            $dbThemes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $dbThemes = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+                ->where('name', 'LIKE', '%Theme%')
+                ->select('name', 'is_enabled', 'is_core', 'is_locked')
+                ->get()
+                ->map(function ($row) {
+                    return (array) $row;
+                })
+                ->toArray();
+        }
 
         if (empty($dbThemes)) {
             $this->log("    INFO: No theme plugins in atom_plugin table");

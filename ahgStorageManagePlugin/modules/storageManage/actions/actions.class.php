@@ -83,15 +83,25 @@ class storageManageActions extends AhgController
 
         $this->resource = $this->getRoute()->resource;
 
-        $criteria = new Criteria();
-        $criteria->add(QubitRelation::SUBJECT_ID, $this->resource->id);
-        $criteria->add(QubitRelation::TYPE_ID, QubitTerm::HAS_PHYSICAL_OBJECT_ID);
-        $criteria->addJoin(QubitRelation::OBJECT_ID, QubitInformationObject::ID);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitRelation::SUBJECT_ID, $this->resource->id);
+            $criteria->add(QubitRelation::TYPE_ID, QubitTerm::HAS_PHYSICAL_OBJECT_ID);
+            $criteria->addJoin(QubitRelation::OBJECT_ID, QubitInformationObject::ID);
 
-        $this->informationObjects = QubitInformationObject::get($criteria);
+            $this->informationObjects = QubitInformationObject::get($criteria);
 
-        $c2 = clone $criteria;
-        $this->foundcount = BasePeer::doCount($c2)->fetchColumn(0);
+            $c2 = clone $criteria;
+            $this->foundcount = BasePeer::doCount($c2)->fetchColumn(0);
+        } else {
+            $query = \Illuminate\Database\Capsule\Manager::table('relation')
+                ->join('information_object', 'relation.object_id', '=', 'information_object.id')
+                ->where('relation.subject_id', $this->resource->id)
+                ->where('relation.type_id', QubitTerm::HAS_PHYSICAL_OBJECT_ID);
+
+            $this->foundcount = $query->count();
+            $this->informationObjects = $query->select('information_object.*')->get();
+        }
     }
 
     public function executeHoldingsReportExport($request)

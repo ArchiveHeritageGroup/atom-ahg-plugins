@@ -34,16 +34,30 @@ class sfIsaarPluginActorEventsAction extends AhgController
 
         $actor = QubitActor::getBySlug($request->slug);
 
-        $criteria = new Criteria();
-        $criteria->add(QubitEvent::ACTOR_ID, $actor->id);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitEvent::ACTOR_ID, $actor->id);
 
-        $data = [];
-        $data['total'] = count(QubitEvent::get($criteria));
+            $data = [];
+            $data['total'] = count(QubitEvent::get($criteria));
 
-        $criteria->setOffset($request->skip);
-        $criteria->setLimit($request->limit);
+            $criteria->setOffset($request->skip);
+            $criteria->setLimit($request->limit);
 
-        $data['data'] = $this->assembleEventData($criteria);
+            $data['data'] = $this->assembleEventData($criteria);
+        } else {
+            $db = \Illuminate\Database\Capsule\Manager::class;
+            $data = [];
+            $data['total'] = $db::table('event')->where('actor_id', $actor->id)->count();
+
+            $rows = $db::table('event')
+                ->where('actor_id', $actor->id)
+                ->offset((int) $request->skip)
+                ->limit((int) $request->limit)
+                ->get();
+
+            $data['data'] = $this->assembleEventDataFromRows($rows);
+        }
 
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
 
@@ -54,7 +68,7 @@ class sfIsaarPluginActorEventsAction extends AhgController
     {
         $events = [];
 
-foreach (QubitEvent::get($criteria) as $event) {
+        foreach (QubitEvent::get($criteria) as $event) {
             $eventData = [
                 'url' => url_for([$event, 'module' => 'event']),
                 'title' => render_title($event->object),
@@ -63,6 +77,57 @@ foreach (QubitEvent::get($criteria) as $event) {
             ];
 
             array_push($events, $eventData);
+        }
+
+        return $events;
+    }
+
+    private function assembleEventDataFromRows($rows)
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $events = [];
+
+        foreach ($rows as $row) {
+            // Resolve event type name
+            $typeName = '';
+            if ($row->type_id) {
+                $typeRow = $db::table('term_i18n')
+                    ->where('id', $row->type_id)
+                    ->where('culture', 'en')
+                    ->first();
+                $typeName = $typeRow->name ?? '';
+            }
+
+            // Resolve information object title
+            $title = '';
+            $slug = '';
+            if ($row->information_object_id) {
+                $ioRow = $db::table('information_object_i18n')
+                    ->where('id', $row->information_object_id)
+                    ->where('culture', 'en')
+                    ->first();
+                $title = $ioRow->title ?? '';
+
+                $slugRow = $db::table('slug')
+                    ->where('object_id', $row->information_object_id)
+                    ->first();
+                $slug = $slugRow->slug ?? '';
+            }
+
+            // Build date string
+            $dateStr = $row->date ?? '';
+            if (!$dateStr && ($row->start_date || $row->end_date)) {
+                $dateStr = trim(($row->start_date ?? '') . ' - ' . ($row->end_date ?? ''), ' -');
+            }
+
+            $eventSlug = $db::table('slug')->where('object_id', $row->id)->value('slug') ?? '';
+
+            $events[] = [
+                'url' => url_for(['module' => 'event', 'slug' => $eventSlug]),
+                'title' => $title,
+                'type' => $typeName,
+                'date' => $dateStr,
+            ];
         }
 
         return $events;

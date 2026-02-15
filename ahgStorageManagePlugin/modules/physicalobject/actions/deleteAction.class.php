@@ -32,10 +32,18 @@ class PhysicalObjectDeleteAction extends AhgController
 
         $this->resource = $this->getRoute()->resource;
 
-        $criteria = new Criteria();
-        $criteria->add(QubitRelation::SUBJECT_ID, $this->resource->id);
-        $criteria->addJoin(QubitRelation::OBJECT_ID, QubitInformationObject::ID);
-        $this->informationObjects = QubitInformationObject::get($criteria);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitRelation::SUBJECT_ID, $this->resource->id);
+            $criteria->addJoin(QubitRelation::OBJECT_ID, QubitInformationObject::ID);
+            $this->informationObjects = QubitInformationObject::get($criteria);
+        } else {
+            $this->informationObjects = \Illuminate\Database\Capsule\Manager::table('relation')
+                ->join('information_object', 'relation.object_id', '=', 'information_object.id')
+                ->where('relation.subject_id', $this->resource->id)
+                ->select('information_object.*')
+                ->get();
+        }
 
         $this->form->setValidator('next', new sfValidatorString());
         $this->form->setWidget('next', new sfWidgetFormInputHidden());

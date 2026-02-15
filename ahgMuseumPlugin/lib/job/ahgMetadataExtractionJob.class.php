@@ -178,8 +178,12 @@ class ahgMetadataExtractionJob extends arBaseJob
 
                 // Update progress
                 if ($processed % 10 == 0) {
-                    $this->job->setStatusNote(sprintf('Processed %d of %d', $processed, $total));
-                    $this->job->save();
+                    if (method_exists($this->job, 'setStatusNote')) {
+                        $this->job->setStatusNote(sprintf('Processed %d of %d', $processed, $total));
+                    }
+                    if (method_exists($this->job, 'save')) {
+                        $this->job->save();
+                    }
                 }
             } catch (Exception $e) {
                 $this->error('Error processing ' . $obj->id . ': ' . $e->getMessage());

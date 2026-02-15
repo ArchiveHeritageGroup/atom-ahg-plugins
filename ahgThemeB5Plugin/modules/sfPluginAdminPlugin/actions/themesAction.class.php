@@ -40,12 +40,25 @@ class sfPluginAdminPluginThemesAction extends AhgController
             \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
-        $criteria = new Criteria();
-        $criteria->add(QubitSetting::NAME, 'plugins');
-        if (1 == count($query = QubitSetting::get($criteria))) {
-            $setting = $query[0];
-
-            $this->form->setDefault('enabled', unserialize($setting->getValue(['sourceCulture' => true])) ?: []);
+        if (class_exists('Criteria')) {
+            $criteria = new Criteria();
+            $criteria->add(QubitSetting::NAME, 'plugins');
+            if (1 == count($query = QubitSetting::get($criteria))) {
+                $setting = $query[0];
+                $this->form->setDefault('enabled', unserialize($setting->getValue(['sourceCulture' => true])) ?: []);
+            }
+        } else {
+            $row = \Illuminate\Database\Capsule\Manager::table('setting')
+                ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+                ->where('setting.name', 'plugins')
+                ->first();
+            if ($row) {
+                $setting = $row;
+                $query = [$row];
+                $this->form->setDefault('enabled', unserialize($row->value) ?: []);
+            } else {
+                $query = [];
+            }
         }
 
         $configuration = ProjectConfiguration::getActive();
