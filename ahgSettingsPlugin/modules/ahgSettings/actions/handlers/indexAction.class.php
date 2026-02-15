@@ -287,6 +287,14 @@ class AhgSettingsIndexAction extends AhgController
             'url' => 'admin/ahg-settings/section?section=encryption'
         ];
 
+        // Voice & AI - always available (part of theme)
+        $this->sections['voice_ai'] = [
+            'label' => 'Voice & AI',
+            'icon' => 'fa-microphone',
+            'description' => 'Voice commands, speech recognition, AI image description, and accessibility settings',
+            'url' => 'admin/ahg-settings/section?section=voice_ai'
+        ];
+
         // Services Monitor - always available
         $this->sections['services'] = [
             'label' => 'Services Monitor',

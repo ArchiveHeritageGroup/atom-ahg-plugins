@@ -22,6 +22,10 @@ class AHGVoiceCommands {
     this.dictationHistory = [];        // Segments for undo
     this.dictationConfirmClear = false; // Waiting for yes/no after "clear field"
 
+    // "Did you mean?" confirmation state
+    this._suggestedCommand = null;     // The suggested command object
+    this._suggestedText = null;        // The suggested pattern text
+
     // UI elements (set after DOM ready)
     this.navbarBtn = null;
     this.floatingBtn = null;
@@ -484,6 +488,35 @@ class AHGVoiceCommands {
       return;
     }
 
+    // Handle "yes" / "yeah" / "yep" to confirm a "Did you mean?" suggestion
+    if (this._suggestedCommand && (text === 'yes' || text === 'yeah' || text === 'yep' || text === 'correct' || text === 'that one')) {
+      var cmd = this._suggestedCommand;
+      var sugText = this._suggestedText || '';
+      this._suggestedCommand = null;
+      this._suggestedText = null;
+
+      this.showToast(cmd.description, 'success');
+      if (cmd.feedback) { this.speak(cmd.feedback); }
+
+      try {
+        if (cmd.feedback && cmd.mode === 'nav') {
+          var self = this;
+          setTimeout(function () { try { cmd.action(sugText); } catch (e) { console.error('Voice command error:', e); } }, 600);
+        } else {
+          cmd.action(sugText);
+        }
+      } catch (e) {
+        console.error('Voice command error:', e);
+      }
+      return;
+    }
+
+    // Clear any previous suggestion if user says something other than "yes"
+    if (this._suggestedCommand && text !== 'no') {
+      this._suggestedCommand = null;
+      this._suggestedText = null;
+    }
+
     // Try matching against registered commands
     if (typeof AHGVoiceRegistry === 'undefined') {
       this.showToast('Voice registry not loaded', 'danger');
@@ -533,12 +566,16 @@ class AHGVoiceCommands {
     if (!matched) {
       console.log('[Voice] No match for: "' + text + '" — tried ' + commands.length + ' commands');
       // Suggest closest match
-      var suggestion = this._findClosestCommand(text, commands);
-      if (suggestion) {
-        console.log('[Voice] Closest match: "' + suggestion + '"');
-        this.showToast('Not recognized: "' + transcript + '". Did you mean "' + suggestion + '"?', 'warning');
-        this.speak('Did you mean, ' + suggestion + '?');
+      var result = this._findClosestCommand(text, commands);
+      if (result) {
+        console.log('[Voice] Closest match: "' + result.pattern + '"');
+        this._suggestedCommand = result.command;
+        this._suggestedText = result.pattern;
+        this.showToast('Did you mean "' + result.pattern + '"? Say "yes" to confirm.', 'warning');
+        this.speak('Did you mean, ' + result.pattern + '? Say yes to confirm.');
       } else {
+        this._suggestedCommand = null;
+        this._suggestedText = null;
         this.showToast('Not recognized: "' + transcript + '"', 'warning');
         this.speak('Sorry, I did not understand that. Say help for available commands.');
       }
@@ -1354,6 +1391,7 @@ class AHGVoiceCommands {
 
   _findClosestCommand(text, commands) {
     var bestMatch = null;
+    var bestCmd = null;
     var bestScore = 0;
     for (var i = 0; i < commands.length; i++) {
         var cmd = commands[i];
@@ -1364,7 +1402,7 @@ class AHGVoiceCommands {
             // Simple contains check
             if (p.indexOf(text) !== -1 || text.indexOf(p) !== -1) {
                 var score = p.length;
-                if (score > bestScore) { bestScore = score; bestMatch = p; }
+                if (score > bestScore) { bestScore = score; bestMatch = p; bestCmd = cmd; }
             }
             // Check word overlap
             var pWords = p.split(' ');
@@ -1373,10 +1411,13 @@ class AHGVoiceCommands {
             for (var k = 0; k < tWords.length; k++) {
                 if (pWords.indexOf(tWords[k]) !== -1) overlap++;
             }
-            if (overlap > 0 && overlap > bestScore) { bestScore = overlap; bestMatch = p; }
+            if (overlap > 0 && overlap > bestScore) { bestScore = overlap; bestMatch = p; bestCmd = cmd; }
         }
     }
-    return bestMatch;
+    if (bestMatch) {
+      return { pattern: bestMatch, command: bestCmd };
+    }
+    return null;
   }
 }
 
