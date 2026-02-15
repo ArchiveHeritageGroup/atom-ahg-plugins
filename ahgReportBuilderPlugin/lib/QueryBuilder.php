@@ -22,33 +22,105 @@ class QueryBuilder
     ];
 
     /**
-     * Relevant AtoM tables available for querying.
+     * Prefix-to-sector mapping for auto-grouping all database tables.
      *
-     * @var array
+     * @var array<string, string>
      */
-    private array $relevantTables = [
-        'information_object', 'information_object_i18n',
-        'actor', 'actor_i18n',
-        'repository', 'repository_i18n',
-        'term', 'term_i18n',
-        'taxonomy', 'taxonomy_i18n',
-        'accession', 'accession_i18n',
-        'digital_object',
-        'relation',
-        'event',
-        'note', 'note_i18n',
-        'status',
-        'property', 'property_i18n',
-        'slug',
-        'physical_object', 'physical_object_i18n',
-        'rights', 'rights_i18n',
-        'rights_holder',
-        'donor',
-        'contact_information',
-        'object',
-        'user',
-        'custom_report',
-        'report_section',
+    private static array $prefixSectorMap = [
+        'information_object' => 'Core AtoM',
+        'actor' => 'Core AtoM',
+        'repository' => 'Core AtoM',
+        'term' => 'Core AtoM',
+        'taxonomy' => 'Core AtoM',
+        'accession' => 'Core AtoM',
+        'digital_object' => 'Core AtoM',
+        'physical_object' => 'Core AtoM',
+        'rights' => 'Core AtoM',
+        'rights_holder' => 'Core AtoM',
+        'donor' => 'Core AtoM',
+        'contact_information' => 'Core AtoM',
+        'relation' => 'Core AtoM',
+        'event' => 'Core AtoM',
+        'note' => 'Core AtoM',
+        'status' => 'Core AtoM',
+        'property' => 'Core AtoM',
+        'slug' => 'Core AtoM',
+        'object' => 'Core AtoM',
+        'user' => 'Core AtoM',
+        'acl_' => 'Core AtoM',
+        'spectrum_' => 'Museum (Spectrum)',
+        'museum_' => 'Museum',
+        'library_' => 'Library',
+        'gallery_' => 'Gallery',
+        'exhibition' => 'Gallery (Exhibitions)',
+        'dam_' => 'DAM',
+        'heritage_' => 'Heritage',
+        'grap_' => 'Heritage Accounting',
+        'ipsas_' => 'Heritage Accounting (IPSAS)',
+        'privacy_' => 'Privacy & Compliance',
+        'preservation_' => 'Preservation',
+        'oais_' => 'Preservation',
+        'condition_' => 'Condition Assessment',
+        'provenance_' => 'Provenance',
+        'security_' => 'Security & Classification',
+        'naz_' => 'Zimbabwe (NAZ)',
+        'nmmz_' => 'Zimbabwe (NMMZ)',
+        'cdpa_' => 'Zimbabwe (CDPA)',
+        'research_' => 'Research & Reading Room',
+        'researcher_' => 'Research & Reading Room',
+        'access_request' => 'Access Requests',
+        'request_to_publish' => 'Access Requests',
+        'backup_' => 'Backups',
+        'ahg_audit_' => 'Audit Trail',
+        'audit_log' => 'Audit Trail',
+        'access_audit_log' => 'Audit Trail',
+        'ahg_workflow' => 'Workflow',
+        'workflow_' => 'Workflow',
+        'ahg_ai_' => 'AI & Automation',
+        'ahg_ner_' => 'AI & Automation',
+        'ahg_translation_' => 'AI & Automation',
+        'ahg_spellcheck_' => 'AI & Automation',
+        'ahg_semantic_' => 'AI & Automation',
+        'ahg_prompt_' => 'AI & Automation',
+        'ahg_tts_' => 'AI & Automation',
+        'ingest_' => 'Data Ingest',
+        'ahg_vendor' => 'Vendors',
+        'ahg_loan' => 'Loans',
+        'loan' => 'Loans',
+        'ahg_doi' => 'DOI',
+        'ahg_api_' => 'API & Webhooks',
+        'ahg_webhook' => 'API & Webhooks',
+        'ahg_graphql_' => 'API & Webhooks',
+        'ahg_statistics_' => 'Statistics',
+        'ahg_settings' => 'Settings',
+        'ahg_form_' => 'Forms',
+        'ahg_dedupe_' => 'Deduplication',
+        'ahg_duplicate_' => 'Deduplication',
+        'ahg_merge_' => 'Deduplication',
+        'ahg_contract' => 'Contracts',
+        'ahg_dropdown' => 'Configuration',
+        'ahg_bot_' => 'Configuration',
+        'ahg_encrypted_' => 'Encryption',
+        'ahg_encryption_' => 'Encryption',
+        'ahg_ecommerce_' => 'E-Commerce',
+        'ahg_order' => 'E-Commerce',
+        'ahg_payment' => 'E-Commerce',
+        'ahg_product_' => 'E-Commerce',
+        'ahg_usage_' => 'Usage Analytics',
+        'ahg_thesaurus_' => 'Thesaurus',
+        'ahg_term_' => 'Thesaurus',
+        'ahg_description_' => 'AI & Automation',
+        'ahg_llm_' => 'AI & Automation',
+        'ahg_download_' => 'Downloads',
+        'embargo_' => 'Rights & Embargo',
+        'custom_report' => 'Reporting',
+        'report_' => 'Reporting',
+        'cart' => 'User Engagement',
+        'favorites' => 'User Engagement',
+        'feedback' => 'User Engagement',
+        'atom_' => 'System',
+        'setting' => 'System',
+        'object_3d_' => '3D Models',
     ];
 
     /**
@@ -272,6 +344,15 @@ class QueryBuilder
             ['table' => 'relation', 'from' => 'id', 'to' => 'subject_id', 'type' => 'left', 'label' => 'Relations (subject)'],
             ['table' => 'property', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Properties'],
             ['table' => 'object', 'from' => 'id', 'to' => 'id', 'type' => 'inner', 'label' => 'Base object (timestamps)'],
+            // GLAM/DAM sector extensions
+            ['table' => 'library_item', 'from' => 'id', 'to' => 'information_object_id', 'type' => 'left', 'label' => 'Library cataloging'],
+            ['table' => 'museum_metadata', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Museum metadata'],
+            ['table' => 'dam_iptc_metadata', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'DAM IPTC metadata'],
+            ['table' => 'dam_external_links', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'DAM external links'],
+            ['table' => 'dam_format_holdings', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'DAM format holdings'],
+            ['table' => 'dam_version_links', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'DAM version links'],
+            ['table' => 'gallery_valuation', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Gallery valuations'],
+            ['table' => 'gallery_loan_object', 'from' => 'id', 'to' => 'object_id', 'type' => 'left', 'label' => 'Gallery loan objects'],
         ],
         'actor' => [
             ['table' => 'actor_i18n', 'from' => 'id', 'to' => 'id', 'type' => 'left', 'label' => 'Translations'],
@@ -349,6 +430,42 @@ class QueryBuilder
         'contact_information' => [
             ['table' => 'actor', 'from' => 'actor_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Actor'],
         ],
+        // ── GLAM/DAM sector tables ──────────────────────────────────────
+        'library_item' => [
+            ['table' => 'information_object', 'from' => 'information_object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'information_object_i18n', 'from' => 'information_object_id', 'to' => 'id', 'type' => 'left', 'label' => 'Description translations'],
+        ],
+        'museum_metadata' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'information_object_i18n', 'from' => 'object_id', 'to' => 'id', 'type' => 'left', 'label' => 'Description translations'],
+        ],
+        'dam_iptc_metadata' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'information_object_i18n', 'from' => 'object_id', 'to' => 'id', 'type' => 'left', 'label' => 'Description translations'],
+        ],
+        'dam_external_links' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+        ],
+        'dam_format_holdings' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+        ],
+        'dam_version_links' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'information_object', 'from' => 'related_object_id', 'to' => 'id', 'type' => 'left', 'label' => 'Related description'],
+        ],
+        'gallery_valuation' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+        ],
+        'gallery_loan_object' => [
+            ['table' => 'information_object', 'from' => 'object_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Description'],
+            ['table' => 'gallery_loan', 'from' => 'loan_id', 'to' => 'id', 'type' => 'inner', 'label' => 'Loan'],
+        ],
+        'gallery_loan' => [
+            ['table' => 'gallery_loan_object', 'from' => 'id', 'to' => 'loan_id', 'type' => 'left', 'label' => 'Loan objects'],
+        ],
+        'gallery_artist' => [
+            ['table' => 'actor', 'from' => 'actor_id', 'to' => 'id', 'type' => 'left', 'label' => 'Actor record'],
+        ],
     ];
 
     /**
@@ -374,9 +491,12 @@ class QueryBuilder
     }
 
     /**
-     * Get the list of available database tables for querying.
+     * Get ALL database tables, auto-grouped by sector/function.
      *
-     * @return array The available tables
+     * Uses prefix matching to classify tables. Tables from plugins that
+     * are not installed simply won't exist, so they're excluded automatically.
+     *
+     * @return array The available tables grouped by sector
      */
     public function getAvailableTables(): array
     {
@@ -385,25 +505,66 @@ class QueryBuilder
         $allTables = DB::select(
             'SELECT TABLE_NAME, TABLE_ROWS, TABLE_COMMENT
              FROM information_schema.TABLES
-             WHERE TABLE_SCHEMA = ?
+             WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = ?
              ORDER BY TABLE_NAME',
-            [$dbName]
+            [$dbName, 'BASE TABLE']
         );
 
-        // Filter to relevant tables
-        $result = [];
+        // Classify each table into a sector by matching prefixes (longest match first)
+        $grouped = [];
         foreach ($allTables as $table) {
-            $tableName = $table->TABLE_NAME;
-            if (in_array($tableName, $this->relevantTables, true)) {
-                $result[] = [
-                    'name' => $tableName,
-                    'rows' => $table->TABLE_ROWS,
-                    'comment' => $table->TABLE_COMMENT,
-                ];
+            $name = $table->TABLE_NAME;
+            $sector = $this->classifyTable($name);
+
+            if (!isset($grouped[$sector])) {
+                $grouped[$sector] = [];
             }
+            $grouped[$sector][] = [
+                'name' => $name,
+                'rows' => $table->TABLE_ROWS,
+                'comment' => $table->TABLE_COMMENT,
+                'sector' => $sector,
+            ];
+        }
+
+        // Sort sectors alphabetically, but put "Core AtoM" first
+        ksort($grouped);
+        $result = [];
+        if (isset($grouped['Core AtoM'])) {
+            $result[] = ['sector' => 'Core AtoM', 'tables' => $grouped['Core AtoM']];
+            unset($grouped['Core AtoM']);
+        }
+        foreach ($grouped as $sector => $tables) {
+            $result[] = ['sector' => $sector, 'tables' => $tables];
         }
 
         return $result;
+    }
+
+    /**
+     * Classify a table name into a sector using prefix matching.
+     *
+     * @param string $tableName The table name
+     *
+     * @return string The sector name
+     */
+    private function classifyTable(string $tableName): string
+    {
+        $bestMatch = '';
+        $bestSector = 'Other';
+
+        foreach (self::$prefixSectorMap as $prefix => $sector) {
+            // Check if table name matches this prefix
+            if ($tableName === $prefix || str_starts_with($tableName, $prefix)) {
+                // Longest prefix match wins
+                if (strlen($prefix) > strlen($bestMatch)) {
+                    $bestMatch = $prefix;
+                    $bestSector = $sector;
+                }
+            }
+        }
+
+        return $bestSector;
     }
 
     /**
