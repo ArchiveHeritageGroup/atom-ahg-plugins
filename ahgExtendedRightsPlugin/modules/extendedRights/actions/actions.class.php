@@ -10,6 +10,8 @@ class extendedRightsActions extends AhgController
 
 
         // RightsStatements.org
+        // Use ->values()->all() to convert Collection to plain PHP array
+        // (Laravel Collections get corrupted by Symfony's sfOutputEscaper pipeline)
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function ($j) {
                 $j->on('rights_statement_i18n.rights_statement_id', '=', 'rights_statement.id')
@@ -27,10 +29,9 @@ class extendedRightsActions extends AhgController
                 'rights_statement.icon_url',
                 'rights_statement_i18n.name',
                 'rights_statement_i18n.definition as description',
-            ])->get();
-        
+            ])->get()->values()->all();
 
-        // Creative Commons - using correct table name
+        // Creative Commons
         $this->ccLicenses = Capsule::table('rights_cc_license')
             ->leftJoin('rights_cc_license_i18n', function ($j) {
                 $j->on('rights_cc_license_i18n.id', '=', 'rights_cc_license.id')
@@ -42,12 +43,11 @@ class extendedRightsActions extends AhgController
                 'rights_cc_license.id',
                 'rights_cc_license.code',
                 'rights_cc_license.uri',
-                
                 'rights_cc_license_i18n.name',
                 'rights_cc_license_i18n.description',
-            ])->get();
+            ])->get()->values()->all();
 
-        // Traditional Knowledge Labels - using correct table name
+        // Traditional Knowledge Labels
         $this->tkLabels = Capsule::table('rights_tk_label')
             ->leftJoin('rights_tk_label_i18n', function ($j) {
                 $j->on('rights_tk_label_i18n.id', '=', 'rights_tk_label.id')
@@ -64,7 +64,7 @@ class extendedRightsActions extends AhgController
                 'rights_tk_label.color',
                 'rights_tk_label_i18n.name',
                 'rights_tk_label_i18n.description',
-            ])->get();
+            ])->get()->values()->all();
 
         // Statistics
         $this->stats = (object) [
@@ -345,6 +345,7 @@ class extendedRightsActions extends AhgController
 
 
         // RightsStatements.org
+        // Use ->values()->all() to convert Collection to plain PHP array
         $this->rightsStatements = Capsule::table('rights_statement')
             ->leftJoin('rights_statement_i18n', function ($j) {
                 $j->on('rights_statement_i18n.rights_statement_id', '=', 'rights_statement.id')
@@ -361,8 +362,7 @@ class extendedRightsActions extends AhgController
                 'rights_statement.icon_filename',
                 'rights_statement_i18n.name',
                 'rights_statement_i18n.definition as description',
-            ])->get();
-        
+            ])->get()->values()->all();
 
         // Creative Commons
         $this->ccLicenses = Capsule::table('rights_cc_license')
@@ -376,10 +376,9 @@ class extendedRightsActions extends AhgController
                 'rights_cc_license.id',
                 'rights_cc_license.code',
                 'rights_cc_license.uri',
-                
                 'rights_cc_license_i18n.name',
                 'rights_cc_license_i18n.description',
-            ])->get();
+            ])->get()->values()->all();
 
         // Traditional Knowledge Labels
         $this->tkLabels = Capsule::table('rights_tk_label')
@@ -398,7 +397,7 @@ class extendedRightsActions extends AhgController
                 'rights_tk_label.color',
                 'rights_tk_label_i18n.name',
                 'rights_tk_label_i18n.description',
-            ])->get();
+            ])->get()->values()->all();
 
         // Statistics
         $this->stats = (object) [
@@ -408,7 +407,6 @@ class extendedRightsActions extends AhgController
             'with_tk_labels' => Capsule::table('rights_object_tk_label')->distinct()->count('object_id'),
             'active_embargoes' => Capsule::table('rights_embargo')->where('status', '=', 'active')->count(),
         ];
-        
     }
 
     public function executeExpiringEmbargoes($request)

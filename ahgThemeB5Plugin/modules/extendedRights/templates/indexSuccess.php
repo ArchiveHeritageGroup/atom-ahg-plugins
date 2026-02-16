@@ -1,4 +1,63 @@
 <?php use_helper('Text'); ?>
+<?php
+// Query the database directly to bypass Symfony's sfOutputEscaper pipeline
+// which corrupts Laravel Collections and grouped arrays.
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+$rightsStatementsRaw = Capsule::table('rights_statement')
+    ->leftJoin('rights_statement_i18n', function ($j) {
+        $j->on('rights_statement_i18n.rights_statement_id', '=', 'rights_statement.id')
+          ->where('rights_statement_i18n.culture', '=', 'en');
+    })
+    ->where('rights_statement.is_active', '=', 1)
+    ->orderBy('rights_statement.category')
+    ->orderBy('rights_statement.sort_order')
+    ->select([
+        'rights_statement.id',
+        'rights_statement.code',
+        'rights_statement.uri',
+        'rights_statement.category',
+        'rights_statement.icon_filename',
+        'rights_statement.icon_url',
+        'rights_statement_i18n.name',
+        'rights_statement_i18n.definition as description',
+    ])->get();
+
+$ccLicensesRaw = Capsule::table('rights_cc_license')
+    ->leftJoin('rights_cc_license_i18n', function ($j) {
+        $j->on('rights_cc_license_i18n.id', '=', 'rights_cc_license.id')
+          ->where('rights_cc_license_i18n.culture', '=', 'en');
+    })
+    ->where('rights_cc_license.is_active', '=', 1)
+    ->orderBy('rights_cc_license.sort_order')
+    ->select([
+        'rights_cc_license.id',
+        'rights_cc_license.code',
+        'rights_cc_license.uri',
+        'rights_cc_license_i18n.name',
+        'rights_cc_license_i18n.description',
+    ])->get();
+
+$tkLabelsRaw = Capsule::table('rights_tk_label')
+    ->leftJoin('rights_tk_label_i18n', function ($j) {
+        $j->on('rights_tk_label_i18n.id', '=', 'rights_tk_label.id')
+          ->where('rights_tk_label_i18n.culture', '=', 'en');
+    })
+    ->where('rights_tk_label.is_active', '=', 1)
+    ->orderBy('rights_tk_label.category')
+    ->orderBy('rights_tk_label.sort_order')
+    ->select([
+        'rights_tk_label.id',
+        'rights_tk_label.code',
+        'rights_tk_label.uri',
+        'rights_tk_label.category',
+        'rights_tk_label.color',
+        'rights_tk_label_i18n.name',
+        'rights_tk_label_i18n.description',
+    ])->get();
+
+$statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stats : null);
+?>
 
 <div class="row">
   <div class="col-md-3">
@@ -34,21 +93,16 @@
           </div>
           <div class="card-body">
             <p class="text-muted small">Standardized rights statements for cultural heritage institutions.</p>
-            <?php if (!empty($rightsStatements) && count($rightsStatements) > 0): ?>
+            <?php if (count($rightsStatementsRaw) > 0): ?>
               <ul class="list-unstyled">
-                <?php foreach ($rightsStatements as $rs): ?>
+                <?php foreach ($rightsStatementsRaw as $rs): ?>
                   <li class="mb-2">
-                    <?php 
-                    $rsName = $rs->name ?? $rs->code ?? 'Unknown';
-                    $rsUri = $rs->uri ?? '';
-                    $rsDesc = $rs->description ?? '';
-                    ?>
-                    <?php if (!empty($rsUri)): ?>
-                      <a href="<?php echo htmlspecialchars($rsUri); ?>" target="_blank" title="<?php echo htmlspecialchars($rsDesc); ?>">
-                        <?php echo htmlspecialchars($rsName); ?>
+                    <?php if (!empty($rs->uri)): ?>
+                      <a href="<?php echo htmlspecialchars($rs->uri); ?>" target="_blank" title="<?php echo htmlspecialchars($rs->description ?? ''); ?>">
+                        <?php echo htmlspecialchars($rs->name ?? $rs->code ?? ''); ?>
                       </a>
                     <?php else: ?>
-                      <?php echo htmlspecialchars($rsName); ?>
+                      <?php echo htmlspecialchars($rs->name ?? $rs->code ?? ''); ?>
                     <?php endif; ?>
                   </li>
                 <?php endforeach; ?>
@@ -68,20 +122,16 @@
           </div>
           <div class="card-body">
             <p class="text-muted small">Open licensing for sharing and reuse.</p>
-            <?php if (!empty($ccLicenses) && count($ccLicenses) > 0): ?>
+            <?php if (count($ccLicensesRaw) > 0): ?>
               <ul class="list-unstyled">
-                <?php foreach ($ccLicenses as $cc): ?>
+                <?php foreach ($ccLicensesRaw as $cc): ?>
                   <li class="mb-2">
-                    <?php 
-                    $ccName = $cc->name ?? $cc->code ?? 'Unknown';
-                    $ccUri = $cc->uri ?? '';
-                    ?>
-                    <?php if (!empty($ccUri)): ?>
-                      <a href="<?php echo htmlspecialchars($ccUri); ?>" target="_blank">
-                        <?php echo htmlspecialchars($ccName); ?>
+                    <?php if (!empty($cc->uri)): ?>
+                      <a href="<?php echo htmlspecialchars($cc->uri); ?>" target="_blank">
+                        <?php echo htmlspecialchars($cc->name ?? $cc->code ?? ''); ?>
                       </a>
                     <?php else: ?>
-                      <?php echo htmlspecialchars($ccName); ?>
+                      <?php echo htmlspecialchars($cc->name ?? $cc->code ?? ''); ?>
                     <?php endif; ?>
                   </li>
                 <?php endforeach; ?>
@@ -101,28 +151,22 @@
           </div>
           <div class="card-body">
             <p class="text-muted small">Labels for Indigenous cultural heritage.</p>
-            <?php if (!empty($tkLabels) && count($tkLabels) > 0): ?>
+            <?php if (count($tkLabelsRaw) > 0): ?>
               <ul class="list-unstyled">
-                <?php foreach ($tkLabels as $tk): ?>
+                <?php foreach ($tkLabelsRaw as $tk): ?>
                   <li class="mb-2">
-                    <?php 
-                    $tkName = $tk->name ?? $tk->code ?? 'Unknown';
-                    $tkUri = $tk->uri ?? '';
-                    $tkIcon = $tk->icon_url ?? '';
-                    $tkCategory = $tk->category_name ?? '';
-                    ?>
-                    <?php if (!empty($tkIcon)): ?>
-                      <img src="<?php echo htmlspecialchars($tkIcon); ?>" alt="" style="width: 20px; height: 20px;" class="me-1">
+                    <?php if (!empty($tk->icon_url)): ?>
+                      <img src="<?php echo htmlspecialchars($tk->icon_url); ?>" alt="" style="width: 20px; height: 20px;" class="me-1">
                     <?php endif; ?>
-                    <?php if (!empty($tkUri)): ?>
-                      <a href="<?php echo htmlspecialchars($tkUri); ?>" target="_blank">
-                        <?php echo htmlspecialchars($tkName); ?>
+                    <?php if (!empty($tk->uri)): ?>
+                      <a href="<?php echo htmlspecialchars($tk->uri); ?>" target="_blank">
+                        <?php echo htmlspecialchars($tk->name ?? $tk->code ?? ''); ?>
                       </a>
                     <?php else: ?>
-                      <?php echo htmlspecialchars($tkName); ?>
+                      <?php echo htmlspecialchars($tk->name ?? $tk->code ?? ''); ?>
                     <?php endif; ?>
-                    <?php if (!empty($tkCategory)): ?>
-                      <small class="text-muted">(<?php echo htmlspecialchars($tkCategory); ?>)</small>
+                    <?php if (!empty($tk->category)): ?>
+                      <small class="text-muted">(<?php echo htmlspecialchars($tk->category); ?>)</small>
                     <?php endif; ?>
                   </li>
                 <?php endforeach; ?>
@@ -136,7 +180,7 @@
     </div>
 
     <!-- Statistics -->
-    <?php if (isset($stats)): ?>
+    <?php if (isset($statsRaw)): ?>
     <div class="card mt-4">
       <div class="card-header">
         <h5 class="mb-0">Rights Coverage Statistics</h5>
@@ -144,23 +188,23 @@
       <div class="card-body">
         <div class="row text-center">
           <div class="col">
-            <h3><?php echo number_format($stats->total_objects ?? 0); ?></h3>
+            <h3><?php echo number_format($statsRaw->total_objects ?? 0); ?></h3>
             <small class="text-muted">Total Objects</small>
           </div>
           <div class="col">
-            <h3><?php echo number_format($stats->with_rights_statement ?? 0); ?></h3>
+            <h3><?php echo number_format($statsRaw->with_rights_statement ?? 0); ?></h3>
             <small class="text-muted">With Rights Statement</small>
           </div>
           <div class="col">
-            <h3><?php echo number_format($stats->with_creative_commons ?? 0); ?></h3>
+            <h3><?php echo number_format($statsRaw->with_creative_commons ?? 0); ?></h3>
             <small class="text-muted">With CC License</small>
           </div>
           <div class="col">
-            <h3><?php echo number_format($stats->with_tk_labels ?? 0); ?></h3>
+            <h3><?php echo number_format($statsRaw->with_tk_labels ?? 0); ?></h3>
             <small class="text-muted">With TK Labels</small>
           </div>
           <div class="col">
-            <h3><?php echo number_format($stats->active_embargoes ?? 0); ?></h3>
+            <h3><?php echo number_format($statsRaw->active_embargoes ?? 0); ?></h3>
             <small class="text-muted">Active Embargoes</small>
           </div>
         </div>
