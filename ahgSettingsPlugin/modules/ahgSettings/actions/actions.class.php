@@ -462,4 +462,28 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('systemInfoAction', $request);
     }
 
+    /**
+     * AJAX endpoint: return allowed level-of-description term IDs for the current sector.
+     */
+    public function executeLevelChoices($request)
+    {
+        $servicePath = $this->config('sf_root_dir') . '/atom-framework/src/Services/LevelOfDescriptionService.php';
+        if (file_exists($servicePath)) {
+            require_once $servicePath;
+        }
+
+        $termIds = [];
+        if (class_exists('AtomExtensions\\Services\\LevelOfDescriptionService')) {
+            $levels = \AtomExtensions\Services\LevelOfDescriptionService::getForCurrentContext();
+            foreach ($levels as $level) {
+                $termIds[] = (int) $level->id;
+            }
+        }
+
+        $this->getResponse()->setContentType('application/json');
+        $this->getResponse()->setContent(json_encode(['term_ids' => $termIds]));
+
+        return sfView::NONE;
+    }
+
 }

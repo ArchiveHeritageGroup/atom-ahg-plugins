@@ -6,7 +6,6 @@
     </ol>
 </nav>
 <h1 class="h2 mb-4"><i class="fas fa-search text-primary me-2"></i>Saved Searches</h1>
-<?php if ($sf_user->hasFlash('success')): ?><div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div><?php endif; ?>
 <div class="card">
     <?php if (!empty($savedSearches)): ?>
         <div class="table-responsive">

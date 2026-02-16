@@ -477,6 +477,11 @@ class VendorService
         return $this->repository->getPaymentStatuses();
     }
 
+    public function getVendorStatuses(): array
+    {
+        return $this->repository->getVendorStatuses();
+    }
+
     // =========================================================================
     // AUDIT LOGGING
     // =========================================================================

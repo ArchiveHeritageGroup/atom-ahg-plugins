@@ -11,14 +11,6 @@
         <i class="fas fa-plus me-1"></i> Generate Key
     </button>
 </div>
-
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <div class="alert alert-info">
     <i class="fas fa-info-circle me-2"></i>
     API keys allow you to access your research data programmatically. Keep your keys secure and never share them publicly.

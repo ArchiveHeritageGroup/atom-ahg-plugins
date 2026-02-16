@@ -7,10 +7,6 @@
 
 <h1 class="h2 mb-4"><i class="fas fa-user-plus text-primary me-2"></i>Researcher Registration</h1>
 
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <div class="card">
     <div class="card-body">
         <form method="post">

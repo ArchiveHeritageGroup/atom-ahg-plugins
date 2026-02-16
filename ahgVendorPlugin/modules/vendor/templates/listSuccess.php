@@ -24,10 +24,9 @@
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All Statuses</option>
-                        <option value="active" <?php echo ($filters['status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
-                        <option value="inactive" <?php echo ($filters['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                        <option value="suspended" <?php echo ($filters['status'] ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
-                        <option value="pending_approval" <?php echo ($filters['status'] ?? '') === 'pending_approval' ? 'selected' : ''; ?>>Pending Approval</option>
+                        <?php foreach ($vendorStatuses as $code => $label): ?>
+                        <option value="<?php echo $code; ?>" <?php echo ($filters['status'] ?? '') === $code ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-2">

@@ -9,7 +9,6 @@
     <h1 class="h2 mb-0"><i class="fas fa-folder text-primary me-2"></i>My Collections</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fas fa-plus me-1"></i> New Collection</button>
 </div>
-<?php if ($sf_user->hasFlash('success')): ?><div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div><?php endif; ?>
 <div class="row">
     <?php if (!empty($collections)): ?>
         <?php foreach ($collections as $c): ?>

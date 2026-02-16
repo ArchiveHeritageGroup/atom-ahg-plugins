@@ -165,8 +165,8 @@ $statusColors = [
                     <div class="mb-3">
                         <label class="form-label">New Status</label>
                         <select name="status" class="form-select" required>
-                            @foreach (['pending', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'] as $s)
-                            <option value="{{ $s }}" {{ $transaction->status === $s ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $s)) }}</option>
+                            @foreach ($statusOptions as $code => $label)
+                            <option value="{{ $code }}" {{ $transaction->status === $code ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>

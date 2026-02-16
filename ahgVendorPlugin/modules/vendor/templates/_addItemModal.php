@@ -1,3 +1,4 @@
+<?php $conditionRatingsRaw = isset($conditionRatingsRaw) ? $conditionRatingsRaw : []; ?>
 <!-- Add/Link Item Modal -->
 <div class="modal fade" id="addItemModal" tabindex="-1">
     <div class="modal-dialog modal-lg">

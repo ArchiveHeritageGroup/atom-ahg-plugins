@@ -2,11 +2,7 @@
 <?php slot('title') ?>
 <h1><i class="fas fa-door-open text-primary me-2"></i><?php echo __('Reading Rooms'); ?></h1>
 <?php end_slot() ?>
-<?php slot('content') ?>
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-<div class="card">
+<?php slot('content') ?><div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <span><?php echo __('Manage Reading Rooms'); ?></span>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'editRoom']); ?>" class="btn btn-sm btn-primary">

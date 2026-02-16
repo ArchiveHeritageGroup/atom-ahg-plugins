@@ -22,14 +22,6 @@ $sections = isset($report->sections) && is_array($report->sections) ? $report->s
 $reviews = isset($reviews) && is_array($reviews) ? $reviews : (isset($reviews) && method_exists($reviews, 'getRawValue') ? $reviews->getRawValue() : (isset($reviews) && is_iterable($reviews) ? iterator_to_array($reviews) : []));
 $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborators : (isset($collaborators) && method_exists($collaborators, 'getRawValue') ? $collaborators->getRawValue() : (isset($collaborators) && is_iterable($collaborators) ? iterator_to_array($collaborators) : []));
 ?>
-
-<?php if ($sf_user->hasFlash('success')): ?>
-  <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('success'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-  <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><?php echo __('Research'); ?></a></li>

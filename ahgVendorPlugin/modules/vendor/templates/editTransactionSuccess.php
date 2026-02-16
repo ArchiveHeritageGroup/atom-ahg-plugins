@@ -1,7 +1,9 @@
-<?php 
+<?php
 $transactionRaw = isset($sf_data) ? $sf_data->getRaw('transaction') : $transaction;
 $vendorsRaw = isset($sf_data) ? $sf_data->getRaw('vendors') : $vendors;
 $serviceTypesRaw = isset($sf_data) ? $sf_data->getRaw('serviceTypes') : $serviceTypes;
+$statusOptionsRaw = isset($sf_data) ? $sf_data->getRaw('statusOptions') : (isset($statusOptions) ? $statusOptions : []);
+$paymentStatusesRaw = isset($sf_data) ? $sf_data->getRaw('paymentStatuses') : (isset($paymentStatuses) ? $paymentStatuses : []);
 
 $isNew = empty($transactionRaw->id);
 $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw->transaction_number;
@@ -81,12 +83,9 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="pending" <?php echo ($transactionRaw->status ?? 'pending') === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                    <option value="approved" <?php echo ($transactionRaw->status ?? '') === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                                    <option value="in_progress" <?php echo ($transactionRaw->status ?? '') === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="on_hold" <?php echo ($transactionRaw->status ?? '') === 'on_hold' ? 'selected' : ''; ?>>On Hold</option>
-                                    <option value="completed" <?php echo ($transactionRaw->status ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="cancelled" <?php echo ($transactionRaw->status ?? '') === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    <?php foreach ($statusOptionsRaw as $code => $label): ?>
+                                    <option value="<?php echo $code; ?>" <?php echo ($transactionRaw->status ?? 'pending') === $code ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -191,10 +190,9 @@ $pageTitle = $isNew ? 'New Transaction' : 'Edit Transaction: ' . $transactionRaw
                         <div class="mb-3">
                             <label class="form-label">Payment Status</label>
                             <select name="payment_status" class="form-select">
-                                <option value="pending" <?php echo ($transactionRaw->payment_status ?? 'pending') === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                <option value="partial" <?php echo ($transactionRaw->payment_status ?? '') === 'partial' ? 'selected' : ''; ?>>Partial</option>
-                                <option value="paid" <?php echo ($transactionRaw->payment_status ?? '') === 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                <option value="overdue" <?php echo ($transactionRaw->payment_status ?? '') === 'overdue' ? 'selected' : ''; ?>>Overdue</option>
+                                <?php foreach ($paymentStatusesRaw as $code => $label): ?>
+                                <option value="<?php echo $code; ?>" <?php echo ($transactionRaw->payment_status ?? 'pending') === $code ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="mb-3">

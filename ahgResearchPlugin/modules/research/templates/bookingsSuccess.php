@@ -4,10 +4,6 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-
 <!-- Pending Bookings -->
 <?php if (!empty($pendingBookings)): ?>
 <div class="card mb-4">

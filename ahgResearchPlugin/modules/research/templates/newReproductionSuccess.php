@@ -8,10 +8,6 @@
 
 <h1 class="h2 mb-4"><i class="fas fa-copy text-primary me-2"></i>New Reproduction Request</h1>
 
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <div class="row">
     <div class="col-md-8">
         <div class="card">

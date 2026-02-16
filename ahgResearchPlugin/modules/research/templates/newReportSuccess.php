@@ -9,10 +9,6 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
 $templates = isset($templates) && is_array($templates) ? $templates : (isset($templates) && method_exists($templates, 'getRawValue') ? $templates->getRawValue() : (isset($templates) && is_iterable($templates) ? iterator_to_array($templates) : []));
 ?>
 
-<?php if ($sf_user->hasFlash('error')): ?>
-  <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><?php echo __('Research'); ?></a></li>

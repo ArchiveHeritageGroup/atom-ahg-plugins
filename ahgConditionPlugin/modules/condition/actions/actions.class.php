@@ -480,4 +480,46 @@ class conditionActions extends AhgController
 
         $this->latestCondition = !empty($this->conditions) ? $this->conditions[0] : null;
     }
+
+    /**
+     * Admin dashboard for condition management
+     */
+    public function executeAdmin($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->redirect('/');
+        }
+
+        // Summary statistics
+        try {
+            $this->totalChecks = DB::table('spectrum_condition_check')->count();
+            $this->recentChecks = DB::table('spectrum_condition_check')
+                ->leftJoin('information_object_i18n as ioi', function ($j) {
+                    $j->on('ioi.id', '=', 'spectrum_condition_check.object_id')
+                      ->where('ioi.culture', '=', 'en');
+                })
+                ->orderBy('spectrum_condition_check.check_date', 'desc')
+                ->limit(20)
+                ->select([
+                    'spectrum_condition_check.*',
+                    'ioi.title as object_title',
+                ])
+                ->get();
+
+            $this->byCondition = DB::table('spectrum_condition_check')
+                ->selectRaw('overall_condition, COUNT(*) as count')
+                ->groupBy('overall_condition')
+                ->orderByDesc('count')
+                ->get();
+
+            $this->totalPhotos = DB::table('condition_photo')->count();
+            $this->totalAnnotations = DB::table('condition_annotation')->count();
+        } catch (\Exception $e) {
+            $this->totalChecks = 0;
+            $this->recentChecks = collect();
+            $this->byCondition = collect();
+            $this->totalPhotos = 0;
+            $this->totalAnnotations = 0;
+        }
+    }
 }

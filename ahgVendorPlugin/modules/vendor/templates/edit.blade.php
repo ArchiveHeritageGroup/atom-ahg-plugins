@@ -64,10 +64,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="active" {{ ($vendor->status ?? 'active') === 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ ($vendor->status ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                    <option value="pending_approval" {{ ($vendor->status ?? '') === 'pending_approval' ? 'selected' : '' }}>Pending Approval</option>
-                                    <option value="suspended" {{ ($vendor->status ?? '') === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                                    @foreach ($vendorStatuses as $code => $label)
+                                    <option value="{{ $code }}" {{ ($vendor->status ?? '') === $code ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>

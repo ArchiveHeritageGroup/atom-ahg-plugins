@@ -42,6 +42,9 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $router->any('condition_report_export', '/condition/check/:id/export', 'exportReport', ['id' => '\d+']);
         $router->any('condition_list_photos', '/condition/check/:id/list', 'listPhotos', ['id' => '\d+|new']);
 
+        // Admin dashboard
+        $router->any('condition_admin', '/admin/condition', 'admin');
+
         // Template routes
         $router->any('condition_template_list', '/condition/templates', 'template', [], ['template_action' => 'list']);
         $router->any('condition_template_view', '/condition/template/:id/view', 'template', ['id' => '\d+'], ['template_action' => 'view']);

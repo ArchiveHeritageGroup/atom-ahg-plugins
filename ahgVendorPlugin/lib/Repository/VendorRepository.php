@@ -688,47 +688,47 @@ class VendorRepository
 
     public function getStatusOptions(): array
     {
-        return [
-            'pending_approval' => 'Pending Approval',
-            'approved' => 'Approved',
-            'dispatched' => 'Dispatched',
-            'received_by_vendor' => 'Received by Vendor',
-            'in_progress' => 'In Progress',
-            'completed' => 'Completed',
-            'ready_for_collection' => 'Ready for Collection',
-            'returned' => 'Returned',
-            'cancelled' => 'Cancelled',
-        ];
+        return $this->loadDropdown('vendor_transaction_status');
     }
 
     public function getConditionRatings(): array
     {
-        return [
-            'excellent' => 'Excellent',
-            'good' => 'Good',
-            'fair' => 'Fair',
-            'poor' => 'Poor',
-            'critical' => 'Critical',
-        ];
+        return $this->loadDropdown('condition_grade');
     }
 
     public function getVendorTypes(): array
     {
-        return [
-            'company' => 'Company',
-            'individual' => 'Individual',
-            'institution' => 'Institution',
-            'government' => 'Government Agency',
-        ];
+        return $this->loadDropdown('vendor_type');
     }
 
     public function getPaymentStatuses(): array
     {
-        return [
-            'not_invoiced' => 'Not Invoiced',
-            'invoiced' => 'Invoiced',
-            'paid' => 'Paid',
-            'disputed' => 'Disputed',
-        ];
+        return $this->loadDropdown('payment_status');
+    }
+
+    public function getVendorStatuses(): array
+    {
+        return $this->loadDropdown('vendor_status');
+    }
+
+    /**
+     * Load dropdown values from ahg_dropdown table.
+     * Returns [code => label] associative array.
+     */
+    private function loadDropdown(string $taxonomy): array
+    {
+        $rows = DB::table('ahg_dropdown')
+            ->where('taxonomy', $taxonomy)
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->orderBy('label')
+            ->get(['code', 'label']);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row->code] = $row->label;
+        }
+
+        return $result;
     }
 }

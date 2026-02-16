@@ -80,12 +80,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="pending" {{ ($transaction->status ?? 'pending') === 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="approved" {{ ($transaction->status ?? '') === 'approved' ? 'selected' : '' }}>Approved</option>
-                                    <option value="in_progress" {{ ($transaction->status ?? '') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="on_hold" {{ ($transaction->status ?? '') === 'on_hold' ? 'selected' : '' }}>On Hold</option>
-                                    <option value="completed" {{ ($transaction->status ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ ($transaction->status ?? '') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    @foreach ($statusOptions as $code => $label)
+                                    <option value="{{ $code }}" {{ ($transaction->status ?? '') === $code ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -190,10 +187,9 @@
                         <div class="mb-3">
                             <label class="form-label">Payment Status</label>
                             <select name="payment_status" class="form-select">
-                                <option value="pending" {{ ($transaction->payment_status ?? 'pending') === 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="partial" {{ ($transaction->payment_status ?? '') === 'partial' ? 'selected' : '' }}>Partial</option>
-                                <option value="paid" {{ ($transaction->payment_status ?? '') === 'paid' ? 'selected' : '' }}>Paid</option>
-                                <option value="overdue" {{ ($transaction->payment_status ?? '') === 'overdue' ? 'selected' : '' }}>Overdue</option>
+                                @foreach ($paymentStatuses as $code => $label)
+                                <option value="{{ $code }}" {{ ($transaction->payment_status ?? '') === $code ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">

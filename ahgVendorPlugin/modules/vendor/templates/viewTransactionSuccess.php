@@ -1,15 +1,22 @@
-<?php 
+<?php
 $transactionRaw = isset($sf_data) ? $sf_data->getRaw('transaction') : $transaction;
 $vendorRaw = isset($sf_data) ? $sf_data->getRaw('vendor') : $vendor;
 $itemsRaw = isset($sf_data) ? $sf_data->getRaw('items') : $items;
+$statusOptionsRaw = isset($sf_data) ? $sf_data->getRaw('statusOptions') : (isset($statusOptions) ? $statusOptions : []);
+$conditionRatingsRaw = isset($sf_data) ? $sf_data->getRaw('conditionRatings') : (isset($conditionRatings) ? $conditionRatings : []);
 
 $statusColors = [
     'pending' => 'warning',
+    'pending_approval' => 'warning',
     'approved' => 'info',
+    'dispatched' => 'info',
+    'received_by_vendor' => 'primary',
     'in_progress' => 'primary',
     'completed' => 'success',
+    'ready_for_collection' => 'success',
+    'returned' => 'success',
     'cancelled' => 'secondary',
-    'on_hold' => 'dark'
+    'on_hold' => 'dark',
 ];
 ?>
 
@@ -158,8 +165,8 @@ $statusColors = [
                     <div class="mb-3">
                         <label class="form-label">New Status</label>
                         <select name="status" class="form-select" required>
-                            <?php foreach (['pending', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'] as $s): ?>
-                            <option value="<?php echo $s; ?>" <?php echo $transactionRaw->status === $s ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $s)); ?></option>
+                            <?php foreach ($statusOptionsRaw as $code => $label): ?>
+                            <option value="<?php echo $code; ?>" <?php echo $transactionRaw->status === $code ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -171,4 +178,4 @@ $statusColors = [
     </div>
 </div>
 
-<?php include_partial('vendor/addItemModal', ['transactionRaw' => $transactionRaw]); ?>
+<?php include_partial('vendor/addItemModal', ['transactionRaw' => $transactionRaw, 'conditionRatingsRaw' => $conditionRatingsRaw]); ?>

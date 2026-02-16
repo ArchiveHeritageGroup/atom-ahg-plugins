@@ -1114,6 +1114,80 @@ class reportBuilderActions extends AhgController
     }
 
     /**
+     * Preview a template (read-only).
+     */
+    public function executePreviewTemplate($request)
+    {
+        $this->checkAdminAccess();
+
+        $this->loadService('TemplateService');
+        $templateService = new TemplateService();
+        $template = $templateService->getTemplate((int) $request->getParameter('id'));
+
+        if (!$template) {
+            $this->forward404('Template not found');
+        }
+
+        $this->template = $template;
+    }
+
+    /**
+     * Edit a template (GET shows form, POST saves changes).
+     */
+    public function executeEditTemplate($request)
+    {
+        $this->checkAdminAccess();
+
+        $this->loadService('TemplateService');
+        $templateService = new TemplateService();
+        $template = $templateService->getTemplate((int) $request->getParameter('id'));
+
+        if (!$template) {
+            $this->forward404('Template not found');
+        }
+
+        if ($request->isMethod('post')) {
+            $templateService->update((int) $template->id, [
+                'name' => $request->getParameter('name'),
+                'description' => $request->getParameter('description'),
+                'category' => $request->getParameter('category'),
+            ]);
+
+            $this->redirect(url_for(['module' => 'reportBuilder', 'action' => 'templates']));
+        }
+
+        $this->template = $template;
+    }
+
+    /**
+     * Delete a non-system template.
+     */
+    public function executeDeleteTemplate($request)
+    {
+        $this->checkAdminAccess();
+
+        $this->loadService('TemplateService');
+        $templateService = new TemplateService();
+        $template = $templateService->getTemplate((int) $request->getParameter('id'));
+
+        if (!$template) {
+            $this->forward404('Template not found');
+        }
+
+        if ($template->scope === 'system') {
+            $this->forward404('System templates cannot be deleted');
+        }
+
+        if ($request->getParameter('confirm')) {
+            $templateService->delete((int) $template->id);
+
+            $this->redirect(url_for(['module' => 'reportBuilder', 'action' => 'templates']));
+        }
+
+        $this->template = $template;
+    }
+
+    /**
      * API: Create report from template.
      */
     public function executeApiTemplateApply($request)

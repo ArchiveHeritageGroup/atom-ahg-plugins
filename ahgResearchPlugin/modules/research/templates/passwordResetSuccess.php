@@ -4,10 +4,6 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <div class="row justify-content-center">
   <div class="col-md-6">
     <div class="card">

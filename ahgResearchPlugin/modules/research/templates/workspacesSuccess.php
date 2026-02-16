@@ -15,14 +15,6 @@ $privacyOptions = $taxonomyService->getWorkspacePrivacyOptions(false);
         <i class="fas fa-plus me-1"></i> New Workspace
     </button>
 </div>
-
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <?php if (!empty($workspaces)): ?>
     <div class="row">
         <?php foreach ($workspaces as $ws): ?>

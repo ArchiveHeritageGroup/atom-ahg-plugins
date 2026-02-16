@@ -4,13 +4,6 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-<?php endif; ?>
-
 <div class="row">
   <div class="col-md-8">
     <div class="card mb-4">

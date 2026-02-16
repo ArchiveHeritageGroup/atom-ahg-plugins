@@ -40,6 +40,7 @@ class vendorActions extends AhgController
             'vendors' => $this->service->listVendors($filters),
             'serviceTypes' => $this->service->listServiceTypes(),
             'vendorTypes' => $this->service->getVendorTypes(),
+            'vendorStatuses' => $this->service->getVendorStatuses(),
         ]);
     }
 
@@ -123,6 +124,7 @@ class vendorActions extends AhgController
             'vendor' => $vendor,
             'errors' => $errors,
             'vendorTypes' => $vendorTypes,
+            'vendorStatuses' => $this->service->getVendorStatuses(),
             'serviceTypes' => $serviceTypes,
             'vendorServices' => $vendorServices,
         ]);
@@ -307,6 +309,7 @@ class vendorActions extends AhgController
             'history' => $this->service->getTransactionHistory($id),
             'attachments' => $this->service->getAttachments($id),
             'statusOptions' => $this->service->getStatusOptions(),
+            'conditionRatings' => $this->service->getConditionRatings(),
         ]);
     }
 
@@ -396,6 +399,7 @@ class vendorActions extends AhgController
             'vendors' => $vendors,
             'serviceTypes' => $serviceTypes,
             'paymentStatuses' => $paymentStatuses,
+            'statusOptions' => $this->service->getStatusOptions(),
         ]);
     }
 
@@ -428,7 +432,7 @@ class vendorActions extends AhgController
             'quote_reference' => $request->getParameter('quote_reference'),
             'invoice_reference' => $request->getParameter('invoice_reference'),
             'invoice_date' => $request->getParameter('invoice_date') ?: null,
-            'payment_status' => $request->getParameter('payment_status', 'not_invoiced'),
+            'payment_status' => $request->getParameter('payment_status', 'pending'),
             'total_insured_value' => $request->getParameter('total_insured_value') ?: null,
             'insurance_arranged' => $request->getParameter('insurance_arranged') ? 1 : 0,
             'insurance_reference' => $request->getParameter('insurance_reference'),

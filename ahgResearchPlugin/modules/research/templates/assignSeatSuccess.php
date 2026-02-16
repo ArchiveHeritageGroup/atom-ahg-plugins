@@ -7,14 +7,6 @@
 <?php
 $availableSeats = isset($availableSeats) && is_array($availableSeats) ? $availableSeats : (isset($availableSeats) && method_exists($availableSeats, 'getRawValue') ? $availableSeats->getRawValue() : []);
 ?>
-
-<?php if ($sf_user->hasFlash('success')): ?>
-  <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('success'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-  <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><?php echo __('Research'); ?></a></li>

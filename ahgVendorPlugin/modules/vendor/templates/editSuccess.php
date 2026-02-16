@@ -1,8 +1,9 @@
-<?php 
+<?php
 $vendorRaw = isset($sf_data) ? $sf_data->getRaw('vendor') : $vendor;
 $serviceTypesRaw = isset($sf_data) ? $sf_data->getRaw('serviceTypes') : $serviceTypes;
 $vendorTypesRaw = isset($sf_data) ? $sf_data->getRaw('vendorTypes') : $vendorTypes;
 $vendorServicesRaw = isset($sf_data) ? $sf_data->getRaw('vendorServices') : (isset($vendorServices) ? $vendorServices : []);
+$vendorStatusesRaw = isset($sf_data) ? $sf_data->getRaw('vendorStatuses') : (isset($vendorStatuses) ? $vendorStatuses : []);
 
 $isNew = empty($vendorRaw->id);
 $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
@@ -65,10 +66,9 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="active" <?php echo ($vendorRaw->status ?? 'active') === 'active' ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?php echo ($vendorRaw->status ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                                    <option value="pending_approval" <?php echo ($vendorRaw->status ?? '') === 'pending_approval' ? 'selected' : ''; ?>>Pending Approval</option>
-                                    <option value="suspended" <?php echo ($vendorRaw->status ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
+                                    <?php foreach ($vendorStatusesRaw as $code => $label): ?>
+                                    <option value="<?php echo $code; ?>" <?php echo ($vendorRaw->status ?? 'active') === $code ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>

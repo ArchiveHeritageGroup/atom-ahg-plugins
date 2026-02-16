@@ -145,6 +145,11 @@ class ahgReportBuilderPluginConfiguration extends sfPluginConfiguration
         // Delete
         $router->any('report_builder_delete', '/admin/report-builder/:id/delete', 'delete', ['id' => '\d+']);
 
+        // Template management
+        $router->any('report_builder_delete_template', '/admin/report-builder/template/:id/delete', 'deleteTemplate', ['id' => '\d+']);
+        $router->any('report_builder_edit_template', '/admin/report-builder/template/:id/edit', 'editTemplate', ['id' => '\d+']);
+        $router->any('report_builder_preview_template', '/admin/report-builder/template/:id/preview', 'previewTemplate', ['id' => '\d+']);
+
         // Templates library
         $router->any('report_builder_templates', '/admin/report-builder/templates', 'templates');
 

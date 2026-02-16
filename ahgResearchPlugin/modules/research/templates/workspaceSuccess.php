@@ -15,14 +15,6 @@ $pastBookings = is_array($pastBookings) ? $pastBookings : (method_exists($pastBo
 // Check if researcher can use features (approved and not expired)
 $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_at || strtotime($researcher->expires_at) >= time());
 ?>
-
-<?php if ($sf_user->hasFlash('success')): ?>
-  <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('success'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-<?php if ($sf_user->hasFlash('error')): ?>
-  <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-<?php endif; ?>
-
 <?php if ($researcher->status === 'expired' || ($researcher->status === 'approved' && $researcher->expires_at && strtotime($researcher->expires_at) < time())): ?>
 <div class="alert alert-danger d-flex justify-content-between align-items-center mb-4">
   <div>

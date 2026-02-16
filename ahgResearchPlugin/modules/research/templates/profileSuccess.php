@@ -7,10 +7,6 @@
 
 <h1 class="h2 mb-4"><i class="fas fa-user-circle text-primary me-2"></i>My Profile</h1>
 
-<?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-<?php endif; ?>
-
 <div class="row">
     <div class="col-md-8">
         <div class="card">
