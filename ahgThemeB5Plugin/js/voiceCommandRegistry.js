@@ -451,9 +451,18 @@ var AHGVoiceRegistry = (function () {
     },
     {
       patterns: ['describe object', 'describe the object', 'what is this', 'what is this object', 'what do i see', 'what is in the image', 'what is in the picture'],
-      action: function () { var v = window.ahgVoice; if (v) v.describeImage(); },
+      action: function () {
+        var v = window.ahgVoice;
+        if (!v) return;
+        // Auto-detect: if a 3D viewer is on the page, use 3D describe; otherwise image describe
+        if (document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer')) {
+          v.describeObject();
+        } else {
+          v.describeImage();
+        }
+      },
       mode: 'action_view',
-      description: 'AI describe what is in the image',
+      description: 'AI describe what is in the image or 3D object',
       feedback: null,
       contextCheck: function () {
         return AHGVoiceRegistry._hasDigitalObject();
@@ -564,6 +573,18 @@ var AHGVoiceRegistry = (function () {
       mode: 'global',
       description: 'Increase speech rate',
       feedback: 'Speeding up'
+    },
+
+    // -- AI 3D Object Description -----------------------------------------
+    {
+      patterns: ['describe 3d', 'describe 3d object', 'describe model', 'describe 3d model', 'what is this model'],
+      action: function () { var v = window.ahgVoice; if (v) v.describeObject(); },
+      mode: 'action_view',
+      description: 'AI-describe a 3D object from multiple angles',
+      feedback: null,
+      contextCheck: function () {
+        return !!document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer');
+      }
     },
 
     // -- AI Image Description (Phase 5) ----------------------------------
@@ -788,8 +809,8 @@ var AHGVoiceRegistry = (function () {
       if (document.querySelector('#wrapper img.img-fluid, #sidebar img.img-fluid, #content img.img-fluid, .digital-object-viewer, .converted-image-viewer, video, audio')) {
         return true;
       }
-      // IIIF viewer / OpenSeadragon / 3D viewer
-      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="viewer-3d-"]')) {
+      // IIIF viewer / OpenSeadragon / 3D viewer / Model Viewer / Gaussian Splat
+      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer')) {
         return true;
       }
       // Digital object metadata section

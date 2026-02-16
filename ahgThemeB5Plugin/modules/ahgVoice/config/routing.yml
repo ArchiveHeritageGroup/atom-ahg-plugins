@@ -10,6 +10,12 @@ ahg_voice_save_description:
   requirements:
     sf_method: [POST]
 
+ahg_voice_describe_object:
+  url: /ahgVoice/describeObject
+  param: { module: ahgVoice, action: describeObject }
+  requirements:
+    sf_method: [POST]
+
 ahg_voice_get_settings:
   url: /ahgVoice/getSettings
   param: { module: ahgVoice, action: getSettings }

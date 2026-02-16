@@ -1743,6 +1743,132 @@ class AHGVoiceCommands {
   }
 
   /**
+   * AI-powered 3D object description via multi-angle Blender renders + LLM.
+   */
+  describeObject() {
+    var meta = this._gatherPageMetadata();
+    console.log('[Voice] describeObject: hasDigitalObject=' + meta.hasDigitalObject);
+
+    // Detect 3D viewer on page
+    var viewer3d = document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer');
+    if (!viewer3d && !meta.hasDigitalObject) {
+      this.speak('No 3D object found on this page');
+      this.showToast('No 3D object on this page', 'warning');
+      return;
+    }
+
+    // Reuse same ID resolution strategies as describeImage
+    var doId = meta.digitalObjectId;
+    if (!doId) {
+      var doIdEl = document.querySelector('[data-do-id]');
+      if (doIdEl) doId = parseInt(doIdEl.getAttribute('data-do-id'), 10);
+    }
+    if (!doId) {
+      var playerEl = document.querySelector('[id^="viewer-3d-"]');
+      if (playerEl) {
+        var pidMatch = playerEl.id.match(/(\d+)$/);
+        if (pidMatch) doId = parseInt(pidMatch[1], 10);
+      }
+    }
+
+    var infoObjectId = meta.informationObjectId || null;
+    if (!doId && !infoObjectId) {
+      var ioEl = document.querySelector('[data-object-id], #tpmInformationObjectId');
+      if (ioEl) infoObjectId = ioEl.getAttribute('data-object-id') || ioEl.value;
+    }
+    if (!doId && !infoObjectId) {
+      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"]');
+      if (iiifEl) {
+        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|osd|mirador)-(\d+)/);
+        if (idMatch) infoObjectId = parseInt(idMatch[1], 10);
+      }
+    }
+
+    var slug = null;
+    if (!doId && !infoObjectId) {
+      var path = window.location.pathname.replace(/\/index\.php/, '');
+      if (path && path !== '/' && !/^\/(admin|user|search|glam|display|clipboard|donor|accession|repository|actor|taxonomy|function|research)/.test(path)) {
+        slug = path.replace(/^\//, '').replace(/\?.*$/, '').split('?')[0];
+      }
+    }
+
+    if (!doId && !infoObjectId && !slug) {
+      this.speak('Cannot identify the 3D object. Try from a record view page.');
+      this.showToast('3D object ID not found', 'warning');
+      return;
+    }
+
+    var self = this;
+    this.speak('Rendering 3D views, this may take a moment.');
+    this.showToast('Generating 3D multi-angle renders...', 'info');
+
+    if (this.indicator) {
+      this.indicator.classList.add('voice-indicator-processing');
+    }
+
+    var waitMessages = [
+      'Still rendering, almost there.',
+      'Processing 3D model, please hold on.',
+      'AI is analyzing the 3D object.'
+    ];
+    var waitIdx = 0;
+    var patienceTimer = setInterval(function () {
+      if (waitIdx < waitMessages.length) {
+        self.showToast(waitMessages[waitIdx], 'info');
+        self.speak(waitMessages[waitIdx]);
+        waitIdx++;
+      }
+    }, 20000);
+
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrfInput = document.querySelector('input[name="csrf_token"], input[name="_csrf_token"]');
+    var csrfToken = (csrfMeta && csrfMeta.content) || (csrfInput && csrfInput.value) || '';
+
+    var formData = new FormData();
+    if (doId) formData.append('digital_object_id', doId);
+    if (infoObjectId) formData.append('information_object_id', infoObjectId);
+    if (slug) formData.append('slug', slug);
+    if (csrfToken) formData.append('csrf_token', csrfToken);
+
+    fetch('/index.php/ahgVoice/describeObject', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    })
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+      clearInterval(patienceTimer);
+      if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
+
+      if (data.success) {
+        var source = data.source || 'AI';
+        var renderInfo = data.render_count ? ' (' + data.render_count + ' views, ' + source + ')' : '';
+        self.speak(data.description);
+        self.showToast('3D description generated' + renderInfo, 'success');
+
+        // Store for save flow (reuses existing saveDescription endpoint)
+        self._pendingDescription = data.description;
+        self._pendingDoId = doId;
+        self._pendingInfoObjectId = data.information_object_id || null;
+
+        setTimeout(function () {
+          self._promptSaveDescription();
+        }, Math.max(2000, data.description.length * 50));
+      } else {
+        self.speak(data.error || '3D description failed');
+        self.showToast(data.error || '3D description failed', 'danger');
+      }
+    })
+    .catch(function (err) {
+      clearInterval(patienceTimer);
+      if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
+      console.error('[Voice] 3D describe error:', err);
+      self.speak('Failed to contact AI service');
+      self.showToast('AI service error', 'danger');
+    });
+  }
+
+  /**
    * Prompt user to save the AI-generated description.
    */
   _promptSaveDescription() {
