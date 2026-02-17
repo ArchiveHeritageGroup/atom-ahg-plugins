@@ -121,7 +121,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
                 <div class="mb-2">
                   <input type="text" name="title" class="form-control form-control-sm" value="<?php echo htmlspecialchars($section->title ?? ''); ?>" placeholder="<?php echo __('Section title...'); ?>">
                 </div>
-                <div class="section-editor" data-section-id="<?php echo $section->id; ?>" style="height: 200px;"></div>
+                <div class="section-editor" id="section-editor-<?php echo $section->id; ?>" data-section-id="<?php echo $section->id; ?>"></div>
                 <div class="mt-2 d-flex gap-2">
                   <button type="submit" class="btn btn-sm btn-primary save-section-btn"><i class="fas fa-save me-1"></i><?php echo __('Save'); ?></button>
                   <button type="button" class="btn btn-sm btn-secondary cancel-edit-btn" data-section-id="<?php echo $section->id; ?>"><?php echo __('Cancel'); ?></button>
@@ -363,29 +363,11 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
   </div>
 </div>
 
-<!-- Quill.js CSS -->
-<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-
-<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-.section-editor { background: #fff; color: #212529; }
-.section-editor .ql-editor { min-height: 150px; }
-.ql-toolbar.ql-snow { background: #f8f9fa; border-color: #dee2e6; }
-.ql-container.ql-snow { border-color: #dee2e6; }
-.ql-editor img { max-width: 100%; height: auto; max-height: 300px; border-radius: 4px; margin: 4px 0; }
-.section-display img { max-width: 300px; height: auto; max-height: 250px; border-radius: 4px; margin: 4px 0; cursor: pointer; }
-.section-display img:hover { max-width: 100%; max-height: none; }
-.border-dashed { border-style: dashed !important; }
-.modal-content { background-color: #fff !important; color: #212529 !important; }
-.modal-body .form-label { color: #212529 !important; }
-.modal-body .form-control, .modal-body .form-select { background-color: #fff !important; color: #212529 !important; }
-</style>
-
-<!-- Quill.js -->
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<?php include_partial('research/tiptapScripts') ?>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
-  var quillInstances = {};
+  var editorInstances = {};
 
   // Edit section button
   document.querySelectorAll('.edit-section-btn').forEach(function(btn) {
@@ -397,26 +379,15 @@ document.addEventListener('DOMContentLoaded', function() {
       displayEl.classList.add('d-none');
       editEl.classList.remove('d-none');
 
-      // Initialize Quill if not yet
-      if (!quillInstances[sectionId]) {
-        var editorEl = editEl.querySelector('.section-editor');
-        quillInstances[sectionId] = new Quill(editorEl, {
-          theme: 'snow',
-          modules: {
-            toolbar: [
-              [{ 'header': [1, 2, 3, false] }],
-              ['bold', 'italic', 'underline'],
-              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-              ['blockquote', 'link'],
-              ['clean']
-            ]
-          }
-        });
-        // Load existing content from display
+      // Initialize TipTap if not yet
+      if (!editorInstances[sectionId]) {
         var existingHtml = displayEl.innerHTML.trim();
-        if (existingHtml && !existingHtml.includes('fst-italic')) {
-          quillInstances[sectionId].root.innerHTML = existingHtml;
-        }
+        var initialContent = (existingHtml && !existingHtml.includes('fst-italic')) ? existingHtml : '';
+        editorInstances[sectionId] = ResearchTipTap.create('section-editor-' + sectionId, {
+          profile: 'minimal',
+          placeholder: '<?php echo __("Write section content..."); ?>',
+          initialContent: initialContent
+        });
       }
     });
   });
@@ -430,12 +401,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Save section - sync Quill content
+  // Save section - sync TipTap content
   document.querySelectorAll('.section-edit-form').forEach(function(form) {
     form.addEventListener('submit', function() {
       var sectionId = form.querySelector('[name="section_id"]').value;
-      if (quillInstances[sectionId]) {
-        form.querySelector('.section-content-hidden').value = quillInstances[sectionId].root.innerHTML;
+      if (editorInstances[sectionId]) {
+        form.querySelector('.section-content-hidden').value = editorInstances[sectionId].getHTML();
       }
     });
   });

@@ -86,27 +86,18 @@
     padding: 0.75rem;
 }
 
-/* Quill editor overrides */
-.section-body .ql-toolbar {
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem 0.25rem 0 0;
-    background: #f8f9fa;
+/* TipTap editor overrides for report sections */
+.section-body .rtt-wrapper {
+    border-radius: 0 0 0.25rem 0.25rem;
 }
 
-.section-body .ql-container {
-    border: 1px solid #dee2e6;
-    border-top: none;
-    border-radius: 0 0 0.25rem 0.25rem;
+.section-body .rtt-wrapper .ProseMirror {
     min-height: 150px;
     font-family: inherit;
     font-size: 0.9rem;
 }
 
-.section-body .ql-editor {
-    min-height: 150px;
-}
-
-.section-body .ql-editor p {
+.section-body .rtt-wrapper .ProseMirror p {
     margin-bottom: 0.5rem;
 }
 

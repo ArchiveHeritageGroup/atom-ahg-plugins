@@ -87,7 +87,7 @@ EOF;
 
         try {
             $commitSvc->executeJob($jobId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logSection('ingest', 'FATAL ERROR: ' . $e->getMessage(), null, 'ERROR');
 
             // Mark job as failed

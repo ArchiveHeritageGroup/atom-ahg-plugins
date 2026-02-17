@@ -126,7 +126,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                     </div>
                     <?php if ($section->section_type === 'narrative'): ?>
                     <div class="section-body">
-                        <div id="quill_<?php echo $section->id; ?>" class="section-quill-editor" data-section-id="<?php echo $section->id; ?>"></div>
+                        <div id="tiptap_<?php echo $section->id; ?>" class="section-tiptap-editor" data-section-id="<?php echo $section->id; ?>"></div>
                         <input type="hidden" id="sectionContent_<?php echo $section->id; ?>" value="<?php echo htmlspecialchars($section->content ?? ''); ?>">
                     </div>
                     <?php else: ?>
@@ -474,16 +474,25 @@ window.reportBuilder = {
 <!-- Section editor styles -->
 <link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/report-sections.css">
 
-<!-- Quill.js (local copies) -->
-<link href="/plugins/ahgReportBuilderPlugin/web/css/quill.snow.css" rel="stylesheet">
-<script src="/plugins/ahgReportBuilderPlugin/web/js/quill.js"></script>
+<!-- TipTap CDN -->
+<?php $_na = sfConfig::get('csp_nonce', ''); $_na = $_na ? preg_replace('/^nonce=/', 'nonce="', $_na) . '"' : ''; ?>
+<link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/tiptap-report.css">
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/core@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/starter-kit@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-text-style@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-image@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-underline@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-color@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-highlight@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-link@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+
+<!-- TipTap init (provides TipTapManager + QuillManager backward-compat alias) -->
+<script src="/plugins/ahgReportBuilderPlugin/web/js/tiptap-init.js" <?php echo $_na; ?>></script>
 
 <!-- Load libraries (local copies to avoid CDN/CSP issues) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/sortable.min.js"></script>
 <script src="/plugins/ahgReportBuilderPlugin/web/js/chart.umd.min.js"></script>
-
-<!-- Quill init (must load after Quill CDN) -->
-<script src="/plugins/ahgReportBuilderPlugin/web/js/quill-init.js"></script>
 
 <!-- Load designer.js (handles all Sortable init for columns + layout + headers + sections) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js"></script>

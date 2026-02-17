@@ -181,8 +181,8 @@ $activeTag = $sf_request->getParameter('tag', '');
           <div class="mb-3">
             <label class="form-label"><?php echo __('Note Content'); ?> *</label>
             <textarea name="content" id="annotationContent" class="form-control d-none" rows="5"></textarea>
-            <div id="annotationQuillEditor" style="min-height: 200px; max-height: 500px; background: #fff; color: #212529;"></div>
-            <div style="cursor: ns-resize; text-align: center; padding: 2px 0; color: #adb5bd; user-select: none;" id="quillResizeHandle"><i class="fas fa-grip-lines"></i></div>
+            <div id="annotationEditor"></div>
+            <div class="rtt-resize-handle" id="editorResizeHandle"></div>
           </div>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Link to Collection'); ?></label>
@@ -269,7 +269,7 @@ $activeTag = $sf_request->getParameter('tag', '');
 
 <!-- Tom Select CSS & JS -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+<?php include_partial('research/tiptapScripts') ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Fix Tom Select dropdown text visibility */
 .ts-dropdown { background: #fff !important; color: #212529 !important; }
@@ -300,14 +300,12 @@ $activeTag = $sf_request->getParameter('tag', '');
 .modal-body { color: #212529 !important; }
 .modal-body .form-label { color: #212529 !important; }
 .modal-body .form-control { background-color: #fff !important; color: #212529 !important; }
-/* Image sizing in Quill editor and annotation cards */
-.ql-editor img { max-width: 100%; height: auto; max-height: 300px; cursor: pointer; border-radius: 4px; margin: 4px 0; }
+/* Image sizing in annotation cards */
 .card-text img { max-width: 300px; height: auto; max-height: 250px; border-radius: 4px; margin: 4px 0; cursor: pointer; transition: max-width 0.2s; }
 .card-text img:hover { max-width: 100%; max-height: none; }
 .card-text img.img-expanded { max-width: 100%; max-height: none; }
 </style>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
@@ -317,54 +315,12 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   var modal = document.getElementById('newAnnotationModal');
   var itemSelect;
-  var quillEditor;
 
-  // Initialize Quill
-  quillEditor = new Quill('#annotationQuillEditor', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        ['blockquote', 'link', 'image'],
-        ['clean']
-      ]
-    },
+  // Initialize TipTap editor
+  var editor = ResearchTipTap.create('annotationEditor', {
+    profile: 'medium',
+    uploadUrl: '<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>',
     placeholder: '<?php echo __("Your notes..."); ?>'
-  });
-
-  // Custom image upload handler
-  quillEditor.getModule('toolbar').addHandler('image', function() {
-    var input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-    input.onchange = function() {
-      var file = input.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be under 5MB');
-        return;
-      }
-      var formData = new FormData();
-      formData.append('image', file);
-      fetch('<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>', {
-        method: 'POST',
-        body: formData
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.url) {
-          var range = quillEditor.getSelection(true);
-          quillEditor.insertEmbed(range.index, 'image', data.url);
-          quillEditor.setSelection(range.index + 1);
-        } else {
-          alert(data.error || 'Upload failed');
-        }
-      })
-      .catch(function() { alert('Upload failed'); });
-    };
   });
 
   // Get current entity type for search URL
@@ -394,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     render: {
       option: function(item, escape) {
-        return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' + 
+        return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
                (item.identifier ? '<br><small class="text-muted">' + escape(item.identifier) + '</small>' : '') +
                '</div>';
       },
@@ -403,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-  
+
   var isEditMode = false;
 
   // Helper to decode HTML entities from data attributes
@@ -421,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('annotationTitle').value = '';
       document.getElementById('annotationContent').value = '';
       itemSelect.clear();
-      quillEditor.root.innerHTML = '';
+      editor.commands.clearContent();
       var collReset = document.getElementById('annotationCollectionId');
       if (collReset) collReset.value = '';
       var visReset = document.getElementById('annotationVisibility');
@@ -450,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
         itemSelect.addOption({id: this.dataset.objectId, title: this.dataset.objectTitle || ('Item #' + this.dataset.objectId)});
         itemSelect.setValue(this.dataset.objectId);
       }
-      quillEditor.root.innerHTML = decodeHtml(this.dataset.content || '');
+      editor.commands.setContent(decodeHtml(this.dataset.content || ''));
       var collSelect = document.getElementById('annotationCollectionId');
       if (collSelect) collSelect.value = this.dataset.collectionId || '';
       var visSelect = document.getElementById('annotationVisibility');
@@ -465,15 +421,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Drag-resize handle for Quill editor
+  // Drag-resize handle for TipTap editor wrapper
   (function() {
-    var handle = document.getElementById('quillResizeHandle');
-    var editor = document.getElementById('annotationQuillEditor');
+    var handle = document.getElementById('editorResizeHandle');
+    var wrapper = document.getElementById('rtt-wrapper-annotationEditor');
+    if (!handle || !wrapper) return;
     var startY, startH;
     handle.addEventListener('mousedown', function(e) {
       startY = e.clientY;
-      startH = editor.offsetHeight;
-      function onMove(ev) { editor.style.height = Math.max(150, startH + (ev.clientY - startY)) + 'px'; }
+      startH = wrapper.offsetHeight;
+      function onMove(ev) { wrapper.style.height = Math.max(150, startH + (ev.clientY - startY)) + 'px'; wrapper.style.overflow = 'hidden'; }
       function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
@@ -487,9 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
     itemSelect.clearOptions();
   });
 
-  // Sync Quill content to hidden textarea on form submit
+  // Sync TipTap content to hidden textarea on form submit
   document.getElementById('annotationForm').addEventListener('submit', function() {
-    document.getElementById('annotationContent').value = quillEditor.root.innerHTML;
+    document.getElementById('annotationContent').value = editor.getHTML();
   });
 
   // Export modal: Select All toggle

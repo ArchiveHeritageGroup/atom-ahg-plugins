@@ -5079,6 +5079,13 @@ class researchActions extends AhgController
         }
 
         if ($request->isMethod('post')) {
+            // Handle delete
+            if ($request->getParameter('form_action') === 'delete' && $id) {
+                $extractionService->deleteDocumentTemplate((int) $id);
+                $this->getUser()->setFlash('success', 'Template deleted');
+                $this->redirect('research/document-templates');
+            }
+
             try {
                 $data = [
                     'name' => $request->getParameter('name'),

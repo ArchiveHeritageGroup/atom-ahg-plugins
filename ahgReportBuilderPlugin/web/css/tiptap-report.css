@@ -1,0 +1,160 @@
+/* tiptap-report.css - TipTap editor styling for ahgReportBuilderPlugin */
+
+/* Toolbar */
+.rtt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.rtt-toolbar .btn {
+  padding: 3px 7px;
+  font-size: 13px;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #495057;
+  border-radius: 3px;
+}
+
+.rtt-toolbar .btn:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.rtt-toolbar .btn.active {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+.rtt-toolbar .separator {
+  width: 1px;
+  background: #dee2e6;
+  margin: 2px 4px;
+  align-self: stretch;
+}
+
+.rtt-toolbar select {
+  padding: 2px 4px;
+  font-size: 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.rtt-toolbar input[type="color"] {
+  width: 28px;
+  height: 26px;
+  padding: 1px;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  cursor: pointer;
+  background: #fff;
+}
+
+/* Editor wrapper */
+.rtt-wrapper {
+  border: 1px solid #dee2e6;
+  border-radius: 0 0 4px 4px;
+  background: #fff;
+  position: relative;
+}
+
+/* ProseMirror content area */
+.rtt-wrapper .ProseMirror {
+  min-height: 200px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 12px 15px;
+  outline: none;
+  color: #212529;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.rtt-wrapper .ProseMirror:focus {
+  box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.25);
+}
+
+/* Placeholder */
+.rtt-wrapper .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+}
+
+/* Typography */
+.rtt-wrapper .ProseMirror h1 { font-size: 1.8em; margin: 0.5em 0 0.3em; font-weight: 600; }
+.rtt-wrapper .ProseMirror h2 { font-size: 1.5em; margin: 0.5em 0 0.3em; font-weight: 600; }
+.rtt-wrapper .ProseMirror h3 { font-size: 1.25em; margin: 0.4em 0 0.2em; font-weight: 600; }
+.rtt-wrapper .ProseMirror h4 { font-size: 1.1em; margin: 0.4em 0 0.2em; font-weight: 600; }
+
+.rtt-wrapper .ProseMirror p { margin: 0 0 0.6em; }
+
+.rtt-wrapper .ProseMirror ul,
+.rtt-wrapper .ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.4em 0;
+}
+
+.rtt-wrapper .ProseMirror blockquote {
+  border-left: 3px solid #dee2e6;
+  padding-left: 12px;
+  margin: 0.6em 0;
+  color: #6c757d;
+}
+
+.rtt-wrapper .ProseMirror pre {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 13px;
+  overflow-x: auto;
+}
+
+.rtt-wrapper .ProseMirror code {
+  background: #f8f9fa;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.rtt-wrapper .ProseMirror a {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+.rtt-wrapper .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.rtt-wrapper .ProseMirror mark {
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+.rtt-wrapper .ProseMirror hr {
+  border: none;
+  border-top: 2px solid #dee2e6;
+  margin: 1em 0;
+}
+
+/* Text alignment */
+.rtt-wrapper .ProseMirror [style*="text-align: center"] { text-align: center; }
+.rtt-wrapper .ProseMirror [style*="text-align: right"] { text-align: right; }
+.rtt-wrapper .ProseMirror [style*="text-align: justify"] { text-align: justify; }

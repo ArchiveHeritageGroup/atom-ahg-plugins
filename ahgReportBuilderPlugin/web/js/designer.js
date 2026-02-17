@@ -991,15 +991,15 @@
     document.addEventListener('DOMContentLoaded', function() {
         initSectionSortable();
 
-        // Initialize Quill editors for narrative sections
-        document.querySelectorAll('.section-quill-editor').forEach(function(container) {
+        // Initialize TipTap editors for narrative sections
+        document.querySelectorAll('.section-tiptap-editor').forEach(function(container) {
             var sectionId = container.dataset.sectionId;
             var hiddenInput = document.getElementById('sectionContent_' + sectionId);
             if (typeof QuillManager !== 'undefined' && hiddenInput) {
-                var editor = QuillManager.init(container.id, hiddenInput.id, { placeholder: 'Write your narrative...' });
-                // Auto-save on text change with debounce
+                QuillManager.init(container.id, hiddenInput.id, { placeholder: 'Write your narrative...' });
+                // Auto-save on hidden input change (fired by TipTapManager onUpdate)
                 var saveTimer = null;
-                editor.on('text-change', function() {
+                hiddenInput.addEventListener('change', function() {
                     clearTimeout(saveTimer);
                     saveTimer = setTimeout(function() {
                         saveSectionContent(sectionId, hiddenInput.value);

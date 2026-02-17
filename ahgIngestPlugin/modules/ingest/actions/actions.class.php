@@ -539,6 +539,35 @@ class ingestActions extends sfActions
         $jobId = (int) $request->getParameter('job_id');
         $job = $commitSvc->getJobStatus($jobId);
 
+        // Detect stale/orphaned jobs: running but background process died
+        if ($job && $job->status === 'running' && $job->started_at) {
+            $elapsed = time() - strtotime($job->started_at);
+            $allProcessed = $job->processed_rows >= $job->total_rows;
+
+            // If all rows processed and running > 5 min, or running > 30 min regardless,
+            // check if the background process is still alive
+            if (($allProcessed && $elapsed > 300) || $elapsed > 1800) {
+                $processAlive = false;
+                $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
+                if (file_exists($logFile)) {
+                    // If log file hasn't been modified in > 2 minutes, process is dead
+                    $processAlive = (time() - filemtime($logFile)) < 120;
+                }
+
+                if (!$processAlive) {
+                    $finalStatus = $allProcessed && $job->error_count == 0 ? 'completed' : 'failed';
+                    \Illuminate\Database\Capsule\Manager::table('ingest_job')
+                        ->where('id', $jobId)
+                        ->update([
+                            'status' => $finalStatus,
+                            'completed_at' => date('Y-m-d H:i:s'),
+                        ]);
+                    $job->status = $finalStatus;
+                    $job->completed_at = date('Y-m-d H:i:s');
+                }
+            }
+        }
+
         $this->getResponse()->setContentType('application/json');
         echo json_encode($job ?: ['error' => 'Job not found']);
 

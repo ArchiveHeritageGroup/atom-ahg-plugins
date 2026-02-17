@@ -51,7 +51,7 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
 
           <div class="mb-3">
             <label class="form-label"><?php echo __('Content'); ?></label>
-            <div id="entryEditor" style="height: 300px;"></div>
+            <div id="entryEditor"></div>
           </div>
 
           <div class="row mb-3">
@@ -142,51 +142,23 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
   </div>
 </div>
 
-<!-- Quill.js CSS -->
-<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-
-<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-#entryEditor { background: #fff; color: #212529; }
-#entryEditor .ql-editor { min-height: 250px; }
-.ql-toolbar.ql-snow { background: #f8f9fa; border-color: #dee2e6; }
-.ql-container.ql-snow { border-color: #dee2e6; }
-.ql-editor img { max-width: 100%; height: auto; max-height: 300px; border-radius: 4px; margin: 4px 0; }
-</style>
-
-<!-- Quill.js -->
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<?php include_partial('research/tiptapScripts') ?>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
-  var quill = new Quill('#entryEditor', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        ['blockquote', 'link', 'image'],
-        [{ 'color': [] }, { 'background': [] }],
-        ['clean']
-      ]
-    },
-    placeholder: '<?php echo __("Write your journal entry..."); ?>'
+  var editor = ResearchTipTap.create('entryEditor', {
+    profile: 'full',
+    uploadUrl: '<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>',
+    placeholder: '<?php echo __("Write your journal entry..."); ?>',
+    initialContent: <?php echo json_encode($entry->content ?? ''); ?>
   });
 
-  // Load existing content
-  var existingContent = <?php echo json_encode($entry->content ?? ''); ?>;
-  if (existingContent) {
-    quill.root.innerHTML = existingContent;
-  }
-
-  // Sync content before form submit
   var form = document.getElementById('entryForm');
   form.addEventListener('submit', function() {
-    document.getElementById('entryContentHidden').value = quill.root.innerHTML;
+    document.getElementById('entryContentHidden').value = editor.getHTML();
   });
-
   document.getElementById('saveEntryBtn').addEventListener('click', function() {
-    document.getElementById('entryContentHidden').value = quill.root.innerHTML;
+    document.getElementById('entryContentHidden').value = editor.getHTML();
   });
 });
 </script>

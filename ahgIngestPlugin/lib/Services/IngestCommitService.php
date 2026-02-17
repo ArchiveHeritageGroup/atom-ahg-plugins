@@ -232,7 +232,12 @@ class IngestCommitService
         }
 
         // Generate manifest
-        $manifestPath = $this->generateManifest($jobId);
+        $manifestPath = null;
+        try {
+            $manifestPath = $this->generateManifest($jobId);
+        } catch (\Throwable $e) {
+            $errors[] = ['stage' => 'manifest', 'error' => $e->getMessage()];
+        }
 
         // Apply security classification if configured
         if (!empty($session->security_classification_id)) {
@@ -1008,7 +1013,10 @@ class IngestCommitService
             ->orderBy('row_number')
             ->get();
 
-        $handle = fopen($manifestPath, 'w');
+        $handle = @fopen($manifestPath, 'w');
+        if (!$handle) {
+            throw new \RuntimeException("Cannot create manifest file: {$manifestPath}");
+        }
         fputcsv($handle, [
             'row_number', 'legacy_id', 'title', 'level_of_description',
             'created_atom_id', 'created_do_id', 'slug', 'is_excluded', 'is_valid',
