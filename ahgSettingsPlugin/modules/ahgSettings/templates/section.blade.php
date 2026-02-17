@@ -314,6 +314,17 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label">{{ __('Email Notifications') }}</label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="spectrum_email_notifications" name="settings[spectrum_email_notifications]" value="true" {{ ($settings['spectrum_email_notifications'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="spectrum_email_notifications">{{ __('Send email notifications for task assignments and state transitions') }}</label>
+                                            </div>
+                                            <small class="form-text text-muted">{{ __('Requires SMTP to be configured in Email settings') }}</small>
+                                        </div>
+                                    </div>
                                 </fieldset>
                             @break
 

@@ -238,7 +238,37 @@ class ingestActions extends sfActions
         }
         $this->requireSessionOwner($this->session);
 
-        // Check if auto-map needed (no mappings exist yet)
+        // Detect directory import (no CSV file)
+        $this->isDirectoryImport = \Illuminate\Database\Capsule\Manager::table('ingest_file')
+            ->where('session_id', $id)
+            ->where('file_type', 'directory')
+            ->exists();
+
+        if ($this->isDirectoryImport) {
+            // Directory import: metadata entry mode
+            if ($request->isMethod('post')) {
+                $metadata = $request->getParameter('metadata', []);
+                $svc->applyMetadataToRows($id, $metadata);
+                $svc->updateSessionStatus($id, 'validate');
+                $this->redirect(['module' => 'ingest', 'action' => 'validate', 'id' => $id]);
+            }
+
+            $this->fieldGroups = \AhgIngestPlugin\Services\IngestService::getMetadataFieldGroups($this->session->standard);
+            $this->vocabularies = \AhgIngestPlugin\Services\IngestService::getControlledVocabularies($this->session->standard);
+            $this->requiredFields = \AhgIngestPlugin\Services\IngestService::getRequiredFields($this->session->standard);
+            $this->sampleRows = \Illuminate\Database\Capsule\Manager::table('ingest_row')
+                ->where('session_id', $id)
+                ->orderBy('row_number')
+                ->limit(10)
+                ->get()
+                ->toArray();
+            $this->rowCount = \Illuminate\Database\Capsule\Manager::table('ingest_row')
+                ->where('session_id', $id)
+                ->count();
+            return;
+        }
+
+        // CSV import: column mapping mode
         $existingMappings = $svc->getMappings($id);
         if (empty($existingMappings)) {
             $svc->autoMapColumns($id, $this->session->standard);
@@ -340,6 +370,11 @@ class ingestActions extends sfActions
             if ($action === 'proceed') {
                 $svc->updateSessionStatus($id, 'preview');
                 $this->redirect(['module' => 'ingest', 'action' => 'preview', 'id' => $id]);
+            }
+
+            if ($action === 'commit') {
+                $svc->updateSessionStatus($id, 'commit');
+                $this->redirect(['module' => 'ingest', 'action' => 'commit', 'id' => $id]);
             }
         }
 

@@ -63,25 +63,570 @@ class IngestService
                 'workType', 'measurements', 'materialsTechniques',
                 'stylePeriod', 'culturalContext',
             ];
+        } elseif ($standard === 'mods') {
+            $extras = [
+                'genre', 'typeOfResource', 'abstract', 'tableOfContents',
+                'originInfoPublisher', 'originInfoPlace', 'originInfoDateIssued',
+                'issuance', 'frequency', 'classification', 'note',
+            ];
         }
 
         return array_merge($common, $extras);
     }
 
     /**
-     * Required fields per standard.
+     * Required fields per standard (ISAD(G) 2.1 numbering, Spectrum, CCO, DC, MODS).
      */
     public static function getRequiredFields(string $standard = 'isadg'): array
     {
-        $base = ['title', 'levelOfDescription'];
+        switch ($standard) {
+            case 'isadg':
+                // ISAD(G) 2nd ed mandatory elements: 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5
+                return ['identifier', 'title', 'creationDatesStart', 'levelOfDescription', 'extentAndMedium'];
 
-        if ($standard === 'isadg') {
-            $base[] = 'identifier';
-        } elseif ($standard === 'dc') {
-            $base = ['title'];
+            case 'rad':
+                // RAD mandatory: title proper, dates, level, extent
+                return ['title', 'creationDatesStart', 'levelOfDescription', 'extentAndMedium'];
+
+            case 'dacs':
+                // DACS required: reference code, title, date, extent, creator
+                return ['identifier', 'title', 'creationDatesStart', 'levelOfDescription', 'extentAndMedium'];
+
+            case 'dc':
+                // Dublin Core: only title is truly required
+                return ['title'];
+
+            case 'mods':
+                // MODS: title and typeOfResource
+                return ['title', 'typeOfResource'];
+
+            case 'spectrum':
+                // Spectrum 5.1: Object number + object name mandatory for Object Entry
+                return ['objectNumber', 'objectName', 'title', 'levelOfDescription'];
+
+            case 'cco':
+                // CCO: work type + title + creator mandatory
+                return ['title', 'workType'];
+
+            default:
+                return ['title', 'levelOfDescription'];
+        }
+    }
+
+    /**
+     * Controlled vocabularies for validated fields per standard.
+     */
+    public static function getControlledVocabularies(string $standard = 'isadg'): array
+    {
+        $vocabularies = [];
+
+        // Level of description — common across archival standards
+        $vocabularies['levelOfDescription'] = [
+            'label' => 'ISAD(G) Levels',
+            'values' => ['Fonds', 'Subfonds', 'Collection', 'Series', 'Subseries', 'File', 'Item', 'Part'],
+        ];
+
+        $vocabularies['publicationStatus'] = [
+            'label' => 'Publication Status',
+            'values' => ['Draft', 'Published'],
+        ];
+
+        $vocabularies['copyrightStatus'] = [
+            'label' => 'Copyright Status',
+            'values' => ['Under copyright', 'Public domain', 'Unknown'],
+        ];
+
+        // ── Spectrum / Museum ──
+        if ($standard === 'spectrum') {
+            // AAT Object Names (common museum object types from Getty AAT)
+            $vocabularies['objectName'] = [
+                'label' => 'AAT Object Names',
+                'values' => [
+                    // Furnishings
+                    'basket', 'bowl', 'box', 'cabinet', 'carpet', 'chair', 'chest', 'clock',
+                    'cup', 'desk', 'dish', 'figurine', 'jar', 'jug', 'lamp', 'mirror',
+                    'plate', 'pot', 'rug', 'table', 'tapestry', 'urn', 'vase',
+                    // Tools & Equipment
+                    'ax', 'bell', 'blade', 'coin', 'die (tool)', 'key', 'knife', 'medal',
+                    'needle', 'ring', 'seal (tool)', 'spindle', 'stamp', 'sword', 'tool', 'weight',
+                    // Costume & Adornment
+                    'bracelet', 'brooch', 'buckle', 'button', 'crown', 'earring', 'hat',
+                    'helmet', 'necklace', 'pendant', 'pin',
+                    // Documents & Visual Works
+                    'book', 'codex', 'document', 'drawing', 'engraving', 'etching', 'icon',
+                    'illumination', 'lithograph', 'manuscript', 'map', 'mosaic', 'mural',
+                    'painting', 'photograph', 'poster', 'print', 'scroll', 'watercolor',
+                    // Sculpture
+                    'bust', 'carving', 'mask', 'model', 'plaque', 'relief', 'sculpture', 'statue', 'stele',
+                    // Architecture
+                    'architectural element', 'brick', 'capital', 'column', 'frieze', 'tile',
+                    // Natural Specimens
+                    'fossil', 'mineral', 'rock', 'shell', 'specimen',
+                ],
+            ];
+
+            $vocabularies['objectType'] = [
+                'label' => 'AAT Object Types',
+                'values' => [
+                    'archaeological object', 'art object', 'ceremonial object', 'costume',
+                    'decorative art', 'document', 'ethnographic object', 'furniture',
+                    'industrial object', 'military object', 'musical instrument',
+                    'natural history specimen', 'numismatic object', 'personal effect',
+                    'photographic material', 'scientific instrument', 'textile', 'tool',
+                    'toy', 'transport', 'weapon',
+                ],
+            ];
+
+            $vocabularies['condition'] = [
+                'label' => 'Condition Assessment',
+                'values' => ['Good', 'Fair', 'Poor', 'Damaged', 'Fragile', 'Deteriorating', 'Unexamined'],
+            ];
+
+            $vocabularies['completeness'] = [
+                'label' => 'Completeness',
+                'values' => ['Complete', 'Incomplete', 'Fragmentary', 'Fragment'],
+            ];
         }
 
-        return $base;
+        // ── CCO / Gallery ──
+        if ($standard === 'cco') {
+            // AAT Work Types (visual resources)
+            $vocabularies['workType'] = [
+                'label' => 'AAT Work Types',
+                'values' => [
+                    // Paintings
+                    'painting', 'oil painting', 'watercolor painting', 'acrylic painting',
+                    'tempera painting', 'fresco', 'mural', 'miniature painting',
+                    // Prints
+                    'print', 'engraving', 'etching', 'lithograph', 'woodcut', 'screenprint',
+                    'aquatint', 'mezzotint', 'linocut', 'monotype',
+                    // Drawings
+                    'drawing', 'charcoal drawing', 'ink drawing', 'pastel', 'sketch',
+                    'pencil drawing', 'pen and ink drawing',
+                    // Sculpture
+                    'sculpture', 'relief', 'bust', 'statue', 'figurine', 'installation',
+                    'assemblage', 'mobile', 'carving', 'casting',
+                    // Photography
+                    'photograph', 'daguerreotype', 'albumen print', 'gelatin silver print',
+                    'chromogenic print', 'digital photograph', 'photogram', 'tintype',
+                    // Mixed/Other
+                    'collage', 'mosaic', 'textile', 'tapestry', 'ceramic', 'pottery',
+                    'glass', 'jewelry', 'metalwork', 'mixed media', 'video art',
+                    'digital art', 'performance art', 'conceptual art',
+                ],
+            ];
+
+            $vocabularies['stylePeriod'] = [
+                'label' => 'AAT Style/Period',
+                'values' => [
+                    'Abstract', 'Abstract Expressionist', 'Art Deco', 'Art Nouveau',
+                    'Baroque', 'Byzantine', 'Classical', 'Contemporary',
+                    'Cubist', 'Dada', 'Early Modern', 'Expressionist',
+                    'Gothic', 'Impressionist', 'Medieval', 'Minimalist',
+                    'Modern', 'Neoclassical', 'Pop Art', 'Post-Impressionist',
+                    'Post-Modern', 'Pre-Raphaelite', 'Realist', 'Renaissance',
+                    'Rococo', 'Romantic', 'Surrealist',
+                ],
+            ];
+        }
+
+        // ── Dublin Core / DAM ──
+        if ($standard === 'dc') {
+            $vocabularies['type'] = [
+                'label' => 'DCMI Type Vocabulary',
+                'values' => [
+                    'Collection', 'Dataset', 'Event', 'Image', 'InteractiveResource',
+                    'MovingImage', 'PhysicalObject', 'Service', 'Software',
+                    'Sound', 'StillImage', 'Text',
+                ],
+            ];
+        }
+
+        // ── MODS / Library ──
+        if ($standard === 'mods') {
+            $vocabularies['typeOfResource'] = [
+                'label' => 'MODS Resource Types',
+                'values' => [
+                    'text', 'cartographic', 'notated music', 'sound recording',
+                    'sound recording-musical', 'sound recording-nonmusical',
+                    'still image', 'moving image', 'three dimensional object',
+                    'software, multimedia', 'mixed material',
+                ],
+            ];
+
+            $vocabularies['issuance'] = [
+                'label' => 'MODS Issuance',
+                'values' => ['monographic', 'continuing', 'serial', 'integrating resource'],
+            ];
+        }
+
+        return $vocabularies;
+    }
+
+    /**
+     * Grouped field definitions for directory-import metadata entry.
+     * Fields include: label, type, help, required, vocabulary (key in getControlledVocabularies).
+     */
+    public static function getMetadataFieldGroups(string $standard = 'isadg'): array
+    {
+        $req = self::getRequiredFields($standard);
+        $r = function (string $field) use ($req) { return in_array($field, $req); };
+
+        // ── ISAD(G) — default archival standard ──
+        if ($standard === 'isadg' || $standard === 'rad' || $standard === 'dacs') {
+            $groups = [
+                'identity' => [
+                    'label' => 'Identity Area (ISAD 3.1)',
+                    'fields' => [
+                        'identifier'          => ['label' => 'Reference Code / Identifier (3.1.1)', 'type' => 'text', 'required' => $r('identifier'),
+                            'help' => 'Add counter suffix: enable below'],
+                        'title'               => ['label' => 'Title (3.1.2)', 'type' => 'text', 'required' => true,
+                            'help' => 'Prepended to auto-generated filename titles'],
+                        'levelOfDescription'  => ['label' => 'Level of Description (3.1.4)', 'type' => 'select', 'required' => $r('levelOfDescription'),
+                            'vocabulary' => 'levelOfDescription'],
+                        'alternateTitle'      => ['label' => 'Alternate Title', 'type' => 'text'],
+                        'extentAndMedium'     => ['label' => 'Extent and Medium (3.1.5)', 'type' => 'text', 'required' => $r('extentAndMedium')],
+                        'creationDatesStart'  => ['label' => 'Date Start (3.1.3)', 'type' => 'text', 'required' => $r('creationDatesStart'),
+                            'help' => 'YYYY-MM-DD or YYYY'],
+                        'creationDatesEnd'    => ['label' => 'Date End', 'type' => 'text', 'help' => 'YYYY-MM-DD or YYYY'],
+                    ],
+                ],
+                'context' => [
+                    'label' => 'Context Area (ISAD 3.2)',
+                    'fields' => [
+                        'archivalHistory' => ['label' => 'Archival History (3.2.3)', 'type' => 'textarea'],
+                        'acquisition'     => ['label' => 'Immediate Source of Acquisition (3.2.4)', 'type' => 'textarea'],
+                        'creators'        => ['label' => 'Creator(s) (3.2.1)', 'type' => 'text', 'help' => 'Pipe-separated: creator1|creator2'],
+                    ],
+                ],
+                'content' => [
+                    'label' => 'Content & Structure Area (ISAD 3.3)',
+                    'fields' => [
+                        'scopeAndContent'         => ['label' => 'Scope and Content (3.3.1)', 'type' => 'textarea'],
+                        'appraisal'               => ['label' => 'Appraisal (3.3.2)', 'type' => 'textarea'],
+                        'accruals'                => ['label' => 'Accruals (3.3.3)', 'type' => 'text'],
+                        'arrangement'             => ['label' => 'System of Arrangement (3.3.4)', 'type' => 'textarea'],
+                        'physicalCharacteristics' => ['label' => 'Physical Characteristics', 'type' => 'text'],
+                    ],
+                ],
+                'access' => [
+                    'label' => 'Conditions of Access & Use (ISAD 3.4)',
+                    'fields' => [
+                        'accessConditions'       => ['label' => 'Conditions of Access (3.4.1)', 'type' => 'text'],
+                        'reproductionConditions' => ['label' => 'Conditions of Reproduction (3.4.2)', 'type' => 'text'],
+                        'findingAids'            => ['label' => 'Finding Aids (3.4.5)', 'type' => 'text'],
+                    ],
+                ],
+                'allied' => [
+                    'label' => 'Allied Materials (ISAD 3.5)',
+                    'fields' => [
+                        'locationOfOriginals'       => ['label' => 'Location of Originals (3.5.1)', 'type' => 'text'],
+                        'locationOfCopies'          => ['label' => 'Location of Copies (3.5.2)', 'type' => 'text'],
+                        'relatedUnitsOfDescription' => ['label' => 'Related Units (3.5.3)', 'type' => 'textarea'],
+                    ],
+                ],
+                'accesspoints' => [
+                    'label' => 'Access Points',
+                    'fields' => [
+                        'subjectAccessPoints' => ['label' => 'Subject Access Points', 'type' => 'text', 'help' => 'Pipe-separated: term1|term2'],
+                        'placeAccessPoints'   => ['label' => 'Place Access Points', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'nameAccessPoints'    => ['label' => 'Name Access Points', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'genreAccessPoints'   => ['label' => 'Genre Access Points', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'rights' => [
+                    'label' => 'Rights',
+                    'fields' => [
+                        'copyrightStatus'  => ['label' => 'Copyright Status', 'type' => 'select', 'vocabulary' => 'copyrightStatus'],
+                        'copyrightHolder'  => ['label' => 'Copyright Holder', 'type' => 'text'],
+                        'copyrightExpires' => ['label' => 'Copyright Expiry Date', 'type' => 'text'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Description Control (ISAD 3.7)',
+                    'fields' => [
+                        'publicationStatus' => ['label' => 'Publication Status', 'type' => 'select', 'vocabulary' => 'publicationStatus'],
+                        'culture'           => ['label' => 'Language (culture code)', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+
+            if ($standard === 'rad') {
+                $groups['identity']['label'] = 'Identity Area (RAD 1)';
+                $groups['identity']['fields']['radOtherTitleInformation'] = ['label' => 'Other Title Information', 'type' => 'text'];
+                $groups['identity']['fields']['radTitleStatementOfResponsibility'] = ['label' => 'Statement of Responsibility', 'type' => 'text'];
+                $groups['identity']['fields']['radEdition'] = ['label' => 'Edition Statement', 'type' => 'text'];
+                $groups['content']['fields']['radStatementOfProjection'] = ['label' => 'Statement of Projection (Cartographic)', 'type' => 'text'];
+                $groups['content']['fields']['radStatementOfCoordinates'] = ['label' => 'Statement of Coordinates (Cartographic)', 'type' => 'text'];
+                $groups['content']['fields']['radStatementOfScaleCartographic'] = ['label' => 'Statement of Scale (Cartographic)', 'type' => 'text'];
+            }
+
+            if ($standard === 'dacs') {
+                $groups['identity']['label'] = 'Identity Elements (DACS 2)';
+                $groups['identity']['fields']['unitDates'] = ['label' => 'Unit Dates', 'type' => 'text'];
+                $groups['identity']['fields']['unitDateActuated'] = ['label' => 'Unit Date Actuated', 'type' => 'text'];
+            }
+
+            return $groups;
+        }
+
+        // ── Dublin Core ──
+        if ($standard === 'dc') {
+            return [
+                'core' => [
+                    'label' => 'Core Elements',
+                    'fields' => [
+                        'title'              => ['label' => 'Title', 'type' => 'text', 'required' => true,
+                            'help' => 'Prepended to auto-generated filename titles'],
+                        'type'               => ['label' => 'Type (DCMI)', 'type' => 'select', 'vocabulary' => 'type'],
+                        'format'             => ['label' => 'Format', 'type' => 'text', 'help' => 'MIME type e.g. image/jpeg'],
+                        'language'           => ['label' => 'Language', 'type' => 'text', 'help' => 'ISO 639 code e.g. en'],
+                        'date'               => ['label' => 'Date', 'type' => 'text'],
+                        'coverage'           => ['label' => 'Coverage', 'type' => 'text'],
+                        'levelOfDescription' => ['label' => 'Level of Description', 'type' => 'select', 'vocabulary' => 'levelOfDescription'],
+                    ],
+                ],
+                'description' => [
+                    'label' => 'Description',
+                    'fields' => [
+                        'scopeAndContent' => ['label' => 'Description', 'type' => 'textarea'],
+                        'extentAndMedium' => ['label' => 'Extent', 'type' => 'text'],
+                    ],
+                ],
+                'agents' => [
+                    'label' => 'Agents',
+                    'fields' => [
+                        'creators'    => ['label' => 'Creator', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'contributor' => ['label' => 'Contributor', 'type' => 'text'],
+                        'publisher'   => ['label' => 'Publisher', 'type' => 'text'],
+                    ],
+                ],
+                'rights_access' => [
+                    'label' => 'Rights & Access',
+                    'fields' => [
+                        'rights'           => ['label' => 'Rights', 'type' => 'text'],
+                        'relation'         => ['label' => 'Relation', 'type' => 'text'],
+                        'accessConditions' => ['label' => 'Access Conditions', 'type' => 'text'],
+                    ],
+                ],
+                'accesspoints' => [
+                    'label' => 'Access Points',
+                    'fields' => [
+                        'subjectAccessPoints' => ['label' => 'Subject', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'placeAccessPoints'   => ['label' => 'Spatial (Place)', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Control',
+                    'fields' => [
+                        'publicationStatus' => ['label' => 'Publication Status', 'type' => 'select', 'vocabulary' => 'publicationStatus'],
+                        'culture'           => ['label' => 'Culture Code', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+        }
+
+        // ── Spectrum 5.1 (Museum) ──
+        if ($standard === 'spectrum') {
+            return [
+                'identification' => [
+                    'label' => 'Object Identification (Spectrum 4.1)',
+                    'fields' => [
+                        'objectNumber'       => ['label' => 'Object Number', 'type' => 'text', 'required' => true,
+                            'help' => 'Add counter suffix: enable below'],
+                        'objectName'         => ['label' => 'Object Name (AAT)', 'type' => 'select', 'required' => true,
+                            'vocabulary' => 'objectName'],
+                        'objectType'         => ['label' => 'Object Type (AAT)', 'type' => 'select',
+                            'vocabulary' => 'objectType'],
+                        'title'              => ['label' => 'Title', 'type' => 'text', 'required' => true,
+                            'help' => 'Prepended to auto-generated filename titles'],
+                        'levelOfDescription' => ['label' => 'Level of Description', 'type' => 'select', 'required' => true,
+                            'vocabulary' => 'levelOfDescription'],
+                    ],
+                ],
+                'description' => [
+                    'label' => 'Object Description (Spectrum 8)',
+                    'fields' => [
+                        'scopeAndContent'    => ['label' => 'Description / Content', 'type' => 'textarea'],
+                        'materialComponent'  => ['label' => 'Material / Component', 'type' => 'text'],
+                        'technique'          => ['label' => 'Technique', 'type' => 'text'],
+                        'dimension'          => ['label' => 'Dimensions', 'type' => 'text'],
+                        'inscription'        => ['label' => 'Inscription', 'type' => 'text'],
+                        'extentAndMedium'    => ['label' => 'Extent and Medium', 'type' => 'text'],
+                        'physicalCharacteristics' => ['label' => 'Physical Characteristics', 'type' => 'text'],
+                    ],
+                ],
+                'condition' => [
+                    'label' => 'Condition (Spectrum 4.2)',
+                    'fields' => [
+                        'condition'    => ['label' => 'Condition', 'type' => 'select', 'vocabulary' => 'condition'],
+                        'completeness' => ['label' => 'Completeness', 'type' => 'select', 'vocabulary' => 'completeness'],
+                    ],
+                ],
+                'history' => [
+                    'label' => 'History & Context',
+                    'fields' => [
+                        'archivalHistory'    => ['label' => 'Ownership History', 'type' => 'textarea'],
+                        'acquisition'        => ['label' => 'Acquisition', 'type' => 'textarea'],
+                        'creators'           => ['label' => 'Maker / Creator', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'creationDatesStart' => ['label' => 'Date Made (Start)', 'type' => 'text'],
+                        'creationDatesEnd'   => ['label' => 'Date Made (End)', 'type' => 'text'],
+                    ],
+                ],
+                'accesspoints' => [
+                    'label' => 'Access Points',
+                    'fields' => [
+                        'subjectAccessPoints' => ['label' => 'Subject', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'placeAccessPoints'   => ['label' => 'Place', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'genreAccessPoints'   => ['label' => 'Genre', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Control',
+                    'fields' => [
+                        'publicationStatus' => ['label' => 'Publication Status', 'type' => 'select', 'vocabulary' => 'publicationStatus'],
+                        'accessConditions'  => ['label' => 'Access Conditions', 'type' => 'text'],
+                        'culture'           => ['label' => 'Culture Code', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+        }
+
+        // ── CCO (Gallery / Visual Resources) ──
+        if ($standard === 'cco') {
+            return [
+                'identification' => [
+                    'label' => 'Work Identification (CCO 1)',
+                    'fields' => [
+                        'title'              => ['label' => 'Title', 'type' => 'text', 'required' => true,
+                            'help' => 'Prepended to auto-generated filename titles'],
+                        'workType'           => ['label' => 'Work Type (AAT)', 'type' => 'select', 'required' => true,
+                            'vocabulary' => 'workType'],
+                        'levelOfDescription' => ['label' => 'Level of Description', 'type' => 'select',
+                            'vocabulary' => 'levelOfDescription'],
+                        'identifier'         => ['label' => 'Identifier / Accession Number', 'type' => 'text'],
+                    ],
+                ],
+                'description' => [
+                    'label' => 'Physical Description (CCO 6)',
+                    'fields' => [
+                        'scopeAndContent'      => ['label' => 'Description', 'type' => 'textarea'],
+                        'materialsTechniques'  => ['label' => 'Materials & Techniques (AAT)', 'type' => 'text'],
+                        'measurements'         => ['label' => 'Measurements', 'type' => 'text'],
+                        'extentAndMedium'      => ['label' => 'Extent and Medium', 'type' => 'text'],
+                    ],
+                ],
+                'context' => [
+                    'label' => 'Style & Context (CCO 3)',
+                    'fields' => [
+                        'stylePeriod'        => ['label' => 'Style / Period (AAT)', 'type' => 'select', 'vocabulary' => 'stylePeriod'],
+                        'culturalContext'     => ['label' => 'Cultural Context', 'type' => 'text'],
+                        'creators'           => ['label' => 'Artist / Creator', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'creationDatesStart' => ['label' => 'Creation Date (Start)', 'type' => 'text'],
+                        'creationDatesEnd'   => ['label' => 'Creation Date (End)', 'type' => 'text'],
+                    ],
+                ],
+                'provenance' => [
+                    'label' => 'Provenance & Rights',
+                    'fields' => [
+                        'archivalHistory'  => ['label' => 'Provenance', 'type' => 'textarea'],
+                        'copyrightStatus'  => ['label' => 'Copyright Status', 'type' => 'select', 'vocabulary' => 'copyrightStatus'],
+                        'copyrightHolder'  => ['label' => 'Copyright Holder', 'type' => 'text'],
+                    ],
+                ],
+                'accesspoints' => [
+                    'label' => 'Access Points',
+                    'fields' => [
+                        'subjectAccessPoints' => ['label' => 'Subject', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'placeAccessPoints'   => ['label' => 'Place', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'genreAccessPoints'   => ['label' => 'Genre', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Control',
+                    'fields' => [
+                        'publicationStatus' => ['label' => 'Publication Status', 'type' => 'select', 'vocabulary' => 'publicationStatus'],
+                        'culture'           => ['label' => 'Culture Code', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+        }
+
+        // ── MODS (Library) ──
+        if ($standard === 'mods') {
+            return [
+                'titleInfo' => [
+                    'label' => 'Title Information',
+                    'fields' => [
+                        'title'              => ['label' => 'Title', 'type' => 'text', 'required' => true,
+                            'help' => 'Prepended to auto-generated filename titles'],
+                        'alternateTitle'     => ['label' => 'Alternative Title', 'type' => 'text'],
+                        'identifier'         => ['label' => 'Identifier (ISBN, ISSN, etc.)', 'type' => 'text'],
+                        'levelOfDescription' => ['label' => 'Level of Description', 'type' => 'select', 'vocabulary' => 'levelOfDescription'],
+                        'typeOfResource'     => ['label' => 'Type of Resource', 'type' => 'select', 'required' => true,
+                            'vocabulary' => 'typeOfResource'],
+                        'genre'              => ['label' => 'Genre', 'type' => 'text'],
+                    ],
+                ],
+                'originInfo' => [
+                    'label' => 'Origin Information',
+                    'fields' => [
+                        'originInfoPublisher'   => ['label' => 'Publisher', 'type' => 'text'],
+                        'originInfoPlace'       => ['label' => 'Place of Publication', 'type' => 'text'],
+                        'originInfoDateIssued'  => ['label' => 'Date Issued', 'type' => 'text'],
+                        'issuance'              => ['label' => 'Issuance', 'type' => 'select',
+                            'options' => ['monographic', 'continuing', 'serial', 'integrating resource']],
+                        'frequency'             => ['label' => 'Frequency', 'type' => 'text', 'help' => 'For serials: monthly, quarterly, etc.'],
+                    ],
+                ],
+                'description' => [
+                    'label' => 'Content Description',
+                    'fields' => [
+                        'abstract'          => ['label' => 'Abstract', 'type' => 'textarea'],
+                        'scopeAndContent'   => ['label' => 'Scope and Content', 'type' => 'textarea'],
+                        'tableOfContents'   => ['label' => 'Table of Contents', 'type' => 'textarea'],
+                        'extentAndMedium'   => ['label' => 'Physical Description / Extent', 'type' => 'text'],
+                        'note'              => ['label' => 'Note', 'type' => 'textarea'],
+                    ],
+                ],
+                'agents' => [
+                    'label' => 'Names & Agents',
+                    'fields' => [
+                        'creators'     => ['label' => 'Creator / Author', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'nameAccessPoints' => ['label' => 'Name Access Points', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'classification' => [
+                    'label' => 'Classification & Access Points',
+                    'fields' => [
+                        'classification'      => ['label' => 'Classification (DDC, LCC)', 'type' => 'text'],
+                        'subjectAccessPoints' => ['label' => 'Subject', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'placeAccessPoints'   => ['label' => 'Geographic Subject', 'type' => 'text', 'help' => 'Pipe-separated'],
+                        'genreAccessPoints'   => ['label' => 'Genre / Form', 'type' => 'text', 'help' => 'Pipe-separated'],
+                    ],
+                ],
+                'access' => [
+                    'label' => 'Access & Rights',
+                    'fields' => [
+                        'accessConditions'       => ['label' => 'Access Conditions', 'type' => 'text'],
+                        'reproductionConditions' => ['label' => 'Use and Reproduction', 'type' => 'text'],
+                        'copyrightStatus'        => ['label' => 'Copyright Status', 'type' => 'select',
+                            'vocabulary' => 'copyrightStatus'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Record Control',
+                    'fields' => [
+                        'publicationStatus' => ['label' => 'Publication Status', 'type' => 'select',
+                            'vocabulary' => 'publicationStatus'],
+                        'culture'           => ['label' => 'Language Code', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+        }
+
+        // Fallback: same as ISAD(G)
+        return self::getMetadataFieldGroups('isadg');
     }
 
     // ─── Session Management ─────────────────────────────────────────────
@@ -158,9 +703,14 @@ class IngestService
 
     public function processUpload(int $sessionId, array $fileInfo): int
     {
-        $ext = strtolower(pathinfo($fileInfo['original_name'], PATHINFO_EXTENSION));
-        $typeMap = ['csv' => 'csv', 'zip' => 'zip', 'xml' => 'ead'];
-        $fileType = $typeMap[$ext] ?? 'csv';
+        // Determine file type
+        if (($fileInfo['mime_type'] ?? '') === 'directory') {
+            $fileType = 'directory';
+        } else {
+            $ext = strtolower(pathinfo($fileInfo['original_name'], PATHINFO_EXTENSION));
+            $typeMap = ['csv' => 'csv', 'zip' => 'zip', 'xml' => 'ead'];
+            $fileType = $typeMap[$ext] ?? 'csv';
+        }
 
         $fileId = DB::table('ingest_file')->insertGetId([
             'session_id' => $sessionId,
@@ -184,6 +734,20 @@ class IngestService
         } elseif ($fileType === 'zip') {
             $extractDir = dirname($fileInfo['stored_path']) . '/extracted_' . $sessionId;
             $this->extractZip($fileId, $extractDir);
+        } elseif ($fileType === 'directory') {
+            // Count files in directory
+            $fileCount = 0;
+            if (is_dir($fileInfo['stored_path'])) {
+                $iter = new \FilesystemIterator($fileInfo['stored_path'], \FilesystemIterator::SKIP_DOTS);
+                foreach ($iter as $item) {
+                    if ($item->isFile()) {
+                        $fileCount++;
+                    }
+                }
+            }
+            DB::table('ingest_file')->where('id', $fileId)->update([
+                'row_count' => $fileCount,
+            ]);
         }
 
         return $fileId;
@@ -309,15 +873,34 @@ class IngestService
 
     public function parseRows(int $sessionId): int
     {
+        // Try CSV first
         $file = DB::table('ingest_file')
             ->where('session_id', $sessionId)
             ->where('file_type', 'csv')
             ->first();
 
-        if (!$file || !file_exists($file->stored_path)) {
-            return 0;
+        if ($file && file_exists($file->stored_path)) {
+            return $this->parseRowsFromCsv($sessionId, $file);
         }
 
+        // Try directory import
+        $dirFile = DB::table('ingest_file')
+            ->where('session_id', $sessionId)
+            ->where('file_type', 'directory')
+            ->first();
+
+        if ($dirFile && is_dir($dirFile->stored_path)) {
+            return $this->parseRowsFromDirectory($sessionId, $dirFile);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Parse rows from a CSV file.
+     */
+    private function parseRowsFromCsv(int $sessionId, object $file): int
+    {
         // Clear existing rows
         DB::table('ingest_row')->where('session_id', $sessionId)->delete();
 
@@ -352,6 +935,63 @@ class IngestService
             ]);
         }
         fclose($handle);
+
+        return $rowNum;
+    }
+
+    /**
+     * Parse rows from a directory of files (one row per file).
+     */
+    private function parseRowsFromDirectory(int $sessionId, object $dirFile): int
+    {
+        // Clear existing rows
+        DB::table('ingest_row')->where('session_id', $sessionId)->delete();
+
+        $dirPath = $dirFile->stored_path;
+        $files = [];
+
+        $iter = new \DirectoryIterator($dirPath);
+        foreach ($iter as $item) {
+            if ($item->isDot() || !$item->isFile()) {
+                continue;
+            }
+            $files[] = [
+                'name' => $item->getFilename(),
+                'path' => $item->getPathname(),
+                'size' => $item->getSize(),
+            ];
+        }
+
+        // Sort by filename
+        usort($files, function ($a, $b) {
+            return strnatcasecmp($a['name'], $b['name']);
+        });
+
+        $rowNum = 0;
+        foreach ($files as $f) {
+            $rowNum++;
+            $titleBase = pathinfo($f['name'], PATHINFO_FILENAME);
+            // Convert underscores/hyphens to spaces for a readable title
+            $title = ucfirst(str_replace(['_', '-'], ' ', $titleBase));
+
+            $data = [
+                'title' => $title,
+                'digitalObjectPath' => $f['path'],
+                'levelOfDescription' => 'Item',
+            ];
+
+            DB::table('ingest_row')->insert([
+                'session_id' => $sessionId,
+                'row_number' => $rowNum,
+                'level_of_description' => 'Item',
+                'title' => $title,
+                'data' => json_encode($data),
+                'enriched_data' => json_encode($data),
+                'digital_object_path' => $f['path'],
+                'digital_object_matched' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
 
         return $rowNum;
     }
@@ -560,6 +1200,74 @@ class IngestService
     }
 
     // ─── Enrichment ─────────────────────────────────────────────────────
+
+    /**
+     * Apply shared metadata to all rows (directory import mode).
+     */
+    public function applyMetadataToRows(int $sessionId, array $metadata): void
+    {
+        // Extract counter settings before filtering
+        $enableCounter = !empty($metadata['_enable_counter']);
+        $counterPrefix = $metadata['_counter_prefix'] ?? '';
+        $counterStart = max(1, (int) ($metadata['_counter_start'] ?? 1));
+        $counterPadding = max(1, min(10, (int) ($metadata['_counter_padding'] ?? 4)));
+
+        // Remove counter meta-keys from field metadata
+        unset($metadata['_enable_counter'], $metadata['_counter_prefix'], $metadata['_counter_start'], $metadata['_counter_padding']);
+
+        // Filter out empty values
+        $metadata = array_filter($metadata, function ($v) {
+            return $v !== '' && $v !== null;
+        });
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $sessionId)
+            ->orderBy('row_number')
+            ->get();
+
+        $counter = $counterStart;
+
+        foreach ($rows as $row) {
+            $data = json_decode($row->data, true) ?: [];
+            $enriched = json_decode($row->enriched_data, true) ?: [];
+
+            // Merge metadata into both data and enriched_data
+            foreach ($metadata as $field => $value) {
+                // title is per-row (auto-generated from filename), only override if explicitly set
+                if ($field === 'title' && !empty($value)) {
+                    // Use as prefix: "prefix - filename title"
+                    if (!empty($row->title)) {
+                        $data[$field] = $value . ' - ' . $row->title;
+                    } else {
+                        $data[$field] = $value;
+                    }
+                } else {
+                    $data[$field] = $value;
+                }
+                $enriched[$field] = $data[$field];
+            }
+
+            // Apply counter/suffix to identifier
+            if ($enableCounter) {
+                $identifier = $counterPrefix . str_pad($counter, $counterPadding, '0', STR_PAD_LEFT);
+                $data['identifier'] = $identifier;
+                $enriched['identifier'] = $identifier;
+                $counter++;
+            }
+
+            $update = [
+                'data' => json_encode($data),
+                'enriched_data' => json_encode($enriched),
+            ];
+
+            // Update level_of_description column if provided
+            if (isset($metadata['levelOfDescription'])) {
+                $update['level_of_description'] = $metadata['levelOfDescription'];
+            }
+
+            DB::table('ingest_row')->where('id', $row->id)->update($update);
+        }
+    }
 
     public function enrichRows(int $sessionId): void
     {
@@ -777,6 +1485,9 @@ class IngestService
 
         foreach ($rows as $row) {
             $enriched = json_decode($row->enriched_data, true) ?: [];
+            if (empty($enriched)) {
+                $enriched = json_decode($row->data, true) ?: [];
+            }
             $rowErrors = 0;
             $rowWarnings = 0;
 

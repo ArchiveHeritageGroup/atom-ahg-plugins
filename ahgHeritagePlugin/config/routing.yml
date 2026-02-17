@@ -6,6 +6,10 @@ heritage_landing:
   url: /heritage
   param: { module: heritage, action: landing }
 
+heritage_index:
+  url: /heritage/index
+  param: { module: heritage, action: landing }
+
 # Public Search/Browse
 heritage_search:
   url: /heritage/search

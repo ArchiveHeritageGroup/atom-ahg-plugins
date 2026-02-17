@@ -103,17 +103,27 @@ function pii_filter($objectId, $content) {
   max-height: 600px !important;
   contain: layout style !important;
 }
-model-viewer {
+model-viewer:not(#fs-model-viewer) {
   position: relative !important;
   display: block !important;
   height: 500px !important;
   max-height: 500px !important;
   overflow: hidden !important;
 }
+#fullscreen-3d-modal model-viewer {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+}
+#fullscreen-3d-modal #fullscreen-3d-container {
+  width: 100% !important;
+  height: 100% !important;
+}
 .osd-viewer {
   max-height: 500px !important;
 }
 </style>
+<?php include_partial('digitalobject/3dFullscreenModal'); ?>
 <?php } ?>
 <!-- User Actions (compact with tooltips) -->
 <?php

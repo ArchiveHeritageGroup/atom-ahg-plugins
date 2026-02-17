@@ -2,6 +2,7 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 use AtomFramework\Services\Write\WriteServiceFactory;
+use Illuminate\Database\Capsule\Manager as DB;
 require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
@@ -9,19 +10,26 @@ require_once dirname(__FILE__).'/../../../lib/Services/PromptService.php';
 
 class aiActions extends AhgController
 {
+    // ─── Propel-free constants ──────────────────────────────────────
+    private const CORPORATE_BODY_ID = 131;
+    private const PERSON_ID = 132;
+    private const NAME_ACCESS_POINT_ID = 161;
+    private const TAXONOMY_PLACE_ID = 42;
+    private const TAXONOMY_SUBJECT_ID = 35;
+
     public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
         
         $objectId = $request->getParameter('id');
-        $object = QubitInformationObject::getById($objectId);
-        
+        $object = $this->getInformationObject($objectId);
+
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
         }
 
         $text = $this->getObjectText($object);
-        $pdfPath = $this->getDigitalObjectPath($object, 'pdf');  // Only get PDF files
+        $pdfPath = $this->getDigitalObjectPath($objectId, 'pdf');  // Only get PDF files
 
         $nerService = new ahgNerService();
 
@@ -196,15 +204,17 @@ class aiActions extends AhgController
     protected function dispatchEntityApproved($entity, $targetId = null)
     {
         try {
-            $this->dispatcher->notify(new sfEvent($this, 'ner.entity_approved', [
-                'entity_id' => $entity->id,
-                'object_id' => $entity->object_id,
-                'entity_type' => $entity->entity_type,
-                'entity_value' => $entity->entity_value,
-                'confidence' => $entity->confidence ?? 1.0,
-                'linked_id' => $targetId,
-            ]));
-        } catch (Exception $e) {
+            if (isset($this->dispatcher) && class_exists('sfEvent', false)) {
+                $this->dispatcher->notify(new \sfEvent($this, 'ner.entity_approved', [
+                    'entity_id' => $entity->id,
+                    'object_id' => $entity->object_id,
+                    'entity_type' => $entity->entity_type,
+                    'entity_value' => $entity->entity_value,
+                    'confidence' => $entity->confidence ?? 1.0,
+                    'linked_id' => $targetId,
+                ]));
+            }
+        } catch (\Exception $e) {
             // Log but don't fail the main operation
             error_log('NER entity approved event dispatch error: ' . $e->getMessage());
         }
@@ -244,7 +254,7 @@ class aiActions extends AhgController
         }
 
         // Determine entity type ID
-        $entityTypeId = ($entityType === 'ORG') ? QubitTerm::CORPORATE_BODY_ID : QubitTerm::PERSON_ID;
+        $entityTypeId = ($entityType === 'ORG') ? self::CORPORATE_BODY_ID : self::PERSON_ID;
 
         // Create actor via WriteServiceFactory
         $actorId = WriteServiceFactory::actor()->createActor([
@@ -284,7 +294,7 @@ class aiActions extends AhgController
         // Check if place term already exists
         $existing = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::PLACE_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_PLACE_ID)
             ->where('term_i18n.name', $entity->entity_value)
             ->first();
 
@@ -302,7 +312,7 @@ class aiActions extends AhgController
         }
 
         // Create place term via WriteServiceFactory
-        $termObj = WriteServiceFactory::term()->createTerm(QubitTaxonomy::PLACE_ID, $entity->entity_value);
+        $termObj = WriteServiceFactory::term()->createTerm(self::TAXONOMY_PLACE_ID, $entity->entity_value);
         $termId = $termObj->id;
 
         // Link to information object
@@ -337,7 +347,7 @@ class aiActions extends AhgController
         // Check if subject term already exists
         $existing = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::SUBJECT_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
             ->where('term_i18n.name', $entity->entity_value)
             ->first();
 
@@ -355,7 +365,7 @@ class aiActions extends AhgController
         }
 
         // Create subject term via WriteServiceFactory
-        $termObj = WriteServiceFactory::term()->createTerm(QubitTaxonomy::SUBJECT_ID, $entity->entity_value);
+        $termObj = WriteServiceFactory::term()->createTerm(self::TAXONOMY_SUBJECT_ID, $entity->entity_value);
         $termId = $termObj->id;
 
         // Link to information object
@@ -382,6 +392,33 @@ class aiActions extends AhgController
 
     // Helper methods
 
+    /**
+     * Get information object by ID using Laravel QB.
+     */
+    private function getInformationObject(int $objectId): ?object
+    {
+        return DB::table('information_object')
+            ->leftJoin('information_object_i18n', function ($join) {
+                $join->on('information_object.id', '=', 'information_object_i18n.id')
+                     ->where('information_object_i18n.culture', '=', 'en');
+            })
+            ->where('information_object.id', $objectId)
+            ->select(
+                'information_object.id',
+                'information_object.parent_id',
+                'information_object.repository_id',
+                'information_object.level_of_description_id',
+                'information_object_i18n.title',
+                'information_object_i18n.scope_and_content as scopeAndContent',
+                'information_object_i18n.archival_history as archivalHistory',
+                'information_object_i18n.extent_and_medium as extentAndMedium',
+                'information_object_i18n.arrangement',
+                'information_object_i18n.physical_characteristics as physicalCharacteristics',
+                'information_object_i18n.acquisition'
+            )
+            ->first();
+    }
+
     private function getObjectText($object)
     {
         $parts = [];
@@ -393,9 +430,13 @@ class aiActions extends AhgController
         return implode("\n\n", $parts);
     }
 
-    private function getDigitalObjectPath($object, $type = 'any')
+    private function getDigitalObjectPath($objectId, $type = 'any')
     {
-        $digitalObject = $object->getDigitalObject();
+        $digitalObject = DB::table('digital_object')
+            ->where('object_id', $objectId)
+            ->whereNull('parent_id')
+            ->orderBy('id', 'desc')
+            ->first();
         if (!$digitalObject) return null;
 
         // Supported extensions by type
@@ -410,28 +451,13 @@ class aiActions extends AhgController
             $allowedExts = array_merge($pdfExts, $imageExts);
         }
 
-        // First try the direct path
-        $path = $digitalObject->getAbsolutePath();
-        if ($path && file_exists($path)) {
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            if (in_array($ext, $allowedExts)) return $path;
-        }
-
-        // Try upload directory
-        $uploadPath = $this->config('sf_upload_dir');
-        $objectPath = $uploadPath . '/r/' . $digitalObject->id;
-        if (is_dir($objectPath)) {
-            foreach ($allowedExts as $ext) {
-                $files = glob($objectPath . '/*.' . $ext);
-                if (!empty($files)) return $files[0];
-            }
-        }
+        $rootDir = defined('SF_ROOT_DIR') ? SF_ROOT_DIR : '/usr/share/nginx/archive';
 
         // Try path from database (path + name)
-        $path = $digitalObject->path;
-        $name = $digitalObject->name;
+        $path = $digitalObject->path ?? null;
+        $name = $digitalObject->name ?? null;
         if ($path && $name) {
-            $fullPath = $this->config('sf_web_dir') . '/' . ltrim($path, '/') . $name;
+            $fullPath = $rootDir . '/' . ltrim($path, '/') . $name;
             if (file_exists($fullPath)) {
                 $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
                 if (in_array($ext, $allowedExts)) return $fullPath;
@@ -440,7 +466,7 @@ class aiActions extends AhgController
 
         // Try uploads directory with path + name
         if ($path && $name) {
-            $fullPath = $this->config('sf_upload_dir') . '/' . ltrim(str_replace('/uploads/', '', $path), '/') . $name;
+            $fullPath = $rootDir . '/uploads/' . ltrim(str_replace('/uploads/', '', $path), '/') . $name;
             if (file_exists($fullPath)) {
                 $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
                 if (in_array($ext, $allowedExts)) return $fullPath;
@@ -521,7 +547,7 @@ class aiActions extends AhgController
     {
         $exact = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::PLACE_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_PLACE_ID)
             ->where('term_i18n.name', $entityValue)
             ->select('term.id', 'term_i18n.name')
             ->get()
@@ -529,7 +555,7 @@ class aiActions extends AhgController
 
         $partial = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::PLACE_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_PLACE_ID)
             ->where('term_i18n.name', 'LIKE', '%' . $entityValue . '%')
             ->whereNotIn('term.id', array_column($exact, 'id'))
             ->select('term.id', 'term_i18n.name')
@@ -544,7 +570,7 @@ class aiActions extends AhgController
     {
         $exact = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::SUBJECT_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
             ->where('term_i18n.name', $entityValue)
             ->select('term.id', 'term_i18n.name')
             ->get()
@@ -552,7 +578,7 @@ class aiActions extends AhgController
 
         $partial = Illuminate\Database\Capsule\Manager::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-            ->where('term.taxonomy_id', QubitTaxonomy::SUBJECT_ID)
+            ->where('term.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
             ->where('term_i18n.name', 'LIKE', '%' . $entityValue . '%')
             ->whereNotIn('term.id', array_column($exact, 'id'))
             ->select('term.id', 'term_i18n.name')
@@ -568,7 +594,7 @@ class aiActions extends AhgController
         $exists = Illuminate\Database\Capsule\Manager::table('relation')
             ->where('subject_id', $objectId)
             ->where('object_id', $actorId)
-            ->where('type_id', QubitTerm::NAME_ACCESS_POINT_ID)
+            ->where('type_id', self::NAME_ACCESS_POINT_ID)
             ->exists();
 
         if (!$exists) {
@@ -584,7 +610,7 @@ class aiActions extends AhgController
                 'id' => $nextId,
                 'subject_id' => $objectId,
                 'object_id' => $actorId,
-                'type_id' => QubitTerm::NAME_ACCESS_POINT_ID
+                'type_id' => self::NAME_ACCESS_POINT_ID
             ]);
         }
     }
@@ -956,7 +982,7 @@ class aiActions extends AhgController
                 $actorId = $existing->id;
             } else {
                 // Create actor with raw SQL (faster than Propel)
-                $entityTypeId = ($entity->entity_type === 'ORG') ? QubitTerm::CORPORATE_BODY_ID : QubitTerm::PERSON_ID;
+                $entityTypeId = ($entity->entity_type === 'ORG') ? self::CORPORATE_BODY_ID : self::PERSON_ID;
                 
                 // Insert into object table first
                 $actorId = Illuminate\Database\Capsule\Manager::table('object')->insertGetId([
@@ -996,7 +1022,7 @@ class aiActions extends AhgController
         } elseif ($type === 'place') {
             $existing = Illuminate\Database\Capsule\Manager::table('term')
                 ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-                ->where('term.taxonomy_id', QubitTaxonomy::PLACE_ID)
+                ->where('term.taxonomy_id', self::TAXONOMY_PLACE_ID)
                 ->where('term_i18n.name', $entity->entity_value)
                 ->first();
             
@@ -1013,7 +1039,7 @@ class aiActions extends AhgController
                 
                 Illuminate\Database\Capsule\Manager::table('term')->insert([
                     'id' => $termId,
-                    'taxonomy_id' => QubitTaxonomy::PLACE_ID,
+                    'taxonomy_id' => self::TAXONOMY_PLACE_ID,
                     'source_culture' => 'en'
                 ]);
                 
@@ -1039,7 +1065,7 @@ class aiActions extends AhgController
         } elseif ($type === 'subject') {
             $existing = Illuminate\Database\Capsule\Manager::table('term')
                 ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
-                ->where('term.taxonomy_id', QubitTaxonomy::SUBJECT_ID)
+                ->where('term.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
                 ->where('term_i18n.name', $entity->entity_value)
                 ->first();
             
@@ -1055,7 +1081,7 @@ class aiActions extends AhgController
                 
                 Illuminate\Database\Capsule\Manager::table('term')->insert([
                     'id' => $termId,
-                    'taxonomy_id' => QubitTaxonomy::SUBJECT_ID,
+                    'taxonomy_id' => self::TAXONOMY_SUBJECT_ID,
                     'source_culture' => 'en'
                 ]);
                 
@@ -1157,14 +1183,14 @@ class aiActions extends AhgController
         $maxLength = $request->getParameter('max_length', 1000);
         $minLength = $request->getParameter('min_length', 100);
 
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
 
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
         }
 
         // Get text to summarize - prefer PDF, fallback to metadata
-        $pdfPath = $this->getDigitalObjectPath($object);
+        $pdfPath = $this->getDigitalObjectPath($objectId);
         $nerService = new ahgNerService();
 
         // Check if summarizer is available
@@ -1306,7 +1332,7 @@ class aiActions extends AhgController
         $targetLang = $data['target'] ?? 'af';
         $fields = $data['fields'] ?? ['title' => true, 'scope_content' => true];
 
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
 
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
@@ -1457,14 +1483,14 @@ class aiActions extends AhgController
         $mode = $data['mode'] ?? 'all';
         $useZones = $data['use_zones'] ?? true;  // Zone detection enabled by default
 
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
 
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
         }
 
         // Get digital object path (images only for HTR)
-        $imagePath = $this->getDigitalObjectPath($object, 'image');
+        $imagePath = $this->getDigitalObjectPath($objectId, 'image');
 
         if (!$imagePath || !file_exists($imagePath)) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'No image found for HTR. Path checked: ' . ($imagePath ?: 'none')]));
@@ -1585,7 +1611,7 @@ class aiActions extends AhgController
         $templateId = $data['template_id'] ?? null;
         $llmConfigId = $data['llm_config_id'] ?? null;
 
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
         }
@@ -1790,7 +1816,7 @@ class aiActions extends AhgController
         $templateId = $data['template_id'] ?? null;
         $llmConfigId = $data['llm_config_id'] ?? null;
 
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
         if (!$object) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Object not found']));
         }
@@ -2358,7 +2384,7 @@ class aiActions extends AhgController
         $objectId = $request->getParameter('id');
 
         // Get information object
-        $object = QubitInformationObject::getById($objectId);
+        $object = $this->getInformationObject($objectId);
         if (!$object) {
             $this->forward404('Object not found');
         }
@@ -2367,11 +2393,15 @@ class aiActions extends AhgController
         $this->objectId = $objectId;
 
         // Get digital object info
-        $digitalObject = $object->getDigitalObject();
+        $digitalObject = DB::table('digital_object')
+            ->where('object_id', $objectId)
+            ->whereNull('parent_id')
+            ->orderBy('id', 'desc')
+            ->first();
         $this->docInfo = null;
 
         if ($digitalObject) {
-            $mimeType = $digitalObject->mimeType ?? '';
+            $mimeType = $digitalObject->mime_type ?? '';
             $isPdf = strpos($mimeType, 'pdf') !== false;
 
             // Get file path and name from digital object
@@ -2381,8 +2411,9 @@ class aiActions extends AhgController
             // Build full path - path contains directory, name contains filename
             $webPath = rtrim($doPath, '/') . '/' . $doName;
 
+            $rootDir = defined('SF_ROOT_DIR') ? SF_ROOT_DIR : '/usr/share/nginx/archive';
             // Get absolute path for page count
-            $absolutePath = $this->config('sf_web_dir', '') . $webPath;
+            $absolutePath = $rootDir . '/' . ltrim($webPath, '/');
 
             // Get page count for PDFs
             $pageCount = 1;

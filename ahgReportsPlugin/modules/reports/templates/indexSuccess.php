@@ -48,6 +48,8 @@ $hasForms = isPluginActive('ahgFormsPlugin');
 $hasDoi = isPluginActive('ahgDoiPlugin');
 $hasHeritage2 = isPluginActive('ahgHeritagePlugin');
 $hasIngest = isPluginActive('ahgIngestPlugin');
+$hasWorkflow = isPluginActive('ahgWorkflowPlugin');
+$hasAccess = isPluginActive('ahgAccessRequestPlugin');
 // Zimbabwe Compliance Plugins
 $hasCDPA = isPluginActive('ahgCDPAPlugin');
 $hasNAZ = isPluginActive('ahgNAZPlugin');
@@ -295,6 +297,40 @@ $canManage = $isAdmin || $isEditor;
         </div>
     </div>
 
+    <?php if ($hasWorkflow): ?>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Approval Workflow'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/workflow"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Workflow Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="/workflow/my-tasks"><i class="fas fa-clipboard-check me-2 text-muted"></i><?php echo __('My Tasks'); ?></a></li>
+                    <li class="list-group-item"><a href="/workflow/pool"><i class="fas fa-inbox me-2 text-muted"></i><?php echo __('Task Pool'); ?></a></li>
+                    <li class="list-group-item"><a href="/workflow/history"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Workflow History'); ?></a></li>
+                    <li class="list-group-item"><a href="/workflow/admin"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Configure Workflows'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php if ($hasSpectrum): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum Workflow'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Spectrum Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for('@spectrum_my_tasks'); ?>"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('My Spectrum Tasks'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflows']); ?>"><i class="fas fa-sitemap me-2 text-muted"></i><?php echo __('Workflow Configurations'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'notifications']); ?>"><i class="fas fa-bell me-2 text-muted"></i><?php echo __('Notifications'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Compliance Row -->
     <div class="row mb-4">
         <?php if ($hasSecurity || $hasAudit): ?>
@@ -347,7 +383,7 @@ $canManage = $isAdmin || $isEditor;
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i><?php echo __('Condition (Spectrum 5.0)'); ?></h5>
+                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i><?php echo __('Condition (Spectrum 5.1)'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">

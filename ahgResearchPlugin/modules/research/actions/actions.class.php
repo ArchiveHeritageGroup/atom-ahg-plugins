@@ -95,6 +95,8 @@ class researchActions extends AhgController
                     $this->service->registerResearcher($data);
                     $this->getUser()->setFlash('success', 'Registration submitted');
                 }
+                // Send email notification
+                $this->sendResearcherEmail('pending', $data);
                 $this->redirect('research/registrationComplete');
             } catch (Exception $e) {
                 if ($e->getMessage()) { $this->getUser()->setFlash('error', $e->getMessage()); }
@@ -151,6 +153,7 @@ class researchActions extends AhgController
             $adminId = $this->getUser()->getAttribute('user_id');
             if ($action === 'approve') {
                 $this->service->approveResearcher($id, $adminId);
+                $this->sendResearcherEmail('approved', $this->researcher);
                 $this->getUser()->setFlash('success', 'Approved');
             } elseif ($action === 'suspend') {
                 DB::table('research_researcher')->where('id', $id)->update(['status' => 'suspended']);
@@ -252,9 +255,11 @@ class researchActions extends AhgController
 
             if ($action === 'confirm') {
                 $this->service->confirmBooking($bookingId, $adminId);
+                $this->sendBookingEmail($this->booking, 'confirmed');
                 $this->getUser()->setFlash('success', 'Booking confirmed');
             } elseif ($action === 'cancel') {
                 $this->service->cancelBooking($bookingId, 'Cancelled by staff');
+                $this->sendBookingEmail($this->booking, 'cancelled');
                 $this->getUser()->setFlash('success', 'Booking cancelled');
             } elseif ($action === 'noshow') {
                 DB::table('research_booking')
@@ -806,6 +811,14 @@ class researchActions extends AhgController
                     'student_id' => $request->getParameter('student_id'),
                 ]);
                 DB::commit();
+                // Send email notification
+                $this->sendResearcherEmail('pending', [
+                    'user_id' => $userId,
+                    'first_name' => $request->getParameter('first_name'),
+                    'last_name' => $request->getParameter('last_name'),
+                    'email' => $email,
+                    'institution' => $request->getParameter('institution'),
+                ]);
                 $this->getUser()->setFlash('success', 'Registration successful! Pending approval.');
                 $this->redirect('research/registrationComplete');
             } catch (Exception $e) {
@@ -1008,6 +1021,8 @@ class researchActions extends AhgController
         $adminId = $this->getUser()->getAttribute('user_id');
         $this->service->approveResearcher($id, $adminId);
         DB::table('user')->where('id', $researcher->user_id)->update(['active' => 1]);
+        // Send approval email
+        $this->sendResearcherEmail('approved', $researcher);
         $this->getUser()->setFlash('success', 'Researcher approved and account activated');
         $this->redirect('research/viewResearcher?id=' . $id);
     }
@@ -1076,6 +1091,8 @@ class researchActions extends AhgController
                 'review_notes' => $reason,
             ]);
         
+        // Send rejection email
+        $this->sendResearcherEmail('rejected', $researcher, $reason);
         $this->getUser()->setFlash('success', 'Researcher registration rejected and archived');
         $this->redirect('research/researchers');
     }
@@ -4112,5 +4129,99 @@ class researchActions extends AhgController
         return $this->renderText(json_encode([
             'url' => '/uploads/research/notes/' . $filename,
         ]));
+    }
+
+    // =========================================================================
+    // EMAIL NOTIFICATION HELPERS
+    // =========================================================================
+
+    /**
+     * Send researcher-related email notification via core EmailService
+     */
+    protected function sendResearcherEmail($type, $researcher, $reason = '')
+    {
+        try {
+            // Check if research email notifications are enabled
+            $enabled = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', 'research_email_notifications')
+                ->value('setting_value');
+            if ($enabled === 'false' || $enabled === '0') {
+                return;
+            }
+
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+                return;
+            }
+
+            // Convert array to object if needed (registration passes array)
+            if (is_array($researcher)) {
+                $researcher = (object) $researcher;
+                // For new registrations, get the ID from DB
+                if (empty($researcher->id) && !empty($researcher->user_id)) {
+                    $dbResearcher = DB::table('research_researcher')
+                        ->where('user_id', $researcher->user_id)
+                        ->first();
+                    if ($dbResearcher) {
+                        $researcher->id = $dbResearcher->id;
+                    }
+                }
+            }
+
+            switch ($type) {
+                case 'pending':
+                    \AhgCore\Services\EmailService::sendResearcherPending($researcher);
+                    break;
+                case 'approved':
+                    \AhgCore\Services\EmailService::sendResearcherApproved($researcher);
+                    break;
+                case 'rejected':
+                    \AhgCore\Services\EmailService::sendResearcherRejected($researcher, $reason);
+                    break;
+            }
+        } catch (\Exception $e) {
+            error_log('Research email notification failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send booking-related email notification
+     */
+    protected function sendBookingEmail($booking, $status)
+    {
+        try {
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+                return;
+            }
+
+            // Get researcher for this booking
+            $researcher = DB::table('research_researcher')
+                ->where('id', $booking->researcher_id)
+                ->first();
+            if (!$researcher || empty($researcher->email)) {
+                return;
+            }
+
+            if ($status === 'confirmed') {
+                \AhgCore\Services\EmailService::sendBookingConfirmed($booking, $researcher);
+            } elseif ($status === 'cancelled') {
+                $subject = 'Booking Cancelled';
+                $body = "Dear {$researcher->first_name} {$researcher->last_name},\n\n"
+                    . "Your reading room booking for {$booking->booking_date} has been cancelled.\n\n"
+                    . "If you have questions, please contact us.";
+                \AhgCore\Services\EmailService::send($researcher->email, $subject, $body);
+            }
+        } catch (\Exception $e) {
+            error_log('Research booking email failed: ' . $e->getMessage());
+        }
     }
 }

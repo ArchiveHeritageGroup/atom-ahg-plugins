@@ -3,6 +3,7 @@
 @section('content')
 <h1><i class="fas fa-envelope text-primary me-2"></i>{{ __('Email Settings') }}</h1>
 
+<!-- TEMPLATE:BLADE_EMAIL -->
 <form method="post">
   <div class="row">
     <div class="col-md-6">
@@ -157,6 +158,52 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Notification Settings -->
+  <div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+      <i class="fas fa-bell me-2"></i>{{ __('Notification Settings') }}
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Spectrum Email Notifications') }}
+          <br><small class="text-muted">{{ __('Task assignments and state transitions') }}</small>
+        </div>
+        <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'spectrum']) }}" class="btn btn-sm btn-outline-primary">{{ __('Configure') }}</a>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <i class="fas fa-book-reader me-2 text-muted"></i>{{ __('Research Notifications') }}
+          <br><small class="text-muted">{{ __('Researcher registration, approval, booking emails') }}</small>
+        </div>
+        <div class="form-check form-switch">
+          <input type="checkbox" class="form-check-input" id="research_email_notifications" name="notif_toggles[research_email_notifications]" value="1" {{ (isset($notifToggles) && (($notifToggles['research_email_notifications'] ?? 'true') === 'true' || ($notifToggles['research_email_notifications'] ?? '1') === '1')) || !isset($notifToggles) ? 'checked' : '' }}>
+          <label class="form-check-label" for="research_email_notifications">{{ __('Enabled') }}</label>
+        </div>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <i class="fas fa-shield-alt me-2 text-muted"></i>{{ __('Access Request Notifications') }}
+          <br><small class="text-muted">{{ __('Approver notifications, request status emails') }}</small>
+        </div>
+        <div class="form-check form-switch">
+          <input type="checkbox" class="form-check-input" id="access_request_email_notifications" name="notif_toggles[access_request_email_notifications]" value="1" {{ (isset($notifToggles) && (($notifToggles['access_request_email_notifications'] ?? 'true') === 'true' || ($notifToggles['access_request_email_notifications'] ?? '1') === '1')) || !isset($notifToggles) ? 'checked' : '' }}>
+          <label class="form-check-label" for="access_request_email_notifications">{{ __('Enabled') }}</label>
+        </div>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <i class="fas fa-project-diagram me-2 text-muted"></i>{{ __('Workflow Notifications') }}
+          <br><small class="text-muted">{{ __('Task assignment, approval, rejection emails') }}</small>
+        </div>
+        <div class="form-check form-switch">
+          <input type="checkbox" class="form-check-input" id="workflow_email_notifications" name="notif_toggles[workflow_email_notifications]" value="1" {{ (isset($notifToggles) && (($notifToggles['workflow_email_notifications'] ?? 'true') === 'true' || ($notifToggles['workflow_email_notifications'] ?? '1') === '1')) || !isset($notifToggles) ? 'checked' : '' }}>
+          <label class="form-check-label" for="workflow_email_notifications">{{ __('Enabled') }}</label>
+        </div>
+      </li>
+    </ul>
   </div>
 
   <hr>

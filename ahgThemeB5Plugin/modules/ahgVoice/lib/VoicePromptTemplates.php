@@ -46,17 +46,36 @@ class VoicePromptTemplates
 
     /**
      * 3D object prompt for local LLM (concise for llava:7b).
+     *
+     * Includes filename and existing scope_and_content as context hints
+     * so the LLM can produce descriptions aligned with the catalogue record.
      */
-    public static function get3DPrompt($context = 'default')
+    public static function get3DPrompt($context = 'default', $fileName = '', $scopeContent = '')
     {
-        $base = 'These are 6 views of the same physical object: front, back, left, right, top, and detail. Describe this object: shape, proportions, color, surface texture, material appearance, any markings or inscriptions, damage or wear, and functional features.';
+        $base = 'This collage shows 6 views of a 3D-scanned heritage object: Front, Back, Left, Right, Top, and Detail.';
+
+        // Add filename context — often contains meaningful identifiers
+        if (!empty($fileName)) {
+            $readable = str_replace(['_', '-', '.'], ' ', $fileName);
+            $base .= ' The object is catalogued as: "' . $readable . '".';
+        }
+
+        // Add existing description as reference context
+        if (!empty($scopeContent)) {
+            $base .= ' Existing catalogue description: "' . substr($scopeContent, 0, 300) . '".';
+            $base .= ' Write a physical description of the object that complements this. Focus on what you can observe: form, material appearance, construction, surface texture, color, condition, and notable physical features. Do not repeat the catalogue description.';
+        } else {
+            $base .= ' Describe this object: its form, material appearance, construction, surface texture, color, condition, and notable physical features.';
+        }
 
         $key = strtolower($context);
         if ($key === 'cco') {
-            $base .= ' This is a museum or heritage object. Note cultural significance, period, and construction technique if apparent.';
+            $base .= ' This is a museum or heritage object.';
         } elseif ($key === 'isad') {
-            $base .= ' This is an archival artefact. Note historical context, provenance indicators, and condition.';
+            $base .= ' This is an archival artefact.';
         }
+
+        $base .= ' Be concise (2-4 sentences). Respond in plain text.';
 
         return $base;
     }
@@ -64,21 +83,29 @@ class VoicePromptTemplates
     /**
      * 3D object prompt for cloud LLM (detailed for Claude).
      */
-    public static function get3DCloudPrompt($context = 'default')
+    public static function get3DCloudPrompt($context = 'default', $fileName = '', $scopeContent = '')
     {
-        $base = 'You are examining a 3D-scanned heritage object from multiple angles. The six images show front, back, left, right, top, and detail views of the same physical object. Provide a comprehensive physical description suitable for museum cataloguing: object identification, form, materials, surface treatment, condition, construction technique, and notable features.';
+        $base = 'You are examining a 3D-scanned heritage object from multiple angles. This collage shows the same physical object from 6 labeled viewpoints: Front, Back, Left, Right, Top, and Detail.';
+
+        if (!empty($fileName)) {
+            $readable = str_replace(['_', '-', '.'], ' ', $fileName);
+            $base .= ' The object is catalogued as: "' . $readable . '".';
+        }
+
+        if (!empty($scopeContent)) {
+            $base .= ' Existing catalogue description: "' . substr($scopeContent, 0, 500) . '".';
+            $base .= ' Write a complementary physical description for the "Extent and medium" field. Focus on what you observe: form, dimensions impression, materials, surface treatment, construction technique, condition, and notable physical features. Do not duplicate the existing description.';
+        } else {
+            $base .= ' Provide a comprehensive physical description suitable for the "Extent and medium" museum catalogue field: object identification, form, materials, surface treatment, condition, construction technique, and notable features.';
+        }
 
         $key = strtolower($context);
         if ($key === 'cco') {
-            $base .= ' Apply CCO (Cataloguing Cultural Objects) descriptive standards. Note cultural significance, period attribution, and Spectrum 5.1 condition indicators.';
+            $base .= ' Apply CCO descriptive standards.';
         } elseif ($key === 'isad') {
-            $base .= ' Apply ISAD(G) archival description principles. Note provenance, historical context, and conservation status.';
+            $base .= ' Apply ISAD(G) archival description principles.';
         }
 
-        return $base . "\n\nProvide:\n"
-            . "1. A one-sentence identification (what is this object?)\n"
-            . "2. A detailed physical description (3-5 sentences) covering form, materials, dimensions impression, surface, and condition\n"
-            . "3. Notable features: markings, inscriptions, damage, repairs, decorative elements\n"
-            . "\nRespond in plain text without headings or bullet points.";
+        return $base . "\n\nRespond in 2-5 sentences of plain text without headings or bullet points.";
     }
 }

@@ -104,9 +104,10 @@ def render_thumbnail(output_path, width=512, height=512):
     scene.render.image_settings.file_format = 'PNG'
     scene.render.filepath = output_path
     scene.render.film_transparent = False
-    if bpy.app.version >= (4, 2, 0):
+    # Try EEVEE_NEXT first (Blender 4.2+), fall back to EEVEE
+    try:
         scene.render.engine = 'BLENDER_EEVEE_NEXT'
-    else:
+    except TypeError:
         scene.render.engine = 'BLENDER_EEVEE'
     
     bpy.ops.render.render(write_still=True)

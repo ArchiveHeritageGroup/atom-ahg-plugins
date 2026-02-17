@@ -321,6 +321,96 @@ class ahgSpectrumNotificationService
     }
 
     /**
+     * Send email notification for a task action
+     *
+     * @param int $userId User ID to notify
+     * @param string $subject Email subject
+     * @param string $message Email body (plain text, will be wrapped in HTML)
+     * @return bool Success
+     */
+    public static function sendEmailNotification($userId, $subject, $message)
+    {
+        // Check if spectrum email notifications are enabled
+        try {
+            $enabled = DB::table('ahg_settings')
+                ->where('setting_key', 'spectrum_email_notifications')
+                ->value('setting_value');
+            if ($enabled !== 'true' && $enabled !== '1') {
+                return false;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        // Get user email
+        $user = DB::table('user')->where('id', $userId)->first();
+        if (!$user || empty($user->email)) {
+            return false;
+        }
+
+        // Load and send via EmailService
+        try {
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+
+            if (!class_exists('AhgCore\Services\EmailService')) {
+                return false;
+            }
+
+            if (!\AhgCore\Services\EmailService::isEnabled()) {
+                return false;
+            }
+
+            // Build simple HTML body
+            $siteTitle = sfConfig::get('app_siteTitle', 'AtoM Archive');
+            $siteUrl = sfConfig::get('app_siteBaseUrl', '');
+            $htmlBody = '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">'
+                . '<h2 style="color: #2c3e50;">' . htmlspecialchars($subject) . '</h2>'
+                . '<div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">'
+                . nl2br(htmlspecialchars($message))
+                . '</div>'
+                . '<p style="color: #666; font-size: 12px;">Sent by ' . htmlspecialchars($siteTitle) . '</p>'
+                . '</div>';
+
+            // Queue to spectrum_workflow_notification table
+            DB::table('spectrum_workflow_notification')->insert([
+                'procedure_type' => 'email',
+                'record_id' => 0,
+                'transition_key' => 'notification',
+                'recipient_user_id' => $userId,
+                'recipient_email' => $user->email,
+                'notification_type' => 'email',
+                'subject' => $subject,
+                'message' => $htmlBody,
+                'is_sent' => 0,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            // Send immediately
+            $sent = \AhgCore\Services\EmailService::send($user->email, $subject, $htmlBody);
+
+            // Update queue status
+            if ($sent) {
+                DB::table('spectrum_workflow_notification')
+                    ->where('recipient_email', $user->email)
+                    ->where('subject', $subject)
+                    ->where('is_sent', 0)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(1)
+                    ->update(['is_sent' => 1, 'sent_at' => date('Y-m-d H:i:s')]);
+            }
+
+            return $sent;
+        } catch (\Exception $e) {
+            error_log('Spectrum email notification failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Get assigned task count for a user
      *
      * @param int $userId User ID

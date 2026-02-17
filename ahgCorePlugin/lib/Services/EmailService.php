@@ -273,19 +273,67 @@ class EmailService
      */
     public static function testConnection(string $testEmail): array
     {
+        self::loadSettings();
+
         if (!self::isEnabled()) {
-            return ['success' => false, 'message' => 'Email is disabled'];
+            return ['success' => false, 'message' => 'Email is disabled. Check SMTP Enabled setting.'];
+        }
+
+        $fromEmail = self::getSetting('smtp_from_email');
+        $fromName = self::getSetting('smtp_from_name', 'AtoM Archive');
+
+        if (empty($fromEmail)) {
+            return ['success' => false, 'message' => 'From email address is not configured'];
         }
 
         try {
-            $sent = self::send($testEmail, 'Test Email', 'This is a test email from the Archive system.');
+            // Use PHPMailer if available for proper SMTP
+            if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host = self::getSetting('smtp_host');
+                $mail->Port = (int) self::getSetting('smtp_port', 587);
+                $mail->SMTPAuth = true;
+                $mail->Username = self::getSetting('smtp_username');
+                $mail->Password = self::getSetting('smtp_password');
 
-            return [
-                'success' => $sent,
-                'message' => $sent ? 'Test email sent successfully' : 'Failed to send test email',
-            ];
+                $encryption = self::getSetting('smtp_encryption', 'tls');
+                if ($encryption === 'tls') {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                } elseif ($encryption === 'ssl') {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                }
+
+                $mail->setFrom($fromEmail, $fromName);
+                $mail->addAddress($testEmail);
+                $mail->Subject = 'Test Email from AtoM';
+                $mail->Body = 'This is a test email from the Archive system. If you receive this, email is configured correctly.';
+
+                $mail->send();
+
+                return ['success' => true, 'message' => 'Test email sent successfully via SMTP'];
+            }
+
+            // Fallback to PHP mail()
+            $headers = "From: {$fromName} <{$fromEmail}>\r\n";
+            $headers .= "Reply-To: {$fromEmail}\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+            $sent = @mail(
+                $testEmail,
+                'Test Email from AtoM',
+                'This is a test email from the Archive system. If you receive this, email is configured correctly.',
+                $headers
+            );
+
+            if ($sent) {
+                return ['success' => true, 'message' => 'Test email sent via PHP mail(). Note: PHPMailer is not installed, so SMTP settings are not used. Install PHPMailer for SMTP support.'];
+            }
+
+            return ['success' => false, 'message' => 'PHP mail() failed. Check server mail configuration or install PHPMailer for SMTP support.'];
         } catch (\Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => 'Email error: ' . $e->getMessage()];
         }
     }
 

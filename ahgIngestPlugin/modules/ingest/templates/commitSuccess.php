@@ -42,7 +42,10 @@ $job = $sf_data->getRaw('job');
         <!-- Progress (polling) -->
         <div class="card mb-4" id="progress-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-spinner fa-spin me-2"></i><?php echo __('Committing...') ?></h5>
+                <h5 class="mb-0" id="progress-header">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    <span id="progress-label"><?php echo __('Committing...') ?></span>
+                </h5>
             </div>
             <div class="card-body">
                 <div class="progress mb-3" style="height: 24px;">
@@ -51,9 +54,13 @@ $job = $sf_data->getRaw('job');
                         <?php echo $pct ?>%
                     </div>
                 </div>
+                <div id="post-processing-info" class="alert alert-info mb-3" style="display: none;">
+                    <i class="fas fa-cogs me-2"></i>
+                    <?php echo __('Records created. Running post-processing (derivatives, packages, indexing)...') ?>
+                </div>
                 <div class="row text-center">
                     <div class="col">
-                        <strong id="stat-processed"><?php echo $job->processed_rows ?></strong> / <?php echo $job->total_rows ?>
+                        <strong id="stat-processed"><?php echo $job->processed_rows ?></strong> / <span id="stat-total"><?php echo $job->total_rows ?></span>
                         <br><small class="text-muted"><?php echo __('Processed') ?></small>
                     </div>
                     <div class="col">
@@ -229,6 +236,7 @@ $job = $sf_data->getRaw('job');
 <?php if ($job && in_array($job->status, ['queued', 'running'])): ?>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+    var totalRows = <?php echo (int) $job->total_rows ?>;
     var pollInterval = setInterval(function() {
         fetch('<?php echo url_for(['module' => 'ingest', 'action' => 'jobStatus']) ?>?job_id=<?php echo $job->id ?>', {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -253,6 +261,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (el) el.textContent = data.created_dos;
             el = document.getElementById('stat-errors');
             if (el) el.textContent = data.error_count;
+
+            // Show post-processing message when all rows processed but still running
+            if (data.processed_rows >= totalRows && data.status === 'running') {
+                var ppInfo = document.getElementById('post-processing-info');
+                if (ppInfo) ppInfo.style.display = 'block';
+                var lbl = document.getElementById('progress-label');
+                if (lbl) lbl.textContent = 'Post-processing...';
+            }
 
             if (data.status === 'completed' || data.status === 'failed') {
                 clearInterval(pollInterval);

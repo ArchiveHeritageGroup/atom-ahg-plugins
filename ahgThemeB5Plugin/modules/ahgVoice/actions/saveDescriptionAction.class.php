@@ -32,7 +32,7 @@ class ahgVoiceSaveDescriptionAction extends sfAction
 
         $ioId = (int) $request->getParameter('information_object_id');
         $description = trim($request->getParameter('description', ''));
-        $saveTarget = $request->getParameter('save_target', 'description'); // description | alt_text | both
+        $saveTarget = $request->getParameter('save_target', 'description'); // description | alt_text | both | extent_and_medium | auto
         $saveMode = $request->getParameter('save_mode', 'replace'); // append | replace
 
         if ($ioId <= 0) {
@@ -51,10 +51,41 @@ class ahgVoiceSaveDescriptionAction extends sfAction
         $culture = sfConfig::get('sf_default_culture', 'en');
         $saved = [];
 
+        // "auto" target: always save to extent_and_medium
+        //  - Empty field: replace with AI-tagged content
+        //  - Has [AI-described] tag: replace (re-describe)
+        //  - Has human content (no AI tag): append after newline
+        $autoAppend = false;
+        if ($saveTarget === 'auto') {
+            $i18n = DB::table('information_object_i18n')
+                ->where('id', $ioId)
+                ->where('culture', $culture)
+                ->first();
+            $extentVal = $i18n->extent_and_medium ?? '';
+            $saveTarget = 'extent_and_medium';
+            if (!empty(trim($extentVal)) && stripos($extentVal, '[AI-described]') === false) {
+                $autoAppend = true;
+            }
+        }
+
         // Save to scope_and_content (description)
         if ($saveTarget === 'description' || $saveTarget === 'both') {
             $this->saveToI18n($ioId, 'scope_and_content', $description, $saveMode, $culture);
             $saved[] = 'description';
+        }
+
+        // Save to extent_and_medium (with AI tag prefix)
+        if ($saveTarget === 'extent_and_medium') {
+            $taggedDescription = '[AI-described] ' . $description;
+            if ($autoAppend) {
+                // Human content exists — append AI description after newline
+                $this->saveToI18n($ioId, 'extent_and_medium', $taggedDescription, 'append', $culture);
+                $saved[] = 'extent and medium (appended)';
+            } else {
+                // Empty or has existing AI tag — replace
+                $this->saveToI18n($ioId, 'extent_and_medium', $taggedDescription, 'replace', $culture);
+                $saved[] = 'extent and medium';
+            }
         }
 
         // Save to digital object alt text
@@ -91,7 +122,7 @@ class ahgVoiceSaveDescriptionAction extends sfAction
             DB::table('information_object_i18n')
                 ->where('id', $ioId)
                 ->where('culture', $culture)
-                ->update([$field => $newVal, 'updated_at' => date('Y-m-d H:i:s')]);
+                ->update([$field => $newVal]);
         } else {
             DB::table('information_object_i18n')->insert([
                 'id'      => $ioId,

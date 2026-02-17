@@ -32,7 +32,14 @@ VIEWS="front back left right top detail"
 
 if [ -n "$BLENDER" ]; then
     echo "Using Blender: $BLENDER"
-    $BLENDER --background --python "$SCRIPT_DIR/render_multiangle.py" -- "$INPUT" "$OUTPUT_DIR" "$SIZE" 2>&1 | grep -v "^Blender\|^Read\|^Fra:\|^Color management"
+    # Snap Blender can't run as www-data (home dir restriction) — use sudo
+    if [ "$(id -u)" -ne 0 ] && sudo -n "$BLENDER" --version >/dev/null 2>&1; then
+        sudo "$BLENDER" --background --python "$SCRIPT_DIR/render_multiangle.py" -- "$INPUT" "$OUTPUT_DIR" "$SIZE" 2>&1 | grep -v "^Blender\|^Read\|^Fra:\|^Color management"
+        # Fix ownership back to www-data (need sudo since files are owned by root)
+        sudo chown www-data:www-data "$OUTPUT_DIR"/*.png 2>/dev/null
+    else
+        $BLENDER --background --python "$SCRIPT_DIR/render_multiangle.py" -- "$INPUT" "$OUTPUT_DIR" "$SIZE" 2>&1 | grep -v "^Blender\|^Read\|^Fra:\|^Color management"
+    fi
 
     # Verify at least one render succeeded
     SUCCESS=0

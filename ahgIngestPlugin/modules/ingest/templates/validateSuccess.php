@@ -175,15 +175,20 @@ $rowCount = $sf_data->getRaw('rowCount') ?? 0;
                 <i class="fas fa-sync me-1"></i><?php echo __('Re-validate') ?>
             </button>
         </form>
-        <?php if (($stats['valid'] ?? 0) > 0): ?>
-            <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'validate', 'id' => $session->id]) ?>" class="d-inline">
-                <input type="hidden" name="form_action" value="proceed">
-                <button type="submit" class="btn btn-primary">
-                    <?php echo __('Preview') ?> (<?php echo $rowCount ?> <?php echo __('rows') ?>)
-                    <i class="fas fa-arrow-right ms-1"></i>
-                </button>
-            </form>
-        <?php endif ?>
+        <?php $validCount = $stats['valid'] ?? 0; ?>
+        <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'validate', 'id' => $session->id]) ?>" class="d-inline">
+            <input type="hidden" name="form_action" value="proceed">
+            <button type="submit" class="btn btn-primary" <?php echo $validCount === 0 ? 'disabled' : '' ?>>
+                <i class="fas fa-eye me-1"></i><?php echo __('Preview') ?> (<?php echo $validCount ?> <?php echo __('valid rows') ?>)
+                <i class="fas fa-arrow-right ms-1"></i>
+            </button>
+        </form>
+        <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'validate', 'id' => $session->id]) ?>" class="d-inline ms-2">
+            <input type="hidden" name="form_action" value="commit">
+            <button type="submit" class="btn btn-success" <?php echo $validCount === 0 ? 'disabled' : '' ?>>
+                <i class="fas fa-check me-1"></i><?php echo __('Commit') ?> (<?php echo $validCount ?> <?php echo __('rows') ?>)
+            </button>
+        </form>
     </div>
 </div>
 

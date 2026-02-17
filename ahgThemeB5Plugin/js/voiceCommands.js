@@ -81,11 +81,19 @@ class AHGVoiceCommands {
         e.preventDefault();
         this.toggle();
       });
+      this.navbarBtn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this._toggleTypeInput();
+      });
     }
     if (this.floatingBtn) {
       this.floatingBtn.addEventListener('click', (e) => {
         e.preventDefault();
         this.toggle();
+      });
+      this.floatingBtn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this._toggleTypeInput();
       });
     }
 
@@ -1737,17 +1745,26 @@ class AHGVoiceCommands {
       clearInterval(patienceTimer);
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
       console.error('[Voice] AI describe error:', err);
-      self.speak('Failed to contact AI service');
-      self.showToast('AI service error', 'danger');
+      var errMsg = 'Failed to contact AI service';
+      if (err && err.message) {
+        if (err.message.indexOf('JSON') !== -1) {
+          errMsg = 'Server timed out processing the image. Try again or check AI service status.';
+        } else {
+          errMsg = 'AI service error: ' + err.message;
+        }
+      }
+      self.speak(errMsg);
+      self.showToast(errMsg, 'danger');
     });
   }
 
   /**
    * AI-powered 3D object description via multi-angle Blender renders + LLM.
+   * @param {boolean} force - If true, bypass cached AI description and re-describe
    */
-  describeObject() {
+  describeObject(force) {
     var meta = this._gatherPageMetadata();
-    console.log('[Voice] describeObject: hasDigitalObject=' + meta.hasDigitalObject);
+    console.log('[Voice] describeObject: hasDigitalObject=' + meta.hasDigitalObject + ', force=' + !!force);
 
     // Detect 3D viewer on page
     var viewer3d = document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer');
@@ -1799,8 +1816,8 @@ class AHGVoiceCommands {
     }
 
     var self = this;
-    this.speak('Rendering 3D views, this may take a moment.');
-    this.showToast('Generating 3D multi-angle renders...', 'info');
+    this.speak(force ? 'Redescribing 3D object, this may take a moment.' : 'Checking for existing description...');
+    this.showToast(force ? 'Re-generating 3D description...' : 'Checking AI description...', 'info');
 
     if (this.indicator) {
       this.indicator.classList.add('voice-indicator-processing');
@@ -1828,6 +1845,7 @@ class AHGVoiceCommands {
     if (doId) formData.append('digital_object_id', doId);
     if (infoObjectId) formData.append('information_object_id', infoObjectId);
     if (slug) formData.append('slug', slug);
+    if (force) formData.append('force', '1');
     if (csrfToken) formData.append('csrf_token', csrfToken);
 
     fetch('/index.php/ahgVoice/describeObject', {
@@ -1841,6 +1859,18 @@ class AHGVoiceCommands {
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
 
       if (data.success) {
+        // If returned from cached field, just read it — no save prompt
+        if (data.from_field) {
+          self.speak(data.description);
+          self.showToast('Reading existing AI description from extent and medium', 'success');
+          // Offer redescribe option
+          setTimeout(function () {
+            self.speak('This is the existing AI description. Say redescribe object to generate a new one.');
+            self.showToast('Say "redescribe object" for a fresh AI description', 'info');
+          }, Math.max(2000, data.description.length * 50));
+          return;
+        }
+
         var source = data.source || 'AI';
         var renderInfo = data.render_count ? ' (' + data.render_count + ' views, ' + source + ')' : '';
         self.speak(data.description);
@@ -1863,9 +1893,25 @@ class AHGVoiceCommands {
       clearInterval(patienceTimer);
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
       console.error('[Voice] 3D describe error:', err);
-      self.speak('Failed to contact AI service');
-      self.showToast('AI service error', 'danger');
+      var errMsg = 'Failed to contact AI service';
+      if (err && err.message) {
+        if (err.message.indexOf('JSON') !== -1) {
+          errMsg = 'Server timed out processing 3D renders. The AI model may need more time.';
+        } else {
+          errMsg = 'AI service error: ' + err.message;
+        }
+      }
+      self.speak(errMsg);
+      self.showToast(errMsg, 'danger');
     });
+  }
+
+  /**
+   * Force re-describe a 3D object, bypassing cached AI description.
+   * Replaces extent_and_medium with fresh AI content.
+   */
+  redescribeObject() {
+    this.describeObject(true);
   }
 
   /**
@@ -1874,8 +1920,8 @@ class AHGVoiceCommands {
   _promptSaveDescription() {
     if (!this._pendingDescription) return;
 
-    this.speak('Would you like to save this description? Say save to description, save to alt text, save to both, or discard.');
-    this.showToast('Say "save to description", "save to alt text", "save to both", or "discard"', 'info');
+    this.speak('Would you like to save this description? Say yes to save to extent and medium if empty, or say save to description, save to alt text, save to both, or discard.');
+    this.showToast('Say "yes", "save to description", "save to extent and medium", "save to alt text", "save to both", or "discard"', 'info');
     this._awaitingSaveCommand = true;
   }
 
@@ -1939,6 +1985,65 @@ class AHGVoiceCommands {
   // ---------------------------------------------------------------
   //  Private
   // ---------------------------------------------------------------
+
+  /**
+   * Toggle the type-a-command input popup above the floating button.
+   */
+  _toggleTypeInput() {
+    var existing = document.getElementById('voice-type-popup');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    var popup = document.createElement('div');
+    popup.id = 'voice-type-popup';
+    popup.className = 'voice-type-popup';
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'voice-type-input';
+    input.placeholder = 'Type a command...';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+
+    var self = this;
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && this.value.trim()) {
+        var text = this.value.trim();
+        popup.remove();
+        self.processCommand(text, 1.0);
+      }
+      if (e.key === 'Escape') {
+        popup.remove();
+      }
+    });
+
+    // Close on outside click
+    var closeHandler = function (e) {
+      if (!popup.contains(e.target) && e.target !== self.floatingBtn) {
+        popup.remove();
+        document.removeEventListener('mousedown', closeHandler);
+      }
+    };
+    setTimeout(function () {
+      document.addEventListener('mousedown', closeHandler);
+    }, 10);
+
+    popup.appendChild(input);
+    document.body.appendChild(popup);
+
+    // Position above floating button
+    if (this.floatingBtn) {
+      var rect = this.floatingBtn.getBoundingClientRect();
+      popup.style.position = 'fixed';
+      popup.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+      popup.style.right = (window.innerWidth - rect.right) + 'px';
+    }
+
+    input.focus();
+  }
 
   /**
    * Inject a mic button into the navbar (next to search).

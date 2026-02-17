@@ -22,7 +22,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
   style="display:none"
   type="button"
   aria-label="<?php echo __('Toggle voice commands'); ?>"
-  title="<?php echo __('Voice commands'); ?>">
+  title="<?php echo __('Click: voice | Right-click: type command'); ?>">
   <i class="bi bi-mic"></i>
 </button>
 

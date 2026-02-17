@@ -133,7 +133,7 @@ class spectrumActions extends AhgController
                    "State: {$stateLabel}\n\n" .
                    "View task: {$objectLink}";
 
-        // Create notification
+        // Create in-app notification
         DB::table('spectrum_notification')->insert([
             'user_id' => $assignedToUserId,
             'notification_type' => 'task_assignment',
@@ -141,6 +141,90 @@ class spectrumActions extends AhgController
             'message' => $message,
             'created_at' => date('Y-m-d H:i:s')
         ]);
+
+        // Send email notification
+        ahgSpectrumNotificationService::sendEmailNotification(
+            $assignedToUserId,
+            $subject,
+            $message
+        );
+    }
+
+    /**
+     * Send email notification for a workflow state transition
+     */
+    protected function sendTransitionEmailNotification($resource, $procedureType, $fromState, $toState, $transitionKey, $actingUserId, $assignedToInt, $note)
+    {
+        // Get acting user details
+        $actingUser = DB::table('user')->where('id', $actingUserId)->first();
+        $actingName = $actingUser ? $actingUser->username : 'System';
+
+        // Get procedure and state labels
+        $procedureLabel = $this->getProcedureLabel($procedureType);
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+        $fromLabel = ucwords(str_replace('_', ' ', $fromState));
+        $toLabel = ucwords(str_replace('_', ' ', $toState));
+        if ($config) {
+            $configData = json_decode($config->config_json, true);
+            $fromLabel = $configData['state_labels'][$fromState] ?? $fromLabel;
+            $toLabel = $configData['state_labels'][$toState] ?? $toLabel;
+        }
+
+        $objectTitle = $resource->title ?: $resource->slug;
+        $transitionLabel = ucwords(str_replace('_', ' ', $transitionKey));
+
+        $subject = "Spectrum: {$transitionLabel} — {$procedureLabel}";
+        $message = "{$actingName} performed '{$transitionLabel}' on a task.\n\n"
+            . "Object: {$objectTitle}\n"
+            . "Procedure: {$procedureLabel}\n"
+            . "State: {$fromLabel} → {$toLabel}\n";
+        if ($note) {
+            $message .= "Note: {$note}\n";
+        }
+        $message .= "\nView task: /{$resource->slug}/spectrum";
+
+        // Determine who to notify (anyone involved except the acting user)
+        $notifyUserIds = [];
+
+        // Notify the assigned user (if different from acting user)
+        if ($assignedToInt && $assignedToInt !== $actingUserId) {
+            $notifyUserIds[] = $assignedToInt;
+        }
+
+        // Notify the previous assignee (if task was reassigned)
+        $previousState = DB::table('spectrum_workflow_state')
+            ->where('record_id', $resource->id)
+            ->where('procedure_type', $procedureType)
+            ->first();
+        if ($previousState && $previousState->assigned_to
+            && $previousState->assigned_to !== $actingUserId
+            && !in_array($previousState->assigned_to, $notifyUserIds)) {
+            $notifyUserIds[] = $previousState->assigned_to;
+        }
+
+        // If no specific assignees, notify admins for certain transitions
+        if (empty($notifyUserIds) && in_array($transitionKey, ['submit_for_review', 'complete', 'report'])) {
+            $admins = DB::table('user')
+                ->join('user_role_relation', 'user.id', '=', 'user_role_relation.user_id')
+                ->where('user_role_relation.role_id', 1)
+                ->where('user.id', '!=', $actingUserId)
+                ->pluck('user.id')
+                ->toArray();
+            $notifyUserIds = array_merge($notifyUserIds, $admins);
+        }
+
+        $notifyUserIds = array_unique($notifyUserIds);
+
+        foreach ($notifyUserIds as $notifyUserId) {
+            ahgSpectrumNotificationService::sendEmailNotification(
+                $notifyUserId,
+                $subject,
+                $message
+            );
+        }
     }
 
     /**
@@ -402,6 +486,18 @@ class spectrumActions extends AhgController
                 $userId
             );
         }
+
+        // Send email notification for state transitions to relevant users
+        $this->sendTransitionEmailNotification(
+            $resource,
+            $procedureType,
+            $fromState,
+            $toState,
+            $transitionKey,
+            $userId,
+            $assignedToInt,
+            $note
+        );
 
         // Mark existing notifications as read when task reaches final state
         if ($isFinalState) {
@@ -681,27 +777,27 @@ class spectrumActions extends AhgController
 
     public function executeDashboard($request)
     {
-        // Get procedures from service
-        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
-        
-        // Get workflow statistics
-        $this->workflowStats = $this->getWorkflowStatistics($repoId);
-        
-        // Get recent activity from workflow history
-        $this->recentActivity = $this->getRecentWorkflowActivity($repoId);
-        
-        // Get procedure status counts
-        $this->procedureStatusCounts = $this->getProcedureStatusCounts($repoId);
-        
-        // Calculate overall completion
-        $this->overallCompletion = $this->calculateOverallCompletion($repoId);
-        
-        // Get repositories for filter
-        $this->repositories = $this->getRepositoriesForFilter();
-        
-        // Handle repository filter
+        // Handle repository filter (must be before statistics queries)
         $this->selectedRepository = $request->getParameter('repository', '');
         $repoId = $this->selectedRepository ? (int)$this->selectedRepository : null;
+
+        // Get procedures from service
+        $this->procedures = ahgSpectrumWorkflowService::getProcedures();
+
+        // Get workflow statistics
+        $this->workflowStats = $this->getWorkflowStatistics($repoId);
+
+        // Get recent activity from workflow history
+        $this->recentActivity = $this->getRecentWorkflowActivity($repoId);
+
+        // Get procedure status counts
+        $this->procedureStatusCounts = $this->getProcedureStatusCounts($repoId);
+
+        // Calculate overall completion
+        $this->overallCompletion = $this->calculateOverallCompletion($repoId);
+
+        // Get repositories for filter
+        $this->repositories = $this->getRepositoriesForFilter();
     }
 
     public function executeConditionPhotos($request)

@@ -41,7 +41,7 @@ function toggle3DAutoRotate() {
   if (mv) mv.autoRotate = !mv.autoRotate;
   if (fs3D.controls) fs3D.controls.autoRotate = !fs3D.controls.autoRotate;
 }
-function initFullscreenThreeJs(container, modelPath, ext) {
+function _doInitFullscreenThreeJs(container, modelPath, ext) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -69,6 +69,23 @@ function initFullscreenThreeJs(container, modelPath, ext) {
   if (ext === 'obj') new THREE.OBJLoader().load(modelPath, centerAndScale);
   else if (ext === 'stl') new THREE.STLLoader().load(modelPath, g => centerAndScale(new THREE.Mesh(g)));
   (function animate() { if (!fs3D.renderer) return; requestAnimationFrame(animate); fs3D.controls.update(); fs3D.renderer.render(scene, camera); })();
+}
+function initFullscreenThreeJs(container, modelPath, ext) {
+  if (typeof THREE !== 'undefined' && THREE.OBJLoader && THREE.OrbitControls) {
+    _doInitFullscreenThreeJs(container, modelPath, ext);
+    return;
+  }
+  var cdn = 'https://cdn.jsdelivr.net/npm/three@0.128.0';
+  var srcs = [cdn+'/build/three.min.js', cdn+'/examples/js/loaders/OBJLoader.js', cdn+'/examples/js/loaders/STLLoader.js', cdn+'/examples/js/controls/OrbitControls.js'];
+  var idx = 0;
+  if (typeof THREE !== 'undefined') { idx = 1; }
+  function loadNext() {
+    if (idx >= srcs.length) { _doInitFullscreenThreeJs(container, modelPath, ext); return; }
+    var s = document.createElement('script'); s.src = srcs[idx]; idx++;
+    s.onload = loadNext; s.onerror = loadNext;
+    document.head.appendChild(s);
+  }
+  loadNext();
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') close3DFullscreen(); });
 </script>

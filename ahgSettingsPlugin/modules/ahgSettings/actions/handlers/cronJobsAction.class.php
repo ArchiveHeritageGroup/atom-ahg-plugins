@@ -1086,6 +1086,35 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Medium (2-5 minutes to load model)',
                 'category' => 'ahg',
             ],
+            [
+                'name' => '3D Thumbnail Derivatives',
+                'command' => 'php atom-framework/bin/atom 3d:derivatives',
+                'description' => 'Generates thumbnail and reference image derivatives for 3D model files (GLB, GLTF, OBJ, STL, FBX, PLY, DAE) using Blender. Processes all 3D digital objects missing derivatives, or a specific object by ID.',
+                'options' => [
+                    '--id=N' => 'Process only the specified digital object ID',
+                    '--force' => 'Regenerate even if derivatives already exist',
+                    '--dry-run' => 'List objects that would be processed without generating',
+                ],
+                'schedule' => 'Nightly or after 3D model uploads',
+                'example' => '0 2 * * * cd {root} && php atom-framework/bin/atom 3d:derivatives >> /var/log/atom/3d-derivatives.log 2>&1',
+                'duration' => 'Medium to Long (10-30s per model via Blender)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => '3D Multi-Angle Renders',
+                'command' => 'php atom-framework/bin/atom 3d:multiangle',
+                'description' => 'Generates 6 multi-angle renders (front, back, left, right, top, detail) of 3D models using Blender. Used for AI description and gallery display. Optionally sends renders to LLM for automated description.',
+                'options' => [
+                    '--id=N' => 'Process only the specified digital object ID',
+                    '--force' => 'Regenerate even if renders already exist',
+                    '--describe' => 'After rendering, send images to LLM and output AI description',
+                    '--dry-run' => 'List objects that would be processed without rendering',
+                ],
+                'schedule' => 'Nightly or after 3D model uploads',
+                'example' => '0 3 * * * cd {root} && php atom-framework/bin/atom 3d:multiangle >> /var/log/atom/3d-multiangle.log 2>&1',
+                'duration' => 'Long (30-60s per model for rendering, +30s if --describe)',
+                'category' => 'ahg',
+            ],
             // ============================================
             // DIGITAL PRESERVATION
             // ============================================

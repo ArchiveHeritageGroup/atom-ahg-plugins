@@ -745,6 +745,18 @@ class WorkflowService
      */
     protected function queueNotification(int $userId, string $type, string $subject, string $body, ?int $taskId = null): int
     {
+        // Check if workflow email notifications are enabled
+        try {
+            $enabled = DB::table('ahg_settings')
+                ->where('setting_key', 'workflow_email_notifications')
+                ->value('setting_value');
+            if ($enabled === 'false' || $enabled === '0') {
+                return 0;
+            }
+        } catch (\Exception $e) {
+            // setting not found - default to enabled
+        }
+
         return DB::table('ahg_workflow_notification')->insertGetId([
             'task_id' => $taskId,
             'user_id' => $userId,

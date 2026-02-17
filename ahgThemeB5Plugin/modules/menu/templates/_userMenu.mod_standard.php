@@ -111,7 +111,7 @@ if ($isAuthenticated && $hasSpectrum) {
     <!-- Profile Section -->
     <li><h6 class="dropdown-header"><i class="fas fa-user me-1"></i><?php echo __('Profile'); ?></h6></li>
     <li>
-      <a class="dropdown-item" href="<?php echo url_for([$sf_user->user, 'module' => 'user']); ?>">
+      <a class="dropdown-item" href="<?php echo url_for('user/' . $sf_user->getAttribute('user_slug')); ?>">
         <i class="fas fa-id-card me-2"></i><?php echo $menuLabels['myProfile'] ?? __('My Profile'); ?>
       </a>
     </li>

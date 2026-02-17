@@ -49,7 +49,7 @@ class AhgSettingsSectionAction extends AhgController
             'map_title_dam', 'map_creator_dam', 'map_keywords_dam', 'map_description_dam',
             'map_date_dam', 'map_copyright_dam', 'map_technical_dam', 'map_gps_dam', 'meta_replace_placeholders'
         ],
-        'spectrum' => ['spectrum_enabled', 'spectrum_auto_create_movement', 'spectrum_require_photos'],
+        'spectrum' => ['spectrum_enabled', 'spectrum_auto_create_movement', 'spectrum_require_photos', 'spectrum_email_notifications'],
         'iiif' => ['iiif_enabled', 'iiif_show_navigator', 'iiif_show_rotation', 'iiif_show_fullscreen'],
         'data_protection' => ['dp_enabled', 'dp_notify_overdue', 'dp_anonymize_on_delete', 'dp_audit_logging', 'dp_consent_required'],
         'faces' => ['face_detect_enabled', 'face_auto_match', 'face_auto_link', 'face_blur_unmatched', 'face_store_embeddings'],

@@ -18,7 +18,7 @@ class AhgSettingsEmailAction extends AhgController
 
         if ($request->isMethod('post')) {
             $settings = $request->getParameter('settings', []);
-            
+
             foreach ($settings as $key => $value) {
                 DB::table('email_setting')
                     ->where('setting_key', $key)
@@ -26,6 +26,25 @@ class AhgSettingsEmailAction extends AhgController
                         'setting_value' => $value,
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
+            }
+
+            // Save notification toggles to ahg_settings
+            $notifKeys = [
+                'research_email_notifications',
+                'access_request_email_notifications',
+                'workflow_email_notifications',
+            ];
+            $notifToggles = $request->getParameter('notif_toggles', []);
+            foreach ($notifKeys as $nk) {
+                $val = isset($notifToggles[$nk]) ? 'true' : 'false';
+                try {
+                    DB::table('ahg_settings')->updateOrInsert(
+                        ['setting_key' => $nk],
+                        ['setting_value' => $val, 'setting_group' => 'email', 'updated_at' => DB::raw('NOW()')]
+                    );
+                } catch (\Exception $e) {
+                    // ignore
+                }
             }
 
             $this->getUser()->setFlash('success', 'Email settings saved successfully');
@@ -51,11 +70,23 @@ class AhgSettingsEmailAction extends AhgController
             ->get()
             ->toArray();
 
-        return [
-            '_blade' => 'email',
-            'smtpSettings' => $this->smtpSettings,
-            'notificationSettings' => $this->notificationSettings,
-            'templateSettings' => $this->templateSettings,
-        ];
+        // Load notification toggle settings from ahg_settings
+        $notifToggles = [];
+        try {
+            $rows = DB::table('ahg_settings')
+                ->whereIn('setting_key', [
+                    'spectrum_email_notifications',
+                    'research_email_notifications',
+                    'access_request_email_notifications',
+                    'workflow_email_notifications',
+                ])
+                ->get(['setting_key', 'setting_value']);
+            foreach ($rows as $row) {
+                $notifToggles[$row->setting_key] = $row->setting_value;
+            }
+        } catch (\Exception $e) {
+            // table may not exist yet
+        }
+        $this->notifToggles = $notifToggles;
     }
 }

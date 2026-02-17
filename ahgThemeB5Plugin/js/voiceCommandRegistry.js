@@ -580,8 +580,18 @@ var AHGVoiceRegistry = (function () {
       patterns: ['describe 3d', 'describe 3d object', 'describe model', 'describe 3d model', 'what is this model'],
       action: function () { var v = window.ahgVoice; if (v) v.describeObject(); },
       mode: 'action_view',
-      description: 'AI-describe a 3D object from multiple angles',
+      description: 'AI-describe a 3D object (reads cached if available)',
       feedback: null,
+      contextCheck: function () {
+        return !!document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer');
+      }
+    },
+    {
+      patterns: ['redescribe object', 'redescribe 3d', 'redescribe model', 'redescribe', 'describe again', 'new description'],
+      action: function () { var v = window.ahgVoice; if (v) v.redescribeObject(); },
+      mode: 'action_view',
+      description: 'Force re-describe 3D object with fresh AI analysis',
+      feedback: 'Redescribing object',
       contextCheck: function () {
         return !!document.querySelector('[id^="viewer-3d-"], model-viewer, .three-js-viewer, .gaussian-splat-viewer');
       }
@@ -599,11 +609,26 @@ var AHGVoiceRegistry = (function () {
       }
     },
     {
+      patterns: ['yes', 'save', 'save it'],
+      action: function () { var v = window.ahgVoice; if (v && v._awaitingSaveCommand) v.saveDescription('auto'); },
+      mode: 'action_view',
+      description: 'Save AI description (auto-detect: extent and medium if empty, otherwise description)',
+      feedback: 'Saving description',
+      contextCheck: function () { var v = window.ahgVoice; return v && v._awaitingSaveCommand; }
+    },
+    {
       patterns: ['save to description', 'save description'],
       action: function () { var v = window.ahgVoice; if (v) v.saveDescription('description'); },
       mode: 'action_view',
       description: 'Save AI description to record',
       feedback: 'Saving to description'
+    },
+    {
+      patterns: ['save to extent and medium', 'save to extent and media', 'save to extent'],
+      action: function () { var v = window.ahgVoice; if (v) v.saveDescription('extent_and_medium'); },
+      mode: 'action_view',
+      description: 'Save AI description to extent and medium field',
+      feedback: 'Saving to extent and medium'
     },
     {
       patterns: ['save to alt text', 'save alt text'],

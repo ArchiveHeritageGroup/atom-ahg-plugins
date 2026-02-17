@@ -85,15 +85,30 @@ class heritageActions extends AhgController
                 $thumbnail = $item->thumbnail_path ?: $collection->thumbnail_url;
                 if (!$thumbnail) {
                     $firstItem = \Illuminate\Database\Capsule\Manager::table('iiif_collection_item as ci')
-                        ->leftJoin('digital_object as do', 'ci.object_id', '=', 'do.object_id')
+                        ->leftJoin('digital_object as do', function ($join) {
+                            $join->on('ci.object_id', '=', 'do.object_id')
+                                ->where('do.usage_id', '=', 140);
+                        })
+                        ->leftJoin('digital_object as do_thumb', function ($join) {
+                            $join->on('do_thumb.parent_id', '=', 'do.id')
+                                ->where('do_thumb.usage_id', '=', 142);
+                        })
                         ->where('ci.collection_id', $collection->id)
                         ->whereNotNull('ci.object_id')
-                        ->select(['do.path', 'do.name'])
+                        ->select(['do.path', 'do.name', 'do_thumb.path as thumb_path', 'do_thumb.name as thumb_name'])
                         ->orderBy('ci.sort_order')
                         ->first();
 
-                    if ($firstItem && $firstItem->path && $firstItem->name) {
-                        $thumbnail = rtrim($firstItem->path, '/') . '/' . pathinfo($firstItem->name, PATHINFO_FILENAME) . '_142.jpg';
+                    if ($firstItem) {
+                        if ($firstItem->thumb_path && $firstItem->thumb_name) {
+                            $thumbnail = rtrim($firstItem->thumb_path, '/') . '/' . $firstItem->thumb_name;
+                        } elseif ($firstItem->path && $firstItem->name) {
+                            $candidate = rtrim($firstItem->path, '/') . '/' . pathinfo($firstItem->name, PATHINFO_FILENAME) . '_142.jpg';
+                            $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                            if (file_exists($rootDir . $candidate)) {
+                                $thumbnail = $candidate;
+                            }
+                        }
                     }
                 }
 
@@ -115,11 +130,19 @@ class heritageActions extends AhgController
                             ->where('ioi.culture', '=', $culture);
                     })
                     ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
-                    ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
+                    ->leftJoin('digital_object as do', function ($join) {
+                        $join->on('io.id', '=', 'do.object_id')
+                            ->where('do.usage_id', '=', 140);
+                    })
+                    ->leftJoin('digital_object as do_thumb', function ($join) {
+                        $join->on('do_thumb.parent_id', '=', 'do.id')
+                            ->where('do_thumb.usage_id', '=', 142);
+                    })
                     ->where('io.id', $item->source_id)
                     ->select([
                         'io.id', 'ioi.title', 'ioi.scope_and_content as description',
                         's.slug', 'do.path as thumb_path', 'do.name as thumb_name',
+                        'do_thumb.path as thumb_child_path', 'do_thumb.name as thumb_child_name',
                         'io.lft', 'io.rgt',
                     ])
                     ->first();
@@ -129,20 +152,42 @@ class heritageActions extends AhgController
                 $itemCount = (int) (($collection->rgt - $collection->lft - 1) / 2);
 
                 $thumbnail = $item->thumbnail_path;
+                if (!$thumbnail && $collection->thumb_child_path && $collection->thumb_child_name) {
+                    $thumbnail = rtrim($collection->thumb_child_path, '/') . '/' . $collection->thumb_child_name;
+                }
                 if (!$thumbnail && $collection->thumb_path && $collection->thumb_name) {
-                    $thumbnail = rtrim($collection->thumb_path, '/') . '/' . pathinfo($collection->thumb_name, PATHINFO_FILENAME) . '_142.jpg';
+                    $candidate = rtrim($collection->thumb_path, '/') . '/' . pathinfo($collection->thumb_name, PATHINFO_FILENAME) . '_142.jpg';
+                    $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                    if (file_exists($rootDir . $candidate)) {
+                        $thumbnail = $candidate;
+                    }
                 }
                 if (!$thumbnail) {
                     $firstChild = \Illuminate\Database\Capsule\Manager::table('information_object as io')
-                        ->join('digital_object as do', 'io.id', '=', 'do.object_id')
+                        ->join('digital_object as do', function ($join) {
+                            $join->on('io.id', '=', 'do.object_id')
+                                ->where('do.usage_id', '=', 140);
+                        })
+                        ->leftJoin('digital_object as do_thumb', function ($join) {
+                            $join->on('do_thumb.parent_id', '=', 'do.id')
+                                ->where('do_thumb.usage_id', '=', 142);
+                        })
                         ->where('io.lft', '>', $collection->lft)
                         ->where('io.rgt', '<', $collection->rgt)
-                        ->select(['do.path', 'do.name'])
+                        ->select(['do.path', 'do.name', 'do_thumb.path as tp', 'do_thumb.name as tn'])
                         ->orderBy('io.lft')
                         ->first();
 
-                    if ($firstChild && $firstChild->path && $firstChild->name) {
-                        $thumbnail = rtrim($firstChild->path, '/') . '/' . pathinfo($firstChild->name, PATHINFO_FILENAME) . '_142.jpg';
+                    if ($firstChild) {
+                        if ($firstChild->tp && $firstChild->tn) {
+                            $thumbnail = rtrim($firstChild->tp, '/') . '/' . $firstChild->tn;
+                        } elseif ($firstChild->path && $firstChild->name) {
+                            $candidate = rtrim($firstChild->path, '/') . '/' . pathinfo($firstChild->name, PATHINFO_FILENAME) . '_142.jpg';
+                            $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                            if (file_exists($rootDir . $candidate)) {
+                                $thumbnail = $candidate;
+                            }
+                        }
                     }
                 }
 

@@ -36,6 +36,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
         $doId = (int) $request->getParameter('digital_object_id');
         $infoObjectId = (int) $request->getParameter('information_object_id');
         $slug = trim($request->getParameter('slug', ''));
+        $force = (bool) $request->getParameter('force', false);
 
         $digitalObject = null;
         $informationObject = null;
@@ -90,6 +91,30 @@ class ahgVoiceDescribeObjectAction extends sfAction
         $objectId = $digitalObject->object_id ?? null;
         if (!$informationObject && $objectId) {
             $informationObject = DB::table('information_object')->where('id', $objectId)->first();
+        }
+
+        // If not forcing, check if extent_and_medium already has AI-described content
+        if (!$force && $objectId) {
+            $culture = sfConfig::get('sf_default_culture', 'en');
+            $i18n = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', $culture)
+                ->first();
+            $extentVal = $i18n->extent_and_medium ?? '';
+            if (stripos($extentVal, '[AI-described]') === 0) {
+                // Strip the tag for reading back
+                $description = trim(substr($extentVal, strlen('[AI-described]')));
+                return $this->renderJson([
+                    'success' => true,
+                    'description' => $description,
+                    'source' => 'cached',
+                    'model' => null,
+                    'information_object_id' => $objectId,
+                    'render_count' => 0,
+                    'cached' => true,
+                    'from_field' => 'extent_and_medium',
+                ]);
+            }
         }
 
         // Validate: is this a 3D model?
@@ -154,20 +179,17 @@ class ahgVoiceDescribeObjectAction extends sfAction
             return $this->renderJson(['success' => false, 'error' => 'Failed to generate 3D renders. Check Blender installation.']);
         }
 
-        // Read all renders as base64
-        $base64Array = [];
-        $viewLabels = [];
-        foreach ($renders as $viewName => $filePath) {
-            $imageData = file_get_contents($filePath);
-            if ($imageData) {
-                $base64Array[] = base64_encode($imageData);
-                $viewLabels[] = $viewName;
-            }
+        // Create a single labeled collage from the 6 renders (3x2 grid).
+        // Sending ONE image to the LLM is far faster than 6 separate base64 images
+        // and avoids PHP-FPM's request_terminate_timeout.
+        $collagePath = $multiAngleDir . '/collage.jpg';
+        $collageData = $this->createCollage($renders, $collagePath);
+
+        if (!$collageData) {
+            return $this->renderJson(['success' => false, 'error' => 'Failed to create collage from renders']);
         }
 
-        if (empty($base64Array)) {
-            return $this->renderJson(['success' => false, 'error' => 'Could not read render files']);
-        }
+        $base64Collage = base64_encode($collageData);
 
         // Detect context
         $context = $this->detectContext($informationObject);
@@ -175,8 +197,20 @@ class ahgVoiceDescribeObjectAction extends sfAction
         // Load config
         $config = $this->loadConfig();
 
-        // Call LLM with multi-image
-        $result = $this->callMultiImageLlm($base64Array, $viewLabels, $context, $config);
+        // Gather contextual hints for the LLM: filename + existing scope_and_content
+        $fileName = pathinfo($digitalObject->name ?? '', PATHINFO_FILENAME);
+        $scopeContent = '';
+        if ($objectId) {
+            $culture = sfConfig::get('sf_default_culture', 'en');
+            $i18n = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', $culture)
+                ->first();
+            $scopeContent = $i18n->scope_and_content ?? '';
+        }
+
+        // Call LLM with single collage image + context hints
+        $result = $this->callCollageLlm($base64Collage, array_keys($renders), $context, $config, $fileName, $scopeContent);
 
         // Audit logging
         if ($config['audit_ai_calls'] ?? true) {
@@ -184,21 +218,91 @@ class ahgVoiceDescribeObjectAction extends sfAction
         }
 
         $result['information_object_id'] = $objectId;
-        $result['render_count'] = count($base64Array);
+        $result['render_count'] = count($renders);
         $result['cached'] = $cached;
 
         return $this->renderJson($result);
     }
 
     /**
-     * Call LLM with multiple images (local first, cloud fallback if hybrid).
+     * Create a labeled 3x2 collage from individual render PNGs using ImageMagick montage.
+     * Returns the collage image data or null on failure.
      */
-    protected function callMultiImageLlm(array $base64Array, array $viewLabels, string $context, array $config): array
+    protected function createCollage(array $renders, string $outputPath): ?string
+    {
+        // If collage already exists and is newer than all renders, return cached
+        if (file_exists($outputPath) && filesize($outputPath) > 500) {
+            $collageMtime = filemtime($outputPath);
+            $allOlder = true;
+            foreach ($renders as $path) {
+                if (filemtime($path) > $collageMtime) {
+                    $allOlder = false;
+                    break;
+                }
+            }
+            if ($allOlder) {
+                return file_get_contents($outputPath);
+            }
+        }
+
+        // Ensure the output directory is writable
+        $outputDir = dirname($outputPath);
+        if (is_dir($outputDir) && !is_writable($outputDir)) {
+            @chmod($outputDir, 0775);
+        }
+        if (!is_dir($outputDir)) {
+            @mkdir($outputDir, 0775, true);
+        }
+        // Fallback to tmp if still not writable
+        if (!is_writable($outputDir)) {
+            $outputPath = sys_get_temp_dir() . '/ahg_collage_' . md5(implode(',', $renders)) . '.png';
+        }
+
+        // Build montage command: 3x2 grid with labels
+        $labelOrder = ['front', 'back', 'left', 'right', 'top', 'detail'];
+        $inputFiles = [];
+        foreach ($labelOrder as $view) {
+            if (isset($renders[$view])) {
+                $inputFiles[] = '-label ' . escapeshellarg(ucfirst($view)) . ' ' . escapeshellarg($renders[$view]);
+            }
+        }
+        // Add any remaining renders not in the standard order
+        foreach ($renders as $view => $path) {
+            if (!in_array($view, $labelOrder)) {
+                $inputFiles[] = '-label ' . escapeshellarg(ucfirst($view)) . ' ' . escapeshellarg($path);
+            }
+        }
+
+        if (empty($inputFiles)) {
+            return null;
+        }
+
+        $outEsc = escapeshellarg($outputPath);
+        $cmd = 'montage ' . implode(' ', $inputFiles)
+            . ' -tile 3x2 -geometry 192x192+2+2'
+            . ' -background white -fill black -pointsize 12'
+            . ' -quality 80'
+            . ' ' . $outEsc . ' 2>&1';
+
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($outputPath) || filesize($outputPath) < 500) {
+            error_log('[VoiceDescribe3D] Montage failed (exit=' . $exitCode . '): ' . implode("\n", $output));
+            return null;
+        }
+
+        return file_get_contents($outputPath);
+    }
+
+    /**
+     * Call LLM with single collage image (local first, cloud fallback if hybrid).
+     */
+    protected function callCollageLlm(string $base64Collage, array $viewLabels, string $context, array $config, string $fileName = '', string $scopeContent = ''): array
     {
         $provider = $config['llm_provider'] ?? 'local';
 
         if ($provider === 'local' || $provider === 'hybrid') {
-            $result = $this->callMultiImageLocal($base64Array, $context, $config);
+            $result = $this->callCollageLocal($base64Collage, $viewLabels, $context, $config, $fileName, $scopeContent);
             if ($result['success']) {
                 return $result;
             }
@@ -208,29 +312,29 @@ class ahgVoiceDescribeObjectAction extends sfAction
         }
 
         if ($provider === 'cloud' || $provider === 'hybrid') {
-            return $this->callMultiImageCloud($base64Array, $viewLabels, $context, $config);
+            return $this->callCollageCloud($base64Collage, $viewLabels, $context, $config, $fileName, $scopeContent);
         }
 
         return ['success' => false, 'error' => 'No LLM provider configured'];
     }
 
     /**
-     * Call Ollama with multiple images.
+     * Call Ollama with single collage image.
      */
-    protected function callMultiImageLocal(array $base64Array, string $context, array $config): array
+    protected function callCollageLocal(string $base64Collage, array $viewLabels, string $context, array $config, string $fileName = '', string $scopeContent = ''): array
     {
         require_once dirname(__FILE__) . '/../lib/VoicePromptTemplates.php';
 
         $url = rtrim($config['local_llm_url'] ?? 'http://localhost:11434', '/') . '/api/generate';
         $model = $config['local_llm_model'] ?? 'llava:7b';
         $timeout = (int) ($config['local_llm_timeout'] ?? 30);
-        $timeout = max($timeout, 180); // 3D renders need more time
-        $prompt = \VoicePromptTemplates::get3DPrompt($context);
+        $timeout = max($timeout, 50); // Single collage is much faster than 6 images
+        $prompt = \VoicePromptTemplates::get3DPrompt($context, $fileName, $scopeContent);
 
         $payload = json_encode([
             'model' => $model,
             'prompt' => $prompt,
-            'images' => $base64Array,
+            'images' => [$base64Collage],
             'stream' => false,
         ]);
 
@@ -250,9 +354,10 @@ class ahgVoiceDescribeObjectAction extends sfAction
         curl_close($ch);
 
         if ($error || $httpCode !== 200) {
+            $errDetail = $error ?: ('HTTP ' . $httpCode);
             return [
                 'success' => false,
-                'error' => 'Local LLM unavailable' . ($error ? ': ' . $error : ''),
+                'error' => 'Local LLM unavailable: ' . $errDetail,
                 'fallback_available' => true,
             ];
         }
@@ -273,9 +378,9 @@ class ahgVoiceDescribeObjectAction extends sfAction
     }
 
     /**
-     * Call Anthropic Claude API with multiple images.
+     * Call Anthropic Claude API with single collage image.
      */
-    protected function callMultiImageCloud(array $base64Array, array $viewLabels, string $context, array $config): array
+    protected function callCollageCloud(string $base64Collage, array $viewLabels, string $context, array $config, string $fileName = '', string $scopeContent = ''): array
     {
         require_once dirname(__FILE__) . '/../lib/VoicePromptTemplates.php';
 
@@ -292,28 +397,26 @@ class ahgVoiceDescribeObjectAction extends sfAction
         }
 
         $model = $config['cloud_model'] ?? 'claude-sonnet-4-20250514';
-        $prompt = \VoicePromptTemplates::get3DCloudPrompt($context);
+        $prompt = \VoicePromptTemplates::get3DCloudPrompt($context, $fileName, $scopeContent);
+        $viewList = implode(', ', array_map('ucfirst', $viewLabels));
 
-        // Build content array: 6 image blocks + 1 text block
-        $content = [];
-        foreach ($base64Array as $i => $b64) {
-            $label = $viewLabels[$i] ?? "view_{$i}";
-            $content[] = [
+        $content = [
+            [
                 'type' => 'text',
-                'text' => ucfirst($label) . ' view:',
-            ];
-            $content[] = [
+                'text' => 'This collage shows a 3D object from 6 angles: ' . $viewList . '.',
+            ],
+            [
                 'type' => 'image',
                 'source' => [
                     'type' => 'base64',
-                    'media_type' => 'image/png',
-                    'data' => $b64,
+                    'media_type' => 'image/jpeg',
+                    'data' => $base64Collage,
                 ],
-            ];
-        }
-        $content[] = [
-            'type' => 'text',
-            'text' => $prompt,
+            ],
+            [
+                'type' => 'text',
+                'text' => $prompt,
+            ],
         ];
 
         $payload = json_encode([
@@ -337,7 +440,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
                 'x-api-key: ' . $apiKey,
                 'anthropic-version: 2023-06-01',
             ],
-            CURLOPT_TIMEOUT => 120,
+            CURLOPT_TIMEOUT => 60,
             CURLOPT_CONNECTTIMEOUT => 10,
         ]);
 
@@ -348,7 +451,9 @@ class ahgVoiceDescribeObjectAction extends sfAction
 
         if ($error || $httpCode !== 200) {
             $errMsg = 'Cloud AI unavailable';
-            if ($response) {
+            if ($error) {
+                $errMsg .= ': ' . $error;
+            } elseif ($response) {
                 $errData = json_decode($response, true);
                 if (!empty($errData['error']['message'])) {
                     $errMsg = $errData['error']['message'];

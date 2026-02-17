@@ -4,7 +4,7 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>">Home</a></li>
-          <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'user', 'action' => 'index', 'slug' => $sf_user->user->slug]); ?>">My Profile</a></li>
+          <li class="breadcrumb-item"><a href="<?php echo url_for('user/' . $sf_user->getAttribute('user_slug')); ?>">My Profile</a></li>
           <li class="breadcrumb-item active">Manage Approvers</li>
         </ol>
       </nav>
@@ -67,7 +67,7 @@
                             <?php endif; ?>
                           </td>
                           <td>
-                            <a href="<?php echo url_for('security/approvers/' . $approver->user_id . '/remove'); ?>" 
+                            <a href="<?php echo url_for('@access_request_remove_approver?id=' . $approver->user_id); ?>"
                                class="btn btn-sm btn-outline-danger"
                                onclick="return confirm('Remove this approver?');">
                               <i class="fas fa-trash"></i>
@@ -89,7 +89,7 @@
               <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Add Approver</h6>
             </div>
             <div class="card-body">
-              <form method="post" action="<?php echo url_for('security/approvers/add'); ?>">
+              <form method="post" action="<?php echo url_for('@access_request_add_approver'); ?>">
                 <div class="mb-3">
                   <label for="user_id" class="form-label">User</label>
                   <select class="form-select" id="user_id" name="user_id" required>

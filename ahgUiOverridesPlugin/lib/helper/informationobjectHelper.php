@@ -360,7 +360,7 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
     } elseif (in_array($ext, ['obj', 'stl'])) {
         // Three.js for OBJ/STL
         $html .= '<div id="' . $viewerId . '-threejs" style="width:100%;height:100%;border-radius:8px;"></div>';
-        $html .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>';
+        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>';
         $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>';
         $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>';
         $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>';
@@ -388,6 +388,12 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
         $html .= '<a href="' . htmlspecialchars($fullPath) . '" download class="btn btn-primary mt-2">';
         $html .= '<i class="fas fa-download me-1"></i>Download 3D Model</a>';
         $html .= '</div>';
+    }
+
+    // Fullscreen button (uses open3DFullscreen from _3dFullscreenModal.php)
+    if (in_array($ext, ['glb', 'gltf', 'obj', 'stl'])) {
+        $html .= '<button onclick="if(typeof open3DFullscreen===\'function\')open3DFullscreen(\'' . htmlspecialchars($fullPath, ENT_QUOTES) . '\',\'' . $ext . '\')" class="btn btn-sm btn-primary position-absolute" style="bottom:10px;right:10px;z-index:10;">';
+        $html .= '<i class="fas fa-expand me-1"></i>Fullscreen</button>';
     }
 
     $html .= '</div>';

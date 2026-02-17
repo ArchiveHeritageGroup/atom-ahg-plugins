@@ -155,7 +155,12 @@ class AccessionEditAction extends AhgEditController
                 $this->alternativeIdentifiersComponent->processForm();
                 $this->eventsComponent->processForm();
 
-                QubitSearch::getInstance()->update($this->resource);
+                // Search indexing should not block the redirect
+                try {
+                    QubitSearch::getInstance()->update($this->resource);
+                } catch (\Exception $e) {
+                    // Log but don't block — data is already saved
+                }
 
                 $this->redirect([$this->resource, 'module' => 'accession']);
             }

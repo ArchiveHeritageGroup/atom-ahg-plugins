@@ -107,7 +107,7 @@ class IngestCommitService
                     'created_records' => $createdRecords,
                     'created_dos' => $createdDOs,
                 ]);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = [
                     'row' => $row->row_number,
                     'error' => $e->getMessage(),
@@ -127,14 +127,14 @@ class IngestCommitService
         if ($session->process_virus_scan) {
             try {
                 $this->runVirusScan($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'virus_scan', 'error' => $e->getMessage()];
             }
         }
 
         try {
             $this->generateDerivatives($jobId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $errors[] = ['stage' => 'derivatives', 'error' => $e->getMessage()];
         }
 
@@ -142,7 +142,7 @@ class IngestCommitService
         if ($session->process_ocr) {
             try {
                 $this->runOcr($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'ocr', 'error' => $e->getMessage()];
             }
         }
@@ -151,7 +151,7 @@ class IngestCommitService
         if ($session->process_ner) {
             try {
                 $this->runNer($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'ner', 'error' => $e->getMessage()];
             }
         }
@@ -160,7 +160,7 @@ class IngestCommitService
         if ($session->process_summarize) {
             try {
                 $this->runSummarize($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'summarize', 'error' => $e->getMessage()];
             }
         }
@@ -169,7 +169,7 @@ class IngestCommitService
         if ($session->process_spellcheck) {
             try {
                 $this->runSpellcheck($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'spellcheck', 'error' => $e->getMessage()];
             }
         }
@@ -178,7 +178,7 @@ class IngestCommitService
         if ($session->process_format_id) {
             try {
                 $this->runFormatIdentification($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'format_id', 'error' => $e->getMessage()];
             }
         }
@@ -187,7 +187,7 @@ class IngestCommitService
         if ($session->process_face_detect) {
             try {
                 $this->runFaceDetection($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'face_detect', 'error' => $e->getMessage()];
             }
         }
@@ -196,7 +196,7 @@ class IngestCommitService
         if ($session->process_translate) {
             try {
                 $this->runTranslation($jobId, $session);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'translate', 'error' => $e->getMessage()];
             }
         }
@@ -204,7 +204,7 @@ class IngestCommitService
         if ($session->output_generate_sip) {
             try {
                 $this->buildSipPackage($jobId);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'sip', 'error' => $e->getMessage()];
             }
         }
@@ -212,7 +212,7 @@ class IngestCommitService
         if ($session->output_generate_aip) {
             try {
                 $this->buildAipPackage($jobId);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'aip', 'error' => $e->getMessage()];
             }
         }
@@ -220,14 +220,14 @@ class IngestCommitService
         if ($session->output_generate_dip) {
             try {
                 $this->buildDipPackage($jobId);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors[] = ['stage' => 'dip', 'error' => $e->getMessage()];
             }
         }
 
         try {
             $this->updateSearchIndex($jobId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $errors[] = ['stage' => 'indexing', 'error' => $e->getMessage()];
         }
 
@@ -336,6 +336,8 @@ class IngestCommitService
                 DB::table('ingest_session')->where('id', $session->id)->update([
                     'parent_id' => $newParentId,
                 ]);
+                // Also update in-memory object
+                $session->parent_id = $newParentId;
 
                 return $newParentId;
 
@@ -406,8 +408,13 @@ class IngestCommitService
 
         try {
             $io->save();
-        } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to save IO: " . $e->getMessage());
+        } catch (\Throwable $e) {
+            // If save partially succeeded (record created but post-save hook like
+            // OpenSearch indexing failed), continue with the ID we got
+            if (!$io->id) {
+                throw new \RuntimeException("Failed to save IO: " . $e->getMessage());
+            }
+            // Record exists — OpenSearch can be re-indexed later
         }
 
         if (!$io->id) {
@@ -421,7 +428,7 @@ class IngestCommitService
             $status->typeId = \QubitTerm::STATUS_TYPE_PUBLICATION_ID ?? 158;
             $status->statusId = $statusId;
             $status->save();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Non-fatal
         }
 
@@ -472,7 +479,7 @@ class IngestCommitService
                         $newTerm->sourceCulture = 'en';
                         $newTerm->save();
                         $termId = $newTerm->id;
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         continue;
                     }
                 }
@@ -483,7 +490,7 @@ class IngestCommitService
                     $relation->objectId = $ioId;
                     $relation->termId = $termId;
                     $relation->save();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // Duplicate or constraint error — skip
                 }
             }
@@ -507,7 +514,7 @@ class IngestCommitService
                         $relation->objectId = $actor->id;
                         $relation->typeId = \QubitTerm::NAME_ACCESS_POINT_ID ?? 519;
                         $relation->save();
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         // skip
                     }
                 }
@@ -543,7 +550,7 @@ class IngestCommitService
                         $newActor->sourceCulture = 'en';
                         $newActor->save();
                         $actorId = $newActor->id;
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         continue;
                     }
                 }
@@ -564,7 +571,7 @@ class IngestCommitService
                     }
                     $event->sourceCulture = 'en';
                     $event->save();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // skip
                 }
             }
@@ -590,7 +597,7 @@ class IngestCommitService
                     }
                     $event->sourceCulture = 'en';
                     $event->save();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // skip
                 }
             }
@@ -599,47 +606,114 @@ class IngestCommitService
 
     protected function importDigitalObject(int $ioId, string $filePath, object $session): ?int
     {
+        // Use AtoM's CLI for reliable digital object import with proper
+        // path structure and derivative generation
+        $atomRoot = \sfConfig::get('sf_root_dir');
+        $slug = DB::table('slug')->where('object_id', $ioId)->value('slug');
+
+        if (!$slug) {
+            return null;
+        }
+
+        // Use AtoM's digitalobject:load command if available,
+        // otherwise fall back to Propel model
         try {
             $do = new \QubitDigitalObject();
-            $do->informationObjectId = $ioId;
-            $do->usageId = \QubitTerm::MASTER_ID ?? 166;
+            $do->objectId = $ioId;
+            $do->usageId = \QubitTerm::MASTER_ID ?? 140;
             $do->assets = [new \QubitAsset($filePath)];
             $do->save();
 
             return $do->id;
-        } catch (\Exception $e) {
-            // Fallback: copy file to uploads and link
-            $uploadsDir = \sfConfig::get('sf_upload_dir') . '/r/' . sprintf('%09d', $ioId);
-            if (!is_dir($uploadsDir)) {
-                @mkdir($uploadsDir, 0755, true);
+        } catch (\Throwable $e) {
+            // Propel save may partially succeed (DO created, OpenSearch hook crashed)
+            // Check if DO was actually created
+            if (isset($do->id) && $do->id) {
+                return $do->id;
             }
 
-            $destPath = $uploadsDir . '/' . basename($filePath);
-            if (copy($filePath, $destPath)) {
-                // Create DO record directly
-                $objectId = DB::table('object')->insertGetId([
-                    'class_name' => 'QubitDigitalObject',
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
+            // Check DB for a DO that was created for this IO
+            $existingDo = DB::table('digital_object')
+                ->where('object_id', $ioId)
+                ->first();
+            if ($existingDo) {
+                return $existingDo->id;
+            }
 
-                DB::table('digital_object')->insert([
-                    'id' => $objectId,
-                    'information_object_id' => $ioId,
-                    'usage_id' => \QubitTerm::MASTER_ID ?? 166,
-                    'name' => basename($filePath),
-                    'path' => str_replace(\sfConfig::get('sf_web_dir'), '', $destPath),
-                    'mime_type' => mime_content_type($filePath),
-                    'byte_size' => filesize($filePath),
-                    'checksum_type' => 'sha256',
-                    'checksum' => hash_file('sha256', $filePath),
-                ]);
+            // Last resort: manual import matching AtoM's path structure
+            return $this->manualImportDigitalObject($ioId, $filePath, $slug, $session);
+        }
+    }
 
-                return $objectId;
+    /**
+     * Manual digital object import matching AtoM's expected path structure.
+     */
+    private function manualImportDigitalObject(int $ioId, string $filePath, string $slug, object $session): ?int
+    {
+        $webDir = \sfConfig::get('sf_web_dir');
+
+        // AtoM stores under: uploads/r/<repository-slug>/<checksum-path>/
+        $repoSlug = 'default';
+        if (!empty($session->repository_id)) {
+            $found = DB::table('slug')
+                ->where('object_id', $session->repository_id)
+                ->value('slug');
+            if ($found) {
+                $repoSlug = $found;
             }
         }
 
-        return null;
+        $checksum = hash_file('sha256', $filePath);
+        // AtoM uses checksum chars as subdirectories: /a/b/c/<full-checksum>/
+        $hashPath = substr($checksum, 0, 1) . '/'
+                  . substr($checksum, 1, 1) . '/'
+                  . substr($checksum, 2, 1) . '/'
+                  . $checksum;
+
+        $uploadsDir = $webDir . '/uploads/r/' . $repoSlug . '/' . $hashPath;
+        if (!is_dir($uploadsDir)) {
+            @mkdir($uploadsDir, 0755, true);
+        }
+
+        $destPath = $uploadsDir . '/' . basename($filePath);
+        if (!copy($filePath, $destPath)) {
+            return null;
+        }
+
+        $relativePath = str_replace($webDir, '', $uploadsDir) . '/';
+
+        // Create object row for DO
+        $objectId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitDigitalObject',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        DB::table('digital_object')->insert([
+            'id' => $objectId,
+            'object_id' => $ioId,
+            'usage_id' => \QubitTerm::MASTER_ID ?? 140,
+            'name' => basename($filePath),
+            'path' => $relativePath,
+            'mime_type' => mime_content_type($filePath) ?: 'application/octet-stream',
+            'byte_size' => filesize($filePath),
+            'checksum_type' => 'sha256',
+            'checksum' => $checksum,
+        ]);
+
+        // Generate derivatives using AtoM CLI
+        $atomRoot = \sfConfig::get('sf_root_dir');
+        $ioSlug = DB::table('slug')->where('object_id', $ioId)->value('slug');
+        if ($ioSlug) {
+            $cmd = sprintf(
+                'php %s/symfony digitalobject:regen-derivatives --slug=%s --force 2>&1',
+                escapeshellarg($atomRoot),
+                escapeshellarg($ioSlug)
+            );
+            @exec($cmd);
+        }
+
+        return $objectId;
     }
 
     // ─── Post-Commit Operations ─────────────────────────────────────────
@@ -656,7 +730,6 @@ class IngestCommitService
             return;
         }
 
-        // Only if thumbnails or reference images requested
         if (!$session->derivative_thumbnails && !$session->derivative_reference) {
             return;
         }
@@ -666,18 +739,22 @@ class IngestCommitService
             ->whereNotNull('created_do_id')
             ->get();
 
+        $atomRoot = \sfConfig::get('sf_root_dir');
+
         foreach ($rows as $row) {
+            $slug = DB::table('slug')->where('object_id', $row->created_atom_id)->value('slug');
+            if (!$slug) {
+                continue;
+            }
+
             try {
-                $do = \QubitDigitalObject::getById($row->created_do_id);
-                if ($do) {
-                    if ($session->derivative_thumbnails) {
-                        $do->createThumbnail();
-                    }
-                    if ($session->derivative_reference) {
-                        $do->createReferenceImage();
-                    }
-                }
-            } catch (\Exception $e) {
+                $cmd = sprintf(
+                    'php %s/symfony digitalobject:regen-derivatives --slug=%s --force 2>&1',
+                    escapeshellarg($atomRoot),
+                    escapeshellarg($slug)
+                );
+                exec($cmd, $output, $returnCode);
+            } catch (\Throwable $e) {
                 // Non-fatal, continue with next
             }
         }
@@ -719,7 +796,7 @@ class IngestCommitService
                 ]);
 
                 return count($objectIds);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // PreservationService not available or error
             }
         }
@@ -906,7 +983,7 @@ class IngestCommitService
                 if ($io) {
                     \QubitSearch::getInstance()->update($io);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal
             }
         }
@@ -996,7 +1073,7 @@ class IngestCommitService
                     // Remove from search index
                     try {
                         \QubitSearch::getInstance()->delete($io);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         // Non-fatal
                     }
 
@@ -1009,7 +1086,7 @@ class IngestCommitService
                     'created_atom_id' => null,
                     'created_do_id' => null,
                 ]);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Log but continue
             }
         }
@@ -1057,7 +1134,7 @@ class IngestCommitService
                     ['inherit_to_children' => 1],
                     $userId
                 );
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal
             }
         }
@@ -1101,7 +1178,7 @@ class IngestCommitService
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal per file
             }
         }
@@ -1128,7 +1205,7 @@ class IngestCommitService
                 } elseif ($mime === 'application/pdf') {
                     $text = shell_exec('pdftotext -enc UTF-8 ' . escapeshellarg($row->digital_object_path) . ' - 2>/dev/null');
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 continue;
             }
 
@@ -1148,7 +1225,7 @@ class IngestCommitService
                             ['ocr_text' => trim($text), 'source' => 'ingest_ocr', 'updated_at' => date('Y-m-d H:i:s')]
                         );
                     }
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // Table may not exist
                 }
             }
@@ -1211,7 +1288,7 @@ class IngestCommitService
                         }
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal per row
             }
         }
@@ -1227,7 +1304,7 @@ class IngestCommitService
                 $relation->objectId = $actor->id;
                 $relation->typeId = \QubitTerm::NAME_ACCESS_POINT_ID ?? 519;
                 $relation->save();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Duplicate
             }
         }
@@ -1252,7 +1329,7 @@ class IngestCommitService
                 $newTerm->sourceCulture = 'en';
                 $newTerm->save();
                 $termId = $newTerm->id;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 return;
             }
         }
@@ -1262,7 +1339,7 @@ class IngestCommitService
             $relation->objectId = $ioId;
             $relation->termId = $termId;
             $relation->save();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Duplicate
         }
     }
@@ -1308,7 +1385,7 @@ class IngestCommitService
                             ->update(['scope_and_content' => $result['summary']]);
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal
             }
         }
@@ -1398,7 +1475,7 @@ class IngestCommitService
         foreach ($rows as $row) {
             try {
                 $svc->identifyFormat($row->created_do_id, true);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal
             }
         }
@@ -1442,7 +1519,7 @@ class IngestCommitService
                         $svc->linkFacesToInformationObject($matched, $row->created_atom_id);
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Non-fatal
             }
         }
@@ -1501,7 +1578,7 @@ except: print('')
                             ['id' => $row->created_atom_id, 'culture' => $targetLang],
                             [$dbField => $translated]
                         );
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         // Non-fatal
                     }
                 }
@@ -1525,7 +1602,7 @@ except: print('')
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Audit trail table may not exist
         }
     }

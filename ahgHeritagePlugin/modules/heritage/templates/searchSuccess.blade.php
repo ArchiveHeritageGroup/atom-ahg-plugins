@@ -21,6 +21,18 @@ $facets = $toArray($resultsRaw['facets'] ?? []);
 $suggestions = $toArray($resultsRaw['suggestions'] ?? []);
 $searchId = $resultsRaw['search_id'] ?? 0;
 $parsedQuery = $toArray($resultsRaw['parsed_query'] ?? []);
+$termMatches = $toArray($resultsRaw['term_matches'] ?? []);
+
+// Identify unmatched search terms
+$unmatchedTerms = [];
+$matchedTerms = [];
+foreach ($termMatches as $tm) {
+    if (!($tm['matched'] ?? true)) {
+        $unmatchedTerms[] = $tm['term'];
+    } else {
+        $matchedTerms[] = $tm['term'];
+    }
+}
 
 // Convert filterOptions and their nested values
 $filterOptionsRaw = $toArray($filterOptions ?? []);
@@ -46,6 +58,15 @@ $filters = $toArray($filters ?? []);
     </h1>
     <span class="badge bg-secondary">{{ number_format($totalResults) }} results</span>
 </div>
+@if (!empty($unmatchedTerms))
+<div class="alert alert-info mt-3 mb-0 py-2 small">
+    <i class="fas fa-info-circle me-1"></i>
+    No results found for <strong>{{ implode(', ', $unmatchedTerms) }}</strong>.
+    @if (!empty($matchedTerms))
+        Showing results matching: <strong>{{ implode(', ', $matchedTerms) }}</strong>
+    @endif
+</div>
+@endif
 @endsection
 
 @section('sidebar')
@@ -240,6 +261,7 @@ $filters = $toArray($filters ?? []);
                             'image' => 'fas fa-image',
                             'video' => 'fas fa-video',
                             'audio' => 'fas fa-music',
+                            'model' => 'fas fa-cube',
                             'document' => 'bi-file-pdf',
                             'text' => 'bi-file-text',
                             default => 'bi-archive'
@@ -248,6 +270,7 @@ $filters = $toArray($filters ?? []);
                             'image' => 'bg-info',
                             'video' => 'bg-danger',
                             'audio' => 'bg-warning',
+                            'model' => 'bg-success',
                             'document' => 'bg-primary',
                             default => 'bg-secondary'
                         };

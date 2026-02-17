@@ -339,19 +339,34 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             <?php
             $recentItems = \Illuminate\Database\Capsule\Manager::table('information_object')
                 ->join('object', 'information_object.id', '=', 'object.id')
+                ->join('status as pub_status', function($join) {
+                    $join->on('information_object.id', '=', 'pub_status.object_id')
+                        ->where('pub_status.type_id', '=', 158);
+                })
                 ->leftJoin('information_object_i18n', function($join) {
                     $join->on('information_object.id', '=', 'information_object_i18n.id')
                         ->where('information_object_i18n.culture', '=', 'en');
                 })
                 ->leftJoin('slug', 'information_object.id', '=', 'slug.object_id')
-                ->leftJoin('digital_object', 'information_object.id', '=', 'digital_object.object_id')
+                ->leftJoin('digital_object', function($join) {
+                    $join->on('information_object.id', '=', 'digital_object.object_id')
+                        ->where('digital_object.usage_id', '=', 140);
+                })
+                ->leftJoin('digital_object as do_thumb', function($join) {
+                    $join->on('do_thumb.parent_id', '=', 'digital_object.id')
+                        ->where('do_thumb.usage_id', '=', 142);
+                })
                 ->select(
                     'information_object.id',
                     'slug.slug',
                     'information_object_i18n.title',
                     'digital_object.path as image_path',
-                    'digital_object.name as image_name'
+                    'digital_object.name as image_name',
+                    'digital_object.mime_type',
+                    'do_thumb.path as thumb_child_path',
+                    'do_thumb.name as thumb_child_name'
                 )
+                ->where('pub_status.status_id', 160) // Published only
                 ->whereNotNull('digital_object.id')
                 ->where('information_object.id', '!=', 1)
                 ->orderByDesc('object.created_at')
@@ -361,12 +376,23 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             @if($recentItems->count() > 0)
                 @foreach($recentItems as $item)
                 <?php
-                    $basePath = $item->image_path;
-                    $filename = $item->image_name;
-                    $ext = pathinfo($filename, PATHINFO_EXTENSION);
-                    $basename = pathinfo($filename, PATHINFO_FILENAME);
-                    $thumbPath = $basePath . $basename . '_142.jpg';
+                    $thumbPath = null;
+                    if (!empty($item->thumb_child_path) && !empty($item->thumb_child_name)) {
+                        $thumbPath = rtrim($item->thumb_child_path, '/') . '/' . $item->thumb_child_name;
+                    } elseif (!empty($item->image_path) && !empty($item->image_name)) {
+                        $mime = $item->mime_type ?? '';
+                        if (str_starts_with($mime, 'image/') || str_starts_with($mime, 'application/pdf')) {
+                            $basePath = $item->image_path;
+                            $basename = pathinfo($item->image_name, PATHINFO_FILENAME);
+                            $candidate = $basePath . $basename . '_142.jpg';
+                            $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                            if (file_exists($rootDir . $candidate)) {
+                                $thumbPath = $candidate;
+                            }
+                        }
+                    }
                 ?>
+                @if($thumbPath)
                 <a href="{{ url_for(['module' => 'informationobject', 'slug' => $item->slug]) }}" class="heritage-masonry-item">
                     <img src="{{ $thumbPath }}"
                          alt="{{ $item->title ?? 'Item' }}"
@@ -375,6 +401,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         <h4 class="heritage-masonry-title">{{ $item->title ?? 'Untitled' }}</h4>
                     </div>
                 </a>
+                @endif
                 @endforeach
             @else
                 <p class="text-muted text-center w-100 py-4" style="column-span: all;">No recent items with images found</p>

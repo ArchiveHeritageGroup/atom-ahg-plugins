@@ -243,6 +243,31 @@
 /* Context badge for dictation in help modal */
 .voice-ctx-dictation { background: #198754; color: #fff; }
 
+/* -- Type-a-command popup ------------------------------------- */
+.voice-type-popup {
+  z-index: 1060;
+  animation: voice-toast-in 0.2s ease-out;
+}
+.voice-type-input {
+  width: 260px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--bs-primary, #0d6efd);
+  border-radius: 1.5rem;
+  font-size: 0.9rem;
+  outline: none;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+.voice-type-input:focus {
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(13, 110, 253, 0.2);
+}
+.voice-type-input::placeholder {
+  color: var(--bs-secondary-color, #6c757d);
+  opacity: 0.7;
+}
+
 /* -- Responsive ----------------------------------------------- */
 @media (max-width: 575.98px) {
   .voice-navbar-btn {
@@ -264,6 +289,10 @@
     font-size: 1rem;
     padding: 4px 6px;
   }
+  .voice-type-input {
+    width: 220px;
+    font-size: 0.85rem;
+  }
 }
 
 /* -- Dark mode ------------------------------------------------ */
@@ -272,4 +301,9 @@
 }
 [data-bs-theme="dark"] .voice-toast {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+[data-bs-theme="dark"] .voice-type-input {
+  background: var(--bs-body-bg, #212529);
+  color: var(--bs-body-color, #dee2e6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }

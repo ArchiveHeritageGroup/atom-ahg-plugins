@@ -325,6 +325,8 @@ class accessRequestActions extends AhgController
             $emailNotifications = (bool) $request->getParameter('email_notifications', true);
 
             if (\AtomExtensions\Services\AccessRequestService::setApprover($userId, $minLevel, $maxLevel, $emailNotifications)) {
+                // Email the new approver
+                $this->sendApproverEmail($userId, 'added');
                 $this->getUser()->setFlash('success', 'Approver added successfully.');
             } else {
                 $this->getUser()->setFlash('error', 'Failed to add approver.');
@@ -346,11 +348,60 @@ class accessRequestActions extends AhgController
         $userId = (int) $request->getParameter('id');
 
         if (\AtomExtensions\Services\AccessRequestService::removeApprover($userId)) {
+            // Email the removed approver
+            $this->sendApproverEmail($userId, 'removed');
             $this->getUser()->setFlash('success', 'Approver removed.');
         } else {
             $this->getUser()->setFlash('error', 'Failed to remove approver.');
         }
 
         $this->redirect('security/approvers');
+    }
+
+    /**
+     * Send email notification to an approver about their role change
+     */
+    protected function sendApproverEmail($userId, $action)
+    {
+        try {
+            // Check if access request email notifications are enabled
+            $enabled = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', 'access_request_email_notifications')
+                ->value('setting_value');
+            if ($enabled === 'false' || $enabled === '0') {
+                return;
+            }
+
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+                return;
+            }
+
+            $user = \Illuminate\Database\Capsule\Manager::table('user')->where('id', $userId)->first();
+            if (!$user || empty($user->email)) {
+                return;
+            }
+
+            $siteTitle = sfConfig::get('app_siteTitle', 'AtoM Archive');
+            if ($action === 'added') {
+                $subject = "You have been added as an Access Request Approver";
+                $body = "Dear {$user->username},\n\n"
+                    . "You have been designated as an access request approver on {$siteTitle}.\n\n"
+                    . "You will receive notifications when new access requests are submitted for your review.";
+            } else {
+                $subject = "Access Request Approver Role Removed";
+                $body = "Dear {$user->username},\n\n"
+                    . "Your access request approver role on {$siteTitle} has been removed.\n\n"
+                    . "You will no longer receive access request notifications.";
+            }
+
+            \AhgCore\Services\EmailService::send($user->email, $subject, $body);
+        } catch (\Exception $e) {
+            error_log('Access request approver email failed: ' . $e->getMessage());
+        }
     }
 }

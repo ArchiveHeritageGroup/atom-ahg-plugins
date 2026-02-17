@@ -7,7 +7,8 @@ $defaults = $sf_data->getRaw('defaults') ?? [];
 // Helper: get value from session (edit) or defaults (new) or fallback
 $d = function($field, $fallback = '') use ($session, $defaults) {
     if ($session && isset($session->{$field})) return $session->{$field};
-    $settingsKey = 'ingest_' . str_replace('process_', '', str_replace('output_', '', $field));
+    $stripped = str_replace(['process_', 'output_', 'derivative_'], '', $field);
+    $settingsKey = 'ingest_' . $stripped;
     if (isset($defaults[$settingsKey])) return ($defaults[$settingsKey] === 'true') ? 1 : (($defaults[$settingsKey] === 'false') ? 0 : $defaults[$settingsKey]);
     return $fallback;
 };
@@ -71,8 +72,20 @@ $placementVal = $session->parent_placement ?? 'top_level';
                         <div class="col-md-6 mb-3">
                             <label for="standard" class="form-label"><?php echo __('Descriptive Standard') ?> <span class="text-danger">*</span></label>
                             <select class="form-select" id="standard" name="standard">
-                                <?php foreach (['isadg' => 'ISAD(G)', 'dc' => 'Dublin Core', 'rad' => 'RAD', 'dacs' => 'DACS', 'spectrum' => 'SPECTRUM', 'cco' => 'CCO'] as $val => $label): ?>
-                                    <option value="<?php echo $val ?>" <?php echo $standardVal === $val ? 'selected' : '' ?>><?php echo $label ?></option>
+                                <?php foreach ([
+                                    'isadg' => ['label' => 'ISAD(G)', 'sectors' => 'archive,library'],
+                                    'dc'    => ['label' => 'Dublin Core', 'sectors' => 'archive,library,museum,gallery,dam'],
+                                    'rad'   => ['label' => 'RAD', 'sectors' => 'archive'],
+                                    'dacs'  => ['label' => 'DACS', 'sectors' => 'archive'],
+                                    'mods'  => ['label' => 'MODS', 'sectors' => 'library'],
+                                    'spectrum' => ['label' => 'SPECTRUM', 'sectors' => 'museum'],
+                                    'cco'   => ['label' => 'CCO', 'sectors' => 'gallery'],
+                                ] as $val => $info): ?>
+                                    <option value="<?php echo $val ?>"
+                                        data-sectors="<?php echo $info['sectors'] ?>"
+                                        <?php echo $standardVal === $val ? 'selected' : '' ?>>
+                                        <?php echo $info['label'] ?>
+                                    </option>
                                 <?php endforeach ?>
                             </select>
                         </div>
@@ -164,22 +177,22 @@ $placementVal = $session->parent_placement ?? 'top_level';
                 <div class="card-body">
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="output_create_records" name="output_create_records" value="1"
-                            <?php echo ($session->output_create_records ?? 1) ? 'checked' : '' ?>>
+                            <?php echo $d('output_create_records', 1) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="output_create_records"><?php echo __('Create AtoM records') ?></label>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="output_generate_sip" name="output_generate_sip" value="1"
-                            <?php echo ($session->output_generate_sip ?? 0) ? 'checked' : '' ?>>
+                            <?php echo $d('output_generate_sip', 0) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="output_generate_sip"><?php echo __('Generate SIP package') ?></label>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="output_generate_aip" name="output_generate_aip" value="1"
-                            <?php echo ($session->output_generate_aip ?? 0) ? 'checked' : '' ?>>
+                            <?php echo $d('output_generate_aip', 0) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="output_generate_aip"><?php echo __('Generate AIP package') ?></label>
                     </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="output_generate_dip" name="output_generate_dip" value="1"
-                            <?php echo ($session->output_generate_dip ?? 0) ? 'checked' : '' ?>>
+                            <?php echo $d('output_generate_dip', 0) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="output_generate_dip"><?php echo __('Generate DIP package') ?></label>
                     </div>
 
@@ -187,12 +200,12 @@ $placementVal = $session->parent_placement ?? 'top_level';
                     <h6><?php echo __('Derivatives') ?></h6>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="derivative_thumbnails" name="derivative_thumbnails" value="1"
-                            <?php echo ($session->derivative_thumbnails ?? 1) ? 'checked' : '' ?>>
+                            <?php echo $d('derivative_thumbnails', 1) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="derivative_thumbnails"><?php echo __('Generate thumbnails') ?></label>
                     </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="derivative_reference" name="derivative_reference" value="1"
-                            <?php echo ($session->derivative_reference ?? 1) ? 'checked' : '' ?>>
+                            <?php echo $d('derivative_reference', 1) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="derivative_reference"><?php echo __('Generate reference images') ?></label>
                     </div>
                 </div>
@@ -349,6 +362,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     radios.forEach(function(r) { r.addEventListener('change', togglePanels); });
     togglePanels();
+
+    // Filter standards by sector
+    var sectorSel = document.getElementById('sector');
+    var standardSel = document.getElementById('standard');
+
+    function filterStandards() {
+        var sector = sectorSel.value;
+        var currentVal = standardSel.value;
+        var firstVisible = null;
+        var currentVisible = false;
+
+        for (var i = 0; i < standardSel.options.length; i++) {
+            var opt = standardSel.options[i];
+            var sectors = (opt.getAttribute('data-sectors') || '').split(',');
+            var show = sectors.indexOf(sector) !== -1;
+            opt.style.display = show ? '' : 'none';
+            opt.disabled = !show;
+            if (show && !firstVisible) firstVisible = opt.value;
+            if (show && opt.value === currentVal) currentVisible = true;
+        }
+
+        if (!currentVisible && firstVisible) {
+            standardSel.value = firstVisible;
+        }
+    }
+
+    sectorSel.addEventListener('change', filterStandards);
+    filterStandards();
 
     // Toggle translate language panel
     var translateChk = document.getElementById('process_translate');
