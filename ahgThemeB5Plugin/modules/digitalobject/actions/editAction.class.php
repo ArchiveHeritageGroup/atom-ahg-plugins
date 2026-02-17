@@ -294,7 +294,7 @@ class digitalobjectEditAction extends AhgController
     {
         return DB::table('property as p')
             ->leftJoin('property_i18n as pi', function ($join) {
-                $join->on('p.id', '=', 'pi.id')->where('pi.culture', '=', 'en');
+                $join->on('p.id', '=', 'pi.id')->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.object_id', $objectId)
             ->where('p.name', $name)

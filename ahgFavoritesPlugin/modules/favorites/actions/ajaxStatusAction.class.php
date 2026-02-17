@@ -25,13 +25,13 @@ class favoritesAjaxStatusAction extends AhgController
         $slug = $request->getParameter('slug');
 
         if (!$slug) {
-            return $this->renderText(json_encode(['favorited' => false, 'error' => 'Slug is required']));
+            return $this->renderText(json_encode(['favorited' => false, 'error' => __('Slug is required')]));
         }
 
         $objectId = DB::table('slug')->where('slug', $slug)->value('object_id');
 
         if (!$objectId) {
-            return $this->renderText(json_encode(['favorited' => false, 'error' => 'Item not found']));
+            return $this->renderText(json_encode(['favorited' => false, 'error' => __('Item not found')]));
         }
 
         $service = new FavoritesService();

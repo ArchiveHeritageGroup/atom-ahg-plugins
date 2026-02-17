@@ -103,7 +103,7 @@ class SnapshotService
             // Get current metadata version from information_object_i18n for hashing
             $i18n = DB::table('information_object_i18n')
                 ->where('id', $item->object_id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             $metadataVersion = null;
@@ -526,7 +526,7 @@ class SnapshotService
             ->join('right_i18n as ri', 'relation.object_id', '=', 'ri.id')
             ->where('relation.subject_id', $objectId)
             ->where('relation.type_id', 159) // QubitTerm::RIGHT_ID
-            ->where('ri.culture', 'en')
+            ->where('ri.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->select('ri.id', 'ri.rights_note', 'ri.copyright_note', 'ri.license_note')
             ->get()
             ->toArray();

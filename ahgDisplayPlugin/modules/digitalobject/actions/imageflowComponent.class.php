@@ -69,7 +69,7 @@ class imageflowComponent extends AhgComponents
             if (!empty($objectIds)) {
                 $titleRows = DB::table('information_object_i18n')
                     ->whereIn('id', $objectIds)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->select('id', 'title')
                     ->get();
                 foreach ($titleRows as $tr) {

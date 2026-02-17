@@ -74,7 +74,7 @@ class ccoEditAction extends InformationObjectEditAction
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('a.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
             ->where(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'), '!=', '')

@@ -59,7 +59,7 @@ class ReportExportService
     {
         $query = DB::table('research_annotation as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
             ->where('a.researcher_id', $researcherId)
@@ -86,7 +86,7 @@ class ReportExportService
     {
         $query = DB::table('research_annotation as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
             ->where('a.researcher_id', $researcherId)
@@ -164,7 +164,7 @@ class ReportExportService
 
         $items = DB::table('research_collection_item as ci')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'ci.object_id', '=', 's.object_id')
             ->where('ci.collection_id', $collectionId)
@@ -194,7 +194,7 @@ class ReportExportService
 
         $items = DB::table('research_collection_item as ci')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('ci.collection_id', $collectionId)
             ->orderBy('ci.sort_order')
@@ -824,7 +824,7 @@ class ReportExportService
     {
         $query = DB::table('research_annotation as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
             ->where('a.researcher_id', $researcherId)
@@ -867,11 +867,11 @@ class ReportExportService
 
         $items = DB::table('research_collection_item as ci')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'ci.object_id', '=', 'io.id')
             ->leftJoin('repository_i18n as ri', function ($join) {
-                $join->on('io.repository_id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+                $join->on('io.repository_id', '=', 'ri.id')->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('ci.collection_id', $collectionId)
             ->orderBy('ci.sort_order')

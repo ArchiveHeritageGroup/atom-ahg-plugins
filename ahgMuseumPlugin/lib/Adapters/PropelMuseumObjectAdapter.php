@@ -178,7 +178,7 @@ class PropelMuseumObjectAdapter
         // Load current i18n data
         $currentI18n = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $updates = [];
@@ -222,7 +222,7 @@ class PropelMuseumObjectAdapter
         if (!empty($updates)) {
             DB::table('information_object_i18n')
                 ->updateOrInsert(
-                    ['id' => $objectId, 'culture' => 'en'],
+                    ['id' => $objectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     $updates
                 );
 
@@ -410,7 +410,7 @@ class PropelMuseumObjectAdapter
 
         $term = DB::table('term_i18n')
             ->where('id', $termId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         return $term ? $term->name : null;

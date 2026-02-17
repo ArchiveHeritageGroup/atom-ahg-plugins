@@ -71,7 +71,7 @@ class PrivacyBreachService
     {
         $query = DB::table('privacy_breach as b')
             ->leftJoin('privacy_breach_i18n as bi', function ($j) {
-                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
+                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions']);
 
@@ -95,7 +95,7 @@ class PrivacyBreachService
     {
         return DB::table('privacy_breach as b')
             ->leftJoin('privacy_breach_i18n as bi', function ($j) {
-                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', 'en');
+                $j->on('bi.id', '=', 'b.id')->where('bi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('b.id', $id)
             ->select(['b.*', 'bi.description', 'bi.impact_assessment', 'bi.remedial_actions', 'bi.lessons_learned'])
@@ -130,7 +130,7 @@ class PrivacyBreachService
         if (!empty($data['description'])) {
             DB::table('privacy_breach_i18n')->insert([
                 'id' => $id,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'description' => $data['description']
             ]);
         }
@@ -181,7 +181,7 @@ class PrivacyBreachService
 
         if (!empty($i18nUpdates)) {
             DB::table('privacy_breach_i18n')->updateOrInsert(
-                ['id' => $id, 'culture' => 'en'],
+                ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                 $i18nUpdates
             );
         }

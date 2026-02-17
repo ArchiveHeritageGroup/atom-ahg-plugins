@@ -249,7 +249,7 @@ class museumEditAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('slug.slug', $slug)
             ->select([
@@ -277,7 +277,7 @@ class museumEditAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $id)
             ->select([
@@ -304,7 +304,7 @@ class museumEditAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('r.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
             ->orderBy(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
@@ -333,7 +333,7 @@ class museumEditAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('a.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
             ->where(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'), '!=', '')
@@ -386,7 +386,7 @@ class museumEditAction extends AhgController
         if (!$infoI18n) {
             $infoI18n = DB::table('information_object_i18n')
                 ->where('id', $resourceId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
         }
 
@@ -705,7 +705,7 @@ class museumEditAction extends AhgController
                 })
                 ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                     $join->on('io.id', '=', 'ioi_en.id')
-                        ->where('ioi_en.culture', '=', 'en');
+                        ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', $resourceId)
                 ->select([
@@ -989,11 +989,11 @@ class museumEditAction extends AhgController
             $propertyId = DB::table('property')->insertGetId([
                 'object_id' => $objectId,
                 'name' => $name,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
             DB::table('property_i18n')->insert([
                 'id' => $propertyId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $value,
             ]);
         }

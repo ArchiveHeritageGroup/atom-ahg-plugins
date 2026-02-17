@@ -52,7 +52,7 @@ function cco_get_resource_title($resource): string
         // Fallback to English
         $ioData = DB::table('information_object_i18n as ioi')
             ->where('ioi.id', $resource->id)
-            ->where('ioi.culture', 'en')
+            ->where('ioi.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->select('ioi.title')
             ->first();
         

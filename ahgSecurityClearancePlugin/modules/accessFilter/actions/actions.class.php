@@ -19,7 +19,7 @@ class accessFilterActions extends AhgController
         // Get object title
         $this->objectTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
             ->where('id', $this->objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title') ?? 'Unknown';
     }
 }

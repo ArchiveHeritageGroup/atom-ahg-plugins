@@ -32,7 +32,7 @@ function compare_get_object(int $id): ?object
         })
         ->leftJoin('information_object_i18n as ioi_en', function ($join) {
             $join->on('io.id', '=', 'ioi_en.id')
-                ->where('ioi_en.culture', '=', 'en');
+                ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('io.id', $id)
         ->select([
@@ -107,7 +107,7 @@ function compare_get_level_name(?int $levelId): ?string
     if ($name === null) {
         $name = DB::table('term_i18n')
             ->where('id', $levelId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('name');
     }
 
@@ -129,7 +129,7 @@ function compare_get_creators(int $objectId): string
         })
         ->leftJoin('actor_i18n as ai_en', function ($join) {
             $join->on('a.id', '=', 'ai_en.id')
-                ->where('ai_en.culture', '=', 'en');
+                ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('e.object_id', $objectId)
         ->where('e.type_id', TERM_CREATION_ID)

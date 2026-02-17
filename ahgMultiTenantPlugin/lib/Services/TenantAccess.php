@@ -658,7 +658,7 @@ class TenantAccess
             $superUsers = DB::table('user as u')
                 ->join('actor_i18n as ai', function ($join) {
                     $join->on('u.id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->whereIn('u.id', $superUserIds)
                 ->select('u.id', 'u.username', 'u.email', 'ai.authorized_form_of_name as name')
@@ -670,7 +670,7 @@ class TenantAccess
             $users = DB::table('user as u')
                 ->join('actor_i18n as ai', function ($join) {
                     $join->on('u.id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->whereIn('u.id', $userIds)
                 ->select('u.id', 'u.username', 'u.email', 'ai.authorized_form_of_name as name')
@@ -699,7 +699,7 @@ class TenantAccess
         $query = DB::table('user as u')
             ->join('actor_i18n as ai', function ($join) {
                 $join->on('u.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('u.active', 1)
             ->select('u.id', 'u.username', 'u.email', 'ai.authorized_form_of_name as name')

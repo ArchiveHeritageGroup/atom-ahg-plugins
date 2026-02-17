@@ -1978,7 +1978,7 @@ class heritageActions extends AhgController
             $creators = \Illuminate\Database\Capsule\Manager::table('actor as a')
                 ->join('actor_i18n as ai', function ($join) {
                     $join->on('a.id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->join('slug as s', 'a.id', '=', 's.object_id')
                 ->leftJoin('relation as r', function ($join) {
@@ -2021,7 +2021,7 @@ class heritageActions extends AhgController
         $baseQuery = \Illuminate\Database\Capsule\Manager::table('actor as a')
             ->join('actor_i18n as ai', function ($join) {
                 $join->on('a.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'a.id', '=', 's.object_id')
             ->leftJoin('relation as r', function ($join) {

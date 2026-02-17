@@ -369,7 +369,7 @@ class TenantContext
             $repos = DB::table('repository as r')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('r.id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 's.object_id', '=', 'r.id')
                 ->select('r.id', 'r.identifier', 'ai.authorized_form_of_name as name', 's.slug')
@@ -398,7 +398,7 @@ class TenantContext
         $repos = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'r.id')
             ->whereIn('r.id', $allRepoIds)
@@ -614,7 +614,7 @@ class TenantContext
         // Repository extends Actor, so name is in actor_i18n
         return DB::table('actor_i18n')
             ->where('id', $repositoryId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('authorized_form_of_name');
     }
 }

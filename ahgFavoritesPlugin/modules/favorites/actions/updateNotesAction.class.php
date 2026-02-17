@@ -19,7 +19,7 @@ class favoritesUpdateNotesAction extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'message' => 'Not authenticated']));
+            return $this->renderText(json_encode(['success' => false, 'message' => __('Not authenticated')]));
         }
 
         $userId = $this->getUser()->getAttribute('user_id');
@@ -36,7 +36,7 @@ class favoritesUpdateNotesAction extends AhgController
         }
 
         if (!$request->isMethod('post')) {
-            return $this->renderText(json_encode(['success' => false, 'message' => 'POST required']));
+            return $this->renderText(json_encode(['success' => false, 'message' => __('POST required')]));
         }
 
         $notes = $request->getParameter('notes', '');

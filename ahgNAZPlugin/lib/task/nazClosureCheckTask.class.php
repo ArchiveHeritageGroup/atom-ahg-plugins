@@ -54,7 +54,7 @@ EOF;
         $expired = \Illuminate\Database\Capsule\Manager::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.end_date')
@@ -66,7 +66,7 @@ EOF;
         $expiring = \Illuminate\Database\Capsule\Manager::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.end_date')
@@ -80,7 +80,7 @@ EOF;
         $overdueReviews = \Illuminate\Database\Capsule\Manager::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.review_date')

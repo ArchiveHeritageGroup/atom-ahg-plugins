@@ -34,10 +34,10 @@ class FavoritesShareService
     {
         $folder = $this->folderRepo->getById($folderId);
         if (!$folder) {
-            return ['success' => false, 'message' => 'Folder not found.'];
+            return ['success' => false, 'message' => \__('Folder not found.')];
         }
         if ($folder->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
+            return ['success' => false, 'message' => \__('Access denied.')];
         }
 
         $token = bin2hex(random_bytes(32));
@@ -149,7 +149,7 @@ class FavoritesShareService
             $items[] = (object) [
                 'id' => $fav->id,
                 'archival_description_id' => $objectId,
-                'title' => $title ?? $fav->archival_description ?? 'Untitled',
+                'title' => $title ?? $fav->archival_description ?? \__('Untitled'),
                 'slug' => $slug ?? $fav->slug,
                 'reference_code' => $fav->reference_code,
                 'notes' => $fav->notes,
@@ -212,7 +212,7 @@ class FavoritesShareService
     {
         $shared = $this->getSharedFolder($token);
         if (!$shared) {
-            return ['success' => false, 'copied' => 0, 'skipped' => 0, 'message' => 'Shared folder not found or expired.'];
+            return ['success' => false, 'copied' => 0, 'skipped' => 0, 'message' => \__('Shared folder not found or expired.')];
         }
 
         require_once dirname(__DIR__).'/Services/FavoritesService.php';
@@ -245,7 +245,7 @@ class FavoritesShareService
             'success' => true,
             'copied' => $copied,
             'skipped' => $skipped,
-            'message' => "Copied {$copied} items to your favorites." . ($skipped ? " {$skipped} already existed." : ''),
+            'message' => \__('Copied %1% items to your favorites.', ['%1%' => $copied]) . ($skipped ? ' ' . \__('%1% already existed.', ['%1%' => $skipped]) : ''),
         ];
     }
 }

@@ -30,7 +30,7 @@ class displayActions extends AhgController
 
         $this->profiles = DB::table('display_profile as dp')
             ->leftJoin('display_profile_i18n as dpi', function($j) {
-                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('dp.*', 'dpi.name')
             ->orderBy('dp.domain')->orderBy('dp.sort_order')
@@ -218,7 +218,7 @@ class displayActions extends AhgController
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('term_i18n as level', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
@@ -624,7 +624,7 @@ class displayActions extends AhgController
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('term_i18n as level', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
@@ -695,12 +695,12 @@ class displayActions extends AhgController
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('term_i18n as level', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
             ->leftJoin('repository as r', 'io.repository_id', '=', 'r.id')
             ->leftJoin('actor_i18n as repo_name', function($j) {
-                $j->on('r.id', '=', 'repo_name.id')->where('repo_name.culture', '=', 'en');
+                $j->on('r.id', '=', 'repo_name.id')->where('repo_name.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', '>', 1)
             ->select(
@@ -866,7 +866,7 @@ class displayActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->profiles = DB::table('display_profile as dp')
             ->leftJoin('display_profile_i18n as dpi', function($j) {
-                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('dp.*', 'dpi.name', 'dpi.description')
             ->orderBy('dp.domain')->orderBy('dp.sort_order')
@@ -909,7 +909,7 @@ class displayActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->fields = DB::table('display_field as df')
             ->leftJoin('display_field_i18n as dfi', function($j) {
-                $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', 'en');
+                $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('df.*', 'dfi.name', 'dfi.help_text')
             ->orderBy('df.field_group')->orderBy('df.sort_order')

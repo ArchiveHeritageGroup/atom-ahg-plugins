@@ -20,14 +20,14 @@ class donorAgreementViewAction extends AhgController
         // Get agreement
         $this->agreement = \Illuminate\Database\Capsule\Manager::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($join) {
-                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('slug as s_donor', 'd.id', '=', 's_donor.object_id')
             ->leftJoin('actor_i18n as ai', function($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('da.id', $id)
             ->select([
@@ -84,7 +84,7 @@ class donorAgreementViewAction extends AhgController
             $this->linkedRecords = \Illuminate\Database\Capsule\Manager::table('donor_agreement_record as dar')
                 ->join('information_object as io', 'dar.information_object_id', '=', 'io.id')
                 ->leftJoin('information_object_i18n as ioi', function($join) {
-                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('dar.agreement_id', $id)
@@ -100,7 +100,7 @@ class donorAgreementViewAction extends AhgController
             $this->linkedAccessions = \Illuminate\Database\Capsule\Manager::table('donor_agreement_accession as daa')
                 ->join('accession as acc', 'daa.accession_id', '=', 'acc.id')
                 ->leftJoin('accession_i18n as acci', function($join) {
-                    $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', 'en');
+                    $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('daa.donor_agreement_id', $id)
                 ->leftJoin('slug as s', 'acc.id', '=', 's.object_id')->select(['acc.id', 'acc.identifier', 'acci.title', 's.slug'])

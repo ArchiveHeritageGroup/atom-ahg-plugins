@@ -19,7 +19,7 @@ class galleryDashboardAction extends AhgController
         // Get recent gallery items
         $this->recentItems = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function($j) {
-                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
@@ -33,7 +33,7 @@ class galleryDashboardAction extends AhgController
         // Get work type statistics
         $this->workTypeStats = DB::table('property as p')
             ->join('property_i18n as pi', function($j) {
-                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', 'en');
+                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('information_object as io', 'p.object_id', '=', 'io.id')
             ->where('p.name', 'galleryData')

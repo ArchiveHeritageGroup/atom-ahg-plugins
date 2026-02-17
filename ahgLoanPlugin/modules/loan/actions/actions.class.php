@@ -99,7 +99,7 @@ class loanActions extends AhgController
             $db = $this->getDatabase();
             $this->object = $db->table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
-                    $join->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+                    $join->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', '=', $objectId)
                 ->select('io.id', 'io.identifier', 'ioi.title')
@@ -474,7 +474,7 @@ class loanActions extends AhgController
             $db = $this->getDatabase();
             $objects = $db->table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
-                    $join->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+                    $join->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where(function ($q) use ($query) {
                     $q->where('io.identifier', 'LIKE', "%{$query}%")

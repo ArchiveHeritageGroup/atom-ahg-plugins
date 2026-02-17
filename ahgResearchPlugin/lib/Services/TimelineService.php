@@ -170,7 +170,7 @@ class TimelineService
             $events = DB::table('event as e')
                 ->leftJoin('event_i18n as ei', function ($join) {
                     $join->on('e.id', '=', 'ei.id')
-                        ->where('ei.culture', '=', 'en');
+                        ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('e.information_object_id', $item->object_id)
                 ->whereNotNull('e.start_date')

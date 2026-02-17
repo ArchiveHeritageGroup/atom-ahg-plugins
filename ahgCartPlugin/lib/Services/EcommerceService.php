@@ -62,7 +62,7 @@ class EcommerceService
         foreach ($items as $item) {
             $title = DB::table('information_object_i18n')
                 ->where('id', $item->archival_description_id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('title');
 
             $slug = DB::table('slug')

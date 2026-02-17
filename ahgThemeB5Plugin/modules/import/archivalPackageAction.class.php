@@ -561,7 +561,7 @@ class importArchivalPackageAction extends AhgController
         
         DB::table('term_i18n')->insert([
             'id' => $termId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'name' => $name,
         ]);
         

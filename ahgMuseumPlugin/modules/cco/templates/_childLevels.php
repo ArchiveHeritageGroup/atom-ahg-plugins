@@ -28,7 +28,7 @@ function cco_get_levels_of_description(): array
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
             $join->on('t.id', '=', 'ti_en.id')
-                ->where('ti_en.culture', '=', 'en');
+                ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('t.taxonomy_id', $taxonomyId)
         ->where('t.id', '!=', $rootTermId)

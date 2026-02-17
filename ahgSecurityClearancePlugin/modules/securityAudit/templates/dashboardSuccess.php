@@ -217,7 +217,7 @@ $period = $sf_data->getRaw('period');
 $recentLogs = \Illuminate\Database\Capsule\Manager::table('spectrum_audit_log as sal')
     ->leftJoin('information_object_i18n as ioi', function($join) {
         $join->on('sal.object_id', '=', 'ioi.id')
-            ->where('ioi.culture', '=', 'en');
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
     })
     ->leftJoin('slug', 'sal.object_id', '=', 'slug.object_id')
     ->select('sal.*', 'ioi.title as object_title', 'slug.slug as object_slug')

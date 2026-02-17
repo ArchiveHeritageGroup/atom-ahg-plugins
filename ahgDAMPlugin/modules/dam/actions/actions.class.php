@@ -77,7 +77,7 @@ class damActions extends AhgController
         // Get repositories for dropdown
         $this->repositories = DB::table('repository as r')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('r.id', 'ai.authorized_form_of_name as name')
             ->orderBy('ai.authorized_form_of_name')
@@ -603,7 +603,7 @@ class damActions extends AhgController
         // Get repositories
         $this->repositories = DB::table('repository as r')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('r.id', 'ai.authorized_form_of_name as name')
             ->orderBy('ai.authorized_form_of_name')

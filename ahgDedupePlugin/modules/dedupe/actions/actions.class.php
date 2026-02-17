@@ -37,11 +37,11 @@ class dedupeActions extends AhgController
         $this->recentDetections = DB::table('ahg_duplicate_detection as dd')
             ->leftJoin('information_object_i18n as ioi_a', function ($join) {
                 $join->on('dd.record_a_id', '=', 'ioi_a.id')
-                    ->where('ioi_a.culture', '=', 'en');
+                    ->where('ioi_a.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi_b', function ($join) {
                 $join->on('dd.record_b_id', '=', 'ioi_b.id')
-                    ->where('ioi_b.culture', '=', 'en');
+                    ->where('ioi_b.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'dd.*',
@@ -83,11 +83,11 @@ class dedupeActions extends AhgController
         $query = DB::table('ahg_duplicate_detection as dd')
             ->leftJoin('information_object_i18n as ioi_a', function ($join) {
                 $join->on('dd.record_a_id', '=', 'ioi_a.id')
-                    ->where('ioi_a.culture', '=', 'en');
+                    ->where('ioi_a.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi_b', function ($join) {
                 $join->on('dd.record_b_id', '=', 'ioi_b.id')
-                    ->where('ioi_b.culture', '=', 'en');
+                    ->where('ioi_b.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io_a', 'dd.record_a_id', '=', 'io_a.id')
             ->leftJoin('information_object as io_b', 'dd.record_b_id', '=', 'io_b.id')
@@ -447,7 +447,7 @@ class dedupeActions extends AhgController
         $this->topClusters = DB::table('ahg_duplicate_detection as dd')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('dd.record_a_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('dd.record_a_id', 'ioi.title', DB::raw('COUNT(*) as duplicate_count'))
             ->where('dd.status', 'pending')
@@ -532,16 +532,16 @@ class dedupeActions extends AhgController
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('actor_i18n as ri', function ($join) {
                 $join->on('io.repository_id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+                    ->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as level', function ($join) {
                 $join->on('io.level_of_description_id', '=', 'level.id')
-                    ->where('level.culture', '=', 'en');
+                    ->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'io.*',

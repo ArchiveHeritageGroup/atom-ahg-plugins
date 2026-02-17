@@ -76,7 +76,7 @@ class dashboardIndexAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('r.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.id', '!=', self::ROOT_REPOSITORY_ID)
             ->whereNotNull(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))

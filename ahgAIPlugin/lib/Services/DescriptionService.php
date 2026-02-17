@@ -17,6 +17,18 @@ class DescriptionService
     private LlmService $llmService;
     private PromptService $promptService;
 
+    /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
     public function __construct()
     {
         $this->llmService = new LlmService();
@@ -120,19 +132,37 @@ class DescriptionService
             ];
         }
 
+        $culture = $this->getCulture();
+
         // Get i18n data
         $i18n = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', $culture)
             ->first();
+
+        // Fallback to 'en' if culture has no data
+        if (!$i18n && $culture !== 'en') {
+            $i18n = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', 'en')
+                ->first();
+        }
 
         // Get level of description
         $level = null;
         if ($object->level_of_description_id) {
             $levelTerm = DB::table('term_i18n')
                 ->where('id', $object->level_of_description_id)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->first();
+
+            // Fallback to 'en' if culture has no data
+            if (!$levelTerm && $culture !== 'en') {
+                $levelTerm = DB::table('term_i18n')
+                    ->where('id', $object->level_of_description_id)
+                    ->where('culture', 'en')
+                    ->first();
+            }
             $level = $levelTerm->name ?? null;
         }
 
@@ -141,8 +171,16 @@ class DescriptionService
         if ($object->repository_id) {
             $repoI18n = DB::table('actor_i18n')
                 ->where('id', $object->repository_id)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->first();
+
+            // Fallback to 'en' if culture has no data
+            if (!$repoI18n && $culture !== 'en') {
+                $repoI18n = DB::table('actor_i18n')
+                    ->where('id', $object->repository_id)
+                    ->where('culture', 'en')
+                    ->first();
+            }
             $repository = $repoI18n->authorized_form_of_name ?? null;
         }
 
@@ -152,9 +190,20 @@ class DescriptionService
             ->join('actor_i18n', 'event.actor_id', '=', 'actor_i18n.id')
             ->where('event.object_id', $objectId)
             ->where('event.type_id', 111) // Creation event
-            ->where('actor_i18n.culture', 'en')
+            ->where('actor_i18n.culture', $culture)
             ->select('actor_i18n.authorized_form_of_name')
             ->first();
+
+        // Fallback to 'en' if culture has no data
+        if (!$creatorEvent && $culture !== 'en') {
+            $creatorEvent = DB::table('event')
+                ->join('actor_i18n', 'event.actor_id', '=', 'actor_i18n.id')
+                ->where('event.object_id', $objectId)
+                ->where('event.type_id', 111)
+                ->where('actor_i18n.culture', 'en')
+                ->select('actor_i18n.authorized_form_of_name')
+                ->first();
+        }
         if ($creatorEvent) {
             $creator = $creatorEvent->authorized_form_of_name;
         }
@@ -330,12 +379,14 @@ class DescriptionService
      */
     public function getPendingSuggestions(?int $repositoryId = null, int $limit = 50): array
     {
+        $culture = $this->getCulture();
+
         $query = DB::table('ahg_description_suggestion as s')
             ->join('information_object as io', 's.object_id', '=', 'io.id')
             ->join('slug', 'io.id', '=', 'slug.object_id')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
+            ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('ahg_prompt_template as pt', 's.prompt_template_id', '=', 'pt.id')
             ->leftJoin('ahg_llm_config as lc', 's.llm_config_id', '=', 'lc.id')
@@ -461,10 +512,12 @@ class DescriptionService
      */
     private function getDateRange(int $objectId): string
     {
+        $culture = $this->getCulture();
+
         $events = DB::table('event')
-            ->leftJoin('event_i18n', function ($join) {
+            ->leftJoin('event_i18n', function ($join) use ($culture) {
                 $join->on('event.id', '=', 'event_i18n.id')
-                     ->where('event_i18n.culture', '=', 'en');
+                     ->where('event_i18n.culture', '=', $culture);
             })
             ->where('event.object_id', $objectId)
             ->whereIn('event.type_id', [111, 118]) // Creation, Accumulation
@@ -501,21 +554,23 @@ class DescriptionService
     private function saveScopeAndContent(int $objectId, string $text): bool
     {
         try {
+            $culture = $this->getCulture();
+
             $exists = DB::table('information_object_i18n')
                 ->where('id', $objectId)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->exists();
 
             if ($exists) {
                 DB::table('information_object_i18n')
                     ->where('id', $objectId)
-                    ->where('culture', 'en')
+                    ->where('culture', $culture)
                     ->update(['scope_and_content' => $text]);
             } else {
                 DB::table('information_object_i18n')
                     ->insert([
                         'id' => $objectId,
-                        'culture' => 'en',
+                        'culture' => $culture,
                         'scope_and_content' => $text,
                     ]);
             }

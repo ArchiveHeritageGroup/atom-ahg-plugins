@@ -43,7 +43,7 @@ class favoritesShareFolderAction extends AhgController
         }
 
         if ($result['success']) {
-            $this->getUser()->setFlash('notice', 'Folder shared. Link: ' . $result['url']);
+            $this->getUser()->setFlash('notice', __('Folder shared. Link: ') . $result['url']);
         } else {
             $this->getUser()->setFlash('error', $result['message']);
         }

@@ -567,7 +567,7 @@ class ahgAuthorityLinkageService
             // Update existing i18n value
             DB::table('property_i18n')
                 ->updateOrInsert(
-                    ['id' => $existing->id, 'culture' => 'en'],
+                    ['id' => $existing->id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['value' => $authorityId]
                 );
 
@@ -583,7 +583,7 @@ class ahgAuthorityLinkageService
         // Create i18n entry
         DB::table('property_i18n')->insert([
             'id' => $propertyId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'value' => $authorityId,
         ]);
 
@@ -634,7 +634,7 @@ class ahgAuthorityLinkageService
             $property = DB::table('property as p')
                 ->leftJoin('property_i18n as pi', function ($join) {
                     $join->on('p.id', '=', 'pi.id')
-                        ->where('pi.culture', '=', 'en');
+                        ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('p.object_id', $actorId)
                 ->where('p.name', $propertyName)
@@ -724,7 +724,7 @@ class ahgAuthorityLinkageService
     {
         $term = DB::table('term_i18n')
             ->where('id', $termId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         return $term ? $term->name : null;
@@ -775,7 +775,7 @@ class ahgAuthorityLinkageService
         $actor = DB::table('actor as a')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('a.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('a.id', $actorId)
             ->select('a.id', 'a.entity_type_id', 'ai.authorized_form_of_name', 'ai.dates_of_existence')

@@ -63,7 +63,7 @@ class MetadataRepository
                 'name' => $name,
                 'value' => $value,
                 'scope' => $scope,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
@@ -80,7 +80,7 @@ class MetadataRepository
 
             DB::table('property_i18n')->insert([
                 'id' => $propertyId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
         }
     }

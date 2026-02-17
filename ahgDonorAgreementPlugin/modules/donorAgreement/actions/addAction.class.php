@@ -110,7 +110,7 @@ class donorAgreementAddAction extends AhgController
             try {
                 \Illuminate\Database\Capsule\Manager::table('donor_agreement_i18n')->insert([
                     'id' => $id,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'title' => $title,
                     'description' => $data['description'] ?? null,
                 ]);

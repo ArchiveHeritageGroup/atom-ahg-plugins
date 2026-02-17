@@ -78,7 +78,7 @@ class securityAuditActions extends AhgController
         // Build logs query
         $logsQuery = $db::table('spectrum_audit_log as sal')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'sal.object_id', '=', 'slug.object_id');
 
@@ -137,7 +137,7 @@ class securityAuditActions extends AhgController
 
         $logs = $db::table('spectrum_audit_log as sal')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'sal.action_date as created_at',
@@ -197,7 +197,7 @@ class securityAuditActions extends AhgController
 
         $this->object = $db::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $objectId)
@@ -281,7 +281,7 @@ class securityAuditActions extends AhgController
 
         $topObjects = $db::table('access_log as al')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('al.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('al.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'al.object_id', '=', 'slug.object_id')
             ->where('al.access_date', '>=', $since)

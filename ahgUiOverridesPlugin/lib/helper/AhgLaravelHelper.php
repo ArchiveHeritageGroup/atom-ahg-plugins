@@ -12,7 +12,7 @@ function ahg_get_subject_access_points($resourceId): array
             $join->on('t.id', '=', 'ti.id')->where('ti.culture', '=', $culture);
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
-            $join->on('t.id', '=', 'ti_en.id')->where('ti_en.culture', '=', 'en');
+            $join->on('t.id', '=', 'ti_en.id')->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 't.id', '=', 'slug.object_id')
         ->where('otr.object_id', $resourceId)
@@ -33,7 +33,7 @@ function ahg_get_place_access_points($resourceId): array
             $join->on('t.id', '=', 'ti.id')->where('ti.culture', '=', $culture);
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
-            $join->on('t.id', '=', 'ti_en.id')->where('ti_en.culture', '=', 'en');
+            $join->on('t.id', '=', 'ti_en.id')->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 't.id', '=', 'slug.object_id')
         ->where('otr.object_id', $resourceId)
@@ -53,13 +53,13 @@ function ahg_get_actor_events($resourceId): array
             $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', $culture);
         })
         ->leftJoin('actor_i18n as ai_en', function ($join) {
-            $join->on('a.id', '=', 'ai_en.id')->where('ai_en.culture', '=', 'en');
+            $join->on('a.id', '=', 'ai_en.id')->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('term_i18n as ti', function ($join) use ($culture) {
             $join->on('e.type_id', '=', 'ti.id')->where('ti.culture', '=', $culture);
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
-            $join->on('e.type_id', '=', 'ti_en.id')->where('ti_en.culture', '=', 'en');
+            $join->on('e.type_id', '=', 'ti_en.id')->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
         ->where('e.object_id', $resourceId)
@@ -81,7 +81,7 @@ function ahg_get_name_access_relations($resourceId): array
             $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', $culture);
         })
         ->leftJoin('actor_i18n as ai_en', function ($join) {
-            $join->on('a.id', '=', 'ai_en.id')->where('ai_en.culture', '=', 'en');
+            $join->on('a.id', '=', 'ai_en.id')->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
         ->where('r.subject_id', $resourceId)

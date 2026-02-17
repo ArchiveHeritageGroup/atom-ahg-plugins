@@ -242,7 +242,7 @@ class ObjectComparisonService
         $query = $this->db->table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', '!=', $objectId)
             ->select('io.id', 'io.identifier', 'ioi.title');
@@ -321,7 +321,7 @@ class ObjectComparisonService
         $object = $this->db->table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select(
@@ -355,7 +355,7 @@ class ObjectComparisonService
             ->join('actor as a', 'a.id', '=', 'e.actor_id')
             ->join('actor_i18n as ai', function ($join) {
                 $join->on('ai.id', '=', 'a.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.information_object_id', $objectId)
             ->where('e.type_id', 111) // Creation event type

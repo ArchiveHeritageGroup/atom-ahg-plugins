@@ -17,7 +17,7 @@ class donorAgreementAutocompleteRecordsAction extends AhgController
 
         $results = \Illuminate\Database\Capsule\Manager::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->where(function($q) use ($query) {

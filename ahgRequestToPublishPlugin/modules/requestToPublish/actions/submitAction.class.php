@@ -39,7 +39,7 @@ class requestToPublishSubmitAction extends AhgController
         $this->informationObject = \Illuminate\Database\Capsule\Manager::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->where('io.id', $objectId)
@@ -96,7 +96,7 @@ class requestToPublishSubmitAction extends AhgController
                 // Try to get actor name
                 $actor = \Illuminate\Database\Capsule\Manager::table('actor_i18n')
                     ->where('id', $userId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 if ($actor && isset($actor->authorized_form_of_name)) {
                     $parts = explode(' ', $actor->authorized_form_of_name, 2);

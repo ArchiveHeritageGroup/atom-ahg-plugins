@@ -25,7 +25,7 @@ class donorAgreementEditAction extends AhgController
         // Get agreement
         $this->agreement = \Illuminate\Database\Capsule\Manager::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($join) {
-                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('da.id', $id)
             ->select(['da.*', 'dai.title as i18n_title', 'dai.description as i18n_description'])
@@ -57,7 +57,7 @@ class donorAgreementEditAction extends AhgController
             $this->donor = \Illuminate\Database\Capsule\Manager::table('donor as d')
                 ->join('actor as a', 'd.id', '=', 'a.id')
                 ->leftJoin('actor_i18n as ai', function($join) {
-                    $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                    $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('d.id', $this->donorId)
                 ->select(['d.id', 'ai.authorized_form_of_name as name'])
@@ -68,7 +68,7 @@ class donorAgreementEditAction extends AhgController
         $this->linkedRecords = \Illuminate\Database\Capsule\Manager::table('donor_agreement_record as dar')
             ->join('information_object as io', 'dar.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->where('dar.agreement_id', $id)
@@ -80,7 +80,7 @@ class donorAgreementEditAction extends AhgController
         $this->linkedAccessions = \Illuminate\Database\Capsule\Manager::table('donor_agreement_accession as daa')
             ->join('accession as acc', 'daa.accession_id', '=', 'acc.id')
             ->leftJoin('accession_i18n as acci', function($join) {
-                $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', 'en');
+                $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('daa.donor_agreement_id', $id)
             ->select(['daa.id as link_id', 'acc.id', 'acc.identifier', 'acci.title'])
@@ -199,7 +199,7 @@ class donorAgreementEditAction extends AhgController
             // Update i18n
             \Illuminate\Database\Capsule\Manager::table('donor_agreement_i18n')
                 ->updateOrInsert(
-                    ['id' => $id, 'culture' => 'en'],
+                    ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     [
                         'title' => $data['title'] ?: $data['agreement_number'],
                         'description' => $data['description'] ?? null,

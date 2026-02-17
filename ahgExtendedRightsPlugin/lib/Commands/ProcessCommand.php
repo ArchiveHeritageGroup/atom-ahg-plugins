@@ -97,7 +97,7 @@ class ProcessCommand extends BaseCommand
         $expiredEmbargoes = DB::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.status', 'active')
             ->where('e.auto_release', true)
@@ -175,7 +175,7 @@ class ProcessCommand extends BaseCommand
             $expiringEmbargoes = DB::table('rights_embargo as e')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('e.object_id', '=', 'ioi.id')
-                        ->where('ioi.culture', '=', 'en');
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('e.status', 'active')
                 ->where('e.end_date', $targetDate)

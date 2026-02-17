@@ -59,7 +59,7 @@ class ricExplorerActions extends AhgController
         // Get record info
         $record = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($j) {
-                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $recordId)
             ->select('io.*', 'ioi.title')
@@ -79,10 +79,10 @@ class ricExplorerActions extends AhgController
         $events = DB::table('event as e')
             ->leftJoin('actor as a', 'e.actor_id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($j) { 
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en'); 
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); 
             })
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('e.type_id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('e.type_id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $recordId)
             ->select('a.id as actor_id', 'ai.authorized_form_of_name', 'e.type_id', 'ti.name as event_type')
@@ -111,7 +111,7 @@ class ricExplorerActions extends AhgController
         $subjects = DB::table('object_term_relation as otr')
             ->join('term as t', 'otr.term_id', '=', 't.id')
             ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('taxonomy as tax', 't.taxonomy_id', '=', 'tax.id')
             ->where('otr.object_id', $recordId)
@@ -138,7 +138,7 @@ class ricExplorerActions extends AhgController
         if ($record->parent_id && $record->parent_id > 1) {
             $parent = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function($j) {
-                    $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', $record->parent_id)
                 ->select('io.id', 'ioi.title')

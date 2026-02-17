@@ -107,7 +107,7 @@ class authorityLinkAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('a.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('slug.slug', $slug)
             ->select([
@@ -342,7 +342,7 @@ class authorityLinkAction extends AhgController
             // First get the authorized_form_of_name from English if available
             $englishData = DB::table('actor_i18n')
                 ->where('id', $actorId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             $insertData = [

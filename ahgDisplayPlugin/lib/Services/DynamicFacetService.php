@@ -307,7 +307,7 @@ class DynamicFacetService
                 $sub->select(DB::raw(1))
                     ->from('event as e')
                     ->join('actor_i18n as ai', function ($j) {
-                        $j->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                        $j->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->whereRaw('e.object_id = io.id')
                     ->where('ai.authorized_form_of_name', 'like', '%' . $creatorSearch . '%');
@@ -321,7 +321,7 @@ class DynamicFacetService
                     ->from('object_term_relation as otr')
                     ->join('term as t', 'otr.term_id', '=', 't.id')
                     ->join('term_i18n as ti', function ($j) {
-                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->whereRaw('otr.object_id = io.id')
                     ->where('t.taxonomy_id', 35)
@@ -336,7 +336,7 @@ class DynamicFacetService
                     ->from('object_term_relation as otr')
                     ->join('term as t', 'otr.term_id', '=', 't.id')
                     ->join('term_i18n as ti', function ($j) {
-                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->whereRaw('otr.object_id = io.id')
                     ->where('t.taxonomy_id', 42)
@@ -351,7 +351,7 @@ class DynamicFacetService
                     ->from('object_term_relation as otr')
                     ->join('term as t', 'otr.term_id', '=', 't.id')
                     ->join('term_i18n as ti', function ($j) {
-                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->whereRaw('otr.object_id = io.id')
                     ->where('t.taxonomy_id', 78)
@@ -454,7 +454,7 @@ class DynamicFacetService
         return $query
             ->join('event as ev', 'io.id', '=', 'ev.object_id')
             ->join('actor_i18n as ai', function ($j) {
-                $j->on('ev.actor_id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('ev.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('ev.actor_id')
             ->select('ev.actor_id as id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))
@@ -493,7 +493,7 @@ class DynamicFacetService
                 $j->on('otr.term_id', '=', 't.id')->where('t.taxonomy_id', '=', $taxonomyId);
             })
             ->join('term_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('t.id', 'ti.name', DB::raw('COUNT(DISTINCT io.id) as count'))
             ->groupBy('t.id', 'ti.name')
@@ -509,7 +509,7 @@ class DynamicFacetService
 
         return $query
             ->join('term_i18n as lvl', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'lvl.id')->where('lvl.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'lvl.id')->where('lvl.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('io.level_of_description_id')
             ->select('io.level_of_description_id as id', 'lvl.name', DB::raw('COUNT(DISTINCT io.id) as count'))
@@ -527,7 +527,7 @@ class DynamicFacetService
         return $query
             ->join('repository as r', 'io.repository_id', '=', 'r.id')
             ->join('actor_i18n as rai', function ($j) {
-                $j->on('r.id', '=', 'rai.id')->where('rai.culture', '=', 'en');
+                $j->on('r.id', '=', 'rai.id')->where('rai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('io.repository_id')
             ->select('r.id', 'rai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))

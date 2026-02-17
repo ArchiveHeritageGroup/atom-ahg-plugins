@@ -56,7 +56,7 @@ class favoritesExportAction extends AhgController
                 exit;
 
             default:
-                $this->getUser()->setFlash('error', 'Unsupported export format.');
+                $this->getUser()->setFlash('error', __('Unsupported export format.'));
                 $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
                 return;

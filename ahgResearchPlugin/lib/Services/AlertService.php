@@ -76,7 +76,7 @@ class AlertService
         if ($searchType === 'informationobject') {
             $dbQuery = DB::table('information_object as io')
                 ->join('information_object_i18n as ioi', function ($join) {
-                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', '!=', 1); // Exclude root
 
@@ -445,7 +445,7 @@ class AlertService
         // Get the object's searchable content
         $object = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->first();

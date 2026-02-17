@@ -15,7 +15,7 @@ class heritageApiActions extends AhgController
             $results = \Illuminate\Database\Capsule\Manager::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function($join) {
                     $join->on('io.id', '=', 'ioi.id')
-                         ->where('ioi.culture', '=', 'en');
+                         ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where(function($q) use ($term) {
                     $q->where('ioi.title', 'like', '%' . $term . '%')

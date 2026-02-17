@@ -11,6 +11,18 @@ use Illuminate\Database\Capsule\Manager as DB;
 class PromptService
 {
     /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
+    /**
      * Available template variables
      */
     private const TEMPLATE_VARS = [
@@ -52,10 +64,19 @@ class PromptService
         // Get level of description
         $level = null;
         if ($object->level_of_description_id) {
+            $culture = $this->getCulture();
             $levelTerm = DB::table('term_i18n')
                 ->where('id', $object->level_of_description_id)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->first();
+
+            // Fallback to 'en' if culture has no data
+            if (!$levelTerm && $culture !== 'en') {
+                $levelTerm = DB::table('term_i18n')
+                    ->where('id', $object->level_of_description_id)
+                    ->where('culture', 'en')
+                    ->first();
+            }
             $level = strtolower($levelTerm->name ?? '');
         }
 

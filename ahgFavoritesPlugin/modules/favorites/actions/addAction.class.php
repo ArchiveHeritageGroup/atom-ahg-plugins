@@ -16,7 +16,7 @@ class favoritesAddAction extends AhgController
     public function execute($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->getUser()->setFlash('error', 'Please log in to add favorites.');
+            $this->getUser()->setFlash('error', __('Please log in to add favorites.'));
             $this->redirect(['module' => 'user', 'action' => 'login']);
 
             return;
@@ -30,7 +30,7 @@ class favoritesAddAction extends AhgController
             ->value('object_id');
 
         if (!$objectId) {
-            $this->getUser()->setFlash('error', 'Item not found.');
+            $this->getUser()->setFlash('error', __('Item not found.'));
             $this->redirect(['module' => 'informationobject', 'action' => 'browse']);
 
             return;

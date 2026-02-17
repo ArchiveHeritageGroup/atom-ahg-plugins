@@ -459,7 +459,7 @@ class IiifAuthService
             ->join('information_object as io', 'ar.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->select([

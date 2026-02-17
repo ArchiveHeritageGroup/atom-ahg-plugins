@@ -210,7 +210,7 @@ class galleryReportsActions extends AhgController
         
         $query = DB::table('gallery_valuation as v')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('v.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('v.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('v.*', 'ioi.title as object_title');
         

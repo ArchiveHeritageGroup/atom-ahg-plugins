@@ -168,7 +168,7 @@ class ccoObjectComparisonAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $id)
@@ -201,7 +201,7 @@ class ccoObjectComparisonAction extends AhgController
         if ($name === null) {
             $name = DB::table('term_i18n')
                 ->where('id', $termId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('name');
         }
 
@@ -223,7 +223,7 @@ class ccoObjectComparisonAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('a.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->where('e.type_id', self::TERM_CREATION_ID)
@@ -254,7 +254,7 @@ class ccoObjectComparisonAction extends AhgController
             })
             ->leftJoin('event_i18n as ei_en', function ($join) {
                 $join->on('e.id', '=', 'ei_en.id')
-                    ->where('ei_en.culture', '=', 'en');
+                    ->where('ei_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->where('e.type_id', self::TERM_CREATION_ID)

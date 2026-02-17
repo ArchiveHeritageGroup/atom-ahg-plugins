@@ -418,7 +418,7 @@ class ProvenanceService
             ->join('information_object as io', 'io.id', '=', 'pe.information_object_id')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             });
 
         // Text search
@@ -478,7 +478,7 @@ class ProvenanceService
             ->join('information_object as io', 'io.id', '=', 'pe.information_object_id')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('pe.owner_name', 'LIKE', "%{$ownerName}%")
             ->select(

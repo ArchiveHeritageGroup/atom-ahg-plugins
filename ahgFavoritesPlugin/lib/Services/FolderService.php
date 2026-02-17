@@ -44,30 +44,30 @@ class FolderService
     {
         $name = trim($name);
         if (empty($name)) {
-            return ['success' => false, 'message' => 'Folder name is required.'];
+            return ['success' => false, 'message' => \__('Folder name is required.')];
         }
 
         if (strlen($name) > 255) {
-            return ['success' => false, 'message' => 'Folder name is too long (max 255 characters).'];
+            return ['success' => false, 'message' => \__('Folder name is too long (max 255 characters).')];
         }
 
         // Validate nesting (max 1 level deep)
         if ($parentId) {
             $parent = $this->repository->getById($parentId);
             if (!$parent) {
-                return ['success' => false, 'message' => 'Parent folder not found.'];
+                return ['success' => false, 'message' => \__('Parent folder not found.')];
             }
             if ($parent->user_id != $userId) {
-                return ['success' => false, 'message' => 'Access denied.'];
+                return ['success' => false, 'message' => \__('Access denied.')];
             }
             if ($parent->parent_id) {
-                return ['success' => false, 'message' => 'Folders can only be nested one level deep.'];
+                return ['success' => false, 'message' => \__('Folders can only be nested one level deep.')];
             }
         }
 
         // Check uniqueness
         if ($this->repository->nameExists($userId, $name, $parentId)) {
-            return ['success' => false, 'message' => 'A folder with this name already exists.'];
+            return ['success' => false, 'message' => \__('A folder with this name already exists.')];
         }
 
         $id = $this->repository->create([
@@ -77,7 +77,7 @@ class FolderService
             'parent_id' => $parentId,
         ]);
 
-        return ['success' => true, 'message' => 'Folder created.', 'id' => $id];
+        return ['success' => true, 'message' => \__('Folder created.'), 'id' => $id];
     }
 
     /**
@@ -87,10 +87,10 @@ class FolderService
     {
         $folder = $this->repository->getById($folderId);
         if (!$folder) {
-            return ['success' => false, 'message' => 'Folder not found.'];
+            return ['success' => false, 'message' => \__('Folder not found.')];
         }
         if ($folder->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
+            return ['success' => false, 'message' => \__('Access denied.')];
         }
 
         $update = [];
@@ -98,10 +98,10 @@ class FolderService
         if (isset($data['name'])) {
             $name = trim($data['name']);
             if (empty($name)) {
-                return ['success' => false, 'message' => 'Folder name is required.'];
+                return ['success' => false, 'message' => \__('Folder name is required.')];
             }
             if ($this->repository->nameExists($userId, $name, $folder->parent_id, $folderId)) {
-                return ['success' => false, 'message' => 'A folder with this name already exists.'];
+                return ['success' => false, 'message' => \__('A folder with this name already exists.')];
             }
             $update['name'] = $name;
         }
@@ -122,7 +122,7 @@ class FolderService
             $this->repository->update($folderId, $update);
         }
 
-        return ['success' => true, 'message' => 'Folder updated.'];
+        return ['success' => true, 'message' => \__('Folder updated.')];
     }
 
     /**
@@ -132,10 +132,10 @@ class FolderService
     {
         $folder = $this->repository->getById($folderId);
         if (!$folder) {
-            return ['success' => false, 'message' => 'Folder not found.'];
+            return ['success' => false, 'message' => \__('Folder not found.')];
         }
         if ($folder->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
+            return ['success' => false, 'message' => \__('Access denied.')];
         }
 
         // Move child folders to root
@@ -151,7 +151,7 @@ class FolderService
 
         $this->repository->delete($folderId);
 
-        return ['success' => true, 'message' => 'Folder deleted. Items moved to unfiled.'];
+        return ['success' => true, 'message' => \__('Folder deleted. Items moved to unfiled.')];
     }
 
     /**

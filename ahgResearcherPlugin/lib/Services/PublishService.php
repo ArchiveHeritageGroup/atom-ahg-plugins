@@ -286,7 +286,7 @@ class PublishService
         DB::table('actor')->insert([
             'id'             => $objectId,
             'parent_id'      => \QubitActor::ROOT_ID,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         // Create actor_i18n
@@ -299,13 +299,13 @@ class PublishService
         // Create repository
         DB::table('repository')->insert([
             'id'             => $objectId,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         // Create repository_i18n
         DB::table('repository_i18n')->insert([
             'id'      => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'desc_detail' => $item->scope_and_content,
         ]);
 
@@ -333,7 +333,7 @@ class PublishService
         DB::table('actor')->insert([
             'id'             => $objectId,
             'parent_id'      => \QubitActor::ROOT_ID,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         DB::table('actor_i18n')->insert([
@@ -525,12 +525,12 @@ class PublishService
             'parent_id'      => $parentId,
             'lft'            => $rgt,
             'rgt'            => $rgt + 1,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         DB::table('term_i18n')->insert([
             'id'      => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'name'    => $name,
         ]);
 
@@ -557,7 +557,7 @@ class PublishService
 
             // Find existing actor by name
             $actor = DB::table('actor_i18n')
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('authorized_form_of_name', $creatorName)
                 ->first();
 
@@ -580,7 +580,7 @@ class PublishService
             if ($actorId) {
                 DB::table('event_i18n')->insert([
                     'id'      => $eventObjectId,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'name'    => $creatorName,
                 ]);
             }
@@ -604,12 +604,12 @@ class PublishService
             'id'             => $noteObjectId,
             'object_id'      => $objectId,
             'type_id'        => \QubitTerm::GENERAL_NOTE_ID,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         DB::table('note_i18n')->insert([
             'id'      => $noteObjectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'content' => $item->scope_and_content ?? $item->notes ?? $item->title,
         ]);
     }
@@ -635,7 +635,7 @@ class PublishService
 
         DB::table('event_i18n')->insert([
             'id'      => $eventId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'date'    => $item->date_display,
         ]);
     }

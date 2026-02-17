@@ -167,7 +167,7 @@ class DeactivateCommand extends BaseCommand
         $deleted = DB::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('d.status', 'deleted')
             ->select(['d.id', 'd.doi', 'd.deactivated_at', 'd.deactivation_reason', 'ioi.title'])

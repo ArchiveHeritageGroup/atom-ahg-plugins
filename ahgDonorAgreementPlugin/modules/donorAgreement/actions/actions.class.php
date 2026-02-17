@@ -49,13 +49,13 @@ class donorAgreementActions extends AhgController
 
         $query = DB::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($j) {
-                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($j) {
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'da.*',
@@ -99,7 +99,7 @@ class donorAgreementActions extends AhgController
             $this->donor = DB::table('donor as d')
                 ->join('actor as a', 'd.id', '=', 'a.id')
                 ->join('actor_i18n as ai', function($j) {
-                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('d.id', $this->donorId)
                 ->select('d.id', 'ai.authorized_form_of_name as name')
@@ -125,7 +125,7 @@ class donorAgreementActions extends AhgController
 
         $this->agreement = DB::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($j) {
-                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('da.id', $id)
             ->select('da.*', 'dai.title', 'dai.description')
@@ -141,7 +141,7 @@ class donorAgreementActions extends AhgController
             $this->donor = DB::table('donor as d')
                 ->join('actor as a', 'd.id', '=', 'a.id')
                 ->join('actor_i18n as ai', function($j) {
-                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                    $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('d.id', $this->donorId)
                 ->select('d.id', 'ai.authorized_form_of_name as name')
@@ -163,13 +163,13 @@ class donorAgreementActions extends AhgController
 
         $this->agreement = DB::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($j) {
-                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($j) {
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('da.id', $id)
             ->select(
@@ -200,12 +200,12 @@ class donorAgreementActions extends AhgController
         $this->reminders = DB::table('donor_agreement_reminder as r')
             ->join('donor_agreement as da', 'r.donor_agreement_id', '=', 'da.id')
             ->leftJoin('donor_agreement_i18n as dai', function($j) {
-                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($j) {
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.is_active', 1)
             ->orderBy('r.reminder_date')
@@ -227,7 +227,7 @@ class donorAgreementActions extends AhgController
         return DB::table('donor as d')
             ->join('actor as a', 'd.id', '=', 'a.id')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->orderBy('ai.authorized_form_of_name')
             ->select('d.id', 'ai.authorized_form_of_name as name')
@@ -320,7 +320,7 @@ class donorAgreementActions extends AhgController
 
             // Save i18n
             DB::table('donor_agreement_i18n')->updateOrInsert(
-                ['id' => $agreementId, 'culture' => 'en'],
+                ['id' => $agreementId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                 ['title' => $data['title'], 'description' => $data['description'] ?? null]
             );
 
@@ -425,7 +425,7 @@ class donorAgreementActions extends AhgController
         try {
             $row = DB::table('donor_agreement as da')
                 ->leftJoin('donor_agreement_i18n as dai', function($j) {
-                    $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                    $j->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('da.id', $id)
                 ->select('da.*', 'dai.title', 'dai.description')

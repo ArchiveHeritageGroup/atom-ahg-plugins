@@ -112,7 +112,7 @@ class OaiLevelSet implements \QubitOaiSet
 
     public function setSpec(): string
     {
-        return 'level:' . strtolower(str_replace(' ', '_', $this->level->getName(['culture' => 'en'])));
+        return 'level:' . strtolower(str_replace(' ', '_', $this->level->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()])));
     }
 
     public function getName(): string

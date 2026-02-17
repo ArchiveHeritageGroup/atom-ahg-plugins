@@ -39,7 +39,7 @@ class heritageReportActions extends AhgController
             ->leftJoin('heritage_asset_class as hc', 'ha.asset_class_id', '=', 'hc.id')
             ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['ha.*', 'hc.name as class_name', 'io.identifier', 'ioi.title'])
             ->whereNotNull('ha.last_valuation_date')
@@ -58,7 +58,7 @@ class heritageReportActions extends AhgController
             ->join('heritage_asset as ha', 'm.heritage_asset_id', '=', 'ha.id')
             ->leftJoin('information_object as io', 'ha.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['m.*', 'io.identifier', 'ioi.title'])
             ->whereBetween('m.movement_date', [$from, $to])

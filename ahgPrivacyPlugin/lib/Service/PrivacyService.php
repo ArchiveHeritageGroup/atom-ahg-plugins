@@ -282,7 +282,7 @@ class PrivacyService
     {
         $query = DB::table('privacy_dsar as d')
             ->leftJoin('privacy_dsar_i18n as di', function ($j) {
-                $j->on('di.id', '=', 'd.id')->where('di.culture', '=', 'en');
+                $j->on('di.id', '=', 'd.id')->where('di.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('user as u', 'u.id', '=', 'd.assigned_to')
             ->select([
@@ -320,7 +320,7 @@ class PrivacyService
     {
         return DB::table('privacy_dsar as d')
             ->leftJoin('privacy_dsar_i18n as di', function ($j) {
-                $j->on('di.id', '=', 'd.id')->where('di.culture', '=', 'en');
+                $j->on('di.id', '=', 'd.id')->where('di.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('user as u', 'u.id', '=', 'd.assigned_to')
             ->where('d.id', $id)
@@ -367,7 +367,7 @@ class PrivacyService
         if (!empty($data['description']) || !empty($data['notes'])) {
             DB::table('privacy_dsar_i18n')->insert([
                 'id' => $id,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'description' => $data['description'] ?? null,
                 'notes' => $data['notes'] ?? null
             ]);
@@ -408,7 +408,7 @@ class PrivacyService
 
         if (!empty($data['notes']) || !empty($data['response_summary'])) {
             DB::table('privacy_dsar_i18n')->updateOrInsert(
-                ['id' => $id, 'culture' => 'en'],
+                ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                 array_filter([
                     'notes' => $data['notes'] ?? null,
                     'response_summary' => $data['response_summary'] ?? null

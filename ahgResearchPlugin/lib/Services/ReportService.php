@@ -347,7 +347,7 @@ class ReportService
                 if ($section->collection_id) {
                     $items = DB::table('research_collection_item as ci')
                         ->leftJoin('information_object_i18n as ioi', function ($join) {
-                            $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                            $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                         })
                         ->where('ci.collection_id', $section->collection_id)
                         ->orderBy('ci.sort_order')

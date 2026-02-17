@@ -31,7 +31,7 @@ class favoritesBulkAction extends AhgController
         $ids = $request->getParameter('ids', []);
 
         if (!is_array($ids) || empty($ids)) {
-            $this->getUser()->setFlash('error', 'No items selected.');
+            $this->getUser()->setFlash('error', __('No items selected.'));
             $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
             return;
@@ -50,7 +50,7 @@ class favoritesBulkAction extends AhgController
                 break;
 
             default:
-                $result = ['success' => false, 'message' => 'Invalid action.'];
+                $result = ['success' => false, 'message' => __('Invalid action.')];
         }
 
         $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);

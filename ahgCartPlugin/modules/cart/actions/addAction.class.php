@@ -28,7 +28,7 @@ class cartAddAction extends AhgController
         
         $title = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title');
         
         // Get user ID or session ID for guests

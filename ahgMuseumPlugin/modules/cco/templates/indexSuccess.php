@@ -44,7 +44,7 @@ function cco_get_i18n_field($resourceId, string $field): ?string
     if ($result === null) {
         $result = DB::table('information_object_i18n')
             ->where('id', $resourceId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value($field);
     }
     
@@ -65,7 +65,7 @@ function cco_get_ancestors($resource): array
         })
         ->leftJoin('information_object_i18n as ioi_en', function ($join) {
             $join->on('io.id', '=', 'ioi_en.id')
-                ->where('ioi_en.culture', '=', 'en');
+                ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
         ->where('io.lft', '<=', $resource->lft)
@@ -117,7 +117,7 @@ function cco_get_dates($resourceId): array
         })
         ->leftJoin('event_i18n as ei_en', function ($join) {
             $join->on('e.id', '=', 'ei_en.id')
-                ->where('ei_en.culture', '=', 'en');
+                ->where('ei_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('term_i18n as ti', function ($join) use ($culture) {
             $join->on('e.type_id', '=', 'ti.id')
@@ -125,7 +125,7 @@ function cco_get_dates($resourceId): array
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
             $join->on('e.type_id', '=', 'ti_en.id')
-                ->where('ti_en.culture', '=', 'en');
+                ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('e.object_id', $resourceId)
         ->whereNotNull('e.type_id')
@@ -187,7 +187,7 @@ function cco_get_term_name(?int $termId): ?string
     if ($term === null) {
         $term = DB::table('term_i18n')
             ->where('id', $termId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('name');
     }
     
@@ -224,7 +224,7 @@ function cco_get_repository($resource): ?object
         })
         ->leftJoin('actor_i18n as ai_en', function ($join) {
             $join->on('r.id', '=', 'ai_en.id')
-                ->where('ai_en.culture', '=', 'en');
+                ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 'r.id', '=', 'slug.object_id')
         ->where('r.id', $repositoryId)

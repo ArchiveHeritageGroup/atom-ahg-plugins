@@ -40,7 +40,7 @@ class ccoActions extends AhgController
         if (!$i18n && $culture !== 'en') {
             $i18n = DB::table('information_object_i18n')
                 ->where('id', $this->resource->id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
         }
 
@@ -73,7 +73,7 @@ class ccoActions extends AhgController
 
             $i18n = DB::table('information_object_i18n')
                 ->where('id', $resource->id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             if ($i18n) {
@@ -97,7 +97,7 @@ class ccoActions extends AhgController
             if ($row->type_id) {
                 $type = DB::table('term_i18n')
                     ->where('id', $row->type_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 $typeName = $type ? $type->name : '';
             }
@@ -106,7 +106,7 @@ class ccoActions extends AhgController
             if ($row->actor_id) {
                 $actor = DB::table('actor_i18n')
                     ->where('id', $row->actor_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 $actorName = $actor ? $actor->authorized_form_of_name : '';
             }
@@ -115,14 +115,14 @@ class ccoActions extends AhgController
             if ($row->place_id) {
                 $place = DB::table('term_i18n')
                     ->where('id', $row->place_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 $placeName = $place ? $place->name : '';
             }
 
             $eventI18n = DB::table('event_i18n')
                 ->where('id', $row->id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             $events[] = [
@@ -155,7 +155,7 @@ class ccoActions extends AhgController
                 if ($row->custodian_id) {
                     $custodian = DB::table('actor_i18n')
                         ->where('id', $row->custodian_id)
-                        ->where('culture', 'en')
+                        ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                         ->first();
                     $custodianName = $custodian ? $custodian->authorized_form_of_name : '';
                 }

@@ -33,7 +33,7 @@ class apiv2DescriptionsDeleteAction extends AhgApiController
         // Get title before deletion for webhook payload
         $i18n = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
         $title = $i18n->title ?? null;
 

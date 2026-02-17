@@ -192,7 +192,7 @@ class IsbnLookupRepository
             ->leftJoin('information_object as io', 'a.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'a.*',

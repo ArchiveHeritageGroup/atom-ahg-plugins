@@ -72,7 +72,7 @@ class model3dActions extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('m.object_id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', function($join) {
                 $join->on('m.object_id', '=', 'slug.object_id');
@@ -135,7 +135,7 @@ class model3dActions extends AhgController
         $this->object = $db::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $this->model->object_id)
@@ -209,7 +209,7 @@ class model3dActions extends AhgController
         $this->object = $db::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $this->objectId)
@@ -325,7 +325,7 @@ class model3dActions extends AhgController
         $title = $request->getParameter('title') ?: pathinfo($file['name'], PATHINFO_FILENAME);
         $db::table('object_3d_model_i18n')->insert([
             'model_id' => $modelId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'title' => $title,
             'description' => $request->getParameter('description'),
             'alt_text' => $request->getParameter('alt_text'),
@@ -386,7 +386,7 @@ class model3dActions extends AhgController
         $this->object = $db::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', $this->model->object_id)
@@ -433,7 +433,7 @@ class model3dActions extends AhgController
         // Update translations
         $db::table('object_3d_model_i18n')
             ->updateOrInsert(
-                ['model_id' => $modelId, 'culture' => 'en'],
+                ['model_id' => $modelId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                 [
                     'title' => $request->getParameter('title'),
                     'description' => $request->getParameter('description'),
@@ -759,7 +759,7 @@ class model3dActions extends AhgController
         // Insert translation
         $db::table('object_3d_hotspot_i18n')->insert([
             'hotspot_id' => $hotspotId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'title' => $input['title'] ?? '',
             'description' => $input['description'] ?? '',
         ]);

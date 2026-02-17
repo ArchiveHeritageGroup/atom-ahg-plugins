@@ -61,7 +61,7 @@ function comparison_get_object(int $id): ?object
         })
         ->leftJoin('information_object_i18n as ioi_en', function ($join) {
             $join->on('io.id', '=', 'ioi_en.id')
-                ->where('ioi_en.culture', '=', 'en');
+                ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
         ->where('io.id', $id)
@@ -96,7 +96,7 @@ function comparison_get_level_name(?int $levelId): ?string
         })
         ->leftJoin('term_i18n as ti_en', function ($join) {
             $join->on('t.id', '=', 'ti_en.id')
-                ->where('ti_en.culture', '=', 'en');
+                ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('t.id', $levelId)
         ->select(DB::raw('COALESCE(ti.name, ti_en.name) as name'))
@@ -123,7 +123,7 @@ function comparison_get_creators(int $objectId): string
         })
         ->leftJoin('actor_i18n as ai_en', function ($join) {
             $join->on('a.id', '=', 'ai_en.id')
-                ->where('ai_en.culture', '=', 'en');
+                ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->where('e.object_id', $objectId)
         ->where('e.type_id', $creationTypeId)

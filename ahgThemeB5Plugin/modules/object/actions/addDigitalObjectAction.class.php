@@ -265,13 +265,13 @@ class ObjectAddDigitalObjectAction extends AhgController
         try {
             $exists = DB::table('information_object_i18n')
                 ->where('id', $ioId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->exists();
             
             if ($exists) {
                 DB::table('information_object_i18n')
                     ->where('id', $ioId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->update(['physical_characteristics' => $summary]);
                 error_log("Updated physical_characteristics");
             } else {
@@ -381,7 +381,7 @@ class ObjectAddDigitalObjectAction extends AhgController
         if ($displayStandardId) {
             $termName = \Illuminate\Database\Capsule\Manager::table('term_i18n')
                 ->where('id', $displayStandardId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('name');
             $termName = strtolower($termName ?? '');
             if (strpos($termName, 'dam') !== false || strpos($termName, 'digital asset') !== false) {
@@ -651,7 +651,7 @@ class ObjectAddDigitalObjectAction extends AhgController
             if (!empty($summary)) {
                 DB::table('information_object_i18n')
                     ->where('id', $ioId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->update(['physical_characteristics' => $summary]);
                 error_log("Updated physical_characteristics for IO $ioId");
             }
@@ -660,12 +660,12 @@ class ObjectAddDigitalObjectAction extends AhgController
             if (!empty($keyFields['title'])) {
                 $row = DB::table('information_object_i18n')
                     ->where('id', $ioId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first(['title']);
                 if ($row && empty($row->title)) {
                     DB::table('information_object_i18n')
                         ->where('id', $ioId)
-                        ->where('culture', 'en')
+                        ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                         ->update(['title' => $keyFields['title']]);
                 }
             }
@@ -674,12 +674,12 @@ class ObjectAddDigitalObjectAction extends AhgController
             if (!empty($keyFields['description'])) {
                 $row = DB::table('information_object_i18n')
                     ->where('id', $ioId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first(['scope_and_content']);
                 if ($row && empty($row->scope_and_content)) {
                     DB::table('information_object_i18n')
                         ->where('id', $ioId)
-                        ->where('culture', 'en')
+                        ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                         ->update(['scope_and_content' => $keyFields['description']]);
                 }
             }

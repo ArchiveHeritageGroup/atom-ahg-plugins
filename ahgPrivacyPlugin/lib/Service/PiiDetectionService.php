@@ -390,7 +390,7 @@ class PiiDetectionService
         $subjects = DB::table('object_term_relation as otr')
             ->join('term as t', 't.id', '=', 'otr.term_id')
             ->join('term_i18n as ti', function ($j) {
-                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('otr.object_id', $objectId)
             ->where('t.taxonomy_id', self::getSubjectsTaxonomyId())
@@ -402,7 +402,7 @@ class PiiDetectionService
         $places = DB::table('object_term_relation as otr')
             ->join('term as t', 't.id', '=', 'otr.term_id')
             ->join('term_i18n as ti', function ($j) {
-                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', 'en');
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('otr.object_id', $objectId)
             ->where('t.taxonomy_id', self::getPlacesTaxonomyId())
@@ -414,7 +414,7 @@ class PiiDetectionService
         $names = DB::table('event as ev')
             ->join('actor as a', 'a.id', '=', 'ev.actor_id')
             ->join('actor_i18n as ai', function ($j) {
-                $j->on('ai.id', '=', 'a.id')->where('ai.culture', '=', 'en');
+                $j->on('ai.id', '=', 'a.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('ev.object_id', $objectId)
             ->whereNotNull('ev.actor_id')
@@ -577,7 +577,7 @@ class PiiDetectionService
         // Get object title for reference
         $object = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $title = $object->title ?? "Object #{$objectId}";

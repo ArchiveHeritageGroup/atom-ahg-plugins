@@ -53,7 +53,7 @@ class FavoritesService
                 ->value('title');
         }
 
-        return $title ?: 'Untitled';
+        return $title ?: \__('Untitled');
     }
 
     /**
@@ -182,7 +182,7 @@ class FavoritesService
                 'id' => $fav->id,
                 'user_id' => $fav->user_id,
                 'archival_description_id' => $objectId,
-                'title' => $title ?? $fav->archival_description ?? 'Untitled',
+                'title' => $title ?? $fav->archival_description ?? \__('Untitled'),
                 'slug' => $slug ?? $fav->slug,
                 'notes' => $fav->notes ?? null,
                 'object_type' => $objectType,
@@ -225,7 +225,7 @@ class FavoritesService
     public function addToFavorites(int $userId, int $objectId, ?string $title = null, ?string $slug = null): array
     {
         if ($this->repository->exists($userId, $objectId)) {
-            return ['success' => false, 'message' => 'Item is already in your favorites.'];
+            return ['success' => false, 'message' => \__('Item is already in your favorites.')];
         }
 
         if (!$title) {
@@ -260,7 +260,7 @@ class FavoritesService
             'reference_code' => $referenceCode,
         ]);
 
-        return ['success' => true, 'message' => 'Added to favorites.', 'id' => $id];
+        return ['success' => true, 'message' => \__('Added to favorites.'), 'id' => $id];
     }
 
     /**
@@ -271,16 +271,16 @@ class FavoritesService
         $favorite = $this->repository->getById($favoriteId);
 
         if (!$favorite) {
-            return ['success' => false, 'message' => 'Favorite not found.'];
+            return ['success' => false, 'message' => \__('Favorite not found.')];
         }
 
         if ($favorite->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
+            return ['success' => false, 'message' => \__('Access denied.')];
         }
 
         $this->repository->remove($favoriteId);
 
-        return ['success' => true, 'message' => 'Removed from favorites.'];
+        return ['success' => true, 'message' => \__('Removed from favorites.')];
     }
 
     /**
@@ -289,12 +289,12 @@ class FavoritesService
     public function removeByObject(int $userId, int $objectId): array
     {
         if (!$this->repository->exists($userId, $objectId)) {
-            return ['success' => false, 'message' => 'Item not in favorites.'];
+            return ['success' => false, 'message' => \__('Item not in favorites.')];
         }
 
         $this->repository->removeByUserAndObject($userId, $objectId);
 
-        return ['success' => true, 'message' => 'Removed from favorites.'];
+        return ['success' => true, 'message' => \__('Removed from favorites.')];
     }
 
     /**
@@ -305,7 +305,7 @@ class FavoritesService
         if ($this->repository->exists($userId, $objectId)) {
             $this->repository->removeByUserAndObject($userId, $objectId);
 
-            return ['success' => true, 'action' => 'removed', 'favorited' => false, 'message' => 'Removed from favorites.'];
+            return ['success' => true, 'action' => 'removed', 'favorited' => false, 'message' => \__('Removed from favorites.')];
         }
 
         $result = $this->addToFavorites($userId, $objectId, null, $slug);
@@ -326,7 +326,7 @@ class FavoritesService
     {
         $count = $this->repository->clearByUser($userId);
 
-        return ['success' => true, 'message' => "Cleared {$count} favorites."];
+        return ['success' => true, 'message' => \__('Cleared %1% favorites.', ['%1%' => $count])];
     }
 
     /**
@@ -353,16 +353,16 @@ class FavoritesService
         $favorite = $this->repository->getById($favoriteId);
 
         if (!$favorite) {
-            return ['success' => false, 'message' => 'Favorite not found.'];
+            return ['success' => false, 'message' => \__('Favorite not found.')];
         }
 
         if ($favorite->user_id != $userId) {
-            return ['success' => false, 'message' => 'Access denied.'];
+            return ['success' => false, 'message' => \__('Access denied.')];
         }
 
         $this->repository->updateNotes($favoriteId, $notes);
 
-        return ['success' => true, 'message' => 'Notes updated.'];
+        return ['success' => true, 'message' => \__('Notes updated.')];
     }
 
     /**
@@ -373,7 +373,7 @@ class FavoritesService
         $ids = array_map('intval', $ids);
         $count = $this->repository->bulkRemove($userId, $ids);
 
-        return ['success' => true, 'message' => "Removed {$count} favorites."];
+        return ['success' => true, 'message' => \__('Removed %1% favorites.', ['%1%' => $count])];
     }
 
     /**
@@ -389,12 +389,12 @@ class FavoritesService
             $folderRepo = new \AtomAhgPlugins\ahgFavoritesPlugin\Repositories\FolderRepository();
             $folder = $folderRepo->getById($folderId);
             if (!$folder || $folder->user_id != $userId) {
-                return ['success' => false, 'message' => 'Folder not found or access denied.'];
+                return ['success' => false, 'message' => \__('Folder not found or access denied.')];
             }
         }
 
         $count = $this->repository->moveToFolder($userId, $ids, $folderId);
 
-        return ['success' => true, 'message' => "Moved {$count} items."];
+        return ['success' => true, 'message' => \__('Moved %1% items.', ['%1%' => $count])];
     }
 }

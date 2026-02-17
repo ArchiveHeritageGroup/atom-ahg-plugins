@@ -43,7 +43,7 @@ class favoritesImportAction extends AhgController
             $slugs = array_map('trim', $slugs);
             $result = $service->importFromSlugs($userId, $slugs, $folderId);
         } else {
-            $result = ['imported' => 0, 'skipped' => 0, 'errors' => ['No CSV file or slug list provided.']];
+            $result = ['imported' => 0, 'skipped' => 0, 'errors' => [__('No CSV file or slug list provided.')]];
         }
 
         // JSON response for AJAX
@@ -53,12 +53,12 @@ class favoritesImportAction extends AhgController
             exit;
         }
 
-        $msg = "Imported {$result['imported']} items.";
+        $msg = __('Imported %1% items.', ['%1%' => $result['imported']]);
         if ($result['skipped'] > 0) {
-            $msg .= " {$result['skipped']} skipped.";
+            $msg .= ' ' . __('%1% skipped.', ['%1%' => $result['skipped']]);
         }
         if (!empty($result['errors'])) {
-            $msg .= ' Errors: ' . implode('; ', array_slice($result['errors'], 0, 5));
+            $msg .= ' ' . __('Errors:') . ' ' . implode('; ', array_slice($result['errors'], 0, 5));
         }
 
         $this->getUser()->setFlash($result['imported'] > 0 ? 'notice' : 'error', $msg);

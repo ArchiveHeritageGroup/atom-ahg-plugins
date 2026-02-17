@@ -140,7 +140,7 @@ class heritageAccountingActions extends AhgController
         if ($this->asset->object_id || $this->asset->information_object_id) {
             $io = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                 ->where('id', $this->asset->object_id ?? $this->asset->information_object_id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
             $this->objectTitle = $io ? $io->title : "No title found";
         }

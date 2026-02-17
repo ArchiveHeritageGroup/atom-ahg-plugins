@@ -17,7 +17,7 @@ class favoritesSendToBibliographyAction extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         if (!$this->getUser()->isAuthenticated()) {
-            echo json_encode(['success' => false, 'message' => 'Not authenticated.']);
+            echo json_encode(['success' => false, 'message' => __('Not authenticated.')]);
             exit;
         }
 
@@ -32,7 +32,7 @@ class favoritesSendToBibliographyAction extends AhgController
         }
 
         if (!$request->isMethod('post')) {
-            echo json_encode(['success' => false, 'message' => 'POST required.']);
+            echo json_encode(['success' => false, 'message' => __('POST required.')]);
             exit;
         }
 
@@ -41,7 +41,7 @@ class favoritesSendToBibliographyAction extends AhgController
         $style = $request->getParameter('style', 'chicago');
 
         if (empty($ids) || !$bibliographyId) {
-            echo json_encode(['success' => false, 'message' => 'Missing parameters.']);
+            echo json_encode(['success' => false, 'message' => __('Missing parameters.')]);
             exit;
         }
 

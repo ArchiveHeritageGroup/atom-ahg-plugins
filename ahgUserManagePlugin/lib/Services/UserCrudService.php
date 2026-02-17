@@ -111,7 +111,7 @@ class UserCrudService
             DB::table('actor')->insert([
                 'id' => $id,
                 'parent_id' => \QubitActor::ROOT_ID,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
 
             // Hash password using AtoM's dual-layer approach
@@ -284,12 +284,12 @@ class UserCrudService
             $propId = DB::table('property')->insertGetId([
                 'object_id' => $userId,
                 'name' => $keyName,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
 
             DB::table('property_i18n')->insert([
                 'id' => $propId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $newKey,
             ]);
         }

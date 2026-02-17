@@ -53,7 +53,7 @@ class SubmissionService
         $sub = DB::table('researcher_submission as s')
             ->leftJoin('user as u', 's.user_id', '=', 'u.id')
             ->leftJoin('actor_i18n as ai', function ($j) {
-                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('s.id', $id)
             ->select('s.*', 'ai.authorized_form_of_name as user_name')
@@ -86,7 +86,7 @@ class SubmissionService
         $reviews = DB::table('researcher_submission_review as r')
             ->leftJoin('user as u', 'r.reviewer_id', '=', 'u.id')
             ->leftJoin('actor_i18n as ai', function ($j) {
-                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.submission_id', $id)
             ->select('r.*', 'ai.authorized_form_of_name as reviewer_name')
@@ -110,7 +110,7 @@ class SubmissionService
         $q = DB::table('researcher_submission as s')
             ->leftJoin('user as u', 's.user_id', '=', 'u.id')
             ->leftJoin('actor_i18n as ai', function ($j) {
-                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('s.*', 'ai.authorized_form_of_name as user_name');
 
@@ -697,7 +697,7 @@ class SubmissionService
         try {
             return DB::table('research_annotation as a')
                 ->leftJoin('information_object_i18n as io', function ($j) {
-                    $j->on('a.object_id', '=', 'io.id')->where('io.culture', '=', 'en');
+                    $j->on('a.object_id', '=', 'io.id')->where('io.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('a.researcher_id', $researcherId)
                 ->select('a.*', 'io.title as object_title')
@@ -722,7 +722,7 @@ class SubmissionService
         try {
             return DB::table('research_collection_item as ci')
                 ->leftJoin('information_object_i18n as io', function ($j) {
-                    $j->on('ci.object_id', '=', 'io.id')->where('io.culture', '=', 'en');
+                    $j->on('ci.object_id', '=', 'io.id')->where('io.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('information_object as iobj', 'ci.object_id', '=', 'iobj.id')
                 ->leftJoin('slug', function ($j) {

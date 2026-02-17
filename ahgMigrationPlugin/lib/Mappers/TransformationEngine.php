@@ -253,7 +253,7 @@ class TransformationEngine
                 $q->where('ti.name', $value)
                   ->orWhere('ti.name', 'LIKE', $value . '%');
             })
-            ->where('ti.culture', 'en')
+            ->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('ti.name');
         
         $result = $term ?: $value;

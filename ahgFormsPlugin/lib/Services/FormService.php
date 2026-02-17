@@ -382,11 +382,11 @@ class FormService
             ->leftJoin('repository as r', 'r.id', '=', 'fa.repository_id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as ti', function ($join) {
                 $join->on('fa.level_of_description_id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'fa.*',

@@ -193,7 +193,7 @@ class workflowActions extends AhgController
         // Get object info
         $this->object = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
     }
 
@@ -443,7 +443,7 @@ class workflowActions extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('repository as r')
             ->join('actor_i18n as ai', function ($join) {
-                $join->on('r.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('r.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('ai.authorized_form_of_name')
             ->select('r.id', 'ai.authorized_form_of_name as name')
@@ -456,7 +456,7 @@ class workflowActions extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('acl_group as g')
             ->join('acl_group_i18n as gi', function ($join) {
-                $join->on('g.id', '=', 'gi.id')->where('gi.culture', '=', 'en');
+                $join->on('g.id', '=', 'gi.id')->where('gi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('gi.name')
             ->where('g.id', '>', 1)
@@ -470,7 +470,7 @@ class workflowActions extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.parent_id', 1)
             ->whereNotNull('ioi.title')

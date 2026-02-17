@@ -17,7 +17,7 @@ class donorAgreementAutocompleteAccessionsAction extends AhgController
 
         $results = \Illuminate\Database\Capsule\Manager::table('accession as acc')
             ->leftJoin('accession_i18n as acci', function($join) {
-                $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', 'en');
+                $join->on('acc.id', '=', 'acci.id')->where('acci.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where(function($q) use ($query) {
                 $q->where('acci.title', 'like', '%' . $query . '%')

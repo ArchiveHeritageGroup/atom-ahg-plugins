@@ -49,7 +49,7 @@ class apiv2DescriptionsUpdateAction extends AhgApiController
             if (!empty($i18nUpdate)) {
                 DB::table('information_object_i18n')
                     ->where('id', $objectId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->update($i18nUpdate);
             }
 

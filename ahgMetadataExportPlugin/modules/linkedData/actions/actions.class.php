@@ -122,7 +122,7 @@ class linkedDataActions extends AhgController
             ->join('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', '>', 1)
             ->whereNotNull('ioi.title')
@@ -148,7 +148,7 @@ class linkedDataActions extends AhgController
             ->join('slug', 'r.id', '=', 'slug.object_id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('ai.authorized_form_of_name')
             ->select('slug.slug', 'r.updated_at')
@@ -170,7 +170,7 @@ class linkedDataActions extends AhgController
             ->join('slug', 'a.id', '=', 'slug.object_id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('a.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('a.id', '>', 1) // Skip root
             ->whereNotNull('ai.authorized_form_of_name')

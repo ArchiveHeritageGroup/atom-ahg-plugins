@@ -22,11 +22,11 @@ class galleryIndexAction extends AhgController
         // Load resource using Laravel
         $this->resource = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function($j) {
-                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term as t', 'io.level_of_description_id', '=', 't.id')
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->where('s.slug', $slug)
@@ -55,7 +55,7 @@ class galleryIndexAction extends AhgController
         // Load gallery data from property
         $prop = DB::table('property as p')
             ->join('property_i18n as pi', function($j) {
-                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', 'en');
+                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.object_id', $this->resource->id)
             ->where('p.name', 'galleryData')
@@ -68,7 +68,7 @@ class galleryIndexAction extends AhgController
         if (isset($this->galleryData['work_type']) && is_numeric($this->galleryData['work_type'])) {
             $workTypeTerm = DB::table('term_i18n')
                 ->where('id', $this->galleryData['work_type'])
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('name');
             if ($workTypeTerm) {
                 $this->galleryData['work_type_name'] = $workTypeTerm;
@@ -77,7 +77,7 @@ class galleryIndexAction extends AhgController
         $this->creatorName = null;
         $creator = DB::table('event as e')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $this->resource->id)
             ->where('e.type_id', 111)
@@ -97,7 +97,7 @@ class galleryIndexAction extends AhgController
         if ($this->digitalObject) {
             $this->derivatives = DB::table('digital_object as d')
                 ->leftJoin('term_i18n as ti', function($j) {
-                    $j->on('d.usage_id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                    $j->on('d.usage_id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('d.parent_id', $this->digitalObject->id)
                 ->select('d.*', 'ti.name as usage_name')

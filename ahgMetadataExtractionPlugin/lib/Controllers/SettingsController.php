@@ -210,7 +210,7 @@ class SettingsController
             } else {
                 DB::table('setting_i18n')->insert([
                     'id' => $existing->id,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'value' => $value,
                 ]);
             }
@@ -230,7 +230,7 @@ class SettingsController
 
             DB::table('setting_i18n')->insert([
                 'id' => $settingId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $value,
             ]);
         }

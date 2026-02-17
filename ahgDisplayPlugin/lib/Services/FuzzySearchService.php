@@ -64,7 +64,7 @@ class FuzzySearchService
         try {
             $terms = DB::table('term_i18n as ti')
                 ->join('term as t', 'ti.id', '=', 't.id')
-                ->where('ti.culture', 'en')
+                ->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->whereIn('t.taxonomy_id', [35, 42, 78])
                 ->whereNotNull('ti.name')
                 ->where('ti.name', '!=', '')
@@ -80,7 +80,7 @@ class FuzzySearchService
         // Source 4: actor_i18n for creators
         try {
             $actors = DB::table('actor_i18n')
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->whereNotNull('authorized_form_of_name')
                 ->where('authorized_form_of_name', '!=', '')
                 ->pluck('authorized_form_of_name')
@@ -95,7 +95,7 @@ class FuzzySearchService
         // Source 5: information_object_i18n titles (top 2000 by id desc for performance)
         try {
             $titles = DB::table('information_object_i18n')
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->whereNotNull('title')
                 ->where('title', '!=', '')
                 ->orderBy('id', 'desc')

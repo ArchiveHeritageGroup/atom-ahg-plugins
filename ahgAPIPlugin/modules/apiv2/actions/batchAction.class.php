@@ -84,7 +84,7 @@ class apiv2BatchAction extends AhgApiController
             DB::table('information_object')->insert([
                 'id' => $objectId,
                 'parent_id' => $op['data']['parent_id'] ?? 1,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'lft' => 0, 'rgt' => 0, // Simplified - needs proper nested set
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -92,7 +92,7 @@ class apiv2BatchAction extends AhgApiController
 
             DB::table('information_object_i18n')->insert([
                 'id' => $objectId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'title' => $op['data']['title']
             ]);
 

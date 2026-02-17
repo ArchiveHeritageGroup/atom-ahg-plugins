@@ -519,7 +519,7 @@ class ahgICIPService
             ->join('information_object as io', 'c.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('icip_community as com', 'c.community_id', '=', 'com.id')
@@ -552,7 +552,7 @@ class ahgICIPService
             ->join('information_object as io', 'c.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('icip_community as com', 'c.community_id', '=', 'com.id')

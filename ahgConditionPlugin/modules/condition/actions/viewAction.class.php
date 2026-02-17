@@ -33,7 +33,7 @@ class conditionViewAction extends AhgController
             ->leftJoin('slug as s', 's.object_id', '=', 'c.object_id')
             ->leftJoin('information_object_i18n as i', function($join) {
                 $join->on('i.id', '=', 'c.object_id')
-                     ->where('i.culture', '=', 'en');
+                     ->where('i.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.id', $checkId)
             ->select('c.*', 's.slug', 'i.title as object_title')

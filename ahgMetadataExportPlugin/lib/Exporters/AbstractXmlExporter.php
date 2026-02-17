@@ -562,7 +562,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                     }
                     // Get display date from event
                     if (method_exists($dateObj, 'getDate')) {
-                        $display = $dateObj->getDate(['culture' => 'en']);
+                        $display = $dateObj->getDate(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                     }
                     break; // Use first date
                 }
@@ -595,7 +595,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 foreach ($creatorObjects as $creator) {
                     $name = null;
                     if (method_exists($creator, 'getAuthorizedFormOfName')) {
-                        $name = $creator->getAuthorizedFormOfName(['culture' => 'en']);
+                        $name = $creator->getAuthorizedFormOfName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                     }
                     $type = null;
                     if (method_exists($creator, 'getEntityType')) {
@@ -633,7 +633,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                     if (method_exists($point, 'getTerm')) {
                         $term = $point->getTerm();
                         if ($term && method_exists($term, 'getName')) {
-                            $name = $term->getName(['culture' => 'en']);
+                            $name = $term->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                             if ($name) {
                                 $subjects[] = $name;
                             }
@@ -666,7 +666,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                     if (method_exists($point, 'getTerm')) {
                         $term = $point->getTerm();
                         if ($term && method_exists($term, 'getName')) {
-                            $name = $term->getName(['culture' => 'en']);
+                            $name = $term->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                             if ($name) {
                                 $places[] = $name;
                             }
@@ -696,7 +696,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 if ($repo) {
                     $name = null;
                     if (method_exists($repo, 'getAuthorizedFormOfName')) {
-                        $name = $repo->getAuthorizedFormOfName(['culture' => 'en']);
+                        $name = $repo->getAuthorizedFormOfName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                     }
                     $identifier = null;
                     if (method_exists($repo, 'getIdentifier')) {

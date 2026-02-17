@@ -53,7 +53,7 @@ class libraryReportsActions extends AhgController
         
         $query = DB::table('library_item as li')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'li.*',
@@ -168,7 +168,7 @@ class libraryReportsActions extends AhgController
         
         $this->callNumbers = DB::table('library_item as li')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('li.call_number', 'li.classification_scheme', 'li.shelf_location', 'ioi.title', 'li.material_type')
             ->whereNotNull('li.call_number')
@@ -204,7 +204,7 @@ class libraryReportsActions extends AhgController
             case 'catalogue':
                 $data = DB::table('library_item as li')
                     ->leftJoin('information_object_i18n as ioi', function($join) {
-                        $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                        $join->on('li.information_object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->select('ioi.title', 'li.material_type', 'li.call_number', 'li.isbn', 'li.publisher', 'li.publication_date', 'li.circulation_status')
                     ->get()

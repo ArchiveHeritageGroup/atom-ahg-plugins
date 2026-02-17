@@ -413,7 +413,7 @@ class WatermarkService
             ->join('user as u', 'swl.user_id', '=', 'u.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('swl.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('swl.watermark_code', $code)
             ->select([
@@ -449,7 +449,7 @@ class WatermarkService
         return DB::table('security_watermark_log as swl')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('swl.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('swl.user_id', $userId)
             ->select(['swl.*', 'ioi.title as object_title'])

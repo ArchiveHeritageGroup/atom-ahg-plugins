@@ -99,7 +99,7 @@ class AuditHelper
             if ($i18nTable) {
                 $i18nRow = DB::table($i18nTable)
                     ->where('id', $id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 if ($i18nRow) {
                     foreach (['title', 'description', 'name'] as $field) {

@@ -363,7 +363,7 @@ class ahgCCOVocabularyService
             ->where('t.taxonomy_id', $taxonomyId)
             ->where('ti.name', 'LIKE', '%' . $query . '%')
             ->where(function ($q) {
-                $q->where('ti.culture', 'en')
+                $q->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->orWhere('ti.culture', sfConfig::get('sf_default_culture', 'en'));
             })
             ->select('t.id', 'ti.name', 'ti.culture')
@@ -416,7 +416,7 @@ class ahgCCOVocabularyService
         $taxonomy = DB::table('taxonomy as t')
             ->leftJoin('taxonomy_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where(function ($query) use ($name) {
                 $query->where('ti.name', $name)
@@ -512,7 +512,7 @@ class ahgCCOVocabularyService
         $term = DB::table('term as t')
             ->leftJoin('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.id', $id)
             ->select('t.id', 't.taxonomy_id', 't.parent_id', 'ti.name')
@@ -580,7 +580,7 @@ class ahgCCOVocabularyService
             $term = DB::table('term as t')
                 ->leftJoin('term_i18n as ti', function ($join) {
                     $join->on('t.id', '=', 'ti.id')
-                        ->where('ti.culture', '=', 'en');
+                        ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('t.id', $currentId)
                 ->select('t.id', 't.parent_id', 'ti.name')
@@ -644,7 +644,7 @@ class ahgCCOVocabularyService
             ->join('term_i18n as ti', 't.id', '=', 'ti.id')
             ->where('t.taxonomy_id', $taxonomyId)
             ->where('ti.name', $name)
-            ->where('ti.culture', 'en')
+            ->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->select('t.id')
             ->first();
 
@@ -678,7 +678,7 @@ class ahgCCOVocabularyService
         // Create i18n entry
         DB::table('term_i18n')->insert([
             'id' => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'name' => $name,
         ]);
 
@@ -693,7 +693,7 @@ class ahgCCOVocabularyService
         $query = DB::table('term as t')
             ->leftJoin('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', $taxonomyId)
             ->select('t.id', 't.parent_id', 'ti.name')

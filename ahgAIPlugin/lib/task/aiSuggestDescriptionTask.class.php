@@ -15,6 +15,18 @@
  */
 class aiSuggestDescriptionTask extends sfBaseTask
 {
+    /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
     protected function configure()
     {
         $this->addOptions([
@@ -207,10 +219,12 @@ EOF;
             return [(int) $options['object']];
         }
 
+        $culture = $this->getCulture();
+
         $query = \Illuminate\Database\Capsule\Manager::table('information_object as io')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
+            ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', $culture);
             })
             ->where('io.id', '>', 1); // Exclude root
 
@@ -274,10 +288,12 @@ EOF;
      */
     protected function getObjectInfo(int $objectId): array
     {
+        $culture = $this->getCulture();
+
         $object = \Illuminate\Database\Capsule\Manager::table('information_object as io')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
+            ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', $culture);
             })
             ->where('io.id', $objectId)
             ->select('io.identifier', 'ioi.title')

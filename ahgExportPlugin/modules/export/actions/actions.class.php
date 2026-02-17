@@ -43,7 +43,7 @@ if (!$this->getUser()->isAuthenticated()) {
         // Get repositories for filter (Repository extends Actor, so name is in actor_i18n)
         $this->repositories = $DB::table('repository')
             ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
-            ->where('actor_i18n.culture', '=', 'en')
+            ->where('actor_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('actor_i18n.authorized_form_of_name')
             ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->get();
@@ -52,7 +52,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $this->levels = $DB::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
             ->where('term.taxonomy_id', '=', QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID)
-            ->where('term_i18n.culture', '=', 'en')
+            ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('term_i18n.name')
             ->select('term.id', 'term_i18n.name')
             ->get();
@@ -76,7 +76,7 @@ if (!$this->getUser()->isAuthenticated()) {
         // Build query
         $query = $DB::table('information_object as io')
             ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
-            ->where('ioi.culture', '=', 'en')
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->where('io.id', '!=', QubitInformationObject::ROOT_ID);
 
         if ($repositoryId) {
@@ -141,7 +141,7 @@ if (!$this->getUser()->isAuthenticated()) {
             if ($r->level_of_description_id) {
                 $levelName = $DB::table('term_i18n')
                     ->where('id', '=', $r->level_of_description_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('name') ?? '';
             }
 
@@ -150,7 +150,7 @@ if (!$this->getUser()->isAuthenticated()) {
             if ($r->repository_id) {
                 $repoName = $DB::table('repository_i18n')
                     ->where('id', '=', $r->repository_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('authorized_form_of_name') ?? '';
             }
 
@@ -158,7 +158,7 @@ if (!$this->getUser()->isAuthenticated()) {
             $dates = $DB::table('event')
                 ->join('event_i18n', 'event.id', '=', 'event_i18n.id')
                 ->where('event.object_id', '=', $r->id)
-                ->where('event_i18n.culture', '=', 'en')
+                ->where('event_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->pluck('event_i18n.date')
                 ->filter()
                 ->implode('|');
@@ -169,7 +169,7 @@ if (!$this->getUser()->isAuthenticated()) {
                 ->join('term', 'object_term_relation.term_id', '=', 'term.id')
                 ->where('object_term_relation.object_id', '=', $r->id)
                 ->where('term.taxonomy_id', '=', QubitTaxonomy::SUBJECT_ID)
-                ->where('term_i18n.culture', '=', 'en')
+                ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->pluck('term_i18n.name')
                 ->implode('|');
 
@@ -179,7 +179,7 @@ if (!$this->getUser()->isAuthenticated()) {
                 ->join('term', 'object_term_relation.term_id', '=', 'term.id')
                 ->where('object_term_relation.object_id', '=', $r->id)
                 ->where('term.taxonomy_id', '=', QubitTaxonomy::PLACE_ID)
-                ->where('term_i18n.culture', '=', 'en')
+                ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->pluck('term_i18n.name')
                 ->implode('|');
 
@@ -188,7 +188,7 @@ if (!$this->getUser()->isAuthenticated()) {
                 ->join('actor_i18n', 'relation.object_id', '=', 'actor_i18n.id')
                 ->where('relation.subject_id', '=', $r->id)
                 ->where('relation.type_id', '=', QubitTerm::NAME_ACCESS_POINT_ID)
-                ->where('actor_i18n.culture', '=', 'en')
+                ->where('actor_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->pluck('actor_i18n.authorized_form_of_name')
                 ->implode('|');
 
@@ -241,7 +241,7 @@ if (!$this->getUser()->isAuthenticated()) {
         // Get repositories (Repository extends Actor, so name is in actor_i18n)
         $this->repositories = $DB::table('repository')
             ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
-            ->where('actor_i18n.culture', '=', 'en')
+            ->where('actor_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('actor_i18n.authorized_form_of_name')
             ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
             ->get();
@@ -251,12 +251,12 @@ if (!$this->getUser()->isAuthenticated()) {
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
             ->where('term.taxonomy_id', '=', QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID)
             ->where('term_i18n.name', 'LIKE', '%fonds%')
-            ->where('term_i18n.culture', '=', 'en')
+            ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('term.id');
 
         $this->fonds = $DB::table('information_object as io')
             ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
-            ->where('ioi.culture', '=', 'en')
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->where('io.parent_id', '=', QubitInformationObject::ROOT_ID)
             ->orderBy('ioi.title')
             ->select('io.id', 'ioi.title', 'io.identifier')
@@ -284,7 +284,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $record = $DB::table('information_object as io')
             ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
             ->where('io.id', '=', $objectId)
-            ->where('ioi.culture', '=', 'en')
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         if (!$record) {
@@ -372,7 +372,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $dates = $DB::table('event')
             ->join('event_i18n', 'event.id', '=', 'event_i18n.id')
             ->where('event.object_id', '=', $record->id)
-            ->where('event_i18n.culture', '=', 'en')
+            ->where('event_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         if ($dates && $dates->date) {
@@ -431,7 +431,7 @@ if (!$this->getUser()->isAuthenticated()) {
             ->join('term', 'object_term_relation.term_id', '=', 'term.id')
             ->where('object_term_relation.object_id', '=', $record->id)
             ->where('term.taxonomy_id', '=', QubitTaxonomy::SUBJECT_ID)
-            ->where('term_i18n.culture', '=', 'en')
+            ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->pluck('term_i18n.name');
 
         if ($subjects->count() > 0) {
@@ -448,7 +448,7 @@ if (!$this->getUser()->isAuthenticated()) {
             $children = $DB::table('information_object as io')
                 ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
                 ->where('io.parent_id', '=', $record->id)
-                ->where('ioi.culture', '=', 'en')
+                ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->orderBy('io.lft')
                 ->get();
 
@@ -496,7 +496,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $children = $DB::table('information_object as io')
             ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
             ->where('io.parent_id', '=', $record->id)
-            ->where('ioi.culture', '=', 'en')
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('io.lft')
             ->get();
 
@@ -516,7 +516,7 @@ if (!$this->getUser()->isAuthenticated()) {
 
         $levelName = $DB::table('term_i18n')
             ->where('id', '=', $levelId)
-            ->where('culture', '=', 'en')
+            ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('name');
 
         $levelMap = [
@@ -549,7 +549,7 @@ if (!$this->getUser()->isAuthenticated()) {
         // Get repositories for filter
         $this->repositories = $DB::table('repository')
             ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
-            ->where('actor_i18n.culture', '=', 'en')
+            ->where('actor_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->where('repository.id', '!=', QubitRepository::ROOT_ID)
             ->orderBy('actor_i18n.authorized_form_of_name')
             ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
@@ -559,7 +559,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $this->levels = $DB::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
             ->where('term.taxonomy_id', '=', QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID)
-            ->where('term_i18n.culture', '=', 'en')
+            ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('term_i18n.name')
             ->select('term.id', 'term_i18n.name')
             ->get();
@@ -597,7 +597,7 @@ if (!$this->getUser()->isAuthenticated()) {
             ->join('information_object_i18n as ioi', 'io.id', '=', 'ioi.id')
             ->leftJoin('object as o', 'io.id', '=', 'o.id')
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
-            ->where('ioi.culture', '=', 'en')
+            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->where('io.id', '!=', QubitInformationObject::ROOT_ID);
 
         if ($repositoryId) {
@@ -654,7 +654,7 @@ if (!$this->getUser()->isAuthenticated()) {
             if ($r->level_of_description_id) {
                 $levelName = $DB::table('term_i18n')
                     ->where('id', '=', $r->level_of_description_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('name') ?? '';
             }
 
@@ -663,7 +663,7 @@ if (!$this->getUser()->isAuthenticated()) {
             if ($r->repository_id) {
                 $repoName = $DB::table('actor_i18n')
                     ->where('id', '=', $r->repository_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('authorized_form_of_name') ?? '';
             }
 
@@ -713,7 +713,7 @@ if (!$this->getUser()->isAuthenticated()) {
         $this->entityTypes = $DB::table('term')
             ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
             ->where('term.taxonomy_id', '=', QubitTaxonomy::ACTOR_ENTITY_TYPE_ID)
-            ->where('term_i18n.culture', '=', 'en')
+            ->where('term_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('term_i18n.name')
             ->select('term.id', 'term_i18n.name')
             ->get();
@@ -732,7 +732,7 @@ if (!$this->getUser()->isAuthenticated()) {
             $query = $DB::table('actor as a')
                 ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
                 ->leftJoin('object as o', 'a.id', '=', 'o.id')
-                ->where('ai.culture', '=', 'en')
+                ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('a.id', '!=', QubitActor::ROOT_ID);
 
             if ($entityTypeId) {
@@ -792,7 +792,7 @@ if (!$this->getUser()->isAuthenticated()) {
             if ($actor->entity_type_id) {
                 $entityType = $DB::table('term_i18n')
                     ->where('id', '=', $actor->entity_type_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('name') ?? '';
             }
 
@@ -1014,7 +1014,7 @@ if (!$this->getUser()->isAuthenticated()) {
 
         $typeName = $DB::table('term_i18n')
             ->where('id', '=', $entityTypeId)
-            ->where('culture', '=', 'en')
+            ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('name');
 
         $typeMap = [
@@ -1047,11 +1047,11 @@ if (!$this->getUser()->isAuthenticated()) {
             $query = $DB::table('repository as r')
                 ->join('actor_i18n as ai', 'r.id', '=', 'ai.id')
                 ->leftJoin('repository_i18n as ri', function ($join) {
-                    $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+                    $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('contact_information as ci', 'r.id', '=', 'ci.actor_id')
                 ->leftJoin('object as o', 'r.id', '=', 'o.id')
-                ->where('ai.culture', '=', 'en')
+                ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('r.id', '!=', QubitRepository::ROOT_ID);
 
             $query->select([

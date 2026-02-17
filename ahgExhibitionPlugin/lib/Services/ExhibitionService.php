@@ -564,7 +564,7 @@ class ExhibitionService
             ->leftJoin('information_object as io', 'io.id', '=', 'eo.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('exhibition_section as es', 'es.id', '=', 'eo.section_id')
             ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
@@ -921,7 +921,7 @@ class ExhibitionService
             ->leftJoin('information_object as io', 'io.id', '=', 'eo.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
             ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
@@ -1293,7 +1293,7 @@ class ExhibitionService
             ->leftJoin('information_object as io', 'io.id', '=', 'eo.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('eo.exhibition_id', $exhibitionId)
             ->orderBy('es.sequence_order')

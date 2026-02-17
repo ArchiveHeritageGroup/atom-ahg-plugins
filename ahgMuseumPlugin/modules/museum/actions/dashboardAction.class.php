@@ -28,7 +28,7 @@ class museumDashboardAction extends AhgController
         // Get recent museum items
         $this->recentItems = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($j) {
-                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
@@ -67,7 +67,7 @@ class museumDashboardAction extends AhgController
                 $this->workTypeStats = DB::table('museum_object as mo')
                     ->join('information_object as io', 'mo.information_object_id', '=', 'io.id')
                     ->leftJoin('term_i18n as ti', function ($j) {
-                        $j->on('mo.work_type_id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                        $j->on('mo.work_type_id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->where('io.display_standard_id', $museumTermId)
                     ->whereNotNull('mo.work_type_id')

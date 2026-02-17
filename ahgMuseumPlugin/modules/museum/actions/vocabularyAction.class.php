@@ -57,7 +57,7 @@ class museumVocabularyAction extends AhgController
             ->join('property_i18n as pi', 'p.id', '=', 'pi.id')
             ->where('p.name', 'ccoData')
             ->whereNotNull('pi.value')
-            ->where('pi.culture', 'en')
+            ->where('pi.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->pluck('pi.value');
 
         foreach ($rows as $json) {

@@ -139,7 +139,7 @@ class reportsReportPhysicalStorageAction extends BaseReportAction
             'dateStart' => date('Y-m-d', strtotime('-1 year')),
             'dateEnd' => date('Y-m-d'),
             'dateOf' => 'CREATED_AT',
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'repositoryId' => '',
             'showLinkedIO' => false,
             'limit' => '20',

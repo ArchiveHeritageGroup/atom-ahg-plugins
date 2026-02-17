@@ -17,7 +17,7 @@ class EmbargoService
         return DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('ei.id', '=', 'e.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.id', $embargoId)
             ->select(['e.*', 'ei.reason_note as reason', 'ei.internal_note as notes'])
@@ -29,7 +29,7 @@ class EmbargoService
         return DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('ei.id', '=', 'e.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->orderByDesc('e.created_at')
@@ -43,7 +43,7 @@ class EmbargoService
         return DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('ei.id', '=', 'e.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->where('e.status', 'active')
@@ -62,12 +62,12 @@ class EmbargoService
         return DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('ei.id', '=', 'e.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'e.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('e.status', 'active')
@@ -89,12 +89,12 @@ class EmbargoService
         return DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('ei.id', '=', 'e.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'e.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('e.status', 'active')
@@ -183,7 +183,7 @@ class EmbargoService
         if (!empty($data['reason']) || !empty($data['notes'])) {
             DB::table('rights_embargo_i18n')->insert([
                 'id' => $embargoId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'reason_note' => $data['reason'] ?? null,
                 'internal_note' => $data['notes'] ?? null,
             ]);
@@ -222,7 +222,7 @@ class EmbargoService
         if (!empty($data['reason']) || !empty($data['notes'])) {
             DB::table('rights_embargo_i18n')
                 ->updateOrInsert(
-                    ['id' => $embargoId, 'culture' => 'en'],
+                    ['id' => $embargoId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     [
                         'reason_note' => $data['reason'] ?? null,
                         'internal_note' => $data['notes'] ?? null,

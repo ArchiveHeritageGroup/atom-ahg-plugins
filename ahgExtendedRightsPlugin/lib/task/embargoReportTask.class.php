@@ -135,7 +135,7 @@ EOF;
         $embargoes = \Illuminate\Database\Capsule\Manager::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->where('e.status', 'active')
@@ -205,7 +205,7 @@ EOF;
         $embargoes = \Illuminate\Database\Capsule\Manager::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->leftJoin('user', 'user.id', '=', 'e.lifted_by')
@@ -242,7 +242,7 @@ EOF;
         $embargoes = \Illuminate\Database\Capsule\Manager::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->where('e.status', 'active')

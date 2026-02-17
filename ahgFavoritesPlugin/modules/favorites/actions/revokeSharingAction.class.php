@@ -39,9 +39,9 @@ class favoritesRevokeSharingAction extends AhgController
         }
 
         if ($revoked) {
-            $this->getUser()->setFlash('notice', 'Folder sharing has been revoked.');
+            $this->getUser()->setFlash('notice', __('Folder sharing has been revoked.'));
         } else {
-            $this->getUser()->setFlash('error', 'Could not revoke sharing.');
+            $this->getUser()->setFlash('error', __('Could not revoke sharing.'));
         }
 
         $this->redirect(['module' => 'favorites', 'action' => 'browse', 'folder_id' => $folderId]);

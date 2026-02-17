@@ -87,12 +87,12 @@ class ResearchBridgeService
     public function sendToCollection(int $userId, array $favoriteIds, int $collectionId, bool $includeNotes = true): array
     {
         if (!$this->isResearchEnabled()) {
-            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => 'Research plugin not enabled.'];
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Research plugin not enabled.')];
         }
 
         $researcherId = $this->getResearcherId($userId);
         if (!$researcherId) {
-            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => 'You are not registered as a researcher.'];
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('You are not registered as a researcher.')];
         }
 
         $service = $this->getResearchService();
@@ -122,7 +122,7 @@ class ResearchBridgeService
             'success' => true,
             'added' => $added,
             'skipped' => $skipped,
-            'message' => "Added {$added} items to collection." . ($skipped ? " {$skipped} already existed." : ''),
+            'message' => \__('Added %1% items to collection.', ['%1%' => $added]) . ($skipped ? ' ' . \__('%1% already existed.', ['%1%' => $skipped]) : ''),
         ];
     }
 
@@ -132,7 +132,7 @@ class ResearchBridgeService
     public function sendToProject(int $userId, array $favoriteIds, int $projectId): array
     {
         if (!$this->isResearchEnabled()) {
-            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => 'Research plugin not enabled.'];
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Research plugin not enabled.')];
         }
 
         $service = $this->getProjectService();
@@ -157,7 +157,7 @@ class ResearchBridgeService
             'success' => true,
             'added' => $added,
             'skipped' => $skipped,
-            'message' => "Added {$added} items to project." . ($skipped ? " {$skipped} skipped." : ''),
+            'message' => \__('Added %1% items to project.', ['%1%' => $added]) . ($skipped ? ' ' . \__('%1% skipped.', ['%1%' => $skipped]) : ''),
         ];
     }
 
@@ -167,7 +167,7 @@ class ResearchBridgeService
     public function sendToBibliography(int $userId, array $favoriteIds, int $bibliographyId, string $style = 'chicago'): array
     {
         if (!$this->isResearchEnabled()) {
-            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => 'Research plugin not enabled.'];
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Research plugin not enabled.')];
         }
 
         $service = $this->getBibliographyService();
@@ -189,7 +189,7 @@ class ResearchBridgeService
             'success' => true,
             'added' => $added,
             'skipped' => $skipped,
-            'message' => "Added {$added} citations." . ($skipped ? " {$skipped} skipped." : ''),
+            'message' => \__('Added %1% citations.', ['%1%' => $added]) . ($skipped ? ' ' . \__('%1% skipped.', ['%1%' => $skipped]) : ''),
         ];
     }
 

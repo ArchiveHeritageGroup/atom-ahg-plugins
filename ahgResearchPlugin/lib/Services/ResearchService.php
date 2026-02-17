@@ -331,7 +331,7 @@ class ResearchService
             }
             return DB::table('information_object_i18n')
                 ->whereIn('id', $ids)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->pluck('title', 'id')
                 ->toArray();
         };
@@ -468,7 +468,7 @@ class ResearchService
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('actor_i18n as ri', function($join) {
-                $join->on('io.repository_id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+                $join->on('io.repository_id', '=', 'ri.id')->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select('io.id', 'io.identifier', 'i18n.title', 'slug.slug', 'ri.authorized_form_of_name as repository_name')
@@ -476,11 +476,11 @@ class ResearchService
         if (!$object) return ['error' => 'Object not found'];
 
         $dates = DB::table('event as e')
-            ->join('event_i18n as ei', function($join) { $join->on('e.id', '=', 'ei.id')->where('ei.culture', '=', 'en'); })
+            ->join('event_i18n as ei', function($join) { $join->on('e.id', '=', 'ei.id')->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
             ->where('e.object_id', $objectId)->select('e.start_date', 'ei.date as date_display')->first();
 
         $creators = DB::table('event as e')
-            ->join('actor_i18n as ai', function($join) { $join->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', 'en'); })
+            ->join('actor_i18n as ai', function($join) { $join->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
             ->where('e.object_id', $objectId)->where('e.type_id', 111)
             ->pluck('ai.authorized_form_of_name')->toArray();
 
@@ -599,15 +599,15 @@ class ResearchService
             ->join('information_object as io', 'ci.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as lod', function($join) {
                 $join->on('io.level_of_description_id', '=', 'lod.id')
-                     ->where('lod.culture', '=', 'en');
+                     ->where('lod.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('actor_i18n as repo', function($join) {
                 $join->on('io.repository_id', '=', 'repo.id')
-                     ->where('repo.culture', '=', 'en');
+                     ->where('repo.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('ci.collection_id', $collectionId)
             ->select(
@@ -643,11 +643,11 @@ class ResearchService
             $descendants = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function($join) {
                     $join->on('io.id', '=', 'ioi.id')
-                         ->where('ioi.culture', '=', 'en');
+                         ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('term_i18n as lod', function($join) {
                     $join->on('io.level_of_description_id', '=', 'lod.id')
-                         ->where('lod.culture', '=', 'en');
+                         ->where('lod.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.lft', '>', $item->lft)
                 ->where('io.rgt', '<', $item->rgt)
@@ -1043,7 +1043,7 @@ class ResearchService
         $query = DB::table('research_verification as v')
             ->leftJoin('user as u', 'v.verified_by', '=', 'u.id')
             ->leftJoin('actor_i18n as ai', function ($join) {
-                $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('v.researcher_id', $researcherId)
             ->select('v.*', 'ai.authorized_form_of_name as verified_by_name');

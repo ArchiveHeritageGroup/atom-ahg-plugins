@@ -168,7 +168,7 @@ class OaiHeritageMetadataFormat
         self::writeNotes($xml, $resource, $culture);
 
         // Publication status
-        $xml->writeElement('heritage:publicationStatus', $resource->getPublicationStatus()->status->getName(['culture' => 'en']));
+        $xml->writeElement('heritage:publicationStatus', $resource->getPublicationStatus()->status->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]));
 
         // Timestamps
         $xml->writeElement('heritage:createdAt', \QubitOai::getDate($resource->getCreatedAt()));
@@ -200,7 +200,7 @@ class OaiHeritageMetadataFormat
 
         foreach ($events as $event) {
             if ($event->typeId && $event->type) {
-                $eventType = $event->type->getName(['culture' => 'en']);
+                $eventType = $event->type->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
 
                 $xml->startElement('heritage:date');
                 $xml->writeAttribute('type', strtolower($eventType));
@@ -267,7 +267,7 @@ class OaiHeritageMetadataFormat
             $xml->writeElement('heritage:term', self::escapeXml($subject->term->getName(['culture' => $culture])));
 
             if ($subject->term->taxonomy) {
-                $xml->writeAttribute('taxonomy', self::escapeXml($subject->term->taxonomy->getName(['culture' => 'en'])));
+                $xml->writeAttribute('taxonomy', self::escapeXml($subject->term->taxonomy->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()])));
             }
 
             $xml->endElement();
@@ -343,7 +343,7 @@ class OaiHeritageMetadataFormat
                 $xml->startElement('heritage:note');
 
                 if ($note->type) {
-                    $xml->writeAttribute('type', strtolower(str_replace(' ', '_', $note->type->getName(['culture' => 'en']))));
+                    $xml->writeAttribute('type', strtolower(str_replace(' ', '_', $note->type->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]))));
                 }
 
                 $xml->text(self::escapeXml($note->getContent(['culture' => $culture])));

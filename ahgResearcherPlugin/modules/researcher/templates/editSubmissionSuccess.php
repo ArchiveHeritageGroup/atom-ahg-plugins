@@ -5,7 +5,7 @@
   if ($submission->parent_object_id) {
     $parentTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
       ->where('id', $submission->parent_object_id)
-      ->where('culture', 'en')
+      ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
       ->value('title') ?? ('ID: ' . $submission->parent_object_id);
   }
 ?>

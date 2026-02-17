@@ -17,7 +17,7 @@ class favoritesAjaxSearchAction extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['success' => false, 'message' => 'Not authenticated']));
+            return $this->renderText(json_encode(['success' => false, 'message' => __('Not authenticated')]));
         }
 
         $userId = $this->getUser()->getAttribute('user_id');

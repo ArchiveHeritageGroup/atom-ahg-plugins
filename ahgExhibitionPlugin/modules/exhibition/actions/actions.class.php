@@ -974,7 +974,7 @@ class exhibitionActions extends AhgController
         $objects = \Illuminate\Database\Capsule\Manager::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('digital_object as do', 'do.object_id', '=', 'io.id')
             ->where('io.id', '!=', 1) // Exclude root

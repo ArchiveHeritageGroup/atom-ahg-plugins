@@ -175,11 +175,11 @@ class ListCommand extends BaseCommand
             ->join('ahg_form_template as ft', 'ft.id', '=', 'fa.template_id')
             ->leftJoin('repository_i18n as ri', function ($join) {
                 $join->on('fa.repository_id', '=', 'ri.id')
-                    ->where('ri.culture', '=', 'en');
+                    ->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as ti', function ($join) {
                 $join->on('fa.level_of_description_id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'fa.*',

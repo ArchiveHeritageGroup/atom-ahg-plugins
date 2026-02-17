@@ -42,11 +42,11 @@ class ReportCommand extends BaseCommand
             ->leftJoin('information_object as io_b', 'dd.record_b_id', '=', 'io_b.id')
             ->leftJoin('information_object_i18n as ioi_a', function ($join) {
                 $join->on('io_a.id', '=', 'ioi_a.id')
-                    ->where('ioi_a.culture', '=', 'en');
+                    ->where('ioi_a.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi_b', function ($join) {
                 $join->on('io_b.id', '=', 'ioi_b.id')
-                    ->where('ioi_b.culture', '=', 'en');
+                    ->where('ioi_b.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'dd.id',

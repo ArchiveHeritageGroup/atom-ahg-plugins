@@ -152,7 +152,7 @@ class reportsReportSpatialAnalysisAction extends AhgController
         $places = \Illuminate\Database\Capsule\Manager::table('term as t')
             ->join('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', '=', 42) // Places taxonomy
             ->whereExists(function ($query) {
@@ -177,7 +177,7 @@ class reportsReportSpatialAnalysisAction extends AhgController
         $levels = \Illuminate\Database\Capsule\Manager::table('term as t')
             ->join('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
-                    ->where('ti.culture', '=', 'en');
+                    ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', '=', 34) // Level of description taxonomy
             ->orderBy('ti.name')

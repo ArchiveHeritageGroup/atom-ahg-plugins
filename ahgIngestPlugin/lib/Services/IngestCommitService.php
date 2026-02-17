@@ -329,7 +329,7 @@ class IngestCommitService
                     'title' => $session->new_parent_title ?: $session->title,
                     'levelOfDescription' => $session->new_parent_level ?: 'Fonds',
                     'publicationStatus' => 'Draft',
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 ], $rootId, $session);
 
                 // Cache so subsequent rows use the same parent

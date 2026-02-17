@@ -41,7 +41,7 @@ class metadataExtractionActions extends AhgController
             ->join('information_object as io', 'do.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'do.id',
@@ -114,7 +114,7 @@ class metadataExtractionActions extends AhgController
             ->join('information_object as io', 'do.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('do.id', $this->digitalObjectId)
             ->select(
@@ -484,7 +484,7 @@ class metadataExtractionActions extends AhgController
             'name' => $name,
             'value' => $value,
             'scope' => 'metadata_extraction',
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -503,7 +503,7 @@ class metadataExtractionActions extends AhgController
         // Create i18n record
         Illuminate\Database\Capsule\Manager::table('property_i18n')->insert([
             'id' => $propertyId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
     }
 }

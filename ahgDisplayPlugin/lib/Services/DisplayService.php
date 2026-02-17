@@ -78,7 +78,7 @@ class DisplayService
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('term_i18n as level', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select('io.*', 'i18n.title', 'i18n.scope_and_content', 'i18n.extent_and_medium',
@@ -110,7 +110,7 @@ class DisplayService
 
         return AhgDb::table('display_field as df')
             ->leftJoin('display_field_i18n as dfi', function ($j) {
-                $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', 'en');
+                $j->on('df.id', '=', 'dfi.id')->where('dfi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereIn('df.code', $fieldCodes)
             ->select('df.*', 'dfi.name', 'dfi.help_text')
@@ -126,7 +126,7 @@ class DisplayService
     {
         $query = AhgDb::table('display_level as dl')
             ->leftJoin('display_level_i18n as dli', function ($j) {
-                $j->on('dl.id', '=', 'dli.id')->where('dli.culture', '=', 'en');
+                $j->on('dl.id', '=', 'dli.id')->where('dli.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('dl.*', 'dli.name', 'dli.description')
             ->orderBy('dl.sort_order');
@@ -145,7 +145,7 @@ class DisplayService
     {
         return AhgDb::table('display_collection_type as dct')
             ->leftJoin('display_collection_type_i18n as dcti', function ($j) {
-                $j->on('dct.id', '=', 'dcti.id')->where('dcti.culture', '=', 'en');
+                $j->on('dct.id', '=', 'dcti.id')->where('dcti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('dct.*', 'dcti.name', 'dcti.description')
             ->orderBy('dct.sort_order')

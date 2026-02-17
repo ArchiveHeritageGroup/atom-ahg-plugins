@@ -49,7 +49,7 @@ class portableExportActions extends sfActions
         // Get repositories for the scope selector
         $this->repositories = DB::table('repository')
             ->join('actor_i18n as ai', 'repository.id', '=', 'ai.id')
-            ->where('ai.culture', '=', 'en')
+            ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('ai.authorized_form_of_name')
             ->select('repository.id', 'ai.authorized_form_of_name as name')
             ->get()
@@ -360,7 +360,7 @@ class portableExportActions extends sfActions
         $io = DB::table('slug as s')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('s.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('s.slug', $slug)
             ->select('s.object_id', 'ioi.title')
@@ -481,7 +481,7 @@ class portableExportActions extends sfActions
         $results = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->where('io.parent_id', 1)

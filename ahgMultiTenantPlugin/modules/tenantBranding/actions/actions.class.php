@@ -62,7 +62,7 @@ class tenantBrandingActions extends AhgController
         $this->repository = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.id', $repoId)
             ->select('r.id', 'r.identifier', 'ai.authorized_form_of_name as name')

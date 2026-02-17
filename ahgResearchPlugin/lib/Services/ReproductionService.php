@@ -92,7 +92,7 @@ class ReproductionService
             ->leftJoin('research_researcher as res', 'r.researcher_id', '=', 'res.id')
             ->leftJoin('user as proc', 'r.processed_by', '=', 'proc.id')
             ->leftJoin('actor_i18n as proc_name', function ($join) {
-                $join->on('proc.id', '=', 'proc_name.id')->where('proc_name.culture', '=', 'en');
+                $join->on('proc.id', '=', 'proc_name.id')->where('proc_name.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.id', $requestId)
             ->select(
@@ -319,7 +319,7 @@ class ReproductionService
         return DB::table('research_request_status_history as h')
             ->leftJoin('user as u', 'h.changed_by', '=', 'u.id')
             ->leftJoin('actor_i18n as ai', function ($join) {
-                $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('h.request_id', $requestId)
             ->where('h.request_type', $requestType)
@@ -347,7 +347,7 @@ class ReproductionService
         if (!empty($data['object_id'])) {
             $object = DB::table('information_object_i18n')
                 ->where('id', $data['object_id'])
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
             $objectTitle = $object->title ?? null;
         }
@@ -403,7 +403,7 @@ class ReproductionService
     {
         $items = DB::table('research_reproduction_item as i')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('i.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('i.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'i.object_id', '=', 'slug.object_id')
             ->where('i.request_id', $requestId)

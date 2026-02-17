@@ -166,7 +166,7 @@ class icipActions extends AhgController
         $this->consents = DB::table('icip_consent as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.community_id', $this->id)
             ->select(['c.*', 'ioi.title as object_title'])
@@ -226,7 +226,7 @@ class icipActions extends AhgController
             ->leftJoin('icip_community as com', 'c.community_id', '=', 'com.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'c.information_object_id', '=', 's.object_id')
             ->select([
@@ -291,7 +291,7 @@ class icipActions extends AhgController
             $this->object = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('io.id', '=', 'ioi.id')
-                        ->where('ioi.culture', '=', 'en');
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('io.id', $this->objectId)
@@ -349,7 +349,7 @@ class icipActions extends AhgController
             ->leftJoin('icip_community as com', 'c.community_id', '=', 'com.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'c.information_object_id', '=', 's.object_id')
             ->where('c.id', $this->id)
@@ -382,7 +382,7 @@ class icipActions extends AhgController
             ->join('icip_community as com', 'c.community_id', '=', 'com.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'c.*',
@@ -475,7 +475,7 @@ class icipActions extends AhgController
             $this->object = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('io.id', '=', 'ioi.id')
-                        ->where('ioi.culture', '=', 'en');
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('io.id', $this->objectId)
@@ -533,7 +533,7 @@ class icipActions extends AhgController
             ->join('icip_community as com', 'c.community_id', '=', 'com.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'c.information_object_id', '=', 's.object_id')
             ->where('c.id', $this->id)
@@ -585,7 +585,7 @@ class icipActions extends AhgController
             ->join('icip_tk_label_type as t', 'l.label_type_id', '=', 't.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('l.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'l.information_object_id', '=', 's.object_id')
             ->leftJoin('icip_community as c', 'l.community_id', '=', 'c.id')
@@ -624,7 +624,7 @@ class icipActions extends AhgController
             ->join('icip_cultural_notice_type as t', 'n.notice_type_id', '=', 't.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('n.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'n.information_object_id', '=', 's.object_id')
             ->leftJoin('icip_community as c', 'n.community_id', '=', 'c.id')
@@ -700,7 +700,7 @@ class icipActions extends AhgController
         $this->restrictions = DB::table('icip_access_restriction as r')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('r.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'r.information_object_id', '=', 's.object_id')
             ->leftJoin('icip_community as c', 'r.community_id', '=', 'c.id')
@@ -785,7 +785,7 @@ class icipActions extends AhgController
         $this->consents = DB::table('icip_consent as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'c.information_object_id', '=', 's.object_id')
             ->where('c.community_id', $this->id)
@@ -804,7 +804,7 @@ class icipActions extends AhgController
             ->join('icip_cultural_notice_type as t', 'n.notice_type_id', '=', 't.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('n.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('n.community_id', $this->id)
             ->select(['n.*', 't.name as notice_name', 'ioi.title as object_title'])
@@ -815,7 +815,7 @@ class icipActions extends AhgController
             ->join('icip_tk_label_type as t', 'l.label_type_id', '=', 't.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('l.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('l.community_id', $this->id)
             ->select(['l.*', 't.name as label_name', 't.code', 'ioi.title as object_title'])
@@ -1210,7 +1210,7 @@ class icipActions extends AhgController
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('s.slug', $slug)
             ->select([

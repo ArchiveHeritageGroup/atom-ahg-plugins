@@ -189,7 +189,7 @@ class ProvenanceRepository
             ->join('information_object as io', 'pr.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('pr.is_complete', 0)
             ->orWhere('pr.has_gaps', 1)
@@ -214,7 +214,7 @@ class ProvenanceRepository
             ->join('information_object as io', 'pr.information_object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('pr.nazi_era_provenance_checked', 0)
             ->orderBy('pr.created_at')

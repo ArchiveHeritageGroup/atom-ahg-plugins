@@ -33,7 +33,7 @@
                         <?php
                         $repos = \Illuminate\Database\Capsule\Manager::table('repository as r')
                             ->join('actor_i18n as ai', 'r.id', '=', 'ai.id')
-                            ->where('ai.culture', 'en')
+                            ->where('ai.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                             ->select('r.id', 'ai.authorized_form_of_name')
                             ->orderBy('ai.authorized_form_of_name')
                             ->get();
@@ -53,7 +53,7 @@
                         $levels = \Illuminate\Database\Capsule\Manager::table('term as t')
                             ->join('term_i18n as ti', 't.id', '=', 'ti.id')
                             ->where('t.taxonomy_id', 157) // Level of Description taxonomy
-                            ->where('ti.culture', 'en')
+                            ->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                             ->select('t.id', 'ti.name')
                             ->orderBy('ti.name')
                             ->get();

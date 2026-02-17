@@ -50,11 +50,11 @@ if (!$this->getUser()->isAdministrator()) {
         $query = DB::table('rights_embargo as e')
             ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                 $join->on('e.id', '=', 'ei.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'e.object_id')
             ->select([
@@ -81,7 +81,7 @@ if (!$this->getUser()->isAdministrator()) {
             $this->embargo = DB::table('rights_embargo as e')
                 ->leftJoin('rights_embargo_i18n as ei', function ($join) {
                     $join->on('e.id', '=', 'ei.id')
-                        ->where('ei.culture', '=', 'en');
+                        ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('e.id', $id)
                 ->select(['e.*', 'ei.reason_note', 'ei.internal_note'])
@@ -135,7 +135,7 @@ if (!$this->getUser()->isAdministrator()) {
                 ]);
 
                 DB::table('rights_embargo_i18n')->updateOrInsert(
-                    ['id' => $id, 'culture' => 'en'],
+                    ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['reason_note' => $data['reason_note'], 'internal_note' => $data['internal_note']]
                 );
 
@@ -206,11 +206,11 @@ if (!$this->getUser()->isAdministrator()) {
         $query = DB::table('rights_orphan_work as o')
             ->leftJoin('rights_orphan_work_i18n as oi', function ($join) {
                 $join->on('o.id', '=', 'oi.id')
-                    ->where('oi.culture', '=', 'en');
+                    ->where('oi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('o.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'o.object_id')
             ->select([
@@ -238,7 +238,7 @@ if (!$this->getUser()->isAdministrator()) {
             $this->orphanWork = DB::table('rights_orphan_work as o')
                 ->leftJoin('rights_orphan_work_i18n as oi', function ($join) {
                     $join->on('o.id', '=', 'oi.id')
-                        ->where('oi.culture', '=', 'en');
+                        ->where('oi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('o.id', $id)
                 ->select(['o.*', 'oi.notes', 'oi.search_summary'])
@@ -277,7 +277,7 @@ if (!$this->getUser()->isAdministrator()) {
                 ]);
 
                 DB::table('rights_orphan_work_i18n')->updateOrInsert(
-                    ['id' => $id, 'culture' => 'en'],
+                    ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['notes' => $data['notes']]
                 );
 
@@ -344,11 +344,11 @@ if (!$this->getUser()->isAdministrator()) {
             ->join('rights_tk_label as tl', 'otl.tk_label_id', '=', 'tl.id')
             ->leftJoin('rights_tk_label_i18n as tli', function ($join) {
                 $join->on('tl.id', '=', 'tli.id')
-                    ->where('tli.culture', '=', 'en');
+                    ->where('tli.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('otl.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'otl.object_id')
             ->select([
@@ -429,7 +429,7 @@ if (!$this->getUser()->isAdministrator()) {
                 $this->data = DB::table('rights_orphan_work as o')
                     ->leftJoin('information_object_i18n as ioi', function ($join) {
                         $join->on('o.object_id', '=', 'ioi.id')
-                            ->where('ioi.culture', '=', 'en');
+                            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->select(['o.*', 'ioi.title as object_title'])
                     ->orderBy('o.status')
@@ -441,11 +441,11 @@ if (!$this->getUser()->isAdministrator()) {
                     ->join('rights_tk_label as tl', 'otl.tk_label_id', '=', 'tl.id')
                     ->leftJoin('rights_tk_label_i18n as tli', function ($join) {
                         $join->on('tl.id', '=', 'tli.id')
-                            ->where('tli.culture', '=', 'en');
+                            ->where('tli.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->leftJoin('information_object_i18n as ioi', function ($join) {
                         $join->on('otl.object_id', '=', 'ioi.id')
-                            ->where('ioi.culture', '=', 'en');
+                            ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->select(['otl.*', 'tl.code', 'tli.name as label_name', 'ioi.title as object_title'])
                     ->get();

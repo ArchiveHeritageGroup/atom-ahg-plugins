@@ -135,7 +135,7 @@ class AhgSettingsPluginsAction extends AhgController
         try {
             $row = DB::table('setting_i18n')
                 ->where('id', 1)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first(['value']);
 
             if (!$row || empty($row->value)) {
@@ -160,7 +160,7 @@ class AhgSettingsPluginsAction extends AhgController
 
             DB::table('setting_i18n')
                 ->where('id', 1)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->update(['value' => serialize($plugins)]);
 
         } catch (Exception $e) {

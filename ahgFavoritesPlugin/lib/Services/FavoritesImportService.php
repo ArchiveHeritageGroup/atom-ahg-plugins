@@ -29,7 +29,7 @@ class FavoritesImportService
     {
         $lines = str_getcsv($csvContent, "\n");
         if (empty($lines)) {
-            return ['imported' => 0, 'skipped' => 0, 'errors' => ['Empty CSV content.']];
+            return ['imported' => 0, 'skipped' => 0, 'errors' => [\__('Empty CSV content.')]];
         }
 
         // Strip BOM if present
@@ -45,7 +45,7 @@ class FavoritesImportService
         $refCol = array_search('reference_code', $header);
 
         if ($slugCol === false && $refCol === false) {
-            return ['imported' => 0, 'skipped' => 0, 'errors' => ['CSV must have a "slug" or "reference_code" column.']];
+            return ['imported' => 0, 'skipped' => 0, 'errors' => [\__('CSV must have a "slug" or "reference_code" column.')]];
         }
 
         $imported = 0;
@@ -78,7 +78,7 @@ class FavoritesImportService
 
             if (!$objectId) {
                 $identifier = ($slugCol !== false && !empty($row[$slugCol])) ? $row[$slugCol] : ($row[$refCol] ?? '');
-                $errors[] = "Row {$i}: could not resolve '{$identifier}'.";
+                $errors[] = \__('Row %1%: could not resolve "%2%".', ['%1%' => $i, '%2%' => $identifier]);
                 $skipped++;
                 continue;
             }
@@ -120,7 +120,7 @@ class FavoritesImportService
                 ->value('object_id');
 
             if (!$objectId) {
-                $errors[] = "Slug '{$slug}' not found.";
+                $errors[] = \__('Slug "%1%" not found.', ['%1%' => $slug]);
                 $skipped++;
                 continue;
             }
@@ -157,7 +157,7 @@ class FavoritesImportService
             }
 
             if (!DB::table('object')->where('id', $oid)->exists()) {
-                $errors[] = "Object ID {$oid} not found.";
+                $errors[] = \__('Object ID %1% not found.', ['%1%' => $oid]);
                 $skipped++;
                 continue;
             }

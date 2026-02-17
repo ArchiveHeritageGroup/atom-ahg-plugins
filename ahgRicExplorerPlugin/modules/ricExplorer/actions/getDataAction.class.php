@@ -259,7 +259,7 @@ SPARQL;
         // Get creators via events
         $events = DB::table('event as e')
             ->leftJoin('actor as a', 'e.actor_id', '=', 'a.id')
-            ->leftJoin('actor_i18n as ai', function($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en'); })
+            ->leftJoin('actor_i18n as ai', function($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
             ->where('e.object_id', $recordId)
             ->whereNotNull('e.actor_id')
             ->select('a.id as actor_id', 'ai.authorized_form_of_name')
@@ -289,17 +289,17 @@ SPARQL;
         }
         if (preg_match('/\/(place|term)\/(\d+)$/', $uri, $m)) {
             $id = $m[2];
-            $term = DB::table('term_i18n')->where('id', $id)->where('culture', 'en')->value('name');
+            $term = DB::table('term_i18n')->where('id', $id)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('name');
             if ($term) return $term;
         }
         if (preg_match('/\/(person|actor|corporatebody|family)\/(\d+)$/', $uri, $m)) {
             $id = $m[2];
-            $name = DB::table('actor_i18n')->where('id', $id)->where('culture', 'en')->value('authorized_form_of_name');
+            $name = DB::table('actor_i18n')->where('id', $id)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('authorized_form_of_name');
             if ($name) return $name;
         }
         if (preg_match('/\/(record|recordset)\/(\d+)$/', $uri, $m)) {
             $id = $m[2];
-            $title = DB::table('information_object_i18n')->where('id', $id)->where('culture', 'en')->value('title');
+            $title = DB::table('information_object_i18n')->where('id', $id)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('title');
             if ($title) return $title;
         }
         if (preg_match('/\/(\w+)\/(\d+)$/', $uri, $m)) return ucfirst($m[1]) . ' ' . $m[2];

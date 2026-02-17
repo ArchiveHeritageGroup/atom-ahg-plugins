@@ -509,7 +509,7 @@ class ahgMetadataExtractionJob extends arBaseJob
         if (empty($informationObject->title) && !empty($keyFields['title'])) {
             DB::table('information_object_i18n')
                 ->updateOrInsert(
-                    ['id' => $informationObjectId, 'culture' => 'en'],
+                    ['id' => $informationObjectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['title' => $keyFields['title']]
                 );
             $modified = true;
@@ -557,7 +557,7 @@ class ahgMetadataExtractionJob extends arBaseJob
             $actor = DB::table('actor as a')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('a.id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('ai.authorized_form_of_name', $keyFields['creator'])
                 ->select('a.id')
@@ -580,7 +580,7 @@ class ahgMetadataExtractionJob extends arBaseJob
                 // Create actor i18n
                 DB::table('actor_i18n')->insert([
                     'id' => $actorObjectId,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'authorized_form_of_name' => $keyFields['creator'],
                 ]);
 
@@ -635,7 +635,7 @@ class ahgMetadataExtractionJob extends arBaseJob
                 $term = DB::table('term as t')
                     ->leftJoin('term_i18n as ti', function ($join) {
                         $join->on('t.id', '=', 'ti.id')
-                            ->where('ti.culture', '=', 'en');
+                            ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->where('t.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
                     ->where('ti.name', $keyword)
@@ -660,7 +660,7 @@ class ahgMetadataExtractionJob extends arBaseJob
                     // Create term i18n
                     DB::table('term_i18n')->insert([
                         'id' => $termObjectId,
-                        'culture' => 'en',
+                        'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                         'name' => $keyword,
                     ]);
 
@@ -711,7 +711,7 @@ class ahgMetadataExtractionJob extends arBaseJob
             if (strpos($current, '=== FILE INFO ===') === false) {
                 DB::table('information_object_i18n')
                     ->updateOrInsert(
-                        ['id' => $informationObjectId, 'culture' => 'en'],
+                        ['id' => $informationObjectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                         ['physical_characteristics' => trim($current . "\n\n" . $techSummary)]
                     );
                 $modified = true;

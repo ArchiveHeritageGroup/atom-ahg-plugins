@@ -33,7 +33,7 @@ class damReportsActions extends AhgController
                 ->toArray(),
             'byMediaType' => DB::table('digital_object as d')
                 ->leftJoin('term_i18n as t', function($join) {
-                    $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', 'en');
+                    $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->select('t.name as media_type', DB::raw('COUNT(*) as count'))
                 ->groupBy('d.media_type_id', 't.name')
@@ -65,10 +65,10 @@ class damReportsActions extends AhgController
         $query = DB::table('digital_object as d')
             ->leftJoin('information_object as io', 'd.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as t', function($join) {
-                $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', 'en');
+                $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('d.*', 'ioi.title', 't.name as media_type_name');
         
@@ -91,7 +91,7 @@ class damReportsActions extends AhgController
         $this->mimeTypes = DB::table('digital_object')->distinct()->whereNotNull('mime_type')->pluck('mime_type')->toArray();
         $this->mediaTypes = DB::table('digital_object as d')
             ->leftJoin('term_i18n as t', function($join) {
-                $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', 'en');
+                $join->on('d.media_type_id', '=', 't.id')->where('t.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('d.media_type_id', 't.name')
             ->distinct()
@@ -110,7 +110,7 @@ class damReportsActions extends AhgController
         $query = DB::table('digital_object_metadata as m')
             ->leftJoin('digital_object as d', 'm.digital_object_id', '=', 'd.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('m.*', 'd.name as filename', 'd.mime_type', 'ioi.title');
         
@@ -149,7 +149,7 @@ class damReportsActions extends AhgController
         $query = DB::table('dam_iptc_metadata as i')
             ->leftJoin('digital_object as d', 'i.object_id', '=', 'd.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('i.*', 'd.name as filename', 'ioi.title as record_title');
         
@@ -201,7 +201,7 @@ class damReportsActions extends AhgController
                 ->toArray(),
             'largest' => DB::table('digital_object as d')
                 ->leftJoin('information_object_i18n as ioi', function($join) {
-                    $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->select('d.name', 'd.mime_type', 'd.byte_size', 'ioi.title')
                 ->orderBy('d.byte_size', 'desc')

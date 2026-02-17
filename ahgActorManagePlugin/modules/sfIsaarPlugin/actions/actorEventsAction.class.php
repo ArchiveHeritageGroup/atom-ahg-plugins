@@ -93,7 +93,7 @@ class sfIsaarPluginActorEventsAction extends AhgController
             if ($row->type_id) {
                 $typeRow = $db::table('term_i18n')
                     ->where('id', $row->type_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 $typeName = $typeRow->name ?? '';
             }
@@ -104,7 +104,7 @@ class sfIsaarPluginActorEventsAction extends AhgController
             if ($row->information_object_id) {
                 $ioRow = $db::table('information_object_i18n')
                     ->where('id', $row->information_object_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
                 $title = $ioRow->title ?? '';
 

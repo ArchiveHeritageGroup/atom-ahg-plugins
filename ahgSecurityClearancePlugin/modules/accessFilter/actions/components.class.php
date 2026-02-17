@@ -29,7 +29,7 @@ class accessFilterComponents extends AhgComponents
         $this->objectId = $this->getVar('objectId');
         $this->restrictions = \Illuminate\Database\Capsule\Manager::table('object_rights_holder as orh')
             ->leftJoin('actor_i18n as ai', function ($join) {
-                $join->on('ai.id', '=', 'orh.donor_id')->where('ai.culture', '=', 'en');
+                $join->on('ai.id', '=', 'orh.donor_id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('donor_agreement as da', 'da.donor_id', '=', 'orh.donor_id')
             ->leftJoin('donor_agreement_restriction as dar', 'dar.donor_agreement_id', '=', 'da.id')

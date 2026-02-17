@@ -22,7 +22,7 @@ class galleryEditAction extends AhgController
         if ($slug) {
             $this->resource = DB::table('information_object as io')
                 ->join('information_object_i18n as ioi', function($j) {
-                    $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->join('slug as s', 'io.id', '=', 's.object_id')
                 ->where('s.slug', $slug)
@@ -220,7 +220,7 @@ class galleryEditAction extends AhgController
     {
         $prop = DB::table('property as p')
             ->join('property_i18n as pi', function($j) {
-                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', 'en');
+                $j->on('p.id', '=', 'pi.id')->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.object_id', $resourceId)
             ->where('p.name', 'galleryData')
@@ -243,7 +243,7 @@ class galleryEditAction extends AhgController
     {
         $this->workTypes = DB::table('term as t')
             ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', 35)
             ->orderBy('ti.name')
@@ -252,7 +252,7 @@ class galleryEditAction extends AhgController
 
         $this->materials = DB::table('term as t')
             ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', 56)
             ->orderBy('ti.name')
@@ -261,7 +261,7 @@ class galleryEditAction extends AhgController
 
         $this->repositories = DB::table('repository')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('repository.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('repository.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->orderBy('ai.authorized_form_of_name')
             ->pluck('ai.authorized_form_of_name', 'repository.id')
@@ -269,7 +269,7 @@ class galleryEditAction extends AhgController
 
         $this->creators = DB::table('actor')
             ->join('actor_i18n as ai', function($j) {
-                $j->on('actor.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $j->on('actor.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull('ai.authorized_form_of_name')
             ->where('ai.authorized_form_of_name', '!=', '')
@@ -280,7 +280,7 @@ class galleryEditAction extends AhgController
         // Display standards
         $this->displayStandards = DB::table('term as t')
             ->join('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', 70)
             ->orderBy('ti.name')
@@ -388,12 +388,12 @@ class galleryEditAction extends AhgController
                 'parent_id' => $parentId,
                 'lft' => $lft,
                 'rgt' => $rgt,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'display_standard_id' => $this->getTermIdByCode('gallery', 70) ?? 353,
             ]);
             DB::table('information_object_i18n')->insert([
                 'id' => $objectId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'title' => $request->getParameter('title'),
                 'scope_and_content' => $request->getParameter('description'),
                 'extent_and_medium' => $request->getParameter('dimensions_display'),
@@ -433,7 +433,7 @@ class galleryEditAction extends AhgController
 
             DB::table('information_object_i18n')
                 ->where('id', $resourceId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->update([
                     'title' => $request->getParameter('title'),
                     'scope_and_content' => $request->getParameter('description'),
@@ -501,7 +501,7 @@ class galleryEditAction extends AhgController
                 'object_id' => $resourceId,
                 'type_id' => 111,
                 'actor_id' => $actorId,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
         }
     }
@@ -516,17 +516,17 @@ class galleryEditAction extends AhgController
         if ($existing) {
             DB::table('property_i18n')
                 ->where('id', $existing->id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->update(['value' => $value]);
         } else {
             $propId = DB::table('property')->insertGetId([
                 'object_id' => $objectId,
                 'name' => $name,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
             DB::table('property_i18n')->insert([
                 'id' => $propId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $value,
             ]);
         }
@@ -568,7 +568,7 @@ class galleryEditAction extends AhgController
         try {
             $io = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
-                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', $resourceId)
                 ->select(['io.identifier', 'ioi.title', 'ioi.scope_and_content', 'ioi.extent_and_medium'])

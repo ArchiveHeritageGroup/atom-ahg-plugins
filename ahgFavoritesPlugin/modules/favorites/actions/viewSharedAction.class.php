@@ -33,7 +33,7 @@ class favoritesViewSharedAction extends AhgController
         // Handle "copy to my favourites" POST
         if ($request->isMethod('post') && $request->getParameter('copy_to_favorites')) {
             if (!$this->getUser()->isAuthenticated()) {
-                $this->getUser()->setFlash('error', 'You must be logged in to copy favorites.');
+                $this->getUser()->setFlash('error', __('You must be logged in to copy favorites.'));
                 $this->redirect('/favorites/shared/' . $token);
 
                 return;

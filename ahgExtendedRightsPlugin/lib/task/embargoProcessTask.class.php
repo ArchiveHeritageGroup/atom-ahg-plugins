@@ -122,7 +122,7 @@ EOF;
         $expiredEmbargoes = \Illuminate\Database\Capsule\Manager::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('e.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.status', 'active')
             ->where('e.auto_release', true)
@@ -212,7 +212,7 @@ EOF;
             $expiringEmbargoes = \Illuminate\Database\Capsule\Manager::table('rights_embargo as e')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('e.object_id', '=', 'ioi.id')
-                        ->where('ioi.culture', '=', 'en');
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('e.status', 'active')
                 ->where('e.end_date', $targetDate)

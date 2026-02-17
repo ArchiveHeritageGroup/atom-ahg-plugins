@@ -241,13 +241,13 @@ class RightsImportService
                 'copyright_jurisdiction' => $rightsData['copyright_jurisdiction'] ?? null,
                 'statute_determination_date' => $rightsData['statute_determination_date'] ?? null,
                 'statute_citation_id' => $rightsData['statute_citation_id'] ?? null,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
             
             // Create i18n record
             DB::table('rights_i18n')->insert([
                 'id' => $objectId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'rights_note' => $rightsData['rights_note'] ?? null,
                 'copyright_note' => $rightsData['copyright_note'] ?? null,
                 'identifier_value' => $rightsData['identifier_value'] ?? null,
@@ -257,7 +257,7 @@ class RightsImportService
             // Get the "Right" relation type ID
             $rightRelationTypeId = DB::table('term_i18n')
                 ->where('name', self::RELATION_TYPE_RIGHT)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('id');
             
             if ($rightRelationTypeId) {
@@ -274,7 +274,7 @@ class RightsImportService
                     'subject_id' => $informationObjectId,
                     'object_id' => $objectId,
                     'type_id' => $rightRelationTypeId,
-                    'source_culture' => 'en',
+                    'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 ]);
             }
             
@@ -342,7 +342,7 @@ class RightsImportService
         // Check if exists
         $existing = DB::table('actor_i18n')
             ->where('authorized_form_of_name', $name)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('id');
         
         if ($existing) {
@@ -362,12 +362,12 @@ class RightsImportService
         
         DB::table('actor')->insert([
             'id' => $objectId,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
         
         DB::table('actor_i18n')->insert([
             'id' => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'authorized_form_of_name' => $name,
         ]);
         

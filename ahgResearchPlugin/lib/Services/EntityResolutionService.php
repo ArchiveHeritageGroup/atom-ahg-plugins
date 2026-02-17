@@ -193,7 +193,7 @@ class EntityResolutionService
             // Get the source actor's name
             $source = DB::table('actor_i18n')
                 ->where('id', $entityId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             if (!$source || empty($source->authorized_form_of_name)) {
@@ -215,7 +215,7 @@ class EntityResolutionService
             // Build LIKE query for each significant name part
             $query = DB::table('actor_i18n as ai')
                 ->where('ai.id', '!=', $entityId)
-                ->where('ai.culture', 'en')
+                ->where('ai.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->whereNotNull('ai.authorized_form_of_name')
                 ->where('ai.authorized_form_of_name', '!=', '');
 
@@ -409,7 +409,7 @@ class EntityResolutionService
         if ($type === 'actor') {
             $name = DB::table('actor_i18n')
                 ->where('id', $id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('authorized_form_of_name');
             return $name ?: "Actor #{$id}";
         }
@@ -417,7 +417,7 @@ class EntityResolutionService
         if ($type === 'information_object') {
             $title = DB::table('information_object_i18n')
                 ->where('id', $id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('title');
             return $title ?: "Object #{$id}";
         }
@@ -425,7 +425,7 @@ class EntityResolutionService
         if ($type === 'repository') {
             $name = DB::table('actor_i18n')
                 ->where('id', $id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('authorized_form_of_name');
             return $name ?: "Repository #{$id}";
         }

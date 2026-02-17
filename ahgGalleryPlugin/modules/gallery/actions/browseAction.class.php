@@ -22,7 +22,7 @@ class galleryBrowseAction extends AhgController
 
         $query = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($j) {
-                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
             ->leftJoin('digital_object as do_master', function ($j) {

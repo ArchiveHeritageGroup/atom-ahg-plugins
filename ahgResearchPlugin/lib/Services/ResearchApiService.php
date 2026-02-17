@@ -365,7 +365,7 @@ class ResearchApiService
 
         $items = DB::table('research_collection_item as ci')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'ci.object_id', '=', 'slug.object_id')
             ->where('ci.collection_id', $collectionId)
@@ -673,7 +673,7 @@ class ResearchApiService
 
         $query = DB::table('research_annotation as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('a.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
             ->where('a.researcher_id', $this->authenticatedResearcher->id)

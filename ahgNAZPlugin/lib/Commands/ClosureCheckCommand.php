@@ -45,7 +45,7 @@ class ClosureCheckCommand extends BaseCommand
         $expired = DB::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.end_date')
@@ -57,7 +57,7 @@ class ClosureCheckCommand extends BaseCommand
         $expiring = DB::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.end_date')
@@ -71,7 +71,7 @@ class ClosureCheckCommand extends BaseCommand
         $overdueReviews = DB::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('c.status', 'active')
             ->whereNotNull('c.review_date')

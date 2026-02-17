@@ -116,7 +116,7 @@
                 $users = \Illuminate\Database\Capsule\Manager::table('user as u')
                     ->leftJoin('actor_i18n as ai', function ($join) {
                         $join->on('u.id', '=', 'ai.id')
-                            ->where('ai.culture', '=', 'en');
+                            ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->where('u.active', 1)
                     ->select('u.id', 'u.username', 'u.email', 'ai.authorized_form_of_name as name')

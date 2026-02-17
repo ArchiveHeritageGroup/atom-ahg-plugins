@@ -88,7 +88,7 @@ class ccoProvenanceAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('slug.slug', $slug)
             ->select([
@@ -114,7 +114,7 @@ class ccoProvenanceAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $id)
             ->select([

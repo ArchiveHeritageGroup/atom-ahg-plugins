@@ -17,6 +17,15 @@ class aiActions extends AhgController
     private const TAXONOMY_PLACE_ID = 42;
     private const TAXONOMY_SUBJECT_ID = 35;
 
+    private function getUserCulture(): string
+    {
+        try {
+            return $this->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
     public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
@@ -74,16 +83,18 @@ class aiActions extends AhgController
 
     public function executeReview($request)
     {
+        $culture = $this->getUserCulture();
+
         $this->pendingCount = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->where('status', 'pending')
             ->count();
-        
+
         $this->pendingObjects = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
             ->join('information_object', 'ahg_ner_entity.object_id', '=', 'information_object.id')
             ->join('slug', 'information_object.id', '=', 'slug.object_id')
-            ->leftJoin('information_object_i18n', function($join) {
+            ->leftJoin('information_object_i18n', function($join) use ($culture) {
                 $join->on('information_object.id', '=', 'information_object_i18n.id')
-                     ->where('information_object_i18n.culture', '=', 'en');
+                     ->where('information_object_i18n.culture', '=', $culture);
             })
             ->where('ahg_ner_entity.status', 'pending')
             ->select(
@@ -257,10 +268,11 @@ class aiActions extends AhgController
         $entityTypeId = ($entityType === 'ORG') ? self::CORPORATE_BODY_ID : self::PERSON_ID;
 
         // Create actor via WriteServiceFactory
+        $culture = $this->getUserCulture();
         $actorId = WriteServiceFactory::actor()->createActor([
             'entity_type_id' => $entityTypeId,
             'authorized_form_of_name' => $entity->entity_value,
-        ], $culture ?? 'en');
+        ], $culture);
 
         // Link to information object
         $this->linkActorToObject($entity->object_id, $actorId);
@@ -397,10 +409,12 @@ class aiActions extends AhgController
      */
     private function getInformationObject(int $objectId): ?object
     {
+        $culture = $this->getUserCulture();
+
         return DB::table('information_object')
-            ->leftJoin('information_object_i18n', function ($join) {
+            ->leftJoin('information_object_i18n', function ($join) use ($culture) {
                 $join->on('information_object.id', '=', 'information_object_i18n.id')
-                     ->where('information_object_i18n.culture', '=', 'en');
+                     ->where('information_object_i18n.culture', '=', $culture);
             })
             ->where('information_object.id', $objectId)
             ->select(
@@ -591,6 +605,8 @@ class aiActions extends AhgController
 
     private function linkActorToObject($objectId, $actorId)
     {
+        $culture = $this->getUserCulture();
+
         $exists = Illuminate\Database\Capsule\Manager::table('relation')
             ->where('subject_id', $objectId)
             ->where('object_id', $actorId)
@@ -606,7 +622,7 @@ class aiActions extends AhgController
             ]);
 
             Illuminate\Database\Capsule\Manager::table('relation')->insert([
-                'source_culture' => 'en',
+                'source_culture' => $culture,
                 'id' => $nextId,
                 'subject_id' => $objectId,
                 'object_id' => $actorId,
@@ -655,6 +671,8 @@ class aiActions extends AhgController
 
     private function linkDateToObject($objectId, $dateString, $eventTypeId = 111)
     {
+        $culture = $this->getUserCulture();
+
         $parsedDate = $this->parseDateString($dateString);
         if (!$parsedDate) {
             return false;
@@ -676,11 +694,11 @@ class aiActions extends AhgController
                 'type_id' => $eventTypeId,
                 'start_date' => $parsedDate['start'],
                 'end_date' => $parsedDate['end'],
-                'source_culture' => 'en'
+                'source_culture' => $culture
             ]);
             Illuminate\Database\Capsule\Manager::table('event_i18n')->insert([
                 'id' => $nextId,
-                'culture' => 'en',
+                'culture' => $culture,
                 'date' => $dateString
             ]);
             return $nextId;
@@ -969,39 +987,40 @@ class aiActions extends AhgController
     
     private function processCreate($entity, $createType)
     {
+        $culture = $this->getUserCulture();
         $type = str_replace('create_', '', $createType);
-        
+
         if ($type === 'actor') {
             // Check if actor exists
             $existing = Illuminate\Database\Capsule\Manager::table('actor_i18n')
                 ->where('authorized_form_of_name', $entity->entity_value)
                 ->first();
-            
+
             if ($existing) {
                 $this->linkActorToObject($entity->object_id, $existing->id);
                 $actorId = $existing->id;
             } else {
                 // Create actor with raw SQL (faster than Propel)
                 $entityTypeId = ($entity->entity_type === 'ORG') ? self::CORPORATE_BODY_ID : self::PERSON_ID;
-                
+
                 // Insert into object table first
                 $actorId = Illuminate\Database\Capsule\Manager::table('object')->insertGetId([
                     'class_name' => 'QubitActor',
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
-                
+
                 // Insert into actor table
                 Illuminate\Database\Capsule\Manager::table('actor')->insert([
                     'id' => $actorId,
                     'entity_type_id' => $entityTypeId,
-                    'source_culture' => 'en'
+                    'source_culture' => $culture
                 ]);
-                
+
                 // Insert into actor_i18n table
                 Illuminate\Database\Capsule\Manager::table('actor_i18n')->insert([
                     'id' => $actorId,
-                    'culture' => 'en',
+                    'culture' => $culture,
                     'authorized_form_of_name' => $entity->entity_value
                 ]);
                 
@@ -1040,28 +1059,28 @@ class aiActions extends AhgController
                 Illuminate\Database\Capsule\Manager::table('term')->insert([
                     'id' => $termId,
                     'taxonomy_id' => self::TAXONOMY_PLACE_ID,
-                    'source_culture' => 'en'
+                    'source_culture' => $culture
                 ]);
-                
+
                 Illuminate\Database\Capsule\Manager::table('term_i18n')->insert([
                     'id' => $termId,
-                    'culture' => 'en',
+                    'culture' => $culture,
                     'name' => $entity->entity_value
                 ]);
-                
+
                 $slug = $this->generateSlug($entity->entity_value);
                 Illuminate\Database\Capsule\Manager::table('slug')->insert([
                     'object_id' => $termId,
                     'slug' => $slug
                 ]);
-                
+
                 $this->linkPlaceToObject($entity->object_id, $termId);
             }
-            
+
             Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
                 ->where('id', $entity->id)
                 ->update(['status' => 'linked', 'linked_actor_id' => $termId, 'reviewed_at' => date('Y-m-d H:i:s')]);
-                
+
         } elseif ($type === 'subject') {
             $existing = Illuminate\Database\Capsule\Manager::table('term')
                 ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
@@ -1082,12 +1101,12 @@ class aiActions extends AhgController
                 Illuminate\Database\Capsule\Manager::table('term')->insert([
                     'id' => $termId,
                     'taxonomy_id' => self::TAXONOMY_SUBJECT_ID,
-                    'source_culture' => 'en'
+                    'source_culture' => $culture
                 ]);
-                
+
                 Illuminate\Database\Capsule\Manager::table('term_i18n')->insert([
                     'id' => $termId,
-                    'culture' => 'en',
+                    'culture' => $culture,
                     'name' => $entity->entity_value
                 ]);
                 
@@ -1284,24 +1303,26 @@ class aiActions extends AhgController
     private function saveScopeAndContent($objectId, $summary)
     {
         try {
+            $culture = $this->getUserCulture();
+
             // Check if i18n record exists
             $exists = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                 ->where('id', $objectId)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->exists();
 
             if ($exists) {
                 // Update existing
                 Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                     ->where('id', $objectId)
-                    ->where('culture', 'en')
+                    ->where('culture', $culture)
                     ->update(['scope_and_content' => $summary]);
             } else {
                 // Insert new
                 Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                     ->insert([
                         'id' => $objectId,
-                        'culture' => 'en',
+                        'culture' => $culture,
                         'scope_and_content' => $summary
                     ]);
             }
@@ -1637,6 +1658,7 @@ class aiActions extends AhgController
         $this->stats = $service->getStatistics();
 
         // Get repositories for filter dropdown
+        $culture = $this->getUserCulture();
         $this->repositories = Illuminate\Database\Capsule\Manager::table('actor as a')
             ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
             ->whereIn('a.id', function ($query) {
@@ -1645,7 +1667,7 @@ class aiActions extends AhgController
                     ->whereNotNull('repository_id')
                     ->distinct();
             })
-            ->where('ai.culture', 'en')
+            ->where('ai.culture', $culture)
             ->select('a.id', 'ai.authorized_form_of_name as name')
             ->orderBy('ai.authorized_form_of_name')
             ->get()
@@ -1672,9 +1694,10 @@ class aiActions extends AhgController
         }
 
         // Get object title
+        $culture = $this->getUserCulture();
         $object = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
             ->where('id', $suggestion->object_id)
-            ->where('culture', 'en')
+            ->where('culture', $culture)
             ->first();
 
         $slug = Illuminate\Database\Capsule\Manager::table('slug')
@@ -1887,10 +1910,11 @@ class aiActions extends AhgController
         $this->taskTypes = $service::getTaskTypes();
 
         // Get repositories for filter
+        $culture = $this->getUserCulture();
         $this->repositories = Illuminate\Database\Capsule\Manager::table('actor')
             ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
             ->where('actor.class_name', 'QubitRepository')
-            ->where('actor_i18n.culture', 'en')
+            ->where('actor_i18n.culture', $culture)
             ->orderBy('actor_i18n.authorized_form_of_name')
             ->select('actor.id', 'actor_i18n.authorized_form_of_name as name')
             ->get()
@@ -1964,11 +1988,12 @@ class aiActions extends AhgController
                 $objectIds = $query->limit($data['limit'] ?? 1000)->pluck('id')->toArray();
             } elseif (!empty($data['search_query'])) {
                 // Search-based selection using title and scope_and_content
+                $culture = $this->getUserCulture();
                 $searchTerm = '%' . trim($data['search_query']) . '%';
                 $query = Illuminate\Database\Capsule\Manager::table('information_object')
                     ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
                     ->where('information_object.id', '!=', 1)
-                    ->where('information_object_i18n.culture', '=', 'en')
+                    ->where('information_object_i18n.culture', '=', $culture)
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('information_object_i18n.title', 'LIKE', $searchTerm)
                           ->orWhere('information_object_i18n.scope_and_content', 'LIKE', $searchTerm)
@@ -2049,14 +2074,15 @@ class aiActions extends AhgController
         $this->taskTypes = $service::getTaskTypes();
 
         // Get object info for display
+        $culture = $this->getUserCulture();
         $objectIds = array_map(function($job) { return $job->object_id; }, $this->jobs);
         $this->objects = [];
         if (!empty($objectIds)) {
             $objects = Illuminate\Database\Capsule\Manager::table('information_object')
                 ->join('slug', 'information_object.id', '=', 'slug.object_id')
-                ->leftJoin('information_object_i18n', function($join) {
+                ->leftJoin('information_object_i18n', function($join) use ($culture) {
                     $join->on('information_object.id', '=', 'information_object_i18n.id')
-                         ->where('information_object_i18n.culture', '=', 'en');
+                         ->where('information_object_i18n.culture', '=', $culture);
                 })
                 ->whereIn('information_object.id', $objectIds)
                 ->select('information_object.id', 'slug.slug', 'information_object_i18n.title')
@@ -2234,11 +2260,12 @@ class aiActions extends AhgController
         }
 
         // Get object info
+        $culture = $this->getUserCulture();
         $object = Illuminate\Database\Capsule\Manager::table('information_object')
             ->join('slug', 'information_object.id', '=', 'slug.object_id')
-            ->leftJoin('information_object_i18n', function($join) {
+            ->leftJoin('information_object_i18n', function($join) use ($culture) {
                 $join->on('information_object.id', '=', 'information_object_i18n.id')
-                     ->where('information_object_i18n.culture', '=', 'en');
+                     ->where('information_object_i18n.culture', '=', $culture);
             })
             ->where('information_object.id', $job->object_id)
             ->select('slug.slug', 'information_object_i18n.title')
@@ -2351,11 +2378,13 @@ class aiActions extends AhgController
             return null;
         }
 
+        $culture = $this->getUserCulture();
+
         // Try actor first
         if (in_array($entityType, ['PERSON', 'PER', 'ORG'])) {
             $actor = Illuminate\Database\Capsule\Manager::table('actor_i18n')
                 ->where('id', $linkedId)
-                ->where('culture', 'en')
+                ->where('culture', $culture)
                 ->first();
             if ($actor) {
                 return $actor->authorized_form_of_name;
@@ -2365,7 +2394,7 @@ class aiActions extends AhgController
         // Try term (for places, subjects)
         $term = Illuminate\Database\Capsule\Manager::table('term_i18n')
             ->where('id', $linkedId)
-            ->where('culture', 'en')
+            ->where('culture', $culture)
             ->first();
         if ($term) {
             return $term->name;

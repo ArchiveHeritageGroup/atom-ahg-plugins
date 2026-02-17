@@ -279,7 +279,7 @@ class securityClearanceActions extends AhgController
         $this->pendingRequests = $db::table('security_access_request as sar')
             ->join('user as u', 'sar.user_id', '=', 'u.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sar.status', 'pending')
             ->select('sar.*', 'u.username', 'ioi.title as object_title', 'sar.id as request_id')
@@ -312,7 +312,7 @@ class securityClearanceActions extends AhgController
         // Due declassifications
         $this->dueDeclassifications = $db::table('object_declassification_schedule as ods')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('ods.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ods.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'ods.object_id', '=', 'io.id')
             ->leftJoin('security_classification as sc_from', 'ods.from_classification_id', '=', 'sc_from.id')
@@ -382,7 +382,7 @@ class securityClearanceActions extends AhgController
         // Recent activity
         $this->recentActivity = $db::table('spectrum_audit_log as sal')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sal.action_date', '>=', $since)
             ->where(function($q) {

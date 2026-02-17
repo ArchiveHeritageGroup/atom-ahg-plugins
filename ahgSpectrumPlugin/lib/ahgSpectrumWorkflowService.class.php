@@ -446,7 +446,7 @@ class ahgSpectrumWorkflowService
         $properties = DB::table('property as p')
             ->leftJoin('property_i18n as pi', function ($join) {
                 $join->on('p.id', '=', 'pi.id')
-                    ->where('pi.culture', '=', 'en');
+                    ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.name', self::PROPERTY_NAME)
             ->whereNotNull('pi.value')
@@ -486,7 +486,7 @@ class ahgSpectrumWorkflowService
         $properties = DB::table('property as p')
             ->leftJoin('property_i18n as pi', function ($join) {
                 $join->on('p.id', '=', 'pi.id')
-                    ->where('pi.culture', '=', 'en');
+                    ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.name', self::PROPERTY_NAME)
             ->whereNotNull('pi.value')
@@ -597,7 +597,7 @@ class ahgSpectrumWorkflowService
         $query = DB::table('property as p')
             ->leftJoin('property_i18n as pi', function ($join) {
                 $join->on('p.id', '=', 'pi.id')
-                    ->where('pi.culture', '=', 'en');
+                    ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.name', self::PROPERTY_NAME)
             ->whereNotNull('pi.value')
@@ -729,7 +729,7 @@ class ahgSpectrumWorkflowService
         $property = DB::table('property as p')
             ->leftJoin('property_i18n as pi', function ($join) {
                 $join->on('p.id', '=', 'pi.id')
-                    ->where('pi.culture', '=', 'en');
+                    ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('p.object_id', $objectId)
             ->where('p.name', $name)
@@ -753,7 +753,7 @@ class ahgSpectrumWorkflowService
             // Update existing
             DB::table('property_i18n')
                 ->updateOrInsert(
-                    ['id' => $existing->id, 'culture' => 'en'],
+                    ['id' => $existing->id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['value' => $value]
                 );
         } else {
@@ -765,7 +765,7 @@ class ahgSpectrumWorkflowService
 
             DB::table('property_i18n')->insert([
                 'id' => $propertyId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $value,
             ]);
         }

@@ -25,6 +25,18 @@ class SuggestDescriptionCommand extends BaseCommand
       php bin/atom ai:suggest-description --llm-config=2 --template=3
     EOF;
 
+    /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
     protected function configure(): void
     {
         $this->addOption('object', null, 'Process specific object ID');
@@ -178,10 +190,12 @@ class SuggestDescriptionCommand extends BaseCommand
             return [(int) $this->option('object')];
         }
 
+        $culture = $this->getCulture();
+
         $query = DB::table('information_object as io')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
+            ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', $culture);
             })
             ->where('io.id', '>', 1);
 
@@ -239,10 +253,12 @@ class SuggestDescriptionCommand extends BaseCommand
 
     private function getObjectInfo(int $objectId): array
     {
+        $culture = $this->getCulture();
+
         $object = DB::table('information_object as io')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
+            ->leftJoin('information_object_i18n as ioi', function ($join) use ($culture) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', $culture);
             })
             ->where('io.id', $objectId)
             ->select('io.identifier', 'ioi.title')

@@ -86,7 +86,7 @@ class DisplayTypeDetector
         // Get object data
         $object = DB::table('information_object as io')
             ->leftJoin('term_i18n as level', function ($j) {
-                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', 'en');
+                $j->on('io.level_of_description_id', '=', 'level.id')->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select('io.*', 'level.name as level_name')
@@ -150,7 +150,7 @@ class DisplayTypeDetector
     {
         $events = DB::table('event as e')
             ->join('term_i18n as t', function ($j) {
-                $j->on('e.type_id', '=', 't.id')->where('t.culture', '=', 'en');
+                $j->on('e.type_id', '=', 't.id')->where('t.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->pluck('t.name')
@@ -188,7 +188,7 @@ class DisplayTypeDetector
         $profile = DB::table('display_object_profile as dop')
             ->join('display_profile as dp', 'dop.profile_id', '=', 'dp.id')
             ->join('display_profile_i18n as dpi', function($j) {
-                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+                $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('dop.object_id', $objectId)
             ->select('dp.*', 'dpi.name', 'dpi.description')
@@ -198,7 +198,7 @@ class DisplayTypeDetector
             // Get default for domain
             $profile = DB::table('display_profile as dp')
                 ->join('display_profile_i18n as dpi', function($j) {
-                    $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', 'en');
+                    $j->on('dp.id', '=', 'dpi.id')->where('dpi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('dp.domain', $type)
                 ->where('dp.is_default', 1)

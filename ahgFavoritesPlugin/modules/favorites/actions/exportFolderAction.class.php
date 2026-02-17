@@ -25,7 +25,7 @@ class favoritesExportFolderAction extends AhgController
         $format = strtolower($request->getParameter('format', 'csv'));
 
         if (!$folderId) {
-            $this->getUser()->setFlash('error', 'No folder specified.');
+            $this->getUser()->setFlash('error', __('No folder specified.'));
             $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
             return;
@@ -38,7 +38,7 @@ class favoritesExportFolderAction extends AhgController
             ->first();
 
         if (!$folder) {
-            $this->getUser()->setFlash('error', 'Folder not found.');
+            $this->getUser()->setFlash('error', __('Folder not found.'));
             $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
             return;
@@ -79,7 +79,7 @@ class favoritesExportFolderAction extends AhgController
                 exit;
 
             default:
-                $this->getUser()->setFlash('error', 'Unsupported export format.');
+                $this->getUser()->setFlash('error', __('Unsupported export format.'));
                 $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
                 return;

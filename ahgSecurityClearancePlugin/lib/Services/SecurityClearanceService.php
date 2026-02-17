@@ -636,7 +636,7 @@ class SecurityClearanceService
             ->join('information_object as io', 'sds.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('security_classification as sc_from', 'sds.from_classification_id', '=', 'sc_from.id')
             ->leftJoin('security_classification as sc_to', 'sds.to_classification_id', '=', 'sc_to.id')
@@ -994,7 +994,7 @@ class SecurityClearanceService
             ->join('user as u', 'sar.user_id', '=', 'u.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('sar.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('security_classification as sc', 'sar.classification_id', '=', 'sc.id')
             ->leftJoin('security_compartment as scomp', 'sar.compartment_id', '=', 'scomp.id')
@@ -1021,7 +1021,7 @@ class SecurityClearanceService
         return DB::table('security_access_request as sar')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('sar.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('security_classification as sc', 'sar.classification_id', '=', 'sc.id')
             ->leftJoin('user as u', 'sar.reviewed_by', '=', 'u.id')
@@ -1092,7 +1092,7 @@ class SecurityClearanceService
         return DB::table('security_access_log as sal')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('sal.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sal.user_id', $userId)
             ->select(['sal.*', 'ioi.title as object_title'])
@@ -1148,7 +1148,7 @@ class SecurityClearanceService
             ->join('user as u', 'swl.user_id', '=', 'u.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('swl.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('swl.watermark_code', $code)
             ->select([
@@ -1243,7 +1243,7 @@ class SecurityClearanceService
             ->join('user as u', 'sal.user_id', '=', 'u.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('sal.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('security_classification as sc', 'sal.classification_id', '=', 'sc.id');
 

@@ -149,7 +149,7 @@ class galleryActions extends AhgController
         $objectId = (int) $request->getParameter('object_id');
         if ($objectId) {
             $this->objectId = $objectId;
-            $this->object = DB::table('information_object_i18n')->where('id', $objectId)->where('culture', 'en')->first();
+            $this->object = DB::table('information_object_i18n')->where('id', $objectId)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->first();
             $this->valuations = $this->service->getValuations($objectId);
         } else {
             $this->valuations = DB::table('gallery_valuation as v')
@@ -166,7 +166,7 @@ class galleryActions extends AhgController
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $this->objectId = (int) $request->getParameter('object_id');
-        $this->object = DB::table('information_object_i18n')->where('id', $this->objectId)->where('culture', 'en')->first();
+        $this->object = DB::table('information_object_i18n')->where('id', $this->objectId)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->first();
 
         if ($request->isMethod('post')) {
             $this->service->createValuation([

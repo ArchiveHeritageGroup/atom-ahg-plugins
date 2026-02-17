@@ -122,7 +122,7 @@ class statisticsActions extends AhgController
         // Get object info
         $this->object = Qubit::db()->table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->where('io.id', $objectId)
@@ -152,7 +152,7 @@ class statisticsActions extends AhgController
         // Get repository info
         $this->repository = Qubit::db()->table('actor as a')
             ->leftJoin('actor_i18n as ai', function ($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('a.id', $repositoryId)
             ->select('a.id', 'ai.authorized_form_of_name as name')

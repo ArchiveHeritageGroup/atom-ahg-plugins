@@ -222,7 +222,7 @@ trait arMetadataExtractionTrait
     {
         return DB::table('information_object_i18n')
             ->where('id', $id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value($field);
     }
 
@@ -233,7 +233,7 @@ trait arMetadataExtractionTrait
     {
         DB::table('information_object_i18n')
             ->updateOrInsert(
-                ['id' => $id, 'culture' => 'en'],
+                ['id' => $id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                 [$field => $value]
             );
     }
@@ -303,7 +303,7 @@ trait arMetadataExtractionTrait
                 $actor = DB::table('actor as a')
                     ->leftJoin('actor_i18n as ai', function ($join) {
                         $join->on('a.id', '=', 'ai.id')
-                            ->where('ai.culture', '=', 'en');
+                            ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->where('ai.authorized_form_of_name', $name)
                     ->select('a.id')
@@ -324,7 +324,7 @@ trait arMetadataExtractionTrait
 
                     DB::table('actor_i18n')->insert([
                         'id' => $actorObjectId,
-                        'culture' => 'en',
+                        'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                         'authorized_form_of_name' => $name,
                     ]);
 
@@ -395,7 +395,7 @@ trait arMetadataExtractionTrait
                 $term = DB::table('term as t')
                     ->leftJoin('term_i18n as ti', function ($join) {
                         $join->on('t.id', '=', 'ti.id')
-                            ->where('ti.culture', '=', 'en');
+                            ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->where('t.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
                     ->where('ti.name', $keyword)
@@ -418,7 +418,7 @@ trait arMetadataExtractionTrait
 
                     DB::table('term_i18n')->insert([
                         'id' => $termObjectId,
-                        'culture' => 'en',
+                        'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                         'name' => $keyword,
                     ]);
 
@@ -553,7 +553,7 @@ trait arMetadataExtractionTrait
         if ($existing) {
             DB::table('property_i18n')
                 ->updateOrInsert(
-                    ['id' => $existing->id, 'culture' => 'en'],
+                    ['id' => $existing->id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['value' => $value]
                 );
         } else {
@@ -564,7 +564,7 @@ trait arMetadataExtractionTrait
 
             DB::table('property_i18n')->insert([
                 'id' => $propId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $value,
             ]);
         }

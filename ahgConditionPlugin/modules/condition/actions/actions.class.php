@@ -462,7 +462,7 @@ class conditionActions extends AhgController
         // Get title from i18n
         $i18n = DB::table('information_object_i18n')
             ->where('id', $this->resource->id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $this->resourceTitle = $i18n->title ?? $this->slug;
@@ -496,7 +496,7 @@ class conditionActions extends AhgController
             $this->recentChecks = DB::table('spectrum_condition_check')
                 ->leftJoin('information_object_i18n as ioi', function ($j) {
                     $j->on('ioi.id', '=', 'spectrum_condition_check.object_id')
-                      ->where('ioi.culture', '=', 'en');
+                      ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->orderBy('spectrum_condition_check.check_date', 'desc')
                 ->limit(20)

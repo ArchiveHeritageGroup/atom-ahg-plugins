@@ -523,7 +523,7 @@ class ProjectService
             } elseif ($resource->object_id) {
                 $resource->object = DB::table('information_object_i18n')
                     ->where('id', $resource->object_id)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->first();
             }
         }
@@ -857,7 +857,7 @@ class ProjectService
     {
         return DB::table('research_clipboard_project as cp')
             ->leftJoin('information_object_i18n as i', function ($join) {
-                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', 'en');
+                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', function ($join) {
                 $join->on('cp.object_id', '=', 'slug.object_id');

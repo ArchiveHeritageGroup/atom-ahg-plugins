@@ -113,7 +113,7 @@ class ReportCommand extends BaseCommand
     {
         $embargoes = DB::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->where('e.status', 'active')
@@ -152,7 +152,7 @@ class ReportCommand extends BaseCommand
 
         $embargoes = DB::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->leftJoin('user', 'user.id', '=', 'e.lifted_by')
@@ -171,7 +171,7 @@ class ReportCommand extends BaseCommand
 
         $embargoes = DB::table('rights_embargo as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'e.object_id', '=', 'slug.object_id')
             ->where('e.status', 'active')

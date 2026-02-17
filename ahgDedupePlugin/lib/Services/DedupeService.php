@@ -94,7 +94,7 @@ class DedupeService
         $query = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', '!=', 1);
@@ -196,7 +196,7 @@ class DedupeService
         $candidates = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', '!=', 1)
             ->whereNotNull('ioi.title');
@@ -348,11 +348,11 @@ class DedupeService
             })
             ->leftJoin('event_i18n as ei', function ($join) {
                 $join->on('event.id', '=', 'ei.id')
-                    ->where('ei.culture', '=', 'en');
+                    ->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('event.actor_id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', '!=', 1);
 
@@ -567,7 +567,7 @@ class DedupeService
             $query = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('io.id', '=', 'ioi.id')
-                        ->where('ioi.culture', '=', 'en');
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('io.id', '!=', 1);
 
@@ -1028,7 +1028,7 @@ class DedupeService
         $records = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->whereIn('io.id', $ids)

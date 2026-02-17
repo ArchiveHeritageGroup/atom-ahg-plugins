@@ -33,7 +33,7 @@ if (!isset($thumbnailMeta) || empty($thumbnailMeta)) {
                 ->join('slug as s', 's.object_id', '=', 'do2.object_id')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('ioi.id', '=', 'do2.object_id')
-                         ->where('ioi.culture', '=', 'en');
+                         ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->whereIn('do2.id', $doIds)
                 ->select('do2.id as do_id', 's.slug', 'ioi.title')

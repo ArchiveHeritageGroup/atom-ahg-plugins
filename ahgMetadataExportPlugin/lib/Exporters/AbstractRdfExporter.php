@@ -955,7 +955,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 foreach ($creatorObjects as $creator) {
                     $name = null;
                     if (method_exists($creator, 'getAuthorizedFormOfName')) {
-                        $name = $creator->getAuthorizedFormOfName(['culture' => 'en']);
+                        $name = $creator->getAuthorizedFormOfName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                     }
                     $creators[] = [
                         'name' => $name,
@@ -989,7 +989,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                     if (method_exists($point, 'getTerm')) {
                         $term = $point->getTerm();
                         if ($term && method_exists($term, 'getName')) {
-                            $subjects[] = $term->getName(['culture' => 'en']);
+                            $subjects[] = $term->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                         }
                     }
                 }
@@ -1019,7 +1019,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                     if (method_exists($point, 'getTerm')) {
                         $term = $point->getTerm();
                         if ($term && method_exists($term, 'getName')) {
-                            $places[] = $term->getName(['culture' => 'en']);
+                            $places[] = $term->getName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                         }
                     }
                 }
@@ -1046,7 +1046,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 if ($repo) {
                     $name = null;
                     if (method_exists($repo, 'getAuthorizedFormOfName')) {
-                        $name = $repo->getAuthorizedFormOfName(['culture' => 'en']);
+                        $name = $repo->getAuthorizedFormOfName(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                     }
                     return [
                         'name' => $name,

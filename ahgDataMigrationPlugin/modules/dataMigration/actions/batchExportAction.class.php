@@ -177,7 +177,7 @@ class dataMigrationBatchExportAction extends AhgController
             if ($record->level_of_description_id) {
                 $levelName = $DB::table('term_i18n')
                     ->where('id', '=', $record->level_of_description_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('name');
                 $row['levelOfDescription'] = $levelName;
             }
@@ -186,7 +186,7 @@ class dataMigrationBatchExportAction extends AhgController
             if ($record->repository_id) {
                 $repoName = $DB::table('actor_i18n')
                     ->where('id', '=', $record->repository_id)
-                    ->where('culture', '=', 'en')
+                    ->where('culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('authorized_form_of_name');
                 $row['repository'] = $repoName;
             }

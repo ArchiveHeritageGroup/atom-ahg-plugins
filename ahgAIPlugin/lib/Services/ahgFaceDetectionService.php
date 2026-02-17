@@ -30,6 +30,18 @@ class ahgFaceDetectionService
     protected $errors = [];
 
     /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
+    /**
      * Constructor
      *
      * @param string $backend Detection backend to use
@@ -835,10 +847,11 @@ PYTHON;
 
         try {
             // Get indexed faces from database
+            $culture = $this->getCulture();
             $indexedFaces = DB::table('actor_face_index as afi')
-                ->join('actor_i18n as ai', function ($join) {
+                ->join('actor_i18n as ai', function ($join) use ($culture) {
                     $join->on('afi.actor_id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', $culture);
                 })
                 ->where('afi.is_active', 1)
                 ->select('afi.*', 'ai.authorized_form_of_name')

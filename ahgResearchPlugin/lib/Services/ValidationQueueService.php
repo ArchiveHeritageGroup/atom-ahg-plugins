@@ -37,7 +37,7 @@ class ValidationQueueService
             ->join('research_extraction_job as ej', 'er.job_id', '=', 'ej.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('er.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_researcher as reviewer', 'vq.reviewer_id', '=', 'reviewer.id')
             ->select(
@@ -180,7 +180,7 @@ class ValidationQueueService
             ->leftJoin('research_validation_queue as vq', 'vq.result_id', '=', 'er.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('er.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_researcher as reviewer', 'vq.reviewer_id', '=', 'reviewer.id')
             ->where('er.id', $resultId)
@@ -454,7 +454,7 @@ class ValidationQueueService
             ->join('research_validation_queue as vq', 'vq.result_id', '=', 'er.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('er.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('er.job_id', $jobId)
             ->where('vq.status', '!=', 'pending')

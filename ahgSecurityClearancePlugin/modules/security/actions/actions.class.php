@@ -49,10 +49,10 @@ class securityActions extends AhgController
             $this->pendingRequests = DB::table('security_access_request as sar')
                 ->leftJoin('user as u', 'sar.user_id', '=', 'u.id')
                 ->leftJoin('actor_i18n as ai', function($join) {
-                    $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                    $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('information_object_i18n as ioi', function($join) {
-                    $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 'sar.object_id', '=', 's.object_id')
                 ->where('sar.status', 'pending')
@@ -177,10 +177,10 @@ class securityActions extends AhgController
             $this->accessRequest = DB::table('security_access_request as sar')
                 ->leftJoin('user as u', 'sar.user_id', '=', 'u.id')
                 ->leftJoin('actor_i18n as ai', function($join) {
-                    $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                    $join->on('u.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('information_object_i18n as ioi', function($join) {
-                    $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                    $join->on('sar.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug as s', 'sar.object_id', '=', 's.object_id')
                 ->where('sar.id', $requestId)

@@ -66,7 +66,7 @@ class threeDReportsActions extends AhgController
         
         $query = DB::table('object_3d_model as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
             ->select('m.*', 'ioi.title', 's.slug');
@@ -98,10 +98,10 @@ class threeDReportsActions extends AhgController
         $query = DB::table('object_3d_hotspot as h')
             ->leftJoin('object_3d_model as m', 'h.model_id', '=', 'm.id')
             ->leftJoin('object_3d_hotspot_i18n as hi', function($join) {
-                $join->on('h.id', '=', 'hi.id')->where('hi.culture', '=', 'en');
+                $join->on('h.id', '=', 'hi.id')->where('hi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('h.*', 'hi.title as hotspot_title', 'hi.description', 'm.filename as model_name', 'ioi.title as object_title');
         
@@ -130,7 +130,7 @@ class threeDReportsActions extends AhgController
         
         $this->withThumbnails = DB::table('object_3d_model as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
             ->select('m.id', 'm.filename', 'm.thumbnail', 'm.poster_image', 'ioi.title', 's.slug')
@@ -141,7 +141,7 @@ class threeDReportsActions extends AhgController
         
         $this->withoutThumbnails = DB::table('object_3d_model as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
             ->select('m.id', 'm.filename', 'm.object_id', 'ioi.title', 's.slug')
@@ -162,7 +162,7 @@ class threeDReportsActions extends AhgController
         
         $this->objects = DB::table('digital_object as d')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'd.object_id', '=', 's.object_id')
             ->leftJoin('object_3d_model as m', 'd.object_id', '=', 'm.object_id')
@@ -194,7 +194,7 @@ class threeDReportsActions extends AhgController
         
         $this->settings = DB::table('object_3d_model as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('m.id', 'm.filename', 'ioi.title', 'm.auto_rotate', 'm.rotation_speed', 
                      'm.camera_orbit', 'm.field_of_view', 'm.exposure', 'm.shadow_intensity',

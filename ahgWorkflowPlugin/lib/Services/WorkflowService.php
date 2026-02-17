@@ -366,7 +366,7 @@ class WorkflowService
             if ($task->object_type === 'information_object') {
                 $task->object = DB::table('information_object as io')
                     ->leftJoin('information_object_i18n as ioi', function ($join) {
-                        $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                        $join->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                     })
                     ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
                     ->where('io.id', $task->object_id)
@@ -405,7 +405,7 @@ class WorkflowService
             ->join('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
             ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.status', 'pending')
             ->whereNull('t.assigned_to')
@@ -445,7 +445,7 @@ class WorkflowService
             ->join('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
             ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.assigned_to', $userId);
 
@@ -816,7 +816,7 @@ class WorkflowService
         if ($objectType === 'information_object') {
             $obj = DB::table('information_object_i18n')
                 ->where('id', $objectId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('title');
             if ($obj) {
                 $objectTitle = $obj;
@@ -952,7 +952,7 @@ class WorkflowService
             ->leftJoin('user as u', 'h.performed_by', '=', 'u.id')
             ->leftJoin('ahg_workflow as w', 'h.workflow_id', '=', 'w.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('h.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('h.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('h.*', 'u.username', 'w.name as workflow_name', 'ioi.title as object_title')
             ->orderBy('h.performed_at', 'desc')

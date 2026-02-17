@@ -17,7 +17,7 @@
 
   // Target languages with culture codes (all 11 SA + international)
   $targetLanguages = array(
-    'en' => ['name' => 'English', 'culture' => 'en'],
+    'en' => ['name' => 'English', 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
     'af' => ['name' => 'Afrikaans', 'culture' => 'af'],
     'zu' => ['name' => 'isiZulu', 'culture' => 'zu'],
     'xh' => ['name' => 'isiXhosa', 'culture' => 'xh'],

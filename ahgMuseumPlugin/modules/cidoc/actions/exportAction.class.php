@@ -115,7 +115,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('r.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNotNull(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'))
             ->where(DB::raw('COALESCE(ai.authorized_form_of_name, ai_en.authorized_form_of_name)'), '!=', '')
@@ -140,7 +140,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('information_object_i18n as ioi_en', function ($join) {
                 $join->on('io.id', '=', 'ioi_en.id')
-                    ->where('ioi_en.culture', '=', 'en');
+                    ->where('ioi_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('slug.slug', $slug)
             ->select([
@@ -191,7 +191,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('term_i18n as ti_en', function ($join) {
                 $join->on('t.id', '=', 'ti_en.id')
-                    ->where('ti_en.culture', '=', 'en');
+                    ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('otr.object_id', $obj->id)
             ->where('t.taxonomy_id', 35) // TAXONOMY_SUBJECT_ID
@@ -211,7 +211,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('term_i18n as ti_en', function ($join) {
                 $join->on('t.id', '=', 'ti_en.id')
-                    ->where('ti_en.culture', '=', 'en');
+                    ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('otr.object_id', $obj->id)
             ->where('t.taxonomy_id', 42) // TAXONOMY_PLACE_ID
@@ -236,7 +236,7 @@ class cidocExportAction extends AhgController
                 })
                 ->leftJoin('actor_i18n as ai_en', function ($join) {
                     $join->on('r.id', '=', 'ai_en.id')
-                        ->where('ai_en.culture', '=', 'en');
+                        ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('slug', 'r.id', '=', 'slug.object_id')
                 ->where('r.id', $obj->repository_id)
@@ -270,7 +270,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('actor_i18n as ai_en', function ($join) {
                 $join->on('a.id', '=', 'ai_en.id')
-                    ->where('ai_en.culture', '=', 'en');
+                    ->where('ai_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'a.id', '=', 'slug.object_id')
             ->where('e.object_id', $objectId)
@@ -299,7 +299,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('event_i18n as ei_en', function ($join) {
                 $join->on('e.id', '=', 'ei_en.id')
-                    ->where('ei_en.culture', '=', 'en');
+                    ->where('ei_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('term_i18n as ti', function ($join) use ($culture) {
                 $join->on('e.type_id', '=', 'ti.id')
@@ -307,7 +307,7 @@ class cidocExportAction extends AhgController
             })
             ->leftJoin('term_i18n as ti_en', function ($join) {
                 $join->on('e.type_id', '=', 'ti_en.id')
-                    ->where('ti_en.culture', '=', 'en');
+                    ->where('ti_en.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.object_id', $objectId)
             ->whereNotNull('e.type_id')
@@ -342,7 +342,7 @@ class cidocExportAction extends AhgController
         if ($name === null) {
             $name = DB::table('term_i18n')
                 ->where('id', $termId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('name');
         }
 

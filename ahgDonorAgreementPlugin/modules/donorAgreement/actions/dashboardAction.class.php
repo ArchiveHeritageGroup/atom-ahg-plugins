@@ -157,13 +157,13 @@ class donorAgreementDashboardAction extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($join) {
-                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('agreement_type as at', 'da.agreement_type_id', '=', 'at.id')
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'da.id',
@@ -185,12 +185,12 @@ class donorAgreementDashboardAction extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('donor_agreement as da')
             ->leftJoin('donor_agreement_i18n as dai', function($join) {
-                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('da.status', 'active')
             ->whereNotNull('da.expiry_date')
@@ -214,7 +214,7 @@ class donorAgreementDashboardAction extends AhgController
         return \Illuminate\Database\Capsule\Manager::table('donor_agreement_reminder as r')
             ->join('donor_agreement as da', 'r.donor_agreement_id', '=', 'da.id')
             ->leftJoin('donor_agreement_i18n as dai', function($join) {
-                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', 'en');
+                $join->on('da.id', '=', 'dai.id')->where('dai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.status', 'active')
             ->whereDate('r.reminder_date', '<=', date('Y-m-d', strtotime('+7 days')))

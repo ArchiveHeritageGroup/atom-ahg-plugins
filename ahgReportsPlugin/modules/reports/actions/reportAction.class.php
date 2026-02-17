@@ -138,11 +138,11 @@ class reportsreportAction extends AhgController
             })
             ->leftJoin('term_i18n as level', function($join) {
                 $join->on('io.level_of_description_id', '=', 'level.id')
-                     ->where('level.culture', '=', 'en');
+                     ->where('level.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('actor_i18n as repo', function($join) {
                 $join->on('io.repository_id', '=', 'repo.id')
-                     ->where('repo.culture', '=', 'en');
+                     ->where('repo.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'io.id',
@@ -229,7 +229,7 @@ class reportsreportAction extends AhgController
         $results = [];
         foreach ($fields as $field => $label) {
             $count = $this->db->table('information_object_i18n')
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->whereNotNull($field)
                 ->where($field, '!=', '')
                 ->count();
@@ -255,7 +255,7 @@ class reportsreportAction extends AhgController
             })
             ->leftJoin('term_i18n as media', function($join) {
                 $join->on('do.media_type_id', '=', 'media.id')
-                     ->where('media.culture', '=', 'en');
+                     ->where('media.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'do.id',
@@ -282,7 +282,7 @@ class reportsreportAction extends AhgController
         $query = $this->db->table('event as e')
             ->join('actor_i18n as a', function($join) {
                 $join->on('e.actor_id', '=', 'a.id')
-                     ->where('a.culture', '=', 'en');
+                     ->where('a.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'e.actor_id',
@@ -306,7 +306,7 @@ class reportsreportAction extends AhgController
             ->leftJoin('donor as d', 'a.id', '=', 'd.id')
             ->leftJoin('actor_i18n as donor_name', function($join) {
                 $join->on('d.id', '=', 'donor_name.id')
-                     ->where('donor_name.culture', '=', 'en');
+                     ->where('donor_name.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'd.id as donor_id',
@@ -359,7 +359,7 @@ class reportsreportAction extends AhgController
         $query = $this->db->table('accession as a')
             ->leftJoin('accession_i18n as ai', function($join) {
                 $join->on('a.id', '=', 'ai.id')
-                     ->where('ai.culture', '=', 'en');
+                     ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'a.id',

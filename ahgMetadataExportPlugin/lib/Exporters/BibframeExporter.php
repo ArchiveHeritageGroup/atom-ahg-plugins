@@ -564,7 +564,7 @@ class BibframeExporter extends AbstractRdfExporter
                     // Ignore
                 }
                 try {
-                    $display = $dateObj->getDate(['culture' => 'en']);
+                    $display = $dateObj->getDate(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                 } catch (\Exception $e) {
                     // Ignore
                 }

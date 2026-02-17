@@ -159,8 +159,8 @@ class FavoritesExportService
 
         // Header
         fputcsv($fp, [
-            'Title', 'Reference Code', 'Level', 'Dates', 'Repository',
-            'Slug', 'Notes', 'Folder', 'Date Added',
+            \__('Title'), \__('Reference Code'), \__('Level'), \__('Dates'), \__('Repository'),
+            \__('Slug'), \__('Notes'), \__('Folder'), \__('Date Added'),
         ]);
 
         foreach ($items as $item) {
@@ -201,11 +201,11 @@ class FavoritesExportService
         }
 
         $date = date('Y-m-d H:i');
-        $title = 'My Favorites';
+        $title = \__('My Favorites');
         if ($folderId) {
             $folderName = DB::table('favorites_folder')->where('id', $folderId)->value('name');
             if ($folderName) {
-                $title = 'Favorites: ' . htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8');
+                $title = \__('Favorites: %1%', ['%1%' => htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8')]);
             }
         }
 
@@ -213,23 +213,23 @@ class FavoritesExportService
         $html = '<h1 style="font-size:18px;color:#1a1a2e;margin-bottom:5px;">' . $title . '</h1>';
         $html .= '<p style="font-size:11px;color:#666;margin-bottom:15px;">';
         if ($userName) {
-            $html .= 'Exported by ' . htmlspecialchars($userName, ENT_QUOTES, 'UTF-8') . ' on ' . $date;
+            $html .= \__('Exported by %1% on %2%', ['%1%' => htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'), '%2%' => $date]);
         } else {
-            $html .= 'Exported on ' . $date;
+            $html .= \__('Exported on %1%', ['%1%' => $date]);
         }
-        $html .= ' &mdash; ' . count($items) . ' items</p>';
+        $html .= ' &mdash; ' . count($items) . ' ' . \__('items') . '</p>';
 
         if (empty($items)) {
-            $html .= '<p style="color:#666;">No favorites to export.</p>';
+            $html .= '<p style="color:#666;">' . \__('No favorites to export.') . '</p>';
         } else {
             $html .= '<table style="width:100%;border-collapse:collapse;font-size:10px;">';
             $html .= '<thead><tr style="background:#1a1a2e;color:#fff;">';
-            $html .= '<th style="padding:6px;text-align:left;">Title</th>';
-            $html .= '<th style="padding:6px;text-align:left;">Reference Code</th>';
-            $html .= '<th style="padding:6px;text-align:left;">Level</th>';
-            $html .= '<th style="padding:6px;text-align:left;">Dates</th>';
-            $html .= '<th style="padding:6px;text-align:left;">Repository</th>';
-            $html .= '<th style="padding:6px;text-align:left;">Notes</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Title') . '</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Reference Code') . '</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Level') . '</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Dates') . '</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Repository') . '</th>';
+            $html .= '<th style="padding:6px;text-align:left;">' . \__('Notes') . '</th>';
             $html .= '</tr></thead><tbody>';
 
             foreach ($items as $i => $item) {
@@ -284,7 +284,7 @@ class FavoritesExportService
                 $fields[] = '  title = {' . $this->escapeBibTeX($item['title']) . '}';
             }
             if ($item['reference_code']) {
-                $fields[] = '  note = {Reference Code: ' . $this->escapeBibTeX($item['reference_code']) . '}';
+                $fields[] = '  note = {' . $this->escapeBibTeX(\__('Reference Code') . ': ' . $item['reference_code']) . '}';
             }
             if ($item['slug']) {
                 $fields[] = '  howpublished = {\\url{' . $this->escapeBibTeX($item['slug']) . '}}';
@@ -370,11 +370,11 @@ class FavoritesExportService
     {
         $items = $this->getEnrichedFavorites($userId, $folderId);
 
-        $title = 'My Favorites';
+        $title = \__('My Favorites');
         if ($folderId) {
             $folderName = DB::table('favorites_folder')->where('id', $folderId)->value('name');
             if ($folderName) {
-                $title = 'Favorites: ' . htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8');
+                $title = \__('Favorites: %1%', ['%1%' => htmlspecialchars($folderName, ENT_QUOTES, 'UTF-8')]);
             }
         }
 
@@ -392,12 +392,12 @@ class FavoritesExportService
             . '</style></head><body>';
 
         $html .= '<h1>' . $title . '</h1>';
-        $html .= '<p class="meta">Printed on ' . date('Y-m-d H:i') . ' &mdash; ' . count($items) . ' items</p>';
+        $html .= '<p class="meta">' . \__('Printed on %1%', ['%1%' => date('Y-m-d H:i')]) . ' &mdash; ' . count($items) . ' ' . \__('items') . '</p>';
 
         if (!empty($items)) {
             $html .= '<table><thead><tr>';
-            $html .= '<th>Title</th><th>Reference Code</th><th>Level</th>';
-            $html .= '<th>Dates</th><th>Repository</th><th>Notes</th>';
+            $html .= '<th>' . \__('Title') . '</th><th>' . \__('Reference Code') . '</th><th>' . \__('Level') . '</th>';
+            $html .= '<th>' . \__('Dates') . '</th><th>' . \__('Repository') . '</th><th>' . \__('Notes') . '</th>';
             $html .= '</tr></thead><tbody>';
 
             foreach ($items as $item) {
@@ -413,7 +413,7 @@ class FavoritesExportService
 
             $html .= '</tbody></table>';
         } else {
-            $html .= '<p>No favorites to display.</p>';
+            $html .= '<p>' . \__('No favorites to display.') . '</p>';
         }
 
         $html .= '<script>window.print();</script></body></html>';

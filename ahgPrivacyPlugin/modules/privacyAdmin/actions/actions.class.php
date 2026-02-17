@@ -135,7 +135,7 @@ class privacyAdminActions extends AhgController
         // Get i18n data
         $this->dsarI18n = \Illuminate\Database\Capsule\Manager::table('privacy_dsar_i18n')
             ->where('id', $this->dsar->id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
         
         $this->requestTypes = \ahgPrivacyPlugin\Service\PrivacyService::getRequestTypes($this->dsar->jurisdiction ?? 'popia');
@@ -229,7 +229,7 @@ class privacyAdminActions extends AhgController
         // Get i18n data
         $this->breachI18n = \Illuminate\Database\Capsule\Manager::table('privacy_breach_i18n')
             ->where('id', $this->breach->id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
         
         $this->breachTypes = \ahgPrivacyPlugin\Service\PrivacyService::getBreachTypes();
@@ -1001,7 +1001,7 @@ class privacyAdminActions extends AhgController
         $this->scanResult = $piiService->scanObject($objectId);
         $this->object = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         if ($request->isMethod('post') && $request->getParameter('save')) {
@@ -1495,7 +1495,7 @@ class privacyAdminActions extends AhgController
                 ->leftJoin('slug', 'slug.object_id', '=', 'i.id')
                 ->leftJoin('information_object as io', 'io.id', '=', 'i.id')
                 ->where('i.id', $objectId)
-                ->where('i.culture', 'en')
+                ->where('i.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->select(['i.id', 'i.title', 'slug.slug', 'io.identifier as referenceCode'])
                 ->first();
         }

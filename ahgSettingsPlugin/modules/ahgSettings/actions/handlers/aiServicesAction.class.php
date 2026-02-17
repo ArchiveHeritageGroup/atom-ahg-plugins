@@ -100,7 +100,7 @@ class AhgSettingsAiServicesAction extends AhgController
 
         // Translation languages (OPUS-MT supported) with culture codes for AtoM
         $this->translationLanguages = [
-            'en' => ['name' => 'English', 'culture' => 'en'],
+            'en' => ['name' => 'English', 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
             'af' => ['name' => 'Afrikaans', 'culture' => 'af'],
             'zu' => ['name' => 'Zulu', 'culture' => 'zu'],
             'xh' => ['name' => 'Xhosa', 'culture' => 'xh'],

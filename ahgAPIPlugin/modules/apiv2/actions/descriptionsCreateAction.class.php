@@ -57,7 +57,7 @@ class apiv2DescriptionsCreateAction extends AhgApiController
                 'parent_id' => $parentId,
                 'lft' => $lft,
                 'rgt' => $rgt,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'created_at' => $now,
                 'updated_at' => $now
             ]);
@@ -65,7 +65,7 @@ class apiv2DescriptionsCreateAction extends AhgApiController
             // Create i18n record
             DB::table('information_object_i18n')->insert([
                 'id' => $objectId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'title' => $data['title'],
                 'alternate_title' => $data['alternate_title'] ?? null,
                 'scope_and_content' => $data['scope_and_content'] ?? null,

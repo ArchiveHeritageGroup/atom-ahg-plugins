@@ -17,10 +17,10 @@ class AuditAccessRepository
             ->leftJoin('user as u', 'sal.user_id', '=', 'u.id')
             ->leftJoin('term as t', 'sal.classification_id', '=', 't.id')
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function($j) {
-                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->orderBy('sal.created_at', 'desc');
         
@@ -47,10 +47,10 @@ class AuditAccessRepository
             ->leftJoin('user as u', 'sal.user_id', '=', 'u.id')
             ->leftJoin('term as t', 'sal.classification_id', '=', 't.id')
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function($j) {
-                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sal.access_granted', 0)
             ->orderBy('sal.created_at', 'desc')
@@ -72,7 +72,7 @@ class AuditAccessRepository
         return DB::table('security_access_log as sal')
             ->leftJoin('user as u', 'sal.user_id', '=', 'u.id')
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('sal.classification_id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('sal.classification_id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sal.object_id', $entityId)
             ->orderBy('sal.created_at', 'desc')
@@ -92,10 +92,10 @@ class AuditAccessRepository
     {
         return DB::table('security_access_log as sal')
             ->leftJoin('term_i18n as ti', function($j) {
-                $j->on('sal.classification_id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('sal.classification_id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object_i18n as ioi', function($j) {
-                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $j->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('sal.user_id', $userId)
             ->orderBy('sal.created_at', 'desc')

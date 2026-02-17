@@ -23,7 +23,7 @@ try {
     $sectorLevels = \Illuminate\Database\Capsule\Manager::table('level_of_description_sector as los')
         ->join('term_i18n as ti', function($join) {
             $join->on('los.term_id', '=', 'ti.id')
-                 ->where('ti.culture', '=', 'en');
+                 ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
         })
         ->select('los.sector', 'los.term_id as id', 'ti.name', 'los.display_order')
         ->orderBy('los.display_order')

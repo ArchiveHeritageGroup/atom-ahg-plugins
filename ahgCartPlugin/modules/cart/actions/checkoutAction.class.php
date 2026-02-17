@@ -202,7 +202,7 @@ class cartCheckoutAction extends AhgController
                 'rtp_type_id' => null,
                 'lft' => 0,
                 'rgt' => 1,
-                'source_culture' => 'en',
+                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
 
             // Create i18n record
@@ -220,7 +220,7 @@ class cartCheckoutAction extends AhgController
                 'rtp_need_image_by' => $rtp_need_image_by ? $rtp_need_image_by . ' 00:00:00' : null,
                 'status_id' => 220,
                 'created_at' => date('Y-m-d H:i:s'),
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             ]);
 
             $createdIds[] = $objectId;

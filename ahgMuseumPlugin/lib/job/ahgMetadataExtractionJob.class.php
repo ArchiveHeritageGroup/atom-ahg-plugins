@@ -496,7 +496,7 @@ class ahgMetadataExtractionJob extends arBaseJob
         if (empty($informationObject->title) && !empty($keyFields['title'])) {
             DB::table('information_object_i18n')
                 ->updateOrInsert(
-                    ['id' => $informationObjectId, 'culture' => 'en'],
+                    ['id' => $informationObjectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['title' => $keyFields['title']]
                 );
             $modified = true;
@@ -599,7 +599,7 @@ class ahgMetadataExtractionJob extends arBaseJob
         if ($techSummary) {
             $currentI18n = DB::table('information_object_i18n')
                 ->where('id', $informationObjectId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             $current = $currentI18n ? $currentI18n->physical_characteristics : '';
@@ -608,7 +608,7 @@ class ahgMetadataExtractionJob extends arBaseJob
             if (strpos($current, '=== FILE INFO ===') === false) {
                 DB::table('information_object_i18n')
                     ->updateOrInsert(
-                        ['id' => $informationObjectId, 'culture' => 'en'],
+                        ['id' => $informationObjectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                         ['physical_characteristics' => trim($current . "\n\n" . $techSummary)]
                     );
                 $modified = true;
@@ -755,7 +755,7 @@ class ahgMetadataExtractionJob extends arBaseJob
 
         DB::table('actor_i18n')->insert([
             'id' => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'authorized_form_of_name' => $name,
         ]);
 
@@ -772,7 +772,7 @@ class ahgMetadataExtractionJob extends arBaseJob
             ->join('term_i18n as ti', 't.id', '=', 'ti.id')
             ->where('t.taxonomy_id', self::TAXONOMY_SUBJECT_ID)
             ->where('ti.name', $name)
-            ->where('ti.culture', 'en')
+            ->where('ti.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->select('t.id')
             ->first();
 
@@ -795,7 +795,7 @@ class ahgMetadataExtractionJob extends arBaseJob
 
         DB::table('term_i18n')->insert([
             'id' => $objectId,
-            'culture' => 'en',
+            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'name' => $name,
         ]);
 

@@ -72,7 +72,7 @@ class VocabSyncService
 
         $taxonomy = DB::table('taxonomy as t')
             ->leftJoin('taxonomy_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.id', $taxonomyId)
             ->select('t.*', 'ti.name')
@@ -85,7 +85,7 @@ class VocabSyncService
         // Get all terms
         $terms = DB::table('term as t')
             ->leftJoin('term_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', $taxonomyId)
             ->select('t.id', 't.parent_id', 't.code', 'ti.name', 'ti.culture')
@@ -163,7 +163,7 @@ class VocabSyncService
         // Get relation records
         $relRecords = DB::table('relation as r')
             ->join('relation_i18n as ri', function ($j) {
-                $j->on('r.id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+                $j->on('r.id', '=', 'ri.id')->where('ri.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where(function ($q) use ($termId) {
                 $q->where('r.subject_id', $termId)
@@ -176,7 +176,7 @@ class VocabSyncService
             $relatedTermId = $rel->subject_id == $termId ? $rel->object_id : $rel->subject_id;
             $relatedTerm = DB::table('term_i18n')
                 ->where('id', $relatedTermId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             if ($relatedTerm) {
@@ -234,7 +234,7 @@ class VocabSyncService
             // Try to find matching taxonomy by name
             $taxonomy = DB::table('taxonomy_i18n')
                 ->where('name', $data['taxonomy']['name'])
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             if ($taxonomy) {
@@ -325,7 +325,7 @@ class VocabSyncService
         // Check for existing term
         $existing = DB::table('term as t')
             ->join('term_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('t.taxonomy_id', $taxonomyId)
             ->where('ti.name', $name)
@@ -767,7 +767,7 @@ class VocabSyncService
         $query = DB::table('federation_vocab_sync as vs')
             ->join('taxonomy as t', 'vs.taxonomy_id', '=', 't.id')
             ->leftJoin('taxonomy_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('vs.peer_id', $peerId)
             ->select('vs.*', 'ti.name as taxonomy_name');
@@ -788,7 +788,7 @@ class VocabSyncService
 
         return DB::table('taxonomy as t')
             ->leftJoin('taxonomy_i18n as ti', function ($j) {
-                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('t.id', 'ti.name', DB::raw('(SELECT COUNT(*) FROM term WHERE taxonomy_id = t.id) as term_count'))
             ->orderBy('ti.name')

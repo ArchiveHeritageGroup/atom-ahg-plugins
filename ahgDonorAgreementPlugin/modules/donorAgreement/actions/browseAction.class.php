@@ -26,7 +26,7 @@ class donorAgreementBrowseAction extends AhgController
             ->leftJoin('donor as d', 'da.donor_id', '=', 'd.id')
             ->leftJoin('actor as a', 'd.id', '=', 'a.id')
             ->leftJoin('actor_i18n as ai', function($join) {
-                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                $join->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'da.id',

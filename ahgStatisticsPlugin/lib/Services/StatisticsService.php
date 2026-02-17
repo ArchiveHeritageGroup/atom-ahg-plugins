@@ -322,7 +322,7 @@ class StatisticsService
 
         return DB::table('ahg_usage_event as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'e.object_id', '=', 's.object_id')
             ->where('e.event_type', $eventType)
@@ -433,7 +433,7 @@ class StatisticsService
     {
         return DB::table('ahg_usage_event as e')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('e.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('e.repository_id', $repositoryId)
             ->where('e.event_type', 'view')

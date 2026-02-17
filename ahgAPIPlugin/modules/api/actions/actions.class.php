@@ -23,12 +23,12 @@ class apiActions extends AhgController
             ->leftJoin('slug', 'information_object.id', '=', 'slug.object_id')
             ->leftJoin('term_i18n as lod', function($join) {
                 $join->on('information_object.level_of_description_id', '=', 'lod.id')
-                     ->where('lod.culture', '=', 'en');
+                     ->where('lod.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('repository', 'information_object.repository_id', '=', 'repository.id')
             ->leftJoin('actor_i18n as repo_name', function($join) {
                 $join->on('repository.id', '=', 'repo_name.id')
-                     ->where('repo_name.culture', '=', 'en');
+                     ->where('repo_name.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where(function($q) use ($query) {
                 $q->where('information_object_i18n.title', 'LIKE', "%{$query}%")
@@ -73,7 +73,7 @@ class apiActions extends AhgController
             ->leftJoin('slug', 'information_object.id', '=', 'slug.object_id')
             ->leftJoin('term_i18n as lod', function($join) {
                 $join->on('information_object.level_of_description_id', '=', 'lod.id')
-                     ->where('lod.culture', '=', 'en');
+                     ->where('lod.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where(function($q) use ($query) {
                 $q->where('information_object_i18n.title', 'LIKE', "%{$query}%")

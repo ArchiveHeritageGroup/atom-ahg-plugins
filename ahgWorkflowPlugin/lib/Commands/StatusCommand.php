@@ -116,7 +116,7 @@ class StatusCommand extends BaseCommand
             ->join('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
             ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('user as u', 't.assigned_to', '=', 'u.id')
             ->where('t.status', $status);
@@ -168,7 +168,7 @@ class StatusCommand extends BaseCommand
             ->join('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
             ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('t.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('user as u', 't.assigned_to', '=', 'u.id')
             ->whereNotNull('t.due_date')

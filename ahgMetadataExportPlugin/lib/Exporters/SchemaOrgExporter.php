@@ -111,7 +111,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
 
         $ioI18n = DB::table('information_object_i18n')
             ->where('id', $id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $slug = DB::table('slug')->where('object_id', $id)->first();
@@ -245,7 +245,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
 
         $repoI18n = DB::table('actor_i18n')
             ->where('id', $id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $slug = DB::table('slug')->where('object_id', $id)->first();
@@ -301,7 +301,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
         // Description
         $repoDescI18n = DB::table('repository_i18n')
             ->where('id', $id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         if ($repoDescI18n && !empty($repoDescI18n->desc_institution_area)) {
@@ -328,7 +328,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
 
         $actorI18n = DB::table('actor_i18n')
             ->where('id', $id)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         $slug = DB::table('slug')->where('object_id', $id)->first();
@@ -378,7 +378,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
 
         $level = DB::table('term_i18n')
             ->where('id', $levelId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         if (!$level) {
@@ -424,7 +424,7 @@ class SchemaOrgExporter extends AbstractRdfExporter
 
         $level = DB::table('term_i18n')
             ->where('id', $levelId)
-            ->where('culture', 'en')
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->first();
 
         return $level ? $level->name : null;

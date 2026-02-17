@@ -221,7 +221,7 @@ class researcherActions extends AhgController
         if ($this->submission->repository_id) {
             $repo = \Illuminate\Database\Capsule\Manager::table('actor_i18n')
                 ->where('id', $this->submission->repository_id)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('authorized_form_of_name');
             $this->repositoryName = $repo;
         }
@@ -696,7 +696,7 @@ class researcherActions extends AhgController
         if ($source === 'actor') {
             // Search actors by name
             $results = $DB::table('actor_i18n')
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('authorized_form_of_name', 'LIKE', '%' . $query . '%')
                 ->whereNotNull('authorized_form_of_name')
                 ->orderBy('authorized_form_of_name')

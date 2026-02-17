@@ -1028,7 +1028,7 @@ class SettingsServicesAction extends AhgController
                 ]);
                 DB::table('setting_i18n')->insert([
                     'id' => $id,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'value' => $value,
                 ]);
             }

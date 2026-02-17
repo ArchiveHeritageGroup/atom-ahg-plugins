@@ -70,7 +70,7 @@ class museumReportsActions extends AhgController
         
         $query = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'm.object_id', '=', 'io.id')
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
@@ -100,7 +100,7 @@ class museumReportsActions extends AhgController
         
         $this->creators = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(
                 'm.creator_identity',
@@ -134,7 +134,7 @@ class museumReportsActions extends AhgController
         
         $query = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'm.object_id', '=', 'io.id')
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
@@ -173,7 +173,7 @@ class museumReportsActions extends AhgController
         
         $this->records = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'm.object_id', '=', 'io.id')
             ->leftJoin('slug as s', 'm.object_id', '=', 's.object_id')
@@ -236,7 +236,7 @@ class museumReportsActions extends AhgController
         
         $this->records = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('m.materials', 'm.techniques', 'm.dimensions', 'm.measurements', 'ioi.title', 'm.object_id')
             ->where(function($q) {
@@ -261,7 +261,7 @@ class museumReportsActions extends AhgController
         
         $data = DB::table('museum_metadata as m')
             ->leftJoin('information_object_i18n as ioi', function($join) {
-                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('m.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select('ioi.title', 'm.work_type', 'm.classification', 'm.materials', 'm.techniques', 'm.condition_term', 'm.creator_identity')
             ->get()

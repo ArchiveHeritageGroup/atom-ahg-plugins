@@ -20,7 +20,7 @@ class doiActions extends AhgController
         $this->recentDois = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->orderByDesc('d.minted_at')
             ->limit(10)
@@ -38,7 +38,7 @@ class doiActions extends AhgController
         $query = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'd.information_object_id', '=', 'slug.object_id')
             ->select(['d.*', 'ioi.title as object_title', 'slug.slug']);
@@ -70,7 +70,7 @@ class doiActions extends AhgController
         $this->doi = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'd.information_object_id', '=', 'slug.object_id')
             ->where('d.id', $request->getParameter('id'))
@@ -115,7 +115,7 @@ class doiActions extends AhgController
         $this->record = \Illuminate\Database\Capsule\Manager::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select(['io.*', 'ioi.title'])
@@ -163,7 +163,7 @@ class doiActions extends AhgController
             ->leftJoin('ahg_doi as d', 'io.id', '=', 'd.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNull('d.id')
             ->where('io.id', '!=', 1)
@@ -205,7 +205,7 @@ class doiActions extends AhgController
         $this->queue = \Illuminate\Database\Capsule\Manager::table('ahg_doi_queue as q')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('q.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->orderByRaw("FIELD(q.status, 'processing', 'pending', 'failed', 'completed')")
             ->orderByDesc('q.scheduled_at')
@@ -249,7 +249,7 @@ class doiActions extends AhgController
         $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['r.id', 'ai.authorized_form_of_name as name'])
             ->get();
@@ -330,7 +330,7 @@ class doiActions extends AhgController
             ->join('information_object as io', 'd.information_object_id', '=', 'io.id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('io.repository_id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->selectRaw('ai.authorized_form_of_name as repository, COUNT(*) as count')
             ->groupBy('io.repository_id', 'ai.authorized_form_of_name')
@@ -478,7 +478,7 @@ class doiActions extends AhgController
         $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['r.id', 'ai.authorized_form_of_name as name'])
             ->get();
@@ -499,7 +499,7 @@ class doiActions extends AhgController
         $this->doi = \Illuminate\Database\Capsule\Manager::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('d.id', $doiId)
             ->select(['d.*', 'ioi.title as object_title'])

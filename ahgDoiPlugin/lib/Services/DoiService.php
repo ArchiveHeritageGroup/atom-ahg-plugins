@@ -755,13 +755,13 @@ class DoiService
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->leftJoin('repository as r', 'io.repository_id', '=', 'r.id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('io.id', $objectId)
             ->select([
@@ -831,7 +831,7 @@ class DoiService
             if ($levelId) {
                 $levelTerm = DB::table('term_i18n')
                     ->where('id', $levelId)
-                    ->where('culture', 'en')
+                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->value('name');
 
                 if ($levelTerm && !in_array(strtolower($levelTerm), array_map('strtolower', $levels))) {
@@ -1358,12 +1358,12 @@ class DoiService
         $query = DB::table('ahg_doi as d')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('d.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('information_object as io', 'd.information_object_id', '=', 'io.id')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('io.repository_id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select([
                 'd.doi',

@@ -454,7 +454,7 @@ class StatisticsService
     {
         $query = DB::table('research_activity_log as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('a.entity_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('a.entity_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('a.activity_type', 'view')
             ->where('a.entity_type', 'information_object')
@@ -485,7 +485,7 @@ class StatisticsService
     {
         $query = DB::table('research_citation_log as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('c.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'c.object_id', '=', 'slug.object_id')
             ->selectRaw('c.object_id, ioi.title, slug.slug, COUNT(*) as citation_count')
@@ -513,7 +513,7 @@ class StatisticsService
     {
         return DB::table('research_collection_item as ci')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+                $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', 'ci.object_id', '=', 'slug.object_id')
             ->selectRaw('ci.object_id, ioi.title, slug.slug, COUNT(*) as collection_count')

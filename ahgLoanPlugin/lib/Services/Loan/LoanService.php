@@ -359,7 +359,7 @@ class LoanService
             ->leftJoin('information_object as io', 'io.id', '=', 'lo.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('ioi.id', '=', 'io.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('lo.loan_id', $loanId)
             ->select(

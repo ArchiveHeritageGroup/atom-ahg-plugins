@@ -156,7 +156,7 @@ class sectorExportAction extends AhgController
         return \Illuminate\Database\Capsule\Manager::table('actor as a')
             ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
             ->where('a.class_name', 'QubitRepository')
-            ->where('ai.culture', 'en')
+            ->where('ai.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('ai.authorized_form_of_name')
             ->select('a.id', 'ai.authorized_form_of_name as name')
             ->get()

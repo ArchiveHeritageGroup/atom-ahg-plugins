@@ -164,7 +164,7 @@ class ReportCommand extends BaseCommand
         $closures = DB::table('naz_closure_period as c')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('c.information_object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->select(['c.*', 'ioi.title as record_title'])
             ->orderBy('c.end_date')

@@ -108,7 +108,7 @@ class GraphService
             // Get the source actor's name
             $sourceActor = DB::table('actor_i18n')
                 ->where('id', $entityId)
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->first();
 
             if (!$sourceActor) {
@@ -127,11 +127,11 @@ class GraphService
             $subjectRelations = DB::table('relation as rel')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('rel.object_id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('term_i18n as ti', function ($join) {
                     $join->on('rel.type_id', '=', 'ti.id')
-                        ->where('ti.culture', '=', 'en');
+                        ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('rel.subject_id', $entityId)
                 ->select(
@@ -168,11 +168,11 @@ class GraphService
             $objectRelations = DB::table('relation as rel')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('rel.subject_id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('term_i18n as ti', function ($join) {
                     $join->on('rel.type_id', '=', 'ti.id')
-                        ->where('ti.culture', '=', 'en');
+                        ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('rel.object_id', $entityId)
                 ->select(
@@ -415,11 +415,11 @@ class GraphService
             $atomSubject = DB::table('relation as rel')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('rel.object_id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('term_i18n as ti', function ($join) {
                     $join->on('rel.type_id', '=', 'ti.id')
-                        ->where('ti.culture', '=', 'en');
+                        ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('rel.subject_id', $id)
                 ->select(
@@ -451,11 +451,11 @@ class GraphService
             $atomObject = DB::table('relation as rel')
                 ->leftJoin('actor_i18n as ai', function ($join) {
                     $join->on('rel.subject_id', '=', 'ai.id')
-                        ->where('ai.culture', '=', 'en');
+                        ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->leftJoin('term_i18n as ti', function ($join) {
                     $join->on('rel.type_id', '=', 'ti.id')
-                        ->where('ti.culture', '=', 'en');
+                        ->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->where('rel.object_id', $id)
                 ->select(

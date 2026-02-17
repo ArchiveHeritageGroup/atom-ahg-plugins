@@ -82,7 +82,7 @@ class RetrievalService
             ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('mr.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             });
 
         // Apply queue filters
@@ -294,7 +294,7 @@ class RetrievalService
             ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('mr.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('b.reading_room_id', $schedule->reading_room_id)
             ->where('b.booking_date', $date)
@@ -438,11 +438,11 @@ class RetrievalService
             ->leftJoin('information_object as io', 'mr.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('mr.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('actor_i18n as repo', function ($join) {
                 $join->on('io.repository_id', '=', 'repo.id')
-                    ->where('repo.culture', '=', 'en');
+                    ->where('repo.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('research_reading_room_seat as seat', 'b.seat_id', '=', 'seat.id')
             ->where('mr.id', $requestId)

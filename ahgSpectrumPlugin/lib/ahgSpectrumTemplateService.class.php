@@ -369,7 +369,7 @@ class ahgSpectrumTemplateService
             // Update existing setting
             DB::table('setting_i18n')
                 ->updateOrInsert(
-                    ['id' => $existing->id, 'culture' => 'en'],
+                    ['id' => $existing->id, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
                     ['value' => $jsonValue]
                 );
         } else {
@@ -381,7 +381,7 @@ class ahgSpectrumTemplateService
 
             DB::table('setting_i18n')->insert([
                 'id' => $settingId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'value' => $jsonValue,
             ]);
         }

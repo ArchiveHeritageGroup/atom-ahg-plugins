@@ -13,6 +13,18 @@ class NerTrainingSync
     private $apiKey;
     private $enabled;
 
+    /**
+     * Get the current user's culture with fallback to 'en'
+     */
+    private function getCulture(): string
+    {
+        try {
+            return sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
+
     public function __construct()
     {
         // Load config from database settings (preferred) or environment (fallback)
@@ -99,11 +111,20 @@ class NerTrainingSync
     public function getEntityContext($objectId, $entityValue, $contextLength = 200)
     {
         // Get digital object text or scope and content
+        $culture = $this->getCulture();
         $io = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', $culture)
             ->first();
-        
+
+        // Fallback to 'en' if culture has no data
+        if (!$io && $culture !== 'en') {
+            $io = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', 'en')
+                ->first();
+        }
+
         if (!$io) {
             return null;
         }

@@ -31,7 +31,7 @@ class favoritesMoveToFolderAction extends AhgController
         $folderId = $request->getParameter('folder_id');
 
         if (!is_array($ids) || empty($ids)) {
-            $this->getUser()->setFlash('error', 'No items selected.');
+            $this->getUser()->setFlash('error', __('No items selected.'));
             $this->redirect(['module' => 'favorites', 'action' => 'browse']);
 
             return;

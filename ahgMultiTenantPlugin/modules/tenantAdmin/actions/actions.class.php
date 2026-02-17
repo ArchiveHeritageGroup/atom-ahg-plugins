@@ -84,7 +84,7 @@ class tenantAdminActions extends AhgController
         $this->repositories = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'r.id')
             ->select('r.id', 'r.identifier', 'ai.authorized_form_of_name as name', 's.slug')
@@ -110,7 +110,7 @@ class tenantAdminActions extends AhgController
         $this->repositories = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('heritage_tenant as t', 't.repository_id', '=', 'r.id')
             ->whereNull('t.id') // Only repositories without tenants
@@ -193,7 +193,7 @@ class tenantAdminActions extends AhgController
         $this->repositories = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('heritage_tenant as t', function ($join) use ($tenantId) {
                 $join->on('t.repository_id', '=', 'r.id')
@@ -441,7 +441,7 @@ class tenantAdminActions extends AhgController
         $this->repository = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'r.id')
             ->where('r.id', $repoId)
@@ -467,7 +467,7 @@ class tenantAdminActions extends AhgController
         $this->repository = DB::table('repository as r')
             ->leftJoin('actor_i18n as ai', function ($join) {
                 $join->on('r.id', '=', 'ai.id')
-                    ->where('ai.culture', '=', 'en');
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('r.id', $repoId)
             ->select('r.id', 'r.identifier', 'ai.authorized_form_of_name as name')

@@ -218,7 +218,7 @@ class MetadataExtractionHandler
         } else {
             DB::table('information_object_i18n')->insert([
                 'id' => $informationObjectId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 $targetField => $newValue,
             ]);
         }
@@ -248,7 +248,7 @@ class MetadataExtractionHandler
 
             DB::table('actor_i18n')->insert([
                 'id' => $actorId,
-                'culture' => 'en',
+                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'authorized_form_of_name' => $creatorName,
             ]);
         }
@@ -338,7 +338,7 @@ class MetadataExtractionHandler
 
                 DB::table('term_i18n')->insert([
                     'id' => $termId,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'name' => $keyword,
                 ]);
             }
@@ -393,7 +393,7 @@ class MetadataExtractionHandler
             } else {
                 DB::table('information_object_i18n')->insert([
                     'id' => $informationObjectId,
-                    'culture' => 'en',
+                    'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
                     'scope_and_content' => $newValue,
                 ]);
             }

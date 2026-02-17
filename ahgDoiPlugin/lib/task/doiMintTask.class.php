@@ -102,7 +102,7 @@ EOF;
             ->leftJoin('ahg_doi as d', 'io.id', '=', 'd.information_object_id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->whereNull('d.id') // No existing DOI
             ->where('io.id', '!=', 1) // Not root
@@ -125,7 +125,7 @@ EOF;
         if ($options['level']) {
             $levelId = DB::table('term_i18n')
                 ->where('name', 'LIKE', $options['level'])
-                ->where('culture', 'en')
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->value('id');
             if ($levelId) {
                 $query->where('io.level_of_description_id', $levelId);
