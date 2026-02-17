@@ -8,6 +8,7 @@ require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FolderService;
 use AtomAhgPlugins\ahgFavoritesPlugin\SimplePager;
+use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * Browse Favorites Action
@@ -80,5 +81,11 @@ class favoritesBrowseAction extends AhgController
         if ($this->currentFolderId) {
             $this->currentFolder = $folderService->getFolder($userId, $this->currentFolderId);
         }
+
+        // Research plugin integration detection
+        $this->researchEnabled = DB::table('atom_plugin')
+            ->where('name', 'ahgResearchPlugin')
+            ->where('is_enabled', 1)
+            ->exists();
     }
 }

@@ -63,16 +63,28 @@ class FavoritesService
     {
         $result = $this->repository->browse($userId, $params);
 
-        // Enrich each hit with resolved title and slug
+        // Enrich each hit with resolved title, slug, and extended metadata
         $culture = $this->getCulture();
         $enriched = [];
+
+        // Type icon map
+        $typeIcons = [
+            'information_object' => 'fas fa-file-alt',
+            'actor' => 'fas fa-user',
+            'repository' => 'fas fa-building',
+            'accession' => 'fas fa-archive',
+            'function' => 'fas fa-sitemap',
+        ];
 
         foreach ($result['hits'] as $fav) {
             $objectId = $fav->archival_description_id;
 
+            // Check object accessibility
+            $itemAccessible = $objectId && DB::table('object')->where('id', $objectId)->exists();
+
             // Resolve title in user's culture
             $title = null;
-            if ($objectId) {
+            if ($objectId && $itemAccessible) {
                 $title = DB::table('information_object_i18n')
                     ->where('id', $objectId)
                     ->where('culture', $culture)
@@ -91,25 +103,80 @@ class FavoritesService
                 ->where('object_id', $objectId)
                 ->value('slug');
 
-            // Get level of description
+            // Get IO details for extended metadata
+            $io = null;
             $lod = null;
-            if ($objectId) {
-                $lodId = DB::table('information_object')
+            $dateRange = '';
+            $repositoryName = '';
+            $hasDigitalObject = false;
+            $thumbnailPath = null;
+            $itemUpdatedSince = false;
+
+            if ($objectId && $itemAccessible) {
+                $io = DB::table('information_object')
                     ->where('id', $objectId)
-                    ->value('level_of_description_id');
-                if ($lodId) {
+                    ->first();
+
+                // Level of description
+                if ($io && $io->level_of_description_id) {
                     $lod = DB::table('term_i18n')
-                        ->where('id', $lodId)
+                        ->where('id', $io->level_of_description_id)
                         ->where('culture', $culture)
                         ->value('name');
                     if (!$lod && $culture !== 'en') {
                         $lod = DB::table('term_i18n')
-                            ->where('id', $lodId)
+                            ->where('id', $io->level_of_description_id)
                             ->where('culture', 'en')
                             ->value('name');
                     }
                 }
+
+                // Date range
+                if ($io) {
+                    $parts = [];
+                    if (!empty($io->start_date)) {
+                        $parts[] = $io->start_date;
+                    }
+                    if (!empty($io->end_date)) {
+                        $parts[] = $io->end_date;
+                    }
+                    $dateRange = implode(' - ', $parts);
+                }
+
+                // Repository name
+                if ($io && $io->repository_id) {
+                    $repositoryName = DB::table('actor_i18n')
+                        ->where('id', $io->repository_id)
+                        ->where('culture', $culture)
+                        ->value('authorized_form_of_name') ?? '';
+                    if (!$repositoryName && $culture !== 'en') {
+                        $repositoryName = DB::table('actor_i18n')
+                            ->where('id', $io->repository_id)
+                            ->where('culture', 'en')
+                            ->value('authorized_form_of_name') ?? '';
+                    }
+                }
+
+                // Digital object check
+                $hasDigitalObject = DB::table('digital_object')
+                    ->where('object_id', $objectId)
+                    ->exists();
+
+                // Thumbnail path (usage_id 142 = thumbnail)
+                if ($hasDigitalObject) {
+                    $thumbnailPath = DB::table('digital_object')
+                        ->where('object_id', $objectId)
+                        ->where('usage_id', 142)
+                        ->value('path');
+                }
+
+                // Item updated since favourited
+                if ($io && isset($io->updated_at) && $fav->created_at) {
+                    $itemUpdatedSince = strtotime($io->updated_at) > strtotime($fav->created_at);
+                }
             }
+
+            $objectType = $fav->object_type ?? 'information_object';
 
             $enriched[] = (object) [
                 'id' => $fav->id,
@@ -118,9 +185,16 @@ class FavoritesService
                 'title' => $title ?? $fav->archival_description ?? 'Untitled',
                 'slug' => $slug ?? $fav->slug,
                 'notes' => $fav->notes ?? null,
-                'object_type' => $fav->object_type ?? 'information_object',
+                'object_type' => $objectType,
                 'reference_code' => $fav->reference_code ?? null,
                 'level_of_description' => $lod,
+                'date_range' => $dateRange,
+                'repository_name' => $repositoryName,
+                'has_digital_object' => $hasDigitalObject,
+                'thumbnail_path' => $thumbnailPath,
+                'type_icon' => $typeIcons[$objectType] ?? 'fas fa-file-alt',
+                'item_updated_since' => $itemUpdatedSince,
+                'item_accessible' => $itemAccessible,
                 'folder_id' => $fav->folder_id ?? null,
                 'created_at' => $fav->created_at,
                 'updated_at' => $fav->updated_at ?? null,

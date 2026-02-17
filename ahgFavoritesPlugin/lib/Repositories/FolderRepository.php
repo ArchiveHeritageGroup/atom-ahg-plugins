@@ -123,6 +123,7 @@ class FolderRepository
             ->groupBy('favorites_folder.id', 'favorites_folder.user_id', 'favorites_folder.name',
                 'favorites_folder.description', 'favorites_folder.color', 'favorites_folder.icon',
                 'favorites_folder.visibility', 'favorites_folder.sort_order', 'favorites_folder.parent_id',
+                'favorites_folder.share_token', 'favorites_folder.share_expires_at',
                 'favorites_folder.created_at', 'favorites_folder.updated_at')
             ->orderBy('favorites_folder.sort_order')
             ->orderBy('favorites_folder.name')

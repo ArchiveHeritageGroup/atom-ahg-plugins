@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `favorites` (
   `reference_code` VARCHAR(255) DEFAULT NULL,
   `folder_id` INT DEFAULT NULL,
   `completed_at` DATETIME DEFAULT NULL,
+  `last_viewed_at` DATETIME DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -37,9 +38,28 @@ CREATE TABLE IF NOT EXISTS `favorites_folder` (
   `visibility` ENUM('private','shared','public') DEFAULT 'private',
   `sort_order` INT DEFAULT 0,
   `parent_id` INT DEFAULT NULL,
+  `share_token` VARCHAR(64) DEFAULT NULL,
+  `share_expires_at` DATETIME DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_user` (`user_id`),
-  INDEX `idx_parent` (`parent_id`)
+  INDEX `idx_parent` (`parent_id`),
+  INDEX `idx_share_token` (`share_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Favorites share table (access tracking for shared folders)
+CREATE TABLE IF NOT EXISTS `favorites_share` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `folder_id` INT NOT NULL,
+  `shared_with_user_id` INT DEFAULT NULL,
+  `shared_via` ENUM('link','email','direct') DEFAULT 'link',
+  `token` VARCHAR(64) NOT NULL,
+  `expires_at` DATETIME DEFAULT NULL,
+  `accessed_at` DATETIME DEFAULT NULL,
+  `access_count` INT DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_folder` (`folder_id`),
+  INDEX `idx_token` (`token`),
+  INDEX `idx_shared_with` (`shared_with_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

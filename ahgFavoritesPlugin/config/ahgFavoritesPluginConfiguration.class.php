@@ -40,6 +40,23 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_favorites_ajax_search', '/favorites/ajax/search', 'ajaxSearch');
         $router->any('ahg_favorites_ajax_status', '/favorites/ajax/status/:slug', 'ajaxStatus');
 
+        // Export
+        $router->any('ahg_favorites_export', '/favorites/export/:format', 'export');
+        $router->any('ahg_favorites_export_folder', '/favorites/folder/:id/export/:format', 'exportFolder', ['id' => '\d+']);
+
+        // Sharing
+        $router->post('ahg_favorites_share_folder', '/favorites/folder/:id/share', 'shareFolder', ['id' => '\d+']);
+        $router->post('ahg_favorites_revoke_sharing', '/favorites/folder/:id/revoke-share', 'revokeSharing', ['id' => '\d+']);
+        $router->any('ahg_favorites_view_shared', '/favorites/shared/:token', 'viewShared');
+
+        // Import
+        $router->post('ahg_favorites_import', '/favorites/import', 'import');
+
+        // Research integration
+        $router->post('ahg_favorites_send_collection', '/favorites/send-to-collection', 'sendToCollection');
+        $router->post('ahg_favorites_send_project', '/favorites/send-to-project', 'sendToProject');
+        $router->post('ahg_favorites_send_bibliography', '/favorites/send-to-bibliography', 'sendToBibliography');
+
         $router->register($event->getSubject());
     }
 
