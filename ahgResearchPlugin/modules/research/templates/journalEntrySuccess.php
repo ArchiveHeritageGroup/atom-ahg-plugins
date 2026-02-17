@@ -23,7 +23,7 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><?php echo htmlspecialchars($entry->title ?? __('Untitled Entry')); ?></h5>
-        <div>
+        <div class="d-flex align-items-center gap-2">
           <?php if (!empty($entry->project_title)): ?>
             <span class="badge bg-info"><i class="fas fa-project-diagram me-1"></i><?php echo htmlspecialchars($entry->project_title); ?></span>
           <?php endif; ?>
@@ -31,6 +31,12 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
             'manual' => 'primary', 'note' => 'secondary', 'observation' => 'success',
             'finding' => 'warning', 'question' => 'danger', 'auto' => 'dark', default => 'light text-dark'
           }; ?>"><?php echo ucfirst($entry->entry_type ?? 'manual'); ?></span>
+          <?php include_partial('research/favoriteResearchButton', [
+              'objectId' => $entry->id,
+              'objectType' => 'research_journal',
+              'title' => $entry->title ?? 'Journal Entry',
+              'url' => '/research/journal/entry/' . $entry->id,
+          ]); ?>
         </div>
       </div>
       <div class="card-body">
@@ -149,8 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
   var editor = ResearchTipTap.create('entryEditor', {
     profile: 'full',
     uploadUrl: '<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>',
+    resolveUrl: '<?php echo url_for(["module" => "research", "action" => "resolveThumbnail"]); ?>',
     placeholder: '<?php echo __("Write your journal entry..."); ?>',
-    initialContent: <?php echo json_encode($entry->content ?? ''); ?>
+    initialContent: <?php echo json_encode(sfOutputEscaper::unescape($entry->content ?? '')); ?>
   });
 
   var form = document.getElementById('entryForm');

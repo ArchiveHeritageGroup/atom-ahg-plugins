@@ -7,6 +7,14 @@
 <?php slot('content'); ?>
 
 <?php
+  // Helper: generate URL for a favorite item (supports research types with direct URLs)
+  function favItemUrl($favorite) {
+      $researchTypes = ['research_journal', 'research_collection', 'research_project', 'research_bibliography', 'research_workspace', 'research_report'];
+      if (in_array($favorite->object_type ?? '', $researchTypes) && !empty($favorite->slug) && str_starts_with($favorite->slug, '/')) {
+          return $favorite->slug;
+      }
+      return url_for(['module' => 'informationobject', 'slug' => $favorite->slug]);
+  }
   // Build base URL for pagination/filtering links
   $baseParams = [];
   if ($currentQuery) $baseParams['query'] = $currentQuery;
@@ -297,7 +305,7 @@
                       </div>
                       <h6 class="card-title">
                         <i class="<?php echo $favorite->type_icon ?? 'fas fa-file-alt'; ?> text-muted me-1"></i>
-                        <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $favorite->slug]); ?>" class="text-decoration-none fav-item-link" data-fav-id="<?php echo $favorite->id; ?>">
+                        <a href="<?php echo favItemUrl($favorite); ?>" class="text-decoration-none fav-item-link" data-fav-id="<?php echo $favorite->id; ?>">
                           <?php echo esc_entities($favorite->title); ?>
                         </a>
                       </h6>
@@ -362,7 +370,7 @@
                         <input type="checkbox" class="form-check-input bulk-checkbox" value="<?php echo $favorite->id; ?>">
                       </td>
                       <td>
-                        <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $favorite->slug]); ?>" class="text-decoration-none fav-item-link" data-fav-id="<?php echo $favorite->id; ?>">
+                        <a href="<?php echo favItemUrl($favorite); ?>" class="text-decoration-none fav-item-link" data-fav-id="<?php echo $favorite->id; ?>">
                           <i class="<?php echo $favorite->type_icon ?? 'fas fa-file-alt'; ?> text-muted me-2"></i>
                           <?php echo esc_entities($favorite->title); ?>
                         </a>
@@ -402,7 +410,7 @@
                         </button>
                       </td>
                       <td class="text-center">
-                        <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $favorite->slug]); ?>"
+                        <a href="<?php echo favItemUrl($favorite); ?>"
                            class="btn btn-sm btn-outline-primary me-1 fav-item-link" data-fav-id="<?php echo $favorite->id; ?>" title="<?php echo __('View'); ?>">
                           <i class="fas fa-eye"></i>
                         </a>
@@ -542,11 +550,25 @@
               <option value="365"><?php echo __('1 year'); ?></option>
             </select>
           </div>
+          <div class="mb-3">
+            <label for="shareEmails" class="form-label"><?php echo __('Email recipients'); ?> <small class="text-muted">(<?php echo __('optional'); ?>)</small></label>
+            <textarea class="form-control" id="shareEmails" name="emails" rows="2"
+                      placeholder="<?php echo __('Enter email addresses, one per line or comma-separated...'); ?>"></textarea>
+            <small class="text-muted"><?php echo __('Recipients will receive an email with the share link. Leave empty to only generate a link.'); ?></small>
+          </div>
+          <div class="mb-3">
+            <label for="shareMessage" class="form-label"><?php echo __('Personal message'); ?> <small class="text-muted">(<?php echo __('optional'); ?>)</small></label>
+            <textarea class="form-control" id="shareMessage" name="message" rows="2"
+                      placeholder="<?php echo __('Add a note for the recipients...'); ?>"></textarea>
+          </div>
           <div id="shareResultArea" style="display:none;" class="mt-3">
+            <div class="alert alert-success mb-2" id="shareSuccessAlert" style="display:none;">
+              <i class="fas fa-check-circle me-1"></i><span id="shareSuccessText"></span>
+            </div>
             <label class="form-label"><?php echo __('Share Link'); ?></label>
             <div class="input-group">
               <input type="text" id="shareUrlInput" class="form-control" readonly>
-              <button type="button" class="btn btn-outline-primary" onclick="navigator.clipboard.writeText(document.getElementById('shareUrlInput').value); this.innerHTML='<i class=\'fas fa-check\'></i>';">
+              <button type="button" class="btn btn-outline-primary" id="shareCopyBtn">
                 <i class="fas fa-copy"></i>
               </button>
             </div>
@@ -555,7 +577,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
-          <button type="submit" class="btn btn-primary" id="shareSubmitBtn"><i class="fas fa-link me-1"></i><?php echo __('Generate Link'); ?></button>
+          <button type="submit" class="btn btn-primary" id="shareSubmitBtn">
+            <i class="fas fa-share-alt me-1"></i><?php echo __('Share'); ?>
+          </button>
         </div>
       </div>
     </form>
@@ -863,6 +887,9 @@
     if (shareForm) {
         shareForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            var submitBtn = document.getElementById('shareSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><?php echo __('Sharing...'); ?>';
             var formData = new URLSearchParams(new FormData(shareForm));
             fetch(shareForm.action, {
                 method: 'POST',
@@ -875,8 +902,39 @@
                     document.getElementById('shareResultArea').style.display = 'block';
                     document.getElementById('shareUrlInput').value = data.url;
                     document.getElementById('shareExpiresText').textContent = '<?php echo __('Expires:'); ?> ' + data.expires_at;
-                    document.getElementById('shareSubmitBtn').style.display = 'none';
+                    submitBtn.style.display = 'none';
+
+                    // Show email result
+                    var successAlert = document.getElementById('shareSuccessAlert');
+                    var successText = document.getElementById('shareSuccessText');
+                    if (data.emails_sent && data.emails_sent > 0) {
+                        successAlert.style.display = 'block';
+                        successText.textContent = '<?php echo __('Link sent to'); ?> ' + data.emails_sent + ' <?php echo __('recipient(s)'); ?>';
+                    } else if (data.email_errors && data.email_errors.length > 0) {
+                        successAlert.className = 'alert alert-warning mb-2';
+                        successAlert.style.display = 'block';
+                        successText.textContent = '<?php echo __('Link generated but some emails could not be sent.'); ?>';
+                    }
+
+                    // Copy button
+                    var copyBtn = document.getElementById('shareCopyBtn');
+                    if (copyBtn) {
+                        copyBtn.addEventListener('click', function() {
+                            navigator.clipboard.writeText(document.getElementById('shareUrlInput').value);
+                            this.innerHTML = '<i class="fas fa-check"></i>';
+                            var self = this;
+                            setTimeout(function() { self.innerHTML = '<i class="fas fa-copy"></i>'; }, 2000);
+                        });
+                    }
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-share-alt me-1"></i><?php echo __('Share'); ?>';
+                    alert(data.message || '<?php echo __('Share failed.'); ?>');
                 }
+            })
+            .catch(function() {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-share-alt me-1"></i><?php echo __('Share'); ?>';
             });
         });
     }
@@ -951,6 +1009,10 @@
                 });
                 if (!sel.options.length) sel.innerHTML = '<option value=""><?php echo __('No collections found'); ?></option>';
                 collectionLoaded = true;
+            }).catch(function(e) {
+                var sel = document.getElementById('collectionSelect');
+                if (sel) sel.innerHTML = '<option value=""><?php echo __('Error loading collections'); ?></option>';
+                console.error('Collection fetch error:', e);
             });
         });
     }
@@ -966,11 +1028,15 @@
                 sel.innerHTML = '';
                 (data.projects || []).forEach(function(p) {
                     var opt = document.createElement('option');
-                    opt.value = p.id; opt.textContent = p.name;
+                    opt.value = p.id; opt.textContent = p.title || p.name;
                     sel.appendChild(opt);
                 });
                 if (!sel.options.length) sel.innerHTML = '<option value=""><?php echo __('No projects found'); ?></option>';
                 projectLoaded = true;
+            }).catch(function(e) {
+                var sel = document.getElementById('projectSelect');
+                if (sel) sel.innerHTML = '<option value=""><?php echo __('Error loading projects'); ?></option>';
+                console.error('Project fetch error:', e);
             });
         });
     }
@@ -991,6 +1057,10 @@
                 });
                 if (!sel.options.length) sel.innerHTML = '<option value=""><?php echo __('No bibliographies found'); ?></option>';
                 bibLoaded = true;
+            }).catch(function(e) {
+                var sel = document.getElementById('bibliographySelect');
+                if (sel) sel.innerHTML = '<option value=""><?php echo __('Error loading bibliographies'); ?></option>';
+                console.error('Bibliography fetch error:', e);
             });
         });
     }

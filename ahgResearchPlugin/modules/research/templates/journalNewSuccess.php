@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var editor = ResearchTipTap.create('entryEditor', {
     profile: 'full',
     uploadUrl: '<?php echo url_for(["module" => "research", "action" => "uploadNoteImage"]); ?>',
+    resolveUrl: '<?php echo url_for(["module" => "research", "action" => "resolveThumbnail"]); ?>',
     placeholder: '<?php echo __("Write your journal entry..."); ?>'
   });
 

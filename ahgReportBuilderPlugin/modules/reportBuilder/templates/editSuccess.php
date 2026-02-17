@@ -474,21 +474,12 @@ window.reportBuilder = {
 <!-- Section editor styles -->
 <link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/report-sections.css">
 
-<!-- TipTap CDN -->
-<?php $_na = sfConfig::get('csp_nonce', ''); $_na = $_na ? preg_replace('/^nonce=/', 'nonce="', $_na) . '"' : ''; ?>
+<!-- TipTap Bundle (v2.27.2 — core + starter-kit + extensions, bundled with esbuild) -->
 <link rel="stylesheet" href="/plugins/ahgReportBuilderPlugin/web/css/tiptap-report.css">
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/core@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/starter-kit@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-text-style@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-image@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-underline@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-color@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-highlight@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
-<script src="https://cdn.jsdelivr.net/npm/@tiptap/extension-link@2.11.7/dist/index.umd.js" <?php echo $_na; ?>></script>
+<script src="/plugins/ahgReportBuilderPlugin/web/js/tiptap.bundle.min.js"></script>
 
 <!-- TipTap init (provides TipTapManager + QuillManager backward-compat alias) -->
-<script src="/plugins/ahgReportBuilderPlugin/web/js/tiptap-init.js" <?php echo $_na; ?>></script>
+<script src="/plugins/ahgReportBuilderPlugin/web/js/tiptap-init.js"></script>
 
 <!-- Load libraries (local copies to avoid CDN/CSP issues) -->
 <script src="/plugins/ahgReportBuilderPlugin/web/js/sortable.min.js"></script>

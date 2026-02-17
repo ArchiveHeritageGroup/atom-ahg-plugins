@@ -21,6 +21,14 @@
             <?php echo ucfirst($workspaceData->visibility); ?>
         </span>
     </div>
+    <div>
+        <?php include_partial('research/favoriteResearchButton', [
+            'objectId' => $workspaceData->id,
+            'objectType' => 'research_workspace',
+            'title' => $workspaceData->name,
+            'url' => '/research/workspaces/' . $workspaceData->id,
+        ]); ?>
+    </div>
 </div>
 <div class="row">
     <div class="col-md-8">
@@ -171,39 +179,81 @@
     </div>
 </div>
 
+<!-- Tom Select CSS/JS -->
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+.ts-dropdown { background: #fff !important; color: #212529 !important; }
+.ts-dropdown .option { color: #212529 !important; }
+</style>
+
 <!-- Invite Modal -->
 <div class="modal fade" id="inviteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post">
                 <input type="hidden" name="form_action" value="invite">
+                <input type="hidden" name="email" id="inviteEmailHidden" value="">
                 <div class="modal-header">
-                    <h5 class="modal-title">Invite Member</h5>
+                    <h5 class="modal-title"><?php echo __('Invite Member'); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="email" class="form-control" required>
-                        <small class="text-muted">Must be a registered researcher</small>
+                        <label class="form-label"><?php echo __('Search Researcher'); ?> *</label>
+                        <select id="inviteResearcherSearch" required></select>
+                        <small class="text-muted"><?php echo __('Type name or email of a registered researcher'); ?></small>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Role</label>
+                        <label class="form-label"><?php echo __('Role'); ?></label>
                         <select name="role" class="form-select">
-                            <option value="member">Member - Can view and comment</option>
-                            <option value="editor">Editor - Can add resources</option>
-                            <option value="admin">Admin - Can manage members</option>
+                            <option value="member"><?php echo __('Member - Can view and comment'); ?></option>
+                            <option value="editor"><?php echo __('Editor - Can add resources'); ?></option>
+                            <option value="admin"><?php echo __('Admin - Can manage members'); ?></option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send Invitation</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
+                    <button type="submit" class="btn btn-primary"><?php echo __('Send Invitation'); ?></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var inviteSelect = new TomSelect('#inviteResearcherSearch', {
+        valueField: 'email',
+        labelField: 'title',
+        searchField: ['title', 'email'],
+        placeholder: '<?php echo __("Search by name or email..."); ?>',
+        loadThrottle: 300,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            var url = '<?php echo url_for(["module" => "research", "action" => "searchEntities"]); ?>';
+            var sep = url.indexOf('?') >= 0 ? '&' : '?';
+            fetch(url + sep + 'type=researcher&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(json) { callback(json.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item, escape) {
+                return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
+                    '<br><small class="text-muted">' + escape(item.email || '') +
+                    (item.institution ? ' &middot; ' + escape(item.institution) : '') + '</small></div>';
+            },
+            item: function(item, escape) {
+                return '<div>' + escape(item.title) + ' <small class="text-muted">(' + escape(item.email || '') + ')</small></div>';
+            }
+        },
+        onChange: function(value) {
+            document.getElementById('inviteEmailHidden').value = value;
+        }
+    });
+});
+</script>
 
 <!-- Add Resource Modal -->
 <div class="modal fade" id="addResourceModal" tabindex="-1">
@@ -211,40 +261,95 @@
         <div class="modal-content">
             <form method="post">
                 <input type="hidden" name="form_action" value="add_resource">
+                <input type="hidden" name="resource_id" id="resourceIdHidden" value="">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Resource</h5>
+                    <h5 class="modal-title"><?php echo __('Add Resource'); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Resource Type *</label>
-                        <select name="resource_type" class="form-select" required>
-                            <option value="collection">Collection</option>
-                            <option value="saved_search">Saved Search</option>
-                            <option value="bibliography">Bibliography</option>
-                            <option value="object">Archive Object</option>
-                            <option value="external_link">External Link</option>
+                        <label class="form-label"><?php echo __('Resource Type'); ?> *</label>
+                        <select name="resource_type" id="resourceTypeSelect" class="form-select" required>
+                            <option value="collection"><?php echo __('Collection'); ?></option>
+                            <option value="saved_search"><?php echo __('Saved Search'); ?></option>
+                            <option value="bibliography"><?php echo __('Bibliography'); ?></option>
+                            <option value="object"><?php echo __('Archive Object'); ?></option>
+                            <option value="external_link"><?php echo __('External Link'); ?></option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Resource ID</label>
-                        <input type="number" name="resource_id" class="form-control">
-                        <small class="text-muted">ID of collection, search, bibliography, or object</small>
+                    <div class="mb-3" id="resourceSearchGroup">
+                        <label class="form-label"><?php echo __('Search Resource'); ?></label>
+                        <select id="resourceSearch"></select>
+                        <small class="text-muted"><?php echo __('Type to search by name or title'); ?></small>
+                    </div>
+                    <div class="mb-3" id="externalLinkGroup" style="display:none;">
+                        <label class="form-label"><?php echo __('URL'); ?> *</label>
+                        <input type="url" name="external_url" id="externalUrlInput" class="form-control" placeholder="https://">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Title *</label>
-                        <input type="text" name="title" class="form-control" required>
+                        <label class="form-label"><?php echo __('Title'); ?> *</label>
+                        <input type="text" name="title" id="resourceTitleInput" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label"><?php echo __('Notes'); ?></label>
                         <textarea name="notes" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Resource</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
+                    <button type="submit" class="btn btn-primary"><?php echo __('Add Resource'); ?></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var typeMap = {collection: 'collection', saved_search: 'saved_search', bibliography: 'bibliography', object: 'information_object'};
+    var resourceSelect = new TomSelect('#resourceSearch', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title', 'identifier'],
+        placeholder: '<?php echo __("Type to search..."); ?>',
+        loadThrottle: 300,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            var resType = document.getElementById('resourceTypeSelect').value;
+            var searchType = typeMap[resType] || 'information_object';
+            var url = '<?php echo url_for(["module" => "research", "action" => "searchEntities"]); ?>';
+            var sep = url.indexOf('?') >= 0 ? '&' : '?';
+            fetch(url + sep + 'type=' + searchType + '&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(json) { callback(json.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item, escape) {
+                return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
+                    (item.identifier ? '<br><small class="text-muted">' + escape(item.identifier) + '</small>' : '') +
+                    '</div>';
+            },
+            item: function(item, escape) {
+                return '<div>' + escape(item.title) + '</div>';
+            }
+        },
+        onChange: function(value) {
+            document.getElementById('resourceIdHidden').value = value;
+            var selected = this.options[value];
+            if (selected && selected.title) {
+                document.getElementById('resourceTitleInput').value = selected.title;
+            }
+        }
+    });
+    // Toggle search vs URL input based on resource type
+    document.getElementById('resourceTypeSelect').addEventListener('change', function() {
+        var isLink = this.value === 'external_link';
+        document.getElementById('resourceSearchGroup').style.display = isLink ? 'none' : '';
+        document.getElementById('externalLinkGroup').style.display = isLink ? '' : 'none';
+        resourceSelect.clear();
+        resourceSelect.clearOptions();
+        document.getElementById('resourceIdHidden').value = '';
+        document.getElementById('resourceTitleInput').value = '';
+    });
+});
+</script>

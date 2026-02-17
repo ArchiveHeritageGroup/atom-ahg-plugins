@@ -37,8 +37,10 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
 
         // AJAX
         $router->post('ahg_favorites_ajax_toggle', '/favorites/ajax/toggle', 'ajaxToggle');
+        $router->post('ahg_favorites_ajax_toggle_custom', '/favorites/ajax/toggle-custom', 'ajaxToggleCustom');
         $router->any('ahg_favorites_ajax_search', '/favorites/ajax/search', 'ajaxSearch');
         $router->any('ahg_favorites_ajax_status', '/favorites/ajax/status/:slug', 'ajaxStatus');
+        $router->any('ahg_favorites_ajax_folders', '/favorites/ajax/folders', 'ajaxFolders');
 
         // Export
         $router->any('ahg_favorites_export', '/favorites/export/:format', 'export');
@@ -53,9 +55,9 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
         $router->post('ahg_favorites_import', '/favorites/import', 'import');
 
         // Research integration
-        $router->post('ahg_favorites_send_collection', '/favorites/send-to-collection', 'sendToCollection');
-        $router->post('ahg_favorites_send_project', '/favorites/send-to-project', 'sendToProject');
-        $router->post('ahg_favorites_send_bibliography', '/favorites/send-to-bibliography', 'sendToBibliography');
+        $router->any('ahg_favorites_send_collection', '/favorites/send-to-collection', 'sendToCollection');
+        $router->any('ahg_favorites_send_project', '/favorites/send-to-project', 'sendToProject');
+        $router->any('ahg_favorites_send_bibliography', '/favorites/send-to-bibliography', 'sendToBibliography');
 
         $router->register($event->getSubject());
     }

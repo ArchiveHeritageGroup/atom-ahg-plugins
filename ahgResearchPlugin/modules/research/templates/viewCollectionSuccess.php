@@ -17,6 +17,12 @@
         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'generateFindingAid', 'id' => $collection->id]); ?>"><i class="fas fa-file-code me-2 text-secondary"></i><?php echo __('HTML'); ?></a></li>
       </ul>
     </div>
+    <?php include_partial('research/favoriteResearchButton', [
+        'objectId' => $collection->id,
+        'objectType' => 'research_collection',
+        'title' => $collection->name,
+        'url' => '/research/collection/' . $collection->id,
+    ]); ?>
     <button type="button" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editCollectionModal"><i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?></button>
     <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCollectionModal"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
   </div>

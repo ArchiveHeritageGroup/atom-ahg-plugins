@@ -6,7 +6,7 @@ require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesShareService;
 
 /**
- * Share a favorites folder — generates a share link
+ * Share a favorites folder — generates a share link, optionally emails recipients
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
@@ -32,18 +32,43 @@ class favoritesShareFolderAction extends AhgController
         $service = new FavoritesShareService();
         $result = $service->shareFolder($userId, $folderId, [
             'expires_in_days' => (int) $request->getParameter('expires_in_days', 30),
-            'shared_via' => $request->getParameter('shared_via', 'link'),
+            'shared_via' => $request->getParameter('emails') ? 'email' : 'link',
         ]);
+
+        // Send emails if provided and share was successful
+        $emailsSent = 0;
+        $emailErrors = [];
+        if ($result['success'] && $request->getParameter('emails')) {
+            $rawEmails = $request->getParameter('emails', '');
+            $message = trim($request->getParameter('message', ''));
+
+            $emailResult = $service->sendShareEmails(
+                $userId,
+                $result['url'],
+                $rawEmails,
+                $message,
+                $folderId
+            );
+            $emailsSent = $emailResult['sent'] ?? 0;
+            $emailErrors = $emailResult['errors'] ?? [];
+        }
+
+        $result['emails_sent'] = $emailsSent;
+        $result['email_errors'] = $emailErrors;
 
         // Return JSON for AJAX requests
         if ($request->isXmlHttpRequest()) {
-            header('Content-Type: application/json');
-            echo json_encode($result);
-            exit;
+            $this->getResponse()->setContentType('application/json');
+
+            return $this->renderText(json_encode($result));
         }
 
         if ($result['success']) {
-            $this->getUser()->setFlash('notice', __('Folder shared. Link: ') . $result['url']);
+            $msg = __('Folder shared.');
+            if ($emailsSent > 0) {
+                $msg .= ' ' . __('Link sent to %1% recipient(s).', ['%1%' => $emailsSent]);
+            }
+            $this->getUser()->setFlash('notice', $msg);
         } else {
             $this->getUser()->setFlash('error', $result['message']);
         }

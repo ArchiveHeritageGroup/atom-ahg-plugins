@@ -77,6 +77,30 @@ class FavoritesRepository
     }
 
     /**
+     * Check if item is in favorites (scoped by object_type)
+     */
+    public function existsByType(int $userId, int $objectId, string $objectType): bool
+    {
+        return DB::table('favorites')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $objectId)
+            ->where('object_type', $objectType)
+            ->exists();
+    }
+
+    /**
+     * Remove from favorites (scoped by object_type)
+     */
+    public function removeByUserObjectType(int $userId, int $objectId, string $objectType): bool
+    {
+        return DB::table('favorites')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $objectId)
+            ->where('object_type', $objectType)
+            ->delete() > 0;
+    }
+
+    /**
      * Get favorite by user and object
      */
     public function getByUserAndObject(int $userId, int $objectId): ?object

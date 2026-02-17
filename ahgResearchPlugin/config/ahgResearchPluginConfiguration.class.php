@@ -171,6 +171,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_ajax_search_entities', '/research/ajax/search-entities', 'searchEntities');
         $research->any('research_ajax_add_to_bibliography', '/research/ajax/add-to-bibliography', 'addToBibliographyAjax');
         $research->any('research_ajax_upload_note_image', '/research/ajax/upload-note-image', 'uploadNoteImage');
+        $research->any('research_ajax_resolve_thumbnail', '/research/ajax/resolve-thumbnail', 'resolveThumbnail');
         $research->any('research_ajax_clipboard_to_project', '/research/ajax/clipboard-to-project', 'clipboardToProject');
         $research->any('research_ajax_manage_clipboard_item', '/research/ajax/manage-clipboard-item', 'manageClipboardItem');
 

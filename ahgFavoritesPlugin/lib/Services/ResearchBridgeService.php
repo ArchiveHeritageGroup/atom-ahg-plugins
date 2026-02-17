@@ -44,7 +44,7 @@ class ResearchBridgeService
         $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ResearchService.php';
         require_once $path;
 
-        return new \AtomAhgPlugins\ahgResearchPlugin\Services\ResearchService();
+        return new \ResearchService();
     }
 
     /**
@@ -55,7 +55,7 @@ class ResearchBridgeService
         $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ProjectService.php';
         require_once $path;
 
-        return new \AtomAhgPlugins\ahgResearchPlugin\Services\ProjectService();
+        return new \ProjectService();
     }
 
     /**
@@ -66,7 +66,7 @@ class ResearchBridgeService
         $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/BibliographyService.php';
         require_once $path;
 
-        return new \AtomAhgPlugins\ahgResearchPlugin\Services\BibliographyService();
+        return new \BibliographyService();
     }
 
     /**

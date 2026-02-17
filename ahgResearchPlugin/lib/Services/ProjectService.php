@@ -35,8 +35,8 @@ class ProjectService
             'funding_source' => $data['funding_source'] ?? null,
             'grant_number' => $data['grant_number'] ?? null,
             'ethics_approval' => $data['ethics_approval'] ?? null,
-            'start_date' => $data['start_date'] ?? null,
-            'expected_end_date' => $data['expected_end_date'] ?? null,
+            'start_date' => !empty($data['start_date']) ? $data['start_date'] : null,
+            'expected_end_date' => !empty($data['expected_end_date']) ? $data['expected_end_date'] : null,
             'status' => 'planning',
             'visibility' => $data['visibility'] ?? 'private',
             'share_token' => bin2hex(random_bytes(32)),
@@ -173,6 +173,13 @@ class ProjectService
 
         $updateData = array_intersect_key($data, array_flip($allowed));
         $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+        // Convert empty date strings to NULL (HTML date inputs submit '' when blank)
+        foreach (['start_date', 'expected_end_date', 'actual_end_date', 'due_date'] as $dateField) {
+            if (array_key_exists($dateField, $updateData) && $updateData[$dateField] === '') {
+                $updateData[$dateField] = null;
+            }
+        }
 
         if (isset($updateData['metadata']) && is_array($updateData['metadata'])) {
             $updateData['metadata'] = json_encode($updateData['metadata']);
@@ -596,7 +603,7 @@ class ProjectService
             'project_id' => $projectId,
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
-            'due_date' => $data['due_date'] ?? null,
+            'due_date' => !empty($data['due_date']) ? $data['due_date'] : null,
             'status' => 'pending',
             'sort_order' => $maxOrder + 1,
             'created_at' => date('Y-m-d H:i:s'),

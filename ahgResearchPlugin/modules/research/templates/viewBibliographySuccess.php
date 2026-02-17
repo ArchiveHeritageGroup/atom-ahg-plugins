@@ -20,6 +20,12 @@
         <span class="badge bg-light text-dark"><?php echo ucfirst($bibliography->citation_style ?? 'chicago'); ?> style</span>
     </div>
     <div class="d-flex gap-2">
+        <?php include_partial('research/favoriteResearchButton', [
+            'objectId' => $bibliography->id,
+            'objectType' => 'research_bibliography',
+            'title' => $bibliography->name,
+            'url' => '/research/bibliography/' . $bibliography->id,
+        ]); ?>
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importBibliographyModal">
             <i class="fas fa-upload me-1"></i> <?php echo __('Import'); ?>
         </button>
@@ -111,6 +117,14 @@
     </div>
 </div>
 
+<!-- Tom Select CSS/JS -->
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+.ts-dropdown { background: #fff !important; color: #212529 !important; }
+.ts-dropdown .option { color: #212529 !important; }
+</style>
+
 <!-- Add Entry Modal -->
 <div class="modal fade" id="addEntryModal" tabindex="-1">
     <div class="modal-dialog">
@@ -123,13 +137,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Object ID *</label>
-                        <input type="number" name="object_id" class="form-control" required>
-                        <small class="text-muted">Enter the ID of the archive object to add</small>
-                    </div>
-                    <div class="alert alert-info small mb-0">
-                        <i class="fas fa-lightbulb me-1"></i>
-                        You can find object IDs in the archive URL or when viewing item details.
+                        <label class="form-label"><?php echo __('Search Archive'); ?> *</label>
+                        <select id="bibObjectSearch" name="object_id" required></select>
+                        <small class="text-muted"><?php echo __('Type to search by title or reference code'); ?></small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -140,6 +150,36 @@
         </div>
     </div>
 </div>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#bibObjectSearch', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title', 'identifier'],
+        placeholder: '<?php echo __("Search archive items..."); ?>',
+        loadThrottle: 300,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            var url = '<?php echo url_for(["module" => "research", "action" => "searchEntities"]); ?>';
+            var sep = url.indexOf('?') >= 0 ? '&' : '?';
+            fetch(url + sep + 'type=information_object&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(json) { callback(json.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item, escape) {
+                return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
+                    (item.identifier ? '<br><small class="text-muted">' + escape(item.identifier) + '</small>' : '') +
+                    '</div>';
+            },
+            item: function(item, escape) {
+                return '<div>' + escape(item.title) + '</div>';
+            }
+        }
+    });
+});
+</script>
 
 <!-- Import Bibliography Modal -->
 <div class="modal fade" id="importBibliographyModal" tabindex="-1">

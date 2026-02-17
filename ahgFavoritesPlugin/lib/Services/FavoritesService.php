@@ -74,10 +74,45 @@ class FavoritesService
             'repository' => 'fas fa-building',
             'accession' => 'fas fa-archive',
             'function' => 'fas fa-sitemap',
+            'research_journal' => 'fas fa-journal-whills',
+            'research_collection' => 'fas fa-layer-group',
+            'research_project' => 'fas fa-project-diagram',
+            'research_bibliography' => 'fas fa-book',
+            'research_workspace' => 'fas fa-users',
+            'research_report' => 'fas fa-file-alt',
         ];
+
+        $researchTypes = ['research_journal', 'research_collection', 'research_project', 'research_bibliography', 'research_workspace', 'research_report'];
 
         foreach ($result['hits'] as $fav) {
             $objectId = $fav->archival_description_id;
+            $objectType = $fav->object_type ?? 'information_object';
+
+            // Research items: use stored title/slug directly, skip AtoM enrichment
+            if (in_array($objectType, $researchTypes)) {
+                $enriched[] = (object) [
+                    'id' => $fav->id,
+                    'user_id' => $fav->user_id,
+                    'archival_description_id' => $objectId,
+                    'title' => $fav->archival_description ?? \__('Untitled'),
+                    'slug' => $fav->slug,
+                    'notes' => $fav->notes ?? null,
+                    'object_type' => $objectType,
+                    'reference_code' => null,
+                    'level_of_description' => null,
+                    'date_range' => null,
+                    'repository_name' => null,
+                    'has_digital_object' => false,
+                    'thumbnail_path' => null,
+                    'type_icon' => $typeIcons[$objectType] ?? 'fas fa-file-alt',
+                    'item_updated_since' => false,
+                    'item_accessible' => true,
+                    'folder_id' => $fav->folder_id ?? null,
+                    'created_at' => $fav->created_at,
+                    'updated_at' => $fav->updated_at ?? null,
+                ];
+                continue;
+            }
 
             // Check object accessibility
             $itemAccessible = $objectId && DB::table('object')->where('id', $objectId)->exists();
@@ -335,6 +370,42 @@ class FavoritesService
     public function isFavorited(int $userId, int $objectId): bool
     {
         return $this->repository->exists($userId, $objectId);
+    }
+
+    /**
+     * Toggle a custom (non-AtoM) entity as favorite, scoped by object_type.
+     */
+    public function toggleCustom(int $userId, int $objectId, string $objectType, string $title, string $url, ?int $folderId = null): array
+    {
+        if ($this->repository->existsByType($userId, $objectId, $objectType)) {
+            $this->repository->removeByUserObjectType($userId, $objectId, $objectType);
+            return ['success' => true, 'action' => 'removed', 'favorited' => false, 'message' => \__('Removed from favorites.')];
+        }
+
+        $data = [
+            'user_id' => $userId,
+            'archival_description_id' => $objectId,
+            'archival_description' => $title,
+            'slug' => $url,
+            'object_type' => $objectType,
+            'reference_code' => null,
+        ];
+
+        if ($folderId) {
+            $data['folder_id'] = $folderId;
+        }
+
+        $id = $this->repository->add($data);
+
+        return ['success' => true, 'action' => 'added', 'favorited' => true, 'message' => \__('Added to favorites.'), 'id' => $id];
+    }
+
+    /**
+     * Check if a custom entity is favorited (scoped by object_type).
+     */
+    public function isFavoritedCustom(int $userId, int $objectId, string $objectType): bool
+    {
+        return $this->repository->existsByType($userId, $objectId, $objectType);
     }
 
     /**

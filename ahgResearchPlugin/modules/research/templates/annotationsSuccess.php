@@ -98,6 +98,20 @@ $activeTag = $sf_request->getParameter('tag', '');
         </div>
         </div>
       </div>
+      <?php if (!empty($annotation->thumbnail_path) && !empty($annotation->object_id)): ?>
+      <div class="text-center bg-light p-2">
+        <?php
+        $thumbSlug = $annotation->object_slug ?? $annotation->object_id;
+        $thumbModule = 'informationobject';
+        $thumbEt = $annotation->entity_type ?? 'information_object';
+        if ($thumbEt === 'actor') $thumbModule = 'actor';
+        elseif ($thumbEt === 'repository') $thumbModule = 'repository';
+        ?>
+        <a href="<?php echo url_for(['module' => $thumbModule, 'slug' => $thumbSlug]); ?>" title="<?php echo htmlspecialchars($annotation->object_title ?? ''); ?>">
+          <img src="<?php echo htmlspecialchars($annotation->thumbnail_path); ?>" alt="<?php echo htmlspecialchars($annotation->object_title ?? ''); ?>" class="img-fluid rounded" style="max-height:120px;">
+        </a>
+      </div>
+      <?php endif; ?>
       <div class="card-body">
         <div class="card-text"><?php if (($annotation->content_format ?? 'text') === 'html'): ?><?php echo $annotation->content; ?><?php else: ?><?php echo nl2br(htmlspecialchars($annotation->content ?? '')); ?><?php endif; ?></div>
         <?php if (!empty($annotation->tags)): ?>

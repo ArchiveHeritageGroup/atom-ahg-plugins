@@ -39,6 +39,12 @@ $isAdmin = $sf_user->isAdministrator();
        class="list-group-item list-group-item-action <?php echo $active === 'reports' ? 'active' : ''; ?>">
         <i class="fas fa-file-alt me-2"></i><?php echo __('My Reports'); ?>
     </a>
+<?php if (Illuminate\Database\Capsule\Manager::table('atom_plugin')->where('name', 'ahgFavoritesPlugin')->where('is_enabled', 1)->exists()): ?>
+    <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'browse']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'favorites' ? 'active' : ''; ?>">
+        <i class="fas fa-heart me-2"></i><?php echo __('My Favorites'); ?>
+    </a>
+<?php endif; ?>
 </div>
 
 <div class="list-group mb-4">

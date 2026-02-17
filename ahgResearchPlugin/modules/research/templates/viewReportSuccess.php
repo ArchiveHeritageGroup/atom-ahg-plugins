@@ -6,6 +6,12 @@
 <div class="d-flex justify-content-between align-items-center">
   <h1><i class="fas fa-file-alt text-primary me-2"></i><?php echo htmlspecialchars($report->title); ?></h1>
   <div class="d-flex gap-2">
+    <?php include_partial('research/favoriteResearchButton', [
+        'objectId' => $report->id,
+        'objectType' => 'research_report',
+        'title' => $report->title,
+        'url' => '/research/report/' . $report->id,
+    ]); ?>
     <div class="dropdown">
       <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
         <i class="fas fa-file-export me-1"></i><?php echo __('Export'); ?>

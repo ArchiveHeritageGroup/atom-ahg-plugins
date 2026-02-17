@@ -1459,6 +1459,62 @@ class researchActions extends AhgController
                 ->select('ri.id', 'ri.authorized_form_of_name as title', 's.slug')
                 ->orderBy('ri.authorized_form_of_name')
                 ->limit(20)->get()->toArray();
+        } elseif ($type === 'researcher') {
+            $items = DB::table('research_researcher')
+                ->where('status', 'approved')
+                ->where(function ($q) use ($query) {
+                    $q->where('email', 'LIKE', '%' . $query . '%')
+                      ->orWhere('first_name', 'LIKE', '%' . $query . '%')
+                      ->orWhere('last_name', 'LIKE', '%' . $query . '%')
+                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $query . '%']);
+                })
+                ->select('id', 'first_name', 'last_name', 'email', 'institution')
+                ->orderBy('last_name')
+                ->limit(20)->get()->map(function ($r) {
+                    return (object) [
+                        'id' => $r->id,
+                        'title' => $r->first_name . ' ' . $r->last_name,
+                        'email' => $r->email,
+                        'institution' => $r->institution,
+                        'slug' => null,
+                    ];
+                })->toArray();
+        } elseif ($type === 'collection') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_collection')
+                ->where('researcher_id', $researcherId)
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->select('id', 'name as title', 'description')
+                ->orderBy('name')
+                ->limit(20)->get()->map(function ($c) {
+                    return (object) ['id' => $c->id, 'title' => $c->title, 'slug' => null];
+                })->toArray();
+        } elseif ($type === 'saved_search') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_saved_search')
+                ->where('researcher_id', $researcherId)
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->select('id', 'name as title')
+                ->orderBy('name')
+                ->limit(20)->get()->map(function ($s) {
+                    return (object) ['id' => $s->id, 'title' => $s->title, 'slug' => null];
+                })->toArray();
+        } elseif ($type === 'bibliography') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_bibliography')
+                ->where('researcher_id', $researcherId)
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->select('id', 'name as title')
+                ->orderBy('name')
+                ->limit(20)->get()->map(function ($b) {
+                    return (object) ['id' => $b->id, 'title' => $b->title, 'slug' => null];
+                })->toArray();
         } elseif ($type === 'accession') {
             $items = DB::table('accession as a')
                 ->leftJoin('accession_i18n as ai', function ($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
@@ -1481,12 +1537,18 @@ class researchActions extends AhgController
                     $q->where('ioi.title', 'LIKE', '%' . $query . '%')
                       ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
                 })
-                ->select('io.id', 'ioi.title', 's.slug')
+                ->select('io.id', 'ioi.title', 'io.identifier', 's.slug')
                 ->orderBy('ioi.title')->limit(20)->get()->toArray();
         }
 
         return $this->renderText(json_encode(['items' => array_values(array_map(function ($i) {
-            return ['id' => $i->id ?? $i['id'], 'title' => $i->title ?? $i['title'] ?? 'Untitled', 'slug' => $i->slug ?? $i['slug'] ?? null];
+            $o = is_object($i) ? $i : (object) $i;
+            $item = ['id' => $o->id ?? null, 'title' => $o->title ?? 'Untitled', 'slug' => $o->slug ?? null];
+            if (isset($o->email)) { $item['email'] = $o->email; }
+            if (isset($o->institution)) { $item['institution'] = $o->institution; }
+            if (isset($o->identifier)) { $item['identifier'] = $o->identifier; }
+            if (isset($o->description)) { $item['description'] = $o->description; }
+            return $item;
         }, $items))]));
     }
 
@@ -1950,13 +2012,24 @@ class researchActions extends AhgController
             $email = trim($request->getParameter('email'));
             $role = $request->getParameter('role', 'contributor');
 
-            $result = $projectService->inviteCollaborator($projectId, $this->researcher->id, $email, $role);
+            // Look up the invited researcher by email
+            $invitedResearcher = DB::table('research_researcher')
+                ->where('email', $email)
+                ->first();
 
-            if (isset($result['error'])) {
-                $this->getUser()->setFlash('error', $result['error']);
+            if (!$invitedResearcher) {
+                $this->getUser()->setFlash('error', 'No researcher found with email: ' . $email);
+            } else if ($invitedResearcher->id == $this->researcher->id) {
+                $this->getUser()->setFlash('error', 'You cannot invite yourself');
             } else {
-                $this->getUser()->setFlash('success', 'Invitation sent');
-                $this->redirect('research/projectCollaborators?id=' . $projectId);
+                $result = $projectService->inviteCollaborator($projectId, (int) $invitedResearcher->id, $role, (int) $this->researcher->id);
+
+                if (isset($result['error'])) {
+                    $this->getUser()->setFlash('error', $result['error']);
+                } else {
+                    $this->getUser()->setFlash('success', 'Invitation sent to ' . $email);
+                    $this->redirect('research/project/' . $projectId . '/collaborators');
+                }
             }
         }
     }
@@ -2210,12 +2283,14 @@ class researchActions extends AhgController
             if ($action === 'add_entry') {
                 $objectId = (int) $request->getParameter('object_id');
                 if ($objectId) {
-                    $result = $bibliographyService->addEntryFromObject($bibliographyId, $this->researcher->id, $objectId);
-                    if (isset($result['error'])) {
-                        $this->getUser()->setFlash('error', $result['error']);
-                    } else {
+                    try {
+                        $bibliographyService->addEntryFromObject($bibliographyId, $objectId);
                         $this->getUser()->setFlash('success', 'Entry added');
+                    } catch (\Exception $e) {
+                        $this->getUser()->setFlash('error', $e->getMessage());
                     }
+                } else {
+                    $this->getUser()->setFlash('error', 'Please select an archive item');
                 }
                 $this->redirect('research/viewBibliography?id=' . $bibliographyId);
             }
@@ -2275,23 +2350,42 @@ class researchActions extends AhgController
         $bibliographyId = (int) $request->getParameter('id');
         $format = $request->getParameter('format', 'ris');
 
-        $result = match ($format) {
-            'bibtex' => $bibliographyService->exportBibTeX($bibliographyId, $researcher->id),
-            'zotero' => $bibliographyService->exportZoteroRDF($bibliographyId, $researcher->id),
-            'mendeley' => $bibliographyService->exportMendeleyJSON($bibliographyId, $researcher->id),
-            'csl' => $bibliographyService->exportCSLJSON($bibliographyId, $researcher->id),
-            default => $bibliographyService->exportRIS($bibliographyId, $researcher->id),
-        };
+        $mimeTypes = [
+            'bibtex' => 'application/x-bibtex',
+            'ris' => 'application/x-research-info-systems',
+            'zotero' => 'application/rdf+xml',
+            'mendeley' => 'application/json',
+            'csl' => 'application/json',
+        ];
+        $extensions = [
+            'bibtex' => 'bib',
+            'ris' => 'ris',
+            'zotero' => 'rdf',
+            'mendeley' => 'json',
+            'csl' => 'json',
+        ];
 
-        if (isset($result['error'])) {
-            $this->getUser()->setFlash('error', $result['error']);
+        try {
+            $content = match ($format) {
+                'bibtex' => $bibliographyService->exportBibTeX($bibliographyId),
+                'zotero' => $bibliographyService->exportZoteroRDF($bibliographyId),
+                'mendeley' => $bibliographyService->exportMendeleyJSON($bibliographyId),
+                'csl' => $bibliographyService->exportCSLJSON($bibliographyId),
+                default => $bibliographyService->exportRIS($bibliographyId),
+            };
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', 'Export failed: ' . $e->getMessage());
             $this->redirect('research/viewBibliography?id=' . $bibliographyId);
         }
 
-        $this->getResponse()->setContentType($result['mime_type']);
-        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $result['filename'] . '"');
+        $mime = $mimeTypes[$format] ?? 'text/plain';
+        $ext = $extensions[$format] ?? 'txt';
+        $filename = 'bibliography-' . $bibliographyId . '.' . $ext;
 
-        return $this->renderText($result['content']);
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $this->renderText($content);
     }
 
     // =========================================================================
@@ -2372,42 +2466,48 @@ class researchActions extends AhgController
             if ($action === 'invite') {
                 $email = trim($request->getParameter('email'));
                 $role = $request->getParameter('role', 'member');
-                $result = $collaborationService->addMember($workspaceId, $this->researcher->id, $email, $role);
 
-                if (isset($result['error'])) {
-                    $this->getUser()->setFlash('error', $result['error']);
+                // Look up researcher by email
+                $invitee = $this->service->getResearcherByEmail($email);
+                if (!$invitee) {
+                    $this->getUser()->setFlash('error', 'No registered researcher found with email: ' . $email);
                 } else {
-                    $this->getUser()->setFlash('success', 'Member invited');
+                    $result = $collaborationService->addMember($workspaceId, (int) $invitee->id, $role, (int) $this->researcher->id);
+                    if (isset($result['error'])) {
+                        $this->getUser()->setFlash('error', $result['error']);
+                    } else {
+                        $this->getUser()->setFlash('success', 'Member invited');
+                    }
                 }
                 $this->redirect('research/viewWorkspace?id=' . $workspaceId);
             }
 
             if ($action === 'create_discussion') {
-                $result = $collaborationService->createDiscussion($workspaceId, $this->researcher->id, [
-                    'title' => $request->getParameter('title'),
-                    'content' => $request->getParameter('content'),
-                ]);
-
-                if (isset($result['error'])) {
-                    $this->getUser()->setFlash('error', $result['error']);
-                } else {
+                try {
+                    $collaborationService->createDiscussion([
+                        'workspace_id' => $workspaceId,
+                        'researcher_id' => (int) $this->researcher->id,
+                        'subject' => $request->getParameter('title'),
+                        'content' => $request->getParameter('content'),
+                    ]);
                     $this->getUser()->setFlash('success', 'Discussion created');
+                } catch (\Exception $e) {
+                    $this->getUser()->setFlash('error', $e->getMessage());
                 }
                 $this->redirect('research/viewWorkspace?id=' . $workspaceId);
             }
 
             if ($action === 'add_resource') {
-                $result = $collaborationService->addResource($workspaceId, $this->researcher->id, [
-                    'resource_type' => $request->getParameter('resource_type'),
-                    'resource_id' => (int) $request->getParameter('resource_id'),
-                    'title' => $request->getParameter('title'),
-                    'notes' => $request->getParameter('notes'),
-                ]);
-
-                if (isset($result['error'])) {
-                    $this->getUser()->setFlash('error', $result['error']);
-                } else {
+                try {
+                    $collaborationService->addResource($workspaceId, [
+                        'resource_type' => $request->getParameter('resource_type'),
+                        'resource_id' => $request->getParameter('resource_id') ? (int) $request->getParameter('resource_id') : null,
+                        'title' => $request->getParameter('title'),
+                        'notes' => $request->getParameter('notes'),
+                    ], (int) $this->researcher->id);
                     $this->getUser()->setFlash('success', 'Resource added');
+                } catch (\Exception $e) {
+                    $this->getUser()->setFlash('error', $e->getMessage());
                 }
                 $this->redirect('research/viewWorkspace?id=' . $workspaceId);
             }
@@ -3165,7 +3265,7 @@ class researchActions extends AhgController
             ->select('p.id', 'p.title')->orderBy('p.title')->get()->toArray();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = $request->getParameter('form_action');
             if ($action === 'delete') {
                 $journalService->deleteEntry($id, $this->researcher->id);
                 $this->getUser()->setFlash('success', 'Entry deleted');
@@ -4225,6 +4325,100 @@ class researchActions extends AhgController
         return $this->renderText(json_encode([
             'url' => '/uploads/research/notes/' . $filename,
         ]));
+    }
+
+    /**
+     * AJAX: Resolve an internal AtoM URL or search query to a record with thumbnail.
+     * Used by TipTap "Embed Record" button to insert linked thumbnails into journal entries.
+     *
+     * GET params:
+     *   q     - search query (title/identifier) or slug
+     *   slug  - direct slug lookup
+     *
+     * Returns JSON: { results: [{ id, title, slug, url, thumbnailUrl, identifier }] }
+     */
+    public function executeResolveThumbnail($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $slug = trim($request->getParameter('slug', ''));
+        $query = trim($request->getParameter('q', ''));
+
+        // Extract slug from a pasted URL (e.g., /index.php/some-slug or https://host/index.php/some-slug)
+        if ($slug && preg_match('#(?:/index\.php)?/([a-z0-9][a-z0-9\-]+)$#i', $slug, $m)) {
+            $slug = $m[1];
+        }
+
+        $culture = 'en';
+        try {
+            $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+        }
+
+        $results = [];
+
+        if ($slug) {
+            // Direct slug lookup
+            $row = DB::table('slug as s')
+                ->join('information_object_i18n as ioi', function ($j) use ($culture) {
+                    $j->on('s.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+                })
+                ->leftJoin('information_object as io', 'io.id', '=', 's.object_id')
+                ->where('s.slug', $slug)
+                ->select('s.object_id as id', 'ioi.title', 's.slug', 'io.identifier')
+                ->first();
+
+            if ($row) {
+                $row->thumbnailUrl = $this->resolveThumbnailUrl($row->id);
+                $row->url = '/index.php/' . $row->slug;
+                $results[] = $row;
+            }
+        } elseif ($query && strlen($query) >= 2) {
+            // Search by title or identifier
+            $rows = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($j) use ($culture) {
+                    $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+                })
+                ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                ->where('io.id', '!=', 1)
+                ->where(function ($q) use ($query) {
+                    $q->where('ioi.title', 'LIKE', '%' . $query . '%')
+                      ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
+                })
+                ->select('io.id', 'ioi.title', 's.slug', 'io.identifier')
+                ->orderBy('ioi.title')
+                ->limit(12)
+                ->get();
+
+            foreach ($rows as $row) {
+                $row->thumbnailUrl = $this->resolveThumbnailUrl($row->id);
+                $row->url = '/index.php/' . $row->slug;
+                $results[] = $row;
+            }
+        }
+
+        return $this->renderText(json_encode(['results' => $results]));
+    }
+
+    /**
+     * Resolve the thumbnail URL for an information object.
+     */
+    private function resolveThumbnailUrl(int $objectId): ?string
+    {
+        $thumb = DB::table('digital_object as m')
+            ->join('digital_object as t', function ($j) {
+                $j->on('t.parent_id', '=', 'm.id')->where('t.usage_id', '=', 142);
+            })
+            ->where('m.object_id', $objectId)
+            ->where('m.usage_id', 140)
+            ->select(DB::raw("CONCAT(t.path, t.name) as thumb_url"))
+            ->first();
+
+        return $thumb ? $thumb->thumb_url : null;
     }
 
     // =========================================================================

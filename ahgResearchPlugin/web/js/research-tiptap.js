@@ -8,6 +8,7 @@
  * Options:
  *   profile: 'minimal' | 'medium' | 'full' (default: 'minimal')
  *   uploadUrl: string|null  - POST endpoint for image upload (null = no image btn)
+ *   resolveUrl: string|null - GET endpoint for internal thumbnail resolution
  *   placeholder: string
  *   initialContent: string  - HTML to load on init
  *   onUpdate: function(html) - callback on content change
@@ -15,32 +16,23 @@
 (function() {
   'use strict';
 
-  var TipTapCore = window['@tiptap/core'];
-  var StarterKit = window['@tiptap/starter-kit'];
-  var TextStyle = window['@tiptap/extension-text-style'];
-  var Image = window['@tiptap/extension-image'];
-  var Underline = window['@tiptap/extension-underline'];
-  var TextAlign = window['@tiptap/extension-text-align'];
-  var Color = window['@tiptap/extension-color'];
-  var Highlight = window['@tiptap/extension-highlight'];
-  var Link = window['@tiptap/extension-link'];
-
-  // Resolve UMD default exports
-  var Editor = TipTapCore.Editor || TipTapCore.default && TipTapCore.default.Editor || TipTapCore;
-  var StarterKitExt = StarterKit.StarterKit || StarterKit.default || StarterKit;
-  var TextStyleExt = TextStyle.TextStyle || TextStyle.default || TextStyle;
-  var ImageExt = Image.Image || Image.default || Image;
-  var UnderlineExt = Underline.Underline || Underline.default || Underline;
-  var TextAlignExt = TextAlign.TextAlign || TextAlign.default || TextAlign;
-  var ColorExt = Color.Color || Color.default || Color;
-  var HighlightExt = Highlight.Highlight || Highlight.default || Highlight;
-  var LinkExt = Link.Link || Link.default || Link;
+  // All TipTap exports come from the pre-bundled window.TipTap global
+  var T = window.TipTap;
+  var Editor = T.Editor;
+  var StarterKitExt = T.StarterKit;
+  var TextStyleExt = T.TextStyle;
+  var ImageExt = T.Image;
+  var UnderlineExt = T.Underline;
+  var TextAlignExt = T.TextAlign;
+  var ColorExt = T.Color;
+  var HighlightExt = T.Highlight;
+  var LinkExt = T.Link;
 
   var instances = {};
 
   // ─── Toolbar Definitions ──────────────────────────────────────
 
-  function buildToolbar(profile, hasUpload) {
+  function buildToolbar(profile, hasUpload, hasResolve) {
     var items = [];
 
     // Heading select (all profiles)
@@ -66,6 +58,11 @@
     // Image (medium + full with upload)
     if ((profile === 'medium' || profile === 'full') && hasUpload) {
       items.push({ type: 'button', cmd: 'image', icon: 'fa-image', title: 'Insert Image' });
+    }
+
+    // Embed Record (medium + full with resolve endpoint)
+    if ((profile === 'medium' || profile === 'full') && hasResolve) {
+      items.push({ type: 'button', cmd: 'embedRecord', icon: 'fa-archive', title: 'Embed Record Thumbnail' });
     }
 
     // Color + highlight (full only)
@@ -188,6 +185,11 @@
           uploadImage(editor, options.uploadUrl);
         }
         break;
+      case 'embedRecord':
+        if (options && options.resolveUrl) {
+          openEmbedRecordModal(editor, options.resolveUrl);
+        }
+        break;
       case 'clear':
         editor.chain().focus().unsetAllMarks().clearNodes().run();
         break;
@@ -216,6 +218,178 @@
         });
     });
     input.click();
+  }
+
+  // ─── Embed Record Modal ─────────────────────────────────────
+
+  function openEmbedRecordModal(editor, resolveUrl) {
+    // Remove any existing modal
+    var existing = document.getElementById('rtt-embed-modal');
+    if (existing) existing.remove();
+
+    var backdrop = document.createElement('div');
+    backdrop.id = 'rtt-embed-modal';
+    backdrop.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+
+    var modal = document.createElement('div');
+    modal.style.cssText = 'background:#fff;border-radius:8px;width:540px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.3);';
+
+    // Header
+    var header = document.createElement('div');
+    header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #dee2e6;display:flex;justify-content:space-between;align-items:center;';
+    header.innerHTML = '<h5 style="margin:0;font-size:1.1rem;"><i class="fas fa-archive" style="margin-right:8px;color:#0d6efd;"></i>Embed Record Thumbnail</h5>';
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.style.cssText = 'border:none;background:none;font-size:1.2rem;cursor:pointer;color:#6c757d;padding:0;';
+    closeBtn.addEventListener('click', function() { backdrop.remove(); });
+    header.appendChild(closeBtn);
+    modal.appendChild(header);
+
+    // Search input
+    var searchWrap = document.createElement('div');
+    searchWrap.style.cssText = 'padding:12px 20px;border-bottom:1px solid #dee2e6;';
+    var searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Search records by title or paste a URL/slug...';
+    searchInput.style.cssText = 'width:100%;padding:8px 12px;border:1px solid #ced4da;border-radius:6px;font-size:0.95rem;outline:none;';
+    searchInput.addEventListener('focus', function() { this.style.borderColor = '#86b7fe'; });
+    searchInput.addEventListener('blur', function() { this.style.borderColor = '#ced4da'; });
+    searchWrap.appendChild(searchInput);
+    modal.appendChild(searchWrap);
+
+    // Results container
+    var resultsWrap = document.createElement('div');
+    resultsWrap.style.cssText = 'padding:8px 20px;overflow-y:auto;flex:1;min-height:120px;max-height:400px;';
+    resultsWrap.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
+    modal.appendChild(resultsWrap);
+
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Close on backdrop click
+    backdrop.addEventListener('click', function(e) {
+      if (e.target === backdrop) backdrop.remove();
+    });
+
+    // Close on Escape
+    function onKey(e) { if (e.key === 'Escape') { backdrop.remove(); document.removeEventListener('keydown', onKey); } }
+    document.addEventListener('keydown', onKey);
+
+    searchInput.focus();
+
+    // Debounced search
+    var timer = null;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(timer);
+      var val = this.value.trim();
+      if (val.length < 2) {
+        resultsWrap.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
+        return;
+      }
+      timer = setTimeout(function() { doSearch(val, resolveUrl, resultsWrap, editor, backdrop); }, 300);
+    });
+  }
+
+  function doSearch(query, resolveUrl, container, editor, backdrop) {
+    container.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
+
+    // Detect if it looks like a URL or slug
+    var param = 'q';
+    if (query.indexOf('/') !== -1 || query.indexOf('.') !== -1) {
+      param = 'slug';
+    }
+
+    fetch(resolveUrl + '?' + param + '=' + encodeURIComponent(query))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.results || data.results.length === 0) {
+          container.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">No records found.</p>';
+          return;
+        }
+        container.innerHTML = '';
+        data.results.forEach(function(rec) {
+          var card = document.createElement('div');
+          card.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:6px;border:1px solid #dee2e6;border-radius:6px;cursor:pointer;transition:background 0.15s;';
+          card.addEventListener('mouseenter', function() { this.style.background = '#f0f4ff'; });
+          card.addEventListener('mouseleave', function() { this.style.background = '#fff'; });
+
+          // Thumbnail or placeholder
+          var thumbEl = document.createElement('div');
+          thumbEl.style.cssText = 'width:56px;height:56px;flex-shrink:0;border-radius:4px;overflow:hidden;background:#f8f9fa;display:flex;align-items:center;justify-content:center;border:1px solid #e9ecef;';
+          if (rec.thumbnailUrl) {
+            thumbEl.innerHTML = '<img src="' + escHtml(rec.thumbnailUrl) + '" style="width:100%;height:100%;object-fit:cover;" alt="">';
+          } else {
+            thumbEl.innerHTML = '<i class="fas fa-file-alt" style="font-size:1.4rem;color:#adb5bd;"></i>';
+          }
+          card.appendChild(thumbEl);
+
+          // Text
+          var textEl = document.createElement('div');
+          textEl.style.cssText = 'flex:1;min-width:0;';
+          var titleText = rec.title || 'Untitled';
+          var sub = rec.identifier ? '<div style="font-size:0.8rem;color:#6c757d;">' + escHtml(rec.identifier) + '</div>' : '';
+          textEl.innerHTML = '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(titleText) + '</div>' + sub;
+          card.appendChild(textEl);
+
+          // Insert icon
+          var insertEl = document.createElement('div');
+          insertEl.style.cssText = 'flex-shrink:0;color:#0d6efd;font-size:0.85rem;';
+          insertEl.innerHTML = '<i class="fas fa-plus-circle"></i>';
+          card.appendChild(insertEl);
+
+          card.addEventListener('click', function() {
+            insertEmbeddedRecord(editor, rec);
+            backdrop.remove();
+          });
+
+          container.appendChild(card);
+        });
+      })
+      .catch(function(err) {
+        container.innerHTML = '<p style="color:#dc3545;text-align:center;margin-top:32px;">Search error: ' + escHtml(err.message) + '</p>';
+      });
+  }
+
+  function insertEmbeddedRecord(editor, rec) {
+    var title = rec.title || 'Untitled';
+    var url = rec.url || '#';
+
+    if (rec.thumbnailUrl) {
+      // Insert thumbnail image followed by a linked title
+      editor.chain().focus()
+        .setImage({ src: rec.thumbnailUrl, alt: title, title: title })
+        .insertContent({
+          type: 'paragraph',
+          content: [{
+            type: 'text',
+            marks: [{ type: 'link', attrs: { href: url, target: '_blank' } }],
+            text: title
+          }]
+        })
+        .run();
+    } else {
+      // No thumbnail — insert as a linked text reference
+      editor.chain().focus()
+        .insertContent({
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Record: ' },
+            {
+              type: 'text',
+              marks: [{ type: 'link', attrs: { href: url, target: '_blank' } }],
+              text: title
+            }
+          ]
+        })
+        .run();
+    }
+  }
+
+  function escHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str || ''));
+    return div.innerHTML;
   }
 
   function updateActiveStates(toolbar, editor) {
@@ -253,6 +427,7 @@
     var placeholder = options.placeholder || 'Write here...';
     var initialContent = options.initialContent || '';
     var uploadUrl = options.uploadUrl || null;
+    var resolveUrl = options.resolveUrl || null;
     var onUpdate = options.onUpdate || null;
 
     var container = document.getElementById(containerId);
@@ -315,7 +490,7 @@
     });
 
     // Build and insert toolbar
-    var toolbarItems = buildToolbar(profile, !!uploadUrl);
+    var toolbarItems = buildToolbar(profile, !!uploadUrl, !!resolveUrl);
     var toolbar = renderToolbar(wrapper, toolbarItems, editor, options);
 
     instances[containerId] = editor;

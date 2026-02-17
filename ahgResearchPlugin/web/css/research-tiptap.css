@@ -16,21 +16,28 @@
   padding: 3px 7px;
   font-size: 13px;
   line-height: 1.4;
-  border: 1px solid transparent;
-  background: transparent;
-  color: #495057;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #495057 !important;
   border-radius: 3px;
 }
 
+.rtt-toolbar .btn i,
+.rtt-toolbar .btn .fas,
+.rtt-toolbar .btn .far {
+  color: inherit !important;
+}
+
 .rtt-toolbar .btn:hover {
-  background: #e9ecef;
-  border-color: #dee2e6;
+  background: #e9ecef !important;
+  border-color: #dee2e6 !important;
+  color: #212529 !important;
 }
 
 .rtt-toolbar .btn.active {
-  background: #0d6efd;
-  color: #fff;
-  border-color: #0d6efd;
+  background: #0d6efd !important;
+  color: #fff !important;
+  border-color: #0d6efd !important;
 }
 
 .rtt-toolbar .separator {

@@ -17,6 +17,12 @@
         <span class="badge bg-light text-dark"><?php echo ucfirst($project->project_type); ?></span>
     </div>
     <div class="d-flex gap-2">
+      <?php include_partial('research/favoriteResearchButton', [
+          'objectId' => $project->id,
+          'objectType' => 'research_project',
+          'title' => $project->title,
+          'url' => '/research/project/' . $project->id,
+      ]); ?>
       <?php if ($project->owner_id == $researcher->id): ?>
         <a href="<?php echo url_for(['module' => 'research', 'action' => 'shareProject', 'id' => $project->id]); ?>" class="btn btn-outline-success">
             <i class="fas fa-share-alt me-1"></i> <?php echo __('Share'); ?>
@@ -125,7 +131,8 @@
                     }
                 }
                 if (!empty($activities)) {
-                    foreach (array_slice($activities, 0, 20) as $act) {
+                    $activitiesArr = is_array($activities) ? $activities : iterator_to_array($activities);
+                    foreach (array_slice($activitiesArr, 0, 20) as $act) {
                         $timelineItems[] = (object)[
                             'date' => $act->created_at,
                             'type' => 'activity',
@@ -205,7 +212,7 @@
                                             </a>
                                         <?php elseif (!empty($resource->object_id)): ?>
                                             <?php
-                                            $resSlug = DB::table('slug')->where('object_id', $resource->object_id)->value('slug');
+                                            $resSlug = \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', $resource->object_id)->value('slug');
                                             ?>
                                             <?php if ($resSlug): ?>
                                                 <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resSlug]); ?>">
@@ -348,7 +355,8 @@
             <div class="card-header"><h6 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h6></div>
             <?php if (!empty($activities)): ?>
                 <ul class="list-group list-group-flush">
-                    <?php foreach (array_slice($activities, 0, 10) as $activity): ?>
+                    <?php $activitiesArr2 = is_array($activities) ? $activities : iterator_to_array($activities); ?>
+                    <?php foreach (array_slice($activitiesArr2, 0, 10) as $activity): ?>
                         <li class="list-group-item">
                             <small>
                                 <span class="badge bg-light text-dark"><?php echo ucfirst($activity->activity_type); ?></span>

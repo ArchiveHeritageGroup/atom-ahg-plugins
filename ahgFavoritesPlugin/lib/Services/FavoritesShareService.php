@@ -84,6 +84,133 @@ class FavoritesShareService
     }
 
     /**
+     * Send share link emails to recipients
+     *
+     * @param int    $userId    Sender user ID
+     * @param string $shareUrl  The share URL to include
+     * @param string $rawEmails Comma/newline-separated email addresses
+     * @param string $message   Optional personal message
+     * @param int    $folderId  Folder being shared
+     *
+     * @return array ['sent' => int, 'errors' => string[]]
+     */
+    public function sendShareEmails(int $userId, string $shareUrl, string $rawEmails, string $message = '', int $folderId = 0): array
+    {
+        // Parse email addresses (comma, semicolon, newline separated)
+        $emails = preg_split('/[\s,;]+/', trim($rawEmails), -1, PREG_SPLIT_NO_EMPTY);
+        $emails = array_filter($emails, function ($e) {
+            return filter_var(trim($e), FILTER_VALIDATE_EMAIL);
+        });
+        $emails = array_unique(array_map('trim', $emails));
+
+        if (empty($emails)) {
+            return ['sent' => 0, 'errors' => []];
+        }
+
+        // Load email service
+        $emailServicePath = \sfConfig::get('sf_plugins_dir', '')
+            . '/ahgCorePlugin/lib/Services/EmailService.php';
+        if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+            require_once $emailServicePath;
+        }
+        if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+            return ['sent' => 0, 'errors' => [\__('Email service is not configured.')]];
+        }
+
+        // Get sender name
+        $senderName = '';
+        try {
+            $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+            $actor = DB::table('actor_i18n')
+                ->where('id', $userId)
+                ->where('culture', $culture)
+                ->value('authorized_form_of_name');
+            $senderName = $actor ?: '';
+        } catch (\Exception $e) {
+        }
+        if (!$senderName) {
+            $senderName = DB::table('user')->where('id', $userId)->value('username') ?: \__('A user');
+        }
+
+        // Get folder name
+        $folderName = '';
+        if ($folderId) {
+            $folderName = DB::table('favorites_folder')->where('id', $folderId)->value('name') ?: '';
+        }
+
+        // Get item count
+        $itemCount = 0;
+        if ($folderId) {
+            $itemCount = DB::table('favorites')->where('folder_id', $folderId)->count();
+        }
+
+        $sent = 0;
+        $errors = [];
+
+        $subject = \__('%1% shared a favorites folder with you', ['%1%' => $senderName]);
+
+        foreach ($emails as $email) {
+            $body = '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">';
+            $body .= '<h2 style="color: #0d6efd;">' . htmlspecialchars($senderName) . ' ' . \__('shared a folder with you') . '</h2>';
+
+            if ($folderName) {
+                $body .= '<p style="font-size: 1.1em;"><strong>' . \__('Folder:') . '</strong> ' . htmlspecialchars($folderName);
+                if ($itemCount) {
+                    $body .= ' <span style="color: #6c757d;">(' . $itemCount . ' ' . \__('items') . ')</span>';
+                }
+                $body .= '</p>';
+            }
+
+            if ($message) {
+                $body .= '<div style="background: #f8f9fa; border-left: 4px solid #0d6efd; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">';
+                $body .= '<p style="margin: 0; color: #495057;"><em>' . nl2br(htmlspecialchars($message)) . '</em></p>';
+                $body .= '</div>';
+            }
+
+            $body .= '<p style="margin: 24px 0;">';
+            $body .= '<a href="' . htmlspecialchars($shareUrl) . '" style="display: inline-block; background: #0d6efd; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">';
+            $body .= '<i class="fas fa-external-link-alt"></i> ' . \__('View Shared Folder');
+            $body .= '</a></p>';
+
+            $body .= '<p style="color: #6c757d; font-size: 0.9em;">' . \__('Or copy this link:') . '<br>';
+            $body .= '<a href="' . htmlspecialchars($shareUrl) . '">' . htmlspecialchars($shareUrl) . '</a></p>';
+
+            $body .= '</div>';
+
+            try {
+                $ok = \AhgCore\Services\EmailService::send($email, $subject, $body);
+                if ($ok) {
+                    $sent++;
+                } else {
+                    $errors[] = $email;
+                }
+            } catch (\Exception $e) {
+                $errors[] = $email;
+                error_log('Share email failed for ' . $email . ': ' . $e->getMessage());
+            }
+        }
+
+        // Track email recipients in favorites_share
+        if ($sent > 0 && $folderId) {
+            try {
+                $token = DB::table('favorites_folder')->where('id', $folderId)->value('share_token');
+                if ($token) {
+                    DB::table('favorites_share')
+                        ->where('token', $token)
+                        ->update([
+                            'shared_via' => 'email',
+                            'recipients' => implode(', ', $emails),
+                        ]);
+                }
+            } catch (\Exception $e) {
+                // recipients column may not exist yet — ignore
+            }
+        }
+
+        return ['sent' => $sent, 'errors' => $errors];
+    }
+
+    /**
      * Get shared folder data by token — validates expiry, tracks access
      *
      * @return array|null Folder + items or null if invalid/expired

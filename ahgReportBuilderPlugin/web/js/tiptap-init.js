@@ -12,26 +12,17 @@
 (function() {
   'use strict';
 
-  var TipTapCore = window['@tiptap/core'];
-  var StarterKit = window['@tiptap/starter-kit'];
-  var TextStyle = window['@tiptap/extension-text-style'];
-  var ImageExt = window['@tiptap/extension-image'];
-  var UnderlineExt = window['@tiptap/extension-underline'];
-  var TextAlignExt = window['@tiptap/extension-text-align'];
-  var ColorExt = window['@tiptap/extension-color'];
-  var HighlightExt = window['@tiptap/extension-highlight'];
-  var LinkExt = window['@tiptap/extension-link'];
-
-  // Resolve UMD default exports
-  var Editor = TipTapCore.Editor || (TipTapCore.default && TipTapCore.default.Editor) || TipTapCore;
-  var StarterKitResolved = StarterKit.StarterKit || StarterKit.default || StarterKit;
-  var TextStyleResolved = TextStyle.TextStyle || TextStyle.default || TextStyle;
-  var ImageResolved = ImageExt.Image || ImageExt.default || ImageExt;
-  var UnderlineResolved = UnderlineExt.Underline || UnderlineExt.default || UnderlineExt;
-  var TextAlignResolved = TextAlignExt.TextAlign || TextAlignExt.default || TextAlignExt;
-  var ColorResolved = ColorExt.Color || ColorExt.default || ColorExt;
-  var HighlightResolved = HighlightExt.Highlight || HighlightExt.default || HighlightExt;
-  var LinkResolved = LinkExt.Link || LinkExt.default || LinkExt;
+  // All TipTap exports come from the pre-bundled window.TipTap global
+  var T = window.TipTap;
+  var Editor = T.Editor;
+  var StarterKitResolved = T.StarterKit;
+  var TextStyleResolved = T.TextStyle;
+  var ImageResolved = T.Image;
+  var UnderlineResolved = T.Underline;
+  var TextAlignResolved = T.TextAlign;
+  var ColorResolved = T.Color;
+  var HighlightResolved = T.Highlight;
+  var LinkResolved = T.Link;
 
   var editors = {};
 
@@ -44,28 +35,28 @@
     var items = [
       { type: 'heading-select' },
       { type: 'sep' },
-      { cmd: 'bold', icon: 'bi-type-bold', title: 'Bold' },
-      { cmd: 'italic', icon: 'bi-type-italic', title: 'Italic' },
-      { cmd: 'underline', icon: 'bi-type-underline', title: 'Underline' },
-      { cmd: 'strike', icon: 'bi-type-strikethrough', title: 'Strikethrough' },
+      { cmd: 'bold', icon: 'fa-bold', title: 'Bold' },
+      { cmd: 'italic', icon: 'fa-italic', title: 'Italic' },
+      { cmd: 'underline', icon: 'fa-underline', title: 'Underline' },
+      { cmd: 'strike', icon: 'fa-strikethrough', title: 'Strikethrough' },
       { type: 'sep' },
       { type: 'color', cmd: 'color', title: 'Text Color' },
       { type: 'color', cmd: 'highlight', title: 'Highlight' },
       { type: 'sep' },
-      { cmd: 'bulletList', icon: 'bi-list-ul', title: 'Bullet List' },
-      { cmd: 'orderedList', icon: 'bi-list-ol', title: 'Ordered List' },
+      { cmd: 'bulletList', icon: 'fa-list-ul', title: 'Bullet List' },
+      { cmd: 'orderedList', icon: 'fa-list-ol', title: 'Ordered List' },
       { type: 'sep' },
-      { cmd: 'alignLeft', icon: 'bi-text-left', title: 'Align Left' },
-      { cmd: 'alignCenter', icon: 'bi-text-center', title: 'Align Center' },
-      { cmd: 'alignRight', icon: 'bi-text-right', title: 'Align Right' },
-      { cmd: 'alignJustify', icon: 'bi-justify', title: 'Justify' },
+      { cmd: 'alignLeft', icon: 'fa-align-left', title: 'Align Left' },
+      { cmd: 'alignCenter', icon: 'fa-align-center', title: 'Align Center' },
+      { cmd: 'alignRight', icon: 'fa-align-right', title: 'Align Right' },
+      { cmd: 'alignJustify', icon: 'fa-align-justify', title: 'Justify' },
       { type: 'sep' },
-      { cmd: 'blockquote', icon: 'bi-blockquote-left', title: 'Blockquote' },
-      { cmd: 'codeBlock', icon: 'bi-code-square', title: 'Code Block' },
-      { cmd: 'link', icon: 'bi-link-45deg', title: 'Link' },
-      { cmd: 'image', icon: 'bi-image', title: 'Insert Image (Base64)' },
+      { cmd: 'blockquote', icon: 'fa-quote-left', title: 'Blockquote' },
+      { cmd: 'codeBlock', icon: 'fa-code', title: 'Code Block' },
+      { cmd: 'link', icon: 'fa-link', title: 'Link' },
+      { cmd: 'image', icon: 'fa-image', title: 'Insert Image (Base64)' },
       { type: 'sep' },
-      { cmd: 'clear', icon: 'bi-eraser', title: 'Clear Formatting' }
+      { cmd: 'clear', icon: 'fa-eraser', title: 'Clear Formatting' }
     ];
 
     items.forEach(function(item) {
@@ -118,7 +109,7 @@
       btn.type = 'button';
       btn.className = 'btn';
       btn.title = item.title;
-      btn.innerHTML = '<i class="bi ' + item.icon + '"></i>';
+      btn.innerHTML = '<i class="fas ' + item.icon + '"></i>';
       btn.dataset.cmd = item.cmd;
 
       btn.addEventListener('click', function(e) {

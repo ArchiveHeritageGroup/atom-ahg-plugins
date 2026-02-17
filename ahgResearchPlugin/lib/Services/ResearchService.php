@@ -23,6 +23,11 @@ class ResearchService
         return DB::table('research_researcher')->where('id', $id)->first();
     }
 
+    public function getResearcherByEmail(string $email): ?object
+    {
+        return DB::table('research_researcher')->where('email', $email)->first();
+    }
+
     public function registerResearcher(array $data): int
     {
         $researcherId = DB::table('research_researcher')->insertGetId([
@@ -448,9 +453,12 @@ class ResearchService
             })
             ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
             ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
+            ->leftJoin('digital_object as do_thumb', function($join) {
+                $join->on('a.object_id', '=', 'do_thumb.object_id')->where('do_thumb.usage_id', '=', 142);
+            })
             ->where('a.researcher_id', $researcherId);
         if ($objectId) $query->where('a.object_id', $objectId);
-        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug', 'rc.name as collection_name')
+        return $query->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug', 'rc.name as collection_name', 'do_thumb.path as thumbnail_path')
             ->orderBy('a.created_at', 'desc')->get()->toArray();
     }
 
@@ -1308,9 +1316,13 @@ class ResearchService
                 $join->on('a.object_id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
             })
             ->leftJoin('slug', 'a.object_id', '=', 'slug.object_id')
+            ->leftJoin('research_collection as rc', 'a.collection_id', '=', 'rc.id')
+            ->leftJoin('digital_object as do_thumb', function($join) {
+                $join->on('a.object_id', '=', 'do_thumb.object_id')->where('do_thumb.usage_id', '=', 142);
+            })
             ->where('a.researcher_id', $researcherId)
             ->whereRaw('MATCH(a.title, a.content) AGAINST(? IN BOOLEAN MODE)', [$query])
-            ->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug')
+            ->select('a.*', 'i18n.title as object_title', 'slug.slug as object_slug', 'rc.name as collection_name', 'do_thumb.path as thumbnail_path')
             ->orderBy('a.created_at', 'desc')
             ->get()
             ->toArray();
