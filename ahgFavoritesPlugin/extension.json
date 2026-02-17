@@ -1,8 +1,8 @@
 {
     "name": "AHG Favorites Plugin",
     "machine_name": "ahgFavoritesPlugin",
-    "version": "1.0.7",
-    "description": "User favorites/bookmarks management for archival descriptions",
+    "version": "2.0.0",
+    "description": "Full-featured favorites/bookmarks management with folders, notes, bulk operations, and AJAX toggle",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "ahg",

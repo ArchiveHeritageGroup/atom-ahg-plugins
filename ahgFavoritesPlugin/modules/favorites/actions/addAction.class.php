@@ -15,10 +15,10 @@ class favoritesAddAction extends AhgController
 {
     public function execute($request)
     {
-        // Check if user is authenticated
         if (!$this->getUser()->isAuthenticated()) {
             $this->getUser()->setFlash('error', 'Please log in to add favorites.');
             $this->redirect(['module' => 'user', 'action' => 'login']);
+
             return;
         }
 
@@ -32,14 +32,23 @@ class favoritesAddAction extends AhgController
         if (!$objectId) {
             $this->getUser()->setFlash('error', 'Item not found.');
             $this->redirect(['module' => 'informationobject', 'action' => 'browse']);
+
             return;
         }
 
-        // Get title
+        // Get title in user's culture
+        $culture = $this->getUser()->getCulture() ?: 'en';
         $title = DB::table('information_object_i18n')
             ->where('id', $objectId)
-            ->where('culture', 'en')
+            ->where('culture', $culture)
             ->value('title');
+
+        if (!$title && $culture !== 'en') {
+            $title = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', 'en')
+                ->value('title');
+        }
 
         $userId = $this->getUser()->getAttribute('user_id');
         $service = new FavoritesService();
@@ -48,7 +57,7 @@ class favoritesAddAction extends AhgController
 
         $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['message']);
 
-        // Redirect back to the item using direct slug URL to avoid routing conflicts
-        $this->redirect('/' . $slug);
+        // Redirect back to the item using direct slug URL
+        $this->redirect('/'.$slug);
     }
 }

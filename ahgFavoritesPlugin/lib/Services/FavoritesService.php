@@ -22,43 +22,127 @@ class FavoritesService
     }
 
     /**
-     * Get user's favorites with object details
+     * Get the current user culture with fallback
      */
-    public function getUserFavorites(int $userId): array
+    private function getCulture(): string
     {
-        $favorites = $this->repository->getByUserId($userId);
-        $result = [];
+        try {
+            return \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        } catch (\Exception $e) {
+            return 'en';
+        }
+    }
 
-        foreach ($favorites as $favorite) {
-            // Get information object details
-            $io = DB::table('information_object')
-                ->where('id', $favorite->archival_description_id)
-                ->first();
+    /**
+     * Resolve title for an object with multi-culture support
+     */
+    private function resolveTitle(int $objectId): string
+    {
+        $culture = $this->getCulture();
 
+        $title = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', $culture)
+            ->value('title');
+
+        // Fallback to English if current culture has no title
+        if (!$title && $culture !== 'en') {
+            $title = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', 'en')
+                ->value('title');
+        }
+
+        return $title ?: 'Untitled';
+    }
+
+    /**
+     * Browse favourites with pagination, search, sort, folder filter
+     */
+    public function browse(int $userId, array $params): array
+    {
+        $result = $this->repository->browse($userId, $params);
+
+        // Enrich each hit with resolved title and slug
+        $culture = $this->getCulture();
+        $enriched = [];
+
+        foreach ($result['hits'] as $fav) {
+            $objectId = $fav->archival_description_id;
+
+            // Resolve title in user's culture
             $title = null;
-            if ($io) {
+            if ($objectId) {
                 $title = DB::table('information_object_i18n')
-                    ->where('id', $io->id)
-                    ->where('culture', 'en')
+                    ->where('id', $objectId)
+                    ->where('culture', $culture)
                     ->value('title');
+
+                if (!$title && $culture !== 'en') {
+                    $title = DB::table('information_object_i18n')
+                        ->where('id', $objectId)
+                        ->where('culture', 'en')
+                        ->value('title');
+                }
             }
 
+            // Resolve current slug
             $slug = DB::table('slug')
-                ->where('object_id', $favorite->archival_description_id)
+                ->where('object_id', $objectId)
                 ->value('slug');
 
-            $result[] = (object) [
-                'id' => $favorite->id,
-                'user_id' => $favorite->user_id,
-                'archival_description_id' => $favorite->archival_description_id,
-                'title' => $title ?? $favorite->archival_description ?? 'Untitled',
-                'slug' => $slug ?? $favorite->slug,
-                'notes' => $favorite->notes ?? null,
-                'created_at' => $favorite->created_at,
+            // Get level of description
+            $lod = null;
+            if ($objectId) {
+                $lodId = DB::table('information_object')
+                    ->where('id', $objectId)
+                    ->value('level_of_description_id');
+                if ($lodId) {
+                    $lod = DB::table('term_i18n')
+                        ->where('id', $lodId)
+                        ->where('culture', $culture)
+                        ->value('name');
+                    if (!$lod && $culture !== 'en') {
+                        $lod = DB::table('term_i18n')
+                            ->where('id', $lodId)
+                            ->where('culture', 'en')
+                            ->value('name');
+                    }
+                }
+            }
+
+            $enriched[] = (object) [
+                'id' => $fav->id,
+                'user_id' => $fav->user_id,
+                'archival_description_id' => $objectId,
+                'title' => $title ?? $fav->archival_description ?? 'Untitled',
+                'slug' => $slug ?? $fav->slug,
+                'notes' => $fav->notes ?? null,
+                'object_type' => $fav->object_type ?? 'information_object',
+                'reference_code' => $fav->reference_code ?? null,
+                'level_of_description' => $lod,
+                'folder_id' => $fav->folder_id ?? null,
+                'created_at' => $fav->created_at,
+                'updated_at' => $fav->updated_at ?? null,
             ];
         }
 
-        return $result;
+        return [
+            'hits' => $enriched,
+            'total' => $result['total'],
+            'page' => $result['page'],
+            'limit' => $result['limit'],
+        ];
+    }
+
+    /**
+     * Get user's favorites with object details (legacy compat)
+     */
+    public function getUserFavorites(int $userId): array
+    {
+        $result = $this->browse($userId, ['limit' => 1000]);
+
+        return $result['hits'];
     }
 
     /**
@@ -66,31 +150,40 @@ class FavoritesService
      */
     public function addToFavorites(int $userId, int $objectId, ?string $title = null, ?string $slug = null): array
     {
-        // Check if already exists
         if ($this->repository->exists($userId, $objectId)) {
             return ['success' => false, 'message' => 'Item is already in your favorites.'];
         }
 
-        // Get title if not provided
         if (!$title) {
-            $title = DB::table('information_object_i18n')
-                ->where('id', $objectId)
-                ->where('culture', 'en')
-                ->value('title') ?? 'Untitled';
+            $title = $this->resolveTitle($objectId);
         }
 
-        // Get slug if not provided
         if (!$slug) {
             $slug = DB::table('slug')
                 ->where('object_id', $objectId)
                 ->value('slug');
         }
 
+        // Determine object type
+        $objectType = 'information_object';
+        if (DB::table('actor')->where('id', $objectId)->exists()) {
+            $objectType = 'actor';
+        } elseif (DB::table('repository')->where('id', $objectId)->exists()) {
+            $objectType = 'repository';
+        }
+
+        // Get reference code
+        $referenceCode = DB::table('information_object')
+            ->where('id', $objectId)
+            ->value('identifier');
+
         $id = $this->repository->add([
             'user_id' => $userId,
             'archival_description_id' => $objectId,
             'archival_description' => $title,
             'slug' => $slug,
+            'object_type' => $objectType,
+            'reference_code' => $referenceCode,
         ]);
 
         return ['success' => true, 'message' => 'Added to favorites.', 'id' => $id];
@@ -131,11 +224,34 @@ class FavoritesService
     }
 
     /**
+     * Toggle favourite (add if not exists, remove if exists)
+     */
+    public function toggle(int $userId, int $objectId, ?string $slug = null): array
+    {
+        if ($this->repository->exists($userId, $objectId)) {
+            $this->repository->removeByUserAndObject($userId, $objectId);
+
+            return ['success' => true, 'action' => 'removed', 'favorited' => false, 'message' => 'Removed from favorites.'];
+        }
+
+        $result = $this->addToFavorites($userId, $objectId, null, $slug);
+
+        return [
+            'success' => $result['success'],
+            'action' => 'added',
+            'favorited' => true,
+            'message' => $result['message'],
+            'id' => $result['id'] ?? null,
+        ];
+    }
+
+    /**
      * Clear all favorites for user
      */
     public function clearAll(int $userId): array
     {
         $count = $this->repository->clearByUser($userId);
+
         return ['success' => true, 'message' => "Cleared {$count} favorites."];
     }
 
@@ -173,5 +289,38 @@ class FavoritesService
         $this->repository->updateNotes($favoriteId, $notes);
 
         return ['success' => true, 'message' => 'Notes updated.'];
+    }
+
+    /**
+     * Bulk remove favourites
+     */
+    public function bulkRemove(int $userId, array $ids): array
+    {
+        $ids = array_map('intval', $ids);
+        $count = $this->repository->bulkRemove($userId, $ids);
+
+        return ['success' => true, 'message' => "Removed {$count} favorites."];
+    }
+
+    /**
+     * Move favourites to a folder
+     */
+    public function moveToFolder(int $userId, array $ids, ?int $folderId): array
+    {
+        $ids = array_map('intval', $ids);
+
+        // Validate folder ownership if moving to a folder
+        if ($folderId) {
+            require_once dirname(__DIR__).'/Repositories/FolderRepository.php';
+            $folderRepo = new \AtomAhgPlugins\ahgFavoritesPlugin\Repositories\FolderRepository();
+            $folder = $folderRepo->getById($folderId);
+            if (!$folder || $folder->user_id != $userId) {
+                return ['success' => false, 'message' => 'Folder not found or access denied.'];
+            }
+        }
+
+        $count = $this->repository->moveToFolder($userId, $ids, $folderId);
+
+        return ['success' => true, 'message' => "Moved {$count} items."];
     }
 }
