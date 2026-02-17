@@ -184,7 +184,7 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
           </div>
           <div class="mb-3">
             <label class="form-label"><?php echo __('Content'); ?> *</label>
-            <div id="journalEditor" style="height: 200px;"></div>
+            <div id="journalEditor"></div>
           </div>
           <div class="row mb-3">
             <div class="col-md-4">
@@ -233,55 +233,32 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
   </div>
 </div>
 
-<!-- Quill.js CSS -->
-<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-
-<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-#journalEditor { background: #fff; color: #212529; }
-#journalEditor .ql-editor { min-height: 150px; }
-.ql-toolbar.ql-snow { background: #f8f9fa; border-color: #dee2e6; }
-.ql-container.ql-snow { border-color: #dee2e6; }
-.modal-content { background-color: #fff !important; color: #212529 !important; }
-.modal-body .form-label { color: #212529 !important; }
-.modal-body .form-control, .modal-body .form-select { background-color: #fff !important; color: #212529 !important; }
-</style>
-
-<!-- Quill.js -->
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<?php include_partial('research/tiptapScripts') ?>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
-  var quill = null;
+  var editor = null;
   var modal = document.getElementById('newEntryModal');
 
   modal.addEventListener('shown.bs.modal', function() {
-    if (!quill) {
-      quill = new Quill('#journalEditor', {
-        theme: 'snow',
-        modules: {
-          toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            ['blockquote', 'link'],
-            ['clean']
-          ]
-        },
+    if (!editor) {
+      editor = ResearchTipTap.create('journalEditor', {
+        profile: 'minimal',
         placeholder: '<?php echo __("Write your journal entry..."); ?>'
       });
     }
   });
 
   document.getElementById('saveEntryBtn').addEventListener('click', function(e) {
-    if (quill) {
-      document.getElementById('journalContentHidden').value = quill.root.innerHTML;
+    if (editor) {
+      document.getElementById('journalContentHidden').value = editor.getHTML();
     }
   });
 
   var form = modal.querySelector('form');
   form.addEventListener('submit', function() {
-    if (quill) {
-      document.getElementById('journalContentHidden').value = quill.root.innerHTML;
+    if (editor) {
+      document.getElementById('journalContentHidden').value = editor.getHTML();
     }
   });
 });
