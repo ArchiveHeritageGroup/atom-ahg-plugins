@@ -1,3 +1,7 @@
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <?php use_helper('Date') ?>
 
 <div class="container-fluid py-4">

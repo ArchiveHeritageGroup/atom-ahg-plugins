@@ -1,4 +1,7 @@
-<?php decorate_with('layout_1col.php') ?>
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <?php slot('title') ?>
 <div class="d-flex justify-content-between align-items-center">
   <h1>
@@ -37,7 +40,7 @@
 </div>
 
 <div class="card mb-4">
-  <div class="card-header bg-success text-white py-2"><i class="fas fa-plus me-2"></i><?php echo __('Add Item to Collection'); ?></div>
+  <div class="card-header bg-success text-white py-2"><i class="fas fa-plus me-2"></i><?php echo __('Add Item to Evidence Set'); ?></div>
   <div class="card-body">
     <form method="post" id="addItemForm">
       <input type="hidden" name="booking_action" value="add_item">
@@ -64,7 +67,7 @@
 </div>
 
 <div class="card">
-  <div class="card-header"><i class="fas fa-list me-2"></i><?php echo __('Collection Items'); ?> (<?php echo count($collection->items ?? []); ?>)</div>
+  <div class="card-header"><i class="fas fa-list me-2"></i><?php echo __('Evidence Set Items'); ?> (<?php echo count($collection->items ?? []); ?>)</div>
   <?php if (!empty($collection->items)): ?>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -90,12 +93,12 @@
     </table>
   </div>
   <?php else: ?>
-  <div class="card-body text-center text-muted py-5"><i class="fas fa-inbox fa-3x mb-3 opacity-50"></i><p class="mb-0"><?php echo __('This collection is empty. Use the search above to add items.'); ?></p></div>
+  <div class="card-body text-center text-muted py-5"><i class="fas fa-inbox fa-3x mb-3 opacity-50"></i><p class="mb-0"><?php echo __('This evidence set is empty. Use the search above to add items.'); ?></p></div>
   <?php endif; ?>
 </div>
 
 <div class="modal fade" id="editCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="booking_action" value="update">
-  <div class="modal-header"><h5 class="modal-title"><i class="fas fa-edit me-2"></i><?php echo __('Edit Collection'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-header"><h5 class="modal-title"><i class="fas fa-edit me-2"></i><?php echo __('Edit Evidence Set'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body">
     <div class="mb-3"><label class="form-label"><?php echo __('Name'); ?> *</label><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($collection->name); ?>" required></div>
     <div class="mb-3"><label class="form-label"><?php echo __('Description'); ?></label><textarea name="description" class="form-control" rows="3"><?php echo htmlspecialchars($collection->description ?? ''); ?></textarea></div>
@@ -133,7 +136,7 @@
 
 <div class="modal fade" id="deleteCollectionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post"><input type="hidden" name="booking_action" value="delete">
   <div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i><?php echo __('Delete'); ?></h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-  <div class="modal-body"><p><?php echo __('Delete this collection?'); ?></p><p class="text-danger"><strong><?php echo htmlspecialchars($collection->name); ?></strong></p></div>
+  <div class="modal-body"><p><?php echo __('Delete this evidence set?'); ?></p><p class="text-danger"><strong><?php echo htmlspecialchars($collection->name); ?></strong></p></div>
   <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button><button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button></div>
 </form></div></div></div>
 

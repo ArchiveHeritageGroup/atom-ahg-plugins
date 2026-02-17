@@ -1,3 +1,7 @@
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
@@ -175,7 +179,7 @@
                                 <th class="text-center">Views</th>
                                 <th class="text-center">Citations</th>
                                 <th class="text-center">Bookings</th>
-                                <th class="text-center">Collections</th>
+                                <th class="text-center">Evidence Sets</th>
                             </tr>
                         </thead>
                         <tbody>

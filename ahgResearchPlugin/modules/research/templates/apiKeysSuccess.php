@@ -1,3 +1,7 @@
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
@@ -93,8 +97,8 @@
                 <tr><td><span class="badge bg-success">GET</span></td><td>/profile</td><td>Get your researcher profile</td></tr>
                 <tr><td><span class="badge bg-success">GET</span></td><td>/projects</td><td>List your projects</td></tr>
                 <tr><td><span class="badge bg-primary">POST</span></td><td>/projects</td><td>Create a project</td></tr>
-                <tr><td><span class="badge bg-success">GET</span></td><td>/collections</td><td>List your collections</td></tr>
-                <tr><td><span class="badge bg-primary">POST</span></td><td>/collections</td><td>Create a collection</td></tr>
+                <tr><td><span class="badge bg-success">GET</span></td><td>/collections</td><td>List your evidence sets</td></tr>
+                <tr><td><span class="badge bg-primary">POST</span></td><td>/collections</td><td>Create an evidence set</td></tr>
                 <tr><td><span class="badge bg-success">GET</span></td><td>/searches</td><td>List saved searches</td></tr>
                 <tr><td><span class="badge bg-success">GET</span></td><td>/bookings</td><td>List bookings</td></tr>
                 <tr><td><span class="badge bg-primary">POST</span></td><td>/bookings</td><td>Create a booking</td></tr>

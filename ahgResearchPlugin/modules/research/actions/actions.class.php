@@ -11,6 +11,102 @@ class researchActions extends AhgController
     {
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchService.php';
         $this->service = new ResearchService();
+
+        // Set sidebar active key for all actions
+        $this->sidebarActive = $this->getSidebarActiveKey();
+
+        // Set unread notifications count for sidebar badge
+        $this->unreadNotifications = 0;
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId($userId);
+            if ($researcher) {
+                try {
+                    $this->unreadNotifications = (int) DB::table('research_notification')
+                        ->where('researcher_id', $researcher->id)
+                        ->where('is_read', 0)
+                        ->count();
+                } catch (\Exception $e) {
+                    // Table may not exist yet
+                }
+            }
+        }
+    }
+
+    protected function getSidebarActiveKey(): string
+    {
+        $action = $this->getContext()->getActionName();
+        $map = [
+            'dashboard'             => 'workspace',
+            'workspace'             => 'workspace',
+            'annotations'           => 'workspace',
+            'savedSearches'         => 'workspace',
+            'projects'              => 'projects',
+            'viewProject'           => 'projects',
+            'editProject'           => 'projects',
+            'shareProject'          => 'projects',
+            'projectCollaborators'  => 'projects',
+            'snapshots'             => 'projects',
+            'viewSnapshot'          => 'projects',
+            'compareSnapshots'      => 'projects',
+            'hypotheses'            => 'projects',
+            'viewHypothesis'        => 'projects',
+            'sourceAssessment'      => 'projects',
+            'assertions'            => 'projects',
+            'viewAssertion'         => 'projects',
+            'knowledgeGraph'        => 'projects',
+            'extractionJobs'        => 'projects',
+            'viewExtractionJob'     => 'projects',
+            'validationQueue'       => 'projects',
+            'documentTemplates'     => 'projects',
+            'entityResolution'      => 'projects',
+            'timelineBuilder'       => 'projects',
+            'mapBuilder'            => 'projects',
+            'annotationStudio'      => 'projects',
+            'workspaces'            => 'workspaces',
+            'viewWorkspace'         => 'workspaces',
+            'inviteCollaborator'    => 'workspaces',
+            'collections'           => 'collections',
+            'viewCollection'        => 'collections',
+            'journal'               => 'journal',
+            'journalNew'            => 'journal',
+            'journalEntry'          => 'journal',
+            'bibliographies'        => 'bibliographies',
+            'viewBibliography'      => 'bibliographies',
+            'cite'                  => 'bibliographies',
+            'reports'               => 'reports',
+            'viewReport'            => 'reports',
+            'newReport'             => 'reports',
+            'reproductions'         => 'reproductions',
+            'newReproduction'       => 'reproductions',
+            'viewReproduction'      => 'reproductions',
+            'book'                  => 'book',
+            'bookEquipment'         => 'book',
+            'bookings'              => 'bookings',
+            'viewBooking'           => 'bookings',
+            'notifications'         => 'notifications',
+            'researchers'           => 'researchers',
+            'viewResearcher'        => 'researchers',
+            'rooms'                 => 'rooms',
+            'editRoom'              => 'rooms',
+            'seats'                 => 'seats',
+            'assignSeat'            => 'seats',
+            'equipment'             => 'equipment',
+            'retrievalQueue'        => 'retrievalQueue',
+            'walkIn'                => 'walkIn',
+            'adminTypes'            => 'adminTypes',
+            'editResearcherType'    => 'adminTypes',
+            'adminStatistics'       => 'adminStatistics',
+            'activities'            => 'activities',
+            'viewActivity'          => 'activities',
+            'institutions'          => 'institutions',
+            'editInstitution'       => 'institutions',
+            'profile'               => 'profile',
+            'apiKeys'               => 'profile',
+            'renewal'               => 'profile',
+        ];
+
+        return $map[$action] ?? '';
     }
 
     public function executeIndex($request)
@@ -858,7 +954,7 @@ class researchActions extends AhgController
             'description_detail_id' => null,
             'description_identifier' => null,
             'source_standard' => null,
-            'source_culture' => 'en',
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
         
         // 3. Insert into user table
@@ -1304,7 +1400,7 @@ class researchActions extends AhgController
         $items = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', 'en');
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
             ->where('io.id', '!=', 1) // Exclude root
@@ -1350,7 +1446,7 @@ class researchActions extends AhgController
         if ($type === 'actor') {
             $items = DB::table('actor_i18n as ai')
                 ->leftJoin('slug as s', 'ai.id', '=', 's.object_id')
-                ->where('ai.culture', 'en')
+                ->where('ai.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('ai.authorized_form_of_name', 'LIKE', '%' . $query . '%')
                 ->select('ai.id', 'ai.authorized_form_of_name as title', 's.slug')
                 ->orderBy('ai.authorized_form_of_name')
@@ -1358,14 +1454,14 @@ class researchActions extends AhgController
         } elseif ($type === 'repository') {
             $items = DB::table('repository_i18n as ri')
                 ->leftJoin('slug as s', 'ri.id', '=', 's.object_id')
-                ->where('ri.culture', 'en')
+                ->where('ri.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                 ->where('ri.authorized_form_of_name', 'LIKE', '%' . $query . '%')
                 ->select('ri.id', 'ri.authorized_form_of_name as title', 's.slug')
                 ->orderBy('ri.authorized_form_of_name')
                 ->limit(20)->get()->toArray();
         } elseif ($type === 'accession') {
             $items = DB::table('accession as a')
-                ->leftJoin('accession_i18n as ai', function ($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', 'en'); })
+                ->leftJoin('accession_i18n as ai', function ($j) { $j->on('a.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
                 ->where(function ($q) use ($query) {
                     $q->where('a.identifier', 'LIKE', '%' . $query . '%')
                       ->orWhere('ai.title', 'LIKE', '%' . $query . '%');
@@ -1378,7 +1474,7 @@ class researchActions extends AhgController
         } else {
             // Default: information_object (use existing searchItems logic)
             $items = DB::table('information_object as io')
-                ->leftJoin('information_object_i18n as ioi', function ($j) { $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en'); })
+                ->leftJoin('information_object_i18n as ioi', function ($j) { $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('io.id', '!=', 1)
                 ->where(function ($q) use ($query) {
@@ -1710,7 +1806,7 @@ class researchActions extends AhgController
 
         $this->clipboardItems = DB::table('research_clipboard_project as cp')
             ->leftJoin('information_object_i18n as i', function ($join) {
-                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', 'en');
+                $join->on('cp.object_id', '=', 'i.id')->where('i.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->leftJoin('slug', function ($join) {
                 $join->on('cp.object_id', '=', 'slug.object_id');
@@ -2936,7 +3032,7 @@ class researchActions extends AhgController
         $this->materials = DB::table('research_activity_material as am')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('am.object_id', '=', 'ioi.id')
-                    ->where('ioi.culture', '=', 'en');
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->where('am.activity_id', $activityId)
             ->select('am.*', 'ioi.title as item_title')
@@ -4450,7 +4546,7 @@ class researchActions extends AhgController
 
         // Get object title for display
         $this->objectTitle = DB::table('information_object_i18n')
-            ->where('id', $objectId)->where('culture', 'en')
+            ->where('id', $objectId)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title') ?? 'Object #' . $objectId;
     }
 
@@ -4519,7 +4615,7 @@ class researchActions extends AhgController
 
         // Get object title
         $this->objectTitle = DB::table('information_object_i18n')
-            ->where('id', $objectId)->where('culture', 'en')
+            ->where('id', $objectId)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title') ?? 'Object #' . $objectId;
     }
 

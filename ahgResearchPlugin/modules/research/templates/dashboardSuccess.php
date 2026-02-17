@@ -1,16 +1,9 @@
-<?php decorate_with('layout_1col.php') ?>
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <?php slot('title') ?>
-<div class="d-flex justify-content-between align-items-center">
-  <h1><i class="fas fa-book-reader text-primary me-2"></i><?php echo __('Research Services'); ?></h1>
-  <?php if ($sf_user->isAuthenticated() && isset($unreadNotifications) && $unreadNotifications > 0): ?>
-  <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="btn btn-outline-primary position-relative">
-    <i class="fas fa-bell"></i>
-    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?php echo $unreadNotifications; ?></span>
-  </a>
-  <?php elseif ($sf_user->isAuthenticated()): ?>
-  <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="btn btn-outline-secondary"><i class="fas fa-bell"></i></a>
-  <?php endif; ?>
-</div>
+<h1><i class="fas fa-book-reader text-primary me-2"></i><?php echo __('Research Services'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -150,10 +143,34 @@
   </div>
 </div>
 
-<div class="row">
-  <!-- Today's Bookings -->
-  <div class="col-md-8">
-    <div class="card mb-4">
+<?php if ($sf_user->isAdministrator() && !empty($pendingResearchers)): ?>
+<div class="card mb-4">
+  <div class="card-header bg-warning">
+    <i class="fas fa-user-clock me-2"></i><?php echo __('Pending Approvals'); ?>
+    <span class="badge bg-dark float-end"><?php echo count(sfOutputEscaper::unescape($pendingResearchers)); ?></span>
+  </div>
+  <ul class="list-group list-group-flush">
+    <?php foreach (array_slice(sfOutputEscaper::unescape($pendingResearchers), 0, 5) as $pending): ?>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <strong><?php echo htmlspecialchars($pending->first_name . ' ' . $pending->last_name); ?></strong><br>
+        <small class="text-muted"><?php echo htmlspecialchars($pending->institution ?? 'Independent'); ?></small>
+      </div>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewResearcher', 'id' => $pending->id]); ?>" class="btn btn-sm btn-outline-primary">
+        <?php echo __('Review'); ?>
+      </a>
+    </li>
+    <?php endforeach; ?>
+  </ul>
+  <?php if (count(sfOutputEscaper::unescape($pendingResearchers)) > 5): ?>
+  <div class="card-footer text-center">
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers', 'status' => 'pending']); ?>"><?php echo __('View all pending'); ?></a>
+  </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-calendar-day me-2"></i><?php echo __("Today's Schedule"); ?></span>
         <?php if ($sf_user->isAuthenticated()): ?>
@@ -275,118 +292,4 @@
       </ul>
     </div>
     <?php endif; ?>
-
-  </div>
-
-  <!-- Quick Links / Pending Researchers -->
-  <div class="col-md-4">
-    <?php if ($sf_user->isAdministrator() && !empty($pendingResearchers)): ?>
-    <div class="card mb-4">
-      <div class="card-header bg-warning">
-        <i class="fas fa-user-clock me-2"></i><?php echo __('Pending Approvals'); ?>
-        <span class="badge bg-dark float-end"><?php echo count(sfOutputEscaper::unescape($pendingResearchers)); ?></span>
-      </div>
-      <ul class="list-group list-group-flush">
-        <?php foreach (array_slice(sfOutputEscaper::unescape($pendingResearchers), 0, 5) as $pending): ?>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong><?php echo htmlspecialchars($pending->first_name . ' ' . $pending->last_name); ?></strong><br>
-            <small class="text-muted"><?php echo htmlspecialchars($pending->institution ?? 'Independent'); ?></small>
-          </div>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewResearcher', 'id' => $pending->id]); ?>" class="btn btn-sm btn-outline-primary">
-            <?php echo __('Review'); ?>
-          </a>
-        </li>
-        <?php endforeach; ?>
-      </ul>
-      <?php if (count(sfOutputEscaper::unescape($pendingResearchers)) > 5): ?>
-      <div class="card-footer text-center">
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers', 'status' => 'pending']); ?>"><?php echo __('View all pending'); ?></a>
-      </div>
-      <?php endif; ?>
-    </div>
-    <?php endif; ?>
-
-    <div class="card">
-      <div class="card-header">
-        <i class="fas fa-link me-2"></i><?php echo __('Quick Links'); ?>
-      </div>
-      <div class="list-group list-group-flush">
-        <?php if ($sf_user->isAuthenticated()): ?>
-          <?php if ($researcher && $researcher->status === 'approved'): ?>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-calendar-plus me-2"></i><?php echo __('Book Reading Room'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'workspace']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-briefcase me-2"></i><?php echo __('My Workspace'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-folder me-2"></i><?php echo __('My Collections'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'projects']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-project-diagram me-2"></i><?php echo __('My Projects'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'bibliographies']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-book me-2"></i><?php echo __('Bibliographies'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'workspaces']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-users-cog me-2"></i><?php echo __('Team Workspaces'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-copy me-2"></i><?php echo __('Reproduction Requests'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'journal']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-pen-fancy me-2"></i><?php echo __('Research Journal'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'reports']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-file-alt me-2"></i><?php echo __('Reports'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'notifications']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-bell me-2"></i><?php echo __('Notifications'); ?>
-          </a>
-          <?php endif; ?>
-          <?php if ($sf_user->isAdministrator()): ?>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-users me-2"></i><?php echo __('Manage Researchers'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-calendar-alt me-2"></i><?php echo __('Manage Bookings'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'rooms']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-door-open me-2"></i><?php echo __('Reading Rooms'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'seats']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-chair me-2"></i><?php echo __('Seat Management'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'equipment']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-tools me-2"></i><?php echo __('Equipment'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'retrievalQueue']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-boxes-stacked me-2"></i><?php echo __('Retrieval Queue'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'walkIn']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-walking me-2"></i><?php echo __('Walk-In Visitors'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminTypes']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-user-tag me-2"></i><?php echo __('Researcher Types'); ?>
-          </a>
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminStatistics']); ?>" class="list-group-item list-group-item-action">
-            <i class="fas fa-chart-bar me-2"></i><?php echo __('Statistics'); ?>
-          </a>
-          <?php endif; ?>
-        <?php else: ?>
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="list-group-item list-group-item-action">
-          <i class="fas fa-user-plus me-2"></i><?php echo __('Register as Researcher'); ?>
-        </a>
-        <a href="<?php echo url_for(['module' => 'user', 'action' => 'login']); ?>" class="list-group-item list-group-item-action">
-          <i class="fas fa-sign-in-alt me-2"></i><?php echo __('Login'); ?>
-        </a>
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'passwordResetRequest']); ?>" class="list-group-item list-group-item-action">
-          <i class="fas fa-key me-2"></i><?php echo __('Forgot Password'); ?>
-        </a>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-</div>
 <?php end_slot() ?>

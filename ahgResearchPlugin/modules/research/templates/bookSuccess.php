@@ -1,4 +1,7 @@
-<?php decorate_with('layout_1col.php') ?>
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <?php slot('title') ?>
 <h1><i class="fas fa-calendar-plus text-primary me-2"></i><?php echo __('Book Reading Room Visit'); ?></h1>
 <?php end_slot() ?>

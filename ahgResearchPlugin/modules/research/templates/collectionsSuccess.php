@@ -1,13 +1,17 @@
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'workspace']); ?>">Workspace</a></li>
-        <li class="breadcrumb-item active">Collections</li>
+        <li class="breadcrumb-item active">Evidence Sets</li>
     </ol>
 </nav>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0"><i class="fas fa-folder text-primary me-2"></i>My Collections</h1>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fas fa-plus me-1"></i> New Collection</button>
+    <h1 class="h2 mb-0"><i class="fas fa-layer-group text-primary me-2"></i>Evidence Sets</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fas fa-plus me-1"></i> New Evidence Set</button>
 </div>
 <div class="row">
     <?php if (!empty($collections)): ?>
@@ -19,17 +23,17 @@
                         <p class="card-text text-muted"><?php echo $c->description ?: 'No description'; ?></p>
                         <p class="mb-0"><span class="badge bg-primary"><?php echo $c->item_count; ?> items</span><?php if ($c->is_public): ?> <span class="badge bg-success">Public</span><?php endif; ?></p>
                     </div>
-                    <div class="card-footer"><a href="<?php echo url_for(['module' => 'research', 'action' => 'viewCollection', 'id' => $c->id]); ?>" class="btn btn-sm btn-outline-primary">View Collection</a></div>
+                    <div class="card-footer"><a href="<?php echo url_for(['module' => 'research', 'action' => 'viewCollection', 'id' => $c->id]); ?>" class="btn btn-sm btn-outline-primary">View Evidence Set</a></div>
                 </div>
             </div>
         <?php endforeach; ?>
     <?php else: ?>
-        <div class="col-12"><div class="card"><div class="card-body text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3"></i><p>No collections yet. Create one to organize your research materials.</p></div></div></div>
+        <div class="col-12"><div class="card"><div class="card-body text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3"></i><p>No evidence sets yet. Create one to organize your research materials.</p></div></div></div>
     <?php endif; ?>
 </div>
 <div class="modal fade" id="createModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
     <form method="post"><input type="hidden" name="do" value="create">
-        <div class="modal-header"><h5 class="modal-title">New Collection</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title">New Evidence Set</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
             <div class="mb-3"><label class="form-label">Name *</label><input type="text" name="name" class="form-control" required></div>
             <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>

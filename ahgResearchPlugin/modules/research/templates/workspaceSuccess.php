@@ -1,4 +1,7 @@
-<?php decorate_with('layout_1col.php') ?>
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <?php slot('title') ?>
 <h1><i class="fas fa-briefcase text-primary me-2"></i><?php echo __('My Workspace'); ?></h1>
 <?php end_slot() ?>
@@ -72,7 +75,7 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
 <!-- Stats Row -->
 <div class="row mb-4">
   <div class="col-6 col-md-3 mb-2">
-    <div class="card text-center h-100 border-primary"><div class="card-body py-3"><h3 class="text-primary mb-0"><?php echo number_format($stats['total_collections'] ?? 0); ?></h3><small class="text-muted"><?php echo __('Collections'); ?></small></div></div>
+    <div class="card text-center h-100 border-primary"><div class="card-body py-3"><h3 class="text-primary mb-0"><?php echo number_format($stats['total_collections'] ?? 0); ?></h3><small class="text-muted"><?php echo __('Evidence Sets'); ?></small></div></div>
   </div>
   <div class="col-6 col-md-3 mb-2">
     <div class="card text-center h-100 border-success"><div class="card-body py-3"><h3 class="text-success mb-0"><?php echo number_format($stats['total_items'] ?? 0); ?></h3><small class="text-muted"><?php echo __('Saved Items'); ?></small></div></div>
@@ -144,11 +147,11 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
     </div>
   </div>
 
-  <!-- Middle Column: Collections -->
+  <!-- Middle Column: Evidence Sets -->
   <div class="col-md-4 mb-4">
     <div class="card h-100">
       <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-2">
-        <span><i class="fas fa-folder me-2"></i><?php echo __('My Collections'); ?></span>
+        <span><i class="fas fa-layer-group me-2"></i><?php echo __('Evidence Sets'); ?></span>
         <button type="button" class="btn btn-sm btn-light py-0" data-bs-toggle="modal" data-bs-target="#newCollectionModal"><i class="fas fa-plus"></i></button>
       </div>
       <?php if (!empty($collections)): ?>
@@ -166,13 +169,13 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
           <?php endforeach; ?>
         </ul>
         <div class="card-footer text-center py-2">
-          <a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>" class="small"><?php echo __('Manage all collections'); ?> <i class="fas fa-arrow-right"></i></a>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>" class="small"><?php echo __('Manage all evidence sets'); ?> <i class="fas fa-arrow-right"></i></a>
         </div>
       <?php else: ?>
         <div class="card-body text-center text-muted py-4">
           <i class="fas fa-folder-open fa-2x mb-2 opacity-50"></i>
-          <p class="mb-2"><?php echo __('No collections yet'); ?></p>
-          <?php if ($canUseFeatures): ?><button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#newCollectionModal"><?php echo __('Create your first collection'); ?></button><?php else: ?><button class="btn btn-sm btn-outline-secondary" disabled><?php echo __('Create your first collection'); ?></button><?php endif; ?>
+          <p class="mb-2"><?php echo __('No evidence sets yet'); ?></p>
+          <?php if ($canUseFeatures): ?><button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#newCollectionModal"><?php echo __('Create your first evidence set'); ?></button><?php else: ?><button class="btn btn-sm btn-outline-secondary" disabled><?php echo __('Create your first evidence set'); ?></button><?php endif; ?>
         </div>
       <?php endif; ?>
     </div>
@@ -232,26 +235,26 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
   <div class="card-body py-3">
     <h6 class="card-title"><i class="fas fa-lightbulb text-info me-2"></i><?php echo __('Research Tips'); ?></h6>
     <div class="row small text-muted">
-      <div class="col-md-4"><i class="fas fa-plus-circle me-1"></i> <?php echo __('Use "Add to Collection" button while browsing to save items'); ?></div>
+      <div class="col-md-4"><i class="fas fa-plus-circle me-1"></i> <?php echo __('Use "Add to Evidence Set" button while browsing to save items'); ?></div>
       <div class="col-md-4"><i class="fas fa-bookmark me-1"></i> <?php echo __('Save searches to quickly re-run them later'); ?></div>
-      <div class="col-md-4"><i class="fas fa-file-pdf me-1"></i> <?php echo __('Generate finding aids from your collections'); ?></div>
+      <div class="col-md-4"><i class="fas fa-file-pdf me-1"></i> <?php echo __('Generate finding aids from your evidence sets'); ?></div>
     </div>
   </div>
 </div>
 
-<!-- New Collection Modal -->
+<!-- New Evidence Set Modal -->
 <div class="modal fade" id="newCollectionModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="post">
         <input type="hidden" name="booking_action" value="create_collection">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fas fa-folder-plus me-2"></i><?php echo __('Create New Collection'); ?></h5>
+          <h5 class="modal-title"><i class="fas fa-folder-plus me-2"></i><?php echo __('Create New Evidence Set'); ?></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label"><?php echo __('Collection Name'); ?> *</label>
+            <label class="form-label"><?php echo __('Evidence Set Name'); ?> *</label>
             <input type="text" name="collection_name" class="form-control" required placeholder="<?php echo __('e.g., My Research Project'); ?>">
           </div>
           <div class="mb-3">

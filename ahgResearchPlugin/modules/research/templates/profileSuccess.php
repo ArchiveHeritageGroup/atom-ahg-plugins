@@ -1,3 +1,7 @@
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
@@ -127,7 +131,7 @@
             <?php endif; ?>
         </div>
         <div class="card mb-3">
-            <div class="card-header bg-primary text-white"><h6 class="mb-0"><i class="fas fa-folder me-2"></i>Collections</h6></div>
+            <div class="card-header bg-primary text-white"><h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>Evidence Sets</h6></div>
             <?php if (!empty($collections)): ?>
                 <ul class="list-group list-group-flush">
                     <?php foreach ($collections as $c): ?>
@@ -138,7 +142,7 @@
                     <?php endforeach; ?>
                 </ul>
             <?php else: ?>
-                <div class="card-body text-muted">No collections</div>
+                <div class="card-body text-muted">No evidence sets</div>
             <?php endif; ?>
         </div>
         <?php if ($researcher->status === 'approved'): ?>
