@@ -214,6 +214,131 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_journal_entry', '/research/journal/:id', 'journalEntry', ['id' => '\d+']);
         $research->any('research_journal', '/research/journal', 'journal');
 
+        // =====================================================================
+        // ISSUE 159 PHASE 2a: SNAPSHOTS
+        // =====================================================================
+        $research->any('research_create_snapshot', '/research/snapshot/create', 'createSnapshot');
+        $research->any('research_delete_snapshot', '/research/snapshot/:id/delete', 'deleteSnapshot', ['id' => '\\d+']);
+        $research->any('research_compare_snapshots', '/research/snapshot/compare', 'compareSnapshots');
+        $research->any('research_view_snapshot', '/research/snapshot/:id', 'viewSnapshot', ['id' => '\\d+']);
+        $research->any('research_snapshots', '/research/snapshots/:project_id', 'snapshots', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2a: HYPOTHESES
+        // =====================================================================
+        $research->any('research_update_hypothesis', '/research/hypothesis/:id/update', 'updateHypothesis', ['id' => '\\d+']);
+        $research->any('research_view_hypothesis', '/research/hypothesis/:id', 'viewHypothesis', ['id' => '\\d+']);
+        $research->any('research_hypotheses', '/research/hypotheses/:project_id', 'hypotheses', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2a: SOURCE ASSESSMENT & TRUST
+        // =====================================================================
+        $research->any('research_save_source_assessment', '/research/source-assessment/save', 'saveSourceAssessment');
+        $research->any('research_trust_score', '/research/trust-score/:object_id', 'trustScore', ['object_id' => '\\d+']);
+        $research->any('research_source_assessment', '/research/source-assessment/:object_id', 'sourceAssessment', ['object_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2a: W3C WEB ANNOTATIONS v2
+        // =====================================================================
+        $research->any('research_create_annotation_v2', '/research/annotation-v2/create', 'createAnnotationV2');
+        $research->any('research_view_annotation_v2', '/research/annotation-v2/:id', 'viewAnnotationV2', ['id' => '\\d+']);
+        $research->any('research_import_annotations_iiif', '/research/annotations/import/:object_id', 'importAnnotationsIIIF', ['object_id' => '\\d+']);
+        $research->any('research_export_annotations_iiif', '/research/annotations/export/:object_id', 'exportAnnotationsIIIF', ['object_id' => '\\d+']);
+        $research->any('research_annotation_studio', '/research/annotation-studio/:object_id', 'annotationStudio', ['object_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2a: ASSERTIONS (KNOWLEDGE GRAPH)
+        // =====================================================================
+        $research->any('research_create_assertion', '/research/assertion/create', 'createAssertion');
+        $research->any('research_update_assertion_status', '/research/assertion/:id/status', 'updateAssertionStatus', ['id' => '\\d+']);
+        $research->any('research_add_assertion_evidence', '/research/assertion/:id/evidence', 'addAssertionEvidence', ['id' => '\\d+']);
+        $research->any('research_assertion_conflicts', '/research/assertion/:id/conflicts', 'assertionConflicts', ['id' => '\\d+']);
+        $research->any('research_view_assertion', '/research/assertion/:id', 'viewAssertion', ['id' => '\\d+']);
+        $research->any('research_knowledge_graph_data', '/research/knowledge-graph-data', 'knowledgeGraphData');
+        $research->any('research_knowledge_graph', '/research/knowledge-graph/:project_id', 'knowledgeGraph', ['project_id' => '\\d+']);
+        $research->any('research_assertions', '/research/assertions/:project_id', 'assertions', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 ENHANCEMENT 5: DISCOVERY — SEARCH DIFF + SNAPSHOT
+        // =====================================================================
+        $research->any('research_search_diff', '/research/search-diff/:id', 'diffSearchResults', ['id' => '\\d+']);
+        $research->any('research_search_snapshot', '/research/search-snapshot/:id', 'snapshotSearchResults', ['id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2b: EXTRACTION ORCHESTRATION
+        // =====================================================================
+        $research->any('research_create_extraction_job', '/research/extraction-job/create', 'createExtractionJob');
+        $research->any('research_view_extraction_job', '/research/extraction-job/:id', 'viewExtractionJob', ['id' => '\\d+']);
+        $research->any('research_extraction_jobs', '/research/extraction-jobs/:project_id', 'extractionJobs', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2b: VALIDATION QUEUE
+        // =====================================================================
+        $research->any('research_bulk_validate', '/research/bulk-validate', 'bulkValidate');
+        $research->any('research_validate_result', '/research/validate/:id', 'validateResult', ['id' => '\\d+']);
+        $research->any('research_validation_queue', '/research/validation-queue', 'validationQueue');
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2b: DOCUMENT TEMPLATES
+        // =====================================================================
+        $research->any('research_edit_document_template', '/research/document-template/:id/edit', 'editDocumentTemplate', ['id' => '\\d+'], ['id' => null]);
+        $research->any('research_document_templates', '/research/document-templates', 'documentTemplates');
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2c: ENTITY RESOLUTION
+        // =====================================================================
+        $research->any('research_find_entity_candidates', '/research/entity-resolution/candidates', 'findEntityCandidates');
+        $research->any('research_propose_entity_match', '/research/entity-resolution/propose', 'proposeEntityMatch');
+        $research->any('research_resolve_entity_match', '/research/entity-resolution/:id/resolve', 'resolveEntityMatch', ['id' => '\\d+']);
+        $research->any('research_entity_resolution', '/research/entity-resolution', 'entityResolution');
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2c: TIMELINE
+        // =====================================================================
+        $research->any('research_timeline_event_api', '/research/timeline-event-api', 'timelineEventApi');
+        $research->any('research_timeline_data', '/research/timeline-data', 'timelineData');
+        $research->any('research_timeline_builder', '/research/timeline/:project_id', 'timelineBuilder', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2c: MAP
+        // =====================================================================
+        $research->any('research_map_point_api', '/research/map-point-api', 'mapPointApi');
+        $research->any('research_map_data', '/research/map-data', 'mapData');
+        $research->any('research_map_builder', '/research/map/:project_id', 'mapBuilder', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2c: NETWORK GRAPH
+        // =====================================================================
+        $research->any('research_export_graph_gexf', '/research/network-graph/:project_id/export/gexf', 'exportGraphGEXF', ['project_id' => '\\d+']);
+        $research->any('research_network_graph_data', '/research/network-graph-data', 'networkGraphData');
+        $research->any('research_network_graph', '/research/network-graph/:project_id', 'networkGraph', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2d: RO-CRATE
+        // =====================================================================
+        $research->any('research_package_collection', '/research/ro-crate/collection/:id', 'packageCollection', ['id' => '\\d+']);
+        $research->any('research_package_project', '/research/ro-crate/:project_id', 'packageProject', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2d: ODRL
+        // =====================================================================
+        $research->any('research_evaluate_access', '/research/odrl/evaluate', 'evaluateAccess');
+        $research->any('research_create_odrl_policy', '/research/odrl/create', 'createOdrlPolicy');
+        $research->any('research_odrl_policies', '/research/odrl/policies', 'odrlPolicies');
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2d: REPRODUCIBILITY & DOI
+        // =====================================================================
+        $research->any('research_mint_doi', '/research/doi/:project_id', 'mintDoi', ['project_id' => '\\d+']);
+        $research->any('research_project_json_ld', '/research/json-ld/:project_id', 'projectJsonLd', ['project_id' => '\\d+']);
+        $research->any('research_reproducibility_pack', '/research/reproducibility/:project_id', 'reproducibilityPack', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2e: ENHANCED COLLABORATION
+        // =====================================================================
+        $research->any('research_assertion_batch_review', '/research/assertion-batch-review/:project_id', 'assertionBatchReview', ['project_id' => '\\d+']);
+        $research->any('research_ethics_milestones', '/research/ethics-milestones/:project_id', 'ethicsMilestones', ['project_id' => '\\d+']);
+
         // Dashboard
         $research->any('research_dashboard', '/research', 'dashboard');
         $research->any('research_renewal', '/research/renewal', 'renewal');

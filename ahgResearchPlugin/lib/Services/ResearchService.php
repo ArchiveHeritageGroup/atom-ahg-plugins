@@ -221,7 +221,7 @@ class ResearchService
 
     public function saveSearch(int $researcherId, array $data): int
     {
-        return DB::table('research_saved_search')->insertGetId([
+        $searchId = DB::table('research_saved_search')->insertGetId([
             'researcher_id' => $researcherId,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
@@ -230,6 +230,13 @@ class ResearchService
             'alert_enabled' => $data['alert_enabled'] ?? 0,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+
+        // Generate citation ID for every saved search
+        $hash = substr(hash('sha256', $researcherId . ':' . $searchId . ':' . ($data['search_query'] ?? '')), 0, 8);
+        $citationId = sprintf('QRY-%d-%d-%s', $researcherId, $searchId, $hash);
+        DB::table('research_saved_search')->where('id', $searchId)->update(['citation_id' => $citationId]);
+
+        return $searchId;
     }
 
     public function getSavedSearches(int $researcherId): array
@@ -243,6 +250,122 @@ class ResearchService
     {
         return DB::table('research_saved_search')
             ->where('id', $id)->where('researcher_id', $researcherId)->delete() > 0;
+    }
+
+    // =========================================================================
+    // ISSUE 159 ENHANCEMENT 5: DISCOVERY — STRUCTURED QUERIES + DIFF + CITATION
+    // =========================================================================
+
+    /**
+     * Save a search query with an auto-generated citation ID.
+     *
+     * @param int $researcherId The researcher ID
+     * @param array $data Search data (name, search_query, etc.)
+     * @return array The saved search record with citation_id
+     */
+    public function saveQueryWithCitation(int $researcherId, array $data): array
+    {
+        $searchId = $this->saveSearch($researcherId, $data);
+
+        // Generate citation ID: QRY-{researcherId}-{id}-{hash8}
+        $hash = substr(hash('sha256', $researcherId . ':' . $searchId . ':' . ($data['search_query'] ?? '')), 0, 8);
+        $citationId = sprintf('QRY-%d-%d-%s', $researcherId, $searchId, $hash);
+
+        // Store structured query AST if provided
+        $update = [
+            'citation_id' => $citationId,
+        ];
+
+        if (isset($data['query_ast'])) {
+            $update['query_ast_json'] = json_encode($data['query_ast']);
+        }
+
+        DB::table('research_saved_search')
+            ->where('id', $searchId)
+            ->update($update);
+
+        $record = DB::table('research_saved_search')->where('id', $searchId)->first();
+
+        return [
+            'id' => $searchId,
+            'citation_id' => $citationId,
+            'record' => $record,
+        ];
+    }
+
+    /**
+     * Diff current search results against the stored snapshot.
+     *
+     * Compares a new set of result IDs (from running the saved query now)
+     * against the last stored result_snapshot_json. Returns added and removed
+     * object IDs.
+     *
+     * @param int $searchId The saved search ID
+     * @param array $currentIds Current result object IDs
+     * @return array Diff with keys: added, removed, unchanged_count, previous_count, current_count
+     */
+    public function diffSearchResults(int $searchId, array $currentIds = []): array
+    {
+        $search = DB::table('research_saved_search')->where('id', $searchId)->first();
+
+        if (!$search) {
+            return ['error' => 'Saved search not found'];
+        }
+
+        $previousIds = [];
+        if (!empty($search->result_snapshot_json)) {
+            $previousIds = json_decode($search->result_snapshot_json, true) ?: [];
+        }
+
+        $currentSet = array_map('intval', $currentIds);
+        $previousSet = array_map('intval', $previousIds);
+
+        $added = array_values(array_diff($currentSet, $previousSet));
+        $removed = array_values(array_diff($previousSet, $currentSet));
+        $unchanged = array_values(array_intersect($currentSet, $previousSet));
+
+        // Enrich added/removed with titles
+        $enriched = function (array $ids): array {
+            if (empty($ids)) {
+                return [];
+            }
+            return DB::table('information_object_i18n')
+                ->whereIn('id', $ids)
+                ->where('culture', 'en')
+                ->pluck('title', 'id')
+                ->toArray();
+        };
+
+        return [
+            'added' => $added,
+            'removed' => $removed,
+            'added_titles' => $enriched($added),
+            'removed_titles' => $enriched($removed),
+            'unchanged_count' => count($unchanged),
+            'previous_count' => count($previousSet),
+            'current_count' => count($currentSet),
+            'search_name' => $search->name,
+            'citation_id' => $search->citation_id ?? null,
+        ];
+    }
+
+    /**
+     * Snapshot current search results for future diffing.
+     *
+     * Stores the current result IDs as the baseline for future diffs.
+     *
+     * @param int $searchId The saved search ID
+     * @param array $currentIds Current result object IDs
+     * @return bool Success
+     */
+    public function snapshotSearchResults(int $searchId, array $currentIds): bool
+    {
+        return DB::table('research_saved_search')
+            ->where('id', $searchId)
+            ->update([
+                'result_snapshot_json' => json_encode(array_map('intval', $currentIds)),
+                'last_result_count' => count($currentIds),
+            ]) >= 0;
     }
 
     public function createCollection(int $researcherId, array $data): int

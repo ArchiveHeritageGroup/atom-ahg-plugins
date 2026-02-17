@@ -4224,4 +4224,1465 @@ class researchActions extends AhgController
             error_log('Research booking email failed: ' . $e->getMessage());
         }
     }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2a: SNAPSHOTS
+    // =========================================================================
+
+    protected function loadSnapshotService(): \SnapshotService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SnapshotService.php';
+        return new \SnapshotService();
+    }
+
+    public function executeSnapshots($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $snapshotService = $this->loadSnapshotService();
+        $this->snapshots = $snapshotService->getProjectSnapshots($projectId);
+    }
+
+    public function executeCreateSnapshot($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $snapshotService = $this->loadSnapshotService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $collectionId = $request->getParameter('collection_id');
+                if ($collectionId) {
+                    $id = $snapshotService->freezeCollectionAsSnapshot($projectId, (int) $collectionId, $researcher->id);
+                } else {
+                    $id = $snapshotService->createSnapshot($projectId, $researcher->id, [
+                        'title' => $request->getParameter('title'),
+                        'description' => $request->getParameter('description'),
+                    ]);
+                }
+                $this->getUser()->setFlash('success', 'Snapshot created');
+                $this->redirect('research/snapshot/' . $id);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+        $this->redirect('research/snapshots/' . $projectId);
+    }
+
+    public function executeViewSnapshot($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $snapshotService = $this->loadSnapshotService();
+        $id = (int) $request->getParameter('id');
+        $this->snapshot = $snapshotService->getSnapshot($id);
+        if (!$this->snapshot) { $this->forward404('Snapshot not found'); }
+
+        $page = (int) $request->getParameter('page', 1);
+        $this->items = $snapshotService->getSnapshotItems($id, $page, 50);
+    }
+
+    public function executeCompareSnapshots($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $snapshotService = $this->loadSnapshotService();
+        $snapshotA = (int) $request->getParameter('snapshot_a');
+        $snapshotB = (int) $request->getParameter('snapshot_b');
+
+        $this->snapshotA = $snapshotService->getSnapshot($snapshotA);
+        $this->snapshotB = $snapshotService->getSnapshot($snapshotB);
+        if (!$this->snapshotA || !$this->snapshotB) { $this->forward404('Snapshot not found'); }
+
+        $this->diff = $snapshotService->compareSnapshots($snapshotA, $snapshotB);
+    }
+
+    public function executeDeleteSnapshot($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $snapshotService = $this->loadSnapshotService();
+        $id = (int) $request->getParameter('id');
+        $snapshot = $snapshotService->getSnapshot($id);
+        if (!$snapshot) { $this->forward404('Snapshot not found'); }
+
+        if ($request->isMethod('post')) {
+            $snapshotService->deleteSnapshot($id);
+            $this->getUser()->setFlash('success', 'Snapshot deleted');
+            $this->redirect('research/snapshots/' . $snapshot->project_id);
+        }
+        $this->redirect('research/snapshot/' . $id);
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2a: HYPOTHESES
+    // =========================================================================
+
+    protected function loadHypothesisService(): \HypothesisService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/HypothesisService.php';
+        return new \HypothesisService();
+    }
+
+    public function executeHypotheses($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $hypothesisService = $this->loadHypothesisService();
+        $this->hypotheses = $hypothesisService->getProjectHypotheses($projectId);
+
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
+            try {
+                $id = $hypothesisService->createHypothesis($projectId, $this->researcher->id, [
+                    'statement' => $request->getParameter('statement'),
+                    'tags' => $request->getParameter('tags'),
+                ]);
+                $this->getUser()->setFlash('success', 'Hypothesis created');
+                $this->redirect('research/hypothesis/' . $id);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+    }
+
+    public function executeViewHypothesis($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $hypothesisService = $this->loadHypothesisService();
+        $id = (int) $request->getParameter('id');
+        $this->hypothesis = $hypothesisService->getHypothesis($id);
+        if (!$this->hypothesis) { $this->forward404('Hypothesis not found'); }
+    }
+
+    public function executeUpdateHypothesis($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $hypothesisService = $this->loadHypothesisService();
+        $id = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action');
+            try {
+                if ($formAction === 'update_status') {
+                    $hypothesisService->updateStatus($id, $request->getParameter('status'));
+                    $this->getUser()->setFlash('success', 'Status updated');
+                } elseif ($formAction === 'add_evidence') {
+                    $hypothesisService->addEvidence($id, [
+                        'source_type' => $request->getParameter('source_type'),
+                        'source_id' => (int) $request->getParameter('source_id'),
+                        'relationship' => $request->getParameter('relationship'),
+                        'confidence' => $request->getParameter('confidence'),
+                        'note' => $request->getParameter('note'),
+                        'added_by' => (int) $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'))->id,
+                    ]);
+                    $this->getUser()->setFlash('success', 'Evidence added');
+                } elseif ($formAction === 'remove_evidence') {
+                    $hypothesisService->removeEvidence((int) $request->getParameter('evidence_id'));
+                    $this->getUser()->setFlash('success', 'Evidence removed');
+                } else {
+                    $hypothesisService->updateHypothesis($id, [
+                        'statement' => $request->getParameter('statement'),
+                        'tags' => $request->getParameter('tags'),
+                    ]);
+                    $this->getUser()->setFlash('success', 'Hypothesis updated');
+                }
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+        $this->redirect('research/hypothesis/' . $id);
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2a: SOURCE ASSESSMENT & TRUST SCORING
+    // =========================================================================
+
+    protected function loadTrustScoringService(): \TrustScoringService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/TrustScoringService.php';
+        return new \TrustScoringService();
+    }
+
+    public function executeSourceAssessment($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $objectId = (int) $request->getParameter('object_id');
+        $trustService = $this->loadTrustScoringService();
+        $this->assessment = $trustService->getAssessment($objectId, $this->researcher->id);
+        $this->history = $trustService->getAssessmentHistory($objectId);
+        $this->metrics = $trustService->getQualityMetrics($objectId);
+        $this->objectId = $objectId;
+
+        // Get object title for display
+        $this->objectTitle = DB::table('information_object_i18n')
+            ->where('id', $objectId)->where('culture', 'en')
+            ->value('title') ?? 'Object #' . $objectId;
+    }
+
+    public function executeSaveSourceAssessment($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $objectId = (int) $request->getParameter('object_id');
+        $trustService = $this->loadTrustScoringService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $trustService->assessSource($objectId, $researcher->id, [
+                    'source_type' => $request->getParameter('source_type'),
+                    'source_form' => $request->getParameter('source_form'),
+                    'completeness' => $request->getParameter('completeness'),
+                    'rationale' => $request->getParameter('rationale'),
+                    'bias_context' => $request->getParameter('bias_context'),
+                ]);
+                $this->getUser()->setFlash('success', 'Assessment saved');
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+        $this->redirect('research/source-assessment/' . $objectId);
+    }
+
+    public function executeTrustScore($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $objectId = (int) $request->getParameter('object_id');
+        $trustService = $this->loadTrustScoringService();
+        $score = $trustService->computeTrustScore($objectId);
+        return $this->renderText(json_encode(['object_id' => $objectId, 'trust_score' => $score]));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2a: W3C WEB ANNOTATIONS v2
+    // =========================================================================
+
+    protected function loadWebAnnotationService(): \WebAnnotationService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/WebAnnotationService.php';
+        return new \WebAnnotationService();
+    }
+
+    public function executeAnnotationStudio($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $objectId = (int) $request->getParameter('object_id');
+        $annotationService = $this->loadWebAnnotationService();
+        $this->annotations = $annotationService->getObjectAnnotations($objectId, null, [
+            'researcher_id' => $this->researcher->id,
+        ]);
+        $this->objectId = $objectId;
+
+        // Get object title
+        $this->objectTitle = DB::table('information_object_i18n')
+            ->where('id', $objectId)->where('culture', 'en')
+            ->value('title') ?? 'Object #' . $objectId;
+    }
+
+    public function executeCreateAnnotationV2($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $annotationService = $this->loadWebAnnotationService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $id = $annotationService->createAnnotation($researcher->id, array_merge($body, [
+                    'project_id' => $request->getParameter('project_id') ?: ($body['project_id'] ?? null),
+                ]));
+                return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeViewAnnotationV2($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $annotationService = $this->loadWebAnnotationService();
+        $id = (int) $request->getParameter('id');
+        $annotation = $annotationService->getAnnotation($id);
+        if (!$annotation) {
+            return $this->renderText(json_encode(['error' => 'Not found']));
+        }
+        return $this->renderText(json_encode(['annotation' => $annotation]));
+    }
+
+    public function executeExportAnnotationsIIIF($request)
+    {
+        $this->getResponse()->setContentType('application/ld+json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $annotationService = $this->loadWebAnnotationService();
+        $objectId = (int) $request->getParameter('object_id');
+        $annotationList = $annotationService->exportAsIIIFAnnotationList($objectId);
+        return $this->renderText(json_encode($annotationList, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    public function executeImportAnnotationsIIIF($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $annotationService = $this->loadWebAnnotationService();
+        $objectId = (int) $request->getParameter('object_id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $iiifData = json_decode($request->getContent(), true) ?: [];
+                $count = $annotationService->importIIIFAnnotations($researcher->id, $objectId, $iiifData);
+                return $this->renderText(json_encode(['success' => true, 'imported' => $count]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2a: ASSERTIONS (KNOWLEDGE GRAPH)
+    // =========================================================================
+
+    protected function loadAssertionService(): \AssertionService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/AssertionService.php';
+        return new \AssertionService();
+    }
+
+    public function executeAssertions($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $assertionService = $this->loadAssertionService();
+        $this->assertions = $assertionService->getProjectAssertions($projectId, [
+            'assertion_type' => $request->getParameter('assertion_type'),
+            'status' => $request->getParameter('status'),
+        ]);
+    }
+
+    public function executeCreateAssertion($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $assertionService = $this->loadAssertionService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $id = $assertionService->createAssertion($researcher->id, $body);
+                return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeViewAssertion($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $assertionService = $this->loadAssertionService();
+        $id = (int) $request->getParameter('id');
+        $this->assertion = $assertionService->getAssertion($id);
+        if (!$this->assertion) { $this->forward404('Assertion not found'); }
+
+        $this->conflicts = $assertionService->detectConflicts($id);
+    }
+
+    public function executeUpdateAssertionStatus($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $assertionService = $this->loadAssertionService();
+        $id = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $status = $request->getParameter('status') ?: json_decode($request->getContent(), true)['status'] ?? '';
+                $assertionService->updateStatus($id, $status, $researcher->id);
+                return $this->renderText(json_encode(['success' => true]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeAddAssertionEvidence($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $assertionService = $this->loadAssertionService();
+        $assertionId = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $body['added_by'] = $researcher->id;
+                $evidenceId = $assertionService->addEvidence($assertionId, $body);
+                return $this->renderText(json_encode(['success' => true, 'id' => $evidenceId]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeAssertionConflicts($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $assertionService = $this->loadAssertionService();
+        $id = (int) $request->getParameter('id');
+        $conflicts = $assertionService->detectConflicts($id);
+        return $this->renderText(json_encode(['conflicts' => $conflicts]));
+    }
+
+    public function executeKnowledgeGraph($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $this->projectId = $projectId;
+    }
+
+    public function executeKnowledgeGraphData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/GraphService.php';
+        $graphService = new \GraphService();
+
+        $projectId = (int) $request->getParameter('project_id');
+        $graph = $graphService->buildRelationshipGraph($projectId, [
+            'assertion_type' => $request->getParameter('assertion_type'),
+            'status' => $request->getParameter('status'),
+        ]);
+        return $this->renderText(json_encode($graph));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2b: EXTRACTION ORCHESTRATION
+    // =========================================================================
+
+    protected function loadExtractionService(): \ExtractionOrchestrationService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ExtractionOrchestrationService.php';
+        return new \ExtractionOrchestrationService();
+    }
+
+    public function executeExtractionJobs($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $extractionService = $this->loadExtractionService();
+        $this->jobs = $extractionService->getProjectJobs($projectId);
+    }
+
+    public function executeCreateExtractionJob($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $extractionService = $this->loadExtractionService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $params = [];
+                if ($request->getParameter('language')) { $params['language'] = $request->getParameter('language'); }
+                if ($request->getParameter('model')) { $params['model'] = $request->getParameter('model'); }
+
+                $jobId = $extractionService->createJob(
+                    $projectId,
+                    (int) $request->getParameter('collection_id'),
+                    $researcher->id,
+                    $request->getParameter('extraction_type'),
+                    $params
+                );
+                $this->getUser()->setFlash('success', 'Extraction job created');
+                $this->redirect('research/extraction-job/' . $jobId);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+        $this->redirect('research/extraction-jobs/' . $projectId);
+    }
+
+    public function executeViewExtractionJob($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $extractionService = $this->loadExtractionService();
+        $id = (int) $request->getParameter('id');
+        $this->job = $extractionService->getJob($id);
+        if (!$this->job) { $this->forward404('Extraction job not found'); }
+
+        $this->results = $extractionService->getJobResults($id, [
+            'result_type' => $request->getParameter('result_type'),
+        ]);
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2b: VALIDATION QUEUE
+    // =========================================================================
+
+    protected function loadValidationService(): \ValidationQueueService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ValidationQueueService.php';
+        return new \ValidationQueueService();
+    }
+
+    public function executeValidationQueue($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $validationService = $this->loadValidationService();
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $this->queue = $validationService->getQueue($this->researcher->id, [
+            'status' => $request->getParameter('status', 'pending'),
+            'result_type' => $request->getParameter('result_type'),
+            'extraction_type' => $request->getParameter('extraction_type'),
+            'min_confidence' => $request->getParameter('min_confidence'),
+        ], $page, 25);
+        $this->pendingCount = $validationService->getPendingCount($this->researcher->id);
+        $this->stats = $validationService->getQueueStats($this->researcher->id);
+    }
+
+    public function executeValidateResult($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $validationService = $this->loadValidationService();
+        $resultId = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $action = $body['form_action'] ?? $request->getParameter('form_action');
+
+                if ($action === 'accept') {
+                    $validationService->acceptResult($resultId, $researcher->id);
+                    return $this->renderText(json_encode(['success' => true, 'action' => 'accepted']));
+                } elseif ($action === 'reject') {
+                    $reason = $body['reason'] ?? $request->getParameter('reason', '');
+                    $validationService->rejectResult($resultId, $researcher->id, $reason);
+                    return $this->renderText(json_encode(['success' => true, 'action' => 'rejected']));
+                } elseif ($action === 'modify') {
+                    $modifiedData = $body['modified_data'] ?? [];
+                    $validationService->modifyResult($resultId, $researcher->id, $modifiedData);
+                    return $this->renderText(json_encode(['success' => true, 'action' => 'modified']));
+                }
+                return $this->renderText(json_encode(['error' => 'Invalid action']));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeBulkValidate($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $validationService = $this->loadValidationService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $ids = $body['result_ids'] ?? [];
+                $action = $body['form_action'] ?? 'accept';
+
+                if ($action === 'accept') {
+                    $count = $validationService->bulkAccept($ids, $researcher->id);
+                    return $this->renderText(json_encode(['success' => true, 'count' => $count]));
+                } elseif ($action === 'reject') {
+                    $reason = $body['reason'] ?? '';
+                    $count = $validationService->bulkReject($ids, $researcher->id, $reason);
+                    return $this->renderText(json_encode(['success' => true, 'count' => $count]));
+                }
+                return $this->renderText(json_encode(['error' => 'Invalid action']));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2b: DOCUMENT TEMPLATES
+    // =========================================================================
+
+    public function executeDocumentTemplates($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $extractionService = $this->loadExtractionService();
+        $this->templates = $extractionService->getDocumentTemplates();
+    }
+
+    public function executeEditDocumentTemplate($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $extractionService = $this->loadExtractionService();
+        $id = $request->getParameter('id');
+
+        if ($id) {
+            $this->template = DB::table('research_document_template')->where('id', (int) $id)->first();
+            if (!$this->template) { $this->forward404('Template not found'); }
+        } else {
+            $this->template = null;
+        }
+
+        if ($request->isMethod('post')) {
+            try {
+                $data = [
+                    'name' => $request->getParameter('name'),
+                    'document_type' => $request->getParameter('document_type'),
+                    'description' => $request->getParameter('description'),
+                    'fields_json' => $request->getParameter('fields_json'),
+                    'created_by' => (int) $this->getUser()->getAttribute('user_id'),
+                ];
+
+                if ($id) {
+                    $extractionService->updateDocumentTemplate((int) $id, $data);
+                    $this->getUser()->setFlash('success', 'Template updated');
+                } else {
+                    $id = $extractionService->createDocumentTemplate($data);
+                    $this->getUser()->setFlash('success', 'Template created');
+                }
+                $this->redirect('research/document-templates');
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2c: ENTITY RESOLUTION
+    // =========================================================================
+
+    protected function loadEntityResolutionService(): \EntityResolutionService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EntityResolutionService.php';
+        return new \EntityResolutionService();
+    }
+
+    public function executeEntityResolution($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $erService = $this->loadEntityResolutionService();
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $this->proposals = $erService->getProposals([
+            'status' => $request->getParameter('status'),
+            'entity_type' => $request->getParameter('entity_type'),
+            'relationship_type' => $request->getParameter('relationship_type'),
+        ], $page, 25);
+    }
+
+    public function executeProposeEntityMatch($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $erService = $this->loadEntityResolutionService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $id = $erService->proposeMatch($body);
+                return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeResolveEntityMatch($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $erService = $this->loadEntityResolutionService();
+        $id = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+
+                // Conflict check mode
+                if (!empty($body['check_conflicts'])) {
+                    $conflicts = $erService->getConflictingAssertions($id);
+                    return $this->renderText(json_encode(['conflicts' => array_values($conflicts)]));
+                }
+
+                $status = $body['status'] ?? $request->getParameter('status');
+                $erService->resolveMatch($id, $status, $researcher->id);
+                return $this->renderText(json_encode(['success' => true]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeFindEntityCandidates($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $erService = $this->loadEntityResolutionService();
+        $entityType = $request->getParameter('entity_type', 'actor');
+        $entityId = (int) $request->getParameter('entity_id');
+        $candidates = $erService->findCandidates($entityType, $entityId);
+        return $this->renderText(json_encode(['candidates' => $candidates]));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2c: TIMELINE
+    // =========================================================================
+
+    protected function loadTimelineService(): \TimelineService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/TimelineService.php';
+        return new \TimelineService();
+    }
+
+    public function executeTimelineBuilder($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $timelineService = $this->loadTimelineService();
+        $this->events = $timelineService->getProjectTimeline($projectId);
+        $this->projectId = $projectId;
+    }
+
+    public function executeTimelineEventApi($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $timelineService = $this->loadTimelineService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $action = $body['form_action'] ?? $request->getParameter('form_action', 'create');
+
+                if ($action === 'create') {
+                    $id = $timelineService->createEvent(
+                        (int) ($body['project_id'] ?? $request->getParameter('project_id')),
+                        $researcher->id,
+                        $body
+                    );
+                    return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+                } elseif ($action === 'update') {
+                    $timelineService->updateEvent((int) ($body['id'] ?? $request->getParameter('id')), $body);
+                    return $this->renderText(json_encode(['success' => true]));
+                } elseif ($action === 'delete') {
+                    $timelineService->deleteEvent((int) ($body['id'] ?? $request->getParameter('id')));
+                    return $this->renderText(json_encode(['success' => true]));
+                } elseif ($action === 'auto_populate') {
+                    $count = $timelineService->autoPopulateFromCollection(
+                        (int) ($body['project_id'] ?? $request->getParameter('project_id')),
+                        (int) ($body['collection_id'] ?? $request->getParameter('collection_id'))
+                    );
+                    return $this->renderText(json_encode(['success' => true, 'count' => $count]));
+                }
+                return $this->renderText(json_encode(['error' => 'Invalid action']));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeTimelineData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $timelineService = $this->loadTimelineService();
+        $projectId = (int) $request->getParameter('project_id');
+        $events = $timelineService->getProjectTimeline($projectId);
+        return $this->renderText(json_encode(['events' => $events]));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2c: MAP
+    // =========================================================================
+
+    protected function loadMapService(): \MapService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/MapService.php';
+        return new \MapService();
+    }
+
+    public function executeMapBuilder($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $mapService = $this->loadMapService();
+        $this->points = $mapService->getProjectPoints($projectId);
+        $this->projectId = $projectId;
+    }
+
+    public function executeMapPointApi($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $mapService = $this->loadMapService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $action = $body['form_action'] ?? $request->getParameter('form_action', 'create');
+
+                if ($action === 'create') {
+                    $id = $mapService->createPoint(
+                        (int) ($body['project_id'] ?? $request->getParameter('project_id')),
+                        $researcher->id,
+                        $body
+                    );
+                    return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+                } elseif ($action === 'update') {
+                    $mapService->updatePoint((int) ($body['id'] ?? $request->getParameter('id')), $body);
+                    return $this->renderText(json_encode(['success' => true]));
+                } elseif ($action === 'delete') {
+                    $mapService->deletePoint((int) ($body['id'] ?? $request->getParameter('id')));
+                    return $this->renderText(json_encode(['success' => true]));
+                }
+                return $this->renderText(json_encode(['error' => 'Invalid action']));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeMapData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $mapService = $this->loadMapService();
+        $projectId = (int) $request->getParameter('project_id');
+        $points = $mapService->getProjectPoints($projectId);
+        return $this->renderText(json_encode(['points' => $points]));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2c: NETWORK GRAPH EXPLORER
+    // =========================================================================
+
+    public function executeNetworkGraph($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $this->projectId = $projectId;
+    }
+
+    public function executeNetworkGraphData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/GraphService.php';
+        $graphService = new \GraphService();
+
+        $projectId = (int) $request->getParameter('project_id');
+        $graph = $graphService->buildRelationshipGraph($projectId, [
+            'assertion_type' => $request->getParameter('assertion_type'),
+            'status' => $request->getParameter('status'),
+        ]);
+        return $this->renderText(json_encode($graph));
+    }
+
+    public function executeExportGraphGEXF($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/GraphService.php';
+        $graphService = new \GraphService();
+
+        $projectId = (int) $request->getParameter('project_id');
+        $gexf = $graphService->exportGEXF($projectId);
+
+        $this->getResponse()->setContentType('application/xml');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="graph-project-' . $projectId . '.gexf"');
+        return $this->renderText($gexf);
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2d: RO-CRATE PACKAGING
+    // =========================================================================
+
+    protected function loadRoCrateService(): \RoCrateService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RoCrateService.php';
+        return new \RoCrateService();
+    }
+
+    public function executePackageProject($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $roCrateService = $this->loadRoCrateService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        try {
+            $filePath = $roCrateService->packageProject($projectId);
+            $this->getUser()->setFlash('success', 'RO-Crate package generated: ' . basename($filePath));
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+        $this->redirect('research/project/' . $projectId);
+    }
+
+    public function executePackageCollection($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) { $this->redirect('research/register'); }
+
+        $roCrateService = $this->loadRoCrateService();
+        $collectionId = (int) $request->getParameter('id');
+
+        try {
+            $filePath = $roCrateService->packageCollection($collectionId);
+            $this->getUser()->setFlash('success', 'RO-Crate package generated');
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+        $this->redirect('research/collection/' . $collectionId);
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2d: ODRL POLICIES
+    // =========================================================================
+
+    protected function loadOdrlService(): \OdrlService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OdrlService.php';
+        return new \OdrlService();
+    }
+
+    public function executeOdrlPolicies($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $odrlService = $this->loadOdrlService();
+        $targetType = $request->getParameter('target_type');
+        $targetId = (int) $request->getParameter('target_id');
+        $policies = $odrlService->getPolicies($targetType, $targetId);
+        return $this->renderText(json_encode(['policies' => $policies]));
+    }
+
+    public function executeCreateOdrlPolicy($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $odrlService = $this->loadOdrlService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $body['created_by'] = (int) $this->getUser()->getAttribute('user_id');
+                $id = $odrlService->createPolicy($body);
+                return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeEvaluateAccess($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $odrlService = $this->loadOdrlService();
+        $targetType = $request->getParameter('target_type');
+        $targetId = (int) $request->getParameter('target_id');
+        $action = $request->getParameter('action_type', 'use');
+
+        $result = $odrlService->evaluateAccess($targetType, $targetId, $researcher->id, $action);
+        return $this->renderText(json_encode($result));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2d: REPRODUCIBILITY
+    // =========================================================================
+
+    protected function loadReproducibilityService(): \ReproducibilityService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproducibilityService.php';
+        return new \ReproducibilityService();
+    }
+
+    public function executeReproducibilityPack($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $reproService = $this->loadReproducibilityService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        try {
+            $pack = $reproService->generatePack($projectId);
+            return $this->renderText(json_encode($pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['error' => $e->getMessage()]));
+        }
+    }
+
+    public function executeProjectJsonLd($request)
+    {
+        $this->getResponse()->setContentType('application/ld+json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $reproService = $this->loadReproducibilityService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        try {
+            $jsonLd = $reproService->exportJsonLd($projectId);
+            return $this->renderText($jsonLd);
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['error' => $e->getMessage()]));
+        }
+    }
+
+    public function executeMintDoi($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $reproService = $this->loadReproducibilityService();
+        $projectId = (int) $request->getParameter('project_id');
+
+        if ($request->isMethod('post')) {
+            try {
+                $result = $reproService->mintDoi($projectId);
+                return $this->renderText(json_encode($result));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    // =========================================================================
+    // ISSUE 159 PHASE 2e: ENHANCED COLLABORATION
+    // =========================================================================
+
+    public function executeEthicsMilestones($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        $this->milestones = DB::table('research_project_milestone')
+            ->where('project_id', $projectId)
+            ->orderBy('sort_order')
+            ->get()->toArray();
+
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'add_milestone') {
+            try {
+                $maxOrder = DB::table('research_project_milestone')
+                    ->where('project_id', $projectId)
+                    ->max('sort_order') ?? 0;
+
+                DB::table('research_project_milestone')->insert([
+                    'project_id' => $projectId,
+                    'title' => $request->getParameter('title'),
+                    'description' => $request->getParameter('description'),
+                    'milestone_type' => $request->getParameter('milestone_type', 'ethics'),
+                    'status' => 'pending',
+                    'sort_order' => $maxOrder + 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Ethics milestone added');
+                $this->redirect('research/ethics-milestones/' . $projectId);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+    }
+
+    public function executeAssertionBatchReview($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        $assertionService = $this->loadAssertionService();
+        $this->assertions = $assertionService->getProjectAssertions($projectId, [
+            'status' => 'proposed',
+        ]);
+        $this->projectId = $projectId;
+
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'batch_review') {
+            try {
+                $ids = $request->getParameter('assertion_ids', []);
+                $newStatus = $request->getParameter('new_status', 'verified');
+                $count = 0;
+                foreach ($ids as $id) {
+                    $assertionService->updateStatus((int) $id, $newStatus, $this->researcher->id);
+                    $count++;
+                }
+                $this->getUser()->setFlash('success', $count . ' assertions updated to ' . $newStatus);
+                $this->redirect('research/assertion-batch-review/' . $projectId);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', $e->getMessage());
+            }
+        }
+    }
+
+    // =========================================================================
+    // ISSUE 159 ENHANCEMENT 5: DISCOVERY — SEARCH DIFF + SNAPSHOT
+    // =========================================================================
+
+    public function executeDiffSearchResults($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $searchId = (int) $request->getParameter('id');
+
+        // Verify ownership
+        $search = DB::table('research_saved_search')
+            ->where('id', $searchId)
+            ->where('researcher_id', $researcher->id)
+            ->first();
+
+        if (!$search) {
+            return $this->renderText(json_encode(['error' => 'Saved search not found']));
+        }
+
+        // Run the saved query to get current result IDs
+        $currentIds = [];
+        try {
+            $query = $search->search_query;
+            if (!empty($query)) {
+                $currentIds = DB::table('information_object as io')
+                    ->leftJoin('information_object_i18n as i18n', function ($join) {
+                        $join->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                    })
+                    ->where('io.id', '>', 1) // skip root
+                    ->where(function ($q) use ($query) {
+                        $q->where('i18n.title', 'LIKE', '%' . $query . '%')
+                            ->orWhere('i18n.scope_and_content', 'LIKE', '%' . $query . '%')
+                            ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
+                    })
+                    ->pluck('io.id')
+                    ->toArray();
+            }
+        } catch (\Exception $e) {
+            // Silent — just use empty
+        }
+
+        $diff = $this->service->diffSearchResults($searchId, $currentIds);
+        return $this->renderText(json_encode($diff));
+    }
+
+    public function executeSnapshotSearchResults($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $searchId = (int) $request->getParameter('id');
+
+        // Verify ownership
+        $search = DB::table('research_saved_search')
+            ->where('id', $searchId)
+            ->where('researcher_id', $researcher->id)
+            ->first();
+
+        if (!$search) {
+            return $this->renderText(json_encode(['error' => 'Saved search not found']));
+        }
+
+        // Run the saved query to get current result IDs
+        $currentIds = [];
+        try {
+            $query = $search->search_query;
+            if (!empty($query)) {
+                $currentIds = DB::table('information_object as io')
+                    ->leftJoin('information_object_i18n as i18n', function ($join) {
+                        $join->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+                    })
+                    ->where('io.id', '>', 1)
+                    ->where(function ($q) use ($query) {
+                        $q->where('i18n.title', 'LIKE', '%' . $query . '%')
+                            ->orWhere('i18n.scope_and_content', 'LIKE', '%' . $query . '%')
+                            ->orWhere('io.identifier', 'LIKE', '%' . $query . '%');
+                    })
+                    ->pluck('io.id')
+                    ->toArray();
+            }
+        } catch (\Exception $e) {
+            // Silent
+        }
+
+        $success = $this->service->snapshotSearchResults($searchId, $currentIds);
+        return $this->renderText(json_encode(['success' => $success, 'count' => count($currentIds)]));
+    }
+
 }

@@ -1186,6 +1186,29 @@ BEGIN
         ALTER TABLE `research_annotation` ADD COLUMN `visibility` ENUM('private','shared','public') DEFAULT 'private' AFTER `is_private`;
     END IF;
 
+    -- ================================================================
+    -- Issue 159 Phase 2: Evidence Set upgrade on research_collection_item
+    -- ================================================================
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_collection_item' AND column_name = 'object_type') THEN
+        ALTER TABLE `research_collection_item` ADD COLUMN `object_type` VARCHAR(50) DEFAULT 'information_object' AFTER `object_id`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_collection_item' AND column_name = 'culture') THEN
+        ALTER TABLE `research_collection_item` ADD COLUMN `culture` VARCHAR(10) DEFAULT NULL AFTER `object_type`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_collection_item' AND column_name = 'external_uri') THEN
+        ALTER TABLE `research_collection_item` ADD COLUMN `external_uri` VARCHAR(1000) DEFAULT NULL AFTER `culture`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_collection_item' AND column_name = 'tags') THEN
+        ALTER TABLE `research_collection_item` ADD COLUMN `tags` VARCHAR(500) DEFAULT NULL AFTER `external_uri`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_collection_item' AND column_name = 'reference_code') THEN
+        ALTER TABLE `research_collection_item` ADD COLUMN `reference_code` VARCHAR(255) DEFAULT NULL AFTER `tags`;
+    END IF;
+
 END//
 
 DELIMITER ;
@@ -1195,6 +1218,485 @@ CALL upgrade_research_tables();
 
 -- Drop the procedure after use
 DROP PROCEDURE IF EXISTS upgrade_research_tables;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2a: SNAPSHOTS (Immutable Research State Freeze)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_snapshot` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `project_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `title` VARCHAR(500) NOT NULL,
+    `description` TEXT,
+    `hash_sha256` VARCHAR(64),
+    `query_state_json` JSON,
+    `rights_state_json` JSON,
+    `metadata_json` JSON,
+    `item_count` INT DEFAULT 0,
+    `status` ENUM('active','archived') DEFAULT 'active',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_hash` (`hash_sha256`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_snapshot_item` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `snapshot_id` INT NOT NULL,
+    `object_id` INT NOT NULL,
+    `object_type` VARCHAR(50) DEFAULT 'information_object',
+    `culture` VARCHAR(10) DEFAULT NULL,
+    `slug` VARCHAR(255) DEFAULT NULL,
+    `metadata_version_json` JSON,
+    `rights_snapshot_json` JSON,
+    `sort_order` INT DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_snapshot` (`snapshot_id`),
+    KEY `idx_object` (`object_id`, `object_type`),
+    KEY `idx_sort` (`snapshot_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2a: HYPOTHESES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_hypothesis` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `project_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `statement` TEXT NOT NULL,
+    `status` ENUM('proposed','testing','supported','refuted') DEFAULT 'proposed',
+    `evidence_count` INT DEFAULT 0,
+    `tags` VARCHAR(500) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_hypothesis_evidence` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `hypothesis_id` INT NOT NULL,
+    `source_type` VARCHAR(50) NOT NULL,
+    `source_id` INT NOT NULL,
+    `relationship` ENUM('supports','refutes','neutral') NOT NULL,
+    `confidence` DECIMAL(5,2) DEFAULT NULL,
+    `note` TEXT,
+    `added_by` INT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_hypothesis` (`hypothesis_id`),
+    KEY `idx_source` (`source_type`, `source_id`),
+    KEY `idx_relationship` (`relationship`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2a: SOURCE ASSESSMENT & TRUST
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_source_assessment` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `object_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `source_type` ENUM('primary','secondary','tertiary') NOT NULL,
+    `source_form` ENUM('born_digital','scan','original','transcription','translation') DEFAULT 'original',
+    `completeness` ENUM('complete','partial','fragment','missing_pages','redacted') DEFAULT 'complete',
+    `trust_score` INT DEFAULT NULL,
+    `rationale` TEXT,
+    `bias_context` TEXT,
+    `assessed_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_object` (`object_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_source_type` (`source_type`),
+    KEY `idx_trust` (`trust_score`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_quality_metric` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `object_id` INT NOT NULL,
+    `metric_type` ENUM('ocr_confidence','image_quality','digitisation_completeness','fixity_status') NOT NULL,
+    `metric_value` DECIMAL(10,4) NOT NULL,
+    `source_service` VARCHAR(100) DEFAULT NULL,
+    `raw_data_json` JSON,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_object` (`object_id`),
+    KEY `idx_type` (`metric_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2a: W3C WEB ANNOTATIONS v2
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_annotation_v2` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `researcher_id` INT NOT NULL,
+    `project_id` INT DEFAULT NULL,
+    `motivation` ENUM('commenting','describing','classifying','linking','questioning','tagging','highlighting') NOT NULL DEFAULT 'commenting',
+    `body_json` JSON,
+    `creator_json` JSON,
+    `generated_json` JSON,
+    `status` ENUM('active','archived','deleted') DEFAULT 'active',
+    `visibility` ENUM('private','shared','public') DEFAULT 'private',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_motivation` (`motivation`),
+    KEY `idx_status` (`status`),
+    KEY `idx_visibility` (`visibility`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_annotation_target` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `annotation_id` INT NOT NULL,
+    `source_type` VARCHAR(50) NOT NULL,
+    `source_id` INT DEFAULT NULL,
+    `selector_type` ENUM('TextQuoteSelector','FragmentSelector','SvgSelector','PointSelector','RangeSelector','TimeSelector') DEFAULT NULL,
+    `selector_json` JSON,
+    `source_url` VARCHAR(1000) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_annotation` (`annotation_id`),
+    KEY `idx_source` (`source_type`, `source_id`),
+    KEY `idx_selector` (`selector_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2a: ASSERTIONS (Knowledge Graph)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_assertion` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `researcher_id` INT NOT NULL,
+    `project_id` INT DEFAULT NULL,
+    `subject_type` VARCHAR(50) NOT NULL,
+    `subject_id` INT NOT NULL,
+    `subject_label` VARCHAR(500) DEFAULT NULL,
+    `predicate` VARCHAR(255) NOT NULL,
+    `object_value` TEXT,
+    `object_type` VARCHAR(50) DEFAULT NULL,
+    `object_id` INT DEFAULT NULL,
+    `object_label` VARCHAR(500) DEFAULT NULL,
+    `assertion_type` ENUM('biographical','chronological','spatial','relational','attributive') NOT NULL,
+    `status` ENUM('proposed','verified','disputed','retracted') DEFAULT 'proposed',
+    `confidence` DECIMAL(5,2) DEFAULT NULL,
+    `version` INT DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_subject` (`subject_type`, `subject_id`),
+    KEY `idx_predicate` (`predicate`),
+    KEY `idx_assertion_type` (`assertion_type`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_assertion_evidence` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `assertion_id` INT NOT NULL,
+    `source_type` VARCHAR(50) NOT NULL,
+    `source_id` INT NOT NULL,
+    `selector_json` JSON,
+    `relationship` ENUM('supports','refutes') NOT NULL,
+    `note` TEXT,
+    `added_by` INT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_assertion` (`assertion_id`),
+    KEY `idx_source` (`source_type`, `source_id`),
+    KEY `idx_relationship` (`relationship`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2b: AI EXTRACTION ORCHESTRATION
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_extraction_job` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `project_id` INT NOT NULL,
+    `collection_id` INT DEFAULT NULL,
+    `researcher_id` INT NOT NULL,
+    `extraction_type` ENUM('ocr','ner','summarize','translate','spellcheck','face_detection','form_extraction') NOT NULL,
+    `parameters_json` JSON,
+    `status` ENUM('queued','running','completed','failed') DEFAULT 'queued',
+    `progress` INT DEFAULT 0,
+    `total_items` INT DEFAULT 0,
+    `processed_items` INT DEFAULT 0,
+    `error_log` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `completed_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_collection` (`collection_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_type` (`extraction_type`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_extraction_result` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `job_id` INT NOT NULL,
+    `object_id` INT NOT NULL,
+    `result_type` ENUM('entity','summary','translation','transcription','form_field','face') NOT NULL,
+    `data_json` JSON,
+    `confidence` DECIMAL(5,4) DEFAULT NULL,
+    `model_version` VARCHAR(100) DEFAULT NULL,
+    `input_hash` VARCHAR(64) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_job` (`job_id`),
+    KEY `idx_object` (`object_id`),
+    KEY `idx_type` (`result_type`),
+    KEY `idx_confidence` (`confidence`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_validation_queue` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `result_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `status` ENUM('pending','accepted','rejected','modified') DEFAULT 'pending',
+    `modified_data_json` JSON,
+    `reviewer_id` INT DEFAULT NULL,
+    `reviewed_at` DATETIME DEFAULT NULL,
+    `notes` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_result` (`result_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_reviewer` (`reviewer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_document_template` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `document_type` VARCHAR(100) NOT NULL,
+    `description` TEXT,
+    `fields_json` JSON,
+    `created_by` INT DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_type` (`document_type`),
+    KEY `idx_creator` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2c: CROSS-COLLECTION SYNTHESIS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_entity_resolution` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `entity_a_type` VARCHAR(50) NOT NULL,
+    `entity_a_id` INT NOT NULL,
+    `entity_b_type` VARCHAR(50) NOT NULL,
+    `entity_b_id` INT NOT NULL,
+    `confidence` DECIMAL(5,4) DEFAULT NULL,
+    `match_method` VARCHAR(100) DEFAULT NULL,
+    `status` ENUM('proposed','accepted','rejected') DEFAULT 'proposed',
+    `resolver_id` INT DEFAULT NULL,
+    `resolved_at` DATETIME DEFAULT NULL,
+    `notes` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_entity_a` (`entity_a_type`, `entity_a_id`),
+    KEY `idx_entity_b` (`entity_b_type`, `entity_b_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_confidence` (`confidence`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_timeline_event` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `project_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `label` VARCHAR(500) NOT NULL,
+    `description` TEXT,
+    `date_start` DATE NOT NULL,
+    `date_end` DATE DEFAULT NULL,
+    `date_type` ENUM('event','creation','accession','publication') DEFAULT 'event',
+    `source_type` VARCHAR(50) DEFAULT NULL,
+    `source_id` INT DEFAULT NULL,
+    `position` INT DEFAULT 0,
+    `color` VARCHAR(7) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_dates` (`date_start`, `date_end`),
+    KEY `idx_source` (`source_type`, `source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_map_point` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `project_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `label` VARCHAR(500) NOT NULL,
+    `description` TEXT,
+    `latitude` DECIMAL(10,7) NOT NULL,
+    `longitude` DECIMAL(10,7) NOT NULL,
+    `place_name` VARCHAR(500) DEFAULT NULL,
+    `date_valid_from` DATE DEFAULT NULL,
+    `date_valid_to` DATE DEFAULT NULL,
+    `source_type` VARCHAR(50) DEFAULT NULL,
+    `source_id` INT DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_coords` (`latitude`, `longitude`),
+    KEY `idx_source` (`source_type`, `source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159 PHASE 2d: DATA PACKAGING (ODRL + Access Decisions)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `research_rights_policy` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `target_type` VARCHAR(50) NOT NULL,
+    `target_id` INT NOT NULL,
+    `policy_type` ENUM('permission','prohibition','obligation') NOT NULL,
+    `action_type` ENUM('use','reproduce','distribute','modify','archive','display') NOT NULL,
+    `constraints_json` JSON,
+    `policy_json` JSON,
+    `created_by` INT DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_target` (`target_type`, `target_id`),
+    KEY `idx_policy_type` (`policy_type`),
+    KEY `idx_action` (`action_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_access_decision` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `policy_id` INT NOT NULL,
+    `researcher_id` INT NOT NULL,
+    `action_requested` VARCHAR(50) NOT NULL,
+    `decision` ENUM('permitted','denied') NOT NULL,
+    `rationale` TEXT,
+    `evaluated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_policy` (`policy_id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_decision` (`decision`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ISSUE 159: Extend activity_log ENUM for canonical events
+-- ============================================================
+
+-- MySQL doesn't support ALTER ENUM cleanly via IF NOT EXISTS, use procedure
+DELIMITER //
+
+CREATE PROCEDURE IF NOT EXISTS upgrade_research_phase2_activity_log()
+BEGIN
+    DECLARE col_type VARCHAR(1000);
+
+    SELECT COLUMN_TYPE INTO col_type
+    FROM information_schema.columns
+    WHERE table_schema = DATABASE()
+      AND table_name = 'research_activity_log'
+      AND column_name = 'activity_type';
+
+    IF col_type IS NOT NULL AND col_type NOT LIKE '%snapshot_created%' THEN
+        ALTER TABLE `research_activity_log` MODIFY COLUMN `activity_type`
+            ENUM('view','search','download','cite','annotate','collect','book','request','export','share','login','logout',
+                 'snapshot_created','snapshot_compared','assertion_created','assertion_verified','assertion_disputed',
+                 'extraction_queued','extraction_completed','validation_accepted','validation_rejected',
+                 'hypothesis_created','hypothesis_updated','policy_evaluated','doi_minted') DEFAULT 'view';
+    END IF;
+END//
+
+DELIMITER ;
+
+CALL upgrade_research_phase2_activity_log();
+DROP PROCEDURE IF EXISTS upgrade_research_phase2_activity_log;
+
+-- ============================================================
+-- ISSUE 159 ENHANCEMENTS: Schema Upgrades
+-- ============================================================
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS upgrade_research_159_enhancements//
+
+CREATE PROCEDURE upgrade_research_159_enhancements()
+BEGIN
+    -- ================================================================
+    -- Enhancement 1: Snapshot frozen status + frozen_at
+    -- ================================================================
+    DECLARE snapshot_col_type VARCHAR(1000);
+
+    SELECT COLUMN_TYPE INTO snapshot_col_type
+    FROM information_schema.columns
+    WHERE table_schema = DATABASE()
+      AND table_name = 'research_snapshot'
+      AND column_name = 'status';
+
+    IF snapshot_col_type IS NOT NULL AND snapshot_col_type NOT LIKE '%frozen%' THEN
+        ALTER TABLE `research_snapshot` MODIFY COLUMN `status`
+            ENUM('active','frozen','archived') DEFAULT 'active';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_snapshot' AND column_name = 'frozen_at') THEN
+        ALTER TABLE `research_snapshot` ADD COLUMN `frozen_at` DATETIME DEFAULT NULL AFTER `status`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_snapshot' AND column_name = 'citation_id') THEN
+        ALTER TABLE `research_snapshot` ADD COLUMN `citation_id` VARCHAR(100) DEFAULT NULL AFTER `frozen_at`;
+    END IF;
+
+    -- ================================================================
+    -- Enhancement 4: Entity Resolution evidence + sameAs
+    -- ================================================================
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_entity_resolution' AND column_name = 'evidence_json') THEN
+        ALTER TABLE `research_entity_resolution` ADD COLUMN `evidence_json` JSON DEFAULT NULL AFTER `notes`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_entity_resolution' AND column_name = 'relationship_type') THEN
+        ALTER TABLE `research_entity_resolution` ADD COLUMN `relationship_type` VARCHAR(50) DEFAULT 'sameAs' AFTER `evidence_json`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_entity_resolution' AND column_name = 'proposer_id') THEN
+        ALTER TABLE `research_entity_resolution` ADD COLUMN `proposer_id` INT DEFAULT NULL AFTER `relationship_type`;
+    END IF;
+
+    -- ================================================================
+    -- Enhancement 5: Saved Search structured queries + diff + citation
+    -- ================================================================
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_saved_search' AND column_name = 'query_ast_json') THEN
+        ALTER TABLE `research_saved_search` ADD COLUMN `query_ast_json` JSON DEFAULT NULL AFTER `search_filters`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_saved_search' AND column_name = 'result_snapshot_json') THEN
+        ALTER TABLE `research_saved_search` ADD COLUMN `result_snapshot_json` JSON DEFAULT NULL AFTER `query_ast_json`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_saved_search' AND column_name = 'citation_id') THEN
+        ALTER TABLE `research_saved_search` ADD COLUMN `citation_id` VARCHAR(100) DEFAULT NULL AFTER `result_snapshot_json`;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'research_saved_search' AND column_name = 'last_result_count') THEN
+        ALTER TABLE `research_saved_search` ADD COLUMN `last_result_count` INT DEFAULT NULL AFTER `citation_id`;
+    END IF;
+
+END//
+
+DELIMITER ;
+
+CALL upgrade_research_159_enhancements();
+DROP PROCEDURE IF EXISTS upgrade_research_159_enhancements;
 
 -- ============================================================
 -- RESTORE SETTINGS
