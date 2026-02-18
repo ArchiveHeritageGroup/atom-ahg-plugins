@@ -489,3 +489,7 @@ function scanForPii(objectId) {
 <?php if (isPluginActive('ahgExtendedRightsPlugin')): ?>
 <?php include_partial('informationobject/extendedRightsContextMenu', ['resource' => $resource]); ?>
 <?php endif; ?>
+
+<?php if (isPluginActive('ahgResearchPlugin')): ?>
+<?php include_partial('informationobject/researchToolsContextMenu', ['resource' => $resource]); ?>
+<?php endif; ?>

@@ -59,6 +59,7 @@
                                 <span class="badge bg-light text-dark border me-1 mb-1">
                                     <?php echo htmlspecialchars($t->selector_type ?? 'none'); ?>
                                     <small class="text-muted">(<?php echo htmlspecialchars($t->source_type ?? ''); ?><?php echo $t->source_id ? '#' . (int)$t->source_id : ''; ?>)</small>
+                                    <button class="btn-close btn-close-sm ms-1 delete-target-btn" data-target-id="<?php echo (int) $t->id; ?>" style="font-size:0.5rem;" title="Remove target"></button>
                                 </span>
                             <?php endforeach; ?>
                         </div>
@@ -67,6 +68,8 @@
                         <!-- Action buttons -->
                         <div class="mt-2 d-flex gap-2">
                             <button class="btn btn-sm btn-outline-primary add-target-btn" data-annotation-id="<?php echo (int) $ann->id; ?>" data-bs-toggle="collapse" data-bs-target="#addTarget-<?php echo (int) $ann->id; ?>"><i class="fas fa-crosshairs me-1"></i>Add Target</button>
+                            <button class="btn btn-sm btn-outline-warning edit-annotation-btn" data-annotation-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($body['value'] ?? $body['text'] ?? ''); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>"><i class="fas fa-edit me-1"></i>Edit</button>
+                            <button class="btn btn-sm btn-outline-danger delete-annotation-btn" data-annotation-id="<?php echo (int) $ann->id; ?>"><i class="fas fa-trash me-1"></i>Delete</button>
                             <button class="btn btn-sm btn-outline-success promote-btn" data-annotation-id="<?php echo (int) $ann->id; ?>"><i class="fas fa-arrow-up me-1"></i>Promote to Assertion</button>
                         </div>
 
@@ -162,6 +165,35 @@
                 <p class="mb-1"><strong>ID:</strong> <?php echo (int) $objectId; ?></p>
                 <p class="mb-0"><strong>Title:</strong> <?php echo htmlspecialchars($objectTitle); ?></p>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Annotation Modal -->
+<div class="modal fade" id="editAnnotationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Edit Annotation</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="editAnnotationId">
+                <div class="mb-3">
+                    <label class="form-label">Motivation</label>
+                    <select id="editMotivation" class="form-select form-select-sm">
+                        <option value="commenting">Commenting</option>
+                        <option value="describing">Describing</option>
+                        <option value="classifying">Classifying</option>
+                        <option value="linking">Linking</option>
+                        <option value="questioning">Questioning</option>
+                        <option value="tagging">Tagging</option>
+                        <option value="highlighting">Highlighting</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Body Text</label>
+                    <textarea id="editAnnotationBody" class="form-control" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" id="saveEditAnnotation" class="btn btn-primary">Save</button></div>
         </div>
     </div>
 </div>
@@ -280,6 +312,63 @@ document.addEventListener('DOMContentLoaded', function() {
             }).then(function(r) { return r.json(); }).then(function(d) {
                 if (d.success) alert('Assertion created (ID: ' + d.id + ')');
                 else alert(d.error || 'Error promoting annotation');
+            });
+        });
+    });
+
+    // Edit annotation
+    document.querySelectorAll('.edit-annotation-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('editAnnotationId').value = this.dataset.annotationId;
+            document.getElementById('editAnnotationBody').value = this.dataset.body;
+            document.getElementById('editMotivation').value = this.dataset.motivation;
+            new bootstrap.Modal(document.getElementById('editAnnotationModal')).show();
+        });
+    });
+
+    document.getElementById('saveEditAnnotation')?.addEventListener('click', function() {
+        var annId = document.getElementById('editAnnotationId').value;
+        fetch('/research/annotation-v2/create', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                update_annotation: true,
+                annotation_id: parseInt(annId),
+                body: { type: 'TextualBody', value: document.getElementById('editAnnotationBody').value, format: 'text/plain' },
+                motivation: document.getElementById('editMotivation').value
+            })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) location.reload();
+            else alert(d.error || 'Error updating annotation');
+        });
+    });
+
+    // Delete annotation
+    document.querySelectorAll('.delete-annotation-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Delete this annotation?')) return;
+            var annId = this.dataset.annotationId;
+            fetch('/research/annotation-v2/create', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delete_annotation: true, annotation_id: parseInt(annId) })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) location.reload();
+                else alert(d.error || 'Error deleting annotation');
+            });
+        });
+    });
+
+    // Delete target
+    document.querySelectorAll('.delete-target-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!confirm('Remove this target?')) return;
+            var targetId = this.dataset.targetId;
+            fetch('/research/annotation-v2/create', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delete_target: true, target_id: parseInt(targetId) })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) location.reload();
+                else alert(d.error || 'Error removing target');
             });
         });
     });

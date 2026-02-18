@@ -48,6 +48,30 @@ $isAdmin = $sf_user->isAdministrator();
 </div>
 
 <div class="list-group mb-4">
+    <span class="list-group-item bg-light fw-bold text-uppercase small"><?php echo __('Knowledge Platform'); ?></span>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'savedSearches']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'savedSearches' ? 'active' : ''; ?>">
+        <i class="fas fa-search me-2"></i><?php echo __('Saved Searches'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'annotations' ? 'active' : ''; ?>">
+        <i class="fas fa-highlighter me-2"></i><?php echo __('Annotation Studio'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'validationQueue']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'validationQueue' ? 'active' : ''; ?>">
+        <i class="fas fa-check-double me-2"></i><?php echo __('Validation Queue'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'entityResolution']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'entityResolution' ? 'active' : ''; ?>">
+        <i class="fas fa-object-group me-2"></i><?php echo __('Entity Resolution'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'odrlPolicies']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'odrlPolicies' ? 'active' : ''; ?>">
+        <i class="fas fa-balance-scale me-2"></i><?php echo __('ODRL Policies'); ?>
+    </a>
+</div>
+
+<div class="list-group mb-4">
     <span class="list-group-item bg-light fw-bold text-uppercase small"><?php echo __('Services'); ?></span>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'reproductions' ? 'active' : ''; ?>">

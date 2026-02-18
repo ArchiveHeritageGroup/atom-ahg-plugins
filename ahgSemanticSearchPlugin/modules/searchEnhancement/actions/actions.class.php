@@ -35,13 +35,43 @@ class searchEnhancementActions extends AhgController
                 'notification_frequency' => 'weekly',
                 'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
                 'is_global' => ($this->getUser()->isAdministrator() && $request->getParameter('is_global', 0)) ? 1 : 0,
-                'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
-                'is_global' => ($this->getUser()->isAdministrator() && $request->getParameter('is_global', 0)) ? 1 : 0,
                 'usage_count' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
             
+            // Bridge: also save to research_saved_search if user is a registered researcher
+            try {
+                $researcher = \Illuminate\Database\Capsule\Manager::table('research_researcher')
+                    ->where('user_id', $userId)
+                    ->where('status', 'approved')
+                    ->first();
+
+                if ($researcher) {
+                    $researchSearchId = \Illuminate\Database\Capsule\Manager::table('research_saved_search')->insertGetId([
+                        'researcher_id' => $researcher->id,
+                        'name' => $name,
+                        'search_query' => $searchParams,
+                        'search_filters' => $paramsJson,
+                        'search_type' => $entityType,
+                        'alert_enabled' => $notify ? 1 : 0,
+                        'alert_frequency' => 'weekly',
+                        'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+
+                    // Generate citation ID
+                    $hash = substr(hash('sha256', $researcher->id . ':' . $researchSearchId . ':' . $searchParams), 0, 8);
+                    $citationId = sprintf('QRY-%d-%d-%s', $researcher->id, $researchSearchId, $hash);
+                    \Illuminate\Database\Capsule\Manager::table('research_saved_search')
+                        ->where('id', $researchSearchId)
+                        ->update(['citation_id' => $citationId]);
+                }
+            } catch (\Exception $bridgeEx) {
+                // Non-fatal: research bridge failure shouldn't break main save
+            }
+
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
         } catch (Exception $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));

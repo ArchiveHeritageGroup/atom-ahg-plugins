@@ -312,6 +312,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         // ISSUE 159 PHASE 2c: NETWORK GRAPH
         // =====================================================================
+        $research->any('research_export_graph_graphml', '/research/network-graph/:project_id/export/graphml', 'exportGraphML', ['project_id' => '\\d+']);
         $research->any('research_export_graph_gexf', '/research/network-graph/:project_id/export/gexf', 'exportGraphGEXF', ['project_id' => '\\d+']);
         $research->any('research_network_graph_data', '/research/network-graph-data', 'networkGraphData');
         $research->any('research_network_graph', '/research/network-graph/:project_id', 'networkGraph', ['project_id' => '\\d+']);
@@ -327,6 +328,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         $research->any('research_evaluate_access', '/research/odrl/evaluate', 'evaluateAccess');
         $research->any('research_create_odrl_policy', '/research/odrl/create', 'createOdrlPolicy');
+        $research->any('research_delete_odrl_policy', '/research/odrl/delete/:id', 'deleteOdrlPolicy', ['id' => '\\d+']);
         $research->any('research_odrl_policies', '/research/odrl/policies', 'odrlPolicies');
 
         // =====================================================================
@@ -335,6 +337,12 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_mint_doi', '/research/doi/:project_id', 'mintDoi', ['project_id' => '\\d+']);
         $research->any('research_project_json_ld', '/research/json-ld/:project_id', 'projectJsonLd', ['project_id' => '\\d+']);
         $research->any('research_reproducibility_pack', '/research/reproducibility/:project_id', 'reproducibilityPack', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 159 PHASE 2: EVIDENCE VIEWER + COMPLIANCE DASHBOARD
+        // =====================================================================
+        $research->any('research_evidence_viewer', '/research/evidence/:object_id', 'evidenceViewer', ['object_id' => '\\d+']);
+        $research->any('research_compliance_dashboard', '/research/compliance/:project_id', 'complianceDashboard', ['project_id' => '\\d+']);
 
         // =====================================================================
         // ISSUE 159 PHASE 2e: ENHANCED COLLABORATION

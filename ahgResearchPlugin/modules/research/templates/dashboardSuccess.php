@@ -107,6 +107,50 @@
 </div>
 <?php endif; ?>
 
+<?php if ($sf_user->isAuthenticated() && isset($researcher) && $researcher && $researcher->status === 'approved'): ?>
+<!-- Knowledge Platform Tools -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-brain me-2"></i><?php echo __('Knowledge Platform'); ?></span>
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-outline-primary w-100 py-2 text-start">
+                    <i class="fas fa-highlighter me-1"></i> <?php echo __('Annotations'); ?>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'savedSearches']); ?>" class="btn btn-outline-info w-100 py-2 text-start">
+                    <i class="fas fa-search me-1"></i> <?php echo __('Saved Searches'); ?>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'validationQueue']); ?>" class="btn btn-outline-success w-100 py-2 text-start">
+                    <i class="fas fa-check-double me-1"></i> <?php echo __('Validation Queue'); ?>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'entityResolution']); ?>" class="btn btn-outline-warning w-100 py-2 text-start">
+                    <i class="fas fa-object-group me-1"></i> <?php echo __('Entity Resolution'); ?>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'odrlPolicies']); ?>" class="btn btn-outline-secondary w-100 py-2 text-start">
+                    <i class="fas fa-balance-scale me-1"></i> <?php echo __('ODRL Policies'); ?>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="<?php echo url_for(['module' => 'research', 'action' => 'documentTemplates']); ?>" class="btn btn-outline-dark w-100 py-2 text-start">
+                    <i class="fas fa-file-alt me-1"></i> <?php echo __('Doc Templates'); ?>
+                </a>
+            </div>
+        </div>
+        <p class="text-muted small mt-2 mb-0"><i class="fas fa-info-circle me-1"></i><?php echo __('Project-specific tools (Knowledge Graph, Timeline, Map, AI Extraction) are available from each project page.'); ?></p>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Statistics -->
 <div class="row mb-4">
   <div class="col-md-3">

@@ -414,6 +414,63 @@
     </div>
 
     <div class="col-md-4">
+        <!-- Analysis Tools -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white"><h6 class="mb-0"><i class="fas fa-brain me-2"></i><?php echo __('Analysis Tools'); ?></h6></div>
+            <div class="list-group list-group-flush">
+                <a href="/index.php/research/knowledge-graph/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-project-diagram me-2 text-primary"></i><?php echo __('Knowledge Graph'); ?>
+                </a>
+                <a href="/index.php/research/assertions/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-quote-right me-2 text-success"></i><?php echo __('Assertions'); ?>
+                </a>
+                <a href="/index.php/research/hypotheses/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i><?php echo __('Hypotheses'); ?>
+                </a>
+                <a href="/index.php/research/extraction-jobs/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-robot me-2 text-info"></i><?php echo __('AI Extraction'); ?>
+                </a>
+                <a href="/index.php/research/snapshots/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-camera me-2 text-secondary"></i><?php echo __('Snapshots'); ?>
+                </a>
+            </div>
+        </div>
+
+        <!-- Visualization -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white"><h6 class="mb-0"><i class="fas fa-chart-area me-2"></i><?php echo __('Visualization'); ?></h6></div>
+            <div class="list-group list-group-flush">
+                <a href="/index.php/research/timeline/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-stream me-2 text-primary"></i><?php echo __('Timeline Builder'); ?>
+                </a>
+                <a href="/index.php/research/map/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-map-marked-alt me-2 text-success"></i><?php echo __('Map Builder'); ?>
+                </a>
+                <a href="/index.php/research/network-graph/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-share-alt me-2 text-warning"></i><?php echo __('Network Graph'); ?>
+                </a>
+            </div>
+        </div>
+
+        <!-- Research Output -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white"><h6 class="mb-0"><i class="fas fa-file-export me-2"></i><?php echo __('Research Output'); ?></h6></div>
+            <div class="list-group list-group-flush">
+                <a href="/index.php/research/ro-crate/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-box me-2 text-primary"></i><?php echo __('RO-Crate Package'); ?>
+                </a>
+                <a href="/index.php/research/reproducibility/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-redo me-2 text-info"></i><?php echo __('Reproducibility Pack'); ?>
+                </a>
+                <a href="/index.php/research/doi/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-link me-2 text-success"></i><?php echo __('DOI Minting'); ?>
+                </a>
+                <a href="/index.php/research/ethics-milestones/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-balance-scale me-2 text-warning"></i><?php echo __('Ethics Milestones'); ?>
+                </a>
+            </div>
+        </div>
+
         <!-- Collaborators -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">

@@ -150,6 +150,12 @@ $canManage = $isAdmin || $isEditor;
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
+<?php if (!$sf_user->isAuthenticated()): ?>
+<div class="alert alert-warning">
+    <i class="fas fa-lock me-2"></i><?php echo __('Please log in to access the Central Dashboard.'); ?>
+    <a href="<?php echo url_for(['module' => 'user', 'action' => 'login']); ?>" class="btn btn-sm btn-primary ms-3"><?php echo __('Login'); ?></a>
+</div>
+<?php return; endif; ?>
 <div class="reports-dashboard">
     <!-- Stats Row -->
     <div class="row mb-4">
@@ -188,6 +194,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
 
     <!-- Main Content -->
+    <?php if ($canManage): ?>
     <div class="row mb-4">
         <!-- Reports Column -->
         <div class="col-md-4">
@@ -296,8 +303,9 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
-    <?php if ($hasWorkflow): ?>
+    <?php if ($hasWorkflow && $canManage): ?>
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
@@ -331,7 +339,62 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
+    <?php if ($hasResearch): ?>
+    <!-- Research Knowledge Platform Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                    <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research Services'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Research Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'projects']); ?>"><i class="fas fa-project-diagram me-2 text-muted"></i><?php echo __('Projects'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Evidence Sets'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'journal']); ?>"><i class="fas fa-journal-whills me-2 text-muted"></i><?php echo __('Research Journal'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'reports']); ?>"><i class="fas fa-file-alt me-2 text-muted"></i><?php echo __('Research Reports'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'bibliographies']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Bibliographies'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                    <h5 class="mb-0"><i class="fas fa-brain me-2"></i><?php echo __('Knowledge Platform'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>"><i class="fas fa-highlighter me-2 text-muted"></i><?php echo __('Annotation Studio'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'savedSearches']); ?>"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Saved Searches'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'validationQueue']); ?>"><i class="fas fa-check-double me-2 text-muted"></i><?php echo __('Validation Queue'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'entityResolution']); ?>"><i class="fas fa-object-group me-2 text-muted"></i><?php echo __('Entity Resolution'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'odrlPolicies']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('ODRL Policies'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'documentTemplates']); ?>"><i class="fas fa-file-alt me-2 text-muted"></i><?php echo __('Document Templates'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <?php if ($isAdmin): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #198754 !important;">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2"></i><?php echo __('Research Admin'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><i class="fas fa-users me-2 text-muted"></i><?php echo __('Manage Researchers'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><i class="fas fa-calendar-alt me-2 text-muted"></i><?php echo __('Manage Bookings'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'rooms']); ?>"><i class="fas fa-door-open me-2 text-muted"></i><?php echo __('Reading Rooms'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>"><i class="fas fa-copy me-2 text-muted"></i><?php echo __('Reproduction Requests'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'adminStatistics']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Statistics'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Compliance Row -->
+    <?php if ($isAdmin): ?>
     <div class="row mb-4">
         <?php if ($hasSecurity || $hasAudit): ?>
         <!-- Security -->
@@ -400,8 +463,9 @@ $canManage = $isAdmin || $isEditor;
         </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
-    <?php if ($hasRights): ?>
+    <?php if ($hasRights && $canManage): ?>
     <!-- Rights & Licensing Row -->
     <div class="row mb-4">
         <!-- Rights & Licensing -->
@@ -472,7 +536,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasVendor): ?>
+    <?php if ($hasVendor && $canManage): ?>
     <!-- Vendor Management Row -->
     <div class="row mb-4">
         <!-- Vendor Management -->
@@ -506,7 +570,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasAccessRequest || $hasRic || $hasBackup): ?>
+    <?php if (($hasAccessRequest || $hasRic || $hasBackup) && $canManage): ?>
     <!-- Access, RiC & Maintenance Row -->
     <div class="row mb-4">
         <?php if ($hasAccessRequest): ?>
@@ -553,7 +617,7 @@ $canManage = $isAdmin || $isEditor;
         </div>
         <?php endif; ?>
 
-        <?php if ($hasBackup): ?>
+        <?php if ($hasBackup && $isAdmin): ?>
         <!-- Backup & Maintenance -->
         <div class="col-md-4">
             <div class="card h-100">
@@ -577,7 +641,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasDedupe || $hasForms || $hasDoi): ?>
+    <?php if (($hasDedupe || $hasForms || $hasDoi) && $canManage): ?>
     <!-- Data Quality, Forms & DOI Row -->
     <div class="row mb-4">
         <?php if ($hasDedupe): ?>
@@ -663,7 +727,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasDataMigration || $hasHeritage2 || $hasIngest): ?>
+    <?php if (($hasDataMigration || $hasHeritage2 || $hasIngest) && $canManage): ?>
     <!-- Data Migration, Ingest & Heritage Row -->
     <div class="row mb-4">
         <?php if ($hasDataMigration): ?>
@@ -737,7 +801,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasPreservation): ?>
+    <?php if ($hasPreservation && $canManage): ?>
     <!-- Digital Preservation Row -->
     <div class="row mb-4">
         <!-- Digital Preservation -->
@@ -808,7 +872,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ): ?>
+    <?php if (($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ) && $isAdmin): ?>
     <!-- Zimbabwe Compliance Row -->
     <div class="row mb-4">
         <?php if ($hasCDPA): ?>

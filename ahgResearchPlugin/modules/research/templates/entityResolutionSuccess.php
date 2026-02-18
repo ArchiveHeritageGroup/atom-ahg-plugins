@@ -148,8 +148,9 @@
                             </select>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label form-label-sm">ID</label>
-                            <input type="number" id="proposeEntityAId" class="form-control form-control-sm" placeholder="Entity A ID">
+                            <label class="form-label form-label-sm">Search Entity A *</label>
+                            <select id="entityASearch" placeholder="<?php echo __('Type to search...'); ?>"></select>
+                            <input type="hidden" id="proposeEntityAId" value="">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -163,8 +164,9 @@
                             </select>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label form-label-sm">ID</label>
-                            <input type="number" id="proposeEntityBId" class="form-control form-control-sm" placeholder="Entity B ID">
+                            <label class="form-label form-label-sm">Search Entity B *</label>
+                            <select id="entityBSearch" placeholder="<?php echo __('Type to search...'); ?>"></select>
+                            <input type="hidden" id="proposeEntityBId" value="">
                         </div>
                     </div>
                 </div>
@@ -229,8 +231,74 @@
     </div>
 </div>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<style <?php echo $na; ?>>
+.modal .ts-dropdown { z-index: 1060 !important; }
+</style>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php echo $na; ?>></script>
+<script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+    var entitySearchUrl = '/index.php/research/ajax/search-entities';
+
+    function createEntityTomSelect(selectId, hiddenId, typeSelectId) {
+        var el = document.getElementById(selectId);
+        var parentEl = el.closest('.modal-body') || document.body;
+        return new TomSelect('#' + selectId, {
+            valueField: 'id',
+            labelField: 'title',
+            searchField: ['title', 'identifier'],
+            maxItems: 1,
+            dropdownParent: parentEl,
+            placeholder: 'Type 2+ characters to search...',
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                var entityType = document.getElementById(typeSelectId).value;
+                fetch(entitySearchUrl + '?q=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(entityType))
+                    .then(function(r) { return r.json(); })
+                    .then(function(j) {
+                        var items = (j.items || []).map(function(i) {
+                            return {
+                                id: String(i.id),
+                                title: i.title + (i.identifier ? ' [' + i.identifier + ']' : ''),
+                                identifier: i.identifier || ''
+                            };
+                        });
+                        callback(items);
+                    })
+                    .catch(function() { callback(); });
+            },
+            render: {
+                option: function(item) { return '<div class="py-1"><strong>' + item.title + '</strong></div>'; },
+                item: function(item) { return '<div>' + item.title + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">No results found</div>'; }
+            },
+            onChange: function(value) {
+                document.getElementById(hiddenId).value = value || '';
+            }
+        });
+    }
+
+    var tsA = createEntityTomSelect('entityASearch', 'proposeEntityAId', 'proposeEntityAType');
+    var tsB = createEntityTomSelect('entityBSearch', 'proposeEntityBId', 'proposeEntityBType');
+
+    // Reset Tom Select when entity type changes
+    document.getElementById('proposeEntityAType').addEventListener('change', function() {
+        tsA.clear(); tsA.clearOptions(); document.getElementById('proposeEntityAId').value = '';
+    });
+    document.getElementById('proposeEntityBType').addEventListener('change', function() {
+        tsB.clear(); tsB.clearOptions(); document.getElementById('proposeEntityBId').value = '';
+    });
+
+    // Reset on modal open
+    var modal = document.getElementById('proposeMatchModal');
+    if (modal) {
+        modal.addEventListener('shown.bs.modal', function() {
+            tsA.clear(); tsA.clearOptions(); document.getElementById('proposeEntityAId').value = '';
+            tsB.clear(); tsB.clearOptions(); document.getElementById('proposeEntityBId').value = '';
+        });
+    }
+
     // Submit proposal
     document.getElementById('submitProposalBtn').addEventListener('click', function() {
         var evidenceRaw = document.getElementById('proposeEvidence').value.trim();
@@ -258,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
             notes: document.getElementById('proposeNotes').value,
             evidence: evidence
         };
-        fetch('/research/entity-resolution/propose', {
+        fetch('/index.php/research/entity-resolution/propose', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         }).then(function(r) { return r.json(); }).then(function(d) {
@@ -275,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var reason = prompt('Rejection reason:');
                 if (reason === null) return;
             }
-            fetch('/research/entity-resolution/' + this.dataset.id + '/resolve', {
+            fetch('/index.php/research/entity-resolution/' + this.dataset.id + '/resolve', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({status: status})
             }).then(function(r) { return r.json(); }).then(function(d) {

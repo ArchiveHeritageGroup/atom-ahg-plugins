@@ -63,6 +63,14 @@ class researchActions extends AhgController
             'timelineBuilder'       => 'projects',
             'mapBuilder'            => 'projects',
             'annotationStudio'      => 'projects',
+            'networkGraph'          => 'projects',
+            'evidenceViewer'        => 'projects',
+            'complianceDashboard'   => 'projects',
+            'reproducibilityPack'   => 'projects',
+            'packageProject'        => 'projects',
+            'mintDoi'               => 'projects',
+            'ethicsMilestones'      => 'projects',
+            'assertionBatchReview'  => 'projects',
             'workspaces'            => 'workspaces',
             'viewWorkspace'         => 'workspaces',
             'inviteCollaborator'    => 'workspaces',
@@ -104,6 +112,7 @@ class researchActions extends AhgController
             'profile'               => 'profile',
             'apiKeys'               => 'profile',
             'renewal'               => 'profile',
+            'odrlPolicies'          => 'odrlPolicies',
         ];
 
         return $map[$action] ?? '';
@@ -1503,6 +1512,66 @@ class researchActions extends AhgController
                 ->limit(20)->get()->map(function ($s) {
                     return (object) ['id' => $s->id, 'title' => $s->title, 'slug' => null];
                 })->toArray();
+        } elseif ($type === 'project') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_project')
+                ->where(function ($q) use ($researcherId) {
+                    $q->where('researcher_id', $researcherId)
+                      ->orWhereExists(function ($sub) use ($researcherId) {
+                          $sub->select(DB::raw(1))
+                              ->from('research_project_collaborator')
+                              ->whereColumn('research_project_collaborator.project_id', 'research_project.id')
+                              ->where('research_project_collaborator.researcher_id', $researcherId);
+                      });
+                })
+                ->where('title', 'LIKE', '%' . $query . '%')
+                ->select('id', 'title')
+                ->orderBy('title')
+                ->limit(20)->get()->map(function ($p) {
+                    return (object) ['id' => $p->id, 'title' => $p->title, 'slug' => null];
+                })->toArray();
+        } elseif ($type === 'snapshot') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_snapshot as rs')
+                ->join('research_project as rp', 'rs.project_id', '=', 'rp.id')
+                ->where('rp.researcher_id', $researcherId)
+                ->where('rs.label', 'LIKE', '%' . $query . '%')
+                ->select('rs.id', 'rs.label as title')
+                ->orderBy('rs.label')
+                ->limit(20)->get()->map(function ($s) {
+                    return (object) ['id' => $s->id, 'title' => $s->title, 'slug' => null];
+                })->toArray();
+        } elseif ($type === 'annotation') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_annotation')
+                ->where('researcher_id', $researcherId)
+                ->where(function ($q) use ($query) {
+                    $q->where('body', 'LIKE', '%' . $query . '%')
+                      ->orWhere('annotation_type', 'LIKE', '%' . $query . '%');
+                })
+                ->select('id', DB::raw("CONCAT(annotation_type, ': ', LEFT(body, 60)) as title"))
+                ->orderByDesc('created_at')
+                ->limit(20)->get()->map(function ($a) {
+                    return (object) ['id' => $a->id, 'title' => $a->title, 'slug' => null];
+                })->toArray();
+        } elseif ($type === 'assertion') {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $researcher = $this->service->getResearcherByUserId((int) $userId);
+            $researcherId = $researcher ? $researcher->id : 0;
+            $items = DB::table('research_assertion')
+                ->where('researcher_id', $researcherId)
+                ->where('statement', 'LIKE', '%' . $query . '%')
+                ->select('id', DB::raw("LEFT(statement, 80) as title"))
+                ->orderByDesc('created_at')
+                ->limit(20)->get()->map(function ($a) {
+                    return (object) ['id' => $a->id, 'title' => $a->title, 'slug' => null];
+                })->toArray();
         } elseif ($type === 'bibliography') {
             $userId = $this->getUser()->getAttribute('user_id');
             $researcher = $this->service->getResearcherByUserId((int) $userId);
@@ -1947,24 +2016,24 @@ class researchActions extends AhgController
         }
 
         if ($request->isMethod('post')) {
-            $result = $projectService->updateProject($projectId, $this->researcher->id, [
-                'title' => $request->getParameter('title'),
-                'description' => $request->getParameter('description'),
-                'project_type' => $request->getParameter('project_type'),
-                'institution' => $request->getParameter('institution'),
-                'supervisor' => $request->getParameter('supervisor'),
-                'funding_source' => $request->getParameter('funding_source'),
-                'start_date' => $request->getParameter('start_date'),
-                'expected_end_date' => $request->getParameter('expected_end_date'),
-                'status' => $request->getParameter('status'),
-                'visibility' => $request->getParameter('visibility'),
-            ]);
-
-            if (isset($result['error'])) {
-                $this->getUser()->setFlash('error', $result['error']);
-            } else {
+            try {
+                $projectService->updateProject($projectId, [
+                    'title' => $request->getParameter('title'),
+                    'description' => $request->getParameter('description'),
+                    'project_type' => $request->getParameter('project_type'),
+                    'institution' => $request->getParameter('institution'),
+                    'supervisor' => $request->getParameter('supervisor'),
+                    'funding_source' => $request->getParameter('funding_source'),
+                    'start_date' => $request->getParameter('start_date'),
+                    'expected_end_date' => $request->getParameter('expected_end_date'),
+                    'status' => $request->getParameter('status'),
+                    'visibility' => $request->getParameter('visibility'),
+                ]);
                 $this->getUser()->setFlash('success', 'Project updated');
-                $this->redirect('research/viewProject?id=' . $projectId);
+                $this->redirect('/research/project/' . $projectId);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', 'Failed to update: ' . $e->getMessage());
+                $this->redirect('/research/project/' . $projectId . '/edit');
             }
         }
     }
@@ -5029,6 +5098,15 @@ class researchActions extends AhgController
                 } elseif ($formAction === 'remove_evidence') {
                     $hypothesisService->removeEvidence((int) $request->getParameter('evidence_id'));
                     $this->getUser()->setFlash('success', 'Evidence removed');
+                } elseif ($formAction === 'delete') {
+                    $hypothesis = $hypothesisService->getHypothesis($id);
+                    $projectId = $hypothesis->project_id ?? null;
+                    $hypothesisService->deleteHypothesis($id);
+                    $this->getUser()->setFlash('success', 'Hypothesis deleted');
+                    if ($projectId) {
+                        $this->redirect('/research/hypotheses/' . $projectId);
+                    }
+                    $this->redirect('/research/projects');
                 } else {
                     $hypothesisService->updateHypothesis($id, [
                         'statement' => $request->getParameter('statement'),
@@ -5159,6 +5237,54 @@ class researchActions extends AhgController
         if ($request->isMethod('post')) {
             try {
                 $body = json_decode($request->getContent(), true) ?: [];
+
+                // Delete annotation
+                if (!empty($body['delete_annotation'])) {
+                    $annId = (int) ($body['annotation_id'] ?? 0);
+                    DB::table('research_annotation_target')->where('annotation_id', $annId)->delete();
+                    DB::table('research_annotation_v2')->where('id', $annId)->delete();
+                    return $this->renderText(json_encode(['success' => true]));
+                }
+
+                // Update annotation
+                if (!empty($body['update_annotation'])) {
+                    $annId = (int) ($body['annotation_id'] ?? 0);
+                    $update = [];
+                    if (isset($body['body'])) {
+                        $update['body_json'] = json_encode($body['body']);
+                    }
+                    if (isset($body['motivation'])) {
+                        $update['motivation'] = $body['motivation'];
+                    }
+                    if (!empty($update)) {
+                        $update['updated_at'] = date('Y-m-d H:i:s');
+                        DB::table('research_annotation_v2')->where('id', $annId)->update($update);
+                    }
+                    return $this->renderText(json_encode(['success' => true]));
+                }
+
+                // Delete target
+                if (!empty($body['delete_target'])) {
+                    $targetId = (int) ($body['target_id'] ?? 0);
+                    DB::table('research_annotation_target')->where('id', $targetId)->delete();
+                    return $this->renderText(json_encode(['success' => true]));
+                }
+
+                // Add target to existing annotation
+                if (!empty($body['add_target'])) {
+                    $annId = (int) ($body['annotation_id'] ?? 0);
+                    DB::table('research_annotation_target')->insert([
+                        'annotation_id' => $annId,
+                        'source_type' => $body['source_type'] ?? 'information_object',
+                        'source_id' => (int) ($body['source_id'] ?? 0),
+                        'selector_type' => $body['selector_type'] ?? null,
+                        'selector_json' => isset($body['selector_json']) ? json_encode($body['selector_json']) : null,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    return $this->renderText(json_encode(['success' => true]));
+                }
+
+                // Create annotation
                 $id = $annotationService->createAnnotation($researcher->id, array_merge($body, [
                     'project_id' => $request->getParameter('project_id') ?: ($body['project_id'] ?? null),
                 ]));
@@ -5949,6 +6075,197 @@ class researchActions extends AhgController
         return $this->renderText($gexf);
     }
 
+    public function executeExportGraphML($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/GraphService.php';
+        $graphService = new \GraphService();
+
+        $projectId = (int) $request->getParameter('project_id');
+        $graphml = $graphService->exportGraphML($projectId);
+
+        $this->getResponse()->setContentType('application/xml');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="graph-project-' . $projectId . '.graphml"');
+        return $this->renderText($graphml);
+    }
+
+    public function executeEvidenceViewer($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $this->objectId = (int) $request->getParameter('object_id');
+
+        // Object title
+        $this->objectTitle = DB::table('information_object_i18n')
+            ->where('id', $this->objectId)
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+            ->value('title') ?? 'Object #' . $this->objectId;
+
+        // Object slug for link
+        $this->objectSlug = DB::table('slug')
+            ->where('object_id', $this->objectId)
+            ->value('slug');
+
+        // Thumbnail
+        $do = DB::table('digital_object')->where('object_id', $this->objectId)->first();
+        $this->thumbnail = $do ? '/uploads/r/' . $do->path . '/thumbnail' : null;
+        $this->iiifAvailable = (bool) $do;
+
+        // Provenance — activity log for this object
+        $this->provenance = DB::table('research_activity_log as al')
+            ->leftJoin('research_researcher as r', 'al.researcher_id', '=', 'r.id')
+            ->leftJoin('actor_i18n as ai', function($join) {
+                $join->on('r.user_id', '=', 'ai.id')
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('al.object_id', $this->objectId)
+            ->orderBy('al.created_at', 'desc')
+            ->limit(50)
+            ->select('al.*', 'ai.authorized_form_of_name as first_name')
+            ->get()->toArray();
+
+        // Security clearance
+        $this->securityClearance = null;
+        try {
+            $this->securityClearance = DB::table('security_clearance')
+                ->where('object_id', $this->objectId)
+                ->first();
+        } catch (\Exception $e) { /* table may not exist */ }
+
+        // ODRL policies
+        $this->odrlPolicies = [];
+        try {
+            $this->odrlPolicies = DB::table('research_rights_policy')
+                ->where('target_id', $this->objectId)
+                ->orderBy('created_at', 'desc')
+                ->get()->toArray();
+        } catch (\Exception $e) { /* table may not exist */ }
+
+        // Trust score
+        $trustService = $this->loadTrustScoringService();
+        try {
+            $this->trustScore = $trustService->computeTrustScore($this->objectId);
+        } catch (\Exception $e) {
+            $this->trustScore = null;
+        }
+
+        // Source assessment
+        $this->sourceAssessment = DB::table('research_source_assessment')
+            ->where('object_id', $this->objectId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Annotations
+        $annotationService = $this->loadWebAnnotationService();
+        $this->annotations = $annotationService->getObjectAnnotations($this->objectId);
+
+        // Assertions where this object is subject
+        $assertionService = $this->loadAssertionService();
+        $this->assertions = DB::table('research_assertion')
+            ->where('subject_id', $this->objectId)
+            ->orWhere('object_id', $this->objectId)
+            ->orderBy('created_at', 'desc')
+            ->limit(50)
+            ->get()->toArray();
+
+        // Quality metrics
+        $this->qualityMetrics = DB::table('research_quality_metric')
+            ->where('object_id', $this->objectId)
+            ->orderBy('created_at', 'desc')
+            ->get()->toArray();
+    }
+
+    public function executeComplianceDashboard($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $projectId = (int) $request->getParameter('project_id');
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        // Ethics milestones
+        $this->ethicsMilestones = DB::table('research_project_milestone')
+            ->where('project_id', $projectId)
+            ->orderBy('sort_order')
+            ->get()->toArray();
+
+        // Compute overall ethics status
+        $milestoneStatuses = array_column($this->ethicsMilestones, 'status');
+        if (empty($milestoneStatuses)) {
+            $this->ethicsStatus = 'not_started';
+        } elseif (in_array('rejected', $milestoneStatuses)) {
+            $this->ethicsStatus = 'rejected';
+        } elseif (count(array_filter($milestoneStatuses, function($s) { return $s === 'completed' || $s === 'approved'; })) === count($milestoneStatuses)) {
+            $this->ethicsStatus = 'approved';
+        } else {
+            $this->ethicsStatus = 'pending';
+        }
+
+        // ODRL policies for project
+        $this->odrlPolicies = DB::table('research_rights_policy')
+            ->where('project_id', $projectId)
+            ->orderBy('created_at', 'desc')
+            ->get()->toArray();
+        $this->odrlPolicyCount = count($this->odrlPolicies);
+
+        // Security levels of linked resources
+        $resourceIds = DB::table('research_project_resource')
+            ->where('project_id', $projectId)
+            ->pluck('object_id');
+
+        $this->sensitivityBreakdown = [];
+        $this->sensitivitySummary = ['max_level' => 'none'];
+        try {
+            if ($resourceIds->count() > 0) {
+                $clearances = DB::table('security_clearance')
+                    ->whereIn('object_id', $resourceIds)
+                    ->get();
+                $breakdown = [];
+                $levelOrder = ['unclassified' => 0, 'confidential' => 1, 'secret' => 2, 'top_secret' => 3];
+                $maxLevel = 'none';
+                foreach ($clearances as $c) {
+                    $lev = $c->level ?? 'unclassified';
+                    $breakdown[$lev] = ($breakdown[$lev] ?? 0) + 1;
+                    if (($levelOrder[$lev] ?? 0) > ($levelOrder[$maxLevel] ?? -1)) {
+                        $maxLevel = $lev;
+                    }
+                }
+                $this->sensitivityBreakdown = $breakdown;
+                $this->sensitivitySummary = ['max_level' => $maxLevel];
+            }
+        } catch (\Exception $e) { /* security_clearance table may not exist */ }
+
+        // Trust scores for project sources
+        $this->trustScores = [];
+        $this->avgTrustScore = null;
+        try {
+            $assessments = DB::table('research_source_assessment as sa')
+                ->leftJoin('information_object_i18n as ioi', function($join) {
+                    $join->on('sa.object_id', '=', 'ioi.id')
+                        ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })
+                ->whereIn('sa.object_id', $resourceIds->count() > 0 ? $resourceIds : [0])
+                ->select('sa.object_id', 'sa.credibility_score as score', 'ioi.title')
+                ->orderBy('sa.created_at', 'desc')
+                ->limit(20)
+                ->get()->toArray();
+            $this->trustScores = $assessments;
+            if (!empty($assessments)) {
+                $scores = array_filter(array_column($assessments, 'score'), function($s) { return $s !== null; });
+                $this->avgTrustScore = count($scores) > 0 ? array_sum($scores) / count($scores) / 10 : null;
+            }
+        } catch (\Exception $e) { /* silent */ }
+    }
+
     // =========================================================================
     // ISSUE 159 PHASE 2d: RO-CRATE PACKAGING
     // =========================================================================
@@ -5961,21 +6278,43 @@ class researchActions extends AhgController
 
     public function executePackageProject($request)
     {
-        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        if (!$this->getUser()->isAuthenticated()) {
+            if ($request->getParameter('format') === 'json') {
+                $this->getResponse()->setContentType('application/json');
+                return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            }
+            $this->redirect('user/login');
+        }
         $userId = $this->getUser()->getAttribute('user_id');
-        $researcher = $this->service->getResearcherByUserId($userId);
-        if (!$researcher) { $this->redirect('research/register'); }
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
 
         $roCrateService = $this->loadRoCrateService();
         $projectId = (int) $request->getParameter('project_id');
 
-        try {
-            $filePath = $roCrateService->packageProject($projectId);
-            $this->getUser()->setFlash('success', 'RO-Crate package generated: ' . basename($filePath));
-        } catch (\Exception $e) {
-            $this->getUser()->setFlash('error', $e->getMessage());
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        // JSON download mode
+        if ($request->getParameter('format') === 'json') {
+            $this->getResponse()->setContentType('application/ld+json');
+            try {
+                $metadata = $roCrateService->generateManifest($projectId);
+                return $this->renderText(json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
         }
-        $this->redirect('/research/project/' . $projectId);
+
+        // HTML mode — render roCrateSuccess.php template
+        try {
+            $this->roCrate = $roCrateService->generateManifest($projectId);
+        } catch (\Exception $e) {
+            $this->roCrate = ['error' => $e->getMessage(), 'items' => [], 'creators' => []];
+        }
+        $this->setTemplate('roCrate');
     }
 
     public function executePackageCollection($request)
@@ -6009,16 +6348,65 @@ class researchActions extends AhgController
 
     public function executeOdrlPolicies($request)
     {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(url_for(['module' => 'user', 'action' => 'login']));
+            return;
+        }
+
+        // JSON API mode: when target_type and target_id are provided
+        $targetType = $request->getParameter('target_type');
+        $targetId = $request->getParameter('target_id');
+        if ($targetType && $targetId) {
+            $this->getResponse()->setContentType('application/json');
+            $odrlService = $this->loadOdrlService();
+            $policies = $odrlService->getPolicies($targetType, (int) $targetId);
+            return $this->renderText(json_encode(['policies' => $policies]));
+        }
+
+        // HTML page mode: list all policies
+        $odrlService = $this->loadOdrlService();
+        $filters = [];
+        if ($request->getParameter('filter_target_type')) {
+            $filters['target_type'] = $request->getParameter('filter_target_type');
+        }
+        if ($request->getParameter('filter_policy_type')) {
+            $filters['policy_type'] = $request->getParameter('filter_policy_type');
+        }
+        if ($request->getParameter('filter_action_type')) {
+            $filters['action_type'] = $request->getParameter('filter_action_type');
+        }
+
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+
+        $result = $odrlService->getAllPolicies($filters, $limit, $offset);
+
+        $this->policies = $result;
+        $this->currentPage = $page;
+        $this->totalPages = ceil($result['total'] / $limit);
+        $this->filters = $filters;
+    }
+
+    public function executeDeleteOdrlPolicy($request)
+    {
         $this->getResponse()->setContentType('application/json');
         if (!$this->getUser()->isAuthenticated()) {
             return $this->renderText(json_encode(['error' => 'Not authenticated']));
         }
 
+        $id = (int) $request->getParameter('id');
+        if (!$id) {
+            return $this->renderText(json_encode(['error' => 'Policy ID required']));
+        }
+
         $odrlService = $this->loadOdrlService();
-        $targetType = $request->getParameter('target_type');
-        $targetId = (int) $request->getParameter('target_id');
-        $policies = $odrlService->getPolicies($targetType, $targetId);
-        return $this->renderText(json_encode(['policies' => $policies]));
+        try {
+            $deleted = $odrlService->deletePolicy($id);
+            return $this->renderText(json_encode(['success' => $deleted]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['error' => $e->getMessage()]));
+        }
     }
 
     public function executeCreateOdrlPolicy($request)
@@ -6076,20 +6464,39 @@ class researchActions extends AhgController
 
     public function executeReproducibilityPack($request)
     {
-        $this->getResponse()->setContentType('application/json');
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            if ($request->getParameter('format') === 'json') {
+                $this->getResponse()->setContentType('application/json');
+                return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            }
+            $this->redirect('user/login');
         }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
 
         $reproService = $this->loadReproducibilityService();
         $projectId = (int) $request->getParameter('project_id');
 
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
         try {
             $pack = $reproService->generatePack($projectId);
-            return $this->renderText(json_encode($pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         } catch (\Exception $e) {
-            return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            $pack = ['error' => $e->getMessage()];
         }
+
+        // JSON download mode
+        if ($request->getParameter('format') === 'json') {
+            $this->getResponse()->setContentType('application/json');
+            return $this->renderText(json_encode($pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        }
+
+        // HTML mode — render template
+        $this->pack = $pack;
     }
 
     public function executeProjectJsonLd($request)
@@ -6112,15 +6519,23 @@ class researchActions extends AhgController
 
     public function executeMintDoi($request)
     {
-        $this->getResponse()->setContentType('application/json');
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            if ($request->isMethod('post')) {
+                $this->getResponse()->setContentType('application/json');
+                return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            }
+            $this->redirect('user/login');
         }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
 
         $reproService = $this->loadReproducibilityService();
         $projectId = (int) $request->getParameter('project_id');
 
+        // POST = AJAX mint request
         if ($request->isMethod('post')) {
+            $this->getResponse()->setContentType('application/json');
             try {
                 $result = $reproService->mintDoi($projectId);
                 return $this->renderText(json_encode($result));
@@ -6128,7 +6543,29 @@ class researchActions extends AhgController
                 return $this->renderText(json_encode(['error' => $e->getMessage()]));
             }
         }
-        return $this->renderText(json_encode(['error' => 'POST required']));
+
+        // GET = HTML page
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new \ProjectService();
+        $this->project = $projectService->getProject($projectId, $this->researcher->id);
+        if (!$this->project) { $this->forward404('Project not found'); }
+
+        // Get current DOI status
+        $this->currentDoi = $this->project->doi ?? null;
+        $this->doiMintedAt = $this->project->doi_minted_at ?? null;
+
+        // Build creators string from collaborators
+        $collaborators = DB::table('research_project_collaborator as pc')
+            ->join('research_researcher as r', 'pc.researcher_id', '=', 'r.id')
+            ->join('actor_i18n as ai', function($join) {
+                $join->on('r.user_id', '=', 'ai.id')
+                    ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('pc.project_id', $projectId)
+            ->select('ai.authorized_form_of_name')
+            ->get()->toArray();
+        $names = array_map(function($c) { return $c->authorized_form_of_name ?? ''; }, $collaborators);
+        $this->creatorsString = implode(', ', array_filter($names));
     }
 
     // =========================================================================
@@ -6153,22 +6590,40 @@ class researchActions extends AhgController
             ->orderBy('sort_order')
             ->get()->toArray();
 
-        if ($request->isMethod('post') && $request->getParameter('form_action') === 'add_milestone') {
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action');
             try {
-                $maxOrder = DB::table('research_project_milestone')
-                    ->where('project_id', $projectId)
-                    ->max('sort_order') ?? 0;
+                if ($formAction === 'add_milestone') {
+                    $maxOrder = DB::table('research_project_milestone')
+                        ->where('project_id', $projectId)
+                        ->max('sort_order') ?? 0;
 
-                DB::table('research_project_milestone')->insert([
-                    'project_id' => $projectId,
-                    'title' => $request->getParameter('title'),
-                    'description' => $request->getParameter('description'),
-                    'milestone_type' => $request->getParameter('milestone_type', 'ethics'),
-                    'status' => 'pending',
-                    'sort_order' => $maxOrder + 1,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-                $this->getUser()->setFlash('success', 'Ethics milestone added');
+                    DB::table('research_project_milestone')->insert([
+                        'project_id' => $projectId,
+                        'title' => $request->getParameter('title'),
+                        'description' => $request->getParameter('description'),
+                        'milestone_type' => $request->getParameter('milestone_type', 'ethics'),
+                        'status' => 'pending',
+                        'sort_order' => $maxOrder + 1,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $this->getUser()->setFlash('success', 'Ethics milestone added');
+                } elseif ($formAction === 'update_status') {
+                    $milestoneId = (int) $request->getParameter('milestone_id');
+                    $newStatus = $request->getParameter('status');
+                    DB::table('research_project_milestone')
+                        ->where('id', $milestoneId)
+                        ->where('project_id', $projectId)
+                        ->update(['status' => $newStatus, 'updated_at' => date('Y-m-d H:i:s')]);
+                    $this->getUser()->setFlash('success', 'Milestone status updated');
+                } elseif ($formAction === 'delete_milestone') {
+                    $milestoneId = (int) $request->getParameter('milestone_id');
+                    DB::table('research_project_milestone')
+                        ->where('id', $milestoneId)
+                        ->where('project_id', $projectId)
+                        ->delete();
+                    $this->getUser()->setFlash('success', 'Milestone deleted');
+                }
                 $this->redirect('/research/ethics-milestones/' . $projectId);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());

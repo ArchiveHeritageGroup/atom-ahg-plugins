@@ -113,6 +113,41 @@ class OdrlService
     }
 
     /**
+     * Get all policies, optionally filtered.
+     *
+     * @param array $filters Optional filters: target_type, policy_type, action_type, created_by
+     * @param int $limit Max results (default 100)
+     * @param int $offset Offset for pagination
+     * @return array ['items' => [...], 'total' => int]
+     */
+    public function getAllPolicies(array $filters = [], int $limit = 100, int $offset = 0): array
+    {
+        $query = DB::table('research_rights_policy');
+
+        if (!empty($filters['target_type'])) {
+            $query->where('target_type', $filters['target_type']);
+        }
+        if (!empty($filters['policy_type'])) {
+            $query->where('policy_type', $filters['policy_type']);
+        }
+        if (!empty($filters['action_type'])) {
+            $query->where('action_type', $filters['action_type']);
+        }
+        if (!empty($filters['created_by'])) {
+            $query->where('created_by', (int) $filters['created_by']);
+        }
+
+        $total = (clone $query)->count();
+        $items = $query->orderByDesc('created_at')
+            ->limit($limit)
+            ->offset($offset)
+            ->get()
+            ->toArray();
+
+        return ['items' => $items, 'total' => $total];
+    }
+
+    /**
      * Update an existing policy.
      *
      * @param int $id The policy ID
