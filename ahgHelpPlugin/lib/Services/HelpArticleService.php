@@ -11,6 +11,33 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class HelpArticleService
 {
+    /** Categories restricted to administrators only */
+    public const ADMIN_CATEGORIES = ['Technical', 'Plugin Reference'];
+
+    /**
+     * Check if the current user is an administrator.
+     */
+    public static function isAdmin(): bool
+    {
+        try {
+            $context = \sfContext::getInstance();
+
+            return $context->getUser()->isAdministrator();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Apply admin-only category filter to a query.
+     */
+    protected static function applyAdminFilter($query): void
+    {
+        if (!self::isAdmin()) {
+            $query->whereNotIn('category', self::ADMIN_CATEGORIES);
+        }
+    }
+
     /**
      * Get all articles, optionally filtered by category and published status.
      */
@@ -28,6 +55,8 @@ class HelpArticleService
                 $query->where('is_published', 1);
             }
 
+            self::applyAdminFilter($query);
+
             return $query->orderBy('sort_order')->orderBy('title')->get()->map(fn ($r) => (array) $r)->all();
         } catch (\Exception $e) {
             error_log('ahgHelpPlugin getAll error: ' . $e->getMessage());
@@ -42,10 +71,13 @@ class HelpArticleService
     public static function getBySlug(string $slug): ?array
     {
         try {
-            $row = DB::table('help_article')
+            $query = DB::table('help_article')
                 ->where('slug', $slug)
-                ->where('is_published', 1)
-                ->first();
+                ->where('is_published', 1);
+
+            self::applyAdminFilter($query);
+
+            $row = $query->first();
 
             return $row ? (array) $row : null;
         } catch (\Exception $e) {
@@ -61,9 +93,12 @@ class HelpArticleService
     public static function getCategories(): array
     {
         try {
-            return DB::table('help_article')
-                ->where('is_published', 1)
-                ->select('category', DB::raw('COUNT(*) as article_count'))
+            $query = DB::table('help_article')
+                ->where('is_published', 1);
+
+            self::applyAdminFilter($query);
+
+            return $query->select('category', DB::raw('COUNT(*) as article_count'))
                 ->groupBy('category')
                 ->orderBy('category')
                 ->get()
@@ -82,6 +117,11 @@ class HelpArticleService
     public static function getByCategory(string $category): array
     {
         try {
+            // Block non-admins from accessing admin-only categories
+            if (!self::isAdmin() && in_array($category, self::ADMIN_CATEGORIES)) {
+                return [];
+            }
+
             return DB::table('help_article')
                 ->where('category', $category)
                 ->where('is_published', 1)
@@ -109,10 +149,13 @@ class HelpArticleService
         try {
             $escaped = addslashes($query);
 
-            return DB::table('help_article')
+            $q = DB::table('help_article')
                 ->where('is_published', 1)
-                ->whereRaw('MATCH(title, body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*'])
-                ->select(
+                ->whereRaw('MATCH(title, body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*']);
+
+            self::applyAdminFilter($q);
+
+            return $q->select(
                     'id',
                     'slug',
                     'title',
@@ -142,11 +185,16 @@ class HelpArticleService
         try {
             $escaped = addslashes($query);
 
-            return DB::table('help_section as hs')
+            $q = DB::table('help_section as hs')
                 ->join('help_article as ha', 'hs.article_id', '=', 'ha.id')
                 ->where('ha.is_published', 1)
-                ->whereRaw('MATCH(hs.heading, hs.body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*'])
-                ->select(
+                ->whereRaw('MATCH(hs.heading, hs.body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*']);
+
+            if (!self::isAdmin()) {
+                $q->whereNotIn('ha.category', self::ADMIN_CATEGORIES);
+            }
+
+            return $q->select(
                     'ha.slug',
                     'ha.title as article_title',
                     'ha.category',
@@ -302,9 +350,12 @@ class HelpArticleService
     public static function getRecentlyUpdated(int $limit = 5): array
     {
         try {
-            return DB::table('help_article')
-                ->where('is_published', 1)
-                ->select('slug', 'title', 'category', 'subcategory', 'updated_at')
+            $query = DB::table('help_article')
+                ->where('is_published', 1);
+
+            self::applyAdminFilter($query);
+
+            return $query->select('slug', 'title', 'category', 'subcategory', 'updated_at')
                 ->orderByDesc('updated_at')
                 ->limit($limit)
                 ->get()

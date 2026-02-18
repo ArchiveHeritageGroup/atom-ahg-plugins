@@ -20,9 +20,15 @@ class HelpSearchIndexService
     public static function buildFlexSearchIndex(): array
     {
         try {
-            $articles = DB::table('help_article')
-                ->where('is_published', 1)
-                ->select('id', 'slug', 'title', 'category', 'subcategory', 'body_text')
+            $query = DB::table('help_article')
+                ->where('is_published', 1);
+
+            // Exclude admin-only categories for non-admins
+            if (!HelpArticleService::isAdmin()) {
+                $query->whereNotIn('category', HelpArticleService::ADMIN_CATEGORIES);
+            }
+
+            $articles = $query->select('id', 'slug', 'title', 'category', 'subcategory', 'body_text')
                 ->orderBy('title')
                 ->get();
 

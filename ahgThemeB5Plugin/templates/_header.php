@@ -75,6 +75,32 @@
           </li>
           
           <?php endif; ?>
+
+          <?php if (in_array('ahgHelpPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+          <!-- Help Center -->
+          <li class="nav-item d-flex flex-column">
+            <a
+              class="nav-link d-flex align-items-center p-0"
+              href="<?php echo url_for('@help_index') ?>"
+              id="help-center-menu">
+              <i
+                class="fas fa-2x fa-fw fa-question-circle px-0 px-lg-2 py-2"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-custom-class="d-none d-lg-block"
+                title="<?php echo __('Help Center'); ?>"
+                aria-hidden="true">
+              </i>
+              <span class="d-lg-none mx-1" aria-hidden="true">
+                <?php echo __('Help Center'); ?>
+              </span>
+              <span class="visually-hidden">
+                <?php echo __('Help Center'); ?>
+              </span>
+            </a>
+          </li>
+          <?php endif; ?>
+
           <?php echo get_component('menu', 'mainMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>
           <?php echo get_component('menu', 'clipboardMenu'); ?>
           <?php if (sfConfig::get('app_toggleLanguageMenu')) { ?>

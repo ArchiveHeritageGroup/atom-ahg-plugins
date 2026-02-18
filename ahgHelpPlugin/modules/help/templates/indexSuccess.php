@@ -12,9 +12,9 @@
     <div class="col-lg-9 col-md-8">
 
       <!-- Hero Search -->
-      <div class="card bg-primary text-white mb-4">
+      <div class="card help-hero-card mb-4">
         <div class="card-body text-center py-5">
-          <h1 class="mb-3"><i class="bi bi-question-circle me-2"></i><?php echo __('Help Center') ?></h1>
+          <h1 class="mb-3"><i class="fas fa-question-circle me-2"></i><?php echo __('Help Center') ?></h1>
           <p class="lead mb-4"><?php echo __('Search the documentation or browse by category') ?></p>
           <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
@@ -39,7 +39,7 @@
               <div class="card h-100 help-category-card">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-2">
-                    <i class="bi <?php echo isset($categoryIcons[$catName]) ? $categoryIcons[$catName] : 'bi-folder' ?> fs-3 text-primary me-2"></i>
+                    <i class="bi <?php echo isset($categoryIcons[$catName]) ? $categoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" style="color: var(--ahg-primary, #005837);"></i>
                     <h5 class="card-title mb-0"><?php echo $catName ?></h5>
                   </div>
                   <p class="card-text text-muted small">
