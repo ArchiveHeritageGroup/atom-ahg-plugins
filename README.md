@@ -7,7 +7,7 @@
 [![AtoM Version](https://img.shields.io/badge/AtoM-2.8.x--2.10.x-blue.svg)](https://www.accesstomemory.org/)
 [![PHP Version](https://img.shields.io/badge/PHP-8.3-purple.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
-[![Extensions](https://img.shields.io/badge/Extensions-36-orange.svg)](#-available-extensions)
+[![Extensions](https://img.shields.io/badge/Extensions-79-orange.svg)](#-available-extensions)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952b3.svg)](https://getbootstrap.com/)
 [![Laravel](https://img.shields.io/badge/Laravel-Query%20Builder-red.svg)](https://laravel.com/)
 
@@ -203,7 +203,7 @@
 │  ├── Base Repository/Service Classes                            │
 │  └── Helper Utilities                                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  LAYER 2: atom-ahg-plugins (36 plugins)                         │
+│  LAYER 2: atom-ahg-plugins (79 plugins)                         │
 │  ├── ahgThemeB5Plugin (Required - Locked)                       │
 │  ├── ahgSecurityClearancePlugin (Required - Locked)             │
 │  └── [34 Optional Plugins...]                                   │
@@ -220,7 +220,7 @@
 | Repository | Purpose | Type |
 |------------|---------|------|
 | [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework) | Core Laravel foundation, CLI, services | Required |
-| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | All 36 AHG plugins | Plugin Collection |
+| [atom-ahg-plugins](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins) | All 79 AHG plugins | Plugin Collection |
 | [atom-ahg-python](https://github.com/ArchiveHeritageGroup/atom-ahg-python) | Python SDK for API integration | SDK |
 | [atom-client-js](https://github.com/ArchiveHeritageGroup/atom-client-js) | TypeScript/JavaScript SDK | SDK |
 | [atom-extensions-catalog](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog) | Documentation & plugin registry | Catalog |
@@ -234,25 +234,65 @@
 
 ### Prerequisites
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| **AtoM** | 2.8.0 | 2.10.x |
-| **PHP** | 8.1 | 8.3 |
-| **MySQL** | 8.0 | 8.0+ |
-| **Elasticsearch** | 5.x | 6.x / 8.x |
-| **OS** | Ubuntu 20.04 | Ubuntu 22.04 LTS |
+#### Core (Required)
 
-### Installation Methods
+| Component | Minimum | Recommended | Purpose |
+|-----------|---------|-------------|---------|
+| **AtoM** | 2.8.0 | 2.10.x | Base archival software |
+| **PHP** | 8.1 | 8.3 | Runtime (with extensions: mysql, xml, mbstring, curl, gd, zip, intl, xsl, opcache, apcu) |
+| **MySQL** | 8.0 | 8.0+ | Database |
+| **Elasticsearch** | 5.x | 6.x / 8.x | Search engine (or OpenSearch) |
+| **Nginx** | 1.18+ | latest | Web server |
+| **Gearman** | 1.1+ | latest | Job server for background tasks |
+| **Composer** | 2.x | latest | PHP dependency manager |
+| **Node.js** | 16.x | LTS (20.x+) | Asset building |
+| **Git** | 2.x | latest | Version control |
+| **Python** | 3.10 | 3.12 | AI features, scripting |
 
-| Method | Best For | Time |
-|--------|----------|------|
-| **[Git Clone](#git-clone)** | Developers, easy updates | ~5 min |
-| **[DEB Package](#deb-package)** | Ubuntu/Debian servers | ~3 min |
-| **[Self-Extracting](#self-extracting)** | Any Linux, offline install | ~3 min |
-| **[Setup Wizard](#setup-wizard)** | Guided interactive setup | ~10 min |
-| **[Ansible](#ansible)** | Multiple servers | ~15 min |
-| **[Docker](#docker)** | Containers, testing | ~10 min |
-| **[Full Stack](#full-stack)** | Fresh server, complete setup | ~20 min |
+#### Media Processing (Required)
+
+| Component | Purpose |
+|-----------|---------|
+| **ImageMagick** | Image processing, thumbnail generation |
+| **FFmpeg** | Audio/video processing, derivatives |
+| **Ghostscript** | PDF rendering, conversion |
+| **Poppler-utils** | PDF text extraction (pdftotext) |
+
+#### AI & Processing (Optional — needed by AI plugins)
+
+| Component | Purpose | Used By |
+|-----------|---------|---------|
+| **Tesseract OCR** | Optical character recognition | ahgAIPlugin, ahgIngestPlugin |
+| **GNU Aspell** | Spell checking | ahgAIPlugin |
+| **PyMuPDF** (pip) | PDF redaction, manipulation | ahgPrivacyPlugin |
+| **spaCy** (pip) | Named Entity Recognition | ahgAIPlugin |
+| **Argos Translate** (pip) | Offline machine translation | ahgAIPlugin, ahgTranslationPlugin |
+| **Pillow** (pip) | Image processing | ahgAIPlugin |
+| **OpenCV** (pip) | Face detection, image analysis | ahgAIPlugin |
+
+#### Digital Preservation (Optional — needed by preservation plugins)
+
+| Component | Purpose | Used By |
+|-----------|---------|---------|
+| **Siegfried** | Format identification (PRONOM) | ahgPreservationPlugin |
+| **ClamAV** | Virus scanning | ahgPreservationPlugin, ahgIngestPlugin |
+| **BagIt** (pip) | Archival packaging | ahgPreservationPlugin |
+
+#### 3D Processing (Optional — needed by 3D plugin)
+
+| Component | Purpose |
+|-----------|---------|
+| **Blender** | 3D rendering, thumbnail generation |
+| **MeshLab** | 3D mesh processing, conversion |
+
+#### Optional Services
+
+| Component | Purpose |
+|-----------|---------|
+| **Redis** | Caching (recommended for production) |
+| **Memcached** | Caching (alternative to Redis) |
+| **Cantaloupe** | IIIF image tile server |
+| **Ollama** | Local LLM for AI suggestions |
 
 📖 **[See INSTALLATION.md for complete step-by-step instructions →](INSTALLATION.md)**
 
@@ -261,42 +301,36 @@
 ### Git Clone
 ```bash
 cd /path/to/your/atom
+
+# 1. Clone repositories
 git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
 git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
-cd atom-framework && composer install
-bash bin/install
+
+# 2. Install system dependencies (requires sudo)
+sudo bash atom-framework/bin/install-deps          # Required only
+sudo bash atom-framework/bin/install-deps --all    # Required + optional (AI, preservation, 3D)
+
+# 3. Install PHP dependencies
+cd atom-framework && composer install && cd ..
+
+# 4. Check all dependencies are satisfied
+bash atom-framework/bin/check-dependencies
+
+# 5. Install framework (DB tables, symlinks, plugins)
+bash atom-framework/bin/install
+
+# 6. Restart and verify
 sudo systemctl restart php8.3-fpm
 php bin/atom framework:version
-php bin/atom discover
+php bin/atom extension:discover
 ```
 
-### DEB Package
-
-
-```
-
-### Self-Extracting
-
-
-```
-
-### Setup Wizard
-
-```
-
-### Ansible
-```
-```
-
-### Docker
-```
-```
-
-### Full Stack
-
-For a fresh Ubuntu server:
-```
-```
+> **Selective install:** You can install optional dependency groups individually:
+> ```bash
+> sudo bash atom-framework/bin/install-deps --ai         # AI/NLP: spaCy, PyMuPDF, Tesseract, etc.
+> sudo bash atom-framework/bin/install-deps --preserve   # Siegfried, ClamAV, BagIt
+> sudo bash atom-framework/bin/install-deps --3d         # Blender, MeshLab
+> ```
 
 ---
 
