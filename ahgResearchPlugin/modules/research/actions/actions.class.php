@@ -5251,6 +5251,26 @@ class researchActions extends AhgController
         $this->objectTitle = DB::table('information_object_i18n')
             ->where('id', $objectId)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title') ?? 'Object #' . $objectId;
+
+        // Load digital object image URL for the canvas
+        $this->imageUrl = null;
+        $do = DB::table('digital_object')->where('object_id', $objectId)->first();
+        if ($do) {
+            // Try reference image (usage_id=141) first, then master (usage_id=140)
+            $ref = DB::table('digital_object')
+                ->where('parent_id', $do->id)
+                ->where('usage_id', 141)
+                ->first();
+            if ($ref) {
+                $this->imageUrl = '/' . ltrim($ref->path, '/') . $ref->name;
+            } else {
+                // Fall back to master digital object
+                $this->imageUrl = '/' . ltrim($do->path, '/') . $do->name;
+            }
+        }
+
+        // Slug for "View Full Record" link
+        $this->objectSlug = DB::table('slug')->where('object_id', $objectId)->value('slug');
     }
 
     public function executeCreateAnnotationV2($request)

@@ -22,10 +22,11 @@ $completenessWeight = match($assessment->completeness ?? '') {
     'missing_pages' => 15, 'redacted' => 15, default => 0
 };
 $qualityScore = 0;
-if (!empty($qualityMetrics)) {
+$qualityCount = is_countable($qualityMetrics) ? count($qualityMetrics) : 0;
+if ($qualityCount > 0) {
     $sum = 0;
     foreach ($qualityMetrics as $m) { $sum += (float) $m->metric_value; }
-    $avg = $sum / count($qualityMetrics);
+    $avg = $sum / $qualityCount;
     $qualityScore = (int) round(max(0, min(1, $avg)) * 30);
 }
 ?>
@@ -107,7 +108,7 @@ if (!empty($qualityMetrics)) {
                 <div class="mb-3">
                     <div class="d-flex justify-content-between mb-1">
                         <span><i class="fas fa-star me-1 text-warning"></i>Quality Metrics
-                            <small class="text-muted">(<?php echo count($qualityMetrics); ?> metrics)</small>
+                            <small class="text-muted">(<?php echo $qualityCount; ?> metrics)</small>
                         </span>
                         <span class="fw-bold"><?php echo $qualityScore; ?>/30</span>
                     </div>
