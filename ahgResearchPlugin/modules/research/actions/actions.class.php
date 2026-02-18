@@ -2009,16 +2009,38 @@ class researchActions extends AhgController
         }
 
         if ($request->isMethod('post')) {
+            $researcherId = (int) $request->getParameter('researcher_id');
             $email = trim($request->getParameter('email'));
+            $externalEmail = trim($request->getParameter('external_email', ''));
             $role = $request->getParameter('role', 'contributor');
 
-            // Look up the invited researcher by email
-            $invitedResearcher = DB::table('research_researcher')
-                ->where('email', $email)
-                ->first();
+            $invitedResearcher = null;
+
+            // Try by researcher_id first (Tom Select selection)
+            if ($researcherId) {
+                $invitedResearcher = DB::table('research_researcher')
+                    ->where('id', $researcherId)
+                    ->first();
+            }
+
+            // Fallback to email lookup
+            if (!$invitedResearcher && $email) {
+                $invitedResearcher = DB::table('research_researcher')
+                    ->where('email', $email)
+                    ->first();
+            }
+
+            // Handle external invite (not a registered researcher)
+            if (!$invitedResearcher && $externalEmail) {
+                // Send external invitation email with link to register
+                $this->sendCollaboratorInviteEmail(null, $externalEmail, $this->project, $this->researcher, $role, true);
+                $this->getUser()->setFlash('success', 'Registration invitation sent to ' . $externalEmail . '. They must register as a researcher first.');
+                $this->redirect('/research/project/' . $projectId);
+                return;
+            }
 
             if (!$invitedResearcher) {
-                $this->getUser()->setFlash('error', 'No researcher found with email: ' . $email);
+                $this->getUser()->setFlash('error', 'No researcher found. Try inviting them via external email.');
             } else if ($invitedResearcher->id == $this->researcher->id) {
                 $this->getUser()->setFlash('error', 'You cannot invite yourself');
             } else {
@@ -2027,8 +2049,10 @@ class researchActions extends AhgController
                 if (isset($result['error'])) {
                     $this->getUser()->setFlash('error', $result['error']);
                 } else {
-                    $this->getUser()->setFlash('success', 'Invitation sent to ' . $email);
-                    $this->redirect('research/project/' . $projectId . '/collaborators');
+                    // Send invitation email
+                    $this->sendCollaboratorInviteEmail($invitedResearcher, $invitedResearcher->email, $this->project, $this->researcher, $role, false);
+                    $this->getUser()->setFlash('success', 'Invitation sent to ' . $invitedResearcher->email);
+                    $this->redirect('/research/project/' . $projectId);
                 }
             }
         }
@@ -3282,7 +3306,7 @@ class researchActions extends AhgController
                 'entry_date' => $request->getParameter('entry_date') ?: $this->entry->entry_date,
             ]);
             $this->getUser()->setFlash('success', 'Entry updated');
-            $this->redirect('research/journal/entry/' . $id);
+            $this->redirect('/research/journal/' . $id);
         }
     }
 
@@ -3314,7 +3338,7 @@ class researchActions extends AhgController
                     'entry_date' => $request->getParameter('entry_date') ?: date('Y-m-d'),
                 ]);
                 $this->getUser()->setFlash('success', 'Journal entry created');
-                $this->redirect('research/journal/' . $entryId);
+                $this->redirect('/research/journal/' . $entryId);
             }
         }
     }
@@ -3369,7 +3393,7 @@ class researchActions extends AhgController
                     'project_id' => $request->getParameter('project_id') ?: null,
                 ]);
                 $this->getUser()->setFlash('success', 'Report created');
-                $this->redirect('research/report/' . $reportId);
+                $this->redirect('/research/report/' . $reportId);
             }
         }
     }
@@ -3397,6 +3421,13 @@ class researchActions extends AhgController
             $this->reviews = [];
         }
 
+        // Load potential reviewers (approved researchers excluding self)
+        $this->collaborators = DB::table('research_researcher')
+            ->where('status', 'approved')
+            ->where('id', '!=', $this->researcher->id)
+            ->orderBy('last_name')
+            ->get()->toArray();
+
         // Load comments per section
         try {
             require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CommentService.php';
@@ -3415,7 +3446,7 @@ class researchActions extends AhgController
             if ($action === 'update_header' || $action === 'update_status') {
                 $reportService->updateReport($id, ['status' => $request->getParameter('status')]);
                 $this->getUser()->setFlash('success', 'Status updated');
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'add_section') {
@@ -3424,7 +3455,7 @@ class researchActions extends AhgController
                     'title' => $request->getParameter('title'),
                 ]);
                 $this->getUser()->setFlash('success', 'Section added');
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'update_section') {
@@ -3436,20 +3467,20 @@ class researchActions extends AhgController
                     'content_format' => 'html',
                 ]);
                 $this->getUser()->setFlash('success', 'Section updated');
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'move_section') {
                 $sectionId = (int) $request->getParameter('section_id');
                 $direction = $request->getParameter('direction');
                 $reportService->moveSection($sectionId, $direction);
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'delete_section') {
                 $reportService->deleteSection((int) $request->getParameter('section_id'));
                 $this->getUser()->setFlash('success', 'Section deleted');
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'load_template') {
@@ -3473,7 +3504,7 @@ class researchActions extends AhgController
                     }
                     $this->getUser()->setFlash('success', $count . ' sections loaded from template');
                 }
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'add_multiple') {
@@ -3490,7 +3521,7 @@ class researchActions extends AhgController
                     }
                     $this->getUser()->setFlash('success', count($types) . ' sections added');
                 }
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'delete_report') {
@@ -3502,7 +3533,46 @@ class researchActions extends AhgController
             if ($action === 'auto_populate' && $this->report->project_id) {
                 $reportService->autoPopulateFromProject($id, $this->report->project_id);
                 $this->getUser()->setFlash('success', 'Report populated from project data');
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
+            }
+
+            if ($action === 'request_review') {
+                $reviewerId = (int) $request->getParameter('reviewer_id');
+                if ($reviewerId && $reviewerId !== $this->researcher->id) {
+                    try {
+                        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/PeerReviewService.php';
+                        $reviewService = new \PeerReviewService();
+                        $reviewService->requestReview($id, $this->researcher->id, $reviewerId);
+
+                        // Send email notification using template
+                        $reviewer = DB::table('research_researcher')->where('id', $reviewerId)->first();
+                        if ($reviewer && $reviewer->email) {
+                            $baseUrl = sfConfig::get('app_siteBaseUrl', '');
+                            $this->sendTemplatedEmail($reviewer->email, 'peer_review_request', [
+                                'name' => $reviewer->first_name . ' ' . $reviewer->last_name,
+                                'requester_name' => $this->researcher->first_name . ' ' . $this->researcher->last_name,
+                                'report_title' => $this->report->title ?? 'Report',
+                                'review_url' => $baseUrl . '/index.php/research/report/' . $id,
+                            ], 'Peer Review Request: ' . ($this->report->title ?? 'Report'),
+                               "Dear {name},\n\n{requester_name} has requested your peer review of the report \"{report_title}\".\n\nReview at: {review_url}\n\nBest regards,\nThe Archive Team");
+                        }
+
+                        // Create notification
+                        try {
+                            $notifService = $this->loadNotificationService();
+                            $notifService->createNotification(
+                                $reviewerId, 'collaboration', 'Peer review requested',
+                                $this->researcher->first_name . ' ' . $this->researcher->last_name . ' requested your review of "' . ($this->report->title ?? 'Report') . '"',
+                                'research/report/' . $id, 'report', $id
+                            );
+                        } catch (\Exception $e) {}
+
+                        $this->getUser()->setFlash('success', 'Review request sent');
+                    } catch (\Exception $e) {
+                        $this->getUser()->setFlash('error', 'Failed to request review: ' . $e->getMessage());
+                    }
+                }
+                $this->redirect('/research/report/' . $id);
             }
 
             if ($action === 'add_comment') {
@@ -3517,7 +3587,7 @@ class researchActions extends AhgController
                         $this->getUser()->setFlash('error', 'Failed to add comment');
                     }
                 }
-                $this->redirect('research/report/' . $id);
+                $this->redirect('/research/report/' . $id);
             }
         }
     }
@@ -3544,7 +3614,7 @@ class researchActions extends AhgController
             ]);
             $this->getUser()->setFlash('success', 'Report updated');
         }
-        $this->redirect('research/report/' . $id);
+        $this->redirect('/research/report/' . $id);
     }
 
     public function executeEditReportSection($request)
@@ -3756,7 +3826,7 @@ class researchActions extends AhgController
 
             if (empty($content)) {
                 $this->getUser()->setFlash('error', 'No content provided');
-                $this->redirect('research/bibliography/' . $bibliographyId);
+                $this->redirect('/research/bibliography/' . $bibliographyId);
             }
 
             if ($format === 'ris') {
@@ -3770,10 +3840,10 @@ class researchActions extends AhgController
                 $msg .= ' Errors: ' . implode('; ', array_slice($result['errors'], 0, 3));
             }
             $this->getUser()->setFlash($result['imported'] > 0 ? 'success' : 'error', $msg);
-            $this->redirect('research/bibliography/' . $bibliographyId);
+            $this->redirect('/research/bibliography/' . $bibliographyId);
         }
 
-        $this->redirect('research/bibliography/' . $bibliographyId);
+        $this->redirect('/research/bibliography/' . $bibliographyId);
     }
 
     // =========================================================================
@@ -3929,7 +3999,7 @@ class researchActions extends AhgController
                 $shareService->createInstitution($data);
                 $this->getUser()->setFlash('success', 'Institution created');
             }
-            $this->redirect('research/admin/institutions');
+            $this->redirect('/research/admin/institutions');
         }
     }
 
@@ -3965,7 +4035,7 @@ class researchActions extends AhgController
                 $shareService->revokeShare((int) $request->getParameter('share_id'));
                 $this->getUser()->setFlash('success', 'Share revoked');
             }
-            $this->redirect('research/project/' . $projectId . '/share');
+            $this->redirect('/research/project/' . $projectId . '/share');
         }
     }
 
@@ -3986,12 +4056,12 @@ class researchActions extends AhgController
             if ($researcher) {
                 $shareService->acceptShare($share->id, $researcher->id);
                 $this->getUser()->setFlash('success', 'Share accepted');
-                $this->redirect('research/project/' . $share->project_id);
+                $this->redirect('/research/project/' . $share->project_id);
             }
         }
 
         // For unauthenticated users, redirect to external access
-        $this->redirect('research/share/' . $token);
+        $this->redirect('/research/share/' . $token);
     }
 
     public function executeExternalAccess($request)
@@ -4022,7 +4092,7 @@ class researchActions extends AhgController
 
             $collab = DB::table('research_external_collaborator')->where('id', $collabId)->first();
             $this->getUser()->setFlash('success', 'Access granted');
-            $this->redirect('research/share/' . $token . '?access_token=' . $collab->access_token);
+            $this->redirect('/research/share/' . $token . '?access_token=' . $collab->access_token);
         }
 
         // If already has access token, load project data
@@ -4137,7 +4207,7 @@ class researchActions extends AhgController
                 $this->getUser()->setFlash('success', 'Review requested');
             }
         }
-        $this->redirect('research/report/' . $reportId);
+        $this->redirect('/research/report/' . $reportId);
     }
 
     public function executeSubmitReview($request)
@@ -4167,7 +4237,7 @@ class researchActions extends AhgController
                 $this->getUser()->setFlash('success', 'Review submitted');
             }
         }
-        $this->redirect('research/report/' . $reportId);
+        $this->redirect('/research/report/' . $reportId);
     }
 
     /**
@@ -4267,6 +4337,90 @@ class researchActions extends AhgController
         }
 
         return $this->renderText(json_encode(['error' => 'Invalid action']));
+    }
+
+    /**
+     * AJAX: Manage milestones (add/complete/delete).
+     */
+    public function executeManageMilestone($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $action = $request->getParameter('do', '');
+
+        if ($action === 'add') {
+            $projectId = (int) $request->getParameter('project_id');
+            $project = $projectService->getProject($projectId, $researcher->id);
+            if (!$project || $project->owner_id != $researcher->id) {
+                return $this->renderText(json_encode(['error' => 'Not authorized']));
+            }
+            $title = trim($request->getParameter('title', ''));
+            if (!$title) {
+                return $this->renderText(json_encode(['error' => 'Title is required']));
+            }
+            $id = $projectService->addMilestone($projectId, [
+                'title' => $title,
+                'description' => trim($request->getParameter('description', '')),
+                'due_date' => $request->getParameter('due_date') ?: null,
+                'status' => $request->getParameter('status', 'pending'),
+            ]);
+            return $this->renderText(json_encode(['success' => true, 'id' => $id, 'message' => 'Milestone added']));
+        } elseif ($action === 'complete') {
+            $milestoneId = (int) $request->getParameter('milestone_id');
+            $projectService->completeMilestone($milestoneId, $researcher->id);
+            return $this->renderText(json_encode(['success' => true, 'message' => 'Milestone completed']));
+        } elseif ($action === 'delete') {
+            $milestoneId = (int) $request->getParameter('milestone_id');
+            $projectService->deleteMilestone($milestoneId);
+            return $this->renderText(json_encode(['success' => true, 'message' => 'Milestone deleted']));
+        }
+
+        return $this->renderText(json_encode(['error' => 'Invalid action']));
+    }
+
+    /**
+     * AJAX: Remove a collaborator from a project.
+     */
+    public function executeRemoveCollaborator($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['error' => 'Not a researcher']));
+        }
+
+        $projectId = (int) $request->getParameter('project_id');
+        $researcherId = (int) $request->getParameter('researcher_id');
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+        $project = $projectService->getProject($projectId, $researcher->id);
+
+        if (!$project || $project->owner_id != $researcher->id) {
+            return $this->renderText(json_encode(['error' => 'Not authorized']));
+        }
+
+        $projectService->removeCollaborator($projectId, $researcherId);
+        return $this->renderText(json_encode(['success' => true, 'message' => 'Collaborator removed']));
     }
 
     /**
@@ -4504,14 +4658,95 @@ class researchActions extends AhgController
             if ($status === 'confirmed') {
                 \AhgCore\Services\EmailService::sendBookingConfirmed($booking, $researcher);
             } elseif ($status === 'cancelled') {
-                $subject = 'Booking Cancelled';
-                $body = "Dear {$researcher->first_name} {$researcher->last_name},\n\n"
-                    . "Your reading room booking for {$booking->booking_date} has been cancelled.\n\n"
-                    . "If you have questions, please contact us.";
+                $subject = \AhgCore\Services\EmailService::getSetting('email_booking_cancelled_subject', 'Booking Cancelled');
+                $body = \AhgCore\Services\EmailService::getSetting('email_booking_cancelled_body',
+                    "Dear {name},\n\nYour reading room booking for {date} has been cancelled.\n\nIf you have questions, please contact us.");
+                $body = \AhgCore\Services\EmailService::parseTemplate($body, [
+                    'name' => $researcher->first_name . ' ' . $researcher->last_name,
+                    'date' => $booking->booking_date,
+                    'time' => substr($booking->start_time, 0, 5) . ' - ' . substr($booking->end_time, 0, 5),
+                    'room' => $booking->room_name ?? 'Reading Room',
+                ]);
                 \AhgCore\Services\EmailService::send($researcher->email, $subject, $body);
             }
         } catch (\Exception $e) {
             error_log('Research booking email failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send collaborator invitation email using template.
+     */
+    protected function sendCollaboratorInviteEmail($invitedResearcher, $email, $project, $inviter, $role, $isExternal = false)
+    {
+        try {
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+                return;
+            }
+
+            $baseUrl = sfConfig::get('app_siteBaseUrl', '');
+            $inviterName = $inviter->first_name . ' ' . $inviter->last_name;
+
+            if ($isExternal) {
+                $subject = \AhgCore\Services\EmailService::getSetting('email_collaborator_external_subject',
+                    'You have been invited to collaborate on a research project');
+                $body = \AhgCore\Services\EmailService::getSetting('email_collaborator_external_body',
+                    "Dear Colleague,\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nTo accept this invitation, you first need to register as a researcher:\n{register_url}\n\nAfter registration and approval, you will be able to join the project.\n\nBest regards,\nThe Archive Team");
+            } else {
+                $subject = \AhgCore\Services\EmailService::getSetting('email_collaborator_invite_subject',
+                    'You have been invited to collaborate on a research project');
+                $body = \AhgCore\Services\EmailService::getSetting('email_collaborator_invite_body',
+                    "Dear {name},\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nView the project and accept the invitation:\n{project_url}\n\nBest regards,\nThe Archive Team");
+            }
+
+            $recipientName = $invitedResearcher
+                ? $invitedResearcher->first_name . ' ' . $invitedResearcher->last_name
+                : 'Colleague';
+
+            $body = \AhgCore\Services\EmailService::parseTemplate($body, [
+                'name' => $recipientName,
+                'inviter_name' => $inviterName,
+                'project_title' => $project->title,
+                'role' => ucfirst($role),
+                'project_url' => $baseUrl . '/index.php/research/project/' . $project->id,
+                'register_url' => $baseUrl . '/index.php/research/register',
+            ]);
+
+            \AhgCore\Services\EmailService::send($email, $subject, $body);
+        } catch (\Exception $e) {
+            error_log('Collaborator invite email failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send a templated email using a key from email_setting table.
+     * Generic helper for any research email type.
+     */
+    protected function sendTemplatedEmail($toEmail, $templateKey, array $placeholders, $fallbackSubject = '', $fallbackBody = '')
+    {
+        try {
+            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
+                . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+                require_once $emailServicePath;
+            }
+            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
+                return false;
+            }
+
+            $subject = \AhgCore\Services\EmailService::getSetting('email_' . $templateKey . '_subject', $fallbackSubject);
+            $body = \AhgCore\Services\EmailService::getSetting('email_' . $templateKey . '_body', $fallbackBody);
+            $body = \AhgCore\Services\EmailService::parseTemplate($body, $placeholders);
+
+            return \AhgCore\Services\EmailService::send($toEmail, $subject, $body);
+        } catch (\Exception $e) {
+            error_log('Research templated email failed (' . $templateKey . '): ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -4564,12 +4799,12 @@ class researchActions extends AhgController
                     ]);
                 }
                 $this->getUser()->setFlash('success', 'Snapshot created');
-                $this->redirect('research/snapshot/' . $id);
+                $this->redirect('/research/snapshot/' . $id);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
-        $this->redirect('research/snapshots/' . $projectId);
+        $this->redirect('/research/snapshots/' . $projectId);
     }
 
     public function executeViewSnapshot($request)
@@ -4617,9 +4852,9 @@ class researchActions extends AhgController
         if ($request->isMethod('post')) {
             $snapshotService->deleteSnapshot($id);
             $this->getUser()->setFlash('success', 'Snapshot deleted');
-            $this->redirect('research/snapshots/' . $snapshot->project_id);
+            $this->redirect('/research/snapshots/' . $snapshot->project_id);
         }
-        $this->redirect('research/snapshot/' . $id);
+        $this->redirect('/research/snapshot/' . $id);
     }
 
     // =========================================================================
@@ -4655,7 +4890,7 @@ class researchActions extends AhgController
                     'tags' => $request->getParameter('tags'),
                 ]);
                 $this->getUser()->setFlash('success', 'Hypothesis created');
-                $this->redirect('research/hypothesis/' . $id);
+                $this->redirect('/research/hypothesis/' . $id);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -4711,7 +4946,7 @@ class researchActions extends AhgController
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
-        $this->redirect('research/hypothesis/' . $id);
+        $this->redirect('/research/hypothesis/' . $id);
     }
 
     // =========================================================================
@@ -4768,7 +5003,7 @@ class researchActions extends AhgController
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
-        $this->redirect('research/source-assessment/' . $objectId);
+        $this->redirect('/research/source-assessment/' . $objectId);
     }
 
     public function executeTrustScore($request)
@@ -5118,12 +5353,12 @@ class researchActions extends AhgController
                     $params
                 );
                 $this->getUser()->setFlash('success', 'Extraction job created');
-                $this->redirect('research/extraction-job/' . $jobId);
+                $this->redirect('/research/extraction-job/' . $jobId);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
-        $this->redirect('research/extraction-jobs/' . $projectId);
+        $this->redirect('/research/extraction-jobs/' . $projectId);
     }
 
     public function executeViewExtractionJob($request)
@@ -5646,7 +5881,7 @@ class researchActions extends AhgController
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', $e->getMessage());
         }
-        $this->redirect('research/project/' . $projectId);
+        $this->redirect('/research/project/' . $projectId);
     }
 
     public function executePackageCollection($request)
@@ -5665,7 +5900,7 @@ class researchActions extends AhgController
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', $e->getMessage());
         }
-        $this->redirect('research/collection/' . $collectionId);
+        $this->redirect('/research/collection/' . $collectionId);
     }
 
     // =========================================================================
@@ -5840,7 +6075,7 @@ class researchActions extends AhgController
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
                 $this->getUser()->setFlash('success', 'Ethics milestone added');
-                $this->redirect('research/ethics-milestones/' . $projectId);
+                $this->redirect('/research/ethics-milestones/' . $projectId);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -5871,7 +6106,7 @@ class researchActions extends AhgController
                     $count++;
                 }
                 $this->getUser()->setFlash('success', $count . ' assertions updated to ' . $newStatus);
-                $this->redirect('research/assertion-batch-review/' . $projectId);
+                $this->redirect('/research/assertion-batch-review/' . $projectId);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }

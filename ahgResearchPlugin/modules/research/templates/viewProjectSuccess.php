@@ -82,28 +82,78 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Milestones</h5>
+                <?php if ($project->owner_id == $researcher->id): ?>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#milestone-add-form">
+                        <i class="fas fa-plus me-1"></i> Add
+                    </button>
+                <?php endif; ?>
             </div>
             <div class="card-body">
+                <?php if ($project->owner_id == $researcher->id): ?>
+                <div class="collapse mb-3" id="milestone-add-form">
+                    <div class="card card-body bg-light">
+                        <div class="mb-2">
+                            <input type="text" id="milestone-title" class="form-control form-control-sm" placeholder="Milestone title *" required>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <input type="date" id="milestone-due-date" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-6">
+                                <select id="milestone-status" class="form-select form-select-sm">
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <textarea id="milestone-description" class="form-control form-control-sm" rows="2" placeholder="Description (optional)"></textarea>
+                        </div>
+                        <button type="button" id="milestone-save-btn" class="btn btn-sm btn-primary" data-project-id="<?php echo $project->id; ?>">
+                            <i class="fas fa-save me-1"></i> Save Milestone
+                        </button>
+                        <div id="milestone-add-result" class="mt-2"></div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <?php if (!empty($milestones)): ?>
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush" id="milestones-list">
                         <?php foreach ($milestones as $milestone): ?>
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="<?php echo $milestone->status === 'completed' ? 'text-decoration-line-through text-muted' : ''; ?>">
-                                        <?php echo htmlspecialchars($milestone->title); ?>
-                                    </span>
-                                    <?php if ($milestone->due_date): ?>
-                                        <small class="text-muted ms-2">Due: <?php echo date('M j, Y', strtotime($milestone->due_date)); ?></small>
-                                    <?php endif; ?>
+                            <div class="list-group-item" id="milestone-<?php echo $milestone->id; ?>">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <span class="<?php echo $milestone->status === 'completed' ? 'text-decoration-line-through text-muted' : ''; ?>">
+                                            <?php echo htmlspecialchars($milestone->title); ?>
+                                        </span>
+                                        <?php if ($milestone->due_date): ?>
+                                            <small class="text-muted ms-2"><i class="fas fa-calendar-alt fa-xs"></i> <?php echo date('M j, Y', strtotime($milestone->due_date)); ?></small>
+                                        <?php endif; ?>
+                                        <?php if ($milestone->description): ?>
+                                            <small class="text-muted d-block mt-1"><?php echo htmlspecialchars($milestone->description); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="badge bg-<?php echo $milestone->status === 'completed' ? 'success' : ($milestone->status === 'in_progress' ? 'primary' : 'secondary'); ?>">
+                                            <?php echo ucfirst(str_replace('_', ' ', $milestone->status)); ?>
+                                        </span>
+                                        <?php if ($project->owner_id == $researcher->id && $milestone->status !== 'completed'): ?>
+                                            <button type="button" class="btn btn-outline-success btn-sm milestone-complete-btn" data-milestone-id="<?php echo $milestone->id; ?>" title="Mark Complete">
+                                                <i class="fas fa-check fa-xs"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <?php if ($project->owner_id == $researcher->id): ?>
+                                            <button type="button" class="btn btn-outline-danger btn-sm milestone-delete-btn" data-milestone-id="<?php echo $milestone->id; ?>" title="Delete">
+                                                <i class="fas fa-trash fa-xs"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <span class="badge bg-<?php echo $milestone->status === 'completed' ? 'success' : ($milestone->status === 'in_progress' ? 'primary' : 'secondary'); ?>">
-                                    <?php echo ucfirst($milestone->status); ?>
-                                </span>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p class="text-muted mb-0">No milestones defined.</p>
+                    <p class="text-muted mb-0" id="no-milestones-msg">No milestones defined.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -296,12 +346,11 @@
 
                 <!-- Add from clipboard form -->
                 <hr>
-                <h6>Add Items from Clipboard</h6>
+                <h6>Add Items to Project</h6>
                 <div id="clipboard-add-form">
                     <div class="mb-2">
-                        <label for="clipboard-slugs" class="form-label small">Slugs (comma-separated)</label>
-                        <textarea id="clipboard-slugs" class="form-control form-control-sm" rows="2"
-                                  placeholder="e.g. item-slug-1, item-slug-2"></textarea>
+                        <label for="clipboard-item-search" class="form-label small">Search items</label>
+                        <select id="clipboard-item-search" multiple placeholder="Type to search archival items..."></select>
                     </div>
                     <div class="mb-2">
                         <label for="clipboard-notes" class="form-label small">Notes (optional)</label>
@@ -339,9 +388,18 @@
                                     <i class="fas fa-crown text-warning ms-1" title="Owner"></i>
                                 <?php endif; ?>
                             </div>
-                            <span class="badge bg-<?php echo $collab->status === 'accepted' ? 'success' : 'warning'; ?>">
-                                <?php echo ucfirst($collab->role); ?>
-                            </span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge bg-<?php echo $collab->status === 'accepted' ? 'success' : 'warning'; ?>">
+                                    <?php echo ucfirst($collab->role); ?>
+                                </span>
+                                <?php if ($project->owner_id == $researcher->id && $collab->role !== 'owner'): ?>
+                                    <button type="button" class="btn btn-outline-danger btn-sm collab-remove-btn"
+                                            data-researcher-id="<?php echo $collab->researcher_id; ?>"
+                                            title="Remove collaborator">
+                                        <i class="fas fa-times fa-xs"></i>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -375,10 +433,43 @@
     </div>
 </div>
 
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var manageUrl = '<?php echo url_for(['module' => 'research', 'action' => 'manageClipboardItem']); ?>';
     var addUrl = '<?php echo url_for(['module' => 'research', 'action' => 'clipboardToProject']); ?>';
+    var milestoneUrl = '<?php echo url_for(['module' => 'research', 'action' => 'manageMilestone']); ?>';
+    var searchUrl = '/index.php/research/ajax/search-items';
+
+    // ── Tom Select: Clipboard item search ──
+    var clipboardSelect = new TomSelect('#clipboard-item-search', {
+        valueField: 'slug',
+        labelField: 'title',
+        searchField: ['title', 'identifier'],
+        placeholder: 'Type to search archival items...',
+        loadThrottle: 300,
+        maxItems: null,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            fetch(searchUrl + '?q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(j) { callback(j.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(data, escape) {
+                var html = '<div class="py-1">';
+                html += '<span class="fw-semibold">' + escape(data.title || 'Untitled') + '</span>';
+                if (data.identifier) html += ' <small class="text-muted">(' + escape(data.identifier) + ')</small>';
+                html += '</div>';
+                return html;
+            },
+            item: function(data, escape) {
+                return '<div>' + escape(data.title || data.slug) + '</div>';
+            }
+        }
+    });
 
     // Pin/Unpin clipboard item
     document.querySelectorAll('.clipboard-pin-btn').forEach(function(btn) {
@@ -417,17 +508,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add items from clipboard
+    // Add items via Tom Select
     var addBtn = document.getElementById('clipboard-add-btn');
     if (addBtn) {
         addBtn.addEventListener('click', function() {
-            var slugs = document.getElementById('clipboard-slugs').value.trim();
+            var selectedSlugs = clipboardSelect.getValue();
             var notes = document.getElementById('clipboard-notes').value.trim();
             var projectId = this.getAttribute('data-project-id');
             var resultDiv = document.getElementById('clipboard-add-result');
 
-            if (!slugs) {
-                resultDiv.innerHTML = '<div class="alert alert-warning alert-sm py-1 px-2 small">Please enter at least one slug.</div>';
+            if (!selectedSlugs || selectedSlugs.length === 0) {
+                resultDiv.innerHTML = '<div class="alert alert-warning py-1 px-2 small">Please select at least one item.</div>';
                 return;
             }
 
@@ -436,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var formData = new FormData();
             formData.append('project_id', projectId);
-            formData.append('slugs', slugs);
+            formData.append('slugs', selectedSlugs.join(','));
             if (notes) formData.append('notes', notes);
 
             fetch(addUrl, { method: 'POST', body: formData })
@@ -444,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(function(data) {
                     if (data.success) {
                         resultDiv.innerHTML = '<div class="alert alert-success py-1 px-2 small">' + data.message + '</div>';
-                        document.getElementById('clipboard-slugs').value = '';
+                        clipboardSelect.clear();
                         document.getElementById('clipboard-notes').value = '';
                         setTimeout(function() { location.reload(); }, 1500);
                     } else {
@@ -460,5 +551,94 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // ── Milestones CRUD ──
+    // Add milestone
+    var mileSaveBtn = document.getElementById('milestone-save-btn');
+    if (mileSaveBtn) {
+        mileSaveBtn.addEventListener('click', function() {
+            var title = document.getElementById('milestone-title').value.trim();
+            var resultDiv = document.getElementById('milestone-add-result');
+            if (!title) {
+                resultDiv.innerHTML = '<div class="alert alert-warning py-1 px-2 small">Title is required.</div>';
+                return;
+            }
+            mileSaveBtn.disabled = true;
+            var formData = new FormData();
+            formData.append('project_id', this.getAttribute('data-project-id'));
+            formData.append('do', 'add');
+            formData.append('title', title);
+            formData.append('due_date', document.getElementById('milestone-due-date').value);
+            formData.append('status', document.getElementById('milestone-status').value);
+            formData.append('description', document.getElementById('milestone-description').value.trim());
+
+            fetch(milestoneUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        resultDiv.innerHTML = '<div class="alert alert-danger py-1 px-2 small">' + (data.error || 'Error') + '</div>';
+                    }
+                })
+                .catch(function() {
+                    resultDiv.innerHTML = '<div class="alert alert-danger py-1 px-2 small">Network error</div>';
+                })
+                .finally(function() { mileSaveBtn.disabled = false; });
+        });
+    }
+
+    // Complete milestone
+    document.querySelectorAll('.milestone-complete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var milestoneId = this.getAttribute('data-milestone-id');
+            var formData = new FormData();
+            formData.append('milestone_id', milestoneId);
+            formData.append('do', 'complete');
+            fetch(milestoneUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { location.reload(); }
+                    else { alert(data.error || 'Error'); }
+                });
+        });
+    });
+
+    // Delete milestone
+    document.querySelectorAll('.milestone-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Delete this milestone?')) return;
+            var milestoneId = this.getAttribute('data-milestone-id');
+            var formData = new FormData();
+            formData.append('milestone_id', milestoneId);
+            formData.append('do', 'delete');
+            fetch(milestoneUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        var el = document.getElementById('milestone-' + milestoneId);
+                        if (el) el.remove();
+                    } else { alert(data.error || 'Error'); }
+                });
+        });
+    });
+
+    // ── Remove collaborator ──
+    var removeCollabUrl = '<?php echo url_for(['module' => 'research', 'action' => 'removeCollaborator']); ?>';
+    document.querySelectorAll('.collab-remove-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Remove this collaborator from the project?')) return;
+            var researcherId = this.getAttribute('data-researcher-id');
+            var formData = new FormData();
+            formData.append('project_id', '<?php echo $project->id; ?>');
+            formData.append('researcher_id', researcherId);
+            fetch(removeCollabUrl, { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { location.reload(); }
+                    else { alert(data.error || 'Error removing collaborator'); }
+                });
+        });
+    });
 });
 </script>
