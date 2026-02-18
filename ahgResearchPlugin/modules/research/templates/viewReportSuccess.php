@@ -352,8 +352,8 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label"><?php echo __('Reviewer'); ?></label>
-            <select name="reviewer_id" class="form-select" required>
-              <option value=""><?php echo __('Select a collaborator...'); ?></option>
+            <select name="reviewer_id" id="reviewer-select" placeholder="Type name or email to search..." required>
+              <option value=""><?php echo __('Search for a reviewer...'); ?></option>
               <?php foreach ($collaborators as $collab): ?>
                 <option value="<?php echo $collab->id; ?>"><?php echo htmlspecialchars(($collab->first_name ?? '') . ' ' . ($collab->last_name ?? '')); ?></option>
               <?php endforeach; ?>
@@ -368,6 +368,37 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
     </div>
   </div>
 </div>
+
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var reviewerEl = document.getElementById('reviewer-select');
+    if (reviewerEl) {
+        new TomSelect('#reviewer-select', {
+            valueField: 'value',
+            labelField: 'text',
+            searchField: ['text'],
+            maxItems: 1,
+            allowEmptyOption: true,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('/index.php/research/ajax/search-entities?type=researcher&q=' + encodeURIComponent(query))
+                    .then(function(r) { return r.json(); })
+                    .then(function(j) {
+                        var items = (j.items || []).map(function(i) {
+                            var label = i.title;
+                            if (i.email) label += ' <' + i.email + '>';
+                            return { value: String(i.id), text: label };
+                        });
+                        callback(items);
+                    })
+                    .catch(function() { callback(); });
+            }
+        });
+    }
+});
+</script>
 
 <?php include_partial('research/tiptapScripts') ?>
 

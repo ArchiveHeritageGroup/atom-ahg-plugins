@@ -229,29 +229,38 @@ class AlertService
      */
     private function sendEmailNotification(object $search, int $newResultsCount): bool
     {
-        // Get site URL for links
-        $siteUrl = sfConfig::get('app_siteBaseUrl', '');
+        $siteUrl = \sfConfig::get('app_siteBaseUrl', '');
 
-        $subject = "New results for your saved search: {$search->name}";
-
-        $body = "Dear {$search->first_name},\n\n";
-        $body .= "Your saved search \"{$search->name}\" has {$newResultsCount} new result(s).\n\n";
-        $body .= "Search query: {$search->search_query}\n\n";
-        $body .= "View your saved searches at: {$siteUrl}/research/saved-searches\n\n";
-        $body .= "You can manage your alert settings from your researcher workspace.\n\n";
-        $body .= "Best regards,\nThe Archive Team";
-
-        // Use the plugin's email service if available
-        $emailServicePath = dirname(__FILE__) . '/EmailService.php';
-        if (file_exists($emailServicePath)) {
+        // Try to use core EmailService with templates
+        $emailServicePath = \sfConfig::get('sf_plugins_dir', '')
+            . '/ahgCorePlugin/lib/Services/EmailService.php';
+        if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
             require_once $emailServicePath;
-            if (class_exists('EmailService')) {
-                $emailService = new EmailService();
-                return $emailService->send($search->email, $subject, $body);
-            }
+        }
+        if (class_exists('AhgCore\Services\EmailService') && \AhgCore\Services\EmailService::isEnabled()) {
+            $subject = \AhgCore\Services\EmailService::getSetting('email_search_alert_subject',
+                'New results for your saved search: {search_name}');
+            $body = \AhgCore\Services\EmailService::getSetting('email_search_alert_body',
+                "Dear {name},\n\nYour saved search \"{search_name}\" has {result_count} new result(s).\n\nSearch query: {search_query}\n\nView your saved searches at: {saved_searches_url}\n\nBest regards,\nThe Archive Team");
+
+            $placeholders = [
+                'name' => $search->first_name . ' ' . ($search->last_name ?? ''),
+                'search_name' => $search->name,
+                'result_count' => (string) $newResultsCount,
+                'search_query' => $search->search_query ?? '',
+                'saved_searches_url' => $siteUrl . '/index.php/research/saved-searches',
+            ];
+            $subject = \AhgCore\Services\EmailService::parseTemplate($subject, $placeholders);
+            $body = \AhgCore\Services\EmailService::parseTemplate($body, $placeholders);
+
+            return \AhgCore\Services\EmailService::send($search->email, $subject, $body);
         }
 
         // Fallback to basic mail
+        $subject = "New results for your saved search: {$search->name}";
+        $body = "Dear {$search->first_name},\n\nYour saved search \"{$search->name}\" has {$newResultsCount} new result(s).\n\n";
+        $body .= "View your saved searches at: {$siteUrl}/index.php/research/saved-searches\n\nBest regards,\nThe Archive Team";
+
         $headers = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'archive.local') . "\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 

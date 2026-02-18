@@ -110,7 +110,12 @@
               'researcher_rejected' => 'Rejection (to Researcher)',
               'password_reset' => 'Password Reset (to User)',
               'booking_confirmed' => 'Booking Confirmed (to Researcher)',
+              'booking_cancelled' => 'Booking Cancelled (to Researcher)',
               'admin_new_researcher' => 'New Registration (to Admin)',
+              'collaborator_invite' => 'Collaborator Invitation (to Researcher)',
+              'collaborator_external' => 'External Collaborator Invitation',
+              'peer_review_request' => 'Peer Review Request (to Reviewer)',
+              'search_alert' => 'Search Alert (to Researcher)',
               'error_alert' => 'System Error Alert (to Admin)',
           ];
           $index = 0;

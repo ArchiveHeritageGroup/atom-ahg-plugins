@@ -438,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `research_activity_log` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `researcher_id` INT NOT NULL,
     `project_id` INT DEFAULT NULL,
-    `activity_type` ENUM('view','search','download','cite','annotate','collect','book','request','export','share','login','logout') NOT NULL,
+    `activity_type` ENUM('view','search','download','cite','annotate','collect','book','request','export','share','login','logout','create','clipboard_add') NOT NULL,
     `entity_type` VARCHAR(50),
     `entity_id` INT,
     `entity_title` VARCHAR(500),
@@ -636,7 +636,7 @@ CREATE TABLE IF NOT EXISTS `research_workspace_member` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `workspace_id` INT NOT NULL,
     `researcher_id` INT NOT NULL,
-    `role` ENUM('owner','admin','editor','viewer') DEFAULT 'viewer',
+    `role` ENUM('owner','admin','editor','viewer','member','contributor') DEFAULT 'viewer',
     `invited_by` INT,
     `invited_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `accepted_at` DATETIME,
@@ -1614,7 +1614,8 @@ BEGIN
             ENUM('view','search','download','cite','annotate','collect','book','request','export','share','login','logout',
                  'snapshot_created','snapshot_compared','assertion_created','assertion_verified','assertion_disputed',
                  'extraction_queued','extraction_completed','validation_accepted','validation_rejected',
-                 'hypothesis_created','hypothesis_updated','policy_evaluated','doi_minted') DEFAULT 'view';
+                 'hypothesis_created','hypothesis_updated','policy_evaluated','doi_minted',
+                 'create','clipboard_add') DEFAULT 'view';
     END IF;
 END//
 

@@ -17,12 +17,25 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="invite-form">
                     <div class="mb-3">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="email" class="form-control" required placeholder="researcher@example.com">
-                        <small class="text-muted">The collaborator must be a registered researcher</small>
+                        <label class="form-label">Find Researcher *</label>
+                        <select id="researcher-select" name="researcher_id" placeholder="Type name or email to search..."></select>
+                        <small class="text-muted">Search registered researchers by name or email</small>
                     </div>
+
+                    <div class="mb-3" id="external-invite-section" style="display:none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Not a registered researcher?</strong><br>
+                            Enter their email below and they will be invited to register first.
+                        </div>
+                        <label class="form-label">External Email Address *</label>
+                        <input type="email" name="external_email" id="external-email" class="form-control" placeholder="colleague@example.com">
+                    </div>
+
+                    <input type="hidden" name="email" id="selected-email" value="">
+
                     <div class="mb-3">
                         <label class="form-label">Role *</label>
                         <select name="role" class="form-select" required>
@@ -37,7 +50,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i> Send Invitation</button>
-                        <a href="<?php echo url_for(['module' => 'research', 'action' => 'projectCollaborators', 'id' => $project->id]); ?>" class="btn btn-secondary">Cancel</a>
+                        <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewProject', 'id' => $project->id]); ?>" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -94,3 +107,87 @@
         </div>
     </div>
 </div>
+
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchUrl = '/index.php/research/ajax/search-entities?type=researcher';
+
+    var researcherSelect = new TomSelect('#researcher-select', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title', 'email'],
+        placeholder: 'Type name or email to search...',
+        loadThrottle: 300,
+        maxItems: 1,
+        create: false,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            fetch(searchUrl + '&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(j) { callback(j.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(data, escape) {
+                var html = '<div class="py-1">';
+                html += '<span class="fw-semibold">' + escape(data.title) + '</span>';
+                if (data.email) html += ' <small class="text-muted">&lt;' + escape(data.email) + '&gt;</small>';
+                if (data.institution) html += '<br><small class="text-muted"><i class="fas fa-university fa-xs me-1"></i>' + escape(data.institution) + '</small>';
+                html += '</div>';
+                return html;
+            },
+            item: function(data, escape) {
+                var html = '<div>' + escape(data.title);
+                if (data.email) html += ' <small class="text-muted">&lt;' + escape(data.email) + '&gt;</small>';
+                html += '</div>';
+                return html;
+            },
+            no_results: function(data, escape) {
+                return '<div class="no-results p-2">No researcher found. <a href="#" id="show-external-invite" class="text-primary">Invite external?</a></div>';
+            }
+        },
+        onChange: function(value) {
+            var emailField = document.getElementById('selected-email');
+            if (value) {
+                var item = this.options[value];
+                if (item && item.email) {
+                    emailField.value = item.email;
+                }
+                document.getElementById('external-invite-section').style.display = 'none';
+                document.getElementById('external-email').removeAttribute('required');
+            } else {
+                emailField.value = '';
+            }
+        }
+    });
+
+    // Show external invite on click
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'show-external-invite') {
+            e.preventDefault();
+            document.getElementById('external-invite-section').style.display = 'block';
+            document.getElementById('external-email').setAttribute('required', 'required');
+            researcherSelect.blur();
+        }
+    });
+
+    // On form submit: set email from Tom Select selection or external email
+    document.getElementById('invite-form').addEventListener('submit', function(e) {
+        var selectedEmail = document.getElementById('selected-email').value;
+        var externalEmail = document.getElementById('external-email').value.trim();
+        var researcherId = researcherSelect.getValue();
+
+        if (!researcherId && !externalEmail) {
+            e.preventDefault();
+            alert('Please select a researcher or enter an external email address.');
+            return;
+        }
+
+        if (!researcherId && externalEmail) {
+            document.getElementById('selected-email').value = externalEmail;
+        }
+    });
+});
+</script>
