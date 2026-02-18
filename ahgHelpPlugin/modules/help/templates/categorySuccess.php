@@ -1,11 +1,15 @@
 <?php use_helper('I18N') ?>
+<?php
+  $rawCategory = sfOutputEscaper::unescape($category);
+  $rawGrouped = sfOutputEscaper::unescape($grouped);
+?>
 
 <div class="container-fluid py-4">
   <div class="row">
 
     <!-- Sidebar -->
     <div class="col-lg-3 col-md-4 mb-4">
-      <?php include_partial('help/helpSidebar', ['categories' => \AhgHelp\Services\HelpArticleService::getCategories()]) ?>
+      <?php include_partial('help/helpSidebar', ['categories' => sfOutputEscaper::unescape(\AhgHelp\Services\HelpArticleService::getCategories())]) ?>
     </div>
 
     <!-- Main Content -->
@@ -15,13 +19,13 @@
       <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?php echo url_for('@help_index') ?>"><?php echo __('Help Center') ?></a></li>
-          <li class="breadcrumb-item active"><?php echo htmlspecialchars($category) ?></li>
+          <li class="breadcrumb-item active"><?php echo htmlspecialchars($rawCategory) ?></li>
         </ol>
       </nav>
 
-      <h1 class="mb-4"><?php echo htmlspecialchars($category) ?></h1>
+      <h1 class="mb-4"><?php echo htmlspecialchars($rawCategory) ?></h1>
 
-      <?php foreach ($grouped as $subcategory => $articles): ?>
+      <?php foreach ($rawGrouped as $subcategory => $articles): ?>
         <h2 class="h5 text-muted mt-4 mb-3">
           <i class="bi bi-tag me-1"></i><?php echo htmlspecialchars($subcategory) ?>
           <span class="badge bg-secondary ms-1"><?php echo count($articles) ?></span>
@@ -35,7 +39,7 @@
                 <div>
                   <h6 class="mb-1"><?php echo htmlspecialchars($article['title']) ?></h6>
                   <?php if (!empty($article['related_plugin'])): ?>
-                    <small class="text-muted"><i class="bi bi-puzzle me-1"></i><?php echo $article['related_plugin'] ?></small>
+                    <small class="text-muted"><i class="bi bi-puzzle me-1"></i><?php echo htmlspecialchars($article['related_plugin']) ?></small>
                   <?php endif; ?>
                 </div>
                 <div class="text-end text-nowrap ms-3">

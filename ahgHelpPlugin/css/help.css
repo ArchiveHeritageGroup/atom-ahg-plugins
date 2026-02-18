@@ -31,6 +31,38 @@
   color: var(--ahg-body-text, #212529) !important;
 }
 
+/* TOC sidebar column — prevent stretching to article height */
+.help-toc-col {
+  align-self: flex-start;
+}
+
+/* TOC sidebar — sticky + independent scroll */
+.help-toc-sidebar {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ahg-border, #dee2e6) transparent;
+}
+
+.help-toc-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.help-toc-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.help-toc-sidebar::-webkit-scrollbar-thumb {
+  background: var(--ahg-border, #dee2e6);
+  border-radius: 3px;
+}
+
+.help-toc-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--ahg-muted, #6c757d);
+}
+
 /* TOC sidebar navigation */
 .help-toc-nav .nav-link {
   color: var(--ahg-sidebar-text, #333333);
@@ -108,9 +140,14 @@
 }
 
 .help-article-content img {
-  max-width: 100%;
+  max-width: 600px;
+  width: 100%;
   height: auto;
   border-radius: 0.375rem;
+  border: 1px solid var(--ahg-border, #dee2e6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 1rem 0;
+  display: block;
 }
 
 .help-article-content a {
@@ -122,6 +159,27 @@
   background: var(--ahg-sidebar-bg, #f8f9fa);
   border-radius: 0.375rem;
   padding: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ahg-border, #dee2e6) transparent;
+}
+
+.help-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.help-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.help-sidebar::-webkit-scrollbar-thumb {
+  background: var(--ahg-border, #dee2e6);
+  border-radius: 3px;
+}
+
+.help-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--ahg-muted, #6c757d);
 }
 
 .help-sidebar .nav-link {
@@ -431,8 +489,14 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .help-toc-col {
+    align-self: stretch;
+  }
+
   .help-toc-sidebar {
     position: static !important;
+    max-height: none;
+    overflow-y: visible;
   }
 
   .help-sidebar {

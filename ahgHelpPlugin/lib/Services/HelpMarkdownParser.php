@@ -167,6 +167,7 @@ class HelpMarkdownParser
             }
             self::$parsedown = new \ParsedownExtra();
             self::$parsedown->setSafeMode(false);
+            self::$parsedown->setMarkupEscaped(false);
         }
 
         return self::$parsedown;

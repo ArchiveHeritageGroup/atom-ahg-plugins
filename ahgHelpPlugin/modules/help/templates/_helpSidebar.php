@@ -1,4 +1,8 @@
 <?php use_helper('I18N') ?>
+<?php
+  // Categories are passed raw from the calling template
+  $rawCategories = is_array($categories) ? $categories : sfOutputEscaper::unescape($categories);
+?>
 
 <div class="help-sidebar sticky-top" style="top: 1rem;">
 
@@ -15,12 +19,12 @@
   <!-- Categories -->
   <h6 class="text-uppercase text-muted mb-2"><?php echo __('Categories') ?></h6>
   <ul class="nav flex-column mb-3">
-    <?php if (isset($categories)): ?>
-      <?php foreach ($categories as $cat): ?>
+    <?php if (!empty($rawCategories)): ?>
+      <?php foreach ($rawCategories as $cat): ?>
         <li class="nav-item">
           <a class="nav-link py-1 d-flex justify-content-between align-items-center"
             href="<?php echo url_for('@help_category?category=' . urlencode($cat['category'])) ?>">
-            <span><?php echo $cat['category'] ?></span>
+            <span><?php echo htmlspecialchars($cat['category']) ?></span>
             <span class="badge bg-secondary rounded-pill"><?php echo $cat['article_count'] ?></span>
           </a>
         </li>

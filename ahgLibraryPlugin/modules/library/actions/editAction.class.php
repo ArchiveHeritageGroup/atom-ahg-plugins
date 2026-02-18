@@ -26,12 +26,8 @@ class libraryEditAction extends AhgController
             
             $this->loadLibraryData($this->resource->id);
         } else {
-            // Creating new resource
-            if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
-                $this->resource = \AtomFramework\Services\Write\WriteServiceFactory::informationObject()->newInformationObject();
-            } else {
-                $this->resource = new QubitInformationObject();
-            }
+            // Creating new resource — must use Propel object for Symfony template compatibility
+            $this->resource = new QubitInformationObject();
             $this->itemLocation = [];
             
             // Check create permission on root

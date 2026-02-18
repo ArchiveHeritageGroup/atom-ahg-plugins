@@ -11,6 +11,16 @@ $docInfo = $sf_data->getRaw('docInfo');
 $entityCounts = $sf_data->getRaw('entityCounts') ?? [];
 $totalEntities = $sf_data->getRaw('totalEntities') ?? 0;
 
+// Resolve slug for URL generation (object is stdClass from Laravel QB)
+$objectSlug = $object->slug ?? null;
+if (!$objectSlug) {
+    $slugRow = \Illuminate\Database\Capsule\Manager::table('slug')
+        ->where('object_id', $objectId)
+        ->first();
+    $objectSlug = $slugRow->slug ?? $objectId;
+}
+$objectTitle = $object->title ?? 'Untitled';
+
 // Entity type colors
 $typeColors = [
     'PERSON' => ['bg' => '#4e79a7', 'label' => 'Person'],
@@ -40,7 +50,7 @@ $typeColors = [
             </nav>
         </div>
         <div class="btn-group">
-            <a href="<?php echo url_for([$object, 'module' => 'informationobject']); ?>" class="btn btn-outline-secondary" target="_blank">
+            <a href="<?php echo url_for('@slug?slug=' . $objectSlug); ?>" class="btn btn-outline-secondary" target="_blank">
                 <i class="fas fa-external-link-alt me-1"></i>View Record
             </a>
             <a href="<?php echo url_for(['module' => 'ai', 'action' => 'review']); ?>" class="btn btn-outline-secondary">
@@ -54,8 +64,8 @@ $typeColors = [
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5 class="mb-1"><?php echo esc_entities($object->getTitle(['cultureFallback' => true]) ?? 'Untitled'); ?></h5>
-                    <small class="text-muted"><?php echo esc_entities($object->identifier ?? $object->slug ?? ''); ?></small>
+                    <h5 class="mb-1"><?php echo esc_entities($objectTitle); ?></h5>
+                    <small class="text-muted"><?php echo esc_entities($object->identifier ?? $objectSlug ?? ''); ?></small>
                 </div>
                 <div class="col-md-6">
                     <div class="d-flex justify-content-end gap-4">

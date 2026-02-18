@@ -1,11 +1,17 @@
 <?php use_helper('I18N') ?>
+<?php
+  $rawCategories = sfOutputEscaper::unescape($categories);
+  $rawRecentArticles = sfOutputEscaper::unescape($recentArticles);
+  $rawCategoryDescriptions = sfOutputEscaper::unescape($categoryDescriptions);
+  $rawCategoryIcons = sfOutputEscaper::unescape($categoryIcons);
+?>
 
 <div class="container-fluid py-4">
   <div class="row">
 
     <!-- Sidebar -->
     <div class="col-lg-3 col-md-4 mb-4">
-      <?php include_partial('help/helpSidebar', ['categories' => $categories]) ?>
+      <?php include_partial('help/helpSidebar', ['categories' => $rawCategories]) ?>
     </div>
 
     <!-- Main Content -->
@@ -32,18 +38,18 @@
       <!-- Category Cards -->
       <h2 class="h4 mb-3"><?php echo __('Browse by Category') ?></h2>
       <div class="row g-3 mb-4">
-        <?php foreach ($categories as $cat): ?>
+        <?php foreach ($rawCategories as $cat): ?>
           <?php $catName = $cat['category']; ?>
           <div class="col-lg-4 col-md-6">
             <a href="<?php echo url_for('@help_category?category=' . urlencode($catName)) ?>" class="text-decoration-none">
               <div class="card h-100 help-category-card">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-2">
-                    <i class="bi <?php echo isset($categoryIcons[$catName]) ? $categoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" style="color: var(--ahg-primary, #005837);"></i>
-                    <h5 class="card-title mb-0"><?php echo $catName ?></h5>
+                    <i class="bi <?php echo isset($rawCategoryIcons[$catName]) ? $rawCategoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" style="color: var(--ahg-primary, #005837);"></i>
+                    <h5 class="card-title mb-0"><?php echo htmlspecialchars($catName) ?></h5>
                   </div>
                   <p class="card-text text-muted small">
-                    <?php echo isset($categoryDescriptions[$catName]) ? $categoryDescriptions[$catName] : '' ?>
+                    <?php echo htmlspecialchars($rawCategoryDescriptions[$catName] ?? '') ?>
                   </p>
                   <span class="badge bg-secondary"><?php echo $cat['article_count'] ?> <?php echo __('articles') ?></span>
                 </div>
@@ -54,17 +60,17 @@
       </div>
 
       <!-- Recently Updated -->
-      <?php if (!empty($recentArticles)): ?>
+      <?php if (!empty($rawRecentArticles)): ?>
         <h2 class="h4 mb-3"><?php echo __('Recently Updated') ?></h2>
         <div class="list-group mb-4">
-          <?php foreach ($recentArticles as $article): ?>
+          <?php foreach ($rawRecentArticles as $article): ?>
             <a href="<?php echo url_for('@help_article_view?slug=' . urlencode($article['slug'])) ?>"
               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
               <div>
                 <strong><?php echo htmlspecialchars($article['title']) ?></strong>
-                <span class="badge bg-info ms-2"><?php echo $article['category'] ?></span>
+                <span class="badge bg-info ms-2"><?php echo htmlspecialchars($article['category']) ?></span>
                 <?php if (!empty($article['subcategory'])): ?>
-                  <span class="badge bg-light text-dark ms-1"><?php echo $article['subcategory'] ?></span>
+                  <span class="badge bg-light text-dark ms-1"><?php echo htmlspecialchars($article['subcategory']) ?></span>
                 <?php endif; ?>
               </div>
               <small class="text-muted"><?php echo date('M j, Y', strtotime($article['updated_at'])) ?></small>

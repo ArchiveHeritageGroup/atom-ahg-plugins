@@ -1,11 +1,18 @@
 <?php use_helper('I18N') ?>
+<?php
+  // Unescape to get raw arrays — Symfony 1.x auto-escapes all template variables
+  $rawArticle = sfOutputEscaper::unescape($article);
+  $rawToc = sfOutputEscaper::unescape($toc);
+  $rawPrev = sfOutputEscaper::unescape($prevArticle);
+  $rawNext = sfOutputEscaper::unescape($nextArticle);
+?>
 
 <div class="container-fluid py-4">
   <div class="row">
 
     <!-- TOC Sidebar -->
-    <div class="col-lg-3 col-md-4 mb-4">
-      <div class="help-toc-sidebar sticky-top" style="top: 1rem;">
+    <div class="col-lg-3 col-md-4 mb-4 help-toc-col">
+      <div class="help-toc-sidebar">
         <!-- Search -->
         <div class="mb-3">
           <form action="<?php echo url_for('@help_search') ?>" method="get" class="input-group input-group-sm">
@@ -17,16 +24,16 @@
         </div>
 
         <!-- Back link -->
-        <a href="<?php echo url_for('@help_category?category=' . urlencode($article['category'])) ?>" class="d-block mb-3 small">
-          <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to %1%', ['%1%' => $article['category']]) ?>
+        <a href="<?php echo url_for('@help_category?category=' . urlencode($rawArticle['category'])) ?>" class="d-block mb-3 small">
+          <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to %1%', ['%1%' => htmlspecialchars($rawArticle['category'])]) ?>
         </a>
 
         <!-- Table of Contents -->
-        <?php if (!empty($toc)): ?>
+        <?php if (!empty($rawToc)): ?>
           <h6 class="text-uppercase text-muted mb-2"><?php echo __('Contents') ?></h6>
           <nav class="help-toc-nav">
             <ul class="nav flex-column">
-              <?php foreach ($toc as $entry): ?>
+              <?php foreach ($rawToc as $entry): ?>
                 <li class="nav-item">
                   <a class="nav-link py-1 <?php echo $entry['level'] === 3 ? 'ms-3 small' : '' ?>"
                     href="#<?php echo htmlspecialchars($entry['anchor']) ?>">
@@ -42,15 +49,15 @@
         <div class="mt-3 pt-3 border-top small text-muted">
           <div class="mb-1">
             <i class="bi bi-tag me-1"></i>
-            <a href="<?php echo url_for('@help_category?category=' . urlencode($article['category'])) ?>">
-              <?php echo $article['category'] ?>
+            <a href="<?php echo url_for('@help_category?category=' . urlencode($rawArticle['category'])) ?>">
+              <?php echo htmlspecialchars($rawArticle['category']) ?>
             </a>
-            <?php if (!empty($article['subcategory'])): ?>
-              / <?php echo $article['subcategory'] ?>
+            <?php if (!empty($rawArticle['subcategory'])): ?>
+              / <?php echo htmlspecialchars($rawArticle['subcategory']) ?>
             <?php endif; ?>
           </div>
-          <div class="mb-1"><i class="bi bi-body-text me-1"></i><?php echo number_format($article['word_count']) ?> words</div>
-          <div><i class="bi bi-clock me-1"></i><?php echo date('M j, Y', strtotime($article['updated_at'])) ?></div>
+          <div class="mb-1"><i class="bi bi-body-text me-1"></i><?php echo number_format($rawArticle['word_count']) ?> words</div>
+          <div><i class="bi bi-clock me-1"></i><?php echo date('M j, Y', strtotime($rawArticle['updated_at'])) ?></div>
         </div>
       </div>
     </div>
@@ -63,32 +70,32 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?php echo url_for('@help_index') ?>"><?php echo __('Help Center') ?></a></li>
           <li class="breadcrumb-item">
-            <a href="<?php echo url_for('@help_category?category=' . urlencode($article['category'])) ?>">
-              <?php echo $article['category'] ?>
+            <a href="<?php echo url_for('@help_category?category=' . urlencode($rawArticle['category'])) ?>">
+              <?php echo htmlspecialchars($rawArticle['category']) ?>
             </a>
           </li>
-          <li class="breadcrumb-item active"><?php echo htmlspecialchars($article['title']) ?></li>
+          <li class="breadcrumb-item active"><?php echo htmlspecialchars($rawArticle['title']) ?></li>
         </ol>
       </nav>
 
       <!-- Article Content -->
       <article class="help-article-content">
-        <?php echo $article['body_html'] ?>
+        <?php echo $rawArticle['body_html'] ?>
       </article>
 
       <!-- Prev / Next Navigation -->
-      <nav class="d-flex justify-content-between mt-5 pt-4 border-top">
-        <?php if ($prevArticle): ?>
-          <a href="<?php echo url_for('@help_article_view?slug=' . urlencode($prevArticle['slug'])) ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-chevron-left me-1"></i><?php echo htmlspecialchars($prevArticle['title']) ?>
+      <nav class="help-article-nav d-flex justify-content-between mt-5 pt-4 border-top">
+        <?php if ($rawPrev): ?>
+          <a href="<?php echo url_for('@help_article_view?slug=' . urlencode($rawPrev['slug'])) ?>" class="btn btn-outline-secondary">
+            <i class="bi bi-chevron-left me-1"></i><?php echo htmlspecialchars($rawPrev['title']) ?>
           </a>
         <?php else: ?>
           <span></span>
         <?php endif; ?>
 
-        <?php if ($nextArticle): ?>
-          <a href="<?php echo url_for('@help_article_view?slug=' . urlencode($nextArticle['slug'])) ?>" class="btn btn-outline-secondary">
-            <?php echo htmlspecialchars($nextArticle['title']) ?><i class="bi bi-chevron-right ms-1"></i>
+        <?php if ($rawNext): ?>
+          <a href="<?php echo url_for('@help_article_view?slug=' . urlencode($rawNext['slug'])) ?>" class="btn btn-outline-secondary">
+            <?php echo htmlspecialchars($rawNext['title']) ?><i class="bi bi-chevron-right ms-1"></i>
           </a>
         <?php else: ?>
           <span></span>

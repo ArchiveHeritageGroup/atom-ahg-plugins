@@ -18,7 +18,23 @@ class helpActions extends AhgController
 
         // Category descriptions for cards
         $this->categoryDescriptions = [
-            'User Guide' => 'Step-by-step guides for using AtoM Heratio features',
+            // Former subcategories (now top-level)
+            'Admin & Settings' => 'System settings, backup, encryption, statistics, and workflow',
+            'AI & Automation' => 'AI tools, NER, duplicate detection, semantic and fuzzy search',
+            'Browse & Search' => 'GLAM browse, advanced search, term and taxonomy browsing',
+            'Collection Mgmt' => 'Condition, contacts, contracts, donors, loans, provenance, vendors',
+            'Compliance' => 'Audit trail, embargo, privacy, security, preservation',
+            'Exhibitions' => 'Exhibition management and landing page builder',
+            'GLAM Sectors' => 'Gallery, Library, Museum, DAM, and GLAM Browse modules',
+            'Heritage Accounting' => 'Heritage asset accounting (GRAP 103 / IPSAS 45)',
+            'Import/Export' => 'Data ingest, migration, metadata export, portable export',
+            'Integration' => 'DOI, REST API, GraphQL, Federation, IIIF, RiC',
+            'Labels & Forms' => 'Barcodes, label printing, and forms builder',
+            'Public Access' => 'Access requests, cart, favorites, feedback, heritage platform',
+            'Research' => 'Researcher portal and knowledge platform',
+            'Rights' => 'Rights management, extended rights, ICIP',
+            'Viewers & Media' => '3D viewer, audio player, IIIF, Mirador, OpenSeadragon, PDF',
+            // Top-level categories
             'User Manual' => 'Comprehensive user manuals',
             'Plugin Reference' => 'Technical reference documentation for each plugin',
             'Technical' => 'Architecture, database, and system documentation',
@@ -27,10 +43,24 @@ class helpActions extends AhgController
 
         // Category icons (Bootstrap Icons class names)
         $this->categoryIcons = [
-            'User Guide' => 'bi-book',
+            'Admin & Settings' => 'bi-gear',
+            'AI & Automation' => 'bi-robot',
+            'Browse & Search' => 'bi-search',
+            'Collection Mgmt' => 'bi-archive',
+            'Compliance' => 'bi-shield-check',
+            'Exhibitions' => 'bi-easel',
+            'GLAM Sectors' => 'bi-building',
+            'Heritage Accounting' => 'bi-calculator',
+            'Import/Export' => 'bi-arrow-left-right',
+            'Integration' => 'bi-plug',
+            'Labels & Forms' => 'bi-tag',
+            'Public Access' => 'bi-people',
+            'Research' => 'bi-mortarboard',
+            'Rights' => 'bi-lock',
+            'Viewers & Media' => 'bi-play-circle',
             'User Manual' => 'bi-journal-text',
             'Plugin Reference' => 'bi-puzzle',
-            'Technical' => 'bi-gear',
+            'Technical' => 'bi-cpu',
             'Reference' => 'bi-file-text',
         ];
     }
@@ -51,7 +81,7 @@ class helpActions extends AhgController
         $this->articles = \AhgHelp\Services\HelpArticleService::getByCategory($category);
 
         if (empty($this->articles)) {
-            $this->forward404();
+            $this->redirect(url_for('@help_index'));
         }
 
         $this->response->setTitle($category . ' - ' . __('Help Center') . ' - ' . $this->response->getTitle());

@@ -189,6 +189,12 @@ EOF;
             $subcategory = $this->detectSubcategory($filename);
             $relatedPlugin = $this->detectPlugin($relPath, $filename);
 
+            // Promote subcategory to category for user guides
+            if ($category === 'User Guide' && !empty($subcategory)) {
+                $category = $subcategory;
+                $subcategory = null;
+            }
+
             if ($dryRun) {
                 $this->logSection('dry-run', sprintf(
                     '%-50s → cat=%-18s sub=%-20s plugin=%s',
