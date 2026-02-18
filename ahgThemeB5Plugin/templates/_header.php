@@ -19,7 +19,28 @@
     <?php if (sfConfig::get('app_toggleLogo') || sfConfig::get('app_toggleTitle')) { ?>
       <a class="navbar-brand d-flex flex-wrap flex-lg-nowrap align-items-center py-0 me-0" href="<?php echo url_for('@homepage'); ?>" title="<?php echo __('Home'); ?>" rel="home">
         <?php if (sfConfig::get('app_toggleLogo')) { ?>
-          <?php echo image_tag('/plugins/arDominionB5Plugin/images/logo', ['alt' => __('AtoM logo'), 'class' => 'd-inline-block my-2 me-3', 'height' => '35']); ?>
+          <?php
+            $customLogo = null;
+            try {
+                if (class_exists('Illuminate\Database\Capsule\Manager')) {
+                    $row = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                        ->where('setting_key', 'ahg_logo_path')
+                        ->where('setting_group', 'general')
+                        ->first();
+                    if ($row && !empty($row->setting_value)) {
+                        $logoFile = sfConfig::get('sf_root_dir').$row->setting_value;
+                        if (file_exists($logoFile)) {
+                            $customLogo = $row->setting_value;
+                        }
+                    }
+                }
+            } catch (Exception $e) {}
+          ?>
+          <?php if ($customLogo): ?>
+            <img src="<?php echo $customLogo; ?>" alt="<?php echo __('Logo'); ?>" class="d-inline-block my-2 me-3" height="35">
+          <?php else: ?>
+            <?php echo image_tag('/plugins/arDominionB5Plugin/images/logo', ['alt' => __('AtoM logo'), 'class' => 'd-inline-block my-2 me-3', 'height' => '35']); ?>
+          <?php endif; ?>
         <?php } ?>
         <?php if (sfConfig::get('app_toggleTitle') && !empty(sfConfig::get('app_siteTitle'))) { ?>
           <span class="text-wrap my-1 me-3"><?php echo esc_specialchars(sfConfig::get('app_siteTitle')); ?></span>

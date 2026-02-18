@@ -1,6 +1,60 @@
 @extends('layouts.page')
 
 @section('content')
+<style {!! $csp_nonce ?? '' !!}>
+/* Page header bar — Primary colour */
+.ahg-settings-page .page-header {
+    background-color: var(--ahg-primary, #005837) !important;
+    color: #fff !important;
+    padding: 1rem 1.5rem;
+    border-radius: 0.375rem;
+}
+.ahg-settings-page .page-header * { color: #fff !important; }
+.ahg-settings-page .page-header .text-muted { color: rgba(255,255,255,0.75) !important; }
+/* Sidebar active item — Secondary colour */
+.ahg-settings-page .list-group-item.active {
+    background-color: var(--ahg-secondary, #37A07F) !important;
+    border-color: var(--ahg-secondary, #37A07F) !important;
+    color: #fff !important;
+}
+/* Sidebar column background and text */
+.ahg-settings-page .col-md-3 .card {
+    background-color: var(--ahg-sidebar-bg, #f8f9fa);
+}
+.ahg-settings-page .col-md-3 .list-group-item:not(.active) {
+    color: var(--ahg-sidebar-text, #333) !important;
+    background-color: var(--ahg-sidebar-bg, #f8f9fa) !important;
+}
+/* Card headers */
+.ahg-settings-page .card-header {
+    background-color: var(--ahg-card-header-bg, #005837) !important;
+    color: var(--ahg-card-header-text, #fff) !important;
+}
+.ahg-settings-page .card-header * {
+    color: var(--ahg-card-header-text, #fff) !important;
+}
+/* Buttons — use background shorthand to override webpack gradients */
+.ahg-settings-page .btn-outline-secondary,
+.ahg-settings-page a.btn-outline-secondary,
+.ahg-settings-page .btn-primary,
+.ahg-settings-page a.btn-primary {
+    background: var(--ahg-button-bg, var(--ahg-btn-bg, #005837)) !important;
+    border-color: var(--ahg-button-bg, var(--ahg-btn-bg, #005837)) !important;
+    color: var(--ahg-button-text, var(--ahg-btn-text, #fff)) !important;
+}
+.ahg-settings-page .btn-outline-danger,
+.ahg-settings-page a.btn-outline-danger {
+    background: var(--ahg-danger, #dc3545) !important;
+    border-color: var(--ahg-danger, #dc3545) !important;
+    color: #fff !important;
+}
+.ahg-settings-page .btn:hover { filter: brightness(0.9); }
+/* Sample preview button */
+.ahg-settings-page #preview-button {
+    background: var(--ahg-button-bg, var(--ahg-btn-bg, #005837)) !important;
+    color: var(--ahg-button-text, var(--ahg-btn-text, #fff)) !important;
+}
+</style>
 <div class="ahg-settings-page">
     <!-- Back to Overview Link -->
     <div class="mb-3">
@@ -19,7 +73,7 @@
         <!-- Sidebar Navigation -->
         <div class="col-md-3">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-list"></i> {{ __('Settings Sections') }}</h5>
                 </div>
                 <div class="list-group list-group-flush">
@@ -1149,7 +1203,7 @@
                             @case('ingest')
                                 <!-- AI & Processing Defaults -->
                                 <div class="card mb-4">
-                                    <div class="card-header bg-info text-white">
+                                    <div class="card-header">
                                         <h5 class="mb-0"><i class="fas fa-brain me-2"></i>{{ __('AI & Processing Defaults') }}</h5>
                                     </div>
                                     <div class="card-body">

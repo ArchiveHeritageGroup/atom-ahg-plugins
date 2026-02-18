@@ -43,7 +43,7 @@ $placementVal = $session->parent_placement ?? 'top_level';
     </div>
 </div>
 
-<form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'configure', 'id' => $session->id ?? '']) ?>">
+<form method="post" action="<?php echo $session ? url_for('@ingest_configure?id=' . $session->id) : url_for('@ingest_new') ?>">
 
     <div class="row">
         <!-- Left Column: Core Settings -->

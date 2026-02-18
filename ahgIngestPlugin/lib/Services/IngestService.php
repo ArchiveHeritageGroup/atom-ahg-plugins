@@ -1491,12 +1491,12 @@ class IngestService
             $rowErrors = 0;
             $rowWarnings = 0;
 
-            // Required field checks
+            // Required field checks (warnings — do not block ingestion)
             foreach ($required as $field) {
                 if (empty($enriched[$field])) {
-                    $this->addValidation($sessionId, $row->row_number, 'error', $field,
+                    $this->addValidation($sessionId, $row->row_number, 'warning', $field,
                         "Required field '{$field}' is empty");
-                    $rowErrors++;
+                    $rowWarnings++;
                 }
             }
 

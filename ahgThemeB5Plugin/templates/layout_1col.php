@@ -14,5 +14,4 @@
     <?php include_slot('after-content'); ?>
   </div>
 </div>
-
 <?php echo get_partial('layout_end'); ?>

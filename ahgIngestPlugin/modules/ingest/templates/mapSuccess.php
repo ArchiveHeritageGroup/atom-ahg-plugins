@@ -107,8 +107,7 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
                                 <?php if ($vocabLabel): ?><small class="text-muted ms-1">(<?php echo $vocabLabel ?>)</small><?php endif ?>
                             </label>
                             <?php if ($fieldDef['type'] === 'select' && !empty($vocabOptions)): ?>
-                                <select class="form-select" id="meta_<?php echo $fieldName ?>" name="metadata[<?php echo $fieldName ?>]"
-                                    <?php echo $isRequired ? 'required' : '' ?>>
+                                <select class="form-select" id="meta_<?php echo $fieldName ?>" name="metadata[<?php echo $fieldName ?>]">
                                     <option value=""><?php echo __('— Select —') ?></option>
                                     <?php foreach ($vocabOptions as $opt): ?>
                                         <option value="<?php echo esc_entities($opt) ?>"
@@ -119,10 +118,9 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
                                 </select>
                             <?php elseif ($fieldDef['type'] === 'textarea'): ?>
                                 <textarea class="form-control" id="meta_<?php echo $fieldName ?>" name="metadata[<?php echo $fieldName ?>]"
-                                    rows="3" <?php echo $isRequired ? 'required' : '' ?>></textarea>
+                                    rows="3"></textarea>
                             <?php else: ?>
-                                <input type="text" class="form-control" id="meta_<?php echo $fieldName ?>" name="metadata[<?php echo $fieldName ?>]"
-                                    <?php echo $isRequired ? 'required' : '' ?>>
+                                <input type="text" class="form-control" id="meta_<?php echo $fieldName ?>" name="metadata[<?php echo $fieldName ?>]">
                             <?php endif ?>
                             <?php if (!empty($fieldDef['help'])): ?>
                                 <small class="text-muted"><?php echo __($fieldDef['help']) ?></small>

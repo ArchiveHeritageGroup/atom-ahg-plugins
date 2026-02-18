@@ -9,17 +9,7 @@ class AhgSettingsSectionAction extends AhgController
     protected $sections = [
         'general' => ['label' => 'General Settings', 'icon' => 'fa-cog'],
         'multi_tenant' => ['label' => 'Multi-Tenancy', 'icon' => 'fa-building', 'description' => 'Repository-based multi-tenancy with user hierarchy'],
-        'metadata' => [
-            'meta_extract_on_upload', 'meta_auto_populate',
-            'meta_images', 'meta_pdf', 'meta_office', 'meta_video', 'meta_audio',
-            'meta_extract_gps', 'meta_extract_technical', 'meta_extract_xmp', 'meta_extract_iptc',
-            'meta_overwrite_existing', 'meta_create_access_points', 'meta_field_mappings',
-            'meta_dam_batch_mode', 'meta_dam_preserve_filename', 'meta_dam_extract_color',
-            'meta_dam_extract_faces', 'meta_dam_auto_tag', 'meta_dam_generate_thumbnail',
-            'meta_dam_thumb_small', 'meta_dam_thumb_medium', 'meta_dam_thumb_large', 'meta_dam_thumb_preview',
-            'map_title_dam', 'map_creator_dam', 'map_keywords_dam', 'map_description_dam',
-            'map_date_dam', 'map_copyright_dam', 'map_technical_dam', 'map_gps_dam', 'meta_replace_placeholders'
-        ],
+        'metadata' => ['label' => 'Metadata Extraction', 'icon' => 'fa-database'],
         'iiif' => ['label' => 'IIIF Viewer', 'icon' => 'fa-images'],
         'spectrum' => ['label' => 'Spectrum / Collections', 'icon' => 'fa-archive'],
         'data_protection' => ['label' => 'Data Protection', 'icon' => 'fa-shield-alt'],
@@ -27,7 +17,6 @@ class AhgSettingsSectionAction extends AhgController
         'media' => ['label' => 'Media Player', 'icon' => 'fa-play-circle'],
         'photos' => ['label' => 'Condition Photos', 'icon' => 'fa-camera'],
         'jobs' => ['label' => 'Background Jobs', 'icon' => 'fa-tasks'],
-		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
 		'fuseki' => ['label' => 'Fuseki / RIC', 'icon' => 'fa-project-diagram'],
         'ingest' => ['label' => 'Data Ingest Defaults', 'icon' => 'fa-file-import', 'description' => 'Default processing options for batch data ingest'],
         'portable_export' => ['label' => 'Portable Export', 'icon' => 'fa-compact-disc', 'description' => 'Standalone portable catalogue viewer for offline access'],

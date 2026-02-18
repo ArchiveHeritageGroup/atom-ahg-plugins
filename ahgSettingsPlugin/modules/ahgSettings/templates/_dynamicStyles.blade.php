@@ -94,6 +94,39 @@ $hexToRgb = function($hex) {
     --ahg-danger-rgb: {{ $hexToRgb($danger) }};
     --ahg-warning-rgb: {{ $hexToRgb($warning) }};
     --ahg-info-rgb: {{ $hexToRgb($info) }};
+
+    /* Webpack bundle variable aliases — sync with dynamic values */
+    --ahg-primary-color: {{ $primary }};
+    --ahg-primary-dark: {{ $primary }};
+    --ahg-accent-color: {{ $secondary }};
+    --ahg-accent-dark: {{ $secondary }};
+    --ahg-button-bg: {{ $buttonBg }};
+    --ahg-button-text: {{ $buttonText }};
+    --ahg-text-white: #ffffff;
+}
+
+/* Main navbar — Primary colour */
+.navbar, header.navbar, #top-bar.navbar {
+    background: {{ $primary }} !important;
+}
+
+/* All buttons — use Button Background, override webpack gradient */
+.btn.btn-primary,
+.btn.btn-outline-secondary,
+.btn.btn-outline-primary,
+a.btn-primary,
+a.btn-outline-secondary,
+a.btn-outline-primary,
+button.btn-primary,
+input.btn-primary {
+    background: {{ $buttonBg }} !important;
+    border-color: {{ $buttonBg }} !important;
+    color: {{ $buttonText }} !important;
+}
+.btn-primary:hover, .btn-primary:focus,
+.btn-outline-secondary:hover, .btn-outline-secondary:focus,
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+    filter: brightness(0.9);
 }
 
 /* Apply to Bootstrap components */
@@ -102,15 +135,6 @@ $hexToRgb = function($hex) {
     color: var(--ahg-card-header-text) !important;
 }
 .card-header * { color: var(--ahg-card-header-text) !important; }
-
-.btn-primary {
-    background-color: var(--ahg-btn-bg) !important;
-    border-color: var(--ahg-btn-bg) !important;
-    color: var(--ahg-btn-text) !important;
-}
-.btn-primary:hover, .btn-primary:focus {
-    filter: brightness(0.9);
-}
 
 a:not(.btn):not(.nav-link):not(.dropdown-item) {
     color: var(--ahg-link-color);
