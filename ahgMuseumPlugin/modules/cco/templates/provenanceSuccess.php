@@ -237,7 +237,7 @@ $canEdit = $sf_data->getRaw('canEdit');
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-<?php include sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin/js/provenance-timeline.js'; ?>
+<?php include sfConfig::get('sf_plugins_dir').'/ahgMuseumPlugin/web/js/provenance-timeline.js'; ?>
 </script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

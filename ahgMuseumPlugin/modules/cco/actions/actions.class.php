@@ -26,29 +26,39 @@ class ccoActions extends AhgController
             $this->forward404();
         }
 
-        // Get provenance data
+        // Get provenance chain from provenance_entry table
+        $this->provenanceChain = DB::table('provenance_entry')
+            ->where('information_object_id', $this->resource->id)
+            ->orderBy('sequence')
+            ->get();
+
+        // Add display labels
+        foreach ($this->provenanceChain as $entry) {
+            $typeLabels = [
+                'person' => 'Individual', 'family' => 'Family', 'dealer' => 'Dealer',
+                'auction_house' => 'Auction House', 'museum' => 'Museum/Gallery',
+                'corporate' => 'Corporate', 'government' => 'Government',
+                'religious' => 'Religious Institution', 'artist' => 'Artist', 'unknown' => 'Unknown',
+            ];
+            $entry->owner_type_label = $typeLabels[$entry->owner_type] ?? $entry->owner_type;
+            $entry->date_display = $entry->start_date;
+            if ($entry->start_date_qualifier) {
+                $entry->date_display = $entry->start_date_qualifier . ' ' . $entry->date_display;
+            }
+            if ($entry->end_date && $entry->end_date !== $entry->start_date) {
+                $entry->date_display .= ' – ' . $entry->end_date;
+            }
+        }
+
+        // Also load legacy event/custody data for timeline
         $this->provenanceEvents = $this->getProvenanceEvents($this->resource->id);
         $this->custodyHistory = $this->getCustodyHistory($this->resource->id);
 
-        // Get i18n fields
-        $culture = $this->getContext()->getUser()->getCulture() ?? 'en';
-        $i18n = DB::table('information_object_i18n')
-            ->where('id', $this->resource->id)
-            ->where('culture', $culture)
-            ->first();
+        // Build timeline data from provenance_entry
+        $this->timelineData = $this->buildProvenanceChainTimeline();
 
-        if (!$i18n && $culture !== 'en') {
-            $i18n = DB::table('information_object_i18n')
-                ->where('id', $this->resource->id)
-                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
-                ->first();
-        }
-
-        $this->archivalHistory = $i18n->archival_history ?? null;
-        $this->custodialHistory = $i18n->archival_history ?? null;
-        $this->immediateSourceOfAcquisition = $i18n->acquisition ?? null;
-
-        $this->timelineData = $this->prepareTimelineData();
+        // Check edit permission
+        $this->canEdit = $this->getContext()->getUser()->isAdministrator();
         
         // Use the provenanceSuccess template from cco/templates
         $this->setTemplate('provenance');
@@ -214,6 +224,100 @@ class ccoActions extends AhgController
         });
 
         return json_encode($timelineItems);
+    }
+
+    /**
+     * Build timeline data from provenance_entry table in the format
+     * expected by ProvenanceTimeline JS: {nodes, links, events, dateRange}
+     */
+    protected function buildProvenanceChainTimeline()
+    {
+        $nodes = [];
+        $links = [];
+        $events = [];
+        $minYear = PHP_INT_MAX;
+        $maxYear = PHP_INT_MIN;
+
+        $certaintyMap = [
+            'certain' => 100, 'probable' => 75, 'possible' => 50,
+            'uncertain' => 25, 'unknown' => 10,
+        ];
+
+        foreach ($this->provenanceChain as $entry) {
+            $startYear = $this->parseYear($entry->start_date);
+            $endYear = $entry->end_date ? $this->parseYear($entry->end_date) : $startYear;
+
+            if ($startYear !== null) {
+                $minYear = min($minYear, $startYear);
+                $maxYear = max($maxYear, $endYear ?? $startYear);
+            }
+
+            $nodes[] = [
+                'id' => $entry->id,
+                'label' => $entry->owner_name,
+                'ownerType' => $entry->owner_type,
+                'startYear' => $startYear ?? 0,
+                'endYear' => $endYear,
+                'location' => $entry->owner_location,
+                'certainty' => $entry->certainty,
+                'certaintyValue' => $certaintyMap[$entry->certainty] ?? 50,
+                'isGap' => (bool) $entry->is_gap,
+                'sequence' => $entry->sequence,
+            ];
+
+            // Create transfer event between this and next entry
+            if ($entry->transfer_type && $entry->transfer_type !== 'unknown') {
+                $events[] = [
+                    'year' => $startYear,
+                    'label' => ucfirst(str_replace('_', ' ', $entry->transfer_type)),
+                    'transferType' => $entry->transfer_type,
+                    'details' => $entry->transfer_details,
+                    'salePrice' => $entry->sale_price ? (float) $entry->sale_price : null,
+                    'saleCurrency' => $entry->sale_currency,
+                    'auctionHouse' => $entry->auction_house,
+                    'auctionLot' => $entry->auction_lot,
+                ];
+            }
+        }
+
+        // Create links between consecutive nodes
+        for ($i = 0; $i < count($nodes) - 1; $i++) {
+            $links[] = [
+                'source' => $nodes[$i]['id'],
+                'target' => $nodes[$i + 1]['id'],
+            ];
+        }
+
+        if ($minYear === PHP_INT_MAX) $minYear = 0;
+        if ($maxYear === PHP_INT_MIN) $maxYear = (int) date('Y');
+
+        return [
+            'nodes' => $nodes,
+            'links' => $links,
+            'events' => $events,
+            'dateRange' => ['min' => $minYear, 'max' => $maxYear],
+        ];
+    }
+
+    /**
+     * Parse a year string like "1873", "100 BC", "circa 1390 BC" into an integer.
+     */
+    protected function parseYear($dateStr)
+    {
+        if (empty($dateStr)) return null;
+
+        $dateStr = trim($dateStr);
+
+        // Check for BC
+        $isBC = (bool) preg_match('/\bBC\b/i', $dateStr);
+
+        // Extract numeric year
+        if (preg_match('/(\d+)/', $dateStr, $m)) {
+            $year = (int) $m[1];
+            return $isBC ? -$year : $year;
+        }
+
+        return null;
     }
 
     protected function categorizeEventType($type)
