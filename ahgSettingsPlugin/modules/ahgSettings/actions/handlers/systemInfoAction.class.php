@@ -210,6 +210,12 @@ class SettingsSystemInfoAction extends AhgController
             'VTK (Python)' => '3d',
             'Potree Converter' => '3d',
             'Python' => 'ai',
+            'PyMuPDF' => 'ai',
+            'spaCy' => 'ai',
+            'Argos Translate' => 'ai',
+            'Pillow' => 'ai',
+            'OpenCV' => 'ai',
+            'GNU Aspell' => 'ai',
             'Node.js' => 'development',
             'Composer' => 'development',
             'Git' => 'development',
@@ -501,6 +507,118 @@ class SettingsSystemInfoAction extends AhgController
             ];
         } else {
             $versions[] = ['name' => 'BagIt (Python)', 'version' => 'Not installed', 'icon' => 'bi-bag-check', 'status' => 'warning', 'path' => ''];
+        }
+
+        // PyMuPDF (fitz) - PDF redaction
+        $result = shell_exec('python3 -c "import fitz; print(fitz.version[0])" 2>&1');
+        if (preg_match('/^(\d+\.\d+\.?\d*)/', trim($result ?? ''), $matches)) {
+            $versions[] = [
+                'name' => 'PyMuPDF',
+                'version' => $matches[1],
+                'icon' => 'bi-file-earmark-pdf',
+                'status' => 'ok',
+                'path' => 'pip3: pymupdf',
+            ];
+        } else {
+            $versions[] = ['name' => 'PyMuPDF', 'version' => 'Not installed', 'icon' => 'bi-file-earmark-pdf', 'status' => 'warning', 'path' => 'pip3 install pymupdf'];
+        }
+
+        // spaCy - NER
+        $result = shell_exec('python3 -c "import spacy; print(spacy.__version__)" 2>&1');
+        if (preg_match('/^(\d+\.\d+\.?\d*)/', trim($result ?? ''), $matches)) {
+            $versions[] = [
+                'name' => 'spaCy',
+                'version' => $matches[1],
+                'icon' => 'bi-diagram-3',
+                'status' => 'ok',
+                'path' => 'pip3: spacy',
+            ];
+        } else {
+            $versions[] = ['name' => 'spaCy', 'version' => 'Not installed', 'icon' => 'bi-diagram-3', 'status' => 'warning', 'path' => 'pip3 install spacy'];
+        }
+
+        // Argos Translate - Machine translation
+        $result = shell_exec('python3 -c "import argostranslate; print(argostranslate.__version__)" 2>&1');
+        if (preg_match('/^(\d+\.\d+\.?\d*)/', trim($result ?? ''), $matches)) {
+            $versions[] = [
+                'name' => 'Argos Translate',
+                'version' => $matches[1],
+                'icon' => 'bi-translate',
+                'status' => 'ok',
+                'path' => 'pip3: argostranslate',
+            ];
+        } else {
+            $versions[] = ['name' => 'Argos Translate', 'version' => 'Not installed', 'icon' => 'bi-translate', 'status' => 'warning', 'path' => 'pip3 install argostranslate'];
+        }
+
+        // Pillow - Image processing
+        $result = shell_exec('python3 -c "from PIL import Image; import PIL; print(PIL.__version__)" 2>&1');
+        if (preg_match('/^(\d+\.\d+\.?\d*)/', trim($result ?? ''), $matches)) {
+            $versions[] = [
+                'name' => 'Pillow',
+                'version' => $matches[1],
+                'icon' => 'bi-image',
+                'status' => 'ok',
+                'path' => 'pip3: Pillow',
+            ];
+        } else {
+            $versions[] = ['name' => 'Pillow', 'version' => 'Not installed', 'icon' => 'bi-image', 'status' => 'warning', 'path' => 'pip3 install Pillow'];
+        }
+
+        // OpenCV - Face detection
+        $result = shell_exec('python3 -c "import cv2; print(cv2.__version__)" 2>&1');
+        if (preg_match('/^(\d+\.\d+\.?\d*)/', trim($result ?? ''), $matches)) {
+            $versions[] = [
+                'name' => 'OpenCV',
+                'version' => $matches[1],
+                'icon' => 'bi-camera',
+                'status' => 'ok',
+                'path' => 'pip3: opencv-python',
+            ];
+        } else {
+            $versions[] = ['name' => 'OpenCV', 'version' => 'Not installed', 'icon' => 'bi-camera', 'status' => 'warning', 'path' => 'pip3 install opencv-python-headless'];
+        }
+
+        // aspell - Spellcheck
+        $result = shell_exec('aspell --version 2>&1');
+        if (preg_match('/(\d+\.\d+\.?\d*)/', $result ?? '', $matches)) {
+            $versions[] = [
+                'name' => 'GNU Aspell',
+                'version' => $matches[1],
+                'icon' => 'bi-spellcheck',
+                'status' => 'ok',
+                'path' => trim(shell_exec('which aspell 2>/dev/null') ?: ''),
+            ];
+        } else {
+            $versions[] = ['name' => 'GNU Aspell', 'version' => 'Not installed', 'icon' => 'bi-spellcheck', 'status' => 'warning', 'path' => ''];
+        }
+
+        // Blender - 3D rendering
+        $result = shell_exec('blender --version 2>&1');
+        if (preg_match('/Blender (\d+\.\d+\.?\d*)/', $result ?? '', $matches)) {
+            $versions[] = [
+                'name' => 'Blender',
+                'version' => $matches[1],
+                'icon' => 'bi-box',
+                'status' => 'ok',
+                'path' => trim(shell_exec('which blender 2>/dev/null') ?: ''),
+            ];
+        } else {
+            $versions[] = ['name' => 'Blender', 'version' => 'Not installed', 'icon' => 'bi-box', 'status' => 'warning', 'path' => ''];
+        }
+
+        // MeshLab - 3D processing
+        $result = shell_exec('meshlabserver --version 2>&1 || meshlab --version 2>&1');
+        if (preg_match('/(\d+\.\d+\.?\d*)/', $result ?? '', $matches)) {
+            $versions[] = [
+                'name' => 'MeshLab',
+                'version' => $matches[1],
+                'icon' => 'bi-grid-3x3',
+                'status' => 'ok',
+                'path' => trim(shell_exec('which meshlabserver 2>/dev/null || which meshlab 2>/dev/null') ?: ''),
+            ];
+        } else {
+            $versions[] = ['name' => 'MeshLab', 'version' => 'Not installed', 'icon' => 'bi-grid-3x3', 'status' => 'warning', 'path' => ''];
         }
 
         // Cantaloupe
