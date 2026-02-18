@@ -245,7 +245,50 @@
 
         <!-- Resources -->
         <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0">Linked Resources</h5></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><?php echo __('Linked Resources'); ?></h5>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addResourceForm">
+                    <i class="fas fa-plus me-1"></i><?php echo __('Link Resource'); ?>
+                </button>
+            </div>
+            <!-- Add Resource Form (collapsed) -->
+            <div class="collapse" id="addResourceForm">
+                <div class="card-body border-bottom bg-light">
+                    <form method="post">
+                        <input type="hidden" name="form_action" value="add_resource">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small"><?php echo __('Type'); ?></label>
+                                <select name="resource_type" class="form-select form-select-sm" id="proj-resource-type">
+                                    <option value="external_link"><?php echo __('External Link'); ?></option>
+                                    <option value="archive_record"><?php echo __('Archive Record'); ?></option>
+                                    <option value="document"><?php echo __('Document'); ?></option>
+                                    <option value="reference"><?php echo __('Reference'); ?></option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small"><?php echo __('Title'); ?></label>
+                                <input type="text" name="title" class="form-control form-control-sm" required placeholder="<?php echo __('Resource title...'); ?>">
+                            </div>
+                            <div class="col-md-8" id="proj-url-field">
+                                <label class="form-label small"><?php echo __('URL'); ?></label>
+                                <input type="url" name="external_url" class="form-control form-control-sm" placeholder="https://...">
+                            </div>
+                            <div class="col-md-4 d-none" id="proj-object-field">
+                                <label class="form-label small"><?php echo __('Record ID'); ?></label>
+                                <input type="number" name="object_id" class="form-control form-control-sm" placeholder="<?php echo __('Object ID'); ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small"><?php echo __('Notes'); ?></label>
+                                <input type="text" name="notes" class="form-control form-control-sm" placeholder="<?php echo __('Optional notes...'); ?>">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-link me-1"></i><?php echo __('Link'); ?></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div class="card-body">
                 <?php if (!empty($resources)): ?>
                     <div class="list-group list-group-flush">
@@ -253,7 +296,7 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <span class="badge bg-secondary me-2"><?php echo ucfirst($resource->resource_type); ?></span>
+                                        <span class="badge bg-secondary me-2"><?php echo ucfirst(str_replace('_', ' ', $resource->resource_type)); ?></span>
                                         <?php if (!empty($resource->link_type)): ?><span class="badge bg-<?php echo match($resource->link_type) { 'academic' => 'primary', 'archive' => 'info', 'database' => 'success', 'government' => 'dark', 'website' => 'warning', 'social_media' => 'danger', default => 'light text-dark' }; ?> me-1"><?php echo ucfirst(str_replace('_', ' ', $resource->link_type)); ?></span><?php endif; ?>
                                         <?php if (!empty($resource->external_url)): ?>
                                             <a href="<?php echo htmlspecialchars($resource->external_url); ?>" target="_blank" rel="noopener noreferrer">
@@ -275,23 +318,26 @@
                                             <?php echo htmlspecialchars($resource->title); ?>
                                         <?php endif; ?>
                                     </div>
-                                    <small class="text-muted"><?php echo date('M j, Y', strtotime($resource->added_at)); ?></small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted"><?php echo date('M j, Y', strtotime($resource->added_at)); ?></small>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this resource?'); ?>');">
+                                            <input type="hidden" name="form_action" value="remove_resource">
+                                            <input type="hidden" name="resource_id" value="<?php echo $resource->id; ?>">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1" title="<?php echo __('Remove'); ?>"><i class="fas fa-times fa-xs"></i></button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <?php if (!empty($resource->external_url) && !empty($resource->link_metadata)): ?>
-                                    <?php
-                                    $meta = is_string($resource->link_metadata) ? json_decode($resource->link_metadata) : $resource->link_metadata;
-                                    if ($meta && !empty($meta->description)): ?>
-                                        <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i><?php echo htmlspecialchars(substr($meta->description, 0, 200)); ?></small>
-                                    <?php endif; ?>
+                                <?php if (!empty($resource->description)): ?>
+                                    <small class="text-muted d-block mt-1"><?php echo htmlspecialchars($resource->description); ?></small>
                                 <?php endif; ?>
-                                <?php if ($resource->notes): ?>
+                                <?php if (!empty($resource->notes)): ?>
                                     <small class="text-muted d-block"><?php echo htmlspecialchars($resource->notes); ?></small>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p class="text-muted mb-0">No resources linked yet.</p>
+                    <p class="text-muted mb-0"><?php echo __('No resources linked yet. Click "Link Resource" to add.'); ?></p>
                 <?php endif; ?>
             </div>
         </div>

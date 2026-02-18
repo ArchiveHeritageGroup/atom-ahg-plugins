@@ -27,7 +27,8 @@
 
 <?php slot('content') ?>
 <?php
-$sections = isset($report->sections) && is_array($report->sections) ? $report->sections : [];
+$rawSections = isset($report->sections) ? $report->sections : null;
+$sections = is_array($rawSections) ? $rawSections : (is_object($rawSections) && method_exists($rawSections, 'getRawValue') ? $rawSections->getRawValue() : (is_iterable($rawSections) ? iterator_to_array($rawSections) : []));
 $reviews = isset($reviews) && is_array($reviews) ? $reviews : (isset($reviews) && method_exists($reviews, 'getRawValue') ? $reviews->getRawValue() : (isset($reviews) && is_iterable($reviews) ? iterator_to_array($reviews) : []));
 $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborators : (isset($collaborators) && method_exists($collaborators, 'getRawValue') ? $collaborators->getRawValue() : (isset($collaborators) && is_iterable($collaborators) ? iterator_to_array($collaborators) : []));
 ?>

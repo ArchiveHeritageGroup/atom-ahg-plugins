@@ -1878,6 +1878,40 @@ class researchActions extends AhgController
             ->orderByDesc('cp.is_pinned')
             ->orderByDesc('cp.created_at')
             ->get()->toArray();
+
+        // Handle POST actions
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action');
+
+            if ($action === 'add_resource') {
+                try {
+                    $projectService->addResource($projectId, [
+                        'resource_type' => $request->getParameter('resource_type', 'external_link'),
+                        'object_id' => $request->getParameter('object_id') ? (int) $request->getParameter('object_id') : null,
+                        'external_url' => $request->getParameter('external_url'),
+                        'title' => $request->getParameter('title'),
+                        'description' => $request->getParameter('notes'),
+                    ], (int) $this->researcher->id);
+                    $this->getUser()->setFlash('success', 'Resource linked');
+                } catch (\Exception $e) {
+                    $this->getUser()->setFlash('error', 'Failed to add resource: ' . $e->getMessage());
+                }
+                $this->redirect('/research/project/' . $projectId);
+            }
+
+            if ($action === 'remove_resource') {
+                try {
+                    DB::table('research_project_resource')
+                        ->where('id', (int) $request->getParameter('resource_id'))
+                        ->where('project_id', $projectId)
+                        ->delete();
+                    $this->getUser()->setFlash('success', 'Resource removed');
+                } catch (\Exception $e) {
+                    $this->getUser()->setFlash('error', 'Failed to remove resource');
+                }
+                $this->redirect('/research/project/' . $projectId);
+            }
+        }
     }
 
     /**
@@ -2138,20 +2172,19 @@ class researchActions extends AhgController
         $reproductionService = new ReproductionService();
 
         if ($request->isMethod('post')) {
-            $result = $reproductionService->createRequest($this->researcher->id, [
-                'purpose' => $request->getParameter('purpose'),
-                'intended_use' => $request->getParameter('intended_use'),
-                'publication_details' => $request->getParameter('publication_details'),
-                'delivery_method' => $request->getParameter('delivery_method', 'digital'),
-                'urgency' => $request->getParameter('urgency', 'normal'),
-                'special_instructions' => $request->getParameter('special_instructions'),
-            ]);
-
-            if (isset($result['error'])) {
-                $this->getUser()->setFlash('error', $result['error']);
-            } else {
+            try {
+                $newId = $reproductionService->createRequest($this->researcher->id, [
+                    'purpose' => $request->getParameter('purpose'),
+                    'intended_use' => $request->getParameter('intended_use'),
+                    'publication_details' => $request->getParameter('publication_details'),
+                    'delivery_method' => $request->getParameter('delivery_method', 'digital'),
+                    'urgency' => $request->getParameter('urgency', 'normal'),
+                    'special_instructions' => $request->getParameter('special_instructions'),
+                ]);
                 $this->getUser()->setFlash('success', 'Reproduction request created');
-                $this->redirect('research/viewReproduction?id=' . $result['id']);
+                $this->redirect('/research/reproduction/' . $newId);
+            } catch (\Exception $e) {
+                $this->getUser()->setFlash('error', 'Failed to create request: ' . $e->getMessage());
             }
         }
     }
@@ -2190,30 +2223,29 @@ class researchActions extends AhgController
 
             if ($action === 'add_item') {
                 $objectId = (int) $request->getParameter('object_id');
-                $result = $reproductionService->addItem($requestId, $this->researcher->id, [
-                    'object_id' => $objectId,
-                    'reproduction_type' => $request->getParameter('reproduction_type', 'digital_scan'),
-                    'format' => $request->getParameter('format'),
-                    'size' => $request->getParameter('size'),
-                    'resolution' => $request->getParameter('resolution'),
-                    'color_mode' => $request->getParameter('color_mode', 'color'),
-                    'quantity' => (int) $request->getParameter('quantity', 1),
-                    'special_instructions' => $request->getParameter('special_instructions'),
-                ]);
-
-                if (isset($result['error'])) {
-                    $this->getUser()->setFlash('error', $result['error']);
-                } else {
+                try {
+                    $reproductionService->addItem($requestId, [
+                        'object_id' => $objectId,
+                        'reproduction_type' => $request->getParameter('reproduction_type', 'digital_scan'),
+                        'format' => $request->getParameter('format'),
+                        'size' => $request->getParameter('size'),
+                        'resolution' => $request->getParameter('resolution'),
+                        'color_mode' => $request->getParameter('color_mode', 'color'),
+                        'quantity' => (int) $request->getParameter('quantity', 1),
+                        'special_instructions' => $request->getParameter('special_instructions'),
+                    ]);
                     $this->getUser()->setFlash('success', 'Item added');
+                } catch (\Exception $e) {
+                    $this->getUser()->setFlash('error', 'Failed to add item: ' . $e->getMessage());
                 }
-                $this->redirect('research/viewReproduction?id=' . $requestId);
+                $this->redirect('/research/reproduction/' . $requestId);
             }
 
             if ($action === 'remove_item') {
                 $itemId = (int) $request->getParameter('item_id');
                 $reproductionService->removeItem($requestId, $itemId, $this->researcher->id);
                 $this->getUser()->setFlash('success', 'Item removed');
-                $this->redirect('research/viewReproduction?id=' . $requestId);
+                $this->redirect('/research/reproduction/' . $requestId);
             }
 
             if ($action === 'submit') {
@@ -2222,8 +2254,40 @@ class researchActions extends AhgController
                     $this->getUser()->setFlash('error', $result['error']);
                 } else {
                     $this->getUser()->setFlash('success', 'Request submitted');
+                    // Send email to admin about reproduction request
+                    try {
+                        $baseUrl = \sfConfig::get('app_siteBaseUrl', '');
+                        $this->sendTemplatedEmail(
+                            $this->getAdminNotifyEmail(),
+                            'reproduction_request',
+                            [
+                                'name' => 'Admin',
+                                'researcher_name' => $this->researcher->first_name . ' ' . $this->researcher->last_name,
+                                'reference_number' => $this->reproductionRequest->reference_number ?? 'N/A',
+                                'purpose' => $this->reproductionRequest->purpose ?? '',
+                                'delivery_method' => $this->reproductionRequest->delivery_method ?? '',
+                                'review_url' => $baseUrl . '/index.php/research/reproduction/' . $requestId,
+                            ],
+                            'New Reproduction Request: ' . ($this->reproductionRequest->reference_number ?? ''),
+                            "Dear {name},\n\nA new reproduction request has been submitted.\n\nResearcher: {researcher_name}\nReference: {reference_number}\nPurpose: {purpose}\nDelivery: {delivery_method}\n\nReview at: {review_url}\n\nBest regards,\nThe Archive Team"
+                        );
+                        // Also send confirmation to researcher
+                        $this->sendTemplatedEmail(
+                            $this->researcher->email,
+                            'reproduction_confirmation',
+                            [
+                                'name' => $this->researcher->first_name . ' ' . $this->researcher->last_name,
+                                'reference_number' => $this->reproductionRequest->reference_number ?? 'N/A',
+                                'purpose' => $this->reproductionRequest->purpose ?? '',
+                            ],
+                            'Reproduction Request Received: ' . ($this->reproductionRequest->reference_number ?? ''),
+                            "Dear {name},\n\nYour reproduction request ({reference_number}) has been received and is being reviewed.\n\nPurpose: {purpose}\n\nYou will be notified when it has been processed.\n\nBest regards,\nThe Archive Team"
+                        );
+                    } catch (\Exception $e) {
+                        // Email sending is non-blocking
+                    }
                 }
-                $this->redirect('research/viewReproduction?id=' . $requestId);
+                $this->redirect('/research/reproduction/' . $requestId);
             }
         }
     }
@@ -2518,7 +2582,7 @@ class researchActions extends AhgController
                 } catch (\Exception $e) {
                     $this->getUser()->setFlash('error', $e->getMessage());
                 }
-                $this->redirect('research/viewWorkspace?id=' . $workspaceId);
+                $this->redirect('/research/workspaces/' . $workspaceId);
             }
 
             if ($action === 'add_resource') {
@@ -2526,14 +2590,15 @@ class researchActions extends AhgController
                     $collaborationService->addResource($workspaceId, [
                         'resource_type' => $request->getParameter('resource_type'),
                         'resource_id' => $request->getParameter('resource_id') ? (int) $request->getParameter('resource_id') : null,
+                        'external_url' => $request->getParameter('external_url'),
                         'title' => $request->getParameter('title'),
-                        'notes' => $request->getParameter('notes'),
+                        'description' => $request->getParameter('notes'),
                     ], (int) $this->researcher->id);
                     $this->getUser()->setFlash('success', 'Resource added');
                 } catch (\Exception $e) {
                     $this->getUser()->setFlash('error', $e->getMessage());
                 }
-                $this->redirect('research/viewWorkspace?id=' . $workspaceId);
+                $this->redirect('/research/workspaces/' . $workspaceId);
             }
         }
     }
@@ -4584,28 +4649,13 @@ class researchActions extends AhgController
      */
     protected function sendResearcherEmail($type, $researcher, $reason = '')
     {
+        if (!$this->isResearchEmailEnabled() || !$this->loadEmailService()) {
+            return;
+        }
         try {
-            // Check if research email notifications are enabled
-            $enabled = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
-                ->where('setting_key', 'research_email_notifications')
-                ->value('setting_value');
-            if ($enabled === 'false' || $enabled === '0') {
-                return;
-            }
-
-            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
-                . '/ahgCorePlugin/lib/Services/EmailService.php';
-            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
-                require_once $emailServicePath;
-            }
-            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
-                return;
-            }
-
             // Convert array to object if needed (registration passes array)
             if (is_array($researcher)) {
                 $researcher = (object) $researcher;
-                // For new registrations, get the ID from DB
                 if (empty($researcher->id) && !empty($researcher->user_id)) {
                     $dbResearcher = DB::table('research_researcher')
                         ->where('user_id', $researcher->user_id)
@@ -4616,15 +4666,40 @@ class researchActions extends AhgController
                 }
             }
 
+            $email = $researcher->email ?? null;
+            if (!$email) {
+                return;
+            }
+
+            $baseUrl = \sfConfig::get('app_siteBaseUrl', '');
+            $name = ($researcher->first_name ?? '') . ' ' . ($researcher->last_name ?? '');
+            $placeholders = [
+                'name' => trim($name),
+                'email' => $email,
+                'login_url' => $baseUrl . '/index.php/user/login',
+                'reason' => $reason,
+            ];
+
             switch ($type) {
                 case 'pending':
-                    \AhgCore\Services\EmailService::sendResearcherPending($researcher);
+                    $this->sendTemplatedEmail($email, 'researcher_pending', $placeholders,
+                        'Registration Received',
+                        "Dear {name},\n\nThank you for registering as a researcher. Your application is being reviewed.\n\nYou will be notified once approved.\n\nBest regards,\nThe Archive Team");
+                    // Also notify admin
+                    $this->sendTemplatedEmail($this->getAdminNotifyEmail(), 'admin_new_researcher', $placeholders,
+                        'New Researcher Registration: ' . trim($name),
+                        "Dear Admin,\n\nA new researcher has registered:\n\nName: {name}\nEmail: {email}\n\nPlease review and approve/reject.\n\nBest regards,\nThe Archive Team");
                     break;
                 case 'approved':
-                    \AhgCore\Services\EmailService::sendResearcherApproved($researcher);
+                    $placeholders['login_url'] = $baseUrl . '/index.php/user/login';
+                    $this->sendTemplatedEmail($email, 'researcher_approved', $placeholders,
+                        'Registration Approved',
+                        "Dear {name},\n\nYour researcher registration has been approved.\n\nYou can now log in and access the research workspace:\n{login_url}\n\nBest regards,\nThe Archive Team");
                     break;
                 case 'rejected':
-                    \AhgCore\Services\EmailService::sendResearcherRejected($researcher, $reason);
+                    $this->sendTemplatedEmail($email, 'researcher_rejected', $placeholders,
+                        'Registration Update',
+                        "Dear {name},\n\nYour researcher registration could not be approved at this time.\n\nReason: {reason}\n\nPlease contact us if you have questions.\n\nBest regards,\nThe Archive Team");
                     break;
             }
         } catch (\Exception $e) {
@@ -4633,21 +4708,46 @@ class researchActions extends AhgController
     }
 
     /**
-     * Send booking-related email notification
+     * Check if research email notifications are enabled.
+     */
+    protected function isResearchEmailEnabled(): bool
+    {
+        try {
+            $enabled = DB::table('ahg_settings')
+                ->where('setting_key', 'research_email_notifications')
+                ->value('setting_value');
+            // Default to enabled if not set
+            if ($enabled === null) {
+                return true;
+            }
+            return $enabled !== 'false' && $enabled !== '0';
+        } catch (\Exception $e) {
+            return true; // default enabled
+        }
+    }
+
+    /**
+     * Ensure EmailService is loaded and enabled.
+     */
+    protected function loadEmailService(): bool
+    {
+        $emailServicePath = \sfConfig::get('sf_plugins_dir', '')
+            . '/ahgCorePlugin/lib/Services/EmailService.php';
+        if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
+            require_once $emailServicePath;
+        }
+        return class_exists('AhgCore\Services\EmailService') && \AhgCore\Services\EmailService::isEnabled();
+    }
+
+    /**
+     * Send booking-related email notification using template from settings.
      */
     protected function sendBookingEmail($booking, $status)
     {
+        if (!$this->isResearchEmailEnabled() || !$this->loadEmailService()) {
+            return;
+        }
         try {
-            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
-                . '/ahgCorePlugin/lib/Services/EmailService.php';
-            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
-                require_once $emailServicePath;
-            }
-            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
-                return;
-            }
-
-            // Get researcher for this booking
             $researcher = DB::table('research_researcher')
                 ->where('id', $booking->researcher_id)
                 ->first();
@@ -4655,19 +4755,21 @@ class researchActions extends AhgController
                 return;
             }
 
+            $placeholders = [
+                'name' => $researcher->first_name . ' ' . $researcher->last_name,
+                'date' => $booking->booking_date,
+                'time' => substr($booking->start_time, 0, 5) . ' - ' . substr($booking->end_time, 0, 5),
+                'room' => $booking->room_name ?? 'Reading Room',
+            ];
+
             if ($status === 'confirmed') {
-                \AhgCore\Services\EmailService::sendBookingConfirmed($booking, $researcher);
+                $this->sendTemplatedEmail($researcher->email, 'booking_confirmed', $placeholders,
+                    'Booking Confirmed',
+                    "Dear {name},\n\nYour reading room booking has been confirmed.\n\nDate: {date}\nTime: {time}\nRoom: {room}\n\nBest regards,\nThe Archive Team");
             } elseif ($status === 'cancelled') {
-                $subject = \AhgCore\Services\EmailService::getSetting('email_booking_cancelled_subject', 'Booking Cancelled');
-                $body = \AhgCore\Services\EmailService::getSetting('email_booking_cancelled_body',
-                    "Dear {name},\n\nYour reading room booking for {date} has been cancelled.\n\nIf you have questions, please contact us.");
-                $body = \AhgCore\Services\EmailService::parseTemplate($body, [
-                    'name' => $researcher->first_name . ' ' . $researcher->last_name,
-                    'date' => $booking->booking_date,
-                    'time' => substr($booking->start_time, 0, 5) . ' - ' . substr($booking->end_time, 0, 5),
-                    'room' => $booking->room_name ?? 'Reading Room',
-                ]);
-                \AhgCore\Services\EmailService::send($researcher->email, $subject, $body);
+                $this->sendTemplatedEmail($researcher->email, 'booking_cancelled', $placeholders,
+                    'Booking Cancelled',
+                    "Dear {name},\n\nYour reading room booking for {date} has been cancelled.\n\nIf you have questions, please contact us.\n\nBest regards,\nThe Archive Team");
             }
         } catch (\Exception $e) {
             error_log('Research booking email failed: ' . $e->getMessage());
@@ -4675,70 +4777,51 @@ class researchActions extends AhgController
     }
 
     /**
-     * Send collaborator invitation email using template.
+     * Send collaborator invitation email using template from settings.
      */
     protected function sendCollaboratorInviteEmail($invitedResearcher, $email, $project, $inviter, $role, $isExternal = false)
     {
+        if (!$this->isResearchEmailEnabled() || !$this->loadEmailService()) {
+            return;
+        }
         try {
-            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
-                . '/ahgCorePlugin/lib/Services/EmailService.php';
-            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
-                require_once $emailServicePath;
-            }
-            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
-                return;
-            }
-
-            $baseUrl = sfConfig::get('app_siteBaseUrl', '');
-            $inviterName = $inviter->first_name . ' ' . $inviter->last_name;
-
-            if ($isExternal) {
-                $subject = \AhgCore\Services\EmailService::getSetting('email_collaborator_external_subject',
-                    'You have been invited to collaborate on a research project');
-                $body = \AhgCore\Services\EmailService::getSetting('email_collaborator_external_body',
-                    "Dear Colleague,\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nTo accept this invitation, you first need to register as a researcher:\n{register_url}\n\nAfter registration and approval, you will be able to join the project.\n\nBest regards,\nThe Archive Team");
-            } else {
-                $subject = \AhgCore\Services\EmailService::getSetting('email_collaborator_invite_subject',
-                    'You have been invited to collaborate on a research project');
-                $body = \AhgCore\Services\EmailService::getSetting('email_collaborator_invite_body',
-                    "Dear {name},\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nView the project and accept the invitation:\n{project_url}\n\nBest regards,\nThe Archive Team");
-            }
-
+            $baseUrl = \sfConfig::get('app_siteBaseUrl', '');
             $recipientName = $invitedResearcher
                 ? $invitedResearcher->first_name . ' ' . $invitedResearcher->last_name
                 : 'Colleague';
 
-            $body = \AhgCore\Services\EmailService::parseTemplate($body, [
+            $placeholders = [
                 'name' => $recipientName,
-                'inviter_name' => $inviterName,
+                'inviter_name' => $inviter->first_name . ' ' . $inviter->last_name,
                 'project_title' => $project->title,
                 'role' => ucfirst($role),
                 'project_url' => $baseUrl . '/index.php/research/project/' . $project->id,
                 'register_url' => $baseUrl . '/index.php/research/register',
-            ]);
+            ];
 
-            \AhgCore\Services\EmailService::send($email, $subject, $body);
+            $templateKey = $isExternal ? 'collaborator_external' : 'collaborator_invite';
+            $fallbackSubject = 'You have been invited to collaborate on a research project';
+            $fallbackBody = $isExternal
+                ? "Dear Colleague,\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nTo accept this invitation, you first need to register as a researcher:\n{register_url}\n\nAfter registration and approval, you will be able to join the project.\n\nBest regards,\nThe Archive Team"
+                : "Dear {name},\n\n{inviter_name} has invited you to collaborate on the research project \"{project_title}\" as a {role}.\n\nView the project and accept the invitation:\n{project_url}\n\nBest regards,\nThe Archive Team";
+
+            $this->sendTemplatedEmail($email, $templateKey, $placeholders, $fallbackSubject, $fallbackBody);
         } catch (\Exception $e) {
             error_log('Collaborator invite email failed: ' . $e->getMessage());
         }
     }
 
     /**
-     * Send a templated email using a key from email_setting table.
-     * Generic helper for any research email type.
+     * Send a templated email using template from email_setting table.
+     * Checks research_email_notifications toggle first.
+     * Hardcoded fallback subject/body used ONLY if no template found in DB.
      */
     protected function sendTemplatedEmail($toEmail, $templateKey, array $placeholders, $fallbackSubject = '', $fallbackBody = '')
     {
+        if (!$this->isResearchEmailEnabled() || !$this->loadEmailService()) {
+            return false;
+        }
         try {
-            $emailServicePath = sfConfig::get('sf_plugins_dir', '')
-                . '/ahgCorePlugin/lib/Services/EmailService.php';
-            if (!class_exists('AhgCore\Services\EmailService') && file_exists($emailServicePath)) {
-                require_once $emailServicePath;
-            }
-            if (!class_exists('AhgCore\Services\EmailService') || !\AhgCore\Services\EmailService::isEnabled()) {
-                return false;
-            }
-
             $subject = \AhgCore\Services\EmailService::getSetting('email_' . $templateKey . '_subject', $fallbackSubject);
             $body = \AhgCore\Services\EmailService::getSetting('email_' . $templateKey . '_body', $fallbackBody);
             $body = \AhgCore\Services\EmailService::parseTemplate($body, $placeholders);
@@ -4747,6 +4830,17 @@ class researchActions extends AhgController
         } catch (\Exception $e) {
             error_log('Research templated email failed (' . $templateKey . '): ' . $e->getMessage());
             return false;
+        }
+    }
+
+    protected function getAdminNotifyEmail(): string
+    {
+        try {
+            return DB::table('email_setting')
+                ->where('setting_key', 'notify_admin_email')
+                ->value('setting_value') ?: \sfConfig::get('app_siteAdminEmail', 'admin@theahg.co.za');
+        } catch (\Exception $e) {
+            return \sfConfig::get('app_siteAdminEmail', 'admin@theahg.co.za');
         }
     }
 

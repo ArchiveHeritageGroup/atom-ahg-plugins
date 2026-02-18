@@ -196,33 +196,40 @@
 <!-- Add Item Modal -->
 <?php if ($reproductionRequest->status === 'draft'): ?>
 <div class="modal fade" id="addItemModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="post">
+            <form method="post" id="addItemForm">
                 <input type="hidden" name="form_action" value="add_item">
+                <input type="hidden" name="object_id" id="selectedObjectId" value="">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Item</h5>
+                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i><?php echo __('Add Item'); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Object ID *</label>
-                        <input type="number" name="object_id" class="form-control" required>
-                        <small class="text-muted">Enter the archive object ID</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Reproduction Type *</label>
-                        <select name="reproduction_type" class="form-select" required>
-                            <option value="digital_scan">Digital Scan</option>
-                            <option value="photograph">Photograph</option>
-                            <option value="photocopy">Photocopy</option>
-                            <option value="microfilm">Microfilm Copy</option>
-                            <option value="certified_copy">Certified Copy</option>
-                        </select>
+                        <label class="form-label"><?php echo __('Search Archive Items'); ?> *</label>
+                        <select id="repro-item-search" placeholder="<?php echo __('Type to search items...'); ?>" required></select>
+                        <small class="text-muted"><?php echo __('Search by title, identifier or reference number'); ?></small>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Format</label>
+                            <label class="form-label"><?php echo __('Reproduction Type'); ?> *</label>
+                            <select name="reproduction_type" class="form-select" required>
+                                <option value="digital_scan"><?php echo __('Digital Scan'); ?></option>
+                                <option value="photograph"><?php echo __('Photograph'); ?></option>
+                                <option value="photocopy"><?php echo __('Photocopy'); ?></option>
+                                <option value="microfilm"><?php echo __('Microfilm Copy'); ?></option>
+                                <option value="certified_copy"><?php echo __('Certified Copy'); ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><?php echo __('Quantity'); ?></label>
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><?php echo __('Format'); ?></label>
                             <select name="format" class="form-select">
                                 <option value="JPEG">JPEG</option>
                                 <option value="TIFF">TIFF</option>
@@ -230,49 +237,110 @@
                                 <option value="PNG">PNG</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Size</label>
+                        <div class="col-md-4">
+                            <label class="form-label"><?php echo __('Size'); ?></label>
                             <select name="size" class="form-select">
                                 <option value="A4">A4</option>
                                 <option value="A3">A3</option>
                                 <option value="A2">A2</option>
-                                <option value="original">Original Size</option>
+                                <option value="original"><?php echo __('Original Size'); ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><?php echo __('Resolution'); ?></label>
+                            <select name="resolution" class="form-select">
+                                <option value="300dpi">300 DPI</option>
+                                <option value="600dpi">600 DPI</option>
+                                <option value="1200dpi">1200 DPI</option>
                             </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Resolution</label>
-                            <select name="resolution" class="form-select">
-                                <option value="300dpi">300 DPI (Standard)</option>
-                                <option value="600dpi">600 DPI (High)</option>
-                                <option value="1200dpi">1200 DPI (Archive)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Color</label>
+                            <label class="form-label"><?php echo __('Color'); ?></label>
                             <select name="color_mode" class="form-select">
-                                <option value="color">Color</option>
-                                <option value="grayscale">Grayscale</option>
-                                <option value="bw">Black & White</option>
+                                <option value="color"><?php echo __('Color'); ?></option>
+                                <option value="grayscale"><?php echo __('Grayscale'); ?></option>
+                                <option value="bw"><?php echo __('Black & White'); ?></option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" name="quantity" class="form-control" value="1" min="1" max="100">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Special Instructions</label>
+                        <label class="form-label"><?php echo __('Special Instructions'); ?></label>
                         <textarea name="special_instructions" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Add Item</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i><?php echo __('Add Item'); ?></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    var reproItemSearch = document.getElementById('repro-item-search');
+    if (reproItemSearch) {
+        var ts = new TomSelect('#repro-item-search', {
+            valueField: 'id',
+            labelField: 'title',
+            searchField: ['title', 'identifier'],
+            maxItems: 1,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('/index.php/research/ajax/search-items?q=' + encodeURIComponent(query))
+                    .then(function(r) { return r.json(); })
+                    .then(function(j) {
+                        var items = (j.items || []).map(function(i) {
+                            return {
+                                id: String(i.id),
+                                title: i.title + (i.identifier ? ' [' + i.identifier + ']' : ''),
+                                identifier: i.identifier || ''
+                            };
+                        });
+                        callback(items);
+                    })
+                    .catch(function() { callback(); });
+            },
+            render: {
+                option: function(item) {
+                    return '<div class="py-1"><strong>' + item.title + '</strong></div>';
+                },
+                item: function(item) {
+                    return '<div>' + item.title + '</div>';
+                }
+            },
+            onChange: function(value) {
+                document.getElementById('selectedObjectId').value = value || '';
+            }
+        });
+
+        // Reset Tom Select when modal opens for adding another item
+        var modal = document.getElementById('addItemModal');
+        if (modal) {
+            modal.addEventListener('shown.bs.modal', function() {
+                ts.clear();
+                ts.clearOptions();
+                document.getElementById('selectedObjectId').value = '';
+            });
+        }
+    }
+
+    // Validate object selected before submit
+    var addItemForm = document.getElementById('addItemForm');
+    if (addItemForm) {
+        addItemForm.addEventListener('submit', function(e) {
+            var objId = document.getElementById('selectedObjectId').value;
+            if (!objId) {
+                e.preventDefault();
+                alert('<?php echo __('Please search and select an archive item'); ?>');
+            }
+        });
+    }
+});
+</script>
 <?php endif; ?>

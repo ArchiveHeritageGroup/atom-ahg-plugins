@@ -102,7 +102,8 @@
             <code>{date}</code>, <code>{time}</code>, <code>{room}</code> - <?php echo __('Booking details'); ?><br>
             <code>{reason}</code> - <?php echo __('Rejection reason'); ?><br>
             <code>{message}</code>, <code>{file}</code>, <code>{line}</code>, <code>{trace}</code> - <?php echo __('Error alert details'); ?><br>
-            <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - <?php echo __('Error context'); ?>
+            <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - <?php echo __('Error context'); ?><br>
+            <code>{researcher_name}</code>, <code>{reference_number}</code>, <code>{purpose}</code>, <code>{delivery_method}</code> - <?php echo __('Reproduction details'); ?>
           </div>
           
           <div class="accordion" id="templateAccordion">
@@ -120,6 +121,8 @@
                 'peer_review_request' => 'Peer Review Request (to Reviewer)',
                 'search_alert' => 'Search Alert (to Researcher)',
                 'error_alert' => 'System Error Alert (to Admin)',
+                'reproduction_request' => 'Reproduction Request (to Admin)',
+                'reproduction_confirmation' => 'Reproduction Request Confirmation (to Researcher)',
             ];
             $index = 0;
             foreach ($templateGroups as $templateKey => $templateLabel): 

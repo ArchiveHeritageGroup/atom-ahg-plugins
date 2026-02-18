@@ -100,7 +100,8 @@
             <code>{date}</code>, <code>{time}</code>, <code>{room}</code> - {{ __('Booking details') }}<br>
             <code>{reason}</code> - {{ __('Rejection reason') }}<br>
             <code>{message}</code>, <code>{file}</code>, <code>{line}</code>, <code>{trace}</code> - {{ __('Error alert details') }}<br>
-            <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - {{ __('Error context') }}
+            <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - {{ __('Error context') }}<br>
+            <code>{researcher_name}</code>, <code>{reference_number}</code>, <code>{purpose}</code>, <code>{delivery_method}</code> - {{ __('Reproduction details') }}
           </div>
 
           @php
@@ -117,6 +118,8 @@
               'peer_review_request' => 'Peer Review Request (to Reviewer)',
               'search_alert' => 'Search Alert (to Researcher)',
               'error_alert' => 'System Error Alert (to Admin)',
+              'reproduction_request' => 'Reproduction Request (to Admin)',
+              'reproduction_confirmation' => 'Reproduction Request Confirmation (to Researcher)',
           ];
           $index = 0;
           @endphp
