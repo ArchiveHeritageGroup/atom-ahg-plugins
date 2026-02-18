@@ -86,7 +86,7 @@ class TranscriptionService
 			'whisper_path' => '/usr/local/bin/whisper',
 			'whisper_model' => 'tiny',
 			'ffmpeg_path' => '/usr/bin/ffmpeg',
-			'default_language' => 'en',
+			'default_language' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
 			'auto_detect_language' => true,
 			'word_timestamps' => true,
 			'max_duration' => 7200, // 2 hours max
@@ -535,7 +535,7 @@ class TranscriptionService
         
         $data = json_decode($transcription->transcription_data, true);
         $segments = $data['segments'] ?? [];
-        $language = $data['language'] ?? 'en';
+        $language = $data['language'] ?? \AtomExtensions\Helpers\CultureHelper::getCulture();
         
         $items = [];
         foreach ($segments as $index => $segment) {

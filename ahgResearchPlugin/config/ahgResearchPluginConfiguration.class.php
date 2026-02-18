@@ -86,7 +86,8 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
         // Admin
         $research->any('research_admin_statistics', '/research/admin/statistics', 'adminStatistics');
-        $research->any('research_admin_types_edit', '/research/admin/types/edit/:id', 'editResearcherType', ['id' => '\d+'], ['id' => null]);
+        $research->any('research_admin_types_new', '/research/admin/types/new', 'editResearcherType');
+        $research->any('research_admin_types_edit', '/research/admin/types/edit/:id', 'editResearcherType', ['id' => '\d+']);
         $research->any('research_admin_types', '/research/admin/types', 'adminTypes');
 
         // ORCID
@@ -183,7 +184,8 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_request_review', '/research/report/:id/review/request', 'requestReview', ['id' => '\d+']);
 
         // Issue 149 Phase 6: Institutional Sharing
-        $research->any('research_institutions_edit', '/research/admin/institutions/edit/:id', 'editInstitution', ['id' => '\d+'], ['id' => null]);
+        $research->any('research_institutions_new', '/research/admin/institutions/new', 'editInstitution');
+        $research->any('research_institutions_edit', '/research/admin/institutions/edit/:id', 'editInstitution', ['id' => '\d+']);
         $research->any('research_institutions', '/research/admin/institutions', 'institutions');
         $research->any('research_share_project', '/research/project/:id/share', 'shareProject', ['id' => '\d+']);
         $research->any('research_accept_share', '/research/share/:token/accept', 'acceptShare');
@@ -284,7 +286,8 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         // ISSUE 159 PHASE 2b: DOCUMENT TEMPLATES
         // =====================================================================
-        $research->any('research_edit_document_template', '/research/document-template/:id/edit', 'editDocumentTemplate', ['id' => '\\d+'], ['id' => null]);
+        $research->any('research_new_document_template', '/research/document-template/new', 'editDocumentTemplate');
+        $research->any('research_edit_document_template', '/research/document-template/:id/edit', 'editDocumentTemplate', ['id' => '\\d+']);
         $research->any('research_document_templates', '/research/document-templates', 'documentTemplates');
 
         // =====================================================================
@@ -349,6 +352,16 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         $research->any('research_assertion_batch_review', '/research/assertion-batch-review/:project_id', 'assertionBatchReview', ['project_id' => '\\d+']);
         $research->any('research_ethics_milestones', '/research/ethics-milestones/:project_id', 'ethicsMilestones', ['project_id' => '\\d+']);
+
+        // =====================================================================
+        // ISSUE 164: IIIF RESEARCH ROOMS
+        // =====================================================================
+        $research->get('research_room_manifest', '/research/room/:id/manifest.json', 'roomManifest', ['id' => '\\d+']);
+        $research->get('research_room_annotations', '/research/room/:id/annotations.json', 'roomAnnotationExport', ['id' => '\\d+']);
+        $research->any('research_update_room', '/research/room/:id/update', 'updateRoom', ['id' => '\\d+']);
+        $research->any('research_create_room', '/research/room/create/:project_id', 'createRoom', ['project_id' => '\\d+']);
+        $research->any('research_view_room', '/research/room/:id', 'viewRoom', ['id' => '\\d+']);
+        $research->any('research_iiif_rooms', '/research/project/:project_id/iiif-rooms', 'iiifRooms', ['project_id' => '\\d+']);
 
         // Dashboard
         $research->any('research_dashboard', '/research', 'dashboard');

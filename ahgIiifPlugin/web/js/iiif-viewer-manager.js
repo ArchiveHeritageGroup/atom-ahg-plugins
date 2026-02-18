@@ -20,8 +20,8 @@ export class IiifViewerManager {
         this.options = {
             objectId: null,
             manifestUrl: null,
-            baseUrl: 'https://psis.theahg.co.za',
-            cantaloupeUrl: 'https://psis.theahg.co.za/iiif/2',
+            baseUrl: (typeof window !== 'undefined' ? window.location.origin : ''),
+            cantaloupeUrl: (typeof window !== 'undefined' ? window.location.origin + '/iiif/2' : '/iiif/2'),
             pluginPath: '/plugins/ahgIiifPlugin',
             defaultViewer: 'openseadragon',
             flags: {},
@@ -85,8 +85,11 @@ export class IiifViewerManager {
             await this.loadAnnotations();
         }
 
-        // Store instance globally for callbacks
+        // Store instance in registry keyed by container ID
         if (typeof window !== 'undefined') {
+            window.iiifViewerInstances = window.iiifViewerInstances || {};
+            window.iiifViewerInstances[this.viewerId] = this;
+            // Keep backward-compatible global reference (last initialized)
             window.iiifViewerManager = this;
         }
     }
@@ -228,7 +231,7 @@ export class IiifViewerManager {
         try {
             // Load OSD if not loaded
             if (!window.OpenSeadragon) {
-                await this.loadScript('https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js');
+                await this.loadScript(this.options.pluginPath + '/js/vendor/openseadragon.min.js');
             }
 
             // Verify OpenSeadragon loaded
@@ -471,8 +474,8 @@ export class IiifViewerManager {
 
         // Load PDF.js
         if (!window.pdfjsLib) {
-            await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            await this.loadScript(this.options.pluginPath + '/js/vendor/pdf.min.js');
+            pdfjsLib.GlobalWorkerOptions.workerSrc = this.options.pluginPath + '/js/vendor/pdf.worker.min.js';
         }
 
         // Use direct PDF URL if provided, otherwise get from manifest
@@ -556,7 +559,7 @@ export class IiifViewerManager {
     async initModelViewer() {
         // Load model-viewer if not loaded
         if (!customElements.get('model-viewer')) {
-            await this.loadScript('https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js', 'module');
+            await this.loadScript(this.options.pluginPath + '/js/vendor/model-viewer.min.js', 'module');
         }
 
         this.loaded.modelViewer = true;
@@ -810,5 +813,6 @@ export class IiifViewerManager {
 // Export for non-module usage
 if (typeof window !== 'undefined') {
     window.IiifViewerManager = IiifViewerManager;
+    window.iiifViewerInstances = window.iiifViewerInstances || {};
     window.iiifViewerManager = null;
 }

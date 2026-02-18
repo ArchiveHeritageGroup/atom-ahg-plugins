@@ -52,6 +52,7 @@ class researchActions extends AhgController
             'hypotheses'            => 'projects',
             'viewHypothesis'        => 'projects',
             'sourceAssessment'      => 'projects',
+            'trustScore'            => 'projects',
             'assertions'            => 'projects',
             'viewAssertion'         => 'projects',
             'knowledgeGraph'        => 'projects',
@@ -5180,14 +5181,46 @@ class researchActions extends AhgController
 
     public function executeTrustScore($request)
     {
-        $this->getResponse()->setContentType('application/json');
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            if ($request->getParameter('format') === 'json') {
+                $this->getResponse()->setContentType('application/json');
+                return $this->renderText(json_encode(['error' => 'Not authenticated']));
+            }
+            $this->redirect('user/login');
         }
+
         $objectId = (int) $request->getParameter('object_id');
         $trustService = $this->loadTrustScoringService();
         $score = $trustService->computeTrustScore($objectId);
-        return $this->renderText(json_encode(['object_id' => $objectId, 'trust_score' => $score]));
+
+        // JSON mode
+        if ($request->getParameter('format') === 'json') {
+            $this->getResponse()->setContentType('application/json');
+            return $this->renderText(json_encode(['object_id' => $objectId, 'trust_score' => $score]));
+        }
+
+        // HTML mode
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $this->objectId = $objectId;
+        $this->score = $score;
+        $this->assessment = $trustService->getAssessment($objectId);
+        $this->assessmentHistory = $trustService->getAssessmentHistory($objectId);
+        $this->qualityMetrics = $trustService->getQualityMetrics($objectId);
+
+        // Get object info for display
+        $this->objectInfo = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', 'en');
+            })
+            ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+            ->where('io.id', $objectId)
+            ->select('io.id', 'i18n.title', 's.slug', 'io.identifier')
+            ->first();
+
+        $this->sidebarActive = $this->getSidebarActiveKey();
     }
 
     // =========================================================================
@@ -5740,7 +5773,7 @@ class researchActions extends AhgController
                     'name' => $request->getParameter('name'),
                     'document_type' => $request->getParameter('document_type'),
                     'description' => $request->getParameter('description'),
-                    'fields_json' => $request->getParameter('fields_json'),
+                    'fields_json' => $request->getParameter('fields_json') ?: '[]',
                     'created_by' => (int) $this->getUser()->getAttribute('user_id'),
                 ];
 
@@ -6110,10 +6143,29 @@ class researchActions extends AhgController
             ->where('object_id', $this->objectId)
             ->value('slug');
 
-        // Thumbnail
+        // Thumbnail — look for the _thumbnail derivative digital object
         $do = DB::table('digital_object')->where('object_id', $this->objectId)->first();
-        $this->thumbnail = $do ? '/uploads/r/' . $do->path . '/thumbnail' : null;
+        $this->thumbnail = null;
         $this->iiifAvailable = (bool) $do;
+        if ($do) {
+            // AtoM stores thumbnails as child digital objects with usage_id = 142 (thumbnail)
+            $thumb = DB::table('digital_object')
+                ->where('parent_id', $do->id)
+                ->where('usage_id', 142)
+                ->first();
+            if ($thumb) {
+                $this->thumbnail = '/' . ltrim($thumb->path, '/') . $thumb->name;
+            } else {
+                // Fallback: try path + name_thumbnail convention
+                $ext = pathinfo($do->name, PATHINFO_EXTENSION);
+                $basename = pathinfo($do->name, PATHINFO_FILENAME);
+                $thumbName = $basename . '_thumbnail.' . ($ext ?: 'png');
+                $thumbPath = '/' . ltrim($do->path, '/') . $thumbName;
+                if (file_exists(sfConfig::get('sf_web_dir', '/usr/share/nginx/archive') . $thumbPath)) {
+                    $this->thumbnail = $thumbPath;
+                }
+            }
+        }
 
         // Provenance — activity log for this object
         $this->provenance = DB::table('research_activity_log as al')
@@ -6122,7 +6174,7 @@ class researchActions extends AhgController
                 $join->on('r.user_id', '=', 'ai.id')
                     ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
-            ->where('al.object_id', $this->objectId)
+            ->where('al.entity_id', $this->objectId)
             ->orderBy('al.created_at', 'desc')
             ->limit(50)
             ->select('al.*', 'ai.authorized_form_of_name as first_name')
@@ -6131,7 +6183,7 @@ class researchActions extends AhgController
         // Security clearance
         $this->securityClearance = null;
         try {
-            $this->securityClearance = DB::table('security_clearance')
+            $this->securityClearance = DB::table('object_security_classification')
                 ->where('object_id', $this->objectId)
                 ->first();
         } catch (\Exception $e) { /* table may not exist */ }
@@ -6156,7 +6208,7 @@ class researchActions extends AhgController
         // Source assessment
         $this->sourceAssessment = DB::table('research_source_assessment')
             ->where('object_id', $this->objectId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('assessed_at', 'desc')
             ->first();
 
         // Annotations
@@ -6226,7 +6278,7 @@ class researchActions extends AhgController
         $this->sensitivitySummary = ['max_level' => 'none'];
         try {
             if ($resourceIds->count() > 0) {
-                $clearances = DB::table('security_clearance')
+                $clearances = DB::table('object_security_classification')
                     ->whereIn('object_id', $resourceIds)
                     ->get();
                 $breakdown = [];
@@ -6254,8 +6306,8 @@ class researchActions extends AhgController
                         ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
                 })
                 ->whereIn('sa.object_id', $resourceIds->count() > 0 ? $resourceIds : [0])
-                ->select('sa.object_id', 'sa.credibility_score as score', 'ioi.title')
-                ->orderBy('sa.created_at', 'desc')
+                ->select('sa.object_id', 'sa.trust_score as score', 'ioi.title')
+                ->orderBy('sa.assessed_at', 'desc')
                 ->limit(20)
                 ->get()->toArray();
             $this->trustScores = $assessments;
@@ -6764,6 +6816,187 @@ class researchActions extends AhgController
 
         $success = $this->service->snapshotSearchResults($searchId, $currentIds);
         return $this->renderText(json_encode(['success' => $success, 'count' => count($currentIds)]));
+    }
+
+    // =========================================================================
+    // ISSUE 164: IIIF RESEARCH ROOMS
+    // =========================================================================
+
+    protected function loadRoomService(): \ResearchRoomService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchRoomService.php';
+        return new \ResearchRoomService();
+    }
+
+    /**
+     * List IIIF research rooms for a project.
+     * GET /research/project/:project_id/iiif-rooms
+     */
+    public function executeIiifRooms($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $projectId = (int) $request->getParameter('project_id');
+        $roomService = $this->loadRoomService();
+
+        $this->projectId = $projectId;
+        $this->rooms = $roomService->listRooms($projectId);
+        $this->userId = (int) $this->getUser()->getAttribute('user_id');
+
+        // Load project name
+        $this->project = \Illuminate\Database\Capsule\Manager::table('research_project')
+            ->where('id', $projectId)
+            ->first();
+
+        $this->response->setTitle('Research Rooms');
+        $this->setTemplate('rooms');
+    }
+
+    /**
+     * View a research room with IIIF viewer + participants.
+     * GET /research/room/:id
+     */
+    public function executeViewRoom($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $roomId = (int) $request->getParameter('id');
+        $roomService = $this->loadRoomService();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+
+        $room = $roomService->getRoom($roomId);
+        if (!$room) {
+            $this->forward404('Room not found');
+        }
+
+        if (!$roomService->hasAccess($roomId, $userId) && !$this->getUser()->isAdministrator()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $this->room = $room;
+        $this->participants = $roomService->getParticipants($roomId);
+        $this->manifests = $roomService->getManifests($roomId);
+        $this->isOwner = $roomService->isOwner($roomId, $userId);
+        $this->userId = $userId;
+
+        $this->response->setTitle($room->name);
+        $this->setTemplate('viewRoom');
+    }
+
+    /**
+     * Create or update a research room.
+     * GET/POST /research/room/create/:project_id
+     */
+    public function executeCreateRoom($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $projectId = (int) $request->getParameter('project_id');
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+
+        if ($request->isMethod('post')) {
+            $roomService = $this->loadRoomService();
+            $name = trim($request->getParameter('name', ''));
+            $description = trim($request->getParameter('description', ''));
+            $maxParticipants = (int) $request->getParameter('max_participants', 10);
+
+            if (empty($name)) {
+                $this->getUser()->setFlash('error', 'Room name is required.');
+                $this->redirect("research/project/{$projectId}/rooms");
+            }
+
+            $roomId = $roomService->createRoom($projectId, $name, $userId, $description ?: null, $maxParticipants);
+
+            $this->getUser()->setFlash('notice', 'Research room created successfully.');
+            $this->redirect("research/room/{$roomId}");
+        }
+
+        $this->projectId = $projectId;
+        $this->response->setTitle('Create Research Room');
+        $this->setTemplate('rooms'); // Re-use rooms list with create modal
+    }
+
+    /**
+     * Update a research room.
+     * POST /research/room/:id/update
+     */
+    public function executeUpdateRoom($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $roomId = (int) $request->getParameter('id');
+        $roomService = $this->loadRoomService();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+
+        if (!$roomService->isOwner($roomId, $userId) && !$this->getUser()->isAdministrator()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $data = [
+            'name' => trim($request->getParameter('name', '')),
+            'description' => trim($request->getParameter('description', '')),
+            'status' => $request->getParameter('status', 'draft'),
+            'max_participants' => (int) $request->getParameter('max_participants', 10),
+        ];
+
+        $roomService->updateRoom($roomId, $data);
+
+        $this->getUser()->setFlash('notice', 'Room updated.');
+        $this->redirect("research/room/{$roomId}");
+    }
+
+    /**
+     * Room derivative manifest (IIIF Collection).
+     * GET /research/room/:id/manifest.json
+     */
+    public function executeRoomManifest($request)
+    {
+        $roomId = (int) $request->getParameter('id');
+        $roomService = $this->loadRoomService();
+
+        $room = $roomService->getRoom($roomId);
+        if (!$room || $room->status === 'archived') {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Room not found']));
+        }
+
+        $manifest = $roomService->generateRoomManifest($roomId);
+
+        $this->getResponse()->setContentType('application/json');
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        return $this->renderText(json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Export room annotations as W3C AnnotationCollection.
+     * GET /research/room/:id/annotations.json
+     */
+    public function executeRoomAnnotationExport($request)
+    {
+        $roomId = (int) $request->getParameter('id');
+        $roomService = $this->loadRoomService();
+
+        $room = $roomService->getRoom($roomId);
+        if (!$room) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Room not found']));
+        }
+
+        $annotations = $roomService->exportAnnotations($roomId);
+
+        $this->getResponse()->setContentType('application/ld+json');
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+        return $this->renderText(json_encode($annotations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
 }

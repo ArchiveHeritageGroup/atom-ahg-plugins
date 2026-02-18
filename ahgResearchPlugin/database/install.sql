@@ -1711,3 +1711,44 @@ DROP PROCEDURE IF EXISTS upgrade_research_159_enhancements;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- =============================================================================
+-- IIIF Research Rooms (Issue #164 Phase 7)
+-- Collaborative IIIF viewing/annotation sessions
+-- Added: 2026-02-18
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `research_room` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `project_id` BIGINT UNSIGNED NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `status` ENUM('draft','active','archived') DEFAULT 'draft',
+    `created_by` INT NOT NULL,
+    `max_participants` INT DEFAULT 10,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_project` (`project_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_room_participant` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `room_id` BIGINT UNSIGNED NOT NULL,
+    `user_id` INT NOT NULL,
+    `role` ENUM('owner','editor','viewer') DEFAULT 'viewer',
+    `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE INDEX `idx_room_user` (`room_id`, `user_id`),
+    FOREIGN KEY (`room_id`) REFERENCES `research_room`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_room_manifest` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `room_id` BIGINT UNSIGNED NOT NULL,
+    `object_id` INT NOT NULL,
+    `manifest_json` LONGTEXT,
+    `derivative_type` ENUM('full','subset','annotated') DEFAULT 'full',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_room` (`room_id`),
+    FOREIGN KEY (`room_id`) REFERENCES `research_room`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -5,7 +5,7 @@
 <?php slot('title') ?>
 <div class="d-flex justify-content-between align-items-center">
   <h1><i class="fas fa-university text-primary me-2"></i><?php echo __('Partner Institutions'); ?></h1>
-  <a href="<?php echo url_for(['module' => 'research', 'action' => 'editInstitution']); ?>" class="btn btn-primary">
+  <a href="/research/admin/institutions/new" class="btn btn-primary">
     <i class="fas fa-plus me-1"></i><?php echo __('Add Institution'); ?>
   </a>
 </div>
@@ -87,7 +87,7 @@ $institutions = isset($institutions) && is_array($institutions) ? $institutions 
     <i class="fas fa-university fa-4x text-muted mb-3 opacity-50"></i>
     <h4 class="text-muted"><?php echo __('No partner institutions yet'); ?></h4>
     <p class="text-muted"><?php echo __('Add partner institutions to enable cross-institutional research sharing.'); ?></p>
-    <a href="<?php echo url_for(['module' => 'research', 'action' => 'editInstitution']); ?>" class="btn btn-primary">
+    <a href="/research/admin/institutions/new" class="btn btn-primary">
       <i class="fas fa-plus me-1"></i><?php echo __('Add First Institution'); ?>
     </a>
   </div>

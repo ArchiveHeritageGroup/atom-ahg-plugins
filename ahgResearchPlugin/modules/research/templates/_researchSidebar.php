@@ -69,6 +69,10 @@ $isAdmin = $sf_user->isAdministrator();
        class="list-group-item list-group-item-action <?php echo $active === 'odrlPolicies' ? 'active' : ''; ?>">
         <i class="fas fa-balance-scale me-2"></i><?php echo __('ODRL Policies'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'documentTemplates']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'documentTemplates' ? 'active' : ''; ?>">
+        <i class="fas fa-file-alt me-2"></i><?php echo __('Document Templates'); ?>
+    </a>
 </div>
 
 <div class="list-group mb-4">

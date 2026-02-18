@@ -9,8 +9,44 @@
  * Part of: ahgIiifPlugin
  *
  * @author Johan Pieterse - The Archive and Heritage Group
- * @version 1.0.0
+ * @version 1.1.0
  */
+
+/**
+ * Get the global RendererRegistry instance (lazy-loaded singleton).
+ *
+ * @return \AhgIiif\Services\RendererRegistry
+ */
+function get_renderer_registry()
+{
+    static $registry = null;
+
+    if ($registry === null) {
+        $pluginDir = sfConfig::get('sf_plugins_dir', '') . '/ahgIiifPlugin';
+        require_once $pluginDir . '/lib/Services/RendererRegistry.php';
+        require_once $pluginDir . '/lib/Services/Renderers/RendererInterface.php';
+
+        $registry = new \AhgIiif\Services\RendererRegistry();
+        // Auto-discovery will load all renderers from Renderers/ directory
+    }
+
+    return $registry;
+}
+
+/**
+ * Detect the best viewer name for a given MIME type using the RendererRegistry.
+ *
+ * @param string $mimeType
+ * @param array $context
+ * @return string|null Renderer name or null if no match
+ */
+function detect_viewer_type(string $mimeType, array $context = []): ?string
+{
+    $registry = get_renderer_registry();
+    $renderer = $registry->getRenderer($mimeType, $context);
+
+    return $renderer ? $renderer->getName() : null;
+}
 
 /**
  * Get base URL from current request or configuration
@@ -203,9 +239,12 @@ function render_iiif_viewer($resource, $options = [])
     $has3D = has_3d_models($resource);
     $hasAV = $hasAudio || $hasVideo;
 
-    // Override default viewer based on content type
-    // Note: viewer names must match JavaScript IiifViewerManager expectations
-    if ($hasPdf) {
+    // Override default viewer based on content type using RendererRegistry
+    $context = ['has3D' => $has3D];
+    $detectedViewer = detect_viewer_type($mimeType, $context);
+    if ($detectedViewer && $detectedViewer !== 'openseadragon' && $detectedViewer !== 'mirador') {
+        $opts['viewer'] = $detectedViewer;
+    } elseif ($hasPdf) {
         $opts['viewer'] = 'pdfjs';
     } elseif ($hasAV) {
         $opts['viewer'] = 'av';

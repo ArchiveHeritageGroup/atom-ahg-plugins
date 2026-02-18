@@ -22,6 +22,10 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Missing slug parameter']));
         }
 
+        if ($this->wantsV3($request)) {
+            return $this->generateManifestV3(['slug' => $slug]);
+        }
+
         return $this->generateManifest(['slug' => $slug]);
     }
 
@@ -37,7 +41,39 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Missing or invalid id parameter']));
         }
 
+        if ($this->wantsV3($request)) {
+            return $this->generateManifestV3(['id' => (int) $id]);
+        }
+
         return $this->generateManifest(['id' => (int) $id]);
+    }
+
+    /**
+     * Explicit v3 manifest endpoint by slug
+     */
+    public function executeManifestV3($request)
+    {
+        $slug = $request->getParameter('slug');
+
+        if (empty($slug)) {
+            $this->getResponse()->setStatusCode(400);
+            return $this->renderText(json_encode(['error' => 'Missing slug parameter']));
+        }
+
+        return $this->generateManifestV3(['slug' => $slug]);
+    }
+
+    /**
+     * Detect if client wants v3 manifest via ?version=3 or Accept header.
+     */
+    private function wantsV3($request): bool
+    {
+        if ($request->getParameter('version') === '3') {
+            return true;
+        }
+
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        return stripos($accept, 'presentation/3') !== false;
     }
 
     /**
@@ -46,18 +82,24 @@ class iiifActions extends AhgController
     protected function generateManifest(array $params)
     {
         $this->getResponse()->setContentType('application/json');
-        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
 
         $db = \Illuminate\Database\Capsule\Manager::class;
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $forceRefresh = !empty($_GET['refresh']);
+
+        // Lazy load namespaced services (Symfony 1.x doesn't autoload plugin namespaces)
+        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin';
+        require_once $pluginDir . '/lib/Services/IiifViewerService.php';
+        require_once $pluginDir . '/lib/Services/IiifAuthService.php';
 
         // Look up the object
         $object = null;
 
         if (!empty($params['slug'])) {
             $result = $db::table('information_object as io')
-                ->leftJoin('information_object_i18n as i18n', function ($join) {
+                ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
                     $join->on('io.id', '=', 'i18n.id')
-                        ->where('i18n.culture', '=', 'en');
+                        ->where('i18n.culture', '=', $culture);
                 })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('s.slug', $params['slug'])
@@ -67,9 +109,9 @@ class iiifActions extends AhgController
         } else {
             // Try as information_object.id
             $result = $db::table('information_object as io')
-                ->leftJoin('information_object_i18n as i18n', function ($join) {
+                ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
                     $join->on('io.id', '=', 'i18n.id')
-                        ->where('i18n.culture', '=', 'en');
+                        ->where('i18n.culture', '=', $culture);
                 })
                 ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                 ->where('io.id', $params['id'])
@@ -81,9 +123,9 @@ class iiifActions extends AhgController
             if (!$object) {
                 $result = $db::table('digital_object as do')
                     ->join('information_object as io', 'do.object_id', '=', 'io.id')
-                    ->leftJoin('information_object_i18n as i18n', function ($join) {
+                    ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
                         $join->on('io.id', '=', 'i18n.id')
-                            ->where('i18n.culture', '=', 'en');
+                            ->where('i18n.culture', '=', $culture);
                     })
                     ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
                     ->where('do.id', $params['id'])
@@ -96,6 +138,15 @@ class iiifActions extends AhgController
         if (!$object) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
+
+        // Check manifest cache
+        $viewerService = new \AhgIiif\Services\IiifViewerService();
+        if (!$forceRefresh) {
+            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture);
+            if ($cached) {
+                return $this->renderText($cached['manifest_json']);
+            }
         }
 
         // Get digital objects
@@ -124,6 +175,7 @@ class iiifActions extends AhgController
         // Build canvases
         $canvases = [];
         $canvasIndex = 1;
+        $totalPageCount = null;
 
         foreach ($digitalObjects as $do) {
             $imagePath = ltrim($do['path'], '/');
@@ -136,22 +188,30 @@ class iiifActions extends AhgController
             $fileName = strtolower($do['name'] ?? '');
 
             if ($mimeType === 'image/tiff' || preg_match('/\.tiff?$/i', $fileName)) {
-                $page2InfoUrl = "{$cantaloupeBaseUrl}/iiif/2/{$cantaloupeId};2/info.json";
-                $page2Info = @file_get_contents($page2InfoUrl);
-
-                if ($page2Info !== false) {
+                // Check cached page count first to avoid expensive Cantaloupe probing
+                $cachedPageCount = $viewerService->getPageCount((int) $object['id']);
+                if ($cachedPageCount !== null && $cachedPageCount > 1) {
                     $isMultiPageTiff = true;
-                    $pageCount = 2;
-                    for ($i = 3; $i <= 100; $i++) {
-                        $pageInfoUrl = "{$cantaloupeBaseUrl}/iiif/2/{$cantaloupeId};{$i}/info.json";
-                        $ctx = stream_context_create(['http' => ['timeout' => 1]]);
-                        $pageInfo = @file_get_contents($pageInfoUrl, false, $ctx);
-                        if ($pageInfo === false) {
-                            break;
+                    $pageCount = $cachedPageCount;
+                } else {
+                    $page2InfoUrl = "{$cantaloupeBaseUrl}/iiif/2/{$cantaloupeId};2/info.json";
+                    $page2Info = @file_get_contents($page2InfoUrl);
+
+                    if ($page2Info !== false) {
+                        $isMultiPageTiff = true;
+                        $pageCount = 2;
+                        for ($i = 3; $i <= 100; $i++) {
+                            $pageInfoUrl = "{$cantaloupeBaseUrl}/iiif/2/{$cantaloupeId};{$i}/info.json";
+                            $ctx = stream_context_create(['http' => ['timeout' => 1]]);
+                            $pageInfo = @file_get_contents($pageInfoUrl, false, $ctx);
+                            if ($pageInfo === false) {
+                                break;
+                            }
+                            $pageCount = $i;
                         }
-                        $pageCount = $i;
                     }
                 }
+                $totalPageCount = $pageCount;
             }
 
             if ($isMultiPageTiff) {
@@ -282,7 +342,181 @@ class iiifActions extends AhgController
             ];
         }
 
+        // IIIF Auth: inject auth service block for protected resources
+        $isProtected = false;
+        try {
+            $authService = new \IiifAuthService();
+            $accessCheck = $authService->checkAccess((int) $object['id']);
+            if (!empty($accessCheck['service'])) {
+                $isProtected = true;
+                $manifest['service'] = $accessCheck['service'];
+            }
+        } catch (\Exception $e) {
+            // Auth check failure is non-fatal — treat as public
+        }
+
+        // Set CORS header: restricted for protected, open for public
+        if ($isProtected) {
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', $origin);
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Credentials', 'true');
+        } else {
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+        }
+
+        // Cache the manifest
+        $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        try {
+            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, $totalPageCount);
+        } catch (\Exception $e) {
+            // Cache write failure is non-fatal
+        }
+
+        return $this->renderText($manifestJson);
+    }
+
+    /**
+     * Generate IIIF Presentation API 3.0 manifest
+     */
+    protected function generateManifestV3(array $params)
+    {
+        $this->getResponse()->setContentType('application/ld+json;profile="http://iiif.io/api/presentation/3/context.json"');
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin';
+        require_once $pluginDir . '/lib/Services/IiifViewerService.php';
+        require_once $pluginDir . '/lib/Services/IiifManifestV3Service.php';
+
+        // Look up the object (same logic as v2.1)
+        $object = null;
+
+        if (!empty($params['slug'])) {
+            $result = $db::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
+                    $join->on('io.id', '=', 'i18n.id')
+                        ->where('i18n.culture', '=', $culture);
+                })
+                ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                ->where('s.slug', $params['slug'])
+                ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+                ->first();
+            $object = $result ? (array) $result : null;
+        } else {
+            $result = $db::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
+                    $join->on('io.id', '=', 'i18n.id')
+                        ->where('i18n.culture', '=', $culture);
+                })
+                ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                ->where('io.id', $params['id'])
+                ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+                ->first();
+            $object = $result ? (array) $result : null;
+
+            if (!$object) {
+                $result = $db::table('digital_object as do')
+                    ->join('information_object as io', 'do.object_id', '=', 'io.id')
+                    ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
+                        $join->on('io.id', '=', 'i18n.id')
+                            ->where('i18n.culture', '=', $culture);
+                    })
+                    ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                    ->where('do.id', $params['id'])
+                    ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+                    ->first();
+                $object = $result ? (array) $result : null;
+            }
+        }
+
+        if (!$object) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
+
+        $digitalObjects = $db::table('digital_object as do')
+            ->where('do.object_id', $object['id'])
+            ->orderBy('do.id')
+            ->select('do.id', 'do.name', 'do.path', 'do.mime_type', 'do.byte_size')
+            ->get()
+            ->map(fn($row) => (array) $row)
+            ->toArray();
+
+        if (empty($digitalObjects)) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'No digital objects found']));
+        }
+
+        // Use cached page count if available
+        $viewerService = new \AhgIiif\Services\IiifViewerService();
+        $cachedPageCount = $viewerService->getPageCount((int) $object['id']);
+
+        $v3Service = new \AhgIiif\Services\IiifManifestV3Service();
+        $manifest = $v3Service->generateV3Manifest($object, $digitalObjects, $culture, $cachedPageCount);
+
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+
         return $this->renderText(json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Standalone IIIF viewer page.
+     * GET /iiif/viewer/:id
+     */
+    public function executeViewer($request)
+    {
+        $id = $request->getParameter('id');
+
+        if (empty($id) || !is_numeric($id)) {
+            $this->getResponse()->setStatusCode(400);
+            return $this->renderText('Invalid object ID');
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        // Look up the object — try as information_object.id first, then digital_object.id
+        $result = $db::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
+                $join->on('io.id', '=', 'i18n.id')
+                    ->where('i18n.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+            ->where('io.id', (int) $id)
+            ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+            ->first();
+
+        if (!$result) {
+            $result = $db::table('digital_object as do')
+                ->join('information_object as io', 'do.object_id', '=', 'io.id')
+                ->leftJoin('information_object_i18n as i18n', function ($join) use ($culture) {
+                    $join->on('io.id', '=', 'i18n.id')
+                        ->where('i18n.culture', '=', $culture);
+                })
+                ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+                ->where('do.id', (int) $id)
+                ->select('io.id', 'io.identifier', 'i18n.title', 's.slug')
+                ->first();
+        }
+
+        if (!$result) {
+            $this->forward404('Object not found');
+        }
+
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        $baseUrl = "{$protocol}://{$host}";
+
+        $this->objectId = $result->id;
+        $this->objectTitle = $result->title ?: $result->identifier ?: 'Untitled';
+        $this->objectSlug = $result->slug;
+        $this->manifestUrl = "{$baseUrl}/iiif/manifest/{$result->slug}";
+        $this->baseUrl = $baseUrl;
+        $this->pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
+
+        $this->response->setTitle('IIIF Viewer - ' . $this->objectTitle);
+        $this->setTemplate('viewer');
     }
 
     /**
@@ -410,6 +644,12 @@ class iiifActions extends AhgController
 
         $annotationId = $service->createAnnotation($parsed);
 
+        // Invalidate manifest cache when annotations change
+        try {
+            $vs = new \AhgIiif\Services\IiifViewerService();
+            $vs->invalidateManifestCache((int) $data['object_id']);
+        } catch (\Exception $e) { /* non-fatal */ }
+
         return $this->renderText(json_encode([
             'success' => true,
             'id' => '#' . $annotationId,
@@ -468,6 +708,12 @@ class iiifActions extends AhgController
 
         $service->updateAnnotation($annotationId, $updateData);
 
+        // Invalidate manifest cache when annotations change
+        try {
+            $vs = new \AhgIiif\Services\IiifViewerService();
+            $vs->invalidateManifestCache((int) $existing->object_id);
+        } catch (\Exception $e) { /* non-fatal */ }
+
         return $this->renderText(json_encode(['success' => true]));
     }
 
@@ -504,7 +750,14 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Annotation not found']));
         }
 
+        $objectId = $existing->object_id;
         $service->deleteAnnotation($annotationId);
+
+        // Invalidate manifest cache when annotations change
+        try {
+            $vs = new \AhgIiif\Services\IiifViewerService();
+            $vs->invalidateManifestCache((int) $objectId);
+        } catch (\Exception $e) { /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
     }

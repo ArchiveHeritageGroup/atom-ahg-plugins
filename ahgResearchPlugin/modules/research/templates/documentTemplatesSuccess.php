@@ -11,7 +11,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2">Document Templates</h1>
-    <a href="<?php echo url_for(['module' => 'research', 'action' => 'editDocumentTemplate']); ?>" class="btn btn-primary"><i class="fas fa-plus me-1"></i> New Template</a>
+    <a href="/research/document-template/new" class="btn btn-primary"><i class="fas fa-plus me-1"></i> New Template</a>
 </div>
 
 <?php if (empty($templates)): ?>

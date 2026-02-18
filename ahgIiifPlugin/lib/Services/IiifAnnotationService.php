@@ -132,7 +132,7 @@ class IiifAnnotationService
             'body_type' => $body['type'] ?? 'TextualBody',
             'body_value' => $body['value'] ?? '',
             'body_format' => $body['format'] ?? 'text/plain',
-            'body_language' => $body['language'] ?? 'en',
+            'body_language' => $body['language'] ?? \AtomExtensions\Helpers\CultureHelper::getCulture(),
             'body_purpose' => $body['purpose'] ?? null,
         ]);
     }
@@ -297,7 +297,7 @@ class IiifAnnotationService
                 'type' => $body['type'] ?? 'TextualBody',
                 'value' => $body['value'] ?? '',
                 'format' => $body['format'] ?? 'text/plain',
-                'language' => $body['language'] ?? 'en',
+                'language' => $body['language'] ?? \AtomExtensions\Helpers\CultureHelper::getCulture(),
                 'purpose' => $body['purpose'] ?? null,
             ];
         }

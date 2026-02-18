@@ -433,6 +433,9 @@
                 <a href="/index.php/research/snapshots/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-camera me-2 text-secondary"></i><?php echo __('Snapshots'); ?>
                 </a>
+                <a href="/index.php/research/assertion-batch-review/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-tasks me-2 text-danger"></i><?php echo __('Batch Review'); ?>
+                </a>
             </div>
         </div>
 
@@ -467,6 +470,9 @@
                 </a>
                 <a href="/index.php/research/ethics-milestones/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-balance-scale me-2 text-warning"></i><?php echo __('Ethics Milestones'); ?>
+                </a>
+                <a href="/index.php/research/compliance/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-shield-alt me-2 text-danger"></i><?php echo __('Compliance Dashboard'); ?>
                 </a>
             </div>
         </div>

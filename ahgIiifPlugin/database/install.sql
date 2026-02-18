@@ -375,6 +375,24 @@ CREATE TABLE IF NOT EXISTS `iiif_auth_access_log` (
     INDEX `idx_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- =============================================================================
+-- IIIF Manifest Cache
+-- Added: 2026-02-18
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `iiif_manifest_cache` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `object_id` INT NOT NULL,
+    `culture` VARCHAR(10) NOT NULL DEFAULT 'en',
+    `manifest_json` LONGTEXT NOT NULL,
+    `cache_key` VARCHAR(64) NOT NULL COMMENT 'SHA-256 of object signature',
+    `page_count` INT DEFAULT NULL COMMENT 'Cached multi-TIFF page count',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `expires_at` TIMESTAMP NULL,
+    INDEX `idx_object_culture` (`object_id`, `culture`),
+    UNIQUE INDEX `idx_cache_key` (`cache_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Insert default auth services
 INSERT INTO `iiif_auth_service` (`name`, `profile`, `label`, `description`, `confirm_label`, `failure_header`, `failure_description`) VALUES
 ('public', 'clickthrough', 'Public Access', 'Click to access this resource', 'I Agree', 'Access Required', 'Please click to acknowledge terms of use.'),

@@ -90,8 +90,10 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // IIIF MODULE ROUTES (manifests, annotations, settings)
         // ===================
         $iiif = new \AtomFramework\Routing\RouteLoader('iiif');
-        $iiif->any('iiif_manifest', '/iiif/manifest/:slug', 'manifest');
-        $iiif->any('iiif_manifest_by_id', '/iiif/manifest/id/:id', 'manifestById', ['id' => '\d+']);
+        $iiif->get('iiif_manifest', '/iiif/manifest/:slug', 'manifest');
+        $iiif->get('iiif_manifest_by_id', '/iiif/manifest/id/:id', 'manifestById', ['id' => '\d+']);
+        $iiif->get('iiif_manifest_v3', '/iiif/v3/manifest/:slug', 'manifestV3');
+        $iiif->get('iiif_viewer', '/iiif/viewer/:id', 'viewer', ['id' => '\d+']);
         $iiif->any('iiif_settings', '/admin/iiif-settings', 'settings');
         $iiif->get('iiif_annotations_object', '/iiif/annotations/object/:id', 'annotationsList', ['id' => '\d+']);
         $iiif->post('iiif_annotations_create', '/iiif/annotations', 'annotationsCreate');

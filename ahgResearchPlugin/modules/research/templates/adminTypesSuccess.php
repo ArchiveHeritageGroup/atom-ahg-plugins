@@ -11,7 +11,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2"><i class="fas fa-user-tag text-primary me-2"></i>Researcher Types</h1>
-    <a href="<?php echo url_for(['module' => 'research', 'action' => 'editResearcherType']); ?>" class="btn btn-primary">
+    <a href="/research/admin/types/new" class="btn btn-primary">
         <i class="fas fa-plus me-1"></i> Add Type
     </a>
 </div>
