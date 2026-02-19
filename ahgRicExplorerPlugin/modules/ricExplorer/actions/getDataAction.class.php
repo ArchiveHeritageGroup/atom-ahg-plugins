@@ -287,7 +287,7 @@ SPARQL;
         if (preg_match('/#(\w+)$/', $uri, $m)) {
             return $this->camelToReadable($m[1]);
         }
-        if (preg_match('/\/(place|term)\/(\d+)$/', $uri, $m)) {
+        if (preg_match('/\/(place|term|concept|documentaryformtype|carriertype|contenttype|recordstate|language)\/(\d+)$/', $uri, $m)) {
             $id = $m[2];
             $term = DB::table('term_i18n')->where('id', $id)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('name');
             if ($term) return $term;
@@ -323,6 +323,28 @@ SPARQL;
                 return $label;
             }
         }
+        if (preg_match('/\/instantiation\/(\d+)$/', $uri, $m)) {
+            $id = $m[1];
+            $do = DB::table('digital_object as d')
+                ->leftJoin('information_object_i18n as ioi', function ($j) {
+                    $j->on('d.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })
+                ->where('d.id', $id)
+                ->select('d.name', 'd.mime_type', 'ioi.title')
+                ->first();
+            if ($do) {
+                $label = $do->name ?: ($do->title ? $do->title . ' (file)' : null);
+                if ($label) {
+                    $ext = pathinfo($label, PATHINFO_EXTENSION);
+                    $base = pathinfo($label, PATHINFO_FILENAME);
+                    // Shorten long filenames
+                    if (mb_strlen($base) > 40) {
+                        $base = mb_substr($base, 0, 37) . '...';
+                    }
+                    return $ext ? $base . '.' . $ext : $base;
+                }
+            }
+        }
         if (preg_match('/\/(\w+)\/(\d+)$/', $uri, $m)) return ucfirst($m[1]) . ' ' . $m[2];
         return 'Unknown';
     }
@@ -339,7 +361,10 @@ SPARQL;
                 'person' => 'Person', 'family' => 'Family', 'corporatebody' => 'CorporateBody',
                 'place' => 'Place', 'instantiation' => 'Instantiation',
                 'production' => 'Production', 'accumulation' => 'Accumulation',
-                'activity' => 'Activity', 'function' => 'Function'
+                'activity' => 'Activity', 'function' => 'Function',
+                'concept' => 'Concept', 'term' => 'Concept',
+                'documentaryformtype' => 'DocumentaryFormType', 'carriertype' => 'CarrierType',
+                'contenttype' => 'ContentType', 'recordstate' => 'RecordState', 'language' => 'Language'
             ];
             return $map[strtolower($m[1])] ?? ucfirst($m[1]);
         }

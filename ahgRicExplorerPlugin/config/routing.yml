@@ -52,7 +52,11 @@ ric_ajax_update_orphan:
   url: /admin/ric/ajax/update-orphan
   param: { module: ricDashboard, action: ajaxUpdateOrphan }
 
-# RiC Explorer AJAX endpoint (uses /ricExplorer/ to avoid nginx /ric/ static file location)
+# RiC Explorer AJAX endpoints (uses /ricExplorer/ to avoid nginx /ric/ static file location)
 ric_explorer_get_data:
   url: /ricExplorer/getData
   param: { module: ricExplorer, action: getData }
+
+ric_explorer_autocomplete:
+  url: /ricExplorer/autocomplete
+  param: { module: ricExplorer, action: autocomplete }

@@ -159,4 +159,5 @@ class ricExplorerActions extends AhgController
 
         return ['nodes' => $nodes, 'edges' => $edges];
     }
+
 }

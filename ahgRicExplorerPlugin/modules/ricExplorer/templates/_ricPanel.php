@@ -69,7 +69,9 @@ if (!$resourceId) return;
     'RecordSet': '#17a2b8', 'Record': '#17a2b8',
     'CorporateBody': '#ffc107', 'Person': '#dc3545', 'Family': '#dc3545',
     'Production': '#6f42c1', 'Accumulation': '#6f42c1', 'Activity': '#6f42c1',
-    'Place': '#fd7e14', 'Thing': '#20c997'
+    'Place': '#fd7e14', 'Thing': '#20c997',
+    'Concept': '#20c997', 'DocumentaryFormType': '#20c997', 'CarrierType': '#20c997',
+    'ContentType': '#20c997', 'RecordState': '#adb5bd', 'Language': '#0d6efd'
   };
 
   function getColor(type) { return typeColors[type] || '#6c757d'; }
