@@ -20,16 +20,17 @@
           <div class="col-6 col-md-4 col-lg-3">
             <a href="{{ url_for(['module' => 'informationobject', 'slug' => $item['slug']]) }}"
                class="card h-100 text-decoration-none trending-card">
-              @if($index < 3)
-                <span class="position-absolute top-0 start-0 m-2 badge bg-warning text-dark">
-                  #{{ $index + 1 }}
-                </span>
-              @endif
+              <span class="position-absolute top-0 start-0 m-2 badge {{ $index < 3 ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                #{{ $index + 1 }}
+              </span>
               @if(!empty($item['thumbnail']))
-                <img src="{{ $item['thumbnail'] }}" class="card-img-top" alt="{{ $item['title'] }}" style="height: 150px; object-fit: cover;" onerror="this.src='/plugins/ahgThemeB5Plugin/images/placeholder.png'">
+                <img src="{{ $item['thumbnail'] }}" class="card-img-top" alt="{{ $item['title'] }}" style="height: 180px; object-fit: cover;" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="card-img-top bg-light align-items-center justify-content-center" style="height: 180px; display: none;">
+                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                </div>
               @else
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
-                  <i class="fas fa-file-earmark text-muted" style="font-size: 3rem;"></i>
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
                 </div>
               @endif
               <div class="card-body">

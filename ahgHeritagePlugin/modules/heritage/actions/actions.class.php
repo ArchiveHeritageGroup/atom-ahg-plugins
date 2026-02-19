@@ -2101,7 +2101,7 @@ class heritageActions extends AhgController
 
         $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
 
-        $result = $service->getExploreCategoryItems('trending', $institutionId ? (int) $institutionId : null, 50);
+        $result = $service->getExploreCategoryItems('trending', $institutionId ? (int) $institutionId : null, 10);
         $this->items = $result['items'];
 
         return sfView::SUCCESS;
