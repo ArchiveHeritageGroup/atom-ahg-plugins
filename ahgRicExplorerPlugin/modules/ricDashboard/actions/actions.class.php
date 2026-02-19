@@ -275,6 +275,73 @@ class ricDashboardActions extends AhgController
         }
     }
 
+    /**
+     * Manual sync trigger - runs ric:queue-process via nohup
+     */
+    public function executeAjaxSync($request)
+    {
+        $atomRoot = $this->config('sf_root_dir');
+        $logFile = $atomRoot . '/cache/ric_sync_' . date('Ymd_His') . '.log';
+
+        // Launch sync in background via nohup
+        $cmd = sprintf(
+            'nohup php %s/symfony ric:queue-process > %s 2>&1 & echo $!',
+            escapeshellarg($atomRoot),
+            escapeshellarg($logFile)
+        );
+
+        $pid = trim(shell_exec($cmd));
+
+        // Log the trigger
+        try {
+            \Illuminate\Database\Capsule\Manager::table('ric_sync_log')->insert([
+                'operation' => 'sync',
+                'entity_type' => 'manual',
+                'entity_id' => null,
+                'status' => 'success',
+                'details' => json_encode(['pid' => $pid, 'log_file' => $logFile, 'triggered_by' => 'dashboard']),
+                'triggered_by' => 'system',
+                'user_id' => $this->getUser()->getAttribute('user_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            // Non-critical
+        }
+
+        return $this->renderJson([
+            'success' => true,
+            'pid' => $pid,
+            'log_file' => $logFile,
+            'message' => 'Sync started in background (PID: ' . $pid . ')',
+        ]);
+    }
+
+    /**
+     * Check sync progress by reading the log file
+     */
+    public function executeAjaxSyncProgress($request)
+    {
+        $logFile = $request->getParameter('log_file');
+
+        if (!$logFile || !file_exists($logFile)) {
+            return $this->renderJson(['running' => false, 'output' => '']);
+        }
+
+        $output = file_get_contents($logFile);
+        $lines = explode("\n", trim($output));
+        $lastLines = array_slice($lines, -15);
+
+        // Check if process is still running
+        $running = strpos($output, 'Sync Complete') === false
+            && strpos($output, 'ERROR') === false;
+
+        return $this->renderJson([
+            'running' => $running,
+            'output' => implode("\n", $lastLines),
+            'line_count' => count($lines),
+        ]);
+    }
+
     public function executeAjaxClearQueueItem($request)
     {
         $id = (int) $request->getParameter('id');
@@ -419,16 +486,29 @@ class ricDashboardActions extends AhgController
     protected function getSyncTrend(int $days): array
     {
         try {
+            $DB = \Illuminate\Database\Capsule\Manager::class;
             $data = [];
             for ($i = $days - 1; $i >= 0; $i--) {
                 $date = date('Y-m-d', strtotime("-{$i} days"));
-                $counts = \Illuminate\Database\Capsule\Manager::table('ric_sync_log')
-                    ->selectRaw('status, COUNT(*) as count')
+
+                // Count records created on this date (actual DB activity)
+                $created = $DB::table('object')
+                    ->whereIn('class_name', ['QubitInformationObject', 'QubitActor', 'QubitRepository'])
                     ->whereRaw('DATE(created_at) = ?', [$date])
-                    ->groupBy('status')
-                    ->pluck('count', 'status')
-                    ->toArray();
-                $data[] = ['date' => $date, 'success' => $counts['success'] ?? 0, 'failure' => $counts['failure'] ?? 0];
+                    ->count();
+
+                // Count records updated on this date (excluding same-day creates)
+                $updated = $DB::table('object')
+                    ->whereIn('class_name', ['QubitInformationObject', 'QubitActor', 'QubitRepository'])
+                    ->whereRaw('DATE(updated_at) = ?', [$date])
+                    ->whereRaw('DATE(created_at) != DATE(updated_at)')
+                    ->count();
+
+                $data[] = [
+                    'date' => $date,
+                    'success' => $created,  // "success" = created records
+                    'failure' => $updated,  // repurpose as "updated" records
+                ];
             }
             return $data;
         } catch (\Exception $e) {
@@ -439,9 +519,19 @@ class ricDashboardActions extends AhgController
     protected function getOperationsByType(): array
     {
         try {
-            return \Illuminate\Database\Capsule\Manager::table('ric_sync_log')
-                ->selectRaw('operation, COUNT(*) as count')
-                ->where('created_at', '>=', date('Y-m-d', strtotime('-7 days')))
+            $DB = \Illuminate\Database\Capsule\Manager::class;
+            $since = date('Y-m-d', strtotime('-7 days'));
+
+            // Show actual entity counts by type from the last 7 days
+            return $DB::table('object')
+                ->selectRaw("CASE class_name
+                    WHEN 'QubitInformationObject' THEN 'Records'
+                    WHEN 'QubitActor' THEN 'Actors'
+                    WHEN 'QubitRepository' THEN 'Repositories'
+                    WHEN 'QubitEvent' THEN 'Events'
+                    ELSE 'Other' END as operation, COUNT(*) as count")
+                ->whereIn('class_name', ['QubitInformationObject', 'QubitActor', 'QubitRepository', 'QubitEvent'])
+                ->where('created_at', '>=', $since)
                 ->groupBy('operation')
                 ->pluck('count', 'operation')
                 ->toArray();

@@ -113,7 +113,7 @@
 <div class="row g-3 mb-4">
   <div class="col-md-8">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0"><?php echo __('Sync Trend (7 Days)'); ?></h5></div>
+      <div class="card-header"><h5 class="mb-0"><?php echo __('Record Activity (7 Days)'); ?></h5></div>
       <div class="card-body position-relative" style="min-height: 200px;">
         <div id="chart-loading-1" class="text-center py-5">
           <div class="spinner-border text-primary"></div>
@@ -157,6 +157,11 @@
         <h5 class="mb-0"><?php echo __('Quick Actions'); ?></h5>
       </div>
       <div class="card-body">
+        <button type="button" class="btn btn-success w-100 mb-2" onclick="runManualSync()" id="sync-btn">
+          <i class="fa fa-sync-alt"></i> <?php echo __('Sync to Fuseki'); ?>
+        </button>
+        <div id="sync-status" class="mb-2" style="display:none;"></div>
+        <hr>
         <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="runIntegrityCheck()">
           <i class="fa fa-check-circle"></i> <?php echo __('Run Integrity Check'); ?>
         </button>
@@ -326,8 +331,8 @@ function updateCharts(trendData, opsData) {
       data: {
         labels: trendData.map(d => d.date),
         datasets: [
-          { label: 'Success', data: trendData.map(d => d.success), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, tension: 0.3 },
-          { label: 'Failure', data: trendData.map(d => d.failure), borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true, tension: 0.3 }
+          { label: 'Created', data: trendData.map(d => d.success), borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, tension: 0.3 },
+          { label: 'Updated', data: trendData.map(d => d.failure), borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.1)', fill: true, tension: 0.3 }
         ]
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
@@ -400,6 +405,76 @@ function executeCleanup() {
       if (data.success) {
         alert('Cleanup complete. Removed ' + data.stats.triples_removed + ' triples.');
         loadDashboardData();
+      }
+    });
+}
+
+// Manual Sync
+let syncLogFile = null;
+let syncPollTimer = null;
+
+function runManualSync() {
+  const btn = document.getElementById('sync-btn');
+  const statusDiv = document.getElementById('sync-status');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Starting sync...';
+  statusDiv.style.display = 'block';
+  statusDiv.innerHTML = '<div class="alert alert-info py-1 small mb-0"><i class="fa fa-spinner fa-spin"></i> Launching sync process...</div>';
+
+  fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxSync']); ?>', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        syncLogFile = data.log_file;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Syncing (PID: ' + data.pid + ')';
+        statusDiv.innerHTML = '<div class="alert alert-info py-1 small mb-0"><i class="fa fa-spinner fa-spin"></i> ' + data.message + '</div>';
+
+        // Poll for progress
+        syncPollTimer = setInterval(pollSyncProgress, 3000);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-sync-alt"></i> Sync to Fuseki';
+        statusDiv.innerHTML = '<div class="alert alert-danger py-1 small mb-0">Error: ' + (data.error || 'Unknown') + '</div>';
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-sync-alt"></i> Sync to Fuseki';
+      statusDiv.innerHTML = '<div class="alert alert-danger py-1 small mb-0">Failed: ' + err.message + '</div>';
+    });
+}
+
+function pollSyncProgress() {
+  if (!syncLogFile) return;
+
+  fetch('<?php echo url_for(['module' => 'ricDashboard', 'action' => 'ajaxSyncProgress']); ?>?log_file=' + encodeURIComponent(syncLogFile))
+    .then(r => r.json())
+    .then(data => {
+      const btn = document.getElementById('sync-btn');
+      const statusDiv = document.getElementById('sync-status');
+
+      if (!data.running) {
+        // Done
+        clearInterval(syncPollTimer);
+        syncPollTimer = null;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-sync-alt"></i> Sync to Fuseki';
+
+        const hasError = data.output && data.output.indexOf('ERROR') !== -1;
+        const alertClass = hasError ? 'alert-warning' : 'alert-success';
+        const icon = hasError ? 'exclamation-triangle' : 'check-circle';
+
+        statusDiv.innerHTML = '<div class="alert ' + alertClass + ' py-1 small mb-0"><i class="fa fa-' + icon + '"></i> Sync complete</div>' +
+          '<pre class="small mt-1 mb-0 p-2 bg-dark text-light" style="max-height:150px; overflow-y:auto; font-size:0.7rem;">' +
+          (data.output || 'No output') + '</pre>';
+
+        // Refresh dashboard data
+        loadDashboardData();
+      } else {
+        // Still running
+        const lastLine = data.output ? data.output.split('\n').pop() : 'Processing...';
+        statusDiv.innerHTML = '<div class="alert alert-info py-1 small mb-0"><i class="fa fa-spinner fa-spin"></i> ' + lastLine + '</div>';
       }
     });
 }

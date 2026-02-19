@@ -302,6 +302,27 @@ SPARQL;
             $title = DB::table('information_object_i18n')->where('id', $id)->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('title');
             if ($title) return $title;
         }
+        if (preg_match('/\/(production|accumulation|activity|event)\/(\d+)$/', $uri, $m)) {
+            $id = $m[2];
+            $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+            $event = DB::table('event as e')
+                ->leftJoin('event_i18n as ei', function ($j) use ($culture) {
+                    $j->on('e.id', '=', 'ei.id')->where('ei.culture', '=', $culture);
+                })
+                ->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                    $j->on('e.type_id', '=', 'ti.id')->where('ti.culture', '=', $culture);
+                })
+                ->where('e.id', $id)
+                ->select('ti.name as type_name', 'ei.date as date_text')
+                ->first();
+            if ($event) {
+                $label = $event->type_name ?: ucfirst($m[1]);
+                if ($event->date_text) {
+                    $label .= ': ' . $event->date_text;
+                }
+                return $label;
+            }
+        }
         if (preg_match('/\/(\w+)\/(\d+)$/', $uri, $m)) return ucfirst($m[1]) . ' ' . $m[2];
         return 'Unknown';
     }

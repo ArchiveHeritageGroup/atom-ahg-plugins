@@ -1116,6 +1116,49 @@ class SettingsCronJobsAction extends AhgController
                 'category' => 'ahg',
             ],
             // ============================================
+            // RIC TRIPLESTORE
+            // ============================================
+            [
+                'name' => 'RiC Triplestore Sync',
+                'command' => 'php symfony ric:queue-process',
+                'description' => 'Syncs AtoM records to the Fuseki RiC triplestore as RiC-O linked data. Uses the Python RiC extractor to generate JSON-LD from the database and loads it into Fuseki. Results are logged to ric_sync_log for the dashboard.',
+                'options' => [
+                    '--limit=N' => 'Maximum records to process',
+                    '--fonds=IDS' => 'Specific fonds IDs (comma-separated)',
+                    '--clear' => 'Clear triplestore before sync',
+                    '--validate' => 'Run SHACL validation after sync',
+                    '--backup' => 'Create backup before sync',
+                    '--status' => 'Show triplestore status only',
+                ],
+                'schedule' => 'Nightly or after significant record changes',
+                'example' => '0 2 * * * cd {root} && php symfony ric:queue-process --limit=500 >> /var/log/atom/ric-sync.log 2>&1',
+                'duration' => 'Medium to Long (depends on record count)',
+                'category' => 'ric',
+            ],
+            [
+                'name' => 'RiC Triplestore Status',
+                'command' => 'php symfony ric:queue-process --status',
+                'description' => 'Displays the current status of the Fuseki triplestore including triple count, dataset size, and connectivity. Useful for monitoring health without modifying data.',
+                'options' => [],
+                'schedule' => 'Hourly for monitoring, or run manually',
+                'example' => '0 * * * * cd {root} && php symfony ric:queue-process --status >> /var/log/atom/ric-status.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ric',
+            ],
+            [
+                'name' => 'RiC Integrity Check',
+                'command' => 'php atom-framework/bin/atom ric:integrity-check',
+                'description' => 'Checks integrity between AtoM records and Fuseki triplestore. Detects orphaned triples, missing records, and inconsistencies. Part of the RiC sync monitoring system.',
+                'options' => [
+                    '--fix' => 'Attempt to fix detected issues',
+                    '--verbose' => 'Show detailed comparison output',
+                ],
+                'schedule' => 'Weekly integrity verification',
+                'example' => '0 5 * * 0 cd {root} && php atom-framework/bin/atom ric:integrity-check >> /var/log/atom/ric-integrity.log 2>&1',
+                'duration' => 'Medium',
+                'category' => 'ric',
+            ],
+            // ============================================
             // DIGITAL PRESERVATION
             // ============================================
             [
@@ -1472,6 +1515,7 @@ class SettingsCronJobsAction extends AhgController
             'maintenance' => ['title' => 'Maintenance', 'icon' => 'bi-wrench', 'jobs' => []],
             'audit' => ['title' => 'Audit & Logging', 'icon' => 'bi-journal-text', 'jobs' => []],
             'ahg' => ['title' => 'AHG Extensions', 'icon' => 'bi-puzzle', 'jobs' => []],
+            'ric' => ['title' => 'RiC Triplestore', 'icon' => 'bi-diagram-3', 'jobs' => []],
         ];
 
         foreach ($jobs as $job) {
