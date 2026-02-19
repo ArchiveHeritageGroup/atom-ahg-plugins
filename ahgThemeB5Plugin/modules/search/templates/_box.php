@@ -65,6 +65,11 @@
         <?php echo __('Advanced search'); ?>
       </a>
       <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#" id="semantic-search-dropdown-link" onclick="event.preventDefault(); var btn = document.getElementById('openSemanticSearchBtn'); if (btn) { btn.click(); } else if (typeof openSemanticModal === 'function') { openSemanticModal(); }">
+        <i class="fas fa-brain me-1" aria-hidden="true"></i>
+        <?php echo __('Semantic search'); ?>
+      </a>
+      <div class="dropdown-divider"></div>
       <div class="px-3 py-2">
         <div class="form-check form-switch">
           <input
@@ -75,13 +80,9 @@
             value="1"
             <?php echo ($sf_request->getParameter('semantic') == '1') ? 'checked' : ''; ?>>
           <label class="form-check-label" for="semantic-search-toggle">
-            <i class="fas fa-brain me-1" aria-hidden="true"></i>
-            <?php echo __('Semantic search'); ?>
+            <?php echo __('Expand search with synonyms'); ?>
           </label>
         </div>
-        <small class="text-muted d-block mt-1">
-          <?php echo __('Expand search with synonyms'); ?>
-        </small>
       </div>
     </div>
     <input
