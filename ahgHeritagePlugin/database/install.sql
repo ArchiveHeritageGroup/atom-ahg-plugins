@@ -1269,12 +1269,12 @@ INSERT IGNORE INTO heritage_explore_category (institution_id, code, name, descri
 
 -- Default timeline periods (South African focused with international context)
 INSERT IGNORE INTO heritage_timeline_period (institution_id, name, short_name, start_year, end_year, description, display_order, show_on_landing) VALUES
-(NULL, 'Pre-Colonial Era', 'Pre-1652', -10000, 1651, 'San and Khoi peoples, early Iron Age settlements, and African kingdoms before European contact', 1, 1),
-(NULL, 'Dutch Colonial Period', '1652-1795', 1652, 1795, 'Dutch East India Company settlement at the Cape, expansion and conflicts', 2, 1),
-(NULL, 'British Colonial Era', '1795-1910', 1795, 1910, 'British rule, the Great Trek, mineral discoveries, and Anglo-Boer Wars', 3, 1),
-(NULL, 'Union of South Africa', '1910-1948', 1910, 1948, 'Formation of the Union, World Wars, and early segregation policies', 4, 1),
-(NULL, 'Apartheid Era', '1948-1994', 1948, 1994, 'Formal apartheid, resistance movements, and the struggle for democracy', 5, 1),
-(NULL, 'Democratic Era', '1994-Present', 1994, NULL, 'Post-apartheid South Africa, reconciliation, and nation building', 6, 1);
+(NULL, 'Ancient World', 'Ancient', -5000, 499, 'Ancient civilisations, classical antiquity, and the foundations of recorded history - from early writing systems to the fall of Rome', 1, 1),
+(NULL, 'Medieval Period', 'Medieval', 500, 1499, 'The Middle Ages across Europe, Asia, and Africa - feudalism, the Islamic Golden Age, Crusades, and early Renaissance', 2, 1),
+(NULL, 'Early Modern Era', '1500-1799', 1500, 1799, 'Age of exploration, colonisation, the Reformation, Scientific Revolution, and the Enlightenment', 3, 1),
+(NULL, '19th Century', '1800s', 1800, 1899, 'Industrial Revolution, nationalism, abolition movements, and the reshaping of global empires', 4, 1),
+(NULL, 'World Wars and Upheaval', '1900-1945', 1900, 1945, 'Two World Wars, the fall of empires, the Great Depression, and the birth of modern geopolitics', 5, 1),
+(NULL, 'Modern and Contemporary', '1946-Present', 1946, NULL, 'Cold War, decolonisation, civil rights, the digital revolution, and the contemporary world', 6, 1);
 
 -- =============================================================================
 -- VERIFICATION

@@ -33,10 +33,10 @@
                 <div class="card-img-top" style="height: 120px; background: url('<?php echo $period['cover_image']; ?>') center/cover;"></div>
               <?php endif; ?>
               <div class="card-body">
-                <h3 class="card-title h5"><?php echo htmlspecialchars($period['name']); ?></h3>
-                <p class="card-subtitle text-primary mb-2"><?php echo htmlspecialchars($period['year_label']); ?></p>
+                <h3 class="card-title h5"><?php echo $period['name']; ?></h3>
+                <p class="card-subtitle text-primary mb-2"><?php echo $period['year_label']; ?></p>
                 <?php if ($period['description']): ?>
-                  <p class="card-text small text-muted"><?php echo htmlspecialchars(substr($period['description'], 0, 150)); ?>...</p>
+                  <p class="card-text small text-muted"><?php echo substr($period['description'], 0, 150); ?>...</p>
                 <?php endif; ?>
                 <?php if ($period['item_count'] > 0): ?>
                   <span class="badge bg-secondary"><?php echo number_format($period['item_count']); ?> items</span>
@@ -57,16 +57,16 @@
           <li class="breadcrumb-item">
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'timeline']); ?>">Timeline</a>
           </li>
-          <li class="breadcrumb-item active"><?php echo htmlspecialchars($currentPeriod['name']); ?></li>
+          <li class="breadcrumb-item active"><?php echo $currentPeriod['name']; ?></li>
         </ol>
       </nav>
 
       <div class="row mb-4">
         <div class="col-12">
-          <h1 class="display-5 fw-bold mb-2"><?php echo htmlspecialchars($currentPeriod['name']); ?></h1>
-          <p class="h4 text-primary mb-3"><?php echo htmlspecialchars($currentPeriod['year_label']); ?></p>
+          <h1 class="display-5 fw-bold mb-2"><?php echo $currentPeriod['name']; ?></h1>
+          <p class="h4 text-primary mb-3"><?php echo $currentPeriod['year_label']; ?></p>
           <?php if ($currentPeriod['description']): ?>
-            <p class="lead text-muted"><?php echo htmlspecialchars($currentPeriod['description']); ?></p>
+            <p class="lead text-muted"><?php echo $currentPeriod['description']; ?></p>
           <?php endif; ?>
           <?php if (isset($totalItems)): ?>
             <p class="text-muted"><?php echo number_format($totalItems); ?> items from this period</p>
@@ -79,7 +79,7 @@
         <?php foreach ($periods as $period): ?>
           <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'timeline', 'period_id' => $period['id']]); ?>"
              class="btn btn-sm <?php echo $period['id'] == $currentPeriod['id'] ? 'btn-primary' : 'btn-outline-secondary'; ?>">
-            <?php echo htmlspecialchars($period['short_name']); ?>
+            <?php echo $period['short_name']; ?>
           </a>
         <?php endforeach; ?>
       </div>
