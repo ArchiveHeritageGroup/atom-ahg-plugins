@@ -6894,8 +6894,7 @@ class researchActions extends AhgController
         if (!$room) {
             $readingRoom = DB::table('research_reading_room')->where('id', $roomId)->first();
             if ($readingRoom) {
-                // Redirect to the reading room edit page
-                $this->redirect('/research/edit-room/' . $roomId);
+                $this->redirect('/research/rooms/edit?id=' . $roomId);
             }
             $this->forward404('Room not found');
         }
