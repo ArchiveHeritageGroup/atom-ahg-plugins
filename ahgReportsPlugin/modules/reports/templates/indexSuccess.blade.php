@@ -53,6 +53,7 @@ $hasCDPA = isPluginActive('ahgCDPAPlugin');
 $hasNAZ = isPluginActive('ahgNAZPlugin');
 $hasIPSAS = isPluginActive('ahgIPSASPlugin');
 $hasNMMZ = isPluginActive('ahgNMMZPlugin');
+$hasAiCondition = isPluginActive('ahgAiConditionPlugin');
 ?>
 
 @section('sidebar')
@@ -394,6 +395,33 @@ $canManage = $isAdmin || $isEditor;
                     </li>
                     <li class="list-group-item">
                         <a href="/condition/templates"><i class="fas fa-clipboard me-2 text-muted"></i>{{ __('Condition Templates') }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        @endif
+
+        @if ($hasAiCondition)
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2"></i>{{ __('AI Condition Assessment') }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'assess']) }}"><i class="fas fa-camera me-2 text-muted"></i>{{ __('AI Assessment') }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'manualAssess']) }}"><i class="fas fa-clipboard-check me-2 text-muted"></i>{{ __('Manual Assessment') }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'bulk']) }}"><i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Bulk Scan') }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'browse']) }}"><i class="fas fa-list me-2 text-muted"></i>{{ __('Browse Assessments') }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'training']) }}"><i class="fas fa-brain me-2 text-muted"></i>{{ __('Model Training') }}</a>
                     </li>
                 </ul>
             </div>

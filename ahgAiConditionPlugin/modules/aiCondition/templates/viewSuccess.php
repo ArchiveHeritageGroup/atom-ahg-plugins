@@ -2,7 +2,6 @@
 
 <?php
 require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Helpers/AiConditionHelper.php';
-use ahgAiConditionPlugin\Helpers\AiConditionHelper;
 ?>
 
 <?php slot('sidebar') ?>
@@ -12,11 +11,11 @@ use ahgAiConditionPlugin\Helpers\AiConditionHelper;
         <div class="card-body py-2 small">
             <div class="mb-2">
                 <strong><?php echo __('Score') ?></strong><br>
-                <span class="fs-4"><?php echo AiConditionHelper::scoreDisplay($assessment->overall_score) ?></span>
+                <span class="fs-4"><?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::scoreDisplay($assessment->overall_score) ?></span>
             </div>
             <div class="mb-2">
                 <strong><?php echo __('Grade') ?></strong><br>
-                <?php echo AiConditionHelper::gradeBadge($assessment->condition_grade) ?>
+                <?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::gradeBadge($assessment->condition_grade) ?>
             </div>
             <div class="mb-2">
                 <strong><?php echo __('Damages') ?></strong><br>
@@ -110,13 +109,13 @@ use ahgAiConditionPlugin\Helpers\AiConditionHelper;
                     <div class="list-group-item py-2">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge" style="background-color:<?php echo AiConditionHelper::damageColor($dmg->damage_type) ?>">
+                                <span class="badge" style="background-color:<?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::damageColor($dmg->damage_type) ?>">
                                     <?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?>
                                 </span>
-                                <?php echo AiConditionHelper::severityBadge($dmg->severity) ?>
+                                <?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::severityBadge($dmg->severity) ?>
                             </div>
                             <div class="text-end small">
-                                <?php echo AiConditionHelper::confidenceBar($dmg->confidence) ?>
+                                <?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::confidenceBar($dmg->confidence) ?>
                             </div>
                         </div>
                         <?php if ($dmg->area_percent): ?>

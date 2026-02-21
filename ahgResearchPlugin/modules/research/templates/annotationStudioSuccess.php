@@ -61,6 +61,9 @@
                     <button type="button" class="btn btn-sm btn-success ms-2" id="aiConditionScan" title="AI Condition Scan">
                         <i class="fas fa-robot me-1"></i>AI Scan
                     </button>
+                    <button type="button" class="btn btn-sm btn-warning ms-1" id="contributeTrainingBtn" title="Contribute annotations as training data for the AI model">
+                        <i class="fas fa-graduation-cap me-1"></i>Train
+                    </button>
                     <?php endif ?>
                     <span class="ms-auto small text-muted" id="statusText">Loading...</span>
                 </div>
@@ -892,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var dataUrl = canvas.toDataURL({format: 'jpeg', quality: 0.85});
             var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, '');
 
-            fetch('/ai-condition/api/submit', {
+            fetch('/index.php/aiCondition/apiSubmit', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -968,10 +971,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (result.recommendations) {
-                    html += '<hr class="my-2"><div class="small text-muted">' + result.recommendations.substring(0, 200) + '</div>';
+                    var recText = Array.isArray(result.recommendations) ? result.recommendations.join('; ') : String(result.recommendations);
+                    html += '<hr class="my-2"><div class="small text-muted">' + recText.substring(0, 200) + '</div>';
                 }
 
-                html += '<a href="/ai-condition/assess?object_id=' + objectId + '" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-external-link-alt me-1"></i>Full Assessment</a>';
+                html += '<a href="/index.php/ai-condition/assess?object_id=' + objectId + '" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-external-link-alt me-1"></i>Full Assessment</a>';
                 body.innerHTML = html;
             })
             .catch(function(err) {
@@ -979,6 +983,75 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerHTML = '<i class="fas fa-robot me-1"></i>AI Scan';
                 document.getElementById('aiResultsCard').style.display = '';
                 document.getElementById('aiResultsBody').innerHTML = '<div class="alert alert-danger py-1 small mb-0">Network error: ' + err.message + '</div>';
+            });
+        });
+    }
+
+    // --- Contribute to Training Button ---
+    var trainBtn = document.getElementById('contributeTrainingBtn');
+    if (trainBtn) {
+        trainBtn.addEventListener('click', function() {
+            if (!fabricCanvas) { alert('Canvas not loaded'); return; }
+
+            // Get all rectangle/shape objects from the canvas as bounding box annotations
+            var objects = fabricCanvas.getObjects();
+            var annotations = [];
+            objects.forEach(function(obj) {
+                if (obj.type === 'rect' || obj.type === 'group' || obj.type === 'path') {
+                    var bound = obj.getBoundingRect();
+                    annotations.push({
+                        damage_type: obj.damageType || obj.label || 'tear',
+                        bbox: {
+                            x1: Math.round(bound.left),
+                            y1: Math.round(bound.top),
+                            x2: Math.round(bound.left + bound.width),
+                            y2: Math.round(bound.top + bound.height)
+                        }
+                    });
+                }
+            });
+
+            if (!annotations.length) {
+                alert('Draw bounding boxes on the image first, then click Train to contribute them as training data.');
+                return;
+            }
+
+            if (!confirm('Submit ' + annotations.length + ' annotation(s) as training data for the AI damage detection model?')) return;
+
+            trainBtn.disabled = true;
+            trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
+
+            // Get canvas image as base64
+            var dataUrl = fabricCanvas.toDataURL({format: 'jpeg', quality: 0.85});
+            var base64 = dataUrl.split(',')[1];
+
+            fetch('/index.php/aiCondition/apiContribute', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    image_base64: base64,
+                    annotations: annotations,
+                    source: 'annotation_studio',
+                    object_id: objectId || null
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                trainBtn.disabled = false;
+                trainBtn.innerHTML = '<i class="fas fa-graduation-cap me-1"></i>Train';
+                if (data.success !== false) {
+                    trainBtn.classList.remove('btn-warning');
+                    trainBtn.classList.add('btn-outline-warning');
+                    trainBtn.innerHTML = '<i class="fas fa-check me-1"></i>Contributed';
+                    alert('Training data submitted successfully. It will be reviewed by an administrator.');
+                } else {
+                    alert(data.error || 'Failed to submit training data.');
+                }
+            })
+            .catch(function(err) {
+                trainBtn.disabled = false;
+                trainBtn.innerHTML = '<i class="fas fa-graduation-cap me-1"></i>Train';
+                alert('Network error: ' + err.message);
             });
         });
     }

@@ -14,7 +14,7 @@ class AiConditionRepository
      */
     public function saveAssessment(array $data): int
     {
-        return DB::table('ahg_ai_condition_assessment')->insertGetId([
+        $row = [
             'information_object_id' => $data['information_object_id'] ?? null,
             'condition_report_id'   => $data['condition_report_id'] ?? null,
             'digital_object_id'     => $data['digital_object_id'] ?? null,
@@ -31,7 +31,16 @@ class AiConditionRepository
             'api_client_id'         => $data['api_client_id'] ?? null,
             'created_by'            => $data['created_by'] ?? null,
             'created_at'            => date('Y-m-d H:i:s'),
-        ]);
+        ];
+
+        // Manual assessments can be pre-confirmed
+        if (!empty($data['is_confirmed'])) {
+            $row['is_confirmed'] = 1;
+            $row['confirmed_by'] = $data['confirmed_by'] ?? null;
+            $row['confirmed_at'] = $data['confirmed_at'] ?? date('Y-m-d H:i:s');
+        }
+
+        return DB::table('ahg_ai_condition_assessment')->insertGetId($row);
     }
 
     /**

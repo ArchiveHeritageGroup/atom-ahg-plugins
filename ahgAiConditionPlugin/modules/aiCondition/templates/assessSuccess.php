@@ -119,7 +119,7 @@ document.getElementById('objectSearch').addEventListener('input', function() {
     var q = this.value.trim();
     if (q.length < 2) { document.getElementById('objectResults').style.display='none'; return; }
     searchTimer = setTimeout(function() {
-        fetch('/index.php/object/autocomplete?query=' + encodeURIComponent(q))
+        fetch('<?php echo url_for(['module' => 'aiCondition', 'action' => 'apiObjectSearch']) ?>?query=' + encodeURIComponent(q))
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var el = document.getElementById('objectResults');
@@ -128,7 +128,7 @@ document.getElementById('objectSearch').addEventListener('input', function() {
                 var a = document.createElement('a');
                 a.href = '#';
                 a.className = 'list-group-item list-group-item-action small py-1';
-                a.textContent = item.title || item.label || item.name;
+                a.textContent = item.title;
                 a.dataset.id = item.id;
                 a.addEventListener('click', function(e) {
                     e.preventDefault();

@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS `ahg_ai_service_client` (
     `api_key` VARCHAR(64) NOT NULL UNIQUE,
     `tier` VARCHAR(50) DEFAULT 'free' COMMENT 'Dropdown: ai_service_tier',
     `monthly_limit` INT DEFAULT 50,
+    `can_contribute_training` TINYINT(1) DEFAULT 0 COMMENT 'Client has opted in to contribute training data',
     `is_active` TINYINT(1) DEFAULT 1,
     `last_used_at` DATETIME DEFAULT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -106,6 +107,26 @@ CREATE TABLE IF NOT EXISTS `ahg_ai_service_usage` (
         REFERENCES `ahg_ai_service_client` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Training data contributions (from condition photos, annotation studio, SaaS clients)
+CREATE TABLE IF NOT EXISTS `ahg_ai_training_contribution` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `source` VARCHAR(50) NOT NULL COMMENT 'condition_photos, annotation_studio, saas_client, manual',
+    `object_id` INT DEFAULT NULL COMMENT 'FK to information_object if linked',
+    `contributor` VARCHAR(255) DEFAULT NULL COMMENT 'User ID or client name',
+    `client_id` BIGINT UNSIGNED DEFAULT NULL COMMENT 'FK to ahg_ai_service_client if SaaS',
+    `image_filename` VARCHAR(255) NOT NULL,
+    `annotation_filename` VARCHAR(255) NOT NULL,
+    `damage_types` JSON DEFAULT NULL COMMENT 'Array of damage types in this contribution',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT 'pending, approved, rejected',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_atc_source` (`source`),
+    INDEX `idx_atc_status` (`status`),
+    INDEX `idx_atc_object` (`object_id`),
+    INDEX `idx_atc_client` (`client_id`),
+    INDEX `idx_atc_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================================
 -- Seed Data: Dropdown Manager taxonomies (section: ai)
 -- ============================================================================
@@ -115,7 +136,8 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `taxonomy_secti
     ('ai_assessment_source', 'AI Assessment Source', 'ai', 'manual', 'Manual Upload', '#6c757d', 10, 1),
     ('ai_assessment_source', 'AI Assessment Source', 'ai', 'bulk', 'Bulk Scan', '#0d6efd', 20, 0),
     ('ai_assessment_source', 'AI Assessment Source', 'ai', 'auto', 'Auto (On Upload)', '#198754', 30, 0),
-    ('ai_assessment_source', 'AI Assessment Source', 'ai', 'api', 'External API', '#6f42c1', 40, 0);
+    ('ai_assessment_source', 'AI Assessment Source', 'ai', 'api', 'External API', '#6f42c1', 40, 0),
+    ('ai_assessment_source', 'AI Assessment Source', 'ai', 'manual_entry', 'Manual Entry', '#495057', 50, 0);
 
 -- AI service tier
 INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `taxonomy_section`, `code`, `label`, `color`, `sort_order`, `is_default`) VALUES

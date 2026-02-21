@@ -28,6 +28,9 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
         // Browse assessments
         $router->any('ai_condition_index', '/ai-condition', 'index');
 
+        // Browse assessments
+        $router->any('ai_condition_browse', '/ai-condition/browse', 'browse');
+
         // New assessment
         $router->any('ai_condition_assess', '/ai-condition/assess', 'assess');
 
@@ -46,6 +49,12 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
         // SaaS client management
         $router->any('ai_condition_clients', '/ai-condition/clients', 'clients');
 
+        // Manual assessment
+        $router->any('ai_condition_manual_assess', '/ai-condition/manual-assess', 'manualAssess');
+
+        // Model training
+        $router->any('ai_condition_training', '/ai-condition/training', 'training');
+
         // AJAX endpoints
         $router->any('ai_condition_api_test', '/ai-condition/api/test', 'apiTest');
         $router->any('ai_condition_api_submit', '/ai-condition/api/submit', 'apiSubmit');
@@ -54,6 +63,24 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
         $router->any('ai_condition_api_bulk_status', '/ai-condition/api/bulk-status', 'apiBulkStatus');
         $router->any('ai_condition_api_client_save', '/ai-condition/api/client-save', 'apiClientSave');
         $router->any('ai_condition_api_client_revoke', '/ai-condition/api/client-revoke', 'apiClientRevoke');
+        $router->any('ai_condition_api_object_search', '/ai-condition/api/object-search', 'apiObjectSearch');
+
+        // Manual assessment save
+        $router->any('ai_condition_api_manual_save', '/ai-condition/api/manual-save', 'apiManualSave');
+
+        // Training proxy endpoints
+        $router->any('ai_condition_api_training_model_info', '/ai-condition/api/training/model-info', 'apiTrainingModelInfo');
+        $router->any('ai_condition_api_training_status', '/ai-condition/api/training/status', 'apiTrainingStatus');
+        $router->any('ai_condition_api_training_upload', '/ai-condition/api/training/upload', 'apiTrainingUpload');
+        $router->any('ai_condition_api_training_datasets', '/ai-condition/api/training/datasets', 'apiTrainingDatasets');
+        $router->any('ai_condition_api_training_start', '/ai-condition/api/training/start', 'apiTrainingStart');
+
+        // Training contribution endpoints
+        $router->any('ai_condition_api_contribute', '/ai-condition/api/contribute', 'apiContribute');
+        $router->any('ai_condition_api_contributions', '/ai-condition/api/contributions', 'apiContributions');
+
+        // Client training permission toggle
+        $router->any('ai_condition_api_client_training_toggle', '/ai-condition/api/client-training-toggle', 'apiClientTrainingToggle');
 
         $router->register($event->getSubject());
     }

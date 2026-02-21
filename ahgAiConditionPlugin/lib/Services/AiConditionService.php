@@ -47,15 +47,11 @@ class AiConditionService
     public function assess(string $imageData, array $options = []): array
     {
         $payload = [
-            'image' => $imageData,
-            'confidence' => $options['confidence'] ?? 0.25,
+            'image_base64' => $imageData,
+            'object_id' => !empty($options['information_object_id']) ? (int) $options['information_object_id'] : null,
             'store' => $options['store'] ?? true,
-            'generate_overlay' => $options['overlay'] ?? true,
+            'include_overlay' => $options['overlay'] ?? true,
         ];
-
-        if (!empty($options['information_object_id'])) {
-            $payload['information_object_id'] = (int) $options['information_object_id'];
-        }
 
         $response = $this->request('POST', '/api/v1/assess', $payload);
 
@@ -107,6 +103,77 @@ class AiConditionService
         return $response;
     }
 
+    // =========================================================================
+    // Proxy Methods (for training page to call Python service)
+    // =========================================================================
+
+    /**
+     * Proxy a GET request to the Python service.
+     */
+    public function proxyGet(string $endpoint): array
+    {
+        $result = $this->request('GET', $endpoint);
+        return $result ?? ['success' => false, 'error' => 'Service unreachable'];
+    }
+
+    /**
+     * Proxy a POST request with JSON body to the Python service.
+     */
+    public function proxyPost(string $endpoint, array $data): array
+    {
+        $result = $this->request('POST', $endpoint, $data);
+        return $result ?? ['success' => false, 'error' => 'Service unreachable'];
+    }
+
+    /**
+     * Proxy a DELETE request to the Python service.
+     */
+    public function proxyDelete(string $endpoint): array
+    {
+        $result = $this->request('DELETE', $endpoint);
+        return $result ?? ['success' => false, 'error' => 'Service unreachable'];
+    }
+
+    /**
+     * Proxy a file upload to the Python service.
+     */
+    public function proxyFileUpload(string $endpoint, string $filePath, string $fileName, string $fieldName = 'file'): array
+    {
+        $ch = curl_init();
+        $url = rtrim($this->apiUrl, '/') . $endpoint;
+
+        $cfile = curl_file_create($filePath, 'application/zip', $fileName);
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 300,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [$fieldName => $cfile],
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'X-API-Key: ' . $this->apiKey,
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['success' => false, 'error' => 'Upload failed: ' . $error];
+        }
+
+        $decoded = json_decode($response, true);
+        if ($httpCode >= 400) {
+            return $decoded ?: ['success' => false, 'error' => 'HTTP ' . $httpCode];
+        }
+
+        return $decoded ?: ['success' => false, 'error' => 'Invalid response'];
+    }
+
     /**
      * Make an HTTP request to the AI service.
      */
@@ -131,6 +198,8 @@ class AiConditionService
         if ($method === 'POST') {
             $options[CURLOPT_POST] = true;
             $options[CURLOPT_POSTFIELDS] = json_encode($data);
+        } elseif ($method === 'DELETE') {
+            $options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
         }
 
         curl_setopt_array($ch, $options);

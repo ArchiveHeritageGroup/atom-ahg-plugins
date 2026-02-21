@@ -2,7 +2,6 @@
 
 <?php
 require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Helpers/AiConditionHelper.php';
-use ahgAiConditionPlugin\Helpers\AiConditionHelper;
 ?>
 
 <?php slot('sidebar') ?>
@@ -62,8 +61,8 @@ use ahgAiConditionPlugin\Helpers\AiConditionHelper;
             <?php foreach (array_reverse($history) as $h): ?>
             <tr>
                 <td class="small"><?php echo date('Y-m-d H:i', strtotime($h->assessed_at)) ?></td>
-                <td class="text-center"><?php echo AiConditionHelper::scoreDisplay($h->score) ?></td>
-                <td class="text-center"><?php echo AiConditionHelper::gradeBadge($h->condition_grade) ?></td>
+                <td class="text-center"><?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::scoreDisplay($h->score) ?></td>
+                <td class="text-center"><?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::gradeBadge($h->condition_grade) ?></td>
                 <td class="text-center"><span class="badge bg-secondary"><?php echo $h->damage_count ?></span></td>
                 <td class="text-end">
                     <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'view', 'id' => $h->assessment_id]) ?>" class="btn btn-sm btn-outline-primary">

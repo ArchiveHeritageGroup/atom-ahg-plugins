@@ -14,14 +14,9 @@ class aiConditionActions extends AhgController
 
     public function boot(): void
     {
-        $ajaxActions = ['apiTest', 'apiSubmit', 'apiConfirm', 'apiHistoryData', 'apiBulkStatus', 'apiClientSave', 'apiClientRevoke'];
-        if (in_array($this->getActionName(), $ajaxActions)) {
-            ob_start();
-        }
-
-        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
-        if (file_exists($ahgDbFile)) {
-            require_once $ahgDbFile;
+        $bootstrap = $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
+        if (file_exists($bootstrap)) {
+            require_once $bootstrap;
         }
 
         $pluginBase = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib';
@@ -34,9 +29,79 @@ class aiConditionActions extends AhgController
     }
 
     /**
-     * List assessments
+     * Settings + API Clients (main page)
      */
     public function executeIndex($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        $settingsFile = $this->config('sf_root_dir') . '/atom-framework/src/Services/AhgSettingsService.php';
+        require_once $settingsFile;
+
+        // Handle settings save
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'save_settings') {
+            $fields = ['ai_condition_service_url', 'ai_condition_api_key', 'ai_condition_auto_scan',
+                        'ai_condition_min_confidence', 'ai_condition_overlay_enabled', 'ai_condition_notify_grade'];
+
+            foreach ($fields as $field) {
+                $value = $request->getParameter($field);
+                if ($value !== null) {
+                    \AtomExtensions\Services\AhgSettingsService::set($field, $value, 'ai_condition');
+                }
+            }
+
+            // Handle checkbox unchecked (not sent in POST)
+            foreach (['ai_condition_auto_scan', 'ai_condition_overlay_enabled'] as $cb) {
+                if ($request->getParameter($cb) === null) {
+                    \AtomExtensions\Services\AhgSettingsService::set($cb, '0', 'ai_condition');
+                }
+            }
+
+            $this->getUser()->setFlash('notice', 'Settings saved.');
+            $this->redirect(['module' => 'aiCondition', 'action' => 'index']);
+        }
+
+        // Load settings
+        $this->settings = [
+            'ai_condition_service_url'      => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_service_url', 'http://localhost:8100'),
+            'ai_condition_api_key'          => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_api_key', ''),
+            'ai_condition_auto_scan'        => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_auto_scan', '0'),
+            'ai_condition_min_confidence'    => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_min_confidence', '0.25'),
+            'ai_condition_overlay_enabled'   => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_overlay_enabled', '1'),
+            'ai_condition_notify_grade'      => \AtomExtensions\Services\AhgSettingsService::get('ai_condition_notify_grade', 'poor'),
+        ];
+
+        // Load API clients
+        $clients = $this->repository->getClients();
+        foreach ($clients as &$client) {
+            $usage = $this->repository->getClientUsage($client->id);
+            $client->scans_used = $usage->scans_used ?? 0;
+        }
+        $this->clients = $clients;
+
+        // Load stats for sidebar
+        $this->stats = $this->repository->getStats();
+    }
+
+    /**
+     * New assessment form + processing
+     */
+    public function executeAssess($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+
+        $this->result = null;
+        $this->objectId = $request->getParameter('object_id');
+    }
+
+    /**
+     * Browse assessments list
+     */
+    public function executeBrowse($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->forward('admin', 'secure');
@@ -59,19 +124,6 @@ class aiConditionActions extends AhgController
         $this->pages = $result['pages'];
         $this->stats = $stats;
         $this->filters = $filters;
-    }
-
-    /**
-     * New assessment form + processing
-     */
-    public function executeAssess($request)
-    {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->forward('admin', 'secure');
-        }
-
-        $this->result = null;
-        $this->objectId = $request->getParameter('object_id');
     }
 
     /**
@@ -215,32 +267,51 @@ class aiConditionActions extends AhgController
     public function executeApiTest($request)
     {
         if (!$this->getUser()->isAdministrator()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authorized']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
         }
 
         $result = $this->service->healthCheck();
-        return $this->jsonResponse($result);
+        return $this->renderJson($result);
     }
 
     /**
      * Submit image for assessment (AJAX)
+     * Accepts: multipart file upload OR JSON body with base64 image
      */
     public function executeApiSubmit($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authenticated']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
         }
 
-        $imageData = $request->getParameter('image');
-        $objectId = $request->getParameter('information_object_id');
-        $confidence = (float) $request->getParameter('confidence', 0.25);
+        $imageData = null;
+        $objectId = null;
+        $confidence = 0.25;
 
+        // Try JSON body first (from annotation studio or API calls)
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') !== false) {
+            $json = json_decode(file_get_contents('php://input'), true);
+            if ($json) {
+                $imageData = $json['image'] ?? $json['image_base64'] ?? null;
+                $objectId = $json['object_id'] ?? $json['information_object_id'] ?? null;
+                $confidence = (float) ($json['confidence'] ?? 0.25);
+            }
+        }
+
+        // Fall back to form params
         if (empty($imageData)) {
-            // Check for file upload
+            $imageData = $request->getParameter('image') ?? $request->getParameter('image_base64');
+            $objectId = $objectId ?: ($request->getParameter('information_object_id') ?? $request->getParameter('object_id'));
+            $confidence = (float) $request->getParameter('confidence', $confidence);
+        }
+
+        // Fall back to file upload
+        if (empty($imageData)) {
             if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
                 $imageData = base64_encode(file_get_contents($_FILES['image_file']['tmp_name']));
             } else {
-                return $this->jsonResponse(['success' => false, 'error' => 'No image provided']);
+                return $this->renderJson(['success' => false, 'error' => 'No image provided']);
             }
         }
 
@@ -252,7 +323,7 @@ class aiConditionActions extends AhgController
         ]);
 
         if (empty($result['success'])) {
-            return $this->jsonResponse(['success' => false, 'error' => $result['error'] ?? 'Assessment failed']);
+            return $this->renderJson(['success' => false, 'error' => $result['error'] ?? 'Assessment failed']);
         }
 
         // Store in local DB
@@ -286,7 +357,7 @@ class aiConditionActions extends AhgController
 
         $result['assessment_id'] = $assessmentId;
 
-        return $this->jsonResponse($result);
+        return $this->renderJson($result);
     }
 
     /**
@@ -295,13 +366,13 @@ class aiConditionActions extends AhgController
     public function executeApiConfirm($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authenticated']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
         }
 
         $id = (int) $request->getParameter('id');
         $result = $this->repository->confirmAssessment($id, $this->getUser()->getUserID());
 
-        return $this->jsonResponse(['success' => $result]);
+        return $this->renderJson(['success' => $result]);
     }
 
     /**
@@ -310,13 +381,13 @@ class aiConditionActions extends AhgController
     public function executeApiHistoryData($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authenticated']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
         }
 
         $objectId = (int) $request->getParameter('object_id');
         $history = $this->repository->getHistory($objectId);
 
-        return $this->jsonResponse(['success' => true, 'data' => $history]);
+        return $this->renderJson(['success' => true, 'data' => $history]);
     }
 
     /**
@@ -325,7 +396,7 @@ class aiConditionActions extends AhgController
     public function executeApiClientSave($request)
     {
         if (!$this->getUser()->isAdministrator()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authorized']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
         }
 
         $data = [
@@ -338,11 +409,11 @@ class aiConditionActions extends AhgController
         ];
 
         if (empty($data['name']) || empty($data['email'])) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Name and email required']);
+            return $this->renderJson(['success' => false, 'error' => 'Name and email required']);
         }
 
         $id = $this->repository->saveClient($data);
-        return $this->jsonResponse(['success' => true, 'id' => $id]);
+        return $this->renderJson(['success' => true, 'id' => $id]);
     }
 
     /**
@@ -351,11 +422,282 @@ class aiConditionActions extends AhgController
     public function executeApiClientRevoke($request)
     {
         if (!$this->getUser()->isAdministrator()) {
-            return $this->jsonResponse(['success' => false, 'error' => 'Not authorized']);
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
         }
 
         $id = (int) $request->getParameter('id');
         $result = $this->repository->revokeClient($id);
-        return $this->jsonResponse(['success' => $result]);
+        return $this->renderJson(['success' => $result]);
+    }
+
+    /**
+     * Object autocomplete for assessment form (AJAX)
+     */
+    public function executeApiObjectSearch($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['results' => []]);
+        }
+
+        $query = trim($request->getParameter('query', ''));
+        if (strlen($query) < 2) {
+            return $this->renderJson(['results' => []]);
+        }
+
+        $results = \Illuminate\Database\Capsule\Manager::table('information_object_i18n as io')
+            ->join('slug', 'io.id', '=', 'slug.object_id')
+            ->where('io.culture', 'en')
+            ->where('io.id', '!=', 1)
+            ->where('io.title', 'like', '%' . $query . '%')
+            ->select('io.id', 'io.title', 'slug.slug')
+            ->orderBy('io.title')
+            ->limit(15)
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'title' => $row->title,
+                    'slug' => $row->slug,
+                ];
+            })
+            ->all();
+
+        return $this->renderJson(['results' => $results]);
+    }
+
+    // =========================================================================
+    // Manual Assessment
+    // =========================================================================
+
+    /**
+     * Manual assessment form (no AI)
+     */
+    public function executeManualAssess($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
+     * Save manual assessment (AJAX)
+     */
+    public function executeApiManualSave($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
+        }
+
+        $grade = $request->getParameter('condition_grade');
+        $score = (float) $request->getParameter('overall_score', 50);
+        $objectId = $request->getParameter('information_object_id') ?: null;
+        $recommendations = $request->getParameter('recommendations');
+        $damagesJson = $request->getParameter('damages_json');
+
+        if (empty($grade)) {
+            return $this->renderJson(['success' => false, 'error' => 'Condition grade is required']);
+        }
+
+        $damages = $damagesJson ? json_decode($damagesJson, true) : [];
+
+        $assessmentId = $this->repository->saveAssessment([
+            'information_object_id' => $objectId,
+            'overall_score'         => $score,
+            'condition_grade'       => $grade,
+            'damage_count'          => count($damages),
+            'recommendations'       => $recommendations,
+            'confidence_threshold'  => 1.0,
+            'source'                => 'manual_entry',
+            'is_confirmed'          => 1,
+            'confirmed_by'          => $this->getUser()->getUserID(),
+            'confirmed_at'          => date('Y-m-d H:i:s'),
+            'created_by'            => $this->getUser()->getUserID(),
+        ]);
+
+        if (!empty($damages)) {
+            $this->repository->saveDamages($assessmentId, $damages);
+        }
+
+        if ($objectId && $score) {
+            $this->repository->saveHistory(
+                (int) $objectId,
+                $assessmentId,
+                $score,
+                $grade,
+                count($damages)
+            );
+        }
+
+        return $this->renderJson(['success' => true, 'assessment_id' => $assessmentId]);
+    }
+
+    // =========================================================================
+    // Model Training
+    // =========================================================================
+
+    /**
+     * Training management page
+     */
+    public function executeTraining($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
+     * Proxy: Get model info from Python service
+     */
+    public function executeApiTrainingModelInfo($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+        return $this->renderJson($this->service->proxyGet('/api/v1/training/model-info'));
+    }
+
+    /**
+     * Proxy: Get training status from Python service
+     */
+    public function executeApiTrainingStatus($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+        return $this->renderJson($this->service->proxyGet('/api/v1/training/status'));
+    }
+
+    /**
+     * Proxy: Upload training data ZIP to Python service
+     */
+    public function executeApiTrainingUpload($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        if (!isset($_FILES['training_file']) || $_FILES['training_file']['error'] !== UPLOAD_ERR_OK) {
+            return $this->renderJson(['success' => false, 'error' => 'No file uploaded']);
+        }
+
+        return $this->renderJson($this->service->proxyFileUpload(
+            '/api/v1/training/upload',
+            $_FILES['training_file']['tmp_name'],
+            $_FILES['training_file']['name'],
+            'file'
+        ));
+    }
+
+    /**
+     * Proxy: List training datasets / delete a dataset
+     */
+    public function executeApiTrainingDatasets($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        if ($request->isMethod('delete') || strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'DELETE') {
+            $datasetId = $request->getParameter('dataset_id');
+            return $this->renderJson($this->service->proxyDelete('/api/v1/training/dataset/' . urlencode($datasetId)));
+        }
+
+        return $this->renderJson($this->service->proxyGet('/api/v1/training/datasets'));
+    }
+
+    /**
+     * Proxy: Start model training
+     */
+    public function executeApiTrainingStart($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $payload = [
+            'dataset_id' => $request->getParameter('dataset_id'),
+            'epochs'     => (int) $request->getParameter('epochs', 100),
+            'batch_size' => (int) $request->getParameter('batch_size', 16),
+        ];
+
+        return $this->renderJson($this->service->proxyPost('/api/v1/training/start', $payload));
+    }
+
+    // =========================================================================
+    // Training Contributions
+    // =========================================================================
+
+    /**
+     * Submit a training contribution (from condition photos, annotation studio, or manual)
+     */
+    public function executeApiContribute($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
+        }
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') !== false) {
+            $json = json_decode(file_get_contents('php://input'), true);
+        } else {
+            $json = [
+                'image_base64' => $request->getParameter('image_base64'),
+                'annotations'  => json_decode($request->getParameter('annotations_json', '[]'), true),
+                'source'       => $request->getParameter('source', 'manual'),
+                'object_id'    => $request->getParameter('object_id'),
+            ];
+        }
+
+        if (empty($json['image_base64'])) {
+            return $this->renderJson(['success' => false, 'error' => 'Image data required']);
+        }
+        if (empty($json['annotations']) || !is_array($json['annotations'])) {
+            return $this->renderJson(['success' => false, 'error' => 'At least one annotation required']);
+        }
+
+        $json['contributor'] = $this->getUser()->getUserID() . '';
+
+        return $this->renderJson($this->service->proxyPost('/api/v1/training/contribute', $json));
+    }
+
+    /**
+     * List training contributions
+     */
+    public function executeApiContributions($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $qs = http_build_query(array_filter([
+            'source' => $request->getParameter('source'),
+            'status' => $request->getParameter('status'),
+            'page'   => $request->getParameter('page'),
+        ]));
+
+        return $this->renderJson($this->service->proxyGet('/api/v1/training/contributions' . ($qs ? '?' . $qs : '')));
+    }
+
+    // =========================================================================
+    // Client Training Permission Toggle
+    // =========================================================================
+
+    /**
+     * Toggle client training data contribution permission (AJAX)
+     */
+    public function executeApiClientTrainingToggle($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $clientId = (int) $request->getParameter('id');
+        $enabled = (int) $request->getParameter('enabled', 0);
+
+        $result = \Illuminate\Database\Capsule\Manager::table('ahg_ai_service_client')
+            ->where('id', $clientId)
+            ->update(['can_contribute_training' => $enabled]);
+
+        return $this->renderJson(['success' => $result !== false]);
     }
 }
