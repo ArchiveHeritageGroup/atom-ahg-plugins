@@ -54,6 +54,25 @@ $hasNAZ = isPluginActive('ahgNAZPlugin');
 $hasIPSAS = isPluginActive('ahgIPSASPlugin');
 $hasNMMZ = isPluginActive('ahgNMMZPlugin');
 $hasAiCondition = isPluginActive('ahgAiConditionPlugin');
+
+$aiConditionStats = null;
+if ($hasAiCondition) {
+    try {
+        $aiConditionStats = [
+            'total' => DB::table('ahg_ai_condition_assessment')->count(),
+            'confirmed' => DB::table('ahg_ai_condition_assessment')->where('is_confirmed', 1)->count(),
+            'avg_score' => round(DB::table('ahg_ai_condition_assessment')->avg('overall_score') ?? 0, 1),
+            'by_grade' => DB::table('ahg_ai_condition_assessment')
+                ->select('condition_grade', DB::raw('COUNT(*) as cnt'))
+                ->groupBy('condition_grade')
+                ->pluck('cnt', 'condition_grade')
+                ->all(),
+        ];
+        $aiConditionStats['pending'] = $aiConditionStats['total'] - $aiConditionStats['confirmed'];
+    } catch (Exception $e) {
+        $aiConditionStats = ['total' => 0, 'confirmed' => 0, 'pending' => 0, 'avg_score' => 0, 'by_grade' => []];
+    }
+}
 ?>
 
 @section('sidebar')
@@ -409,24 +428,84 @@ $canManage = $isAdmin || $isEditor;
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'assess']) }}"><i class="fas fa-camera me-2 text-muted"></i>{{ __('AI Assessment') }}</a>
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'assess']) }}"><i class="fas fa-camera me-2 text-success"></i>{{ __('New AI Assessment') }}</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'manualAssess']) }}"><i class="fas fa-clipboard-check me-2 text-muted"></i>{{ __('Manual Assessment') }}</a>
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'manualAssess']) }}"><i class="fas fa-clipboard-check me-2 text-primary"></i>{{ __('Manual Assessment') }}</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'bulk']) }}"><i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Bulk Scan') }}</a>
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'bulk']) }}"><i class="fas fa-layer-group me-2 text-info"></i>{{ __('Bulk Scan') }}</a>
                     </li>
                     <li class="list-group-item">
                         <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'browse']) }}"><i class="fas fa-list me-2 text-muted"></i>{{ __('Browse Assessments') }}</a>
                     </li>
                     <li class="list-group-item">
-                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'training']) }}"><i class="fas fa-brain me-2 text-muted"></i>{{ __('Model Training') }}</a>
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'training']) }}"><i class="fas fa-brain me-2 text-warning"></i>{{ __('Model Training') }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for(['module' => 'aiCondition', 'action' => 'index']) }}"><i class="fas fa-cog me-2 text-secondary"></i>{{ __('Settings & API Clients') }}</a>
                     </li>
                 </ul>
             </div>
         </div>
         @endif
+    </div>
+
+    @if ($hasAiCondition)
+    {{-- AI Condition Stats Row --}}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>{{ __('Assessment Statistics') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="fs-3 fw-bold text-success">{{ $aiConditionStats['total'] ?? 0 }}</div>
+                            <small class="text-muted">{{ __('Total') }}</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fs-3 fw-bold text-primary">{{ $aiConditionStats['confirmed'] ?? 0 }}</div>
+                            <small class="text-muted">{{ __('Confirmed') }}</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fs-3 fw-bold text-warning">{{ $aiConditionStats['pending'] ?? 0 }}</div>
+                            <small class="text-muted">{{ __('Pending') }}</small>
+                        </div>
+                    </div>
+                    <?php $avgScore = $aiConditionStats['avg_score'] ?? 0; $scoreColor = $avgScore >= 80 ? 'success' : ($avgScore >= 60 ? 'info' : ($avgScore >= 40 ? 'warning' : 'danger')); ?>
+                    <div><span class="text-muted small">{{ __('Average Score') }}:</span> <span class="fw-bold text-{{ $scoreColor }} fs-5">{{ $avgScore }}/100</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>{{ __('Grade Distribution') }}</h5>
+                </div>
+                <div class="card-body">
+                    <?php
+                    $gradeColors = ['excellent' => 'success', 'good' => 'info', 'fair' => 'warning', 'poor' => 'danger', 'critical' => 'dark'];
+                    $gradeIcons = ['excellent' => 'fa-check-circle', 'good' => 'fa-thumbs-up', 'fair' => 'fa-exclamation-triangle', 'poor' => 'fa-times-circle', 'critical' => 'fa-skull-crossbones'];
+                    $byGrade = $aiConditionStats['by_grade'] ?? [];
+                    $totalAssessments = max(1, $aiConditionStats['total'] ?? 1);
+                    ?>
+                    @foreach (['excellent', 'good', 'fair', 'poor', 'critical'] as $grade)
+                    <?php $count = $byGrade[$grade] ?? 0; $pct = round(($count / $totalAssessments) * 100); $color = $gradeColors[$grade]; $icon = $gradeIcons[$grade]; ?>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-{{ $color }} me-2" style="min-width:85px"><i class="fas {{ $icon }} me-1"></i>{{ ucfirst($grade) }}</span>
+                        <div class="progress flex-grow-1" style="height:8px">
+                            <div class="progress-bar bg-{{ $color }}" style="width:{{ $pct }}%"></div>
+                        </div>
+                        <span class="ms-2 small text-muted" style="min-width:30px">{{ $count }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
     </div>
 
     @if ($hasRights)
