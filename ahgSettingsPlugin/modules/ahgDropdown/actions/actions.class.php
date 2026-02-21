@@ -9,11 +9,66 @@ use AtomFramework\Http\Controllers\AhgController;
 class ahgDropdownActions extends AhgController
 {
     /**
+     * Section labels for taxonomy grouping in Dropdown Manager
+     */
+    public const SECTION_LABELS = [
+        'access_research'    => 'Access & Research',
+        'ai'                 => 'AI & Automation',
+        'condition'          => 'Condition & Conservation',
+        'core'               => 'Core & System',
+        'digital_media'      => 'Digital Assets & Media',
+        'display_ui'         => 'Display & UI',
+        'donor_agreement'    => 'Donors & Agreements',
+        'exhibition_loan'    => 'Exhibitions & Loans',
+        'export_import'      => 'Export, Import & Ingest',
+        'federation'         => 'Federation',
+        'finance'            => 'Finance & Valuation',
+        'forms_metadata'     => 'Forms & Metadata',
+        'heritage_monuments' => 'Heritage & Monuments',
+        'integration'        => 'Integrations & Extensions',
+        'people'             => 'People & Contacts',
+        'preservation'       => 'Digital Preservation',
+        'privacy_compliance' => 'Privacy & Compliance',
+        'provenance_rights'  => 'Provenance & Rights',
+        'reporting_workflow' => 'Reporting & Workflow',
+        'reproduction'       => 'Reproduction & Publishing',
+        'vendor'             => 'Vendors & Contracts',
+        'uncategorized'      => 'Uncategorized',
+    ];
+
+    /**
+     * Section icons for Dropdown Manager UI
+     */
+    public const SECTION_ICONS = [
+        'access_research'    => 'fa-book-reader',
+        'ai'                 => 'fa-robot',
+        'condition'          => 'fa-clipboard-check',
+        'core'               => 'fa-cogs',
+        'digital_media'      => 'fa-photo-video',
+        'display_ui'         => 'fa-desktop',
+        'donor_agreement'    => 'fa-handshake',
+        'exhibition_loan'    => 'fa-university',
+        'export_import'      => 'fa-file-export',
+        'federation'         => 'fa-project-diagram',
+        'finance'            => 'fa-coins',
+        'forms_metadata'     => 'fa-file-alt',
+        'heritage_monuments' => 'fa-landmark',
+        'integration'        => 'fa-plug',
+        'people'             => 'fa-users',
+        'preservation'       => 'fa-shield-alt',
+        'privacy_compliance' => 'fa-user-shield',
+        'provenance_rights'  => 'fa-balance-scale',
+        'reporting_workflow' => 'fa-tasks',
+        'reproduction'       => 'fa-copy',
+        'vendor'             => 'fa-store',
+        'uncategorized'      => 'fa-folder',
+    ];
+    /**
      * Pre-execute - require admin access
      */
     public function boot(): void
     {
-if (!$this->getUser()->isAdministrator()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -29,22 +84,65 @@ if (!$this->getUser()->isAdministrator()) {
     }
 
     /**
-     * List all taxonomies
+     * List all taxonomies grouped by section
      */
     public function executeIndex($request)
     {
-        $service = new \ahgCorePlugin\Services\AhgTaxonomyService();
-        $taxonomies = $service->getAllTaxonomies();
+        // Direct query to include taxonomy_section (not in base service)
+        $taxonomies = \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+            ->select('taxonomy', 'taxonomy_label', 'taxonomy_section')
+            ->selectRaw('COUNT(*) as term_count')
+            ->where('is_active', 1)
+            ->groupBy('taxonomy', 'taxonomy_label', 'taxonomy_section')
+            ->orderBy('taxonomy_label')
+            ->get()
+            ->all();
 
         // Get term counts
         $termCounts = [];
         foreach ($taxonomies as $tax) {
-            $termCounts[$tax->taxonomy] = $service->getTermCount($tax->taxonomy);
+            $termCounts[$tax->taxonomy] = $tax->term_count;
+        }
+
+        // Group taxonomies by section
+        $sections = [];
+        foreach ($taxonomies as $tax) {
+            $section = $tax->taxonomy_section ?? 'uncategorized';
+            if (!isset($sections[$section])) {
+                $sections[$section] = [];
+            }
+            $sections[$section][] = $tax;
+        }
+
+        // Sort sections by label
+        uksort($sections, function ($a, $b) {
+            $labelA = self::SECTION_LABELS[$a] ?? $a;
+            $labelB = self::SECTION_LABELS[$b] ?? $b;
+            return strcasecmp($labelA, $labelB);
+        });
+
+        // Build section metadata
+        $sectionMeta = [];
+        foreach ($sections as $code => $items) {
+            $sectionMeta[$code] = [
+                'label' => self::SECTION_LABELS[$code] ?? ucfirst(str_replace('_', ' ', $code)),
+                'icon'  => self::SECTION_ICONS[$code] ?? 'fa-folder',
+                'count' => count($items),
+            ];
+        }
+
+        // Get available sections for create modal
+        $availableSections = [];
+        foreach (self::SECTION_LABELS as $code => $label) {
+            $availableSections[$code] = $label;
         }
 
         return $this->renderBlade('index', [
             'taxonomies' => $taxonomies,
             'termCounts' => $termCounts,
+            'sections' => $sections,
+            'sectionMeta' => $sectionMeta,
+            'availableSections' => $availableSections,
         ]);
     }
 
@@ -99,6 +197,8 @@ if (!$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Code and label are required']));
         }
 
+        $section = $this->sanitizeCode($request->getParameter('section', 'uncategorized')) ?: 'uncategorized';
+
         $service = new \ahgCorePlugin\Services\AhgTaxonomyService();
 
         if ($service->taxonomyExists($code)) {
@@ -109,6 +209,11 @@ if (!$this->getUser()->isAdministrator()) {
         $service->createTaxonomy($code, $label, [
             ['code' => 'default', 'label' => 'Default', 'is_default' => 1]
         ]);
+
+        // Assign section
+        \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+            ->where('taxonomy', $code)
+            ->update(['taxonomy_section' => $section]);
 
         return $this->renderText(json_encode(['success' => true, 'taxonomy' => $code]));
     }
@@ -319,6 +424,31 @@ if (!$this->getUser()->isAdministrator()) {
         $result = $service->updateTerm($id, ['is_default' => 1]);
 
         return $this->renderText(json_encode(['success' => $result]));
+    }
+
+    /**
+     * Move taxonomy to a different section (AJAX)
+     */
+    public function executeMoveSection($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid method']));
+        }
+
+        $taxonomy = $request->getParameter('taxonomy');
+        $section = $this->sanitizeCode($request->getParameter('section', 'uncategorized')) ?: 'uncategorized';
+
+        if (empty($taxonomy)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Taxonomy is required']));
+        }
+
+        $result = \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+            ->where('taxonomy', $taxonomy)
+            ->update(['taxonomy_section' => $section]);
+
+        return $this->renderText(json_encode(['success' => true, 'rows' => $result]));
     }
 
     /**

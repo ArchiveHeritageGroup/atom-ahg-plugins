@@ -1116,6 +1116,34 @@ class SettingsCronJobsAction extends AhgController
                 'category' => 'ahg',
             ],
             // ============================================
+            // AI CONDITION ASSESSMENT
+            // ============================================
+            [
+                'name' => 'AI Condition Bulk Scan',
+                'command' => 'php symfony ai-condition:bulk-scan',
+                'description' => 'Runs AI-powered condition assessment on digital objects using YOLOv8 damage detection and EfficientNet classification. Scans images for 15 damage types (tear, stain, foxing, mold, etc.) and generates condition scores.',
+                'options' => [
+                    '--repository=ID' => 'Restrict scan to specific repository ID',
+                    '--limit=N' => 'Maximum objects to scan (default: 50)',
+                    '--confidence=N' => 'Minimum confidence threshold 0.1-0.9 (default: 0.25)',
+                ],
+                'schedule' => 'Nightly or weekly depending on collection activity',
+                'example' => '0 3 * * * cd {root} && php symfony ai-condition:bulk-scan --limit=100 --confidence=0.25 >> /var/log/atom/ai-condition.log 2>&1',
+                'duration' => 'Long (2-10s per image depending on GPU)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'AI Condition Service Status',
+                'command' => 'php symfony ai-condition:status',
+                'description' => 'Checks the health of the AI Condition Assessment service (FastAPI on port 8100). Reports model loading status, GPU availability, database connectivity, and usage statistics.',
+                'options' => [],
+                'schedule' => 'Every 5 minutes for monitoring',
+                'example' => '*/5 * * * * cd {root} && php symfony ai-condition:status >> /var/log/atom/ai-condition-status.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+
+            // ============================================
             // RIC TRIPLESTORE
             // ============================================
             [

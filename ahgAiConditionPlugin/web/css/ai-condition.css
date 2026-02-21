@@ -1,0 +1,74 @@
+/* AI Condition Assessment Plugin Styles */
+
+/* Score display */
+.ai-score-gauge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Damage cards in view */
+.damage-card {
+    border-left: 4px solid #6c757d;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+/* Canvas overlay positioning */
+.overlay-container {
+    position: relative;
+    display: inline-block;
+}
+
+.overlay-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+/* Confidence bars */
+.confidence-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.confidence-bar .progress {
+    height: 6px;
+    width: 60px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* History chart container */
+.history-chart-container {
+    position: relative;
+    height: 250px;
+}
+
+/* Bulk scan progress */
+.bulk-progress {
+    position: relative;
+}
+
+.bulk-progress .progress {
+    height: 20px;
+    border-radius: 10px;
+}
+
+/* Assessment list */
+.assessment-row:hover {
+    background-color: #f0f7ff;
+}
+
+/* API key display */
+.api-key-display {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+}

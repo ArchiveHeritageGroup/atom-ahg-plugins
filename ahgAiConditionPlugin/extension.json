@@ -1,0 +1,30 @@
+{
+    "name": "ahgAiConditionPlugin",
+    "version": "1.0.0",
+    "description": "AI-powered condition assessment using YOLOv8 damage detection and EfficientNet classification. Companion to ahgConditionPlugin.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "category": "ai",
+    "load_order": 55,
+    "dependencies": ["ahgCorePlugin", "ahgConditionPlugin"],
+    "optional_dependencies": ["ahgAIPlugin"],
+    "php_version": ">=8.1",
+    "tables": [
+        "ahg_ai_condition_assessment",
+        "ahg_ai_condition_damage",
+        "ahg_ai_condition_history",
+        "ahg_ai_condition_config",
+        "ahg_ai_service_client",
+        "ahg_ai_service_usage"
+    ],
+    "display_actions": [
+        {
+            "id": "ai_condition_assess_action",
+            "label": "AI Condition Scan",
+            "icon": "bi-robot",
+            "template": "ahgAiConditionPlugin/templates/display/_ai_condition.php",
+            "contexts": ["informationobject"],
+            "permission": "update",
+            "weight": 42
+        }
+    ]
+}
