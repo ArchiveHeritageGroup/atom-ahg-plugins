@@ -232,38 +232,78 @@
 
 ## ⚡ Installation
 
-### Quick Install (DEB Packages)
+### Quick Install (APT Repository)
 
-Two pre-built Debian packages are available for Ubuntu 22.04+ / Debian 12+:
+The easiest way to install on Ubuntu 22.04+ / Debian 12+:
 
-| Package | Description | Size | Command |
-|---------|-------------|------|---------|
-| **`atom_2.10.1-1_all.deb`** | Vanilla AtoM 2.10.1 with guided TUI wizard | ~25 MB | `sudo apt install ./atom_2.10.1-1_all.deb` |
-| **`atom-heratio_2.10.19-1_all.deb`** | AtoM 2.10 + Heratio framework + 79 plugins | ~45 MB | `sudo apt install ./atom-heratio_2.10.19-1_all.deb` |
+```bash
+# Add the APT repository (one-time setup)
+curl -fsSL https://archiveheritagegroup.github.io/atom-framework/gpg.key \
+  | sudo gpg --dearmor -o /usr/share/keyrings/atom-heratio.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/atom-heratio.gpg] https://archiveheritagegroup.github.io/atom-framework stable main" \
+  | sudo tee /etc/apt/sources.list.d/atom-heratio.list
+
+sudo apt update
+
+# Install AtoM Heratio (recommended)
+sudo apt install atom-heratio
+
+# Or install vanilla AtoM 2.10.1 (no Heratio)
+sudo apt install atom
+```
+
+The installer launches an **interactive TUI wizard** that configures your database, web server, SSL, Elasticsearch, and admin account automatically.
+
+### Quick Install (One-Liner)
+
+```bash
+curl -fsSL https://archiveheritagegroup.github.io/atom-framework/install.sh | sudo bash
+sudo apt install atom-heratio
+```
+
+### Direct Download (DEB Packages)
+
+Download from [GitHub Releases](https://github.com/ArchiveHeritageGroup/atom-framework/releases) or the [download page](https://archiveheritagegroup.github.io/atom-framework/):
+
+| Package | Description | Size |
+|---------|-------------|------|
+| **[atom-heratio.deb](https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest)** | AtoM 2.10 + Heratio framework + 79 plugins | ~45 MB |
+| **[atom.deb](https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest)** | Vanilla AtoM 2.10.1 with guided TUI wizard | ~25 MB |
 
 Both packages include bundled tarballs for **air-gapped / offline installations** (no internet required during install).
 
-#### AtoM 2.10.1 (Vanilla)
-
-Standard AtoM with a debconf TUI wizard that configures:
-- Database (MySQL/MariaDB) - auto-creates DB and user
-- Nginx virtual host with optimized PHP-FPM pool
-- SSL (none / self-signed / Let's Encrypt)
-- Elasticsearch 8.x (optional install)
-- Gearman worker systemd service
-- Admin account
-
 ```bash
-# Download and install
-sudo apt install ./atom_2.10.1-1_all.deb
-
-# Reconfigure later
-sudo dpkg-reconfigure atom
+# Download and install directly
+wget https://github.com/ArchiveHeritageGroup/atom-framework/releases/latest/download/atom-heratio_2.10.20-1_all.deb
+sudo apt install ./atom-heratio_2.10.20-1_all.deb
 ```
 
-#### AtoM Heratio (Full Platform)
+### What Happens When You Install
 
-AtoM 2.10 + Heratio framework + 79 GLAM/DAM plugins. Three installation modes:
+1. **TUI Wizard** launches in your terminal (via debconf) asking:
+   - Installation mode (complete / atom-only / heratio-only)
+   - Installation path, database credentials, site title
+   - SSL configuration (none / self-signed / Let's Encrypt)
+   - Elasticsearch install (optional)
+   - Web wizard enable (for browser-based plugin configuration)
+
+2. **Automated Setup** runs after answering:
+   - Extracts bundled AtoM 2.10 tarball
+   - Installs Heratio framework + 79 plugins
+   - Configures MySQL database, Nginx, PHP-FPM, systemd worker
+   - Sets file permissions, clears caches
+   - Runs initial database migration
+
+3. **Web Wizard** starts on port 9090 (if enabled) for advanced configuration:
+   - System status dashboard
+   - Plugin selection by category
+   - GLAM sector configuration
+   - AI & automation settings
+   - Compliance module setup
+   - Digital preservation settings
+
+#### AtoM Heratio - Installation Modes
 
 | Mode | Description |
 |------|-------------|
@@ -271,21 +311,30 @@ AtoM 2.10 + Heratio framework + 79 GLAM/DAM plugins. Three installation modes:
 | **atom-only** | Vanilla AtoM 2.10 only (no Heratio) |
 | **heratio-only** | Overlay Heratio onto existing AtoM >= 2.8 |
 
-```bash
-# Download and install (TUI wizard will guide you)
-sudo apt install ./atom-heratio_2.10.19-1_all.deb
+#### AtoM Heratio - CLI Management Tool
 
-# CLI management tool
+After install, use the `atom-heratio` command:
+
+```bash
 atom-heratio status              # Show status + service health
 atom-heratio plugins             # List available plugins
 atom-heratio enable <plugin>     # Enable a plugin
 atom-heratio disable <plugin>    # Disable a plugin
 atom-heratio wizard start        # Launch web configuration wizard
+atom-heratio wizard stop         # Stop web wizard
 atom-heratio reconfigure         # Re-run TUI wizard
+atom-heratio version             # Show version info
+atom-heratio upgrade             # Pull latest updates
+```
 
-# Web wizard (browser-based advanced configuration)
-# Launched automatically after install on port 9090
-# 7 steps: System Status > Plugins > GLAM Sector > AI > Compliance > Preservation > Apply
+#### Reconfigure / Upgrade
+
+```bash
+# Re-run the TUI wizard to change settings
+sudo dpkg-reconfigure atom-heratio
+
+# Upgrade to latest version (if using APT repository)
+sudo apt update && sudo apt upgrade atom-heratio
 ```
 
 #### Building Packages from Source
@@ -293,13 +342,17 @@ atom-heratio reconfigure         # Re-run TUI wizard
 ```bash
 cd atom-framework/packaging
 
-# Build AtoM Heratio package (with bundled AtoM tarball)
-bash build.sh                    # => dist/atom-heratio_2.10.19-1_all.deb (~45 MB)
-bash build.sh --no-tarball       # => dist/atom-heratio_2.10.19-1_all.deb (~21 MB)
+# Build AtoM Heratio package
+bash build.sh                    # With bundled AtoM tarball (~45 MB)
+bash build.sh --no-tarball       # Without tarball (~21 MB)
 
 # Build vanilla AtoM package
 cd atom-vanilla
 bash build.sh                    # => dist/atom_2.10.1-1_all.deb (~25 MB)
+
+# Publish to all channels (GitHub Releases + APT repo + download page)
+cd ..
+bash publish-all.sh
 ```
 
 ---
