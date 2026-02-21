@@ -6889,7 +6889,14 @@ class researchActions extends AhgController
         $userId = (int) $this->getUser()->getAttribute('user_id');
 
         $room = $roomService->getRoom($roomId);
+
+        // Fall back to reading rooms table if not found in IIIF rooms
         if (!$room) {
+            $readingRoom = DB::table('research_reading_room')->where('id', $roomId)->first();
+            if ($readingRoom) {
+                // Redirect to the reading room edit page
+                $this->redirect('/research/edit-room/' . $roomId);
+            }
             $this->forward404('Room not found');
         }
 
