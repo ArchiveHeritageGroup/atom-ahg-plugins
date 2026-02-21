@@ -48,7 +48,7 @@ class aiConditionStatusTask extends sfBaseTask
             }
         } else {
             $this->logSection('error', 'Service is OFFLINE: ' . ($result['error'] ?? 'unknown'), null, 'ERROR');
-            $this->logSection('info', 'Start with: /usr/share/nginx/archive/ai-condition-service/scripts/start.sh');
+            $this->logSection('info', 'Start with: /opt/ahg-ai/condition/scripts/start.sh');
         }
 
         return $result['success'] ? 0 : 1;

@@ -1,9 +1,0 @@
-# Runtime files (created by install.sh, not committed)
-venv/
-__pycache__/
-*.pyc
-uploads/
-logs/
-runs/
-weights/*.pt
-.env

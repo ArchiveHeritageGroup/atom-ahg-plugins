@@ -106,7 +106,7 @@ class aiConditionInstallTask extends sfBaseTask
         $this->logSection('info', '');
         $this->logSection('info', 'Next steps:');
         $this->logSection('info', '  1. Enable plugin: php bin/atom extension:enable ahgAiConditionPlugin');
-        $this->logSection('info', '  2. Start AI service: /usr/share/nginx/archive/ai-condition-service/scripts/start.sh');
+        $this->logSection('info', '  2. Start AI service: /opt/ahg-ai/condition/scripts/start.sh');
         $this->logSection('info', '  3. Configure at: /ai-condition/settings');
         $this->logSection('info', '  4. Clear cache: php symfony cc');
 
