@@ -83,6 +83,21 @@ class aiConditionActions extends AhgController
 
         // Load stats for sidebar
         $this->stats = $this->repository->getStats();
+
+        // Load training contributions per client for approval section
+        $this->trainingContributions = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+            ->select(
+                'client_id',
+                \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as total'),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending"),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='approved' THEN 1 ELSE 0 END) as approved"),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='rejected' THEN 1 ELSE 0 END) as rejected")
+            )
+            ->whereNotNull('client_id')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id')
+            ->all();
     }
 
     /**
@@ -96,6 +111,52 @@ class aiConditionActions extends AhgController
 
         $this->result = null;
         $this->objectId = $request->getParameter('object_id');
+    }
+
+    /**
+     * Dashboard - stats, grade distribution, recent assessments
+     */
+    public function executeDashboard($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+
+        $this->stats = $this->repository->getStats();
+
+        // Recent assessments (last 10)
+        $recent = $this->repository->listAssessments([], 1, 10);
+        $this->recentAssessments = $recent['items'];
+
+        // Monthly trend (last 12 months)
+        $this->monthlyTrend = \Illuminate\Database\Capsule\Manager::table('ahg_ai_condition_assessment')
+            ->select(
+                \Illuminate\Database\Capsule\Manager::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as total'),
+                \Illuminate\Database\Capsule\Manager::raw('AVG(overall_score) as avg_score')
+            )
+            ->where('created_at', '>=', date('Y-m-d', strtotime('-12 months')))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->all();
+
+        // Top damage types
+        $this->topDamages = \Illuminate\Database\Capsule\Manager::table('ahg_ai_condition_damage')
+            ->select('damage_type', \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as count'))
+            ->groupBy('damage_type')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()
+            ->all();
+
+        // Source breakdown
+        $this->sourceBreakdown = \Illuminate\Database\Capsule\Manager::table('ahg_ai_condition_assessment')
+            ->select('source', \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as count'))
+            ->groupBy('source')
+            ->orderByDesc('count')
+            ->get()
+            ->all();
     }
 
     /**
@@ -699,5 +760,229 @@ class aiConditionActions extends AhgController
             ->update(['can_contribute_training' => $enabled]);
 
         return $this->renderJson(['success' => $result !== false]);
+    }
+
+    // =========================================================================
+    // Client Training Data Approval
+    // =========================================================================
+
+    /**
+     * Approve client training data usage (AJAX)
+     * Sets training_approved=1 and records who approved it
+     */
+    public function executeApiClientApproveTraining($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $clientId = (int) $request->getParameter('id');
+        $action = $request->getParameter('approve_action', 'approve');
+
+        if ($action === 'revoke') {
+            $result = \Illuminate\Database\Capsule\Manager::table('ahg_ai_service_client')
+                ->where('id', $clientId)
+                ->update([
+                    'training_approved' => 0,
+                    'training_approved_at' => null,
+                    'training_approved_by' => null,
+                ]);
+            return $this->renderJson(['success' => $result !== false, 'message' => 'Training approval revoked']);
+        }
+
+        $result = \Illuminate\Database\Capsule\Manager::table('ahg_ai_service_client')
+            ->where('id', $clientId)
+            ->update([
+                'training_approved'    => 1,
+                'training_approved_at' => date('Y-m-d H:i:s'),
+                'training_approved_by' => $this->getUser()->getUserID(),
+            ]);
+
+        // If approved, push pending contributions to training pipeline
+        if ($result !== false) {
+            $pendingContributions = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+                ->where('client_id', $clientId)
+                ->where('status', 'pending')
+                ->get()
+                ->all();
+
+            $approvedCount = 0;
+            foreach ($pendingContributions as $c) {
+                \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+                    ->where('id', $c->id)
+                    ->update(['status' => 'approved']);
+                $approvedCount++;
+            }
+
+            return $this->renderJson([
+                'success' => true,
+                'message' => 'Training approved. ' . $approvedCount . ' contributions moved to approved.',
+            ]);
+        }
+
+        return $this->renderJson(['success' => false, 'error' => 'Update failed']);
+    }
+
+    /**
+     * Upload consent/approval document for a client (AJAX)
+     */
+    public function executeApiClientUploadConsent($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $clientId = (int) $request->getParameter('id');
+        if (!$clientId) {
+            return $this->renderJson(['success' => false, 'error' => 'Client ID required']);
+        }
+
+        if (!isset($_FILES['consent_doc']) || $_FILES['consent_doc']['error'] !== UPLOAD_ERR_OK) {
+            return $this->renderJson(['success' => false, 'error' => 'No file uploaded']);
+        }
+
+        $file = $_FILES['consent_doc'];
+        $allowed = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword',
+                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+        if (!in_array($file['type'], $allowed)) {
+            return $this->renderJson(['success' => false, 'error' => 'File type not allowed. Use PDF, DOC, DOCX, JPG, or PNG.']);
+        }
+
+        // Store in uploads/ai-condition/consent/
+        $uploadDir = \sfConfig::get('sf_upload_dir') . '/ai-condition/consent';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'consent_client_' . $clientId . '_' . date('Ymd_His') . '.' . $ext;
+        $destPath = $uploadDir . '/' . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+            return $this->renderJson(['success' => false, 'error' => 'Failed to save file']);
+        }
+
+        $relativePath = 'uploads/ai-condition/consent/' . $filename;
+
+        \Illuminate\Database\Capsule\Manager::table('ahg_ai_service_client')
+            ->where('id', $clientId)
+            ->update(['training_approval_doc' => $relativePath]);
+
+        return $this->renderJson([
+            'success'  => true,
+            'filename' => $filename,
+            'path'     => $relativePath,
+        ]);
+    }
+
+    /**
+     * Get training contributions for a specific client (AJAX)
+     */
+    public function executeApiClientContributions($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $clientId = $request->getParameter('client_id');
+        $status = $request->getParameter('status');
+
+        $query = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution');
+
+        if ($clientId) {
+            $query->where('client_id', (int) $clientId);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $contributions = $query->orderBy('created_at', 'desc')->limit(100)->get()->all();
+
+        // Get contribution counts per client
+        $clientStats = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+            ->select(
+                'client_id',
+                \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as total'),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending"),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='approved' THEN 1 ELSE 0 END) as approved"),
+                \Illuminate\Database\Capsule\Manager::raw("SUM(CASE WHEN status='rejected' THEN 1 ELSE 0 END) as rejected")
+            )
+            ->whereNotNull('client_id')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id')
+            ->all();
+
+        return $this->renderJson([
+            'success'       => true,
+            'contributions' => $contributions,
+            'client_stats'  => $clientStats,
+        ]);
+    }
+
+    /**
+     * Approve or reject a specific training contribution (AJAX)
+     */
+    public function executeApiContributionReview($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $id = (int) $request->getParameter('id');
+        $action = $request->getParameter('review_action', 'approve');
+
+        if (!in_array($action, ['approve', 'reject'])) {
+            return $this->renderJson(['success' => false, 'error' => 'Invalid action']);
+        }
+
+        $status = $action === 'approve' ? 'approved' : 'rejected';
+
+        $result = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+            ->where('id', $id)
+            ->update(['status' => $status]);
+
+        return $this->renderJson(['success' => $result !== false]);
+    }
+
+    /**
+     * Push all approved client contributions to training pipeline (AJAX)
+     */
+    public function executeApiPushTrainingData($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not authorized']);
+        }
+
+        $clientId = (int) $request->getParameter('client_id');
+
+        // Verify client is approved for training
+        $client = \Illuminate\Database\Capsule\Manager::table('ahg_ai_service_client')
+            ->where('id', $clientId)
+            ->first();
+
+        if (!$client || !$client->training_approved) {
+            return $this->renderJson(['success' => false, 'error' => 'Client not approved for training data contribution']);
+        }
+
+        // Get approved contributions for this client
+        $contributions = \Illuminate\Database\Capsule\Manager::table('ahg_ai_training_contribution')
+            ->where('client_id', $clientId)
+            ->where('status', 'approved')
+            ->get()
+            ->all();
+
+        if (empty($contributions)) {
+            return $this->renderJson(['success' => false, 'error' => 'No approved contributions to push']);
+        }
+
+        // Build dataset from contributions via Python service
+        $result = $this->service->proxyPost('/api/v1/training/build-dataset', [
+            'client_id'   => $clientId,
+            'client_name' => $client->name,
+        ]);
+
+        return $this->renderJson($result);
     }
 }

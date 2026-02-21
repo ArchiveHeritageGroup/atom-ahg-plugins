@@ -205,6 +205,144 @@
     </div>
 </div>
 
+<!-- Training Data Approval -->
+<div class="card mb-3">
+    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Client Training Data Approval') ?></h6>
+    </div>
+    <div class="card-body">
+        <p class="small text-muted mb-3">
+            <?php echo __('Review and approve client data for use as model training data. Client consent documentation must be uploaded before approval.') ?>
+        </p>
+
+        <?php
+        $approvalClients = [];
+        foreach ($clients as $c) {
+            if ($c->is_active && !empty($c->can_contribute_training)) {
+                $approvalClients[] = $c;
+            }
+        }
+        ?>
+
+        <?php if (empty($approvalClients)): ?>
+        <div class="text-center text-muted small py-3">
+            <i class="fas fa-info-circle me-1"></i><?php echo __('No clients have training contributions enabled. Toggle the Training switch in the API Clients table above.') ?>
+        </div>
+        <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><?php echo __('Client') ?></th>
+                        <th class="text-center"><?php echo __('Contributions') ?></th>
+                        <th class="text-center"><?php echo __('Pending') ?></th>
+                        <th class="text-center"><?php echo __('Approved') ?></th>
+                        <th><?php echo __('Consent Document') ?></th>
+                        <th class="text-center"><?php echo __('Training Status') ?></th>
+                        <th class="text-end"><?php echo __('Actions') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($approvalClients as $ac):
+                        $cStats = $trainingContributions[$ac->id] ?? null;
+                        $totalContrib = $cStats ? $cStats->total : 0;
+                        $pendingContrib = $cStats ? $cStats->pending : 0;
+                        $approvedContrib = $cStats ? $cStats->approved : 0;
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_entities($ac->name) ?></strong>
+                            <br><small class="text-muted"><?php echo esc_entities($ac->organization ?? '') ?></small>
+                        </td>
+                        <td class="text-center"><span class="badge bg-secondary"><?php echo $totalContrib ?></span></td>
+                        <td class="text-center">
+                            <?php if ($pendingContrib > 0): ?>
+                            <span class="badge bg-warning text-dark"><?php echo $pendingContrib ?></span>
+                            <?php else: ?>
+                            <span class="text-muted">0</span>
+                            <?php endif ?>
+                        </td>
+                        <td class="text-center">
+                            <?php if ($approvedContrib > 0): ?>
+                            <span class="badge bg-success"><?php echo $approvedContrib ?></span>
+                            <?php else: ?>
+                            <span class="text-muted">0</span>
+                            <?php endif ?>
+                        </td>
+                        <td>
+                            <?php if (!empty($ac->training_approval_doc)): ?>
+                                <a href="/<?php echo esc_entities($ac->training_approval_doc) ?>" target="_blank" class="small text-success">
+                                    <i class="fas fa-file-alt me-1"></i><?php echo __('View Document') ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="small text-warning"><i class="fas fa-exclamation-triangle me-1"></i><?php echo __('Not uploaded') ?></span>
+                            <?php endif ?>
+                            <button type="button" class="btn btn-outline-secondary btn-sm ms-1" onclick="uploadConsent(<?php echo $ac->id ?>, '<?php echo esc_entities($ac->name) ?>')">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            <?php if ($ac->training_approved): ?>
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i><?php echo __('Approved') ?></span>
+                                <?php if ($ac->training_approved_at): ?>
+                                <br><small class="text-muted"><?php echo date('d M Y', strtotime($ac->training_approved_at)) ?></small>
+                                <?php endif ?>
+                            <?php else: ?>
+                                <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i><?php echo __('Pending') ?></span>
+                            <?php endif ?>
+                        </td>
+                        <td class="text-end">
+                            <?php if (!$ac->training_approved): ?>
+                                <button type="button" class="btn btn-sm btn-success" onclick="approveTraining(<?php echo $ac->id ?>, '<?php echo esc_entities($ac->name) ?>')"
+                                    <?php echo empty($ac->training_approval_doc) ? 'disabled title="' . __('Upload consent document first') . '"' : '' ?>>
+                                    <i class="fas fa-check me-1"></i><?php echo __('Approve') ?>
+                                </button>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-sm btn-outline-info me-1" onclick="pushTrainingData(<?php echo $ac->id ?>)" <?php echo $approvedContrib < 1 ? 'disabled' : '' ?>>
+                                    <i class="fas fa-paper-plane me-1"></i><?php echo __('Push to Training') ?>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeTrainingApproval(<?php echo $ac->id ?>)">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            <?php endif ?>
+                        </td>
+                    </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif ?>
+    </div>
+</div>
+
+<!-- Upload Consent Document Modal -->
+<div class="modal fade" id="uploadConsentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-file-upload me-2"></i><?php echo __('Upload Consent Document') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted"><?php echo __('Upload a signed consent/approval document from the client authorizing use of their data for model training.') ?></p>
+                <p class="small"><strong><?php echo __('Client:') ?></strong> <span id="consentClientName"></span></p>
+                <input type="hidden" id="consentClientId">
+                <div class="mb-3">
+                    <label class="form-label"><?php echo __('Document') ?> <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control form-control-sm" id="consentFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <div class="form-text"><?php echo __('Accepted formats: PDF, DOC, DOCX, JPG, PNG') ?></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
+                <button type="button" class="btn btn-primary" onclick="submitConsent()">
+                    <i class="fas fa-upload me-1"></i><?php echo __('Upload') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Add Client Modal -->
 <div class="modal fade" id="addClientModal" tabindex="-1">
     <div class="modal-dialog">
@@ -302,7 +440,89 @@ function toggleTraining(id, enabled) {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'id=' + id + '&enabled=' + enabled
-    }).then(function(r) { return r.json(); });
+    }).then(function(r) { return r.json(); }).then(function() {
+        location.reload();
+    });
+}
+
+function uploadConsent(clientId, clientName) {
+    document.getElementById('consentClientId').value = clientId;
+    document.getElementById('consentClientName').textContent = clientName;
+    document.getElementById('consentFile').value = '';
+    var modal = new bootstrap.Modal(document.getElementById('uploadConsentModal'));
+    modal.show();
+}
+
+function submitConsent() {
+    var clientId = document.getElementById('consentClientId').value;
+    var fileInput = document.getElementById('consentFile');
+    if (!fileInput.files.length) {
+        alert('Please select a file.');
+        return;
+    }
+    var formData = new FormData();
+    formData.append('id', clientId);
+    formData.append('consent_doc', fileInput.files[0]);
+
+    fetch('<?php echo url_for(['module' => 'aiCondition', 'action' => 'apiClientUploadConsent']) ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            bootstrap.Modal.getInstance(document.getElementById('uploadConsentModal')).hide();
+            location.reload();
+        } else {
+            alert(d.error || 'Upload failed');
+        }
+    });
+}
+
+function approveTraining(clientId, clientName) {
+    if (!confirm('Approve training data usage for client "' + clientName + '"?\n\nThis will allow their contributed assessment data to be used for model training.')) return;
+
+    fetch('<?php echo url_for(['module' => 'aiCondition', 'action' => 'apiClientApproveTraining']) ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id=' + clientId + '&approve_action=approve'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) location.reload();
+        else alert(d.error || 'Approval failed');
+    });
+}
+
+function revokeTrainingApproval(clientId) {
+    if (!confirm('Revoke training approval for this client? Pending contributions will remain but no new data will be used.')) return;
+
+    fetch('<?php echo url_for(['module' => 'aiCondition', 'action' => 'apiClientApproveTraining']) ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id=' + clientId + '&approve_action=revoke'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.success) location.reload(); });
+}
+
+function pushTrainingData(clientId) {
+    if (!confirm('Push approved contributions to the training pipeline? This will build a dataset from the client\'s approved data.')) return;
+
+    fetch('<?php echo url_for(['module' => 'aiCondition', 'action' => 'apiPushTrainingData']) ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'client_id=' + clientId
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            alert('Training data pushed successfully!');
+            location.reload();
+        } else {
+            alert(d.error || 'Push failed');
+        }
+    });
 }
 </script>
 <?php end_slot() ?>

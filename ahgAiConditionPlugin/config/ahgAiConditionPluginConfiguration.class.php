@@ -28,6 +28,9 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
         // Browse assessments
         $router->any('ai_condition_index', '/ai-condition', 'index');
 
+        // Dashboard
+        $router->any('ai_condition_dashboard', '/ai-condition/dashboard', 'dashboard');
+
         // Browse assessments
         $router->any('ai_condition_browse', '/ai-condition/browse', 'browse');
 
@@ -81,6 +84,13 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
 
         // Client training permission toggle
         $router->any('ai_condition_api_client_training_toggle', '/ai-condition/api/client-training-toggle', 'apiClientTrainingToggle');
+
+        // Client training approval workflow
+        $router->any('ai_condition_api_client_approve_training', '/ai-condition/api/client-approve-training', 'apiClientApproveTraining');
+        $router->any('ai_condition_api_client_upload_consent', '/ai-condition/api/client-upload-consent', 'apiClientUploadConsent');
+        $router->any('ai_condition_api_client_contributions', '/ai-condition/api/client-contributions', 'apiClientContributions');
+        $router->any('ai_condition_api_contribution_review', '/ai-condition/api/contribution-review', 'apiContributionReview');
+        $router->any('ai_condition_api_push_training_data', '/ai-condition/api/push-training-data', 'apiPushTrainingData');
 
         $router->register($event->getSubject());
     }

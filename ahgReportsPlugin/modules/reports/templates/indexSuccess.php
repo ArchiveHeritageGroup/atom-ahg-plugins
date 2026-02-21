@@ -55,6 +55,7 @@ $hasCDPA = isPluginActive('ahgCDPAPlugin');
 $hasNAZ = isPluginActive('ahgNAZPlugin');
 $hasIPSAS = isPluginActive('ahgIPSASPlugin');
 $hasNMMZ = isPluginActive('ahgNMMZPlugin');
+$hasAiCondition = isPluginActive('ahgAiConditionPlugin');
 ?>
 
 <?php slot('sidebar'); ?>
@@ -462,6 +463,43 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
         <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($hasAiCondition): ?>
+    <!-- AI Condition Assessment Row -->
+    <div class="row mb-4">
+        <!-- AI Condition Actions -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2"></i><?php echo __('AI Condition Assessment'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-success"></i><?php echo __('Dashboard'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'assess']); ?>"><i class="fas fa-camera me-2 text-success"></i><?php echo __('New AI Assessment'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'manualAssess']); ?>"><i class="fas fa-clipboard-check me-2 text-primary"></i><?php echo __('Manual Assessment'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'bulk']); ?>"><i class="fas fa-layer-group me-2 text-info"></i><?php echo __('Bulk Scan'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Assessments'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'training']); ?>"><i class="fas fa-brain me-2 text-warning"></i><?php echo __('Model Training'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'aiCondition', 'action' => 'index']); ?>"><i class="fas fa-cog me-2 text-secondary"></i><?php echo __('Settings & API Clients'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
     <?php endif; ?>
 
