@@ -232,6 +232,84 @@
 
 ## ⚡ Installation
 
+### Quick Install (DEB Packages)
+
+Two pre-built Debian packages are available for Ubuntu 22.04+ / Debian 12+:
+
+| Package | Description | Size | Command |
+|---------|-------------|------|---------|
+| **`atom_2.10.1-1_all.deb`** | Vanilla AtoM 2.10.1 with guided TUI wizard | ~25 MB | `sudo apt install ./atom_2.10.1-1_all.deb` |
+| **`atom-heratio_2.10.19-1_all.deb`** | AtoM 2.10 + Heratio framework + 79 plugins | ~45 MB | `sudo apt install ./atom-heratio_2.10.19-1_all.deb` |
+
+Both packages include bundled tarballs for **air-gapped / offline installations** (no internet required during install).
+
+#### AtoM 2.10.1 (Vanilla)
+
+Standard AtoM with a debconf TUI wizard that configures:
+- Database (MySQL/MariaDB) - auto-creates DB and user
+- Nginx virtual host with optimized PHP-FPM pool
+- SSL (none / self-signed / Let's Encrypt)
+- Elasticsearch 8.x (optional install)
+- Gearman worker systemd service
+- Admin account
+
+```bash
+# Download and install
+sudo apt install ./atom_2.10.1-1_all.deb
+
+# Reconfigure later
+sudo dpkg-reconfigure atom
+```
+
+#### AtoM Heratio (Full Platform)
+
+AtoM 2.10 + Heratio framework + 79 GLAM/DAM plugins. Three installation modes:
+
+| Mode | Description |
+|------|-------------|
+| **complete** | Fresh AtoM 2.10 + Heratio framework + all plugins (recommended) |
+| **atom-only** | Vanilla AtoM 2.10 only (no Heratio) |
+| **heratio-only** | Overlay Heratio onto existing AtoM >= 2.8 |
+
+```bash
+# Download and install (TUI wizard will guide you)
+sudo apt install ./atom-heratio_2.10.19-1_all.deb
+
+# CLI management tool
+atom-heratio status              # Show status + service health
+atom-heratio plugins             # List available plugins
+atom-heratio enable <plugin>     # Enable a plugin
+atom-heratio disable <plugin>    # Disable a plugin
+atom-heratio wizard start        # Launch web configuration wizard
+atom-heratio reconfigure         # Re-run TUI wizard
+
+# Web wizard (browser-based advanced configuration)
+# Launched automatically after install on port 9090
+# 7 steps: System Status > Plugins > GLAM Sector > AI > Compliance > Preservation > Apply
+```
+
+#### Building Packages from Source
+
+```bash
+cd atom-framework/packaging
+
+# Build AtoM Heratio package (with bundled AtoM tarball)
+bash build.sh                    # => dist/atom-heratio_2.10.19-1_all.deb (~45 MB)
+bash build.sh --no-tarball       # => dist/atom-heratio_2.10.19-1_all.deb (~21 MB)
+
+# Build vanilla AtoM package
+cd atom-vanilla
+bash build.sh                    # => dist/atom_2.10.1-1_all.deb (~25 MB)
+```
+
+---
+
+### Git Clone (Manual Install)
+
+For development or custom deployments:
+
+---
+
 ### Prerequisites
 
 #### Core (Required)
