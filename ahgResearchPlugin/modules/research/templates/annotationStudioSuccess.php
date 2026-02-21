@@ -57,6 +57,11 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomOut" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="zoomFit" title="Fit to View"><i class="fas fa-expand"></i></button>
                     </div>
+                    <?php if (sfProjectConfiguration::getActive()->isPluginEnabled('ahgAiConditionPlugin')): ?>
+                    <button type="button" class="btn btn-sm btn-success ms-2" id="aiConditionScan" title="AI Condition Scan">
+                        <i class="fas fa-robot me-1"></i>AI Scan
+                    </button>
+                    <?php endif ?>
                     <span class="ms-auto small text-muted" id="statusText">Loading...</span>
                 </div>
             </div>
@@ -161,6 +166,15 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+        <?php if (sfProjectConfiguration::getActive()->isPluginEnabled('ahgAiConditionPlugin')): ?>
+        <!-- AI Condition Results -->
+        <div class="card mt-3" id="aiResultsCard" style="display:none;">
+            <div class="card-header py-2 bg-success text-white"><h6 class="mb-0"><i class="fas fa-robot me-1"></i>AI Condition Results</h6></div>
+            <div class="card-body py-2" id="aiResultsBody">
+                <!-- Populated by JS after AI scan -->
+            </div>
+        </div>
+        <?php endif ?>
         </div>
     </div>
 </div>
@@ -864,6 +878,108 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (ex) { alert('Invalid JSON file.'); }
             };
             reader.readAsText(fileInput.files[0]);
+        });
+    }
+    // AI Condition Scan
+    var aiScanBtn = document.getElementById('aiConditionScan');
+    if (aiScanBtn) {
+        aiScanBtn.addEventListener('click', function() {
+            var btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Scanning...';
+
+            // Export canvas image as base64
+            var dataUrl = canvas.toDataURL({format: 'jpeg', quality: 0.85});
+            var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+
+            fetch('/ai-condition/api/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    image: base64,
+                    object_id: objectId,
+                    confidence: 0.25
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-robot me-1"></i>AI Scan';
+
+                var card = document.getElementById('aiResultsCard');
+                var body = document.getElementById('aiResultsBody');
+                card.style.display = '';
+
+                if (data.success === false) {
+                    body.innerHTML = '<div class="alert alert-danger py-1 small mb-0">' + (data.error || 'Scan failed') + '</div>';
+                    return;
+                }
+
+                var result = data.result || data;
+                var grade = result.condition_grade || 'unknown';
+                var score = result.overall_score != null ? parseFloat(result.overall_score).toFixed(1) : '?';
+                var damages = result.damages || [];
+                var gradeColors = {excellent:'success', good:'primary', fair:'warning', poor:'danger', critical:'dark'};
+                var html = '<div class="d-flex justify-content-between align-items-center mb-2">'
+                    + '<span class="badge bg-' + (gradeColors[grade]||'secondary') + '">' + grade.toUpperCase() + '</span>'
+                    + '<strong>' + score + '/100</strong></div>';
+
+                if (damages.length) {
+                    html += '<div class="small">';
+                    var dmgColors = {tear:'#e74c3c',stain:'#8B4513',foxing:'#D2691E',fading:'#BDB76B',water_damage:'#4682B4',mold:'#2E8B57',pest_damage:'#8B0000',abrasion:'#CD853F',brittleness:'#DEB887',loss:'#FF6347',discoloration:'#DAA520',warping:'#6A5ACD',cracking:'#A0522D',delamination:'#BC8F8F',corrosion:'#B8860B'};
+                    damages.forEach(function(d) {
+                        var conf = d.confidence != null ? (d.confidence * 100).toFixed(0) : '?';
+                        var color = dmgColors[d.damage_type] || '#6c757d';
+                        html += '<div class="d-flex justify-content-between py-1 border-bottom">'
+                            + '<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + color + ';margin-right:4px;"></span>' + (d.damage_type||'').replace(/_/g,' ') + '</span>'
+                            + '<span class="text-muted">' + conf + '%</span></div>';
+
+                        // Draw bounding box on canvas
+                        if (d.bbox_x != null && bgImage) {
+                            var scaleX = bgImage.scaleX || 1;
+                            var scaleY = bgImage.scaleY || 1;
+                            var rect = new fabric.Rect({
+                                left: bgImage.left + d.bbox_x * scaleX,
+                                top: bgImage.top + d.bbox_y * scaleY,
+                                width: d.bbox_w * scaleX,
+                                height: d.bbox_h * scaleY,
+                                fill: 'transparent',
+                                stroke: color,
+                                strokeWidth: 2,
+                                selectable: false,
+                                evented: false,
+                                aiDamage: true
+                            });
+                            var label = new fabric.Text((d.damage_type||'').replace(/_/g,' ') + ' ' + conf + '%', {
+                                left: bgImage.left + d.bbox_x * scaleX,
+                                top: bgImage.top + d.bbox_y * scaleY - 14,
+                                fontSize: 11, fill: '#fff', fontFamily: 'sans-serif',
+                                backgroundColor: color, padding: 2,
+                                selectable: false, evented: false, aiDamage: true
+                            });
+                            canvas.add(rect);
+                            canvas.add(label);
+                        }
+                    });
+                    html += '</div>';
+                    canvas.renderAll();
+                } else {
+                    html += '<p class="small text-muted mb-0">No damage detected.</p>';
+                }
+
+                if (result.recommendations) {
+                    html += '<hr class="my-2"><div class="small text-muted">' + result.recommendations.substring(0, 200) + '</div>';
+                }
+
+                html += '<a href="/ai-condition/assess?object_id=' + objectId + '" class="btn btn-sm btn-outline-success w-100 mt-2"><i class="fas fa-external-link-alt me-1"></i>Full Assessment</a>';
+                body.innerHTML = html;
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-robot me-1"></i>AI Scan';
+                document.getElementById('aiResultsCard').style.display = '';
+                document.getElementById('aiResultsBody').innerHTML = '<div class="alert alert-danger py-1 small mb-0">Network error: ' + err.message + '</div>';
+            });
         });
     }
 });

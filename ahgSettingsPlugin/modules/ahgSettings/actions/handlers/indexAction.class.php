@@ -18,6 +18,7 @@ class AhgSettingsIndexAction extends AhgController
         $hasRic = in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasAccessRequest = in_array('ahgAccessRequestPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasCondition = in_array('ahgConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        $hasAiCondition = in_array('ahgAiConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasSpectrum = in_array('ahgSpectrumPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasIiif = in_array('IiifViewerFramework', sfProjectConfiguration::getActive()->getPlugins());
         $hasLibrary = in_array('ahgLibraryPlugin', sfProjectConfiguration::getActive()->getPlugins());
@@ -227,6 +228,15 @@ class AhgSettingsIndexAction extends AhgController
                 'icon' => 'fa-camera',
                 'description' => 'Photo upload and thumbnail settings',
                 'url' => 'admin/ahg-settings/section?section=photos'
+            ];
+        }
+
+        if ($hasAiCondition) {
+            $this->sections['ai_condition'] = [
+                'label' => 'AI Condition Assessment',
+                'icon' => 'fa-robot',
+                'description' => 'AI-powered damage detection and condition scoring for archival materials',
+                'url' => 'aiCondition/index'
             ];
         }
 
