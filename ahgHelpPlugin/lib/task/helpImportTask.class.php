@@ -30,6 +30,7 @@ class helpImportTask extends arBaseTask
         'Browse & Search' => ['repository-browse-', 'term-taxonomy-', 'advanced-search-', 'knowledge-graph-'],
         'Public Access' => ['access-request', 'cart-', 'favorites-', 'feedback-', 'request-to-publish-', 'heritage-site'],
         'Exhibitions' => ['exhibition-', 'landing-page-'],
+        'Marketplace' => ['marketplace-'],
         'Integration' => ['api-', 'graphql-', 'doi-', 'federation-', 'ric-'],
         'Labels & Forms' => ['label-', 'forms-', 'barcode-'],
         'Heritage Accounting' => ['heritage-accounting-', 'grap-', 'ipsas-'],
@@ -107,6 +108,7 @@ class helpImportTask extends arBaseTask
         'term-taxonomy' => 'ahgTermTaxonomyPlugin',
         'translation-' => 'ahgTranslationPlugin',
         'vendor-' => 'ahgVendorPlugin',
+        'marketplace-' => 'ahgMarketplacePlugin',
         'workflow-' => 'ahgWorkflowPlugin',
     ];
 
