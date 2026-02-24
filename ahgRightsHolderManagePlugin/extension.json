@@ -1,5 +1,6 @@
 {
     "name": "AHG Rights Holder Manage",
+    "machine_name": "ahgRightsHolderManagePlugin",
     "version": "1.0.0",
     "description": "Rights holder browse and management using Laravel Query Builder",
     "author": "The Archive and Heritage Group",

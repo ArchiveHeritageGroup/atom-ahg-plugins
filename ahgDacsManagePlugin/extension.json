@@ -1,0 +1,18 @@
+{
+    "name": "DACS Descriptive Standard",
+    "machine_name": "ahgDacsManagePlugin",
+    "version": "1.0.0",
+    "description": "DACS (Describing Archives: A Content Standard) edit form for information objects",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "descriptive-standard",
+    "keywords": ["dacs", "descriptive-standard", "edit", "information-object"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": []
+}

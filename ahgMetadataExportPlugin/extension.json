@@ -1,6 +1,6 @@
 {
-    "name": "ahgMetadataExportPlugin",
-    "displayName": "GLAM Metadata Export Framework",
+    "name": "GLAM Metadata Export Framework",
+    "machine_name": "ahgMetadataExportPlugin",
     "description": "Unified export framework supporting 10 metadata standards across GLAM sectors (Galleries, Libraries, Archives, Museums) and digital preservation.",
     "version": "1.0.0",
     "author": "The Archive and Heritage Group (Pty) Ltd",

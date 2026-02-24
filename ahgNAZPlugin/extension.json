@@ -1,0 +1,29 @@
+{
+    "name": "Zimbabwe NAZ Compliance",
+    "machine_name": "ahgNAZPlugin",
+    "version": "1.0.0",
+    "description": "Zimbabwe National Archives Act [Chapter 25:06] compliance — 25-year closure rule, researcher permits, records schedules, transfers, and protected records management",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "compliance",
+    "keywords": ["zimbabwe", "naz", "national-archives", "closure-rule", "records-schedule", "compliance"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [
+        "naz_config",
+        "naz_closure_period",
+        "naz_researcher",
+        "naz_research_permit",
+        "naz_records_schedule",
+        "naz_transfer",
+        "naz_transfer_item",
+        "naz_protected_record",
+        "naz_audit_log",
+        "naz_research_visit"
+    ]
+}

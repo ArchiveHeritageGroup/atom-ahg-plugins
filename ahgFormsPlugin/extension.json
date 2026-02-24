@@ -1,0 +1,25 @@
+{
+    "name": "Forms Builder",
+    "machine_name": "ahgFormsPlugin",
+    "version": "1.0.0",
+    "description": "Configurable metadata entry forms per repository — drag-drop form builder, template library, field assignments, draft saving, and import/export",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "data-entry",
+    "keywords": ["forms", "builder", "metadata", "template", "drag-drop", "custom-fields"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [
+        "ahg_form_template",
+        "ahg_form_field",
+        "ahg_form_assignment",
+        "ahg_form_field_mapping",
+        "ahg_form_draft",
+        "ahg_form_submission_log"
+    ]
+}

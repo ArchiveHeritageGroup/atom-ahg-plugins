@@ -1,0 +1,30 @@
+{
+    "name": "Indigenous Cultural IP",
+    "machine_name": "ahgICIPPlugin",
+    "version": "1.0.0",
+    "description": "Indigenous Cultural and Intellectual Property management — community registration, TK Labels, cultural notices, consent tracking, consultations, and access restrictions",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "rights",
+    "keywords": ["indigenous", "icip", "tk-labels", "cultural-notices", "consent", "community", "traditional-knowledge"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [
+        "icip_community",
+        "icip_consent",
+        "icip_cultural_notice_type",
+        "icip_cultural_notice",
+        "icip_notice_acknowledgement",
+        "icip_tk_label_type",
+        "icip_tk_label",
+        "icip_consultation",
+        "icip_access_restriction",
+        "icip_object_summary",
+        "icip_config"
+    ]
+}

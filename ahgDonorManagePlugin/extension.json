@@ -1,5 +1,6 @@
 {
     "name": "AHG Donor Manage",
+    "machine_name": "ahgDonorManagePlugin",
     "version": "1.0.0",
     "description": "Donor browse and management using Laravel Query Builder",
     "author": "The Archive and Heritage Group",

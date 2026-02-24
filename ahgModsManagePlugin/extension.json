@@ -1,0 +1,18 @@
+{
+    "name": "MODS Descriptive Standard",
+    "machine_name": "ahgModsManagePlugin",
+    "version": "1.0.0",
+    "description": "MODS (Metadata Object Description Schema) descriptive standard edit form for information objects",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "descriptive-standard",
+    "keywords": ["mods", "descriptive-standard", "edit", "information-object", "metadata"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": []
+}

@@ -1,5 +1,6 @@
 {
     "name": "AHG Search",
+    "machine_name": "ahgSearchPlugin",
     "version": "1.0.0",
     "description": "Global search, autocomplete, description updates, and search/replace for AtoM Heratio",
     "author": "The Archive and Heritage Group",

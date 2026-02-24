@@ -1,5 +1,6 @@
 {
     "name": "AHG Federation",
+    "machine_name": "ahgFederationPlugin",
     "version": "1.0.0",
     "description": "OAI-PMH Federation plugin for Heritage Platform metadata exchange",
     "author": "AHG Development Team",

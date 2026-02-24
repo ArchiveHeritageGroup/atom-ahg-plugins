@@ -1,0 +1,28 @@
+{
+    "name": "Zimbabwe CDPA Compliance",
+    "machine_name": "ahgCDPAPlugin",
+    "version": "1.0.0",
+    "description": "Zimbabwe Cyber and Data Protection Act [Chapter 12:07] compliance — DPO registration, breach management, DPIA, consent tracking, data subject requests, and POTRAZ reporting",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "compliance",
+    "keywords": ["zimbabwe", "cdpa", "data-protection", "potraz", "compliance", "breach", "dpia", "consent"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": [
+        "cdpa_controller_license",
+        "cdpa_dpo",
+        "cdpa_data_subject_request",
+        "cdpa_processing_activity",
+        "cdpa_dpia",
+        "cdpa_consent",
+        "cdpa_breach",
+        "cdpa_config",
+        "cdpa_audit_log"
+    ]
+}
