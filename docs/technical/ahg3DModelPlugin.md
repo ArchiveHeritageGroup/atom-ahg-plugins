@@ -299,6 +299,60 @@ class Ar3dService implements Ar3dServiceInterface
 }
 ```
 
+### ThreeDThumbnailService
+
+```php
+namespace AtomExtensions\Services;
+
+class ThreeDThumbnailService
+{
+    // Model detection
+    public function is3DModel(string $filename): bool
+    public function is3DMimeType(string $mime): bool
+    public function getSupportedMimeTypes(): array
+
+    // Single thumbnail generation
+    public function generateThumbnail(string $inputPath, string $outputPath, int $width = 512, int $height = 512): bool
+
+    // Derivative generation (thumbnail + reference image)
+    public function createDerivatives(int $digitalObjectId): bool
+
+    // Multi-angle rendering (6 views via Blender)
+    public function generateMultiAngle(string $inputPath, string $outputDir, int $size = 1024): array
+    // Returns: ['front' => '/path/front.png', 'back' => '...', 'left' => '...', 'right' => '...', 'top' => '...', 'detail' => '...']
+
+    // Multi-angle directory for a digital object
+    public function getMultiAngleDir(int $digitalObjectId): string
+
+    // Batch processing
+    public function batchProcessExisting(): array
+    // Returns: ['processed' => N, 'success' => N, 'failed' => N]
+}
+```
+
+#### Supported MIME Types
+
+| MIME Type | Format |
+|-----------|--------|
+| `model/obj` | Wavefront OBJ |
+| `model/gltf-binary` | GLB |
+| `model/gltf+json` | GLTF |
+| `model/stl` | STL |
+| `application/x-tgif` | OBJ (common mislabel) |
+| `model/vnd.usdz+zip` | USDZ |
+| `application/x-ply` | PLY |
+
+#### Multi-Angle Camera Positions
+
+| View | Azimuth | Elevation | Purpose |
+|------|---------|-----------|---------|
+| Front | 0° | 15° | Primary view |
+| Back | 180° | 15° | Reverse view |
+| Left | 270° | 15° | Left profile |
+| Right | 90° | 15° | Right profile |
+| Top | 0° | 80° | Bird's-eye |
+| Detail | 45° | 35° | Close-up detail |
+
 ### Model3DProvider
 
 ```php
@@ -758,6 +812,147 @@ location ~ ^/iiif/3d/ {
 
 ---
 
+## CLI Commands
+
+### 3d:derivatives
+
+Generates thumbnail and reference image derivatives for 3D model files using Blender.
+
+```bash
+php atom-framework/bin/atom 3d:derivatives              # Process all 3D objects missing derivatives
+php atom-framework/bin/atom 3d:derivatives --id=123     # Process specific digital object
+php atom-framework/bin/atom 3d:derivatives --force      # Regenerate even if derivatives exist
+php atom-framework/bin/atom 3d:derivatives --dry-run    # Preview without generating
+```
+
+| Option | Description |
+|--------|-------------|
+| `--id=N` | Process only the specified digital object ID |
+| `--force` | Regenerate even if derivatives already exist |
+| `--dry-run` | List objects that would be processed without generating |
+
+### 3d:multiangle
+
+Generates 6 multi-angle renders (front, back, left, right, top, detail) using Blender. Optionally sends renders to LLM for AI description.
+
+```bash
+php atom-framework/bin/atom 3d:multiangle               # Render all 3D objects missing multi-angle views
+php atom-framework/bin/atom 3d:multiangle --id=123      # Render specific digital object
+php atom-framework/bin/atom 3d:multiangle --describe    # Render + generate AI description
+php atom-framework/bin/atom 3d:multiangle --force       # Regenerate even if renders exist
+php atom-framework/bin/atom 3d:multiangle --dry-run     # Preview without rendering
+```
+
+| Option | Description |
+|--------|-------------|
+| `--id=N` | Process only the specified digital object ID |
+| `--force` | Regenerate even if renders already exist |
+| `--describe` | After rendering, send images to LLM and output AI description |
+| `--dry-run` | List objects that would be processed without rendering |
+
+### Cron Examples
+
+```bash
+# Nightly derivative generation
+0 2 * * * cd /usr/share/nginx/archive && php atom-framework/bin/atom 3d:derivatives >> /var/log/atom/3d-derivatives.log 2>&1
+
+# Nightly multi-angle rendering
+0 3 * * * cd /usr/share/nginx/archive && php atom-framework/bin/atom 3d:multiangle >> /var/log/atom/3d-multiangle.log 2>&1
+
+# Weekly multi-angle + AI description batch
+0 4 * * 0 cd /usr/share/nginx/archive && php atom-framework/bin/atom 3d:multiangle --describe >> /var/log/atom/3d-describe.log 2>&1
+```
+
+---
+
+## Voice Integration
+
+### AI 3D Object Description
+
+The voice command system (ahgVoice module in ahgThemeB5Plugin) supports AI-powered description of 3D objects via multi-angle renders.
+
+#### Endpoint
+
+```
+POST /ahgVoice/describeObject
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| `digital_object_id` | Direct digital object ID |
+| `information_object_id` | Information object ID (resolves to digital object) |
+| `slug` | Record slug (resolves to information object, then digital object) |
+
+**Response:**
+```json
+{
+    "success": true,
+    "description": "This object is a...",
+    "source": "local",
+    "model": "llava:7b",
+    "render_count": 6,
+    "cached": false,
+    "information_object_id": 456
+}
+```
+
+#### Voice Commands
+
+| Command | Action |
+|---------|--------|
+| "describe object" / "describe 3D" | Auto-detects 3D viewer, generates multi-angle renders, sends to LLM |
+| "describe model" / "what is this object" | Same as above |
+| "save to description" | Save AI description to scope_and_content |
+| "save to alt text" | Save as digital object alt text |
+| "save to both" | Save to both fields |
+| "discard" | Discard the AI description |
+
+#### LLM Configuration
+
+Uses the same hybrid LLM configuration as image description:
+
+| Provider | Model | Timeout | Notes |
+|----------|-------|---------|-------|
+| Local (Ollama) | llava:7b | 180s | All 6 images sent in single request |
+| Cloud (Anthropic) | claude-sonnet | 120s | 6 image content blocks per request |
+
+Context-aware prompts adjust vocabulary for GLAM sector: CCO (museum), ISAD(G) (archive), MARC (library), VRA (gallery), IPTC (DAM).
+
+#### Multi-Angle Gallery Partial
+
+```php
+<?php include_partial('model3d/multiAngleGallery', [
+    'digitalObject' => $digitalObject,
+    'informationObject' => $informationObject,
+]); ?>
+```
+
+Renders a thumbnail row with lightbox modal for the 6 views if renders exist. Purely additive — shows nothing if `{derivative_dir}/multiangle/` doesn't exist.
+
+---
+
+## Blender Integration
+
+### Requirements
+
+- **Blender 4.2+** (5.0+ recommended)
+- Installed via snap (`/snap/bin/blender`) or system package
+
+### Scripts
+
+| Script | Location | Purpose |
+|--------|----------|---------|
+| `blender_thumbnail.py` | `tools/3d-thumbnail/` | Single thumbnail render |
+| `render_multiangle.py` | `tools/3d-thumbnail/` | 6-angle orbit renders |
+| `generate-thumbnail.sh` | `tools/3d-thumbnail/` | Shell wrapper for single thumbnail |
+| `generate-multiangle.sh` | `tools/3d-thumbnail/` | Shell wrapper for multi-angle renders |
+
+### EEVEE Compatibility
+
+Blender 4.2+ renamed the render engine from `BLENDER_EEVEE` to `BLENDER_EEVEE_NEXT`. Both Python scripts handle this automatically with version detection.
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -769,6 +964,11 @@ location ~ ^/iiif/3d/ {
 | Slow performance | Optimize model, reduce polygon count |
 | CORS errors | Add Access-Control headers to nginx |
 | Manifest 404 | Check route configuration, clear cache |
+| Thumbnails not generating | Check Blender installed (`/snap/bin/blender --version`), verify script permissions |
+| Multi-angle renders missing | Run `php atom-framework/bin/atom 3d:multiangle --id=N`, check Blender logs |
+| AI describe returns empty | Check Ollama running (`curl localhost:11434`), verify LLM model pulled |
+| OBJ MIME type wrong | OBJ files often mislabeled as `application/x-tgif` — handled automatically |
+| Blender snap permission | Snap Blender may need `--no-sandbox` or run as correct user |
 
 ---
 
@@ -779,6 +979,8 @@ location ~ ^/iiif/3d/ {
 | ahgConditionPlugin | Damage hotspots linked to condition reports |
 | ahgAuditTrailPlugin | Central audit logging |
 | ahgCorePlugin | Database initialization, helper functions |
+| ahgThemeB5Plugin | Voice AI 3D description (ahgVoice module) |
+| atom-framework | ThreeDThumbnailService, CLI commands (3d:derivatives, 3d:multiangle) |
 
 ---
 

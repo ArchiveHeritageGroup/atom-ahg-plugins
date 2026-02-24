@@ -140,6 +140,57 @@ Click on the 3D model thumbnail or the **View 3D** button.
 
 ---
 
+## Multi-Angle Gallery
+
+When multi-angle renders have been generated for a 3D model, a gallery of 6 views appears below the viewer on the record view page:
+
+- **Front** — straight-on front view
+- **Back** — rear view
+- **Left** — left side profile
+- **Right** — right side profile
+- **Top** — bird's-eye view from above
+- **Detail** — close-up at 45-degree angle
+
+Click any thumbnail to open a full-size lightbox view. These renders are generated automatically by Blender and cached for fast access.
+
+---
+
+## AI 3D Description
+
+### Voice Command
+Say **"describe object"** or **"describe 3D"** while viewing a record with a 3D model. The system will:
+1. Generate 6 multi-angle renders of the object using Blender
+2. Send all 6 views to an AI model for analysis
+3. Read the description aloud
+4. Offer to save the description to the record
+
+### Save Options
+After hearing the AI description, you can say:
+- **"save to description"** — save to the record's scope and content field
+- **"save to alt text"** — save as the digital object's alt text
+- **"save to both"** — save to both fields
+- **"discard"** — discard the AI description
+
+---
+
+## Thumbnails & Derivatives
+
+3D models (GLB, GLTF, OBJ, STL, FBX, PLY, DAE) automatically get thumbnail and reference images generated via Blender when uploaded. If thumbnails are missing, an administrator can regenerate them:
+
+```
+php atom-framework/bin/atom 3d:derivatives           # Process all
+php atom-framework/bin/atom 3d:derivatives --id=123  # Specific object
+php atom-framework/bin/atom 3d:derivatives --dry-run  # Preview only
+```
+
+---
+
+## Type-a-Command
+
+If you prefer typing to speaking, **right-click** the floating microphone button (bottom-right corner). A text input will appear where you can type any voice command and press Enter. This is useful in noisy environments or when speech recognition is unavailable.
+
+---
+
 ## Tips for Best Experience
 ```
 ┌────────────────────────────────────────┬────────────────────┐

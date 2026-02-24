@@ -1,6 +1,6 @@
 # AtoM AHG Framework - User Manual
 
-## Version 1.6.x
+## Version 1.6.x  
 ## Last Updated: January 2026
 
 ---
@@ -31,10 +31,10 @@ The AtoM AHG Framework extends Access to Memory (AtoM) with advanced AI-powered 
 
 ### System Requirements
 
-- AtoM 2.8+ or 2.10+
-- PHP 8.1+
-- MySQL 8.0+
-- Elasticsearch 6.x (for AtoM 2.9.x) or 7.x (for AtoM 2.10+)
+- AtoM `2.8+` or `2.10+`
+- PHP `8.1+`
+- MySQL `8.0+`
+- Elasticsearch `6.x` (for AtoM `2.9.x`) or `7.x` (for AtoM `2.10+`)
 
 ---
 
@@ -45,21 +45,8 @@ The AtoM AHG Framework extends Access to Memory (AtoM) with advanced AI-powered 
 1. Log in as an administrator
 2. Navigate to **Admin** → **AHG Settings**
 3. Select the desired settings module
-```
-┌─────────────────────────────────────────────────────────┐
-│                    AHG Settings                         │
-├─────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │ AI Services │  │  Security   │  │   Backup    │     │
-│  │             │  │  Clearance  │  │             │     │
-│  └─────────────┘  └─────────────┘  └─────────────┘     │
-│                                                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │   Audit     │  │  Display    │  │  Favorites  │     │
-│  │   Trail     │  │  Settings   │  │             │     │
-│  └─────────────┘  └─────────────┘  └─────────────┘     │
-└─────────────────────────────────────────────────────────┘
-```
+
+<img src="/plugins/ahgHelpPlugin/images/accessing-ahg-settings.png" alt="AHG Settings" width="500">
 
 ---
 
@@ -73,90 +60,43 @@ Navigate to: **Admin** → **AHG Settings** → **AI Services**
 
 #### API Configuration
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| API URL | URL of the AI service endpoint | `http://localhost:5004/ai/v1` |
-| API Key | Authentication key for API access | - |
-| Timeout | Request timeout in seconds | 60 |
-| Processing Mode | `Hybrid` (direct) or `Job` (background) | Job |
+| Setting          | Description                             | Default                       |
+|-----------------|------------------------------------------|-------------------------------|
+| API URL         | URL of the AI service endpoint           | `http://localhost:5004/ai/v1` |
+| API Key         | Authentication key for API access        | *(empty)*                     |
+| Timeout         | Request timeout in seconds               | `60`                          |
+| Processing Mode | `Hybrid` (direct) or `Job` (background)  | `Job`                         |
 
 #### NER Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Enable NER | Turn NER extraction on/off | On |
-| Extract from PDFs | Extract text from attached PDFs | On |
-| Auto-extract on Upload | Run NER when records are created | Off |
-| Require Review | Require manual review before linking | On |
-| Entity Types | Types to extract (PERSON, ORG, GPE, DATE) | All |
+| Setting                | Description                                     | Default |
+|------------------------|-------------------------------------------------|---------|
+| Enable NER             | Turn NER extraction on/off                      | `On`    |
+| Extract from PDFs      | Extract text from attached PDFs                 | `On`    |
+| Auto-extract on Upload | Run NER when records are created                | `Off`   |
+| Require Review         | Require manual review before linking            | `On`    |
+| Entity Types           | Types to extract (`PERSON`, `ORG`, `GPE`, `DATE`) | `All`   |
 
 #### Summarization Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Enable Summarization | Turn summarization on/off | On |
-| Target Field | Field to store summaries | Scope and Content |
-| Min Length | Minimum summary length | 100 |
-| Max Length | Maximum summary length | 500 |
+| Setting              | Description               | Default             |
+|---------------------|---------------------------|---------------------|
+| Enable Summarization| Turn summarization on/off | `On`                |
+| Target Field        | Field to store summaries  | `Scope and Content` |
+| Min Length          | Minimum summary length    | `100`               |
+| Max Length          | Maximum summary length    | `500`               |
 
 #### Spell Check Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Enable Spell Check | Turn spell checking on/off | Off |
-| Language | Dictionary language | en_ZA |
-| Fields to Check | Metadata fields to check | title, scopeAndContent |
+| Setting           | Description                    | Default                  |
+|------------------|--------------------------------|--------------------------|
+| Enable Spell Check | Turn spell checking on/off    | `Off`                    |
+| Language         | Dictionary language            | `en_ZA`                  |
+| Fields to Check  | Metadata fields to check       | `title, scopeAndContent` |
 
 ### Workflow Diagram
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    AI Services Workflow                          │
-└──────────────────────────────────────────────────────────────────┘
 
-    ┌─────────────┐
-    │   Record    │
-    │  Created/   │
-    │  Updated    │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐     No      ┌─────────────┐
-    │ Auto-extract├────────────►│    Done     │
-    │  Enabled?   │             └─────────────┘
-    └──────┬──────┘
-           │ Yes
-           ▼
-    ┌─────────────┐
-    │  Extract    │
-    │   Text      │
-    │ (Metadata   │
-    │  + PDF)     │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐
-    │  Call NER   │
-    │    API      │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐
-    │   Store     │
-    │  Entities   │
-    └──────┬──────┘
-           │
-           ▼
-    ┌─────────────┐     No      ┌─────────────┐
-    │  Require    ├────────────►│ Auto-link   │
-    │  Review?    │             │ to Actors   │
-    └──────┬──────┘             └─────────────┘
-           │ Yes
-           ▼
-    ┌─────────────┐
-    │  Pending    │
-    │   Review    │
-    └─────────────┘
-```
+<img src="/plugins/ahgHelpPlugin/images/ai-services-workflow.png" alt="AI Services Workflow" width="500">
 
 ---
 
@@ -166,30 +106,16 @@ Navigate to: **Admin** → **AHG Settings** → **AI Services**
 
 NER automatically identifies and classifies named entities in text:
 
-| Entity Type | Code | Examples |
-|-------------|------|----------|
-| Person | PERSON | Nelson Mandela, Cheryl Carolus |
-| Organization | ORG | African National Congress, Department of Education |
-| Location | GPE | Johannesburg, South Africa |
-| Date | DATE | 18 January 1993, 1994 |
+| Entity Type  | Code     | Examples                                                   |
+|-------------|----------|------------------------------------------------------------|
+| Person      | `PERSON` | Nelson Mandela, Cheryl Carolus                             |
+| Organization| `ORG`    | African National Congress, Department of Education          |
+| Location    | `GPE`    | Johannesburg, South Africa                                 |
+| Date        | `DATE`   | 18 January 1993, 1994                                      |
 
 ### How NER Works
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     NER Processing Flow                          │
-└─────────────────────────────────────────────────────────────────┘
 
-  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-  │   Archival   │      │    Text      │      │   NER API    │
-  │   Record     │─────►│  Extraction  │─────►│  Processing  │
-  └──────────────┘      └──────────────┘      └──────┬───────┘
-                                                      │
-                                                      ▼
-  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-  │   Review     │◄─────│   Pending    │◄─────│   Entities   │
-  │  Dashboard   │      │   Entities   │      │   Stored     │
-  └──────────────┘      └──────────────┘      └──────────────┘
-```
+<img src="/plugins/ahgHelpPlugin/images/ner_processing_flow.png" alt="NER Processing" width="500">
 
 ### Text Sources
 
@@ -200,9 +126,9 @@ NER extracts text from multiple sources:
    - Scope and Content
    - Archival History
 
-2. **Attached PDFs** (when "Extract from PDFs" is enabled)
+2. **Attached PDFs** (when “Extract from PDFs” is enabled)
    - Uses `pdftotext` for extraction
-   - Limited to 50,000 characters per document
+   - Limited to `50,000` characters per document
 
 ### Viewing Extracted Entities
 
@@ -219,32 +145,8 @@ NER extracts text from multiple sources:
 AI Summarization automatically generates concise summaries from PDF documents and saves them to the specified metadata field.
 
 ### Summarization Workflow
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  Summarization Workflow                          │
-└─────────────────────────────────────────────────────────────────┘
 
-  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-  │   Record     │      │   Extract    │      │   Check      │
-  │   with PDF   │─────►│   PDF Text   │─────►│   Length     │
-  └──────────────┘      └──────────────┘      └──────┬───────┘
-                                                      │
-                                    ┌─────────────────┴─────────────────┐
-                                    │                                   │
-                              < 200 chars                         >= 200 chars
-                                    │                                   │
-                                    ▼                                   ▼
-                            ┌──────────────┐                   ┌──────────────┐
-                            │    Skip      │                   │  Call API    │
-                            │  (Too Short) │                   │  Summarize   │
-                            └──────────────┘                   └──────┬───────┘
-                                                                      │
-                                                                      ▼
-                                                               ┌──────────────┐
-                                                               │    Save to   │
-                                                               │  Target Field│
-                                                               └──────────────┘
-```
+<img src="/plugins/ahgHelpPlugin/images/summarization_workflow.png" alt="Summarization Workflow" width="500">
 
 ### Best Practices
 
@@ -262,12 +164,12 @@ Spell checking identifies potential spelling errors in metadata fields using lan
 
 ### Supported Languages
 
-| Code | Language |
-|------|----------|
-| en_ZA | English (South Africa) |
-| en_US | English (United States) |
-| en_GB | English (United Kingdom) |
-| af_ZA | Afrikaans |
+| Code    | Language                 |
+|---------|--------------------------|
+| `en_ZA` | English (South Africa)   |
+| `en_US` | English (United States)  |
+| `en_GB` | English (United Kingdom) |
+| `af_ZA` | Afrikaans                |
 
 ### Spell Check Results
 
@@ -286,31 +188,17 @@ Results are stored and can be reviewed:
 Navigate to: `/ner/review` or **Admin** → **NER Review**
 
 ### Dashboard Features
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    NER Review Dashboard                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Filter: [All Types ▼] [All Status ▼] [Search...    ] [Filter]  │
-│                                                                  │
-├─────────────────────────────────────────────────────────────────┤
-│  Entity          │ Type   │ Record        │ Status  │ Actions   │
-├──────────────────┼────────┼───────────────┼─────────┼───────────┤
-│  Nelson Mandela  │ PERSON │ Letter 1993   │ Pending │ [✓] [✗]   │
-│  ANC             │ ORG    │ Minutes 1994  │ Pending │ [✓] [✗]   │
-│  Johannesburg    │ GPE    │ Report 1992   │ Approved│ [View]    │
-│  ...             │        │               │         │           │
-└─────────────────────────────────────────────────────────────────┘
-```
+
+<img src="/plugins/ahgHelpPlugin/images/ner_review_dashboard_layout.png" alt="NER Review Dashboard" width="500">
 
 ### Review Actions
 
-| Action | Description |
-|--------|-------------|
-| Approve (✓) | Confirm entity is correct, optionally link to actor |
-| Reject (✗) | Mark entity as incorrect/not relevant |
-| Edit | Modify entity value or type |
-| Link | Link to existing authority record |
+| Action        | Description                                         |
+|---------------|-----------------------------------------------------|
+| Approve (✓)   | Confirm entity is correct, optionally link to actor |
+| Reject (✗)    | Mark entity as incorrect/not relevant               |
+| Edit          | Modify entity value or type                         |
+| Link          | Link to existing authority record                   |
 
 ### Bulk Actions
 
@@ -327,6 +215,7 @@ Navigate to: `/ner/review` or **Admin** → **NER Review**
 Batch processing is available via command line for large-scale operations.
 
 #### NER Extraction
+
 ```bash
 # Extract from all unprocessed records
 php symfony ner:extract --all --limit=1000
@@ -342,6 +231,7 @@ php symfony ner:extract --all --dry-run --limit=10
 ```
 
 #### Summarization
+
 ```bash
 # Summarize records with empty scope_and_content
 php symfony ner:summarize --all-empty --limit=100
@@ -354,6 +244,7 @@ php symfony ner:summarize --all-empty --field=abstract --limit=100
 ```
 
 #### Spell Check
+
 ```bash
 # Check all records
 php symfony ner:spellcheck --all --limit=100
@@ -368,6 +259,7 @@ php symfony ner:spellcheck --all --language=af_ZA --limit=100
 ### Running Long Batches
 
 For large archives, use `screen` to run batches in the background:
+
 ```bash
 # Start a screen session
 screen -S batch_ner
@@ -380,13 +272,14 @@ php symfony ner:extract --all --limit=10000
 ```
 
 ### Monitoring Progress
+
 ```sql
 -- Check NER progress
-SELECT COUNT(*) as processed FROM ahg_ner_extraction;
-SELECT COUNT(*) as entities FROM ahg_ner_entity;
+SELECT COUNT(*) AS processed FROM ahg_ner_extraction;
+SELECT COUNT(*) AS entities FROM ahg_ner_entity;
 
 -- Check summarization progress
-SELECT COUNT(*) FROM information_object_i18n 
+SELECT COUNT(*) FROM information_object_i18n
 WHERE scope_and_content IS NOT NULL AND scope_and_content != '';
 ```
 
@@ -401,16 +294,18 @@ WHERE scope_and_content IS NOT NULL AND scope_and_content != '';
 **Symptoms**: Records processed but no entities found
 
 **Solutions**:
-1. Check if "Extract from PDFs" is enabled
+
+1. Check if “Extract from PDFs” is enabled
 2. Verify PDFs contain searchable text
 3. Check API connectivity: `curl http://API_URL/health`
 
 #### Summarization Returns Empty
 
-**Symptoms**: "Text too short" errors
+**Symptoms**: “Text too short” errors
 
 **Solutions**:
-1. Document may not have enough text (minimum 200 characters)
+
+1. Document may not have enough text (minimum `200` characters)
 2. PDF may be image-only (needs OCR)
 3. Check PDF extraction: `pdftotext document.pdf -`
 
@@ -419,15 +314,17 @@ WHERE scope_and_content IS NOT NULL AND scope_and_content != '';
 **Symptoms**: Errors when saving records
 
 **Solutions**:
+
 1. Check Elasticsearch is running: `systemctl status elasticsearch`
 2. Verify Elastica version matches ES version
 3. Rebuild index: `php symfony search:populate`
 
 #### API Connection Errors
 
-**Symptoms**: "API error: HTTP 0" or timeout errors
+**Symptoms**: “API error: HTTP 0” or timeout errors
 
 **Solutions**:
+
 1. Verify API URL in settings
 2. Check API key is correct
 3. Increase timeout if processing large documents
@@ -443,32 +340,32 @@ WHERE scope_and_content IS NOT NULL AND scope_and_content != '';
 
 ## Appendix A: Entity Type Reference
 
-| Type | Description | Examples |
-|------|-------------|----------|
-| PERSON | Individual names | Nelson Mandela, F.W. de Klerk |
-| ORG | Organizations, companies, agencies | ANC, UN, Department of Education |
-| GPE | Geopolitical entities (countries, cities) | South Africa, Johannesburg, Pretoria |
-| DATE | Dates and time periods | 1994, 18 January 1993, the 1990s |
-| LOC | Non-GPE locations | Table Mountain, Robben Island |
-| EVENT | Named events | World Cup, Elections |
-| MONEY | Monetary values | R1,000, $500 |
-| PERCENT | Percentages | 50%, 10 percent |
+| Type      | Description                         | Examples                                   |
+|-----------|-------------------------------------|--------------------------------------------|
+| `PERSON`  | Individual names                    | Nelson Mandela, F.W. de Klerk              |
+| `ORG`     | Organizations, companies, agencies  | ANC, UN, Department of Education           |
+| `GPE`     | Geopolitical entities (countries, cities) | South Africa, Johannesburg, Pretoria |
+| `DATE`    | Dates and time periods              | 1994, 18 January 1993, the 1990s           |
+| `LOC`     | Non-GPE locations                   | Table Mountain, Robben Island              |
+| `EVENT`   | Named events                        | World Cup, Elections                       |
+| `MONEY`   | Monetary values                     | R1,000, $500                               |
+| `PERCENT` | Percentages                         | 50%, 10 percent                            |
 
 ---
 
 ## Appendix B: Keyboard Shortcuts
 
 | Shortcut | Action (Review Dashboard) |
-|----------|---------------------------|
-| A | Approve selected entity |
-| R | Reject selected entity |
-| E | Edit selected entity |
-| N | Next entity |
-| P | Previous entity |
-| / | Focus search box |
+|----------|----------------------------|
+| `A`      | Approve selected entity    |
+| `R`      | Reject selected entity     |
+| `E`      | Edit selected entity       |
+| `N`      | Next entity                |
+| `P`      | Previous entity            |
+| `/`      | Focus search box           |
 
 ---
 
-*Document Version: 1.0.0*
-*Last Updated: January 2026*
+*Document Version: 1.0.0*  
+*Last Updated: January 2026*  
 *© The Archive and Heritage Group*
