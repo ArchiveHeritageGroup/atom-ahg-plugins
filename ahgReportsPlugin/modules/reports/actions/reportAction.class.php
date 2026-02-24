@@ -175,10 +175,6 @@ class reportsreportAction extends AhgController
             $query->where('o.created_at', '<=', $this->filters['date_to'] . ' 23:59:59');
         }
         
-        // Debug
-        error_log('Collection Overview SQL: ' . $query->toSql());
-        error_log('Bindings: ' . json_encode($query->getBindings()));
-        
         $this->paginateQuery($query);
     }
     

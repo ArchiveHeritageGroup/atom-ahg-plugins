@@ -63,7 +63,6 @@ class MetadataExtractionHandler
         try {
             // Check if arEmbeddedMetadataParser is available
             if (!class_exists('arEmbeddedMetadataParser', true)) {
-                error_log('MetadataExtractionHandler: arEmbeddedMetadataParser not available');
                 return false;
             }
 
@@ -81,7 +80,6 @@ class MetadataExtractionHandler
             $absPath = $this->uploadDir . '/' . ltrim($path, '/') . $do->name;
 
             if (!$absPath || !is_readable($absPath)) {
-                error_log('MetadataExtractionHandler: File not readable: ' . $absPath);
                 return false;
             }
 
@@ -89,7 +87,6 @@ class MetadataExtractionHandler
             $metadata = \arEmbeddedMetadataParser::extract($absPath);
 
             if (!is_array($metadata) || empty($metadata)) {
-                error_log('MetadataExtractionHandler: No metadata extracted from: ' . $absPath);
                 return false;
             }
 
@@ -99,10 +96,8 @@ class MetadataExtractionHandler
             // Add technical metadata
             $this->appendTechnicalMetadata($metadata, $informationObjectId);
 
-            error_log('MetadataExtractionHandler: Metadata extraction completed for DO: ' . $digitalObjectId);
             return true;
         } catch (\Throwable $e) {
-            error_log('MetadataExtractionHandler: Metadata extraction failed: ' . $e->getMessage());
             return false;
         }
     }

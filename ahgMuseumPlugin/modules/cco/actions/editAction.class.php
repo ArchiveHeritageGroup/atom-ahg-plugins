@@ -645,7 +645,6 @@ class ccoEditAction extends InformationObjectEditAction
             
             // Handle custom watermark upload
             $newWatermarkName = $this->request->getParameter('new_watermark_name');
-            error_log("DEBUG UPLOAD CHECK: name=[" . $newWatermarkName . "] file_tmp=[" . ($newWatermarkFile["tmp_name"] ?? "NONE") . "]");
             $newWatermarkFile = $this->request->getFiles('new_watermark_file');
             
             if ($newWatermarkName && $newWatermarkFile && !empty($newWatermarkFile['tmp_name'])) {

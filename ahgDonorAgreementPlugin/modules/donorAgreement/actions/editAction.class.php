@@ -370,7 +370,6 @@ class donorAgreementEditAction extends AhgController
     protected function handleLinkedRecords($request, $agreementId)
     {
         $records = $request->getParameter('link_records', []);
-        error_log("DEBUG link_records: " . json_encode($records));
         foreach ($records as $record) {
             if (empty($record['id'])) {
                 continue;
@@ -391,7 +390,6 @@ class donorAgreementEditAction extends AhgController
     protected function handleLinkedAccessions($request, $agreementId)
     {
         $accessions = $request->getParameter('link_accessions', []);
-        error_log("DEBUG link_accessions: " . json_encode($accessions));
         foreach ($accessions as $accession) {
             if (empty($accession['id'])) {
                 continue;

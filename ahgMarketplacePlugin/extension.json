@@ -1,0 +1,58 @@
+{
+    "name": "AHG Marketplace Plugin",
+    "machine_name": "ahgMarketplacePlugin",
+    "version": "1.0.0",
+    "description": "Online art/gallery marketplace with multi-GLAM sector support. Fixed pricing, make-an-offer negotiations, and timed auctions. Multi-currency, seller verification, commission tracking, and payout management.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=2.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgCartPlugin",
+            "ahgGalleryPlugin",
+            "ahgExhibitionPlugin",
+            "ahgFavoritesPlugin",
+            "ahgLoanPlugin",
+            "ahgHeritagePlugin",
+            "ahgLandingPagePlugin",
+            "ahgDisplayPlugin"
+        ]
+    },
+    "tables": [
+        "marketplace_seller",
+        "marketplace_listing",
+        "marketplace_listing_image",
+        "marketplace_auction",
+        "marketplace_bid",
+        "marketplace_offer",
+        "marketplace_transaction",
+        "marketplace_payout",
+        "marketplace_review",
+        "marketplace_enquiry",
+        "marketplace_follow",
+        "marketplace_collection",
+        "marketplace_collection_item",
+        "marketplace_settings",
+        "marketplace_currency",
+        "marketplace_category"
+    ],
+    "features": {
+        "fixed_price": "Direct buy-now pricing with cart integration",
+        "auctions": "English, sealed-bid, and Dutch auctions with anti-sniping",
+        "offers": "Make-an-offer negotiation with counter-offers",
+        "multi_currency": "ZAR, USD, EUR, GBP, AUD with exchange rates",
+        "seller_verification": "Document-based seller verification workflow",
+        "commission_tracking": "Configurable platform commission with per-seller overrides",
+        "payout_management": "Bank transfer, PayPal, PayFast, Stripe Connect payouts",
+        "sectors": "Gallery, Museum, Archive, Library, DAM"
+    },
+    "load_order": 120
+}

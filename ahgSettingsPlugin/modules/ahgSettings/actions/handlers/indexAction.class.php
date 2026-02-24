@@ -354,6 +354,17 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // Marketplace Plugin
+        $hasMarketplace = in_array('ahgMarketplacePlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasMarketplace) {
+            $this->sections['marketplace'] = [
+                'label' => 'Marketplace',
+                'icon' => 'fa-store-alt',
+                'description' => 'Commission rates, listing fees, currencies, payout rules, and platform configuration',
+                'url' => 'marketplace/adminSettings'
+            ];
+        }
+
         return [
             '_blade' => 'index',
             'sections' => $this->sections,

@@ -56,6 +56,8 @@ $hasNAZ = isPluginActive('ahgNAZPlugin');
 $hasIPSAS = isPluginActive('ahgIPSASPlugin');
 $hasNMMZ = isPluginActive('ahgNMMZPlugin');
 $hasAiCondition = isPluginActive('ahgAiConditionPlugin');
+$hasMarketplace = isPluginActive('ahgMarketplacePlugin');
+$hasCart = isPluginActive('ahgCartPlugin');
 ?>
 
 <?php slot('sidebar'); ?>
@@ -83,6 +85,17 @@ $canManage = $isAdmin || $isEditor;
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>"><i class="fas fa-building me-2"></i><?php echo __('Vendor Dashboard'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Transactions'); ?></a></li>
+    </ul>
+    <?php endif; ?>
+
+    <?php if ($hasMarketplace && $canManage): ?>
+    <h4 class="mt-4"><?php echo __('Marketplace'); ?></h4>
+    <ul class="list-unstyled">
+        <li><a href="/marketplace/admin"><i class="fas fa-store-alt me-2"></i><?php echo __('Admin Dashboard'); ?></a></li>
+        <li><a href="/marketplace/admin/listings"><i class="fas fa-list me-2"></i><?php echo __('Listings'); ?></a></li>
+        <li><a href="/marketplace/admin/sellers"><i class="fas fa-users me-2"></i><?php echo __('Sellers'); ?></a></li>
+        <li><a href="/marketplace/admin/transactions"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Transactions'); ?></a></li>
+        <li><a href="/marketplace/admin/payouts"><i class="fas fa-money-bill-wave me-2"></i><?php echo __('Payouts'); ?></a></li>
     </ul>
     <?php endif; ?>
 
@@ -605,6 +618,71 @@ $canManage = $isAdmin || $isEditor;
                 </ul>
             </div>
         </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (($hasMarketplace || $hasCart) && $canManage): ?>
+    <!-- Buy / Sell / Store Row -->
+    <div class="row mb-4">
+        <?php if ($hasMarketplace): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #7c3aed !important;">
+                    <h5 class="mb-0"><i class="fas fa-store-alt me-2"></i><?php echo __('Marketplace'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/marketplace/admin"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Admin Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/listings"><i class="fas fa-list me-2 text-muted"></i><?php echo __('All Listings'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Browse Marketplace'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/auctions"><i class="fas fa-gavel me-2 text-muted"></i><?php echo __('Active Auctions'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/reports"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Revenue Reports'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #2563eb !important;">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i><?php echo __('Sellers & Stores'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/marketplace/admin/sellers"><i class="fas fa-id-badge me-2 text-muted"></i><?php echo __('Manage Sellers'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/reviews"><i class="fas fa-star me-2 text-muted"></i><?php echo __('Moderate Reviews'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/categories"><i class="fas fa-tags me-2 text-muted"></i><?php echo __('Categories'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/currencies"><i class="fas fa-coins me-2 text-muted"></i><?php echo __('Currencies'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/settings"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Marketplace Settings'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #059669 !important;">
+                    <h5 class="mb-0"><i class="fas fa-cash-register me-2"></i><?php echo __('Sales & Payouts'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/marketplace/admin/transactions"><i class="fas fa-exchange-alt me-2 text-muted"></i><?php echo __('All Transactions'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/payouts"><i class="fas fa-money-bill-wave me-2 text-muted"></i><?php echo __('Pending Payouts'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/payouts/batch"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Payouts'); ?></a></li>
+                    <?php if ($hasCart): ?>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cart', 'action' => 'adminOrders']); ?>"><i class="fas fa-shopping-bag me-2 text-muted"></i><?php echo __('Shop Orders'); ?></a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+        <?php elseif ($hasCart): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #059669 !important;">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i><?php echo __('E-Commerce'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cart', 'action' => 'adminSettings']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Shop Settings'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cart', 'action' => 'adminOrders']); ?>"><i class="fas fa-shopping-bag me-2 text-muted"></i><?php echo __('Orders'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 

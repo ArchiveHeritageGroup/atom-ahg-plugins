@@ -196,11 +196,9 @@ class ConditionTemplateService
                     'template_data' => json_encode($fieldData),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
-            file_put_contents('/tmp/template_debug.log', "Service: template_data update done\n", FILE_APPEND);
 
             // Save individual field values
             foreach ($fieldData as $fieldId => $value) {
-                file_put_contents('/tmp/template_debug.log', "Processing field: $fieldId = " . print_r($value, true) . "\n", FILE_APPEND);
                 if (!is_numeric($fieldId)) {
                     continue;
                 }

@@ -300,9 +300,7 @@ class EcommerceService
         }
         
         // Generate MD5 signature
-        error_log('PayFast Signature String: ' . $signatureString);
         $pfData['signature'] = md5($signatureString);
-        error_log('PayFast Signature: ' . $pfData['signature']);
 
         // Create payment record
         $this->ecommerceRepo->createPayment([

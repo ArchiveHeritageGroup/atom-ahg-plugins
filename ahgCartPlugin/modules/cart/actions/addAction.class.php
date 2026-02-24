@@ -44,7 +44,6 @@ class cartAddAction extends AhgController
                 @session_start();
                 $sessionId = session_id();
             }
-            error_log("CART ADD DEBUG: Guest session_id = " . $sessionId);
         }
         
         $service = new CartService();

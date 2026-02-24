@@ -25,8 +25,6 @@ class dataMigrationSaveMappingAction extends AhgController
         $fields = $request->getParameter('fields', []);
         $targetType = $request->getParameter('target_type', 'archives');
 
-        error_log("SaveMapping: name=$name, category=$category, overwrite=$overwrite, existingId=$existingId, setAsDefault=$setAsDefault, targetType=$targetType");
-
         if (empty($name) && empty($existingId)) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Mapping name is required']));
         }
@@ -60,8 +58,6 @@ class dataMigrationSaveMappingAction extends AhgController
                 ];
             }
         }
-
-        error_log("SaveMapping: " . count($cleanFields) . " fields to save");
 
         $mappingData = json_encode(['fields' => $cleanFields]);
 
@@ -100,8 +96,6 @@ class dataMigrationSaveMappingAction extends AhgController
                     ->where('id', $existingId)
                     ->update($updateData);
 
-                error_log("SaveMapping: Updated existing mapping ID $existingId");
-
                 return $this->renderText(json_encode([
                     'success' => true,
                     'id' => $existingId,
@@ -139,8 +133,6 @@ class dataMigrationSaveMappingAction extends AhgController
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
 
-                error_log("SaveMapping: Overwritten mapping ID {$existing->id}");
-
                 return $this->renderText(json_encode([
                     'success' => true,
                     'id' => $existing->id,
@@ -160,8 +152,6 @@ class dataMigrationSaveMappingAction extends AhgController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
-
-            error_log("SaveMapping: Created new mapping ID $id");
 
             return $this->renderText(json_encode([
                 'success' => true,

@@ -57,7 +57,6 @@ if (!empty($resource->identifier)) {
 
 // 2. ISBN from library_item
 $isbn = safeQuery('library_item', $objectId, 'isbn');
-error_log("DEBUG ISBN for $objectId: " . var_export($isbn, true));
 if (!empty($isbn)) {
     $barcodeSources['isbn'] = [
         'label' => __('ISBN'),

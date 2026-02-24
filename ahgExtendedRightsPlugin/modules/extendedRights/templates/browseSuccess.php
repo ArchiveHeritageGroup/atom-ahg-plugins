@@ -3,12 +3,6 @@ $rsData = $sf_data->getRaw('rightsStatements');
 $ccData = $sf_data->getRaw('ccLicenses');
 $tkData = $sf_data->getRaw('tkLabels');
 $statsData = $sf_data->getRaw('stats');
-
-// Debug TK
-if (!empty($tkData)) { 
-    $first = reset($tkData);
-    error_log("DEBUG_STATS: type=" . gettype($statsData) . " data=" . json_encode($statsData)); 
-}
 ?>
 <main id="content" class="container-xxl py-4">
   <h1 class="mb-4"><i class="fas fa-copyright me-2"></i><?php echo __('Browse Rights'); ?></h1>

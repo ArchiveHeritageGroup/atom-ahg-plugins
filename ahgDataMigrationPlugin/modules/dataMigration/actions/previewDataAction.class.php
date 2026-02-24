@@ -14,10 +14,6 @@ class dataMigrationPreviewDataAction extends AhgController
         $this->detection = $this->getUser()->getAttribute('migration_detection');
         $this->mapping = $this->getUser()->getAttribute('migration_mapping');
         
-        // Debug
-        error_log("PreviewData: filepath=" . $this->filepath);
-        error_log("PreviewData: mapping count=" . (is_array($this->mapping) ? count($this->mapping) : 'not array'));
-        
         if (!$this->filepath || !file_exists($this->filepath)) {
             $this->getUser()->setFlash('error', 'Session expired. Please upload file again.');
             $this->redirect(['module' => 'dataMigration', 'action' => 'index']);

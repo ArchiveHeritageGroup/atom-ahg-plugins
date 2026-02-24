@@ -5,9 +5,6 @@ class DonorIndexAction extends AhgController
 {
     public function execute($request)
     {
-        // DEBUG: Verify this action is loading from the plugin
-        error_log('DonorIndexAction loaded from ahgDonorManagePlugin');
-
         // Bootstrap Laravel QB
         if (!class_exists('Illuminate\Database\Capsule\Manager')) {
             require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';

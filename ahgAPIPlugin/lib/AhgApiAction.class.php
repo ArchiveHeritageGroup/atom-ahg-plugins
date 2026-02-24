@@ -73,7 +73,6 @@ class AhgApiAction extends sfAction
 
     protected function authenticate(): bool
     {
-        error_log("AhgApiAction::authenticate called");
         if ($this->context->user->isAuthenticated()) {
             $userId = $this->context->user->getAttribute('user_id');
             $this->apiKeyInfo = [
@@ -86,22 +85,18 @@ class AhgApiAction extends sfAction
             $this->user = (object) ['id' => $userId];
             return true;
         }
-        error_log("Calling apiKeyService->authenticate()");
+
         $this->apiKeyInfo = $this->apiKeyService->authenticate();
-        error_log("apiKeyInfo = " . json_encode($this->apiKeyInfo));
 
         if ($this->apiKeyInfo) {
-            error_log("Looking up user ID: " . $this->apiKeyInfo['user_id']);
             $user = QubitUser::getById($this->apiKeyInfo['user_id']);
-            error_log("QubitUser result: " . ($user ? "found user " . $user->username : "NULL"));
             if ($user) {
                 $this->context->user->signIn($user);
                 $this->user = (object) ['id' => $this->apiKeyInfo['user_id']];
-                error_log("User signed in successfully");
                 return true;
             }
         }
-        error_log("authenticate returning false");
+
         return false;
     }
     protected function hasScope(string $scope): bool

@@ -22,31 +22,25 @@ class cartPaymentNotifyAction extends AhgController
         // Get POST data via request object
         $pfData = $request->getPostParameters();
 
-        // Log incoming ITN (sanitized)
-        error_log('PayFast ITN received for order: ' . ($pfData['m_payment_id'] ?? 'unknown'));
-
         if (empty($pfData)) {
-            error_log('PayFast ITN: No POST data received');
             return $this->renderText('NO_DATA');
         }
 
         // Get the payment ID (order number)
         $orderNumber = $pfData['m_payment_id'] ?? null;
         if (!$orderNumber) {
-            error_log('PayFast ITN: No order number in m_payment_id');
             return $this->renderText('NO_ORDER');
         }
-        
+
         $ecommerceService = new EcommerceService();
-        
+
         // Process the notification
         $result = $ecommerceService->processPayFastNotification($pfData);
-        
+
         if ($result['success']) {
-            error_log('PayFast ITN: Payment processed successfully for ' . $orderNumber);
             return $this->renderText('OK');
         } else {
-            error_log('PayFast ITN: Payment processing failed - ' . ($result['message'] ?? 'Unknown error'));
+            error_log('PayFast ITN failed for ' . $orderNumber . ': ' . ($result['message'] ?? 'Unknown error'));
             return $this->renderText('FAILED: ' . ($result['message'] ?? 'Unknown error'));
         }
     }

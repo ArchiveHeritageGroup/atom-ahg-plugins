@@ -1126,7 +1126,6 @@ class dataMigrationExecuteAhgImportAction extends AhgController
             return;
         }
         
-        error_log("Processing " . count($this->pendingDigitalObjects) . " pending digital objects");
         $DB = \Illuminate\Database\Capsule\Manager::class;
         
         foreach ($this->pendingDigitalObjects as $pending) {
@@ -1189,11 +1188,8 @@ class dataMigrationExecuteAhgImportAction extends AhgController
                     "checksum_type" => "sha1",
                 ]);
                 
-                error_log("SUCCESS: Digital object created for IO $objectId (DO ID: $doObjectId)");
-                
             } catch (\Exception $e) {
                 $this->stats["errors"][] = "Digital object error for $objectId: " . $e->getMessage();
-                error_log("Digital object error for $objectId: " . $e->getMessage());
             }
         }
     }

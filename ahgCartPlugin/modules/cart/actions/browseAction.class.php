@@ -40,7 +40,6 @@ class cartBrowseAction extends AhgController
                 @session_start();
                 $sessionId = session_id();
             }
-            error_log("CART BROWSE DEBUG: Guest session_id = " . $sessionId);
         }
         
         // Check e-commerce mode

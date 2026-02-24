@@ -1035,10 +1035,8 @@ class PreservicaImportService
                 $sequence++;
             }
 
-            error_log("Created provenance record with " . count($provenanceEvents) . " events for object $objectId");
-
         } catch (\Exception $e) {
-            error_log("Warning: Could not create provenance: " . $e->getMessage());
+            // Provenance creation failed silently
         }
     }
 
@@ -1250,13 +1248,8 @@ class PreservicaImportService
             // Create the rights record
             $rightsId = $rightsService->createRightsRecord($objectId, $importData);
 
-            if ($rightsId) {
-                // Log success if debugging
-                error_log("Created rights record {$rightsId} for object {$objectId}");
-            }
-
         } catch (\Exception $e) {
-            error_log("Failed to create rights for object {$objectId}: " . $e->getMessage());
+            // Rights creation failed silently
         }
     }
 

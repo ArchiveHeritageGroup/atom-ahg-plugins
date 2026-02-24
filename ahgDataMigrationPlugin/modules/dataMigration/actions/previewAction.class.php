@@ -31,9 +31,6 @@ class dataMigrationPreviewAction extends AhgController
         $outputMode = $request->getParameter('output_mode', 'preview');
         $targetSector = $request->getParameter('target_sector', 'archives');
         
-        // Debug - log what we received
-        error_log("Migration: Received " . count($fields) . " fields, output_mode: " . $outputMode);
-        
         // Convert to raw array if needed
         if ($fields instanceof sfOutputEscaperArrayDecorator) {
             $fields = $fields->getRawValue();
@@ -43,8 +40,6 @@ class dataMigrationPreviewAction extends AhgController
         $this->getUser()->setAttribute('migration_mapping', $fields);
         $this->getUser()->setAttribute('migration_output_mode', $outputMode);
         $this->getUser()->setAttribute('migration_target_sector', $targetSector);
-        
-        error_log("Migration: Saved mapping with " . count($fields) . " fields to session");
         
         // Redirect based on output mode
         switch ($outputMode) {

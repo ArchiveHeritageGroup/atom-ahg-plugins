@@ -43,11 +43,7 @@ trait arMetadataExtractionTrait
      */
     protected function extractAllMetadata($filePath)
     {
-        error_log("=== UNIVERSAL METADATA EXTRACTION ===");
-        error_log("File: " . basename($filePath));
-
         if (!file_exists($filePath)) {
-            error_log("ERROR: File not found: " . $filePath);
             return null;
         }
 
@@ -57,12 +53,10 @@ trait arMetadataExtractionTrait
             $metadata = $extractor->extractAll();
 
             if (empty($metadata)) {
-                error_log("WARNING: No metadata extracted");
                 return null;
             }
 
             $fileType = $extractor->getFileType();
-            error_log("File type: " . $fileType);
 
             // Get key fields for AtoM integration
             $keyFields = $extractor->getKeyFields();
@@ -78,17 +72,9 @@ trait arMetadataExtractionTrait
                 'errors' => $extractor->getErrors(),
             ];
 
-            error_log("Extraction complete. Type: {$fileType}");
-
-            // Log any errors
-            foreach ($extractor->getErrors() as $error) {
-                error_log("Extractor warning: " . $error);
-            }
-
             return $metadata;
 
         } catch (Exception $e) {
-            error_log("ERROR: Metadata extraction failed: " . $e->getMessage());
             return null;
         }
     }
@@ -117,12 +103,9 @@ trait arMetadataExtractionTrait
         if (!is_object($informationObject)) {
             $informationObject = $this->getInformationObjectData($informationObjectId);
             if (!$informationObject) {
-                error_log("ERROR: Information object not found: " . $informationObjectId);
                 return false;
             }
         }
-
-        error_log("=== APPLYING METADATA TO INFORMATION OBJECT ===");
 
         $modified = false;
         $extractorInfo = $metadata['_extractor'] ?? [];
@@ -137,7 +120,6 @@ trait arMetadataExtractionTrait
         if (empty($currentTitle) && !empty($keyFields['title'])) {
             $this->setI18nField($informationObjectId, 'title', $keyFields['title']);
             $modified = true;
-            error_log("Set title: " . $keyFields['title']);
         }
 
         // 2. DATE CREATED
@@ -190,9 +172,7 @@ trait arMetadataExtractionTrait
                 DB::table('object')
                     ->where('id', $informationObjectId)
                     ->update(['updated_at' => date('Y-m-d H:i:s')]);
-                error_log("Information object saved successfully");
             } catch (Exception $e) {
-                error_log("ERROR saving information object: " . $e->getMessage());
                 return false;
             }
         }
@@ -250,7 +230,6 @@ trait arMetadataExtractionTrait
             ->exists();
 
         if ($exists) {
-            error_log("Creation date already exists, skipping");
             return;
         }
 
@@ -258,7 +237,6 @@ trait arMetadataExtractionTrait
         $normalizedDate = $this->normalizeDateString($dateString);
 
         if (!$normalizedDate) {
-            error_log("Could not parse date: " . $dateString);
             return;
         }
 
@@ -278,9 +256,8 @@ trait arMetadataExtractionTrait
                 'date' => $normalizedDate,
             ]);
 
-            error_log("Added creation date: " . $normalizedDate);
         } catch (Exception $e) {
-            error_log("ERROR adding creation date: " . $e->getMessage());
+            // Date creation failed silently
         }
     }
 
@@ -336,7 +313,6 @@ trait arMetadataExtractionTrait
                     ]);
 
                     $actorId = $actorObjectId;
-                    error_log("Created new actor: " . $name);
                 } else {
                     $actorId = $actor->id;
                 }
@@ -349,7 +325,6 @@ trait arMetadataExtractionTrait
                     ->exists();
 
                 if ($relationExists) {
-                    error_log("Name access point already exists: " . $name);
                     continue;
                 }
 
@@ -367,10 +342,8 @@ trait arMetadataExtractionTrait
                     'type_id' => self::TERM_NAME_ACCESS_POINT_ID,
                 ]);
 
-                error_log("Added name access point: " . $name);
-
             } catch (Exception $e) {
-                error_log("ERROR adding creator: " . $e->getMessage());
+                // Creator access point failed silently
             }
         }
     }
@@ -430,7 +403,6 @@ trait arMetadataExtractionTrait
                     ]);
 
                     $termId = $termObjectId;
-                    error_log("Created new subject term: " . $keyword);
                 } else {
                     $termId = $term->id;
                 }
@@ -458,10 +430,8 @@ trait arMetadataExtractionTrait
                     'term_id' => $termId,
                 ]);
 
-                error_log("Added subject access point: " . $keyword);
-
             } catch (Exception $e) {
-                error_log("ERROR adding subject: " . $e->getMessage());
+                // Subject access point failed silently
             }
         }
     }
@@ -485,7 +455,6 @@ trait arMetadataExtractionTrait
         $newContent .= $description;
 
         $this->setI18nField($informationObjectId, 'scope_and_content', $newContent);
-        error_log("Updated scope and content");
     }
 
     /**
@@ -506,7 +475,6 @@ trait arMetadataExtractionTrait
         $newContent .= $summary;
 
         $this->setI18nField($informationObjectId, 'physical_characteristics', $newContent);
-        error_log("Updated physical characteristics ({$fileType})");
     }
 
     /**
@@ -533,10 +501,7 @@ trait arMetadataExtractionTrait
             // Store as properties
             $this->storeProperty($digitalObjectId, 'latitude', (string) $lat);
             $this->storeProperty($digitalObjectId, 'longitude', (string) $lon);
-            error_log("Set GPS on digital object: {$lat}, {$lon}");
         }
-
-        error_log("GPS data: " . $gpsText);
     }
 
     /**
@@ -588,7 +553,6 @@ trait arMetadataExtractionTrait
         $newContent .= "Copyright: " . $copyright;
 
         $this->setI18nField($informationObjectId, 'access_conditions', $newContent);
-        error_log("Added copyright notice");
     }
 
     /**
@@ -662,8 +626,6 @@ trait arMetadataExtractionTrait
             return;
         }
 
-        error_log("=== FACE DETECTION ===");
-
         // Get information object ID
         $informationObjectId = is_object($informationObject) ? $informationObject->id : (int) $informationObject;
 
@@ -674,11 +636,8 @@ trait arMetadataExtractionTrait
             $faces = $faceService->detectFaces($filePath);
 
             if (empty($faces)) {
-                error_log("No faces detected");
                 return;
             }
-
-            error_log("Detected " . count($faces) . " faces");
 
             // Match to authorities if enabled
             $autoMatch = $this->getSettingValue('face_auto_match', true);
@@ -690,18 +649,12 @@ trait arMetadataExtractionTrait
                 $autoLink = $this->getSettingValue('face_auto_link', false);
 
                 if ($autoLink) {
-                    $linked = $faceService->linkFacesToInformationObject($faces, $informationObjectId);
-                    error_log("Auto-linked {$linked} faces to authority records");
+                    $faceService->linkFacesToInformationObject($faces, $informationObjectId);
                 }
             }
 
-            // Log errors
-            foreach ($faceService->getErrors() as $error) {
-                error_log("Face detection warning: " . $error);
-            }
-
         } catch (Exception $e) {
-            error_log("ERROR in face detection: " . $e->getMessage());
+            // Face detection failed silently
         }
     }
 

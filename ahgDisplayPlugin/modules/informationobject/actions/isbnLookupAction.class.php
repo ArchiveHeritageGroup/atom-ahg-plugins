@@ -70,7 +70,6 @@ class InformationobjectIsbnLookupAction extends AhgController
 
         } catch (\Exception $e) {
             // Log error
-            error_log('[ISBN DEBUG] ' . date('Y-m-d H:i:s') . ' ISBN=' . $isbn . ' Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
             $this->getContext()->getLogger()->err(
                 'ISBN lookup failed: '.$e->getMessage()
             );

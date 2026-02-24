@@ -38,26 +38,20 @@ try {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row) {
-        error_log("METADATA: No digital object for IO $ioId");
         exit(0);
     }
 
     $filePath = SF_ROOT_DIR . $row['path'] . $row['name'];
 
     if (!file_exists($filePath)) {
-        error_log("METADATA: File not found: $filePath");
         exit(0);
     }
 
-    error_log("METADATA: Processing $filePath for IO $ioId");
-
     // Detect template type (dam, museum, isad)
     $templateType = detectTemplateType($conn, $ioId);
-    error_log("METADATA: Template type: $templateType");
 
     // Get field mappings from settings
     $mappings = getFieldMappings($conn, $templateType);
-    error_log("METADATA: Using mappings for $templateType");
     
     // Check if we should overwrite existing values
     $stmt = $conn->prepare("SELECT setting_value FROM ahg_settings WHERE setting_key = ?");
@@ -70,14 +64,11 @@ try {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $replacePlaceholders = !$row || $row["setting_value"] !== "false"; // Default true
     
-    error_log("METADATA: Overwrite existing: " . ($overwriteExisting ? "yes" : "no") . ", Replace placeholders: " . ($replacePlaceholders ? "yes" : "no"));
-
     // Extract metadata
     $extractor = new ahgUniversalMetadataExtractor($filePath);
     $metadata = $extractor->extractAll();
 
     if (empty($metadata)) {
-        error_log("METADATA: No metadata extracted");
         exit(0);
     }
 
@@ -94,7 +85,6 @@ try {
         if ($dbColumn) {
             $stmt = $conn->prepare("UPDATE information_object_i18n SET $dbColumn = ? WHERE id = ? AND culture = ?");
             $stmt->execute([$summary, $ioId, 'en']);
-            error_log("METADATA: Updated $dbColumn with technical summary");
         }
     }
 
@@ -113,9 +103,6 @@ try {
         if (empty($currentTitle) || $overwriteExisting || ($replacePlaceholders && $isPlaceholder)) {
             $stmt = $conn->prepare("UPDATE information_object_i18n SET title = ? WHERE id = ? AND culture = ?");
             $stmt->execute([$titleValue, $ioId, 'en']);
-            error_log("METADATA: Set title: " . $titleValue . ($isPlaceholder ? " (replaced placeholder: $currentTitle)" : ""));
-        } else {
-            error_log("METADATA: Title not updated - existing: " . $currentTitle);
         }
     }
 
@@ -131,7 +118,6 @@ try {
             if (empty($row[$dbColumn]) || $overwriteExisting) {
                 $stmt = $conn->prepare("UPDATE information_object_i18n SET $dbColumn = ? WHERE id = ? AND culture = ?");
                 $stmt->execute([$descValue, $ioId, 'en']);
-                error_log("METADATA: Set $dbColumn (description)" . ($overwriteExisting ? " (overwrite)" : ""));
             }
         }
     }
@@ -152,7 +138,6 @@ try {
                 $newVal .= "Copyright: " . $copyrightValue;
                 $stmt = $conn->prepare("UPDATE information_object_i18n SET $dbColumn = ? WHERE id = ? AND culture = ?");
                 $stmt->execute([$newVal, $ioId, 'en']);
-                error_log("METADATA: Added copyright to $dbColumn");
             }
         }
     }
@@ -184,8 +169,6 @@ try {
                 // Create event i18n
                 $stmt = $conn->prepare("INSERT INTO event_i18n (id, culture, date) VALUES (?, ?, ?)");
                 $stmt->execute([$eventId, 'en', $dateOnly]);
-
-                error_log("METADATA: Created creation event with date $dateOnly");
             }
         }
     }
@@ -206,7 +189,6 @@ try {
             $actor = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$actor) {
-                error_log("METADATA: Creator not found (skipping): $name");
                 continue;
             }
 
@@ -227,8 +209,6 @@ try {
             // Create relation
             $stmt = $conn->prepare("INSERT INTO relation (id, subject_id, object_id, type_id, source_culture) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$relationId, $ioId, $actorId, TERM_NAME_ACCESS_POINT_ID, 'en']);
-
-            error_log("METADATA: Linked creator: $name");
         }
     }
 
@@ -276,8 +256,6 @@ try {
             // Create term relation
             $stmt = $conn->prepare("INSERT INTO object_term_relation (id, object_id, term_id) VALUES (?, ?, ?)");
             $stmt->execute([$relationId, $ioId, $termId]);
-
-            error_log("METADATA: Linked subject: $keyword");
         }
     }
 
@@ -309,15 +287,11 @@ try {
             $newVal .= $gpsText;
             $stmt = $conn->prepare("UPDATE information_object_i18n SET scope_and_content = ? WHERE id = ? AND culture = ?");
             $stmt->execute([$newVal, $ioId, 'en']);
-            error_log("METADATA: Added GPS to scope_and_content");
         }
     }
 
-    error_log("METADATA: Complete for IO $ioId");
-
 } catch (Exception $e) {
-    error_log("METADATA ERROR: " . $e->getMessage());
-    error_log("METADATA TRACE: " . $e->getTraceAsString());
+    error_log("process_metadata error for IO $ioId: " . $e->getMessage());
 }
 
 /**

@@ -131,11 +131,7 @@ class AhgSettingsSectionAction extends AhgController
             $this->currentSection = 'general';
         }
 
-        // Debug: Log the request method
-        error_log("AHG Settings: Method = " . $request->getMethod() . ", Section = " . $this->currentSection);
-
         if ($request->isMethod('post')) {
-            error_log("AHG Settings: Processing POST for section " . $this->currentSection);
             $this->processSettings($request);
         }
 
@@ -152,9 +148,6 @@ class AhgSettingsSectionAction extends AhgController
     protected function processSettings($request)
     {
         $settings = $request->getParameter('settings', []);
-        
-        error_log("AHG Settings: Received " . count($settings) . " settings");
-        error_log("AHG Settings: Keys = " . implode(', ', array_keys($settings)));
 
         // Handle unchecked checkboxes
         if (isset($this->checkboxFields[$this->currentSection])) {
@@ -186,8 +179,6 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
-        error_log("AHG Settings: Saved $saved settings");
-        
         // Regenerate static CSS
         if ($this->currentSection === 'general') {
             require_once $this->config('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/AhgCssGenerator.class.php';

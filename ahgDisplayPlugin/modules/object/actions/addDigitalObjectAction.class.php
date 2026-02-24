@@ -264,13 +264,10 @@ class ObjectAddDigitalObjectAction extends AhgController
 
     protected function applyPhysicalCharacteristicsOnly($ioId, $metadata)
     {
-        error_log("=== APPLYING PHYSICAL CHARACTERISTICS ONLY ===");
-        
         $extractorInfo = $metadata['_extractor'] ?? [];
         $summary = $extractorInfo['summary'] ?? null;
-        
+
         if (empty($summary)) {
-            error_log("No summary to apply");
             return;
         }
         
@@ -290,92 +287,57 @@ class ObjectAddDigitalObjectAction extends AhgController
                     ->where('id', $ioId)
                     ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
                     ->update(['physical_characteristics' => $summary]);
-                error_log("Updated physical_characteristics");
-            } else {
-                error_log("No i18n record found for IO " . $ioId);
             }
         } catch (\Exception $e) {
-            error_log("Error updating physical_characteristics: " . $e->getMessage());
+            // Physical characteristics update failed
         }
     }
 
 
     protected function testMetadataLogging()
     {
-        error_log("=== TEST METADATA LOGGING START ===");
-        
-        try {
-            $digitalObject = $this->resource->getDigitalObject();
-            if (!$digitalObject) {
-                error_log("No digital object");
-                return;
-            }
-            
-            error_log("Digital object ID: " . $digitalObject->id);
-            
-            $filePath = $digitalObject->getAbsolutePath();
-            error_log("File path: " . $filePath);
-            
-            if (!$filePath || !file_exists($filePath)) {
-                error_log("File not found");
-                return;
-            }
-            
-            error_log("File exists, size: " . filesize($filePath));
-            error_log("=== TEST METADATA LOGGING END ===");
-            
-        } catch (\Throwable $e) {
-            error_log("Test error: " . $e->getMessage());
-        }
+        // Debug method - no-op in production
     }
 
 
     protected function applyMetadataLaravel()
     {
-        error_log("=== APPLY METADATA LARAVEL START ===");
         try {
             \AhgCore\Core\AhgDb::init();
-            
+
             if (!($this->resource instanceof QubitInformationObject)) {
                 return;
             }
-            
+
             $digitalObject = $this->resource->getDigitalObject();
             if (!$digitalObject) {
-                error_log("No digital object");
                 return;
             }
-            
+
             $filePath = $digitalObject->getAbsolutePath();
             if (!$filePath || !file_exists($filePath)) {
-                error_log("File not found: " . $filePath);
                 return;
             }
-            
-            error_log("Extracting from: " . basename($filePath));
-            
+
             // Extract metadata
             $extractor = new ahgUniversalMetadataExtractor($filePath);
             $metadata = $extractor->extractAll();
             if (empty($metadata)) {
-                error_log("No metadata extracted");
                 return;
             }
-            
+
             // Detect template type (dam, museum, isad)
             $templateType = $this->detectTemplateType();
-            error_log("Template type: " . $templateType);
-            
+
             // Get field mappings from settings
             $mappings = $this->getFieldMappings($templateType);
-            
+
             // Apply mapped metadata
             $this->applyMappedMetadata($metadata, $mappings, $extractor->formatSummary());
-            
+
         } catch (\Throwable $e) {
-            error_log("Metadata error: " . $e->getMessage());
+            // Metadata extraction failed silently
         }
-        error_log("=== APPLY METADATA LARAVEL END ===");
     }
     
     /**

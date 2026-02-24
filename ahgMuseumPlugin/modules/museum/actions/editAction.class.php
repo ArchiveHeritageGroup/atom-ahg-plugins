@@ -112,10 +112,7 @@ class museumEditAction extends AhgController
             $this->itemLocation = [];
         }
 
-        error_log('Route resource: ' . ($this->resource ? $this->resource->id : 'NONE'));
-
         // Get template
-        error_log('Loading template param: ' . $request->getParameter('template', 'NONE'));
         $templateId = $request->getParameter('template', ahgCCOTemplates::TEMPLATE_GENERIC);
         $this->template = ahgCCOTemplates::getTemplate($templateId);
         $this->templateId = $templateId;
@@ -139,7 +136,6 @@ class museumEditAction extends AhgController
 
         // Process form submission
         if ($request->isMethod('post')) {
-            error_log('POST - resourceId param: ' . $request->getParameter('id') . ' | resource->id: ' . ($this->resource->id ?? 'NULL'));
             $this->form->bind($request->getPostParameters());
 
             if ($this->form->isValid()) {
@@ -170,7 +166,6 @@ class museumEditAction extends AhgController
         }
 
         // Calculate current completeness
-        error_log('Template will receive resource->id: ' . ($this->resource->id ?? 'NULL'));
         $this->resourceId = $this->resource->id ?? null;
         $this->resourceSlug = $this->resource->slug ?? null;
         $this->completeness = ahgCCOTemplates::calculateCompleteness($templateId, $this->ccoData);
@@ -639,14 +634,10 @@ class museumEditAction extends AhgController
         $request = $this->getRequest();
         $displayStandardId = $request->getParameter('displayStandard');
         
-        error_log("DISPLAY STANDARD DEBUG: received = " . var_export($displayStandardId, true));
-        
         // Default to Museum (CCO) if not set - lookup by code
         if (empty($displayStandardId)) {
             $displayStandardId = $this->getTermIdByCode('museum', 70) ?? 353; // fallback to ISAD
         }
-        
-        error_log("DISPLAY STANDARD DEBUG: saving = " . $displayStandardId);
         
         // Update the record's display standard
         DB::table('information_object')
@@ -655,8 +646,7 @@ class museumEditAction extends AhgController
 
         // If checkbox is ticked, update all descendants
         $updateDescendants = $request->getParameter('displayStandardUpdateDescendants');
-        error_log("DISPLAY STANDARD DEBUG: updateDescendants = " . var_export($updateDescendants, true));
-        
+
         if ($updateDescendants) {
             $this->updateDescendantsDisplayStandard($resourceId, (int) $displayStandardId);
         }
@@ -682,8 +672,6 @@ class museumEditAction extends AhgController
             ->where('lft', '>', $parent->lft)
             ->where('rgt', '<', $parent->rgt)
             ->update(['display_standard_id' => $displayStandardId]);
-
-        error_log("Updated descendants of {$parentId} to display standard {$displayStandardId}");
     }
 	
     /**
@@ -823,8 +811,6 @@ class museumEditAction extends AhgController
         // Get parent from request parameter (slug) or use root
         $parentSlug = $this->getRequest()->getParameter('parent');
         $parentId = self::ROOT_INFORMATION_OBJECT_ID;
-        error_log("MUSEUM CREATE: parentSlug = " . ($parentSlug ?? "NULL"));
-        
         if ($parentSlug) {
             $parentRecord = DB::table('slug')
                 ->join('information_object', 'slug.object_id', '=', 'information_object.id')
@@ -833,7 +819,6 @@ class museumEditAction extends AhgController
                 ->first();
             if ($parentRecord) {
                 $parentId = $parentRecord->id;
-        error_log("MUSEUM CREATE: parentId = " . $parentId);
             }
         }
         
@@ -1068,7 +1053,6 @@ class museumEditAction extends AhgController
             \AtomExtensions\Services\DerivativeWatermarkService::regenerateDerivatives($objectId);
         }
 
-        error_log("Watermark settings saved for object $objectId: enabled=$watermarkEnabled");
     }
 
     /**
